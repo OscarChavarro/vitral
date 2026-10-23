@@ -1,6 +1,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_FALLBACK_GEOMETRY__
 #define ___POLYHEDRAL_BOUNDED_SOLID_FALLBACK_GEOMETRY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -22,14 +23,14 @@ public:
     typedef ArrayList<Vector3Dd> Profile;
 
     static double coordinate(const Vector3Dd& p, int axis);
-    static bool sameCoordinate(double a, double b);
+    static BOOLEAN sameCoordinate(double a, double b);
 
     /**
     @param a first bounds (minX, minY, minZ, maxX, maxY, maxZ)
     @param b second bounds
     @return true when all six values match within tolerance
     */
-    static bool boundsMatch(const double* a, const double* b);
+    static BOOLEAN boundsMatch(const double* a, const double* b);
 
     /**
     Inserts `value` when no coordinate within tolerance is present, keeping
@@ -44,7 +45,7 @@ public:
     @return the largest loop lying on the plane `x`, or empty (Java null)
     */
     static Profile extractProfileAtX(PolyhedralBoundedSolid* solid, double x);
-    static bool sameProfilePoint(const Vector3Dd& a, const Vector3Dd& b);
+    static BOOLEAN sameProfilePoint(const Vector3Dd& a, const Vector3Dd& b);
     static void appendProfilePoint(Profile& profile, const Vector3Dd& point);
     static Vector3Dd projectProfilePoint(const Vector3Dd& point, double x,
         double zCut);

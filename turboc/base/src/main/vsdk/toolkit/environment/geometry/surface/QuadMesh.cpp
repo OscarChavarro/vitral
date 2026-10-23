@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Math.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -44,9 +45,10 @@ void QuadMesh::getVertexAt(int i, Vertex& vertex) const
 void QuadMesh::initVertexPositionsArray(int n)
 {
     vertexPositions.clear(); vertexPositions.reserve((long int)n*3);
-    for (long int i = 0; i < (long int)n*3; i++) vertexPositions.add(0.0);
+    long int i;
+    for (i = 0; i < (long int)n*3; i++) vertexPositions.add(0.0);
     incidentQuadsPerVertexArray.clear(); incidentQuadsPerVertexArray.reserve((long int)n);
-    for (long int i = 0; i < (long int)n; i++) incidentQuadsPerVertexArray.add(ArrayList<int>());
+    for (i = 0; i < (long int)n; i++) incidentQuadsPerVertexArray.add(ArrayList<int>());
 }
 
 void QuadMesh::initVertexColorsArray()
@@ -139,7 +141,8 @@ ArrayList<int>& QuadMesh::getQuadIndices() { return quadIndices; }
 void QuadMesh::calculateNormals()
 {
     initVertexNormalsArray();
-    for (int i = 0; i < getNumQuads(); i++) {
+    int i;
+    for (i = 0; i < getNumQuads(); i++) {
         int i0 = quadIndices[4*i];
         int i1 = quadIndices[4*i+1];
         int i2 = quadIndices[4*i+2];
@@ -168,7 +171,7 @@ void QuadMesh::calculateNormals()
         }
     }
 
-    for (int i = 0; i < getNumVertices(); i++) {
+    for (i = 0; i < getNumVertices(); i++) {
         Vector3Dd n(vertexNormals[3*i], vertexNormals[3*i+1], vertexNormals[3*i+2]);
         n = n.normalized();
         vertexNormals[3*i] = n.x();
@@ -249,10 +252,10 @@ Ray* QuadMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
     return out;
 }
 
-bool QuadMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN QuadMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     TriangleMeshGroup* g = exportToTriangleMeshGroup();
-    bool out = g->doIntersectionFirstHit(inRay, outHit);
+    BOOLEAN out = g->doIntersectionFirstHit(inRay, outHit);
     delete g;
     return out;
 }

@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
@@ -46,7 +47,7 @@ static ShadingType shadingTypeValueOf(const String& name)
 }
 
 
-MCPViewportTools::MCPViewportTools(ApplicationModel* model, bool supportsXlib)
+MCPViewportTools::MCPViewportTools(ApplicationModel* model, BOOLEAN supportsXlib)
     : model(model), supportsXlib(supportsXlib)
 {
 }
@@ -117,7 +118,7 @@ void MCPViewportTools::setRendererConfiguration(const String& request)
     for ( long i = 0; i < viewports.size(); i++ ) {
         Viewport* viewport = viewports.get(i);
         RendererConfiguration* q = viewport->getRendererConfiguration();
-        bool value;
+        BOOLEAN value;
 
         if ( MCPJson::booleanProperty(request, "points", value) ) q->setPoints(value);
         if ( MCPJson::booleanProperty(request, "wires", value) ) q->setWires(value);
@@ -147,7 +148,7 @@ String MCPViewportTools::describeRendererConfigurations(
     StringBuilder sb;
     ViewportSet* set = model->getActiveViewportSet();
     ArrayList<Viewport*> viewports = selectedViewports(request);
-    bool first = true;
+    BOOLEAN first = TRUE;
 
     sb.append("{\"viewports\":[");
     for ( long i = 0; i < viewports.size(); i++ ) {
@@ -164,20 +165,20 @@ String MCPViewportTools::describeRendererConfigurations(
         if ( !first ) {
             sb.append(',');
         }
-        first = false;
+        first = FALSE;
         sb.append("{\"index\":").append(index)
             .append(",\"title\":\"").append(MCPJson::escape(viewport->getTitle())).append('"')
-            .append(",\"points\":").append(q->isPointsSet())
-            .append(",\"wires\":").append(q->isWiresSet())
-            .append(",\"surfaces\":").append(q->isSurfacesSet())
-            .append(",\"texture\":").append(q->isTextureSet())
-            .append(",\"bumpMap\":").append(q->isBumpMapSet())
-            .append(",\"boundingVolume\":").append(q->isBoundingVolumeSet())
-            .append(",\"normals\":").append(q->isNormalsSet())
-            .append(",\"trianglesNormals\":").append(q->isTrianglesNormalsSet())
-            .append(",\"selectionCorners\":").append(q->isSelectionCornersSet())
+            .append(",\"points\":").appendBoolean(q->isPointsSet())
+            .append(",\"wires\":").appendBoolean(q->isWiresSet())
+            .append(",\"surfaces\":").appendBoolean(q->isSurfacesSet())
+            .append(",\"texture\":").appendBoolean(q->isTextureSet())
+            .append(",\"bumpMap\":").appendBoolean(q->isBumpMapSet())
+            .append(",\"boundingVolume\":").appendBoolean(q->isBoundingVolumeSet())
+            .append(",\"normals\":").appendBoolean(q->isNormalsSet())
+            .append(",\"trianglesNormals\":").appendBoolean(q->isTrianglesNormalsSet())
+            .append(",\"selectionCorners\":").appendBoolean(q->isSelectionCornersSet())
             .append(",\"shading\":\"").append(shadingTypeName(q->getShadingTypeEnum())).append('"')
-            .append(",\"grid\":").append(viewport->isShowGrid())
+            .append(",\"grid\":").appendBoolean(viewport->isShowGrid())
             .append(",\"renderMode\":\"")
             .append(viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING ? "cpu" :
                     viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_LINES ? "hidden_lines" : "gpu")

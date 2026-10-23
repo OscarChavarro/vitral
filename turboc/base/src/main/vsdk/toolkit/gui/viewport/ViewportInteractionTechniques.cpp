@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
@@ -84,55 +85,55 @@ void ViewportInteractionTechniques::setRendererConfiguration(
     qualityController->setRendererConfiguration(rendererConfiguration);
 }
 
-bool ViewportInteractionTechniques::processCameraKeyPressedEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraKeyPressedEvent(
     const KeyEvent& event)
 {
     return cameraController->processKeyPressedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processCameraKeyReleasedEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraKeyReleasedEvent(
     const KeyEvent& event)
 {
     return cameraController->processKeyReleasedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processCameraMousePressedEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraMousePressedEvent(
     const MouseEvent& event)
 {
     return cameraController->processMousePressedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processCameraMouseReleasedEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraMouseReleasedEvent(
     const MouseEvent& event)
 {
     return cameraController->processMouseReleasedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processCameraMouseClickedEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraMouseClickedEvent(
     const MouseEvent& event)
 {
     return cameraController->processMouseClickedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processCameraMouseMovedEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraMouseMovedEvent(
     const MouseEvent& event)
 {
     return cameraController->processMouseMovedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processCameraMouseDraggedEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraMouseDraggedEvent(
     const MouseEvent& event)
 {
     return cameraController->processMouseDraggedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processCameraMouseWheelEvent(
+BOOLEAN ViewportInteractionTechniques::processCameraMouseWheelEvent(
     const MouseEvent& event)
 {
     return cameraController->processMouseWheelEvent(event);
 }
 
-bool ViewportInteractionTechniques::processQualityKeyPressedEvent(
+BOOLEAN ViewportInteractionTechniques::processQualityKeyPressedEvent(
     const KeyEvent& event)
 {
     return qualityController->processKeyPressedEvent(event);
@@ -143,25 +144,25 @@ InputGizmo* ViewportInteractionTechniques::getTranslationInputGizmo()
     return translationGizmo->getInputGizmo();
 }
 
-bool ViewportInteractionTechniques::isTranslationInputGizmoKey(
+BOOLEAN ViewportInteractionTechniques::isTranslationInputGizmoKey(
     const KeyEvent& event)
 {
     return translationTechnique->isInputGizmoKey(event);
 }
 
-bool ViewportInteractionTechniques::processTranslationKeyPressedEvent(
+BOOLEAN ViewportInteractionTechniques::processTranslationKeyPressedEvent(
     const KeyEvent& event)
 {
     return translationTechnique->processKeyPressedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processTranslationMousePressedEvent(
+BOOLEAN ViewportInteractionTechniques::processTranslationMousePressedEvent(
     const MouseEvent& event)
 {
     return translationTechnique->processMousePressedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processTranslationMousePressedEvent(
+BOOLEAN ViewportInteractionTechniques::processTranslationMousePressedEvent(
     const MouseEvent& event, Viewport* viewport)
 {
     return translationTechnique->processMousePressedEvent(event, viewport);
@@ -173,36 +174,36 @@ Viewport* ViewportInteractionTechniques::getTranslationDragViewport() const
 }
 
 void ViewportInteractionTechniques::setTranslationCursorWrapEnabled(
-    bool enabled)
+    BOOLEAN enabled)
 {
     translationTechnique->setCursorWrapEnabled(enabled);
 }
 
-bool ViewportInteractionTechniques::consumeTranslationCursorWarp(
+BOOLEAN ViewportInteractionTechniques::consumeTranslationCursorWarp(
     TranslateGizmoInteractionTechnique::CursorWarp* outWarp)
 {
     return translationTechnique->consumeCursorWarp(outWarp);
 }
 
-bool ViewportInteractionTechniques::processTranslationMouseReleasedEvent(
+BOOLEAN ViewportInteractionTechniques::processTranslationMouseReleasedEvent(
     const MouseEvent& event)
 {
     return translationTechnique->processMouseReleasedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processTranslationMouseClickedEvent(
+BOOLEAN ViewportInteractionTechniques::processTranslationMouseClickedEvent(
     const MouseEvent& event)
 {
     return translationTechnique->processMouseClickedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processTranslationMouseMovedEvent(
+BOOLEAN ViewportInteractionTechniques::processTranslationMouseMovedEvent(
     const MouseEvent& event)
 {
     return translationTechnique->processMouseMovedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processTranslationMouseDraggedEvent(
+BOOLEAN ViewportInteractionTechniques::processTranslationMouseDraggedEvent(
     const MouseEvent& event)
 {
     return translationTechnique->processMouseDraggedEvent(event);
@@ -213,25 +214,25 @@ InputGizmo* ViewportInteractionTechniques::getRotationInputGizmo()
     return rotateGizmo->getInputGizmo();
 }
 
-bool ViewportInteractionTechniques::isRotationInputGizmoKey(
+BOOLEAN ViewportInteractionTechniques::isRotationInputGizmoKey(
     const KeyEvent& event)
 {
     return rotationTechnique->isInputGizmoKey(event);
 }
 
-bool ViewportInteractionTechniques::processRotateKeyPressedEvent(
+BOOLEAN ViewportInteractionTechniques::processRotateKeyPressedEvent(
     const KeyEvent& event)
 {
     return rotationTechnique->processKeyPressedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processRotationMousePressedEvent(
+BOOLEAN ViewportInteractionTechniques::processRotationMousePressedEvent(
     const MouseEvent& event)
 {
     return rotationTechnique->processMousePressedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processRotationMousePressedEvent(
+BOOLEAN ViewportInteractionTechniques::processRotationMousePressedEvent(
     const MouseEvent& event, Viewport* viewport)
 {
     return rotationTechnique->processMousePressedEvent(event, viewport);
@@ -242,31 +243,31 @@ Viewport* ViewportInteractionTechniques::getRotationDragViewport() const
     return rotationTechnique->getDragViewport();
 }
 
-bool ViewportInteractionTechniques::processRotationMouseReleasedEvent(
+BOOLEAN ViewportInteractionTechniques::processRotationMouseReleasedEvent(
     const MouseEvent& event)
 {
     return rotationTechnique->processMouseReleasedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processRotationMouseDraggedEvent(
+BOOLEAN ViewportInteractionTechniques::processRotationMouseDraggedEvent(
     const MouseEvent& event)
 {
     return rotationTechnique->processMouseDraggedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processRotationMouseClickedEvent(
+BOOLEAN ViewportInteractionTechniques::processRotationMouseClickedEvent(
     const MouseEvent& event)
 {
     return rotationTechnique->processMouseClickedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processRotationMouseMovedEvent(
+BOOLEAN ViewportInteractionTechniques::processRotationMouseMovedEvent(
     const MouseEvent& event)
 {
     return rotationTechnique->processMouseMovedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processScaleKeyPressedEvent(
+BOOLEAN ViewportInteractionTechniques::processScaleKeyPressedEvent(
     const KeyEvent& event)
 {
     return scaleTechnique->processKeyPressedEvent(event);
@@ -277,7 +278,7 @@ InputGizmo* ViewportInteractionTechniques::getScaleInputGizmo()
     return scaleGizmo->getInputGizmo();
 }
 
-bool ViewportInteractionTechniques::isScaleInputGizmoKey(
+BOOLEAN ViewportInteractionTechniques::isScaleInputGizmoKey(
     const KeyEvent& event)
 {
     return scaleTechnique->isInputGizmoKey(event);
@@ -289,13 +290,13 @@ ViewportInteractionTechniques::getScaleTechnique() const
     return scaleTechnique;
 }
 
-bool ViewportInteractionTechniques::processScaleMousePressedEvent(
+BOOLEAN ViewportInteractionTechniques::processScaleMousePressedEvent(
     const MouseEvent& event)
 {
     return scaleTechnique->processMousePressedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processScaleMousePressedEvent(
+BOOLEAN ViewportInteractionTechniques::processScaleMousePressedEvent(
     const MouseEvent& event, Viewport* viewport)
 {
     return scaleTechnique->processMousePressedEvent(event, viewport);
@@ -306,25 +307,25 @@ Viewport* ViewportInteractionTechniques::getScaleDragViewport() const
     return scaleTechnique->getDragViewport();
 }
 
-bool ViewportInteractionTechniques::processScaleMouseReleasedEvent(
+BOOLEAN ViewportInteractionTechniques::processScaleMouseReleasedEvent(
     const MouseEvent& event)
 {
     return scaleTechnique->processMouseReleasedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processScaleMouseDraggedEvent(
+BOOLEAN ViewportInteractionTechniques::processScaleMouseDraggedEvent(
     const MouseEvent& event)
 {
     return scaleTechnique->processMouseDraggedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processScaleMouseClickedEvent(
+BOOLEAN ViewportInteractionTechniques::processScaleMouseClickedEvent(
     const MouseEvent& event)
 {
     return scaleTechnique->processMouseClickedEvent(event);
 }
 
-bool ViewportInteractionTechniques::processScaleMouseMovedEvent(
+BOOLEAN ViewportInteractionTechniques::processScaleMouseMovedEvent(
     const MouseEvent& event)
 {
     return scaleTechnique->processMouseMovedEvent(event);

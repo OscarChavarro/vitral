@@ -1,6 +1,7 @@
 #ifndef __GEOMETRIC_PLANARITY_STRATEGY__
 #define __GEOMETRIC_PLANARITY_STRATEGY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"
 
 /**
@@ -9,7 +10,7 @@ Applies the planar-face consistency expected from the half-edge face model in
 */
 class _GeometricPlanarityStrategy : public _PolyhedralBoundedSolidValidationStrategy {
 public:
-    virtual bool validate(PolyhedralBoundedSolid* solid,
+    virtual BOOLEAN validate(PolyhedralBoundedSolid* solid,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
         String* msg);
 };

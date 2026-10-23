@@ -2,6 +2,7 @@
 #define __ENTITY_CONTROL_ACCESSOR__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Class.h"
 #include "java/lang/String.h"
 
@@ -63,7 +64,7 @@ public:
     @param outText the value as text
     @return false if the entity is not of the class of the accessor
     */
-    virtual bool readValue(const Entity &entity,
+    virtual BOOLEAN readValue(const Entity &entity,
                            String &outText) const = 0;
 
     /**
@@ -84,7 +85,7 @@ public:
     @throws java::NumberFormatException if the text is not a valid value of
     the type
     */
-    virtual bool writeValue(Entity &entity,
+    virtual BOOLEAN writeValue(Entity &entity,
                             const String &text) const = 0;
 
 protected:
@@ -92,7 +93,7 @@ protected:
     @return true if the entity is an instance of the class (Java
     `instanceof`; defined where `Entity` is complete)
     */
-    static bool isInstance(const Entity &entity, const Class &type);
+    static BOOLEAN isInstance(const Entity &entity, const Class &type);
 };
 
 /**
@@ -110,19 +111,25 @@ public:
     static const char *getType(const float *) { return "float"; }
     static const char *getType(const int *) { return "int"; }
     /// Java long is 64 bits: C++ `long long` (and `long` on LP64 platforms)
+#ifdef VSDK_HAS_LONG_LONG
     static const char *getType(const long long *) { return "long"; }
+#endif
     static const char *getType(const long *) { return "long"; }
 
     static void parse(const String &text, double *outValue);
     static void parse(const String &text, float *outValue);
     static void parse(const String &text, int *outValue);
+#ifdef VSDK_HAS_LONG_LONG
     static void parse(const String &text, long long *outValue);
+#endif
     static void parse(const String &text, long *outValue);
 
     static String toString(double value);
     static String toString(float value);
     static String toString(int value);
+#ifdef VSDK_HAS_LONG_LONG
     static String toString(long long value);
+#endif
     static String toString(long value);
 
 private:
@@ -176,15 +183,15 @@ public:
         return EntityControlValue::getType((const V *)NULL);
     }
 
-    virtual bool readValue(const Entity &entity,
+    virtual BOOLEAN readValue(const Entity &entity,
                            String &outText) const
     {
         if ( !isInstance(entity, T::CLASS) ) {
-            return false;
+            return FALSE;
         }
         const T *target = (const T *)&entity;
         outText = EntityControlValue::toString(get(*target));
-        return true;
+        return TRUE;
     }
 
     virtual double parseValue(const String &text) const
@@ -194,17 +201,17 @@ public:
         return ((double)(value));
     }
 
-    virtual bool writeValue(Entity &entity,
+    virtual BOOLEAN writeValue(Entity &entity,
                             const String &text) const
     {
         if ( !isInstance(entity, T::CLASS) ) {
-            return false;
+            return FALSE;
         }
         T *target = (T *)&entity;
         V value;
         EntityControlValue::parse(text, &value);
         (target->*setter)(value);
-        return true;
+        return TRUE;
     }
 };
 

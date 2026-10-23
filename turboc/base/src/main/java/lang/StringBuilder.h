@@ -1,6 +1,7 @@
 #ifndef __STRING_BUILDER__
 #define __STRING_BUILDER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class StringBuilder {
@@ -54,16 +55,19 @@ append(int value);
 StringBuilder &
 append(long value);
 
+#ifdef VSDK_HAS_LONG_LONG
 StringBuilder &
 append(long long value);
+#endif
 
 /// As Java, with the text of `Double.toString` (i.e. "1.0")
 StringBuilder &
 append(double value);
 
-/// As Java: "true" or "false"
+/// As Java's append(boolean): "true" or "false" (BOOLEAN is an int, so
+/// it cannot overload append)
 StringBuilder &
-append(bool value);
+appendBoolean(BOOLEAN value);
 
 String
 toString() const;

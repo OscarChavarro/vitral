@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/Collections.h"
@@ -26,7 +27,7 @@ SceneTransformationOperation::SceneTransformationOperation(
     const String& name,
     const ArrayList<EntityTransformState*>& before,
     const ArrayList<EntityTransformState*>& after,
-    bool mergeable)
+    BOOLEAN mergeable)
     : name(name), mergeable(mergeable),
       lastChangeTime(System::currentTimeMillis())
 {
@@ -66,7 +67,7 @@ int SceneTransformationOperation::getEntityCount() const
     return (int)before.size();
 }
 
-bool SceneTransformationOperation::absorb(UndoableOperation* next)
+BOOLEAN SceneTransformationOperation::absorb(UndoableOperation* next)
 {
     SceneTransformationOperation* other =
         (next != NULL && next->instanceOf(SceneTransformationOperation::CLASS) ? (SceneTransformationOperation*)next : NULL);
@@ -75,35 +76,35 @@ bool SceneTransformationOperation::absorb(UndoableOperation* next)
          !mergeable || !other->mergeable || !name.equals(other->name) ||
          other->lastChangeTime - lastChangeTime > MERGE_INTERVAL_MILLISECONDS ||
          !sameElements(other) ) {
-        return false;
+        return FALSE;
     }
     // Takes the placements after the other operation; the old ones go to
     // the other operation, deleted by the caller
     Collections<EntityTransformState*>::swap(after, other->after);
     lastChangeTime = other->lastChangeTime;
-    return true;
+    return TRUE;
 }
 
-bool SceneTransformationOperation::sameElements(
+BOOLEAN SceneTransformationOperation::sameElements(
     const SceneTransformationOperation* other) const
 {
     long i;
 
     if ( other->before.size() != before.size() ) {
-        return false;
+        return FALSE;
     }
     for ( i = 0; i < before.size(); i++ ) {
         if ( other->before.get(i)->getEntity() !=
              before.get(i)->getEntity() ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const long long SceneTransformationOperation::MERGE_INTERVAL_MILLISECONDS;
+const long long SceneTransformationOperation::MERGE_INTERVAL_MILLISECONDS = 1000;
 
 const Class SceneTransformationOperation::CLASS = { "SceneTransformationOperation", &UndoableOperation::CLASS };
 

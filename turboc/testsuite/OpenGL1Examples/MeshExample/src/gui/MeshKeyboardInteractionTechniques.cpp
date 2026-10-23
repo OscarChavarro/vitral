@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/CameraController.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
@@ -11,7 +12,7 @@ MeshKeyboardInteractionTechniques::MeshKeyboardInteractionTechniques(
     MeshModel* model,
     CameraController* cameraController,
     RendererConfigurationController* qualityController,
-    bool* shouldClose)
+    BOOLEAN* shouldClose)
     : model(model),
       cameraController(cameraController),
       qualityController(qualityController),
@@ -27,40 +28,40 @@ MeshKeyboardInteractionTechniques::~MeshKeyboardInteractionTechniques()
     delete rayGizmoTechniques;
 }
 
-bool MeshKeyboardInteractionTechniques::processKeyPressedEvent(const KeyEvent& event)
+BOOLEAN MeshKeyboardInteractionTechniques::processKeyPressedEvent(const KeyEvent& event)
 {
     if ( event.keycode == KeyEvent::KEY_ESC ) {
         if ( shouldClose != 0 ) {
-            *shouldClose = true;
+            *shouldClose = TRUE;
         }
-        return true;
+        return TRUE;
     }
     if ( event.keycode == KeyEvent::KEY_I ) {
         printf("%s\n", model->getQualitySelection()->toString().c_str());
-        return true;
+        return TRUE;
     }
     if ( rayGizmoTechniques != 0 &&
          rayGizmoTechniques->processKeyPressedEvent(event) ) {
-        return true;
+        return TRUE;
     }
     if ( cameraController != 0 && cameraController->processKeyPressedEvent(event) ) {
-        return true;
+        return TRUE;
     }
     if ( qualityController != 0 && qualityController->processKeyPressedEvent(event) ) {
         printf("%s\n", model->getQualitySelection()->toString().c_str());
-        return true;
+        return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
-bool MeshKeyboardInteractionTechniques::processKeyReleasedEvent(const KeyEvent& event)
+BOOLEAN MeshKeyboardInteractionTechniques::processKeyReleasedEvent(const KeyEvent& event)
 {
     if ( cameraController != 0 && cameraController->processKeyReleasedEvent(event) ) {
-        return true;
+        return TRUE;
     }
     if ( qualityController != 0 && qualityController->processKeyReleasedEvent(event) ) {
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }

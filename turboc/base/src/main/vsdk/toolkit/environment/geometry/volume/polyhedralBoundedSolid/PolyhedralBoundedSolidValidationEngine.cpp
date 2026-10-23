@@ -1,4 +1,5 @@
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
@@ -27,18 +28,18 @@ static const char* const CLASS_NAME = "PolyhedralBoundedSolidValidationEngine";
 Runs the strategies in order, stopping at the first failure.
 @return true when all strategies succeed
 */
-static bool runStrategies(
+static BOOLEAN runStrategies(
     ArrayList<_PolyhedralBoundedSolidValidationStrategy*>& strategies,
     PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
-    bool ok = true;
+    BOOLEAN ok = TRUE;
     long i;
 
     for ( i = 0; i < strategies.size(); i++ ) {
         if ( !strategies[i]->validate(solid, numericContext, msg) ) {
-            ok = false;
+            ok = FALSE;
             break;
         }
     }
@@ -56,10 +57,10 @@ static void append(String* msg, const String& text)
 }
 
 
-bool PolyhedralBoundedSolidValidationEngine::validateIntermediate(PolyhedralBoundedSolid* solid)
+BOOLEAN PolyhedralBoundedSolidValidationEngine::validateIntermediate(PolyhedralBoundedSolid* solid)
 {
     String msg;
-    bool ok;
+    BOOLEAN ok;
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext =
         PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
     ArrayList<_PolyhedralBoundedSolidValidationStrategy*> strategies;
@@ -77,27 +78,27 @@ bool PolyhedralBoundedSolidValidationEngine::validateIntermediate(PolyhedralBoun
     return ok;
 }
 
-bool PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
+BOOLEAN PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB,
     String* msg)
 {
-    bool ok;
+    BOOLEAN ok;
     String sub;
     int welded;
 
-    ok = true;
+    ok = TRUE;
 
     if ( !validateIntermediate(solidA) ) {
         append(msg, "solidA failed validateIntermediate\n");
-        ok = false;
+        ok = FALSE;
     }
     if ( !validateIntermediate(solidB) ) {
         append(msg, "solidB failed validateIntermediate\n");
-        ok = false;
+        ok = FALSE;
     }
     if ( !ok ) {
-        return false;
+        return FALSE;
     }
 
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext ctxA =
@@ -139,31 +140,31 @@ bool PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
     if ( !PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
             solidA, &sub) ) {
         append(msg, String("solidA has ID violations:\n") + sub);
-        ok = false;
+        ok = FALSE;
     }
 
     sub = "";
     if ( !PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
             solidB, &sub) ) {
         append(msg, String("solidB has ID violations:\n") + sub);
-        ok = false;
+        ok = FALSE;
     }
 
     return ok;
 }
 
-bool PolyhedralBoundedSolidValidationEngine::validateStrict(PolyhedralBoundedSolid* solid)
+BOOLEAN PolyhedralBoundedSolidValidationEngine::validateStrict(PolyhedralBoundedSolid* solid)
 {
     String msg;
     return validateStrict(solid, &msg);
 }
 
-bool PolyhedralBoundedSolidValidationEngine::validateStrict(
+BOOLEAN PolyhedralBoundedSolidValidationEngine::validateStrict(
     PolyhedralBoundedSolid* solid,
     String* msg)
 {
     String localMsg;
-    bool ok;
+    BOOLEAN ok;
 
     if ( msg == 0 ) {
         msg = &localMsg;
@@ -186,7 +187,7 @@ bool PolyhedralBoundedSolidValidationEngine::validateStrict(
         if ( topology.hasUniversalContradiction() ) {
             *msg += String("  - Global topology contradiction: ") +
                 topology.toString() + "\n";
-            ok = false;
+            ok = FALSE;
         }
     }
 
@@ -208,58 +209,59 @@ void PolyhedralBoundedSolidValidationEngine::resetStrictValidationInvocationCoun
     strictValidationInvocationCount.set(0L);
 }
 
-bool PolyhedralBoundedSolidValidationEngine::areGeometricallyIdentical(
+BOOLEAN PolyhedralBoundedSolidValidationEngine::areGeometricallyIdentical(
     PolyhedralBoundedSolid* a,
     PolyhedralBoundedSolid* b,
     double tolerance)
 {
     if ( a == 0 || b == 0 ) {
-        return false;
+        return FALSE;
     }
     if ( a->getVerticesList().size() != b->getVerticesList().size() ) {
-        return false;
+        return FALSE;
     }
     if ( a->getEdgesList().size() != b->getEdgesList().size() ) {
-        return false;
+        return FALSE;
     }
     if ( a->getPolygonsList().size() != b->getPolygonsList().size() ) {
-        return false;
+        return FALSE;
     }
     double* ma = a->getMinMax();
     double* mb = b->getMinMax();
-    bool sameBox = true;
-    for ( int i = 0; i < 6; i++ ) {
+    BOOLEAN sameBox = TRUE;
+    long i;
+    for ( i = 0; i < 6; i++ ) {
         if ( fabs(ma[i] - mb[i]) > tolerance ) {
-            sameBox = false;
+            sameBox = FALSE;
             break;
         }
     }
     delete[] ma;
     delete[] mb;
     if ( !sameBox ) {
-        return false;
+        return FALSE;
     }
 
     // Pairwise vertex coincidence: every vertex in A has at least
     // one matching counterpart in B (and by cardinality this implies
     // a bijection). O(n^2) on vertex count.
     long int n = a->getVerticesList().size();
-    ArrayList<bool> matched(Collections<bool>::nCopies(n, false));
-    for ( long int i = 0; i < n; i++ ) {
+    ArrayList<BOOLEAN> matched(Collections<BOOLEAN>::nCopies(n, FALSE));
+    for ( i = 0; i < n; i++ ) {
         Vector3Dd pa = a->getVerticesList().get(i)->position;
-        bool found = false;
+        BOOLEAN found = FALSE;
         for ( long int j = 0; j < n; j++ ) {
             if ( matched[j] ) continue;
             Vector3Dd pb = b->getVerticesList().get(j)->position;
             if ( fabs(pa.x() - pb.x()) <= tolerance
                  && fabs(pa.y() - pb.y()) <= tolerance
                  && fabs(pa.z() - pb.z()) <= tolerance ) {
-                matched[j] = true;
-                found = true;
+                matched[j] = TRUE;
+                found = TRUE;
                 break;
             }
         }
-        if ( !found ) return false;
+        if ( !found ) return FALSE;
     }
-    return true;
+    return TRUE;
 }

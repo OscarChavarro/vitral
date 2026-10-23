@@ -1,6 +1,7 @@
 #ifndef __FLOAT__
 #define __FLOAT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class Float {
@@ -8,7 +9,7 @@ class Float {
     static const float MIN_VALUE;
     static const float MAX_VALUE;
 
-    static bool isFinite(float a);
+    static BOOLEAN isFinite(float a);
 
     /**
     Emulation of `Float.parseFloat`: leading and trailing white space is

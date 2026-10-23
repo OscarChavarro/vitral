@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
@@ -16,37 +17,37 @@ void RendererConfigurationController::setRendererConfiguration(RendererConfigura
     qualitySelection = q;
 }
 
-bool RendererConfigurationController::processKeyPressedEvent(const KeyEvent& keyEvent)
+BOOLEAN RendererConfigurationController::processKeyPressedEvent(const KeyEvent& keyEvent)
 {
-    if (qualitySelection == 0) return false;
+    if (qualitySelection == 0) return FALSE;
 
-    bool updated = false;
+    BOOLEAN updated = FALSE;
     int st;
 
     switch (keyEvent.keycode) {
         case KeyEvent::KEY_F1:
             qualitySelection->changePoints();
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F2:
             qualitySelection->changeWires();
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F3:
             qualitySelection->changeSurfaces();
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F4:
             qualitySelection->changeBoundingVolume();
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F5:
             qualitySelection->changeNormals();
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F6:
             qualitySelection->changeTrianglesNormals();
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F7:
             st = qualitySelection->getShadingType();
@@ -66,15 +67,15 @@ bool RendererConfigurationController::processKeyPressedEvent(const KeyEvent& key
                 st = RendererConfiguration::SHADING_TYPE_NOLIGHT;
             }
             qualitySelection->setShadingType(st);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F8:
             qualitySelection->changeTexture();
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_F9:
             qualitySelection->changeBumpMap();
-            updated = true;
+            updated = TRUE;
             break;
         default:
             break;
@@ -83,9 +84,9 @@ bool RendererConfigurationController::processKeyPressedEvent(const KeyEvent& key
     return updated;
 }
 
-bool RendererConfigurationController::processKeyReleasedEvent(const KeyEvent&)
+BOOLEAN RendererConfigurationController::processKeyReleasedEvent(const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
 const Class RendererConfigurationController::CLASS = { "RendererConfigurationController", &Controller::CLASS };

@@ -1,6 +1,7 @@
 #ifndef __POLYGON_2_D_CONTOUR__
 #define __POLYGON_2_D_CONTOUR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 class _Polygon2DContour
@@ -11,7 +12,7 @@ public:
 private:
     _Polygon2DContour* exteriorContour;
 public:
-    bool fleetingFlag; //Caution, not a long term flag.
+    BOOLEAN fleetingFlag; //Caution, not a long term flag.
 
     _Polygon2DContour();
 
@@ -20,7 +21,7 @@ public:
     void pushVertex(double x, double y);
 
     double* getMinMax();
-    double calcMinMaxArea(bool modifyState);
+    double calcMinMaxArea(BOOLEAN modifyState);
 
     _Polygon2DContour* getExteriorContour();
     void setExteriorContour(_Polygon2DContour* exteriorContour);

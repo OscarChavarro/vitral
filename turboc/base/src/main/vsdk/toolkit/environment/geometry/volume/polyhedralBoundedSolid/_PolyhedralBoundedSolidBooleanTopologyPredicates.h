@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_BOOLEAN_TOPOLOGY_PREDICATES__
 #define __POLYHEDRAL_BOUNDED_SOLID_BOOLEAN_TOPOLOGY_PREDICATES__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 class InfinitePlane;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -17,7 +18,7 @@ public:
     @param tolerance comparison tolerance over normalized plane equations
     @return true when both planes are the same, in any orientation
     */
-    static bool planesCoincidentIgnoringOrientation(
+    static BOOLEAN planesCoincidentIgnoringOrientation(
         const InfinitePlane* a,
         const InfinitePlane* b,
         double tolerance);
@@ -29,10 +30,10 @@ public:
     @param numericContext numeric tolerance context
     @return true when both loops visit coincident vertex positions
     */
-    static bool loopsCoincidentFrom(
+    static BOOLEAN loopsCoincidentFrom(
         _PolyhedralBoundedSolidHalfEdge* startA,
         _PolyhedralBoundedSolidHalfEdge* startB,
-        bool reverse,
+        BOOLEAN reverse,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
 
     /**
@@ -42,7 +43,7 @@ public:
     @return true when both loops have the same vertex positions sequence, in
     any orientation and from any starting vertex
     */
-    static bool loopsCoincident(
+    static BOOLEAN loopsCoincident(
         _PolyhedralBoundedSolidLoop* a,
         _PolyhedralBoundedSolidLoop* b,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);

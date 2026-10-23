@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include <java/lang/Math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -78,11 +79,11 @@ void OpenGL1LightRenderer::draw(const Light* light, Camera* camera)
 
 void OpenGL1LightRenderer::draw(const Light* light, Camera* camera, LightGizmoStyle lightGizmoStyle)
 {
-    draw(light, camera, lightGizmoStyle, false);
+    draw(light, camera, lightGizmoStyle, FALSE);
 }
 
 void OpenGL1LightRenderer::draw(const Light* light, Camera* camera,
-                                LightGizmoStyle lightGizmoStyle, bool selected)
+                                LightGizmoStyle lightGizmoStyle, BOOLEAN selected)
 {
     if (light == NULL) return;
 
@@ -95,7 +96,7 @@ void OpenGL1LightRenderer::draw(const Light* light, Camera* camera,
 }
 
 void OpenGL1LightRenderer::drawCross(const Light* light, Camera* camera,
-                                     bool selected)
+                                     BOOLEAN selected)
 {
     int viewport[4] = {0, 0, 1, 1};
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -139,7 +140,7 @@ void OpenGL1LightRenderer::drawCross(const Light* light, Camera* camera,
 }
 
 void OpenGL1LightRenderer::drawOmniBillboard(const Light* light, Camera* camera,
-                                             bool selected)
+                                             BOOLEAN selected)
 {
     int viewport[4] = {0, 0, 1, 1};
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -169,7 +170,8 @@ void OpenGL1LightRenderer::drawOmniBillboard(const Light* light, Camera* camera,
     ArrayList<float> positions;
     positions.reserve((long int)lineCount * 2 * 3);
 
-    for (int i = 0; i < lineCount; i++) {
+    long i;
+    for (i = 0; i < lineCount; i++) {
         Vector3Dd* p0Pattern = pattern.get2DLinePoint0(i);
         Vector3Dd* p1Pattern = pattern.get2DLinePoint1(i);
         if (p0Pattern == NULL || p1Pattern == NULL) {
@@ -194,7 +196,7 @@ void OpenGL1LightRenderer::drawOmniBillboard(const Light* light, Camera* camera,
     ColorRgb c = selected ? ColorRgb(1, 1, 0) : light->getEmission();
     ArrayList<float> colors;
     colors.reserve(positions.size());
-    for (long int i = 0; i < positions.size() / 3; i++) {
+    for (i = 0; i < positions.size() / 3; i++) {
         colors.add((float)c.r());
         colors.add((float)c.g());
         colors.add((float)c.b());

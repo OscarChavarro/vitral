@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/io/PersistenceElement.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-const bool PersistenceElement::bigEndianArchitecture = false;
+const BOOLEAN PersistenceElement::bigEndianArchitecture = FALSE;
 unsigned char PersistenceElement::byteBuffer1byte[1] = {0};
 unsigned char PersistenceElement::byteBuffer2byte[2] = {0, 0};
 unsigned char PersistenceElement::byteBuffer4byte[4] = {0, 0, 0, 0};
@@ -36,7 +37,7 @@ PersistenceElement::writeByte(OutputStream &os, unsigned char value) {
 }
 
 void
-PersistenceElement::writeBool(OutputStream &os, bool value) {
+PersistenceElement::writeBool(OutputStream &os, BOOLEAN value) {
     writeByte(os, ((unsigned char)(value ? 1 : 0)));
 }
 
@@ -476,8 +477,8 @@ PersistenceElement::writeInt32LE(OutputStream &os, int num) {
 void
 PersistenceElement::writeInt64LE(OutputStream &os, long long num) {
     const unsigned long long bits = ((unsigned long long)(num));
-    const int low = ((int)(bits & 0xFFFFFFFFULL));
-    const int high = ((int)((bits >> 32) & 0xFFFFFFFFULL));
+    const int low = ((int)(bits & VSDK_ULL(0xFFFFFFFF)));
+    const int high = ((int)((bits >> 32) & VSDK_ULL(0xFFFFFFFF)));
     writeInt32LE(os, low);
     writeInt32LE(os, high);
 }
@@ -609,7 +610,7 @@ PersistenceElement::readAsciiString(InputStream &is) {
     return msg;
 }
 
-bool
+BOOLEAN
 PersistenceElement::buildUtf8Char(const unsigned char arr[2], unsigned char outBytes[2]) {
     const int a = signedByte2unsignedInteger(arr[0]);
     const int b = signedByte2unsignedInteger(arr[1]);
@@ -617,10 +618,10 @@ PersistenceElement::buildUtf8Char(const unsigned char arr[2], unsigned char outB
     if ( ((a >> 5) == 0x06) && ((b >> 6) == 0x02) ) {
         outBytes[0] = arr[0];
         outBytes[1] = arr[1];
-        return true;
+        return TRUE;
     }
 
-    return false;
+    return FALSE;
 }
 
 char *
@@ -721,7 +722,7 @@ PersistenceElement::readAsciiLine(InputStream &is) {
     unsigned char character[1] = {0};
     ArrayList<unsigned char> bytes(64);
 
-    while ( true ) {
+    while ( TRUE ) {
         readBytes(is, character, 1);
         if ( character[0] == 0x00 ) {
             break;
@@ -752,14 +753,14 @@ PersistenceElement::readAsciiLine(InputStream &is) {
     return msg;
 }
 
-bool
+BOOLEAN
 PersistenceElement::isInSet(unsigned char key, const unsigned char *set, int setLength) {
     for ( int i = 0; i < setLength; i++ ) {
         if ( key == set[i] ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 char *
@@ -888,44 +889,44 @@ PersistenceElement::joinCString3(const char *first, const char *second, const ch
     return joined;
 }
 
-bool
+BOOLEAN
 PersistenceElement::containsCString(const char *text, const char *fragment) {
     if ( text == NULL || fragment == NULL ) {
-        return false;
+        return FALSE;
     }
     return strstr(text, fragment) != NULL;
 }
 
-bool
+BOOLEAN
 PersistenceElement::startsWithCString(const char *text, const char *prefix) {
     if ( text == NULL || prefix == NULL ) {
-        return false;
+        return FALSE;
     }
     const size_t textLength = strlen(text);
     const size_t prefixLength = strlen(prefix);
     if ( prefixLength > textLength ) {
-        return false;
+        return FALSE;
     }
     return strncmp(text, prefix, prefixLength) == 0;
 }
 
-bool
+BOOLEAN
 PersistenceElement::endsWithCString(const char *text, const char *suffix) {
     if ( text == NULL || suffix == NULL ) {
-        return false;
+        return FALSE;
     }
     const size_t textLength = strlen(text);
     const size_t suffixLength = strlen(suffix);
     if ( suffixLength > textLength ) {
-        return false;
+        return FALSE;
     }
     return strncmp(text + textLength - suffixLength, suffix, suffixLength) == 0;
 }
 
-bool
+BOOLEAN
 PersistenceElement::containsExistingLibrary(const char *pathList, char pathSeparator, const char *nativeLibname) {
     if ( pathList == NULL || nativeLibname == NULL || nativeLibname[0] == '\0' ) {
-        return false;
+        return FALSE;
     }
 
     const char *tokenStart = pathList;
@@ -948,7 +949,7 @@ PersistenceElement::containsExistingLibrary(const char *pathList, char pathSepar
                     if ( candidate.exists() && candidate.canRead() && candidate.isFile() ) {
                         free(fullPath);
                         free(token);
-                        return true;
+                        return TRUE;
                     }
                     free(fullPath);
                 }
@@ -962,13 +963,13 @@ PersistenceElement::containsExistingLibrary(const char *pathList, char pathSepar
         tokenStart = cursor + 1;
     }
 
-    return false;
+    return FALSE;
 }
 
-bool
+BOOLEAN
 PersistenceElement::verifyLibrary(const char *libname) {
     if ( libname == NULL || libname[0] == '\0' ) {
-        return false;
+        return FALSE;
     }
 
     const char *prefix = "";
@@ -987,7 +988,7 @@ PersistenceElement::verifyLibrary(const char *libname) {
 
     char *nativeLibname = joinCString3(prefix, libname, suffix);
     if ( nativeLibname == NULL ) {
-        return false;
+        return FALSE;
     }
 
     const char *paths = getenv("JAVA_LIBRARY_PATH");
@@ -995,7 +996,7 @@ PersistenceElement::verifyLibrary(const char *libname) {
         paths = getenv("LD_LIBRARY_PATH");
     }
 
-    bool exists = false;
+    BOOLEAN exists = FALSE;
     if ( paths != NULL && paths[0] != '\0' ) {
         exists = containsExistingLibrary(paths, separator, nativeLibname);
     }
@@ -1012,7 +1013,7 @@ PersistenceElement::verifyLibrary(const char *libname) {
             if ( candidate != NULL ) {
                 File file(candidate);
                 if ( file.exists() && file.canRead() && file.isFile() ) {
-                    exists = true;
+                    exists = TRUE;
                     free(candidate);
                     break;
                 }
@@ -1026,11 +1027,11 @@ PersistenceElement::verifyLibrary(const char *libname) {
     return exists;
 }
 
-bool
+BOOLEAN
 PersistenceElement::checkDirectory(const char *dirName) {
     if ( dirName == NULL || dirName[0] == '\0' ) {
         System::err.print("Directory name is empty.\n");
-        return false;
+        return FALSE;
     }
 
     File directory(dirName);
@@ -1038,7 +1039,7 @@ PersistenceElement::checkDirectory(const char *dirName) {
         System::err.printf(
             "Directory %s can not be created, because a file with that name already exists (not overwriten).\n",
             dirName);
-        return false;
+        return FALSE;
     }
 
     if ( !directory.exists() ) {
@@ -1046,7 +1047,7 @@ PersistenceElement::checkDirectory(const char *dirName) {
             System::err.printf(
                 "Directory %s can not be created, check permisions and available free disk space.\n",
                 dirName);
-            return false;
+            return FALSE;
         }
     }
 
@@ -1054,10 +1055,10 @@ PersistenceElement::checkDirectory(const char *dirName) {
         System::err.printf(
             "Directory %s is not accessible for read/write operations.\n",
             dirName);
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 /**
@@ -1078,7 +1079,7 @@ PersistenceElement::extractExtensionFromFile(const File &fd) {
 
     const char *extension = raw;
     const char *cursor = raw;
-    while ( true ) {
+    while ( TRUE ) {
         const char *dot = strchr(cursor, '.');
         if ( dot == NULL ) {
             break;

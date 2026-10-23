@@ -1,6 +1,7 @@
 #ifndef __SIMPLE_BODY__
 #define __SIMPLE_BODY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -18,8 +19,8 @@ class SimpleBody : public Entity {
 private:
     Geometry* geometry;
     /// False when the geometry is shared (see `setGeometryReference`)
-    bool ownsGeometry;
-    bool geometryIsSphere;
+    BOOLEAN ownsGeometry;
+    BOOLEAN geometryIsSphere;
     Vector3Dd position;
     Vector3Dd scale;
     Matrix4x4d rotation;
@@ -27,16 +28,16 @@ private:
     Quaterniond rotationQuaternion;
     Quaterniond rotationInverseQuaternion;
     Vector3Dd inverseScale;
-    bool hasInvertibleScale;
-    bool hasIdentityRotation;
-    bool hasUnitScale;
-    bool hasZeroTranslation;
-    bool hasTranslationOnlyTransform;
-    bool hasIdentityTransform;
+    BOOLEAN hasInvertibleScale;
+    BOOLEAN hasIdentityRotation;
+    BOOLEAN hasUnitScale;
+    BOOLEAN hasZeroTranslation;
+    BOOLEAN hasTranslationOnlyTransform;
+    BOOLEAN hasIdentityTransform;
 
     SimpleMaterial* material;
     /// False when the material is shared (see `setMaterialReference`)
-    bool ownsMaterial;
+    BOOLEAN ownsMaterial;
     Image* texture;
     NormalMap* normalMap;
     RGBImageUncompressed* normalMapRgb;
@@ -46,9 +47,9 @@ private:
 
     void markModified();
     void updateTransformFlags();
-    static bool isIdentityRotation(const Matrix4x4d& matrix);
-    bool doIntersectionWithTranslationOnly(const Ray& inOutRay, RayHit* outHit, int requiredDetailMask) const;
-    bool doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const;
+    static BOOLEAN isIdentityRotation(const Matrix4x4d& matrix);
+    BOOLEAN doIntersectionWithTranslationOnly(const Ray& inOutRay, RayHit* outHit, int requiredDetailMask) const;
+    BOOLEAN doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const;
 
 public:
     static const Class CLASS;
@@ -113,7 +114,7 @@ public:
     void setScale(const Vector3Dd& s);
 
     Ray* doIntersectionFirstHit(const Ray& inRay) const;
-    bool doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const;
+    BOOLEAN doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const;
     int computeQuantitativeInvisibility(const Vector3Dd& origin, const Vector3Dd& p) const;
     void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) const;
 };

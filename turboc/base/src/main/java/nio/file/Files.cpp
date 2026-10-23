@@ -1,14 +1,15 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/io/FileInputStream.h"
 #include "java/lang/StringBuilder.h"
 #include "java/nio/file/Files.h"
 
-bool
+BOOLEAN
 Files::readString(const String &path, String &outText)
 {
     File file(path);
     if ( !file.isFile() || !file.canRead() ) {
-        return false;
+        return FALSE;
     }
     FileInputStream input(path.c_str());
     StringBuilder text;
@@ -19,5 +20,5 @@ Files::readString(const String &path, String &outText)
     }
     input.close();
     outText = text.toString();
-    return true;
+    return TRUE;
 }

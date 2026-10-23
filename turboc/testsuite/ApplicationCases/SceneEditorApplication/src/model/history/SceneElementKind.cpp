@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/light/Light.h"
@@ -37,7 +38,7 @@ SelectionSet* SceneElementKind::getSelection(Value kind, Scene* scene)
 }
 
 void SceneElementKind::insert(Value kind, Scene* scene, int index,
-                              Entity* element, bool selected)
+                              Entity* element, BOOLEAN selected)
 {
     SelectionSet* selection = getSelection(kind, scene);
 
@@ -63,4 +64,3 @@ void SceneElementKind::remove(Value kind, Scene* scene, int index)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int SceneElementKind::COUNT;

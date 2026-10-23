@@ -6,6 +6,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.h"
@@ -81,14 +82,14 @@ Emulates `locateWindowAtElem` followed by `removeElemAtWindow`.
 @return true if the element was found and removed
 */
 template <class T>
-static bool removeElem(ArrayList<T>& list, T elem)
+static BOOLEAN removeElem(ArrayList<T>& list, T elem)
 {
     long pos = indexOf(list, elem);
     if ( pos < 0 ) {
-        return false;
+        return FALSE;
     }
     list.remove(pos);
-    return true;
+    return TRUE;
 }
 
 /**
@@ -216,11 +217,11 @@ static void insertLineDrawingEdge(
     oldVertex->emanatingHalfEdge = he;
 }
 
-static bool failLringmv(const String& message)
+static BOOLEAN failLringmv(const String& message)
 {
     PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
     report(Logger::WARNING, LRINGMV_MESSAGE, message);
-    return false;
+    return FALSE;
 }
 
 static _PolyhedralBoundedSolidFace* validateLringmvInput(
@@ -255,7 +256,7 @@ static void promoteLoopAsOuter(
     swapElems(face->boundariesList, loop, face->boundariesList.get(0));
 }
 
-static bool demoteLoopAsInner(
+static BOOLEAN demoteLoopAsInner(
     _PolyhedralBoundedSolidFace* face,
     _PolyhedralBoundedSolidLoop* loop)
 {
@@ -264,16 +265,16 @@ static bool demoteLoopAsInner(
         return failLringmv("Cannot mark the only boundary loop as inner.");
     }
     if ( face->boundariesList.get(0) != loop ) {
-        return true;
+        return TRUE;
     }
     swapElems(face->boundariesList, loop, face->boundariesList.get(1));
-    return true;
+    return TRUE;
 }
 
-static bool reorderLoopInSameFace(
+static BOOLEAN reorderLoopInSameFace(
     _PolyhedralBoundedSolidLoop* loop,
     _PolyhedralBoundedSolidFace* face,
-    bool setAsOuterLoop)
+    BOOLEAN setAsOuterLoop)
 {
     if ( indexOf(face->boundariesList, loop) < 0 ) {
         return failLringmv(
@@ -281,16 +282,16 @@ static bool reorderLoopInSameFace(
     }
     if ( setAsOuterLoop ) {
         promoteLoopAsOuter(face, loop);
-        return true;
+        return TRUE;
     }
     return demoteLoopAsInner(face, loop);
 }
 
-static bool moveLoopAcrossFaces(
+static BOOLEAN moveLoopAcrossFaces(
     _PolyhedralBoundedSolidLoop* loop,
     _PolyhedralBoundedSolidFace* sourceFace,
     _PolyhedralBoundedSolidFace* destinationFace,
-    bool setAsOuterLoop)
+    BOOLEAN setAsOuterLoop)
 {
     if ( sourceFace->boundariesList.size() <= 1 ) {
         return failLringmv("Cannot move the only boundary loop of a face.");
@@ -312,7 +313,7 @@ static bool moveLoopAcrossFaces(
     else {
         destinationFace->boundariesList.add(loop);
     }
-    return true;
+    return TRUE;
 }
 
 
@@ -786,17 +787,17 @@ lringmv moves the loop `l` from its parent face to `toFace`, as inner loop
 or as outer loop following `setAsOuterLoop`. It is an addendum to lmef, not
 an Euler operator, following section [MANT1988].11.5.1.
 */
-bool PolyhedralBoundedSolidEulerOperators::lringmv(
+BOOLEAN PolyhedralBoundedSolidEulerOperators::lringmv(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidLoop* l,
     _PolyhedralBoundedSolidFace* toFace,
-    bool setAsOuterLoop)
+    BOOLEAN setAsOuterLoop)
 {
     PolyhedralBoundedSolidStatistics::recordLringmvCall();
     (void)solid;
     _PolyhedralBoundedSolidFace* fromFace = validateLringmvInput(l, toFace);
     if ( fromFace == 0 ) {
-        return false;
+        return FALSE;
     }
     if ( fromFace == toFace ) {
         return reorderLoopInSameFace(l, toFace, setAsOuterLoop);
@@ -882,7 +883,7 @@ void PolyhedralBoundedSolidEulerOperators::lmekr(
 /**
 smev: "Strut" or line-drawing "Simplified" version of mev operator.
 */
-bool PolyhedralBoundedSolidEulerOperators::smev(
+BOOLEAN PolyhedralBoundedSolidEulerOperators::smev(
     PolyhedralBoundedSolid* solid, int f1, int v1, int v4, const Vector3Dd& p)
 {
     _PolyhedralBoundedSolidFace* oldFace1;
@@ -892,7 +893,7 @@ bool PolyhedralBoundedSolidEulerOperators::smev(
     if ( oldFace1 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "mev", FACE_MESSAGE + str(f1) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     he1 = oldFace1->findHalfEdge(v1);
     if ( he1 == 0 ) {
@@ -900,10 +901,10 @@ bool PolyhedralBoundedSolidEulerOperators::smev(
         report(Logger::WARNING, "mev",
             EDGE_MESSAGE + str(v1) + EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE +
             str(f1) + DOT);
-        return false;
+        return FALSE;
     }
     lmev(solid, he1, he1, v4, p);
-    return true;
+    return TRUE;
 }
 
 /**
@@ -911,7 +912,7 @@ mev: (high level version) make edge vertex (vertex splitting operation).
 Edges from `v1` -> `v2` (inclusive) to `v1` -> `v3` (exclusive) become
 adjacent to the new vertex `v4`.
 */
-bool PolyhedralBoundedSolidEulerOperators::mev(
+BOOLEAN PolyhedralBoundedSolidEulerOperators::mev(
     PolyhedralBoundedSolid* solid, int f1, int f2,
     int v1, int v2, int v3, int v4, const Vector3Dd& p)
 {
@@ -924,13 +925,13 @@ bool PolyhedralBoundedSolidEulerOperators::mev(
     if ( oldFace1 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "mev", FACE_MESSAGE + str(f1) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     oldFace2 = solid->findFace(f2);
     if ( oldFace2 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "mev", FACE_MESSAGE + str(f2) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     he1 = oldFace1->findHalfEdge(v1, v2);
     if ( he1 == 0 ) {
@@ -938,7 +939,7 @@ bool PolyhedralBoundedSolidEulerOperators::mev(
         report(Logger::WARNING, "mev",
             EDGE_MESSAGE + str(v1) + " - " + str(v2) +
             EDGE_NOT_FOUND_IN_FACE_MESSAGE + str(f1) + DOT);
-        return false;
+        return FALSE;
     }
     he2 = oldFace2->findHalfEdge(v1, v3);
     if ( he2 == 0 ) {
@@ -946,16 +947,16 @@ bool PolyhedralBoundedSolidEulerOperators::mev(
         report(Logger::WARNING, "mev",
             EDGE_MESSAGE + str(v1) + " - " + str(v3) +
             EDGE_NOT_FOUND_IN_FACE_MESSAGE + str(f2) + DOT);
-        return false;
+        return FALSE;
     }
     lmev(solid, he1, he2, v4, p);
-    return true;
+    return TRUE;
 }
 
 /**
 smef: simplified version of mef operator.
 */
-bool PolyhedralBoundedSolidEulerOperators::smef(
+BOOLEAN PolyhedralBoundedSolidEulerOperators::smef(
     PolyhedralBoundedSolid* solid, int f1, int v1, int v3, int newFaceId)
 {
     _PolyhedralBoundedSolidFace* oldFace1;
@@ -966,7 +967,7 @@ bool PolyhedralBoundedSolidEulerOperators::smef(
     if ( oldFace1 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "smef", FACE_MESSAGE + str(f1) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     he1 = oldFace1->findHalfEdge(v1);
     if ( he1 == 0 ) {
@@ -974,7 +975,7 @@ bool PolyhedralBoundedSolidEulerOperators::smef(
         report(Logger::WARNING, "smef",
             EDGE_MESSAGE + str(v1) + EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE +
             str(f1) + DOT);
-        return false;
+        return FALSE;
     }
     he2 = oldFace1->findHalfEdge(v3);
     if ( he2 == 0 ) {
@@ -982,17 +983,17 @@ bool PolyhedralBoundedSolidEulerOperators::smef(
         report(Logger::WARNING, "smef",
             EDGE_MESSAGE + str(v3) + EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE +
             str(f1) + DOT);
-        return false;
+        return FALSE;
     }
     lmef(solid, he1, he2, newFaceId);
-    return true;
+    return TRUE;
 }
 
 /**
 mef: (high level version) make edge face (face splitting operation).
 Executes a lmef in half-edges `v1`-`v2`, `v3`-`v4` of faces `f1` and `f2`.
 */
-bool PolyhedralBoundedSolidEulerOperators::mef(
+BOOLEAN PolyhedralBoundedSolidEulerOperators::mef(
     PolyhedralBoundedSolid* solid, int f1, int f2,
     int v1, int v2, int v3, int v4, int newFaceId)
 {
@@ -1005,13 +1006,13 @@ bool PolyhedralBoundedSolidEulerOperators::mef(
     if ( oldFace1 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "mef", FACE_MESSAGE + str(f1) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     oldFace2 = solid->findFace(f2);
     if ( oldFace2 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "mef", FACE_MESSAGE + str(f2) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     he1 = oldFace1->findHalfEdge(v1, v2);
     if ( he1 == 0 ) {
@@ -1019,7 +1020,7 @@ bool PolyhedralBoundedSolidEulerOperators::mef(
         report(Logger::WARNING, "mef",
             EDGE_MESSAGE + str(v1) + " - " + str(v2) +
             EDGE_NOT_FOUND_IN_FACE_MESSAGE + str(f1) + DOT);
-        return false;
+        return FALSE;
     }
     he2 = oldFace2->findHalfEdge(v3, v4);
     if ( he2 == 0 ) {
@@ -1027,16 +1028,16 @@ bool PolyhedralBoundedSolidEulerOperators::mef(
         report(Logger::WARNING, "mef",
             EDGE_MESSAGE + str(v3) + " - " + str(v4) +
             EDGE_NOT_FOUND_IN_FACE_MESSAGE + str(f2) + DOT);
-        return false;
+        return FALSE;
     }
     lmef(solid, he1, he2, newFaceId);
-    return true;
+    return TRUE;
 }
 
 /**
 kemr: (high level version) kill edge make ring (loop splitting operation).
 */
-bool PolyhedralBoundedSolidEulerOperators::kemr(
+BOOLEAN PolyhedralBoundedSolidEulerOperators::kemr(
     PolyhedralBoundedSolid* solid, int f1, int f2,
     int v1, int v2, int v3, int v4)
 {
@@ -1049,13 +1050,13 @@ bool PolyhedralBoundedSolidEulerOperators::kemr(
     if ( oldFace1 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "kemr", FACE_MESSAGE + str(f1) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     oldFace2 = solid->findFace(f2);
     if ( oldFace2 == 0 ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "kemr", FACE_MESSAGE + str(f2) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     he1 = oldFace1->findHalfEdge(v1, v2);
     if ( he1 == 0 ) {
@@ -1063,7 +1064,7 @@ bool PolyhedralBoundedSolidEulerOperators::kemr(
         report(Logger::WARNING, "kemr",
             EDGE_MESSAGE + str(v1) + " - " + str(v2) +
             EDGE_NOT_FOUND_IN_FACE_MESSAGE + str(f1) + DOT);
-        return false;
+        return FALSE;
     }
     he2 = oldFace2->findHalfEdge(v3, v4);
     if ( he2 == 0 ) {
@@ -1071,17 +1072,17 @@ bool PolyhedralBoundedSolidEulerOperators::kemr(
         report(Logger::WARNING, "kemr",
             EDGE_MESSAGE + str(v3) + " - " + str(v4) +
             EDGE_NOT_FOUND_IN_FACE_MESSAGE + str(f2) + DOT);
-        return false;
+        return FALSE;
     }
     lkemr(solid, he1, he2);
-    return true;
+    return TRUE;
 }
 
 /**
 kfmrh: (high level version) KillFaceMakeRingHole, for the same-shell case
 of section [MANT1988].9.2.4.
 */
-bool PolyhedralBoundedSolidEulerOperators::kfmrh(PolyhedralBoundedSolid* solid, int f1, int f2)
+BOOLEAN PolyhedralBoundedSolidEulerOperators::kfmrh(PolyhedralBoundedSolid* solid, int f1, int f2)
 {
     _PolyhedralBoundedSolidFace* oldFace1;
     _PolyhedralBoundedSolidFace* oldFace2;
@@ -1089,13 +1090,13 @@ bool PolyhedralBoundedSolidEulerOperators::kfmrh(PolyhedralBoundedSolid* solid, 
     oldFace1 = solid->findFace(f1);
     if ( oldFace1 == 0 ) {
         report(Logger::WARNING, "kfmrh", FACE_MESSAGE + str(f1) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     oldFace2 = solid->findFace(f2);
     if ( oldFace2 == 0 ) {
         report(Logger::WARNING, "kfmrh", FACE_MESSAGE + str(f2) + NOT_FOUND_MESSAGE);
-        return false;
+        return FALSE;
     }
     lkfmrh(solid, oldFace1, oldFace2);
-    return true;
+    return TRUE;
 }

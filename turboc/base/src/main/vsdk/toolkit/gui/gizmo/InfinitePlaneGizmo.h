@@ -2,6 +2,7 @@
 #define __INFINITE_PLANE_GIZMO__
 
 #include <time.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -33,8 +34,8 @@ public:
     InfinitePlane getPlane() const;
     Vector3Dd getPoint() const;
     Vector3Dd getNormal() const;
-    bool isVisible() const;
-    void setVisible(bool visible);
+    BOOLEAN isVisible() const;
+    void setVisible(BOOLEAN visible);
     double getDisableAfterElapsedSeconds() const;
     void setDisableAfterElapsedSeconds(double disableAfterElapsedSeconds);
     time_t getLastDataTime() const;
@@ -52,12 +53,12 @@ private:
 
     time_t lastDataTime;
     time_t previousDataTime;
-    bool visible;
+    BOOLEAN visible;
     double disableAfterElapsedSeconds;
     ColorRgb frameColor;
 
     void recordDataArrival();
-    bool inactivityThresholdExceeded() const;
+    BOOLEAN inactivityThresholdExceeded() const;
 };
 
 #endif

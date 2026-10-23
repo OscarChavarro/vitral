@@ -1,4 +1,5 @@
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
 #include "java/lang/Integer.h"
@@ -8,7 +9,7 @@
 #include "vsdk/toolkit/common/EntityControlAccessor.h"
 #include <limits.h>
 
-bool
+BOOLEAN
 EntityControlAccessor::isInstance(const Entity &entity, const Class &type)
 {
     return entity.instanceOf(type);
@@ -50,6 +51,7 @@ EntityControlValue::toString(int value)
     return String::valueOf(value);
 }
 
+#ifdef VSDK_HAS_LONG_LONG
 void
 EntityControlValue::parse(const String &text, long long *outValue)
 {
@@ -61,6 +63,7 @@ EntityControlValue::toString(long long value)
 {
     return String::valueOf(value);
 }
+#endif
 
 void
 EntityControlValue::parse(const String &text, long *outValue)

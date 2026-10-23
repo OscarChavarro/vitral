@@ -1,6 +1,7 @@
 #ifndef __PERSISTENCE_ELEMENT__
 #define __PERSISTENCE_ELEMENT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/io/InputStream.h"
 #include "java/io/OutputStream.h"
@@ -42,7 +43,7 @@ class PersistenceElement {
     static int readByteInt(InputStream &is);
     static int readByteUnsignedInt(InputStream &is);
     static void writeByte(OutputStream &os, unsigned char value);
-    static void writeBool(OutputStream &os, bool value);
+    static void writeBool(OutputStream &os, BOOLEAN value);
 
     static void readBytes(InputStream &is, unsigned char *bytesBuffer, int length);
 
@@ -97,14 +98,14 @@ class PersistenceElement {
     static void writeUtf8String(OutputStream &writer, const char *cad);
     static void writeAsciiLine(OutputStream &writer, const char *cad);
     static void writeUtf8Line(OutputStream &writer, const char *cad);
-    static bool verifyLibrary(const char *libname);
-    static bool checkDirectory(const char *dirName);
+    static BOOLEAN verifyLibrary(const char *libname);
+    static BOOLEAN checkDirectory(const char *dirName);
 
   protected:
     static char *extractExtensionFromFile(const File &fd);
 
   private:
-    static const bool bigEndianArchitecture;
+    static const BOOLEAN bigEndianArchitecture;
 
     // Those are not thread safe / re-entrant... each different thread should
     // use its own arrays
@@ -135,15 +136,15 @@ class PersistenceElement {
     static float byteArray2floatInvert(const unsigned char *arr, int start);
     static double byteArray2doubleInvert(const unsigned char *arr, int start);
 
-    static bool isInSet(unsigned char key, const unsigned char *set, int setLength);
-    static bool buildUtf8Char(const unsigned char arr[2], unsigned char outBytes[2]);
+    static BOOLEAN isInSet(unsigned char key, const unsigned char *set, int setLength);
+    static BOOLEAN buildUtf8Char(const unsigned char arr[2], unsigned char outBytes[2]);
     static char *duplicateCString(const char *text);
     static char *joinCString2(const char *left, const char *right);
     static char *joinCString3(const char *first, const char *second, const char *third);
-    static bool containsCString(const char *text, const char *fragment);
-    static bool startsWithCString(const char *text, const char *prefix);
-    static bool endsWithCString(const char *text, const char *suffix);
-    static bool containsExistingLibrary(const char *pathList, char pathSeparator, const char *nativeLibname);
+    static BOOLEAN containsCString(const char *text, const char *fragment);
+    static BOOLEAN startsWithCString(const char *text, const char *prefix);
+    static BOOLEAN endsWithCString(const char *text, const char *suffix);
+    static BOOLEAN containsExistingLibrary(const char *pathList, char pathSeparator, const char *nativeLibname);
 };
 
 

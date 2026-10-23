@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "CommandOptionsProcessor.h"
 const char* CommandOptionsProcessor::DEFAULT_SCENE_FILE = "../../../../etc/geometry/mitscenes/balls.ray";
@@ -13,31 +14,31 @@ const int CommandOptionsProcessor::DEFAULT_Y_RESOLUTION = 240;
 
 CommandOptionsProcessor::CommandOptionsProcessor()
     : sceneFile(DEFAULT_SCENE_FILE), outputFile(DEFAULT_OUTPUT_FILE_NAME),
-      save(true), parallel(false), showHelp(false),
+      save(TRUE), parallel(FALSE), showHelp(FALSE),
       xResolution(DEFAULT_X_RESOLUTION), yResolution(DEFAULT_Y_RESOLUTION)
 {
 }
 
 // Parses "<width>x<height>" (e.g. 640x480), or "scene" for the viewport
 // defined on the scene file (reported as 0x0)
-bool CommandOptionsProcessor::parseResolution(const String& value, int* x, int* y)
+BOOLEAN CommandOptionsProcessor::parseResolution(const String& value, int* x, int* y)
 {
     if ( value == "scene" ) {
         *x = 0;
         *y = 0;
-        return true;
+        return TRUE;
     }
 
     const char* text = value.c_str();
     char* end = 0;
     long w = strtol(text, &end, 10);
-    if ( end == text || (*end != 'x' && *end != 'X') ) return false;
+    if ( end == text || (*end != 'x' && *end != 'X') ) return FALSE;
     const char* heightText = end + 1;
     long h = strtol(heightText, &end, 10);
-    if ( end == heightText || *end != '\0' || w <= 0 || h <= 0 ) return false;
+    if ( end == heightText || *end != '\0' || w <= 0 || h <= 0 ) return FALSE;
     *x = (int)w;
     *y = (int)h;
-    return true;
+    return TRUE;
 }
 
 CommandOptionsProcessor CommandOptionsProcessor::process(const ArrayList<String>& args)
@@ -48,21 +49,21 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const ArrayList<String>
     for (long int i = 0; i < args.size(); i++) {
         String arg = args.get(i);
         if ( arg == "nosave" || arg == "--nosave" || arg == "-n" ) {
-            options.save = false;
+            options.save = FALSE;
             continue;
         }
         if ( arg == "-parallel" || arg == "--parallel" ) {
-            options.parallel = true;
+            options.parallel = TRUE;
             continue;
         }
         if ( arg == "--help" || arg == "-h" ) {
-            options.showHelp = true;
+            options.showHelp = TRUE;
             continue;
         }
         if ( arg == "--scene" || arg == "-s" ) {
             if ( i + 1 >= args.size() ) {
                 fprintf(stderr, "Missing value for %s\n", arg.c_str());
-                options.showHelp = true;
+                options.showHelp = TRUE;
                 return options;
             }
             options.sceneFile = args.get(++i);
@@ -71,7 +72,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const ArrayList<String>
         if ( arg == "--output" || arg == "-o" ) {
             if ( i + 1 >= args.size() ) {
                 fprintf(stderr, "Missing value for %s\n", arg.c_str());
-                options.showHelp = true;
+                options.showHelp = TRUE;
                 return options;
             }
             options.outputFile = args.get(++i);
@@ -80,20 +81,20 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const ArrayList<String>
         if ( arg == "--resolution" || arg == "-r" ) {
             if ( i + 1 >= args.size() ) {
                 fprintf(stderr, "Missing value for %s\n", arg.c_str());
-                options.showHelp = true;
+                options.showHelp = TRUE;
                 return options;
             }
             String value = args.get(++i);
             if ( !parseResolution(value, &options.xResolution, &options.yResolution) ) {
                 fprintf(stderr, "Invalid resolution: %s\n", value.c_str());
-                options.showHelp = true;
+                options.showHelp = TRUE;
                 return options;
             }
             continue;
         }
         if ( !arg.empty() && arg[0] == '-' ) {
             fprintf(stderr, "Unknown option: %s\n", arg.c_str());
-            options.showHelp = true;
+            options.showHelp = TRUE;
             return options;
         }
 
@@ -101,7 +102,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const ArrayList<String>
         else if ( positionalCount == 1 ) options.outputFile = arg;
         else {
             fprintf(stderr, "Unexpected argument: %s\n", arg.c_str());
-            options.showHelp = true;
+            options.showHelp = TRUE;
             return options;
         }
         positionalCount++;
@@ -128,9 +129,9 @@ void CommandOptionsProcessor::printUsage()
 
 const String& CommandOptionsProcessor::getSceneFile() const { return sceneFile; }
 const String& CommandOptionsProcessor::getOutputFile() const { return outputFile; }
-bool CommandOptionsProcessor::shouldSave() const { return save; }
-bool CommandOptionsProcessor::shouldUseParallelExecutor() const { return parallel; }
-bool CommandOptionsProcessor::shouldShowHelp() const { return showHelp; }
-bool CommandOptionsProcessor::shouldUseSceneResolution() const { return xResolution <= 0 || yResolution <= 0; }
+BOOLEAN CommandOptionsProcessor::shouldSave() const { return save; }
+BOOLEAN CommandOptionsProcessor::shouldUseParallelExecutor() const { return parallel; }
+BOOLEAN CommandOptionsProcessor::shouldShowHelp() const { return showHelp; }
+BOOLEAN CommandOptionsProcessor::shouldUseSceneResolution() const { return xResolution <= 0 || yResolution <= 0; }
 int CommandOptionsProcessor::getXResolution() const { return xResolution; }
 int CommandOptionsProcessor::getYResolution() const { return yResolution; }

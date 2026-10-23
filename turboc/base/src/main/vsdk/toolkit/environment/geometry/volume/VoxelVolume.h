@@ -1,6 +1,7 @@
 #ifndef __VOXEL_VOLUME__
 #define __VOXEL_VOLUME__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class IndexedColorImageUncompressed;
 class Ray;
@@ -13,7 +14,7 @@ public:
     virtual const Class *getClass() const;
 
     /** Default lowest value of a voxel considered part of the solid */
-    static const int DEFAULT_THRESHOLD = 127;
+    enum { DEFAULT_THRESHOLD = 127 };
 
 private:
     /** Smallest ray direction component not considered parallel to an axis */
@@ -37,7 +38,7 @@ private:
         int side;
     };
 
-    bool traceFirstFilledVoxel(const Ray& ray, VoxelFaceHit& outHit) const;
+    BOOLEAN traceFirstFilledVoxel(const Ray& ray, VoxelFaceHit& outHit) const;
     static void fillSurfaceData(const Ray& hitRay, const VoxelFaceHit& hit,
                                 RayHit* outData);
 
@@ -67,9 +68,9 @@ public:
     @return true if the voxel is inside the volume and its value reaches the
     threshold
     */
-    bool isFilled(int x, int y, int z) const;
+    BOOLEAN isFilled(int x, int y, int z) const;
 
-    bool init(int xSize, int ySize, int zSize);
+    BOOLEAN init(int xSize, int ySize, int zSize);
 
     void putVoxel(int x, int y, int z, char val);
     int getVoxel(int x, int y, int z) const;
@@ -86,7 +87,7 @@ public:
 
     virtual double* getMinMax();
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 
     static Matrix4x4d getTransformFromVoxelFrameToMinMax(const double minmax[6]);

@@ -1,6 +1,7 @@
 #ifndef __RAY_HIT__
 #define __RAY_HIT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 class SimpleMaterial;
@@ -12,12 +13,14 @@ RayHit describes the result of a ray/geometry intersection.
 */
 class RayHit {
 public:
-    static const int DETAIL_NONE = 0;
-    static const int DETAIL_POINT = 1 << 0;
-    static const int DETAIL_NORMAL = 1 << 1;
-    static const int DETAIL_UV = 1 << 2;
-    static const int DETAIL_TANGENT = 1 << 3;
-    static const int DETAIL_ALL = DETAIL_POINT | DETAIL_NORMAL | DETAIL_UV | DETAIL_TANGENT;
+    enum {
+        DETAIL_NONE = 0,
+        DETAIL_POINT = 1 << 0,
+        DETAIL_NORMAL = 1 << 1,
+        DETAIL_UV = 1 << 2,
+        DETAIL_TANGENT = 1 << 3,
+        DETAIL_ALL = DETAIL_POINT | DETAIL_NORMAL | DETAIL_UV | DETAIL_TANGENT
+    };
 
     Vector3Dd point; // Intersection point coordinates
     Vector3Dd normal; // Surface normal at intersection point
@@ -39,17 +42,17 @@ public:
 
 private:
     Ray ray;
-    bool hasRay;
+    BOOLEAN hasRay;
 
     int requiredDetailMask;
-    bool storeRay;
+    BOOLEAN storeRay;
     double hitDistance;
-    bool hitDistanceKnown;
+    BOOLEAN hitDistanceKnown;
 
 public:
     RayHit();
     explicit RayHit(int requiredDetailMask);
-    RayHit(int requiredDetailMask, bool storeRay);
+    RayHit(int requiredDetailMask, BOOLEAN storeRay);
     RayHit(const RayHit& other);
     ~RayHit();
 
@@ -62,19 +65,19 @@ public:
     int getRequiredDetailMask() const;
     void setRequiredDetailMask(int value);
 
-    bool shouldStoreRay() const;
-    void setStoreRay(bool value);
+    BOOLEAN shouldStoreRay() const;
+    void setStoreRay(BOOLEAN value);
 
-    bool needsPoint() const;
-    bool needsNormal() const;
-    bool needsTextureCoordinates() const;
-    bool needsTangent() const;
-    bool needsAnySurfaceData() const;
+    BOOLEAN needsPoint() const;
+    BOOLEAN needsNormal() const;
+    BOOLEAN needsTextureCoordinates() const;
+    BOOLEAN needsTangent() const;
+    BOOLEAN needsAnySurfaceData() const;
 
     const Ray* getRay() const;
     void setRay(const Ray& value);
 
-    bool hasHitDistance() const;
+    BOOLEAN hasHitDistance() const;
     double getHitDistance() const;
     void setHitDistance(double value);
 

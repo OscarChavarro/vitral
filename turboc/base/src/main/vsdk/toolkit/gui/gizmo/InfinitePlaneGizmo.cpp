@@ -31,7 +31,7 @@ InfinitePlaneGizmo::InfinitePlaneGizmo()
       currentNormal(0, 0, 1),
       lastDataTime(time(0)),
       previousDataTime(time(0)),
-      visible(true),
+      visible(TRUE),
       disableAfterElapsedSeconds(DEFAULT_DISABLE_TIME),
       frameColor(DEFAULT_FRAME_COLOR)
 {
@@ -58,7 +58,7 @@ void InfinitePlaneGizmo::setPlane(const InfinitePlane& plane, const Vector3Dd& p
     delete pendingSnapshot;
     pendingSnapshot = snap;
     pthread_mutex_unlock(&pendingMutex);
-    visible = true;
+    visible = TRUE;
     recordDataArrival();
 }
 
@@ -90,7 +90,7 @@ InfinitePlaneGizmo::PlaneSnapshot* InfinitePlaneGizmo::acquireSnapshot()
 void InfinitePlaneGizmo::update()
 {
     if ( inactivityThresholdExceeded() ) {
-        visible = false;
+        visible = FALSE;
     }
     previousDataTime = lastDataTime;
 }
@@ -110,12 +110,12 @@ Vector3Dd InfinitePlaneGizmo::getNormal() const
     return currentNormal;
 }
 
-bool InfinitePlaneGizmo::isVisible() const
+BOOLEAN InfinitePlaneGizmo::isVisible() const
 {
     return visible;
 }
 
-void InfinitePlaneGizmo::setVisible(bool visible)
+void InfinitePlaneGizmo::setVisible(BOOLEAN visible)
 {
     this->visible = visible;
 }
@@ -156,7 +156,7 @@ void InfinitePlaneGizmo::recordDataArrival()
     lastDataTime = time(0);
 }
 
-bool InfinitePlaneGizmo::inactivityThresholdExceeded() const
+BOOLEAN InfinitePlaneGizmo::inactivityThresholdExceeded() const
 {
     double elapsed = difftime(time(0), lastDataTime);
     return disableAfterElapsedSeconds > 0.0 && elapsed > disableAfterElapsedSeconds;

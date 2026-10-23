@@ -1,4 +1,5 @@
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/light/Light.h"
@@ -28,7 +29,7 @@ SceneSelectionEditor::SceneSelectionEditor(Scene* scene) : scene(scene)
 {
 }
 
-bool SceneSelectionEditor::computeSelectionCentroid(Vector3Dd* outCentroid)
+BOOLEAN SceneSelectionEditor::computeSelectionCentroid(Vector3Dd* outCentroid)
 {
     Vector3Dd sum;
     int count = 0;
@@ -47,10 +48,10 @@ bool SceneSelectionEditor::computeSelectionCentroid(Vector3Dd* outCentroid)
         count++;
     }
     if ( count == 0 ) {
-        return false;
+        return FALSE;
     }
     *outCentroid = sum.multiply(1.0 / count);
-    return true;
+    return TRUE;
 }
 
 Matrix4x4d SceneSelectionEditor::createTranslationGizmoMatrix(

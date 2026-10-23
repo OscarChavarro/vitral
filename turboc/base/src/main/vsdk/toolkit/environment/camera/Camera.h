@@ -1,6 +1,7 @@
 #ifndef __CAMERA__
 #define __CAMERA__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -13,15 +14,19 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int OPCODE_FAR = (0x01 << 1);
-    static const int OPCODE_NEAR = (0x01 << 2);
-    static const int OPCODE_RIGHT = (0x01 << 3);
-    static const int OPCODE_LEFT = (0x01 << 4);
-    static const int OPCODE_UP = (0x01 << 5);
-    static const int OPCODE_DOWN = (0x01 << 6);
+    enum {
+        OPCODE_FAR = (0x01 << 1),
+        OPCODE_NEAR = (0x01 << 2),
+        OPCODE_RIGHT = (0x01 << 3),
+        OPCODE_LEFT = (0x01 << 4),
+        OPCODE_UP = (0x01 << 5),
+        OPCODE_DOWN = (0x01 << 6)
+    };
 
-    static const int PROJECTION_MODE_ORTHOGONAL = 4;
-    static const int PROJECTION_MODE_PERSPECTIVE = 5;
+    enum {
+        PROJECTION_MODE_ORTHOGONAL = 4,
+        PROJECTION_MODE_PERSPECTIVE = 5
+    };
 
     Camera();
     Camera(const Camera& other);
@@ -88,7 +93,7 @@ public:
     @return false if the point can not be projected or lies outside the
     viewport (the Java version returns null)
     */
-    bool projectPointUsingRayMethod(const Vector3Dd& inPoint,
+    BOOLEAN projectPointUsingRayMethod(const Vector3Dd& inPoint,
                                     Vector3Dd* outProjected);
 
     float* toColumnMajorFloatArray() const;
@@ -117,7 +122,7 @@ private:
 
     Vector3Dd frontWithScale, upWithScale, rightWithScale;
     Matrix4x4d normalizingTransformation;
-    mutable long modificationVersion;
+    long modificationVersion;
 
     void markModified();
 };

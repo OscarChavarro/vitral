@@ -1,6 +1,7 @@
 #ifndef __ALGEBRAIC_EXPRESSION__
 #define __ALGEBRAIC_EXPRESSION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "java/util/HashMap.h"
@@ -26,7 +27,7 @@ private:
     _AlgebraicExpressionNode* root;
     HashMap<String, double> values;
 
-    static bool isOperator(const String& cad);
+    static BOOLEAN isOperator(const String& cad);
     static ArrayList<String> tokenize(const String& text);
     _AlgebraicExpressionNode* buildExpressionTree(
         ArrayList<String>& tokens) const;

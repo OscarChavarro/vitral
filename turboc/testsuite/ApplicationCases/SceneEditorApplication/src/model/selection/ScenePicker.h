@@ -1,6 +1,8 @@
 #ifndef __SCENE_PICKER__
 #define __SCENE_PICKER__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 class Ray;
 class Scene;
 
@@ -29,7 +31,7 @@ public:
     @param composite true to modify the current selection
     @return the ray fired through the pixel
     */
-    Ray selectObjectWithMouse(int x, int y, bool composite);
+    Ray selectObjectWithMouse(int x, int y, BOOLEAN composite);
 };
 
 #endif

@@ -252,7 +252,7 @@ int ScaleGizmo::getCurrentSelection() const
     return volatileSelection;
 }
 
-bool ScaleGizmo::groupIncludesAxis(int group, int axis)
+BOOLEAN ScaleGizmo::groupIncludesAxis(int group, int axis)
 {
     checkAxis(axis);
     switch ( group ) {
@@ -262,22 +262,22 @@ bool ScaleGizmo::groupIncludesAxis(int group, int axis)
       case XY_GROUP: return axis == 0 || axis == 1;
       case YZ_GROUP: return axis == 1 || axis == 2;
       case XZ_GROUP: return axis == 0 || axis == 2;
-      case UNIFORM_GROUP: return true;
-      default: return false;
+      case UNIFORM_GROUP: return TRUE;
+      default: return FALSE;
     }
 }
 
-bool ScaleGizmo::isAxisHighlighted(int axis) const
+BOOLEAN ScaleGizmo::isAxisHighlighted(int axis) const
 {
     return groupIncludesAxis(getCurrentSelection(), axis);
 }
 
-bool ScaleGizmo::isBandHighlighted(int group) const
+BOOLEAN ScaleGizmo::isBandHighlighted(int group) const
 {
     return getCurrentSelection() == group;
 }
 
-bool ScaleGizmo::isUniformHighlighted() const
+BOOLEAN ScaleGizmo::isUniformHighlighted() const
 {
     return getCurrentSelection() == UNIFORM_GROUP;
 }
@@ -314,7 +314,7 @@ ScaleGizmo::buildContourSegments() const
 
 void ScaleGizmo::addContourEdge(ArrayList<ContourSegment>& segments,
                                 const Vector3Dd& a, const Vector3Dd& b,
-                                const int axes[2], bool highlighted) const
+                                const int axes[2], BOOLEAN highlighted) const
 {
     Vector3Dd middle = a.add(b).multiply(0.5);
     ColorRgb colorA = highlighted ? InputGizmo::HIGHLIGHT_COLOR :
@@ -525,20 +525,20 @@ Matrix4x4d ScaleGizmo::axisTilt(int axis)
     }
 }
 
-bool ScaleGizmo::nearestOfTwoTriangles(const Ray& ray,
+BOOLEAN ScaleGizmo::nearestOfTwoTriangles(const Ray& ray,
     const Vector3Dd& a1, const Vector3Dd& b1, const Vector3Dd& c1,
     const Vector3Dd& a2, const Vector3Dd& b2, const Vector3Dd& c2,
     double* outT)
 {
     double t1;
     double t2;
-    bool hit1 = rayTriangleT(ray.getOrigin(), ray.getDirection(),
+    BOOLEAN hit1 = rayTriangleT(ray.getOrigin(), ray.getDirection(),
                              a1, b1, c1, &t1);
-    bool hit2 = rayTriangleT(ray.getOrigin(), ray.getDirection(),
+    BOOLEAN hit2 = rayTriangleT(ray.getOrigin(), ray.getDirection(),
                              a2, b2, c2, &t2);
 
     if ( !hit1 && !hit2 ) {
-        return false;
+        return FALSE;
     }
     if ( !hit1 ) {
         *outT = t2;
@@ -549,10 +549,10 @@ bool ScaleGizmo::nearestOfTwoTriangles(const Ray& ray,
     else {
         *outT = Cpp98Support::fmin(t1, t2);
     }
-    return true;
+    return TRUE;
 }
 
-bool ScaleGizmo::rayTriangleT(const Vector3Dd& origin, const Vector3Dd& dir,
+BOOLEAN ScaleGizmo::rayTriangleT(const Vector3Dd& origin, const Vector3Dd& dir,
     const Vector3Dd& a, const Vector3Dd& b, const Vector3Dd& c, double* outT)
 {
     // Ray-triangle intersection (Moller-Trumbore), used to pick the flat
@@ -563,7 +563,7 @@ bool ScaleGizmo::rayTriangleT(const Vector3Dd& origin, const Vector3Dd& dir,
     double det = edge1.dotProduct(h);
 
     if ( fabs(det) < VSDK::EPSILON ) {
-        return false;
+        return FALSE;
     }
 
     double invDet = 1.0/det;
@@ -571,23 +571,23 @@ bool ScaleGizmo::rayTriangleT(const Vector3Dd& origin, const Vector3Dd& dir,
     double u = invDet*s.dotProduct(h);
 
     if ( u < 0.0 || u > 1.0 ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd q = s.crossProduct(edge1);
     double v = invDet*dir.dotProduct(q);
 
     if ( v < 0.0 || u + v > 1.0 ) {
-        return false;
+        return FALSE;
     }
 
     double t = invDet*edge2.dotProduct(q);
 
     if ( t > VSDK::EPSILON ) {
         *outT = t;
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 Vector3Dd ScaleGizmo::unitAxis(int axis)
@@ -619,12 +619,12 @@ InputGizmo* ScaleGizmo::getInputGizmo()
 
 //= Events ================================================================
 
-bool ScaleGizmo::processMouseEvent(const MouseEvent&)
+BOOLEAN ScaleGizmo::processMouseEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmo::processKeyPressedEvent(const KeyEvent& keyEvent)
+BOOLEAN ScaleGizmo::processKeyPressedEvent(const KeyEvent& keyEvent)
 {
     if ( inputGizmo.consumesKey(keyEvent) ) {
         // Boxes not being edited must start from the current scale
@@ -637,42 +637,42 @@ bool ScaleGizmo::processKeyPressedEvent(const KeyEvent& keyEvent)
 
             inputGizmo.cancelEditing();
             scale = Vector3Dd(values[0], values[1], values[2]);
-            return true;
+            return TRUE;
         }
-        return false;
+        return FALSE;
     }
 
     char unicodeId = keyEvent.unicodeId;
     int keycode = keyEvent.keycode;
     double deltaMov = 1.1;
-    bool updateNeeded = false;
+    BOOLEAN updateNeeded = FALSE;
     Vector3Dd s = scale;
 
     if ( unicodeId != KeyEvent::KEY_NONE ) {
         switch ( unicodeId ) {
           case 'x':
             s = s.withX(s.x() / deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'X':
             s = s.withX(s.x() * deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'y':
             s = s.withY(s.y() / deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'Y':
             s = s.withY(s.y() * deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'z':
             s = s.withZ(s.z() / deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'Z':
             s = s.withZ(s.z() * deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           default:
             break;
@@ -683,12 +683,12 @@ bool ScaleGizmo::processKeyPressedEvent(const KeyEvent& keyEvent)
           case KeyEvent::KEY_UP:
           case KeyEvent::KEY_RIGHT:
             s = Vector3Dd(s.x() * deltaMov, s.y() * deltaMov, s.z() * deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case KeyEvent::KEY_LEFT:
           case KeyEvent::KEY_DOWN:
             s = Vector3Dd(s.x() / deltaMov, s.y() / deltaMov, s.z() / deltaMov);
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           default:
             break;
@@ -699,57 +699,40 @@ bool ScaleGizmo::processKeyPressedEvent(const KeyEvent& keyEvent)
     return updateNeeded;
 }
 
-bool ScaleGizmo::processKeyReleasedEvent(const KeyEvent&)
+BOOLEAN ScaleGizmo::processKeyReleasedEvent(const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmo::processMousePressedEvent(const MouseEvent&)
+BOOLEAN ScaleGizmo::processMousePressedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmo::processMouseReleasedEvent(const MouseEvent&)
+BOOLEAN ScaleGizmo::processMouseReleasedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmo::processMouseClickedEvent(const MouseEvent&)
+BOOLEAN ScaleGizmo::processMouseClickedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmo::processMouseMovedEvent(const MouseEvent&)
+BOOLEAN ScaleGizmo::processMouseMovedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmo::processMouseDraggedEvent(const MouseEvent&)
+BOOLEAN ScaleGizmo::processMouseDraggedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmo::processMouseWheelEvent(const MouseEvent&)
+BOOLEAN ScaleGizmo::processMouseWheelEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int ScaleGizmo::AXIS_COUNT;
-const int ScaleGizmo::X_AXIS_GROUP;
-const int ScaleGizmo::Y_AXIS_GROUP;
-const int ScaleGizmo::Z_AXIS_GROUP;
-const int ScaleGizmo::XY_GROUP;
-const int ScaleGizmo::YZ_GROUP;
-const int ScaleGizmo::XZ_GROUP;
-const int ScaleGizmo::UNIFORM_GROUP;
-const int ScaleGizmo::BAND_GROUPS_COUNT;
-const int ScaleGizmo::DEFAULT_APPARENT_SIZE_IN_PIXELS;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int ScaleGizmo::NULL_GROUP;
 
 const Class ScaleGizmo::CLASS = { "ScaleGizmo", &Gizmo::CLASS };
 

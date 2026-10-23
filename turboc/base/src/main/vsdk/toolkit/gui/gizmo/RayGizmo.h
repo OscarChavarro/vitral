@@ -2,6 +2,7 @@
 #define __RAY_GIZMO__
 
 #include <time.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 
 #include "java/util/ArrayList.h"
@@ -56,11 +57,11 @@ public:
     void setMaxNumOfReflections(int maxNumOfReflections);
     InputGizmo* getInputGizmo();
     void update();
-    bool isVisible() const;
-    void setVisible(bool visible);
+    BOOLEAN isVisible() const;
+    void setVisible(BOOLEAN visible);
     /// The roll marker is opt-in: most ray sources do not provide roll.
-    bool isRollIndicatorEnabled() const;
-    void setRollIndicatorEnabled(bool enabled);
+    BOOLEAN isRollIndicatorEnabled() const;
+    void setRollIndicatorEnabled(BOOLEAN enabled);
     double getDisableAfterElapsedSeconds() const;
     void setDisableAfterElapsedSeconds(double disableAfterElapsedSeconds);
     time_t getLastDataTime() const;
@@ -87,7 +88,7 @@ private:
     static const double ARROW_BASE_RADIUS;
     static const double ARROW_HEAD_RADIUS;
     // Colors of the boxes of the input gizmo: x, y, z, yaw and pitch
-    static const int NUMBER_OF_INPUT_FIELDS = 5;
+    enum { NUMBER_OF_INPUT_FIELDS = 5 };
     static const ColorRgb INPUT_FIELD_COLORS[NUMBER_OF_INPUT_FIELDS];
 
     Arrow* arrow;
@@ -106,8 +107,8 @@ private:
 
     time_t lastDataTime;
     time_t previousDataTime;
-    bool visible;
-    bool rollIndicatorEnabled;
+    BOOLEAN visible;
+    BOOLEAN rollIndicatorEnabled;
     double disableAfterElapsedSeconds;
 
     ColorRgb sourceRayColor;
@@ -126,7 +127,7 @@ private:
     static SimpleBody* cloneBody(const SimpleBody* source);
     static SimpleMaterial* materialFromColor(const ColorRgb& color);
     void recordDataArrival();
-    bool inactivityThresholdExceeded() const;
+    BOOLEAN inactivityThresholdExceeded() const;
     void applyTransform(const Vector3Dd& position, const Vector3Dd& direction);
     void syncInputGizmo(const Vector3Dd& position, const Vector3Dd& direction);
     static Ray* computeReflectedRay(const Ray& incomingRay, const Intersection* intersection);

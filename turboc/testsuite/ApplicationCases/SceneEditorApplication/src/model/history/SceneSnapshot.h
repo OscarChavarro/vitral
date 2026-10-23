@@ -1,6 +1,7 @@
 #ifndef __SCENE_SNAPSHOT__
 #define __SCENE_SNAPSHOT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "java/util/HashMap.h"
 #include "model/history/SceneElementKind.h"
@@ -25,7 +26,7 @@ class SceneSnapshot {
 private:
     Scene* scene;
     ArrayList<Entity*> elements[SceneElementKind::COUNT];
-    ArrayList<bool> selections[SceneElementKind::COUNT];
+    ArrayList<BOOLEAN> selections[SceneElementKind::COUNT];
     HashMap<Entity*, EntityTransformState*> transforms;
     /// Owned states, the values of `transforms`
     ArrayList<EntityTransformState*> ownedStates;
@@ -35,7 +36,7 @@ private:
     EntityTransformState* getTransform(Entity* entity) const;
     UndoableOperation* transformationTo(const SceneSnapshot* later,
                                         const String& name,
-                                        bool mergeable) const;
+                                        BOOLEAN mergeable) const;
     UndoableOperation* membershipTo(const SceneSnapshot* later,
                                     SceneElementKind::Value kind,
                                     const String& name) const;
@@ -71,7 +72,7 @@ public:
     */
     UndoableOperation* operationTo(const SceneSnapshot* later,
                                    const String& name,
-                                   bool mergeable) const;
+                                   BOOLEAN mergeable) const;
 };
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef __PROGRESS_MONITOR_CONSOLE__
 #define __PROGRESS_MONITOR_CONSOLE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 class ProgressMonitorConsole : public ProgressMonitor {
@@ -10,7 +11,7 @@ private:
     double jumpPercent;
     int lastPrintedLabel;
 
-    bool testLabelLimit(int limit);
+    BOOLEAN testLabelLimit(int limit);
 
 public:
     static const Class CLASS;

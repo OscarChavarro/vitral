@@ -1,6 +1,7 @@
 #ifndef __XT_TANGIBLE_INTERFACE_DIALOG__
 #define __XT_TANGIBLE_INTERFACE_DIALOG__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -56,7 +57,7 @@ public:
     /**
     @return true while the form is shown
     */
-    bool isVisible() const;
+    BOOLEAN isVisible() const;
 
     /**
     @return text of the field of the service URL
@@ -74,7 +75,7 @@ public:
     @param serviceUrl if not null, typed in the field before connecting
     @return false if the form is not shown or has no such button
     */
-    bool performAction(const String& action,
+    BOOLEAN performAction(const String& action,
                        const String* serviceUrl);
 
 private:
@@ -83,12 +84,12 @@ private:
     port): each request has its own, so late answers of older requests are
     told apart.
     */
-    class ConnectionListener : public Consumer<bool> {
+    class ConnectionListener : public Consumer<BOOLEAN> {
     public:
         ConnectionListener(XtTangibleInterfaceDialog* dialog, long serial,
                            long request)
             : dialog(dialog), serial(serial), request(request) {}
-        virtual void accept(bool connected)
+        virtual void accept(BOOLEAN connected)
         {
             dialog->connectionFinished(serial, request, connected);
         }
@@ -111,7 +112,7 @@ private:
     // in the C++11 port)
     virtual String message(const String& key);
     virtual void actionPerformed(const String& action);
-    void connectionFinished(long serial, long request, bool connected);
+    void connectionFinished(long serial, long request, BOOLEAN connected);
 
     XtTangibleInterfaceDialog(const XtTangibleInterfaceDialog& other);
     XtTangibleInterfaceDialog& operator=(const XtTangibleInterfaceDialog& other);

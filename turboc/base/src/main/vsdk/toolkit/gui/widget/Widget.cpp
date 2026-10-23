@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/HashMap.h"
 #include "vsdk/toolkit/gui/widget/Widget.h"
@@ -9,16 +10,16 @@
 #include "vsdk/toolkit/gui/widget/variable/WidgetVariable.h"
 
 
-static bool containsElement(const ArrayList<WidgetElement*>& list,
+static BOOLEAN containsElement(const ArrayList<WidgetElement*>& list,
                      const WidgetElement* element)
 {
     long i;
     for ( i = 0; i < list.size(); i++ ) {
         if ( list.get(i) == element ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 static void collect(ArrayList<WidgetElement*>& owned, WidgetElement* element)

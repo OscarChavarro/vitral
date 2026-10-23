@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_GUI_EVENT_EXECUTOR__
 #define __XT_OPENGL1_GUI_EVENT_EXECUTOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/gui/CommandListener.h"
@@ -19,7 +20,7 @@ class XtOpenGL1GuiEventExecutor : public CommandListener {
 private:
     XtApplicationHost* parent;
 
-    bool executeXtCommand(const String& label);
+    BOOLEAN executeXtCommand(const String& label);
 
 public:
     static const Class CLASS;
@@ -31,7 +32,7 @@ public:
     @param label identifier of the command (`IDC_*`)
     @return false if the command failed
     */
-    virtual bool executeCommand(const String& label);
+    virtual BOOLEAN executeCommand(const String& label);
 };
 
 #endif

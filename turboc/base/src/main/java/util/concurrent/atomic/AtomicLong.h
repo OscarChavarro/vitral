@@ -1,6 +1,7 @@
 #ifndef __ATOMIC_LONG__
 #define __ATOMIC_LONG__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/concurrent/locks/ReentrantLock.h"
 
 
@@ -10,7 +11,7 @@ operations, so the value is protected by a lock.
 */
 class AtomicLong {
 private:
-    mutable ReentrantLock lock;
+    ReentrantLock lock;
     long long value;
 
     AtomicLong(const AtomicLong &other);
@@ -22,7 +23,8 @@ public:
 
     long long get() const
     {
-        ReentrantLockGuard guard(lock);
+        // Locking changes the lock (no `mutable` in Turbo C++ 3.0)
+        ReentrantLockGuard guard(*(ReentrantLock *)&lock);
         return value;
     }
 

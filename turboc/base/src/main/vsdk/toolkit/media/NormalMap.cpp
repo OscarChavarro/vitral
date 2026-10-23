@@ -53,24 +53,25 @@ NormalMap::~NormalMap() {
     }
 }
 
-bool NormalMap::init(int width, int height) {
+BOOLEAN NormalMap::init(int width, int height) {
     try {
-        for (long int i = 0; i < data.size(); i++) {
+        long i;
+        for (i = 0; i < data.size(); i++) {
             if (data[i] != NULL) {
                 delete data[i];
             }
         }
         data.clear();
 
-        for (int i = 0; i < width * height; i++) {
+        for (i = 0; i < width * height; i++) {
             data.add(new Vector3Dd());
         }
     } catch (...) {
-        return false;
+        return FALSE;
     }
     xSize = width;
     ySize = height;
-    return true;
+    return TRUE;
 }
 
 int NormalMap::getXSize() const {
@@ -207,7 +208,8 @@ Vector3Dd NormalMap::importBumpMap(IndexedColorImageUncompressed* inBumpmap, con
     setBumpMapScale(scale);
     init(xxSize, yySize);
 
-    for (int u = 1; u < xxSize - 1; u++) {
+    int u;
+    for (u = 1; u < xxSize - 1; u++) {
         for (int v = 1; v < yySize - 1; v++) {
             int a = (unsigned char)inBumpmap->getPixel(u + 1, v);
             int b = (unsigned char)inBumpmap->getPixel(u - 1, v);
@@ -226,7 +228,7 @@ Vector3Dd NormalMap::importBumpMap(IndexedColorImageUncompressed* inBumpmap, con
         }
     }
 
-    for (int u = 0; u < xxSize; u++) {
+    for (u = 0; u < xxSize; u++) {
         Vector3Dd* n1 = getNormal(u, 1);
         if (n1) { putNormal(u, 0, *n1); delete n1; }
         Vector3Dd* n2 = getNormal(u, yySize - 3);

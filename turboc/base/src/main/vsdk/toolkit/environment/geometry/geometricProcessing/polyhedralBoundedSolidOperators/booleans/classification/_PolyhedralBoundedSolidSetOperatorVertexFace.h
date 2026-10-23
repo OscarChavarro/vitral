@@ -2,8 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_VERTEX_FACE__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_VERTEX_FACE__
+#ifndef ___PBS_SET_OPERATOR_VERTEX_FACE__
+#define ___PBS_SET_OPERATOR_VERTEX_FACE__
 
 #include <stddef.h>
 #include "java/lang/String.h"

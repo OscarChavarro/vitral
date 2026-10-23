@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/ProcessBuilder.h"
 #include "vsdk/toolkit/io/wrapper/PipeOutputStream.h"
 FILE *
@@ -20,7 +21,7 @@ PipeOutputStream::~PipeOutputStream() {
     close();
 }
 
-bool
+BOOLEAN
 PipeOutputStream::isOpen() const {
     return pipeHandle != NULL;
 }

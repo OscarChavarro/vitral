@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/util/TreeSet.h"
 #include "java/lang/String.h"
@@ -54,7 +55,7 @@ static int floorMod(int value, int modulus)
     return result < 0 ? result + modulus : result;
 }
 
-static const char* booleanName(bool value)
+static const char* booleanName(BOOLEAN value)
 {
     return value ? "true" : "false";
 }
@@ -107,14 +108,14 @@ public:
 
 PolyhedralBoundedSolidTopologySummary::Shell::Shell()
     : faceCount(0), edgeCount(0), vertexCount(0),
-      adjustedEulerCharacteristic(0), closed(false),
-      closedOrientableEulerCompatible(false)
+      adjustedEulerCharacteristic(0), closed(FALSE),
+      closedOrientableEulerCompatible(FALSE)
 {
 }
 
 PolyhedralBoundedSolidTopologySummary::Shell::Shell(int faceCount,
     int edgeCount, int vertexCount, int adjustedEulerCharacteristic,
-    bool closed)
+    BOOLEAN closed)
     : faceCount(faceCount), edgeCount(edgeCount), vertexCount(vertexCount),
       adjustedEulerCharacteristic(adjustedEulerCharacteristic),
       closed(closed),
@@ -128,8 +129,8 @@ int PolyhedralBoundedSolidTopologySummary::Shell::getFaceCount() const { return 
 int PolyhedralBoundedSolidTopologySummary::Shell::getEdgeCount() const { return edgeCount; }
 int PolyhedralBoundedSolidTopologySummary::Shell::getVertexCount() const { return vertexCount; }
 int PolyhedralBoundedSolidTopologySummary::Shell::getAdjustedEulerCharacteristic() const { return adjustedEulerCharacteristic; }
-bool PolyhedralBoundedSolidTopologySummary::Shell::isClosed() const { return closed; }
-bool PolyhedralBoundedSolidTopologySummary::Shell::isClosedOrientableEulerCompatible() const { return closedOrientableEulerCompatible; }
+BOOLEAN PolyhedralBoundedSolidTopologySummary::Shell::isClosed() const { return closed; }
+BOOLEAN PolyhedralBoundedSolidTopologySummary::Shell::isClosedOrientableEulerCompatible() const { return closedOrientableEulerCompatible; }
 
 String PolyhedralBoundedSolidTopologySummary::Shell::toString() const
 {
@@ -196,15 +197,16 @@ PolyhedralBoundedSolidTopologySummary::PolyhedralBoundedSolidTopologySummary(
         const ArrayList<_PolyhedralBoundedSolidFace*>& faces =
             componentFaces.getValue(c);
         TreeSet<_PolyhedralBoundedSolidFace*> faceSet;
-        for ( long f = 0; f < faces.size(); f++ ) {
+        long f;
+        for ( f = 0; f < faces.size(); f++ ) {
             faceSet.add(faces[f]);
         }
         TreeSet<_PolyhedralBoundedSolidEdge*> shellEdges;
         TreeSet<_PolyhedralBoundedSolidVertex*> shellVertices;
         int adjustedFaceTerm = 0;
-        bool closed = true;
+        BOOLEAN closed = TRUE;
 
-        for ( long f = 0; f < faces.size(); f++ ) {
+        for ( f = 0; f < faces.size(); f++ ) {
             adjustedFaceTerm += 2 - (int)faces[f]->boundariesList.size();
             collectFaceVertices(faces[f], shellVertices);
         }
@@ -214,7 +216,7 @@ PolyhedralBoundedSolidTopologySummary::PolyhedralBoundedSolidTopologySummary(
             _PolyhedralBoundedSolidEdge* edge = solid->getEdgesList().get(i);
             _PolyhedralBoundedSolidFace* leftFace = faceOf(edge->leftHalf);
             _PolyhedralBoundedSolidFace* rightFace = faceOf(edge->rightHalf);
-            bool touchesShell = faceSet.contains(leftFace) ||
+            BOOLEAN touchesShell = faceSet.contains(leftFace) ||
                 faceSet.contains(rightFace);
             if ( !touchesShell ) {
                 continue;
@@ -223,7 +225,7 @@ PolyhedralBoundedSolidTopologySummary::PolyhedralBoundedSolidTopologySummary(
             if ( leftFace == NULL || rightFace == NULL ||
                  !faceSet.contains(leftFace) ||
                  !faceSet.contains(rightFace) ) {
-                closed = false;
+                closed = FALSE;
             }
             collectVertex(edge->leftHalf, shellVertices);
             collectVertex(edge->rightHalf, shellVertices);
@@ -252,7 +254,7 @@ int PolyhedralBoundedSolidTopologySummary::getEdgeCount() const { return edgeCou
 int PolyhedralBoundedSolidTopologySummary::getVertexCount() const { return vertexCount; }
 int PolyhedralBoundedSolidTopologySummary::getShellCount() const { return (int)shells.size(); }
 int PolyhedralBoundedSolidTopologySummary::getAdjustedEulerCharacteristic() const { return adjustedEulerCharacteristic; }
-bool PolyhedralBoundedSolidTopologySummary::isEveryFaceReachedExactlyOnce() const { return everyFaceReachedExactlyOnce; }
+BOOLEAN PolyhedralBoundedSolidTopologySummary::isEveryFaceReachedExactlyOnce() const { return everyFaceReachedExactlyOnce; }
 int PolyhedralBoundedSolidTopologySummary::getInvalidEdgeAdjacencyCount() const { return invalidEdgeAdjacencyCount; }
 
 const ArrayList<PolyhedralBoundedSolidTopologySummary::Shell>&
@@ -261,17 +263,17 @@ PolyhedralBoundedSolidTopologySummary::getShells() const
     return shells;
 }
 
-bool PolyhedralBoundedSolidTopologySummary::hasUniversalContradiction() const
+BOOLEAN PolyhedralBoundedSolidTopologySummary::hasUniversalContradiction() const
 {
     if ( !everyFaceReachedExactlyOnce || invalidEdgeAdjacencyCount > 0 ) {
-        return true;
+        return TRUE;
     }
     for ( long i = 0; i < shells.size(); i++ ) {
         if ( !shells[i].isClosedOrientableEulerCompatible() ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 String PolyhedralBoundedSolidTopologySummary::toString() const

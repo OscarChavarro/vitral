@@ -1,6 +1,7 @@
 #ifndef __FILES__
 #define __FILES__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 /**
@@ -14,7 +15,7 @@ class Files {
     @param outText the contents of the file
     @return false if the file could not be read (Java throws IOException)
     */
-    static bool readString(const String &path, String &outText);
+    static BOOLEAN readString(const String &path, String &outText);
 
   private:
     Files();

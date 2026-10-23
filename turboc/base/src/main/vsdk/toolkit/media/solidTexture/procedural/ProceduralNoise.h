@@ -15,10 +15,12 @@ build patterns such as wood, marble, and agate on top of them.
 */
 class ProceduralNoise {
   private:
-    static const int MIN_X = -10000; // Ridiculously large scaling offset to ensure positive lattice coords
-    static const int MIN_Y = MIN_X;
-    static const int MIN_Z = MIN_X;
-    static const int MAXSIZE = 267;
+    enum {
+        MIN_X = -10000, // Ridiculously large scaling offset to ensure positive lattice coords
+        MIN_Y = MIN_X,
+        MIN_Z = MIN_X,
+        MAXSIZE = 267
+    };
     static const double REAL_SCALE;
 
     short *permutationTable;

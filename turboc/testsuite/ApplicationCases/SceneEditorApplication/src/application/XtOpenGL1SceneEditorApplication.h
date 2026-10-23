@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_SCENE_EDITOR_APPLICATION__
 #define __XT_OPENGL1_SCENE_EDITOR_APPLICATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "java/lang/IllegalArgumentException.h"
@@ -51,7 +52,7 @@ public:
     @param language one of the identifiers given by `getGuiLanguages`
     @return true if the language exists and was selected
     */
-    virtual bool setGuiLanguageById(const String& language) = 0;
+    virtual BOOLEAN setGuiLanguageById(const String& language) = 0;
 
     /**
     Ray traces the scene into the raytraced image of the application model,
@@ -60,7 +61,7 @@ public:
     virtual void doRaytracingImage() = 0;
 
     /** Opens the native File > Import dialog, owned by the editor window. */
-    virtual bool showImportSceneDialog() = 0;
+    virtual BOOLEAN showImportSceneDialog() = 0;
 
     /**
     Opens the tangible interface connection dialog, as its GUI command does
@@ -71,7 +72,7 @@ public:
     /**
     @return true while the tangible interface connection dialog is shown
     */
-    virtual bool isTangibleInterfaceDialogVisible() = 0;
+    virtual BOOLEAN isTangibleInterfaceDialogVisible() = 0;
 
     /**
     @return text of the service URL field of the tangible interface dialog
@@ -89,7 +90,7 @@ public:
     @param serviceUrl if not null, typed in the field before connecting
     @return false if the action is not a button of the dialog
     */
-    virtual bool tangibleInterfaceDialogAction(const String& action,
+    virtual BOOLEAN tangibleInterfaceDialogAction(const String& action,
         const String* serviceUrl) = 0;
 
     /**
@@ -100,7 +101,7 @@ public:
     /**
     @return true while the scene selector dialog is shown
     */
-    virtual bool isSelectorDialogVisible() = 0;
+    virtual BOOLEAN isSelectorDialogVisible() = 0;
 
     /**
     Selects a geometry object through the tree of the scene selector.

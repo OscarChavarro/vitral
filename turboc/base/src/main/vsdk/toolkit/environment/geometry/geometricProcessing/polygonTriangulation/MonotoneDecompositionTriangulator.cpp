@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -46,7 +47,7 @@ void MonotoneDecompositionTriangulator::stage2BootStrap(int numVertices) {
     // Reset insertion flags and generate the randomized segment ordering used
     // by Stage-3 insertion.
     for (int i = 1; i <= numVertices; ++i) {
-        _Construct::segmentAt(i).hasBeenInserted = false;
+        _Construct::segmentAt(i).hasBeenInserted = FALSE;
     }
     _RandomSegmentOrder::generateRandomOrdering(numVertices);
 }

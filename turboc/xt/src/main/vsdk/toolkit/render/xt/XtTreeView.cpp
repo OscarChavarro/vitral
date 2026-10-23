@@ -1,4 +1,5 @@
 // Before any other header that could include the Xt ones
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/XtIntrinsics.h"
 #include "vsdk/toolkit/gui/XtTextEncoding.h"
 
@@ -65,7 +66,7 @@ struct XtTreeViewCallbacks {
 
 XtTreeView::XtTreeView(XtWidget parent, XFontSet fontSet, int x, int y,
                        int width, int height)
-    : widget(NULL), fontSet(fontSet), gc(NULL), colorsAllocated(false),
+    : widget(NULL), fontSet(fontSet), gc(NULL), colorsAllocated(FALSE),
       rowHeight(20), ascent(14), scrollTop(0), anchor(-1), root(NULL),
       selectionListener(NULL), deleteListener(NULL), contextMenuListener(NULL)
 {
@@ -150,8 +151,9 @@ void XtTreeView::buildRows()
     }
     // Rows that are not shown are not selected (as collapsing in a JTree)
     TreeSet<const DialogTreeNode*> shown;
-    for ( long i = 0; i < rows.size(); i++ ) shown.add(rows[i].node);
-    for ( long i = 0; i < selected.size(); ) {
+    long i;
+    for ( i = 0; i < rows.size(); i++ ) shown.add(rows[i].node);
+    for ( i = 0; i < selected.size(); ) {
         if ( !shown.contains(selected.get(i)) ) selected.remove(selected.get(i));
         else ++i;
     }
@@ -245,7 +247,7 @@ void XtTreeView::allocateColors()
             colors[i] = color.pixel;
         }
     }
-    colorsAllocated = true;
+    colorsAllocated = TRUE;
 }
 
 void XtTreeView::redraw()
@@ -266,7 +268,7 @@ void XtTreeView::redraw()
         const Row& row = rows[scrollTop + i];
         int y = MARGIN / 2 + i * rowHeight;
         int x = MARGIN + row.depth * INDENT;
-        bool isSelected = selected.contains(row.node);
+        BOOLEAN isSelected = selected.contains(row.node);
         String label = XtTextEncoding::toLocale(row.node->getLabel());
         int labelX = x + INDENT;
         if ( isSelected ) {
@@ -323,7 +325,7 @@ void XtTreeView::click(int x, int y, unsigned int button, unsigned int state)
         return;
     }
     int index = scrollTop + (y - MARGIN / 2) / rowHeight;
-    bool onRow = y >= MARGIN / 2 && index >= 0 &&
+    BOOLEAN onRow = y >= MARGIN / 2 && index >= 0 &&
         index < ((int)(rows.size()));
 
     if ( button == Button1 ) {

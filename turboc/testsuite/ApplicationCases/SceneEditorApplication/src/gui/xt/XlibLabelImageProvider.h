@@ -1,6 +1,7 @@
 #ifndef __XLIB_LABEL_IMAGE_PROVIDER__
 #define __XLIB_LABEL_IMAGE_PROVIDER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/lang/String.h"
 
@@ -25,10 +26,10 @@ public:
     XlibLabelImageKey(const String& text, int fontSize, unsigned long rgb)
         : text(text), fontSize(fontSize), rgb(rgb) {}
 
-    bool operator<(const XlibLabelImageKey& other) const
+    BOOLEAN operator<(const XlibLabelImageKey& other) const
     {
-        if ( text < other.text ) return true;
-        if ( other.text < text ) return false;
+        if ( text < other.text ) return TRUE;
+        if ( other.text < text ) return FALSE;
         if ( fontSize != other.fontSize ) return fontSize < other.fontSize;
         return rgb < other.rgb;
     }

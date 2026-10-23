@@ -1,6 +1,7 @@
 #ifndef __XAW_FILE_DIALOG__
 #define __XAW_FILE_DIALOG__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -37,7 +38,7 @@ public:
     @param outPath the chosen file, when approved
     @return true if the user approved a file (`APPROVE_OPTION`)
     */
-    static bool showDialog(XtApplicationHost* host, const String& title,
+    static BOOLEAN showDialog(XtApplicationHost* host, const String& title,
                            const String& folder,
                            const ArrayList<FileSuffixFilter>& filters,
                            String& outPath);
@@ -53,15 +54,15 @@ private:
     Widget folderLabel;
     Widget list;
     Widget pathField;
-    bool done;
-    bool approved;
+    BOOLEAN done;
+    BOOLEAN approved;
 
     XawFileDialog(XtApplicationHost* host,
                   const ArrayList<FileSuffixFilter>& filters);
     ~XawFileDialog();
     void create(const String& title);
     void showFolder(const String& newFolder);
-    void close(bool approve);
+    void close(BOOLEAN approve);
 
     static void entrySelected(Widget, XtPointer clientData, XtPointer callData);
     static void approve(Widget, void* clientData);

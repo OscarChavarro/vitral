@@ -1,6 +1,7 @@
 #ifndef __INTERACTION_EDIT_RECORDER__
 #define __INTERACTION_EDIT_RECORDER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
@@ -31,7 +32,7 @@ class InteractionEditRecorder {
 private:
     EditHistory* history;
     ViewportSet* viewportSet;
-    bool gestureOpen;
+    BOOLEAN gestureOpen;
     String gestureSceneOperationName;
 
 public:
@@ -49,7 +50,7 @@ public:
     /**
     @return true if a mouse gesture is being recorded
     */
-    bool isGestureOpen() const;
+    BOOLEAN isGestureOpen() const;
 
     /**
     Starts recording a mouse gesture (at a mouse press), finishing first the
@@ -77,7 +78,7 @@ public:
     @param mergeable true if the operations can be merged with the ones of
     the next action over the same things (keyboard actions)
     */
-    void endAction(const String& sceneOperationName, bool mergeable);
+    void endAction(const String& sceneOperationName, BOOLEAN mergeable);
 
     /**
     Executes an action recording it.

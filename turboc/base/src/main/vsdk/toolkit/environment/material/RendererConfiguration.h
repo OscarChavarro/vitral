@@ -1,29 +1,32 @@
 #ifndef __RENDERER_CONFIGURATION__
 #define __RENDERER_CONFIGURATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/environment/material/ShadingType.h"
 class RendererConfiguration {
 public:
-    static const int SHADING_TYPE_NOLIGHT = 0;
-    static const int SHADING_TYPE_FLAT = 1;
-    static const int SHADING_TYPE_GOURAUD = 2;
-    static const int SHADING_TYPE_PHONG = 3;
-    static const int SHADING_TYPE_COOK_TERRANCE = 4;
+    enum {
+        SHADING_TYPE_NOLIGHT = 0,
+        SHADING_TYPE_FLAT = 1,
+        SHADING_TYPE_GOURAUD = 2,
+        SHADING_TYPE_PHONG = 3,
+        SHADING_TYPE_COOK_TERRANCE = 4
+    };
 
 private:
     int shadingType;
-    bool surfaces;
-    bool wires;
-    bool boundingVolume;
-    bool selectionCorners;
-    bool texture;
-    bool bumpMap;
-    bool points;
-    bool normals;
-    bool trianglesNormals;
-    bool useVertexColors;
+    BOOLEAN surfaces;
+    BOOLEAN wires;
+    BOOLEAN boundingVolume;
+    BOOLEAN selectionCorners;
+    BOOLEAN texture;
+    BOOLEAN bumpMap;
+    BOOLEAN points;
+    BOOLEAN normals;
+    BOOLEAN trianglesNormals;
+    BOOLEAN useVertexColors;
     double vertexNormalSmoothingThresholdDegrees;
     ColorRgb wireColor;
     ColorRgb boundingVolumeColor;
@@ -44,28 +47,28 @@ public:
     void setWireColor(double r, double g, double b);
     ColorRgb getWireColor() const;
 
-    void setSurfaces(bool b);
-    void setWires(bool b);
-    void setBoundingVolume(bool b);
-    void setSelectionCorners(bool c);
-    void setTexture(bool b);
-    void setBumpMap(bool b);
-    void setPoints(bool b);
-    void setNormals(bool b);
-    void setTrianglesNormals(bool b);
+    void setSurfaces(BOOLEAN b);
+    void setWires(BOOLEAN b);
+    void setBoundingVolume(BOOLEAN b);
+    void setSelectionCorners(BOOLEAN c);
+    void setTexture(BOOLEAN b);
+    void setBumpMap(BOOLEAN b);
+    void setPoints(BOOLEAN b);
+    void setNormals(BOOLEAN b);
+    void setTrianglesNormals(BOOLEAN b);
     void setShadingType(int type);
     void setShadingType(ShadingType type);
     void setVertexNormalSmoothingThresholdDegrees(double thresholdDegrees);
 
-    bool isSurfacesSet() const;
-    bool isWiresSet() const;
-    bool isBoundingVolumeSet() const;
-    bool isSelectionCornersSet() const;
-    bool isTextureSet() const;
-    bool isBumpMapSet() const;
-    bool isPointsSet() const;
-    bool isNormalsSet() const;
-    bool isTrianglesNormalsSet() const;
+    BOOLEAN isSurfacesSet() const;
+    BOOLEAN isWiresSet() const;
+    BOOLEAN isBoundingVolumeSet() const;
+    BOOLEAN isSelectionCornersSet() const;
+    BOOLEAN isTextureSet() const;
+    BOOLEAN isBumpMapSet() const;
+    BOOLEAN isPointsSet() const;
+    BOOLEAN isNormalsSet() const;
+    BOOLEAN isTrianglesNormalsSet() const;
 
     int getShadingType() const;
     ShadingType getShadingTypeEnum() const;
@@ -82,8 +85,8 @@ public:
     void changeTrianglesNormals();
     void changeShadingType();
 
-    bool getUseVertexColors() const;
-    void setUseVertexColors(bool useVertexColors);
+    BOOLEAN getUseVertexColors() const;
+    void setUseVertexColors(BOOLEAN useVertexColors);
     ColorRgb getBoundingVolumeColor() const;
     void setBoundingVolumeColor(const ColorRgb& boundingVolumeColor);
 

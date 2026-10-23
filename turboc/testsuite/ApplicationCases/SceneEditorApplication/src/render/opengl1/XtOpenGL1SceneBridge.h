@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_SCENE_BRIDGE__
 #define __XT_OPENGL1_SCENE_BRIDGE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include <X11/Xlib.h>
@@ -100,9 +101,9 @@ public:
     struct ViewportMenuItem {
         String label;
         String command;
-        bool separator;
+        BOOLEAN separator;
         /** true for the projection location / render mode in use */
-        bool current;
+        BOOLEAN current;
     };
 
 private:
@@ -151,7 +152,7 @@ public:
     void display(int width, int height);
     void displayXlib(Display* display, Window window, Visual* visual,
                      int depth, int width, int height);
-    bool usesXlibRendering() const;
+    BOOLEAN usesXlibRendering() const;
     void reshape(int width, int height);
 
     /**
@@ -199,7 +200,7 @@ public:
     @param file destination file
     @param jpg true for a JPG file, false for a PNG one
     */
-    void requestViewportExport(const File& file, bool jpg);
+    void requestViewportExport(const File& file, BOOLEAN jpg);
 
     /**
     Requests the export of the whole viewport set area as a JPG, done while
@@ -215,7 +216,7 @@ public:
     @param outCanvas {x, y} in canvas pixels
     @return false if the point is behind the camera
     */
-    bool projectToCanvas(Viewport* viewport, const Vector3Dd& point,
+    BOOLEAN projectToCanvas(Viewport* viewport, const Vector3Dd& point,
                          double outCanvas[2]);
 
     /**
@@ -254,7 +255,7 @@ public:
     /**
     @param selected true while the modify panel of the GUI is shown
     */
-    void setModifyPanelSelected(bool selected);
+    void setModifyPanelSelected(BOOLEAN selected);
 
     /**
     @return the body the modify panel must edit: the first selected body

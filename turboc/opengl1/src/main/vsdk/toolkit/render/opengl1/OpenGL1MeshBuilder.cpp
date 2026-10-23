@@ -1,10 +1,11 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1MeshBuilder.h"
 #include "java/util/Collections.h"
 
 OpenGL1MeshBuilder::OpenGL1MeshBuilder(double characteristicSize)
-    : characteristicSize(characteristicSize), doubleSided(false)
+    : characteristicSize(characteristicSize), doubleSided(FALSE)
 {
 }
 
@@ -71,7 +72,7 @@ void OpenGL1MeshBuilder::addFrustum(double z0, double r0, double z1, double r1,
 }
 
 void OpenGL1MeshBuilder::addDisk(double z, double innerRadius,
-                                 double outerRadius, bool facingUp, int slices)
+                                 double outerRadius, BOOLEAN facingUp, int slices)
 {
     Vector3Dd n(0, 0, facingUp ? 1 : -1);
 
@@ -109,7 +110,7 @@ void OpenGL1MeshBuilder::addDisk(double z, double innerRadius,
     }
 }
 
-void OpenGL1MeshBuilder::setDoubleSided(bool doubleSided)
+void OpenGL1MeshBuilder::setDoubleSided(BOOLEAN doubleSided)
 {
     this->doubleSided = doubleSided;
 }
@@ -168,13 +169,14 @@ void OpenGL1MeshBuilder::addBackSides(int frontCount)
         for ( int k = 2; k >= 0; k-- ) {
             long start = (long)(t + k) * VERTEX_SIZE;
             float v[VERTEX_SIZE];
-            for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+            int c;
+            for ( c = 0; c < VERTEX_SIZE; c++ ) {
                 v[c] = vertices[start + c];
             }
-            for ( int c = 3; c < 6; c++ ) {
+            for ( c = 3; c < 6; c++ ) {
                 v[c] = -v[c];
             }
-            for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+            for ( c = 0; c < VERTEX_SIZE; c++ ) {
                 vertices.add(v[c]);
             }
         }
@@ -183,4 +185,3 @@ void OpenGL1MeshBuilder::addBackSides(int frontCount)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int OpenGL1MeshBuilder::VERTEX_SIZE;

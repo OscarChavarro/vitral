@@ -1,6 +1,7 @@
 #ifndef __XT_PANEL_WIDGETS__
 #define __XT_PANEL_WIDGETS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -52,7 +53,7 @@ public:
     panel)
     */
     virtual XtWidget createPanel(XtWidget parent, const char* name, int x, int y,
-                               int width, int height, bool managed) = 0;
+                               int width, int height, BOOLEAN managed) = 0;
 
     virtual XtWidget createLabel(XtWidget parent, const String& text,
                                XFontSet fontSet, Justify justify,
@@ -81,7 +82,7 @@ public:
     @param invalid true to show the field with the background used for
     invalid values, false for the normal one
     */
-    virtual void setInvalid(XtWidget field, bool invalid) = 0;
+    virtual void setInvalid(XtWidget field, BOOLEAN invalid) = 0;
 
     /**
     @param widget widget whose foreground changes

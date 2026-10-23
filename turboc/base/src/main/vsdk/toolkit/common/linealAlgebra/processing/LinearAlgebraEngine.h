@@ -1,6 +1,7 @@
 #ifndef __LINEAR_ALGEBRA_ENGINE__
 #define __LINEAR_ALGEBRA_ENGINE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
 #include "vsdk/toolkit/common/linealAlgebra/processing/Strategies.h"
 class LinearAlgebraEngine {

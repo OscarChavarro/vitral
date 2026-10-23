@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
@@ -13,7 +14,7 @@ static const double MIN_DRAG_DISTANCE = 4.0;
 
 ScaleGizmoInteractionTechnique::ScaleGizmoInteractionTechnique(
     ScaleGizmo* gizmo)
-    : gizmo(gizmo), active(false)
+    : gizmo(gizmo), active(FALSE)
 {
     endGesture();
 }
@@ -23,7 +24,7 @@ ScaleGizmo* ScaleGizmoInteractionTechnique::getGizmo() const
     return gizmo;
 }
 
-bool ScaleGizmoInteractionTechnique::isActive() const
+BOOLEAN ScaleGizmoInteractionTechnique::isActive() const
 {
     return active;
 }
@@ -33,32 +34,32 @@ Viewport* ScaleGizmoInteractionTechnique::getDragViewport() const
     return dragViewport;
 }
 
-bool ScaleGizmoInteractionTechnique::isInputGizmoKey(const KeyEvent& keyEvent)
+BOOLEAN ScaleGizmoInteractionTechnique::isInputGizmoKey(const KeyEvent& keyEvent)
 {
     return gizmo->getInputGizmo()->consumesKey(keyEvent);
 }
 
-bool ScaleGizmoInteractionTechnique::processKeyPressedEvent(
+BOOLEAN ScaleGizmoInteractionTechnique::processKeyPressedEvent(
     const KeyEvent& keyEvent)
 {
     return gizmo->processKeyPressedEvent(keyEvent);
 }
 
-bool ScaleGizmoInteractionTechnique::processKeyReleasedEvent(const KeyEvent&)
+BOOLEAN ScaleGizmoInteractionTechnique::processKeyReleasedEvent(const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmoInteractionTechnique::processMousePressedEvent(
+BOOLEAN ScaleGizmoInteractionTechnique::processMousePressedEvent(
     const MouseEvent& e, Viewport* viewport)
 {
-    bool changed = processMousePressedEvent(e);
+    BOOLEAN changed = processMousePressedEvent(e);
 
     dragViewport = isDragging() ? viewport : NULL;
     return changed;
 }
 
-bool ScaleGizmoInteractionTechnique::processMousePressedEvent(
+BOOLEAN ScaleGizmoInteractionTechnique::processMousePressedEvent(
     const MouseEvent& e)
 {
     endGesture();
@@ -69,25 +70,25 @@ bool ScaleGizmoInteractionTechnique::processMousePressedEvent(
         gizmo->setVolatileSelection(selection);
         dragGroup = selection;
         dragStartScale = gizmo->getScale();
-        hasDragStartScale = true;
+        hasDragStartScale = TRUE;
         dragStartDistance = distanceToOrigin(e.getX(), e.getY());
     }
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmoInteractionTechnique::isDragging() const
+BOOLEAN ScaleGizmoInteractionTechnique::isDragging() const
 {
     return dragGroup != ScaleGizmo::NULL_GROUP;
 }
 
-bool ScaleGizmoInteractionTechnique::processMouseReleasedEvent(
+BOOLEAN ScaleGizmoInteractionTechnique::processMouseReleasedEvent(
     const MouseEvent&)
 {
     endGesture();
-    return false;
+    return FALSE;
 }
 
-bool ScaleGizmoInteractionTechnique::processMouseClickedEvent(
+BOOLEAN ScaleGizmoInteractionTechnique::processMouseClickedEvent(
     const MouseEvent& e)
 {
     int previousSelection = gizmo->getCurrentSelection();
@@ -101,12 +102,12 @@ bool ScaleGizmoInteractionTechnique::processMouseClickedEvent(
     return selection != previousSelection;
 }
 
-bool ScaleGizmoInteractionTechnique::processMouseMovedEvent(
+BOOLEAN ScaleGizmoInteractionTechnique::processMouseMovedEvent(
     const MouseEvent& e)
 {
     if ( isDragging() ) {
         // The selection of the gizmo is fixed while dragging
-        return false;
+        return FALSE;
     }
 
     int previousSelection = gizmo->getCurrentSelection();
@@ -117,11 +118,11 @@ bool ScaleGizmoInteractionTechnique::processMouseMovedEvent(
     return selection != previousSelection;
 }
 
-bool ScaleGizmoInteractionTechnique::processMouseDraggedEvent(
+BOOLEAN ScaleGizmoInteractionTechnique::processMouseDraggedEvent(
     const MouseEvent& e)
 {
     if ( !isDragging() || !hasDragStartScale ) {
-        return false;
+        return FALSE;
     }
 
     double distance = distanceToOrigin(e.getX(), e.getY());
@@ -134,12 +135,12 @@ bool ScaleGizmoInteractionTechnique::processMouseDraggedEvent(
 
     gizmo->getInputGizmo()->cancelEditing();
     gizmo->setScale(newScale);
-    return true;
+    return TRUE;
 }
 
-bool ScaleGizmoInteractionTechnique::processMouseWheelEvent(const MouseEvent&)
+BOOLEAN ScaleGizmoInteractionTechnique::processMouseWheelEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
 double ScaleGizmoInteractionTechnique::scaledIfIncluded(int axis,
@@ -167,7 +168,7 @@ void ScaleGizmoInteractionTechnique::endGesture()
 {
     dragViewport = NULL;
     dragGroup = ScaleGizmo::NULL_GROUP;
-    hasDragStartScale = false;
+    hasDragStartScale = FALSE;
     dragStartScale = Vector3Dd();
     dragStartDistance = 0.0;
 }
@@ -177,7 +178,7 @@ int ScaleGizmoInteractionTechnique::calculateSelection(int x, int y)
     Camera* camera = gizmo->getCamera();
 
     if ( camera == NULL ) {
-        active = false;
+        active = FALSE;
         return ScaleGizmo::NULL_GROUP;
     }
     camera->updateVectors();

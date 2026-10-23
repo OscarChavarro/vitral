@@ -10,6 +10,7 @@
 #ifndef __PARAMETRIC_BI_CUBIC_PATCH_INTERSECTOR__
 #define __PARAMETRIC_BI_CUBIC_PATCH_INTERSECTOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -102,7 +103,7 @@ public:
     @param outHit receives the nearest hit with positive ray parameter
     @return false if the ray misses the patch (Java returns null)
     */
-    bool intersect(const Ray& ray, PatchHit& outHit) const;
+    BOOLEAN intersect(const Ray& ray, PatchHit& outHit) const;
 
     /**
     Evaluates the patch and its first partial derivatives.
@@ -143,17 +144,17 @@ private:
                           double target[], int targetIndex);
     void walkTree(const PatchNode* node, const double o[3], const double d[3],
                   double directionLengthSquared, PatchHit& best) const;
-    static bool sphericalBoundsCheck(const PatchNode* node, const double o[3],
+    static BOOLEAN sphericalBoundsCheck(const PatchNode* node, const double o[3],
                                      const double d[3],
                                      double directionLengthSquared,
                                      double maxT);
-    static bool intersectTriangle(const double o[3], const double d[3],
+    static BOOLEAN intersectTriangle(const double o[3], const double d[3],
                                   const double corners[12],
                                   int a, int b, int c, double result[3]);
     void acceptHit(const PatchNode* node, const double o[3], const double d[3],
                    const double corners[12], int a, int b, int c,
                    double t, double u, double v, PatchHit& best) const;
-    bool refineOnSurface(const double o[3], const double d[3],
+    BOOLEAN refineOnSurface(const double o[3], const double d[3],
                          double uvt[3]) const;
     static double determinant3x3(double a, double b, double c,
                                  double d, double e, double f,

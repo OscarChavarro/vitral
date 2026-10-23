@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "org/w3c/dom/Document.h"
 #include "org/w3c/dom/Element.h"
@@ -166,7 +167,7 @@ String Element::getAttribute(const String& name) const
     return attribute->getNodeValue();
 }
 
-bool Element::hasAttribute(const String& name) const
+BOOLEAN Element::hasAttribute(const String& name) const
 {
     return getAttributes()->getNamedItem(name) != NULL;
 }
@@ -242,7 +243,3 @@ void Document::normalizeDocument()
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const short Node::ELEMENT_NODE;
-const short Node::ATTRIBUTE_NODE;
-const short Node::TEXT_NODE;
-const short Node::DOCUMENT_NODE;

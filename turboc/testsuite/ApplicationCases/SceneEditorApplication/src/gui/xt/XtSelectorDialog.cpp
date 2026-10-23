@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 
 // Xt names its strings and objects as the vitral String and Object
@@ -31,7 +32,7 @@ XtSelectorDialog::XtSelectorDialog(XtApplicationHost* host)
       presenter(host->getApplicationModel(), &repaintRequest),
       form(NULL),
       hierarchy("Scene", NULL),
-      updating(false),
+      updating(FALSE),
       popupMenu(NULL)
 {
     const WidgetDialog* definition = host->getDialogById(DIALOG_ID);
@@ -73,7 +74,7 @@ XtSelectorDialog::~XtSelectorDialog()
 void XtSelectorDialog::rebuild()
 {
     XtTreeView* tree = form->tree(TREE_BINDING);
-    updating = true;
+    updating = TRUE;
     // The tree references the rows: they are replaced after it forgets them
     tree->setRoot(NULL);
     hierarchy = presenter.hierarchy();
@@ -81,7 +82,7 @@ void XtSelectorDialog::rebuild()
     ArrayList<const DialogTreeNode*> selected;
     collectSelected(&hierarchy, selected);
     tree->setSelection(selected);
-    updating = false;
+    updating = FALSE;
 }
 
 void XtSelectorDialog::collectSelected(
@@ -95,7 +96,7 @@ void XtSelectorDialog::collectSelected(
     }
 }
 
-void XtSelectorDialog::setVisible(bool visible)
+void XtSelectorDialog::setVisible(BOOLEAN visible)
 {
     if ( visible ) {
         form->show();
@@ -105,7 +106,7 @@ void XtSelectorDialog::setVisible(bool visible)
     }
 }
 
-bool XtSelectorDialog::isVisible() const
+BOOLEAN XtSelectorDialog::isVisible() const
 {
     return form->isVisible();
 }
@@ -155,12 +156,12 @@ void XtSelectorDialog::showPopup(int rootX, int rootY)
     if ( bodies.isEmpty() ) {
         return;
     }
-    bool anyHidden = presenter.anyHidden(bodies);
+    BOOLEAN anyHidden = presenter.anyHidden(bodies);
     XtWidgetSet::MenuChoice item;
     item.label = presenter.text(anyHidden ? "IDM_SELECTOR_SHOW" : "IDM_SELECTOR_HIDE",
         anyHidden ? "Show objects" : "Hide objects").c_str();
-    item.checked = false;
-    item.separator = false;
+    item.checked = FALSE;
+    item.separator = FALSE;
     ArrayList<XtWidgetSet::MenuChoice> items;
     items.add(item);
     XtWidgetSet* widgetSet = host->getUiFactory()->getWidgetSet();

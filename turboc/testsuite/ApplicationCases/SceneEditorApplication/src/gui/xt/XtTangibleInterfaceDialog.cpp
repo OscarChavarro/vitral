@@ -9,6 +9,7 @@
 #undef Object
 #undef String
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtTangibleInterfaceDialog.h"
 #include "gui/xt/XtUiFactory.h"
@@ -109,7 +110,7 @@ void XtTangibleInterfaceDialog::actionPerformed(const String& action)
 }
 
 void XtTangibleInterfaceDialog::connectionFinished(long serial, long request,
-                                                   bool connected)
+                                                   BOOLEAN connected)
 {
     if ( form == NULL || serial != formSerial ||
          !form->session()->completeAction(request) ) {
@@ -125,7 +126,7 @@ void XtTangibleInterfaceDialog::connectionFinished(long serial, long request,
         host->getMessage("IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY"));
 }
 
-bool XtTangibleInterfaceDialog::isVisible() const
+BOOLEAN XtTangibleInterfaceDialog::isVisible() const
 {
     return form != NULL && form->isVisible();
 }
@@ -140,15 +141,15 @@ String XtTangibleInterfaceDialog::getConnectLabel() const
     return form != NULL ? form->getActionLabel(CONNECT) : String();
 }
 
-bool XtTangibleInterfaceDialog::performAction(const String& action,
+BOOLEAN XtTangibleInterfaceDialog::performAction(const String& action,
                                               const String* serviceUrl)
 {
     if ( !isVisible() || form->action(action) == NULL ) {
-        return false;
+        return FALSE;
     }
     if ( action == CONNECT && serviceUrl != NULL ) {
         form->setText(SERVICE_URL, *serviceUrl);
     }
     actionPerformed(action);
-    return true;
+    return TRUE;
 }

@@ -15,12 +15,12 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 SimpleBody::SimpleBody()
-    : geometry(0), ownsGeometry(true), geometryIsSphere(false), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
+    : geometry(0), ownsGeometry(TRUE), geometryIsSphere(FALSE), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
       rotationQuaternion(rotation.exportToQuaternion()), rotationInverseQuaternion(rotationInverse.exportToQuaternion()),
-      inverseScale(1, 1, 1), hasInvertibleScale(true),
-      hasIdentityRotation(true), hasUnitScale(true), hasZeroTranslation(true),
-      hasTranslationOnlyTransform(true), hasIdentityTransform(true),
-      material(0), ownsMaterial(true), texture(0), normalMap(0), normalMapRgb(0),
+      inverseScale(1, 1, 1), hasInvertibleScale(TRUE),
+      hasIdentityRotation(TRUE), hasUnitScale(TRUE), hasZeroTranslation(TRUE),
+      hasTranslationOnlyTransform(TRUE), hasIdentityTransform(TRUE),
+      material(0), ownsMaterial(TRUE), texture(0), normalMap(0), normalMapRgb(0),
       name(""), modificationVersion(0)
 {
 }
@@ -51,7 +51,7 @@ SimpleBody::~SimpleBody()
 
 void SimpleBody::markModified() { modificationVersion++; }
 
-bool SimpleBody::isIdentityRotation(const Matrix4x4d& matrix)
+BOOLEAN SimpleBody::isIdentityRotation(const Matrix4x4d& matrix)
 {
     return
         Cpp98Support::abs(matrix.get(0, 0) - 1.0) <= VSDK::EPSILON &&
@@ -91,7 +91,7 @@ void SimpleBody::setGeometry(Geometry* g)
         delete geometry;
     }
     geometry = g;
-    ownsGeometry = true;
+    ownsGeometry = TRUE;
     geometryIsSphere = (geometry != NULL && geometry->instanceOf(Sphere::CLASS));
     markModified();
 }
@@ -102,7 +102,7 @@ void SimpleBody::setGeometryReference(Geometry* g)
         delete geometry;
     }
     geometry = g;
-    ownsGeometry = false;
+    ownsGeometry = FALSE;
     geometryIsSphere = (geometry != NULL && geometry->instanceOf(Sphere::CLASS));
     markModified();
 }
@@ -138,7 +138,7 @@ void SimpleBody::setMaterial(SimpleMaterial* m)
         delete material;
     }
     material = m;
-    ownsMaterial = true;
+    ownsMaterial = TRUE;
     markModified();
 }
 
@@ -148,7 +148,7 @@ void SimpleBody::setMaterialReference(SimpleMaterial* m)
         delete material;
     }
     material = m;
-    ownsMaterial = false;
+    ownsMaterial = FALSE;
     markModified();
 }
 Image* SimpleBody::getTexture() const { return texture; }
@@ -211,7 +211,7 @@ Ray* SimpleBody::doIntersectionFirstHit(const Ray& inRay) const
     return new Ray(*hit.getRay());
 }
 
-bool SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const
+BOOLEAN SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const
 {
     const Sphere* sphere = ((const Sphere*)(geometry));
     const Vector3Dd& origin = inOutRay.getOrigin();
@@ -224,12 +224,12 @@ bool SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOu
         sphere->getRadiusSquared() + projection * projection - dx * dx - dy * dy - dz * dz;
 
     if ( discriminant < 0 ) {
-        return false;
+        return FALSE;
     }
 
     const double t = projection - sqrt(discriminant);
     if ( t < 0 ) {
-        return false;
+        return FALSE;
     }
 
     if ( outHit != 0 ) {
@@ -240,13 +240,13 @@ bool SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOu
             outHit->setHitDistance(t);
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const
+BOOLEAN SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const
 {
     if ( geometry == 0 || !hasInvertibleScale ) {
-        return false;
+        return FALSE;
     }
 
     const int requestedDetailMask = outHit != 0 ? outHit->getRequiredDetailMask() : RayHit::DETAIL_NONE;
@@ -277,7 +277,7 @@ bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) con
         rotatedDirection.z() * inverseScale.z());
     const double localDirectionLength = localDirection.length();
     if ( localDirectionLength <= VSDK::EPSILON ) {
-        return false;
+        return FALSE;
     }
     localDirection = localDirection.multiply(1.0 / localDirectionLength);
 
@@ -290,23 +290,23 @@ bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) con
     }
 
     Ray localRay(localOrigin, localDirection, localRayT);
-    const bool requestedStoreRay = outHit != 0 ? outHit->shouldStoreRay() : false;
+    const BOOLEAN requestedStoreRay = outHit != 0 ? outHit->shouldStoreRay() : FALSE;
 
     if ( outHit != 0 ) {
-        outHit->setStoreRay(false);
+        outHit->setStoreRay(FALSE);
         outHit->resetForDistanceOnly();
         if ( !SurfaceRayIntersection::doIntersectionFirstHit(geometry, localRay, outHit) ) {
             outHit->setStoreRay(requestedStoreRay);
             outHit->setRequiredDetailMask(requestedDetailMask);
-            return false;
+            return FALSE;
         }
     }
     else {
         RayHit localHitStorage;
-        localHitStorage.setStoreRay(false);
+        localHitStorage.setStoreRay(FALSE);
         localHitStorage.resetForDistanceOnly();
         if ( !SurfaceRayIntersection::doIntersectionFirstHit(geometry, localRay, &localHitStorage) ) {
-            return false;
+            return FALSE;
         }
     }
 
@@ -319,7 +319,7 @@ bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) con
             localHitT = outHit->getHitDistance();
         }
         else {
-            return false;
+            return FALSE;
         }
 
         double worldT = localHitT / localDirectionLength;
@@ -337,10 +337,10 @@ bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) con
             outHit->setHitDistance(worldT);
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool SimpleBody::doIntersectionWithTranslationOnly(
+BOOLEAN SimpleBody::doIntersectionWithTranslationOnly(
     const Ray& inOutRay,
     RayHit* outHit,
     int requiredDetailMask) const
@@ -358,7 +358,7 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
     }
 
     if ( !SurfaceRayIntersection::doIntersectionFirstHit(geometry, localRay, hit) ) {
-        return false;
+        return FALSE;
     }
 
     double localHitT;
@@ -369,7 +369,7 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
         localHitT = hit->getHitDistance();
     }
     else {
-        return false;
+        return FALSE;
     }
 
     if ( outHit != 0 ) {
@@ -397,7 +397,7 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
         outHit->normalMap = hit->normalMap;
     }
 
-    return true;
+    return TRUE;
 }
 
 int SimpleBody::computeQuantitativeInvisibility(

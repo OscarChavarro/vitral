@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/StringBuilder.h"
 
@@ -151,10 +152,12 @@ StringBuilder::append(long value) {
     return append(String::valueOf(value));
 }
 
+#ifdef VSDK_HAS_LONG_LONG
 StringBuilder &
 StringBuilder::append(long long value) {
     return append(String::valueOf(value));
 }
+#endif
 
 StringBuilder &
 StringBuilder::append(double value) {
@@ -162,7 +165,7 @@ StringBuilder::append(double value) {
 }
 
 StringBuilder &
-StringBuilder::append(bool value) {
+StringBuilder::appendBoolean(BOOLEAN value) {
     return append(value ? "true" : "false");
 }
 

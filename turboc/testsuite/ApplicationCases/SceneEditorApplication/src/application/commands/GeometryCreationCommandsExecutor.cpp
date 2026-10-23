@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
@@ -164,14 +165,14 @@ void GeometryCreationCommandsExecutor::createSphericalHarmonicDebugSpheres()
     }
 }
 
-bool GeometryCreationCommandsExecutor::createVolume()
+BOOLEAN GeometryCreationCommandsExecutor::createVolume()
 {
     //- The volume is built from the selected object -------------------
     int selectedThing = scene()->selectedThings->firstSelected();
 
     if ( selectedThing < 0 ) {
         presenter->showStatusMessage(message("IDM_CREATE_VOLUME_NO_SELECTION"));
-        return false;
+        return FALSE;
     }
     SimpleBody* thing = scene()->scene->getSimpleBodies().get(selectedThing);
     Geometry* referenceGeometry = thing->getGeometry();
@@ -198,7 +199,7 @@ bool GeometryCreationCommandsExecutor::createVolume()
     if ( !hasFilledVoxels(*vv) ) {
         presenter->showStatusMessage(message("IDM_CREATE_VOLUME_EMPTY"));
         delete vv;
-        return false;
+        return FALSE;
     }
 
     //- Append newly created volume to scene, matching reference form -
@@ -218,10 +219,10 @@ bool GeometryCreationCommandsExecutor::createVolume()
     newThing->setScale(thingScale.multiply(voxelSpaceScale));
     newThing->setPosition(thing->getPosition().add(
         thing->getRotation().multiply(scaledCenter)));
-    return true;
+    return TRUE;
 }
 
-bool GeometryCreationCommandsExecutor::hasFilledVoxels(const VoxelVolume& vv)
+BOOLEAN GeometryCreationCommandsExecutor::hasFilledVoxels(const VoxelVolume& vv)
 {
     int x;
     int y;
@@ -231,12 +232,12 @@ bool GeometryCreationCommandsExecutor::hasFilledVoxels(const VoxelVolume& vv)
         for ( y = 0; y < vv.getYSize(); y++ ) {
             for ( x = 0; x < vv.getXSize(); x++ ) {
                 if ( vv.isFilled(x, y, z) ) {
-                    return true;
+                    return TRUE;
                 }
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
 void GeometryCreationCommandsExecutor::createBrep()
@@ -285,7 +286,7 @@ void GeometryCreationCommandsExecutor::createFunctionalExplicitSurface()
     functionalSurface->setTesselationHint(100, 100);
     newThing = scene()->addThing(functionalSurface);
     newThing->setMaterial(new SimpleMaterial(
-        newThing->getMaterial()->withDoubleSided(true)));
+        newThing->getMaterial()->withDoubleSided(TRUE)));
 }
 
 void GeometryCreationCommandsExecutor::createParametricBiCubicPatch()
@@ -335,7 +336,7 @@ void GeometryCreationCommandsExecutor::createParametricBiCubicPatch()
     SimpleBody* newThing;
     newThing = scene()->addThing(patch);
     newThing->setMaterial(new SimpleMaterial(
-        newThing->getMaterial()->withDoubleSided(true)));
+        newThing->getMaterial()->withDoubleSided(TRUE)));
 }
 
 SimpleBody* GeometryCreationCommandsExecutor::addDebugSphere(
@@ -362,7 +363,7 @@ SimpleBody* GeometryCreationCommandsExecutor::addDebugSphere(
     body = new SimpleBody();
     body->setGeometry(sphere);
     body->setMaterial(new SimpleMaterial(
-        Scene::defaultMaterial().withDoubleSided(true)));
+        Scene::defaultMaterial().withDoubleSided(TRUE)));
     scale = voxelBody->getScale();
     S = S.scale(scale.x(), scale.y(), scale.z());
     scale = scale.multiply(r);

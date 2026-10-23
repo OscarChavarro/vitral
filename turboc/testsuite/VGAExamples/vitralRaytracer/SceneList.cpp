@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vitralRaytracer/SceneList.h"
 #include <ctype.h>
 #include <dirent.h>

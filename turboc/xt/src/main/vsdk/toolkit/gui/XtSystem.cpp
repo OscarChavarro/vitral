@@ -4,6 +4,7 @@
 #include <X11/keysym.h>
 
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -72,7 +73,7 @@ MouseEvent XtSystem::xt2vsdkMouseEvent(const XEvent& event)
     return result;
 }
 
-bool XtSystem::isWheelButton(const XEvent& event)
+BOOLEAN XtSystem::isWheelButton(const XEvent& event)
 {
     return event.xbutton.button >= 4 && event.xbutton.button <= 7;
 }
@@ -110,8 +111,8 @@ KeyEvent XtSystem::xt2vsdkKeyEvent(KeySym keysym, KeySym base,
                                    unsigned int state)
 {
     KeyEvent result;
-    bool shift = (state & ShiftMask) != 0;
-    bool control = (state & ControlMask) != 0;
+    BOOLEAN shift = (state & ShiftMask) != 0;
+    BOOLEAN control = (state & ControlMask) != 0;
 
     if ( shift ) result.modifierMask |= KeyEvent::MASK_SHIFT;
     if ( control ) result.modifierMask |= KeyEvent::MASK_CTRL;
@@ -204,7 +205,7 @@ public:
     FontSetKey(Display* display, int pixelSize) :
         display(display), pixelSize(pixelSize) {}
 
-    bool operator<(const FontSetKey& other) const
+    BOOLEAN operator<(const FontSetKey& other) const
     {
         return display < other.display ||
             (display == other.display && pixelSize < other.pixelSize);
@@ -330,5 +331,3 @@ void XtSystem::releaseResources(Display* display)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int XtSystem::SHIFT_DOWN_MASK;
-const int XtSystem::ALT_DOWN_MASK;

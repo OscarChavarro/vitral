@@ -1,5 +1,7 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGICAL_VALIDATOR__
-#define __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGICAL_VALIDATOR__
+#ifndef __PBS_TOPOLOGICAL_VALIDATOR__
+#define __PBS_TOPOLOGICAL_VALIDATOR__
+
+#include "vsdk/toolkit/common/VSDK.h"
 
 class PolyhedralBoundedSolid;
 
@@ -17,7 +19,7 @@ public:
     @return true when every edge is used exactly by two half-edges of closed
     loops
     */
-    static bool validateTopologicalIntegrity(PolyhedralBoundedSolid* solid);
+    static BOOLEAN validateTopologicalIntegrity(PolyhedralBoundedSolid* solid);
 
     /**
     Rebuilds the vertex-to-emanating-halfedge links required by the vertex

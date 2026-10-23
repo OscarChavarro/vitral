@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersector.h"
@@ -38,12 +39,12 @@ int _PolyhedralBoundedSolidSetIntersector::compareToZero(double value)
         numericContext);
 }
 
-bool _PolyhedralBoundedSolidSetIntersector::isZero(double value)
+BOOLEAN _PolyhedralBoundedSolidSetIntersector::isZero(double value)
 {
     return PolyhedralBoundedSolidNumericPolicy::isZero(value, numericContext);
 }
 
-bool _PolyhedralBoundedSolidSetIntersector::isZeroBig(double value)
+BOOLEAN _PolyhedralBoundedSolidSetIntersector::isZeroBig(double value)
 {
     return PolyhedralBoundedSolidNumericPolicy::isZeroBig(value, numericContext);
 }

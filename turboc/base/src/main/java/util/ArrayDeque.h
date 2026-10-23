@@ -1,6 +1,7 @@
 #ifndef __ARRAY_DEQUE__
 #define __ARRAY_DEQUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 template <class E>
 class ArrayDeque : public Object {
@@ -24,7 +25,7 @@ public:
 
     // Capacity operations
     long size() const;
-    bool isEmpty() const;
+    BOOLEAN isEmpty() const;
     void clear();
 
     // Add operations

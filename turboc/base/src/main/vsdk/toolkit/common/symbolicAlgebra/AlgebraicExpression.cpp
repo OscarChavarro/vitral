@@ -5,6 +5,7 @@
 #include "java/lang/NumberFormatException.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/Cpp98Support.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/_AlgebraicExpressionBinaryOperatorNode.h"
@@ -24,17 +25,17 @@ static String charToString(char c)
 //= wordChars for letters, digits and '_', ordinaryChar for the operators
 //= and parenthesis, and parseNumbers (which adds the "digit" class to the
 //= digits, '.' and '-').
-static bool isWhitespaceClass(char c)
+static BOOLEAN isWhitespaceClass(char c)
 {
     return c == ' ';
 }
 
-static bool isDigitClass(char c)
+static BOOLEAN isDigitClass(char c)
 {
     return (c >= '0' && c <= '9') || c == '.' || c == '-';
 }
 
-static bool isAlphaClass(char c)
+static BOOLEAN isAlphaClass(char c)
 {
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
         (c >= '0' && c <= '9') || c == '_';
@@ -135,18 +136,18 @@ double AlgebraicExpression::getVariableValue(const String& name) const
     return *val;
 }
 
-bool AlgebraicExpression::isOperator(const String& cad)
+BOOLEAN AlgebraicExpression::isOperator(const String& cad)
 {
-    if ( cad.length() != 1 ) return false;
+    if ( cad.length() != 1 ) return FALSE;
     switch ( cad.charAt(0) ) {
       case '+':
       case '-':
       case '*':
       case '/':
       case '^':
-        return true;
+        return TRUE;
       default:
-        return false;
+        return FALSE;
     }
 }
 
@@ -160,7 +161,7 @@ ArrayList<String> AlgebraicExpression::tokenize(
     int n = text.length();
     int position = 0;
 
-    while ( true ) {
+    while ( TRUE ) {
         while ( position < n && isWhitespaceClass(text.charAt(position)) ) {
             position++;
         }
@@ -170,7 +171,7 @@ ArrayList<String> AlgebraicExpression::tokenize(
         char c = text.charAt(position);
 
         if ( isDigitClass(c) ) {
-            bool negative = false;
+            BOOLEAN negative = FALSE;
             if ( c == '-' ) {
                 char next = position + 1 < n ? text.charAt(position + 1) : '\0';
                 if ( next != '.' && (next < '0' || next > '9') ) {
@@ -179,7 +180,7 @@ ArrayList<String> AlgebraicExpression::tokenize(
                     position++;
                     continue;
                 }
-                negative = true;
+                negative = TRUE;
                 position++;
             }
             double v = 0;
@@ -254,7 +255,7 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
     while ( tokens[0].equals("(") &&
             tokens[tokens.size()-1].equals(")") ) {
         level = 0;
-        bool trim = true;
+        BOOLEAN trim = TRUE;
 
         for ( i = 0; i < tokens.size(); i++ ) {
             c = tokens[i].charAt(0);
@@ -265,7 +266,7 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
                 level--;
             }
             if ( level == 0 && i < (tokens.size()-1) ) {
-                trim = false;
+                trim = FALSE;
             }
         }
 
@@ -465,7 +466,7 @@ void _AlgebraicExpressionUnaryOperatorNode::setOperand(
 double _AlgebraicExpressionUnaryOperatorNode::eval() const
 {
     double operandValue = operand->eval();
-    double val = NAN;
+    double val = Cpp98Support::nan();
 
     if ( operatorName.equals("sin") ) {
         val = sin(operandValue);

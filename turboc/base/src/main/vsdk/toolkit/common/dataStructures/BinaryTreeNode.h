@@ -2,6 +2,7 @@
 #define __BINARY_TREE_NODE__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 
 /**
 @param <T>

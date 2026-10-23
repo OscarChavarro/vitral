@@ -2,6 +2,7 @@
 #define __VSDK_FATAL_EXCEPTION__
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/RuntimeException.h"
 #include "java/lang/String.h"
 

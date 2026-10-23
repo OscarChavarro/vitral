@@ -1,4 +1,5 @@
 // Before any other header that could include the Xt ones
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/XmIntrinsics.h"
 
 #include "java/lang/String.h"
@@ -146,7 +147,7 @@ XtWidget XmGuiRenderer::buildButtonGroup(XtWidget parent,
                                          XFontSet fontSet, int x, int y,
                                          int width)
 {
-    bool horizontal = group != NULL &&
+    BOOLEAN horizontal = group != NULL &&
         group->getDirection() == WidgetButtonGroup::HORIZONTAL;
     long count = group != NULL ? group->getCommands().size() : 0;
     int height = horizontal ? ICON_BUTTON_SIZE + 2 * BUTTON_SPACING :
@@ -190,7 +191,7 @@ XtWidget XmGuiRenderer::buildButtonGroup(XtWidget parent,
     for ( long i = 0; i < count; i++ ) {
         WidgetCommand* element = commands.get(i);
         RGBAImageUncompressed* icon = element->getIcon();
-        bool withIcon = icon != NULL && group->isShowIconsSet();
+        BOOLEAN withIcon = icon != NULL && group->isShowIconsSet();
         // Icon buttons show their text only if the group asks for it
         String label = !withIcon || group->isShowTextSet() ?
             element->getName() : String("");

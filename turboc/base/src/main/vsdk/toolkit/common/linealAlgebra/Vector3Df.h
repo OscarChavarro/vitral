@@ -3,6 +3,7 @@
 
 
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 class Vector3Dd;
 
 class Vector3Df {
@@ -31,10 +32,10 @@ public:
     float y() const { return y_; }
     float z() const { return z_; }
 
-    bool epsilonEquals(const Vector3Df& other) const { return epsilonEquals(other, 1e-6f); }
-    bool epsilonEquals(const Vector3Df& other, float epsilon) const;
+    BOOLEAN epsilonEquals(const Vector3Df& other) const { return epsilonEquals(other, 1e-6f); }
+    BOOLEAN epsilonEquals(const Vector3Df& other, float epsilon) const;
 
-    bool operator==(const Vector3Df& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_; }
+    BOOLEAN operator==(const Vector3Df& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_; }
 };
 
 

@@ -19,7 +19,7 @@ RaytracerHud::loadFont() {
     }
 }
 
-bool
+BOOLEAN
 RaytracerHud::hasFont() const {
     return glyphHeight != 0;
 }

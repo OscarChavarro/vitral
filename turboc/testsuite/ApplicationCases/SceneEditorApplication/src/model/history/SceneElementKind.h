@@ -1,6 +1,7 @@
 #ifndef __SCENE_ELEMENT_KIND__
 #define __SCENE_ELEMENT_KIND__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "model/selection/EntityListView.h"
 
 class Entity;
@@ -23,7 +24,7 @@ public:
         CAMERA,
         DEBUG_GROUP
     };
-    static const int COUNT = 4;
+    enum { COUNT = 4 };
 
     /**
     @param kind kind of the elements
@@ -47,7 +48,7 @@ public:
     @param selected true if the element must be selected
     */
     static void insert(Value kind, Scene* scene, int index, Entity* element,
-                       bool selected);
+                       BOOLEAN selected);
 
     /**
     Removes an element from its list (without deleting it), keeping the

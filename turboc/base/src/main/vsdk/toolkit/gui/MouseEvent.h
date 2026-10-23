@@ -7,13 +7,15 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int BUTTON1 = 1;
-    static const int BUTTON2 = 2;
-    static const int BUTTON3 = 3;
-    static const int CTRL_DOWN_MASK = 128;
-    static const int BUTTON1_DOWN_MASK = 1024;
-    static const int BUTTON2_DOWN_MASK = 2048;
-    static const int BUTTON3_DOWN_MASK = 4096;
+    enum {
+        BUTTON1 = 1,
+        BUTTON2 = 2,
+        BUTTON3 = 3,
+        CTRL_DOWN_MASK = 128,
+        BUTTON1_DOWN_MASK = 1024,
+        BUTTON2_DOWN_MASK = 2048,
+        BUTTON3_DOWN_MASK = 4096
+    };
 
     MouseEvent()
         : x(0), y(0), button(0), modifiers(0), clicks(0)

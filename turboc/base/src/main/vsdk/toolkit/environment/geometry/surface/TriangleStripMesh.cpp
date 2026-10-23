@@ -36,23 +36,23 @@ void TriangleStripMesh::setVertexes(const ArrayList<Vertex>& v) { vertexes = v; 
 void TriangleStripMesh::setStrips(const ArrayList< ArrayList<int> >& indexes) { strips = indexes; }
 ArrayList< ArrayList<int> >& TriangleStripMesh::getStrips() { return strips; }
 
-static bool intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2, double& t)
+static BOOLEAN intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2, double& t)
 {
     Vector3Dd e1 = v1.subtract(v0);
     Vector3Dd e2 = v2.subtract(v0);
     Vector3Dd h = ray.getDirection().crossProduct(e2);
     double a = e1.dotProduct(h);
-    if (Cpp98Support::abs(a) < VSDK::EPSILON) return false;
+    if (Cpp98Support::abs(a) < VSDK::EPSILON) return FALSE;
     double f = 1.0 / a;
     Vector3Dd s = ray.getOrigin().subtract(v0);
     double u = f * s.dotProduct(h);
-    if (u < 0.0 || u > 1.0) return false;
+    if (u < 0.0 || u > 1.0) return FALSE;
     Vector3Dd q = s.crossProduct(e1);
     double v = f * ray.getDirection().dotProduct(q);
-    if (v < 0.0 || u + v > 1.0) return false;
+    if (v < 0.0 || u + v > 1.0) return FALSE;
     double tt = f * e2.dotProduct(q);
-    if (tt > VSDK::EPSILON) { t = tt; return true; }
-    return false;
+    if (tt > VSDK::EPSILON) { t = tt; return TRUE; }
+    return FALSE;
 }
 
 Ray* TriangleStripMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
@@ -64,9 +64,9 @@ Ray* TriangleStripMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
     return NULL;
 }
 
-bool TriangleStripMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN TriangleStripMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
-    bool found = false;
+    BOOLEAN found = FALSE;
     double bestT = 1e308;
     Vector3Dd bestN;
 
@@ -87,19 +87,19 @@ bool TriangleStripMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
             if (intersectTriangle(inRay, v0, v1, v2, t) && t < bestT) {
                 bestT = t;
                 bestN = v1.subtract(v0).crossProduct(v2.subtract(v0)).normalized();
-                found = true;
+                found = TRUE;
             }
         }
     }
 
-    if (!found) return false;
+    if (!found) return FALSE;
     if (outHit != NULL) {
         if (outHit->shouldStoreRay() || outHit->needsAnySurfaceData()) outHit->setRay(inRay.withT(bestT));
         else outHit->setHitDistance(bestT);
         if (outHit->needsPoint()) outHit->point = inRay.getOrigin().add(inRay.getDirection().multiply(bestT));
         if (outHit->needsNormal()) outHit->normal = bestN;
     }
-    return true;
+    return TRUE;
 }
 
 void TriangleStripMesh::doExtraInformation(const Ray& inRay, double inT, RayHit* outData)

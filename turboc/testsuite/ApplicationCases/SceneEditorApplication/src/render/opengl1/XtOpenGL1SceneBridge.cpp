@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "application/commands/GuiEventExecutor.h"
 #include "gui/DrawingAreaInteractionListener.h"
@@ -84,7 +85,7 @@ public:
         selectionEditor = new SceneSelectionEditor(model->getScene());
         techniques = new DrawingAreaInteractionTechniques(model, this);
         // While dragging a gizmo, the pointer wraps around its viewport
-        techniques->setCursorWrapEnabled(true);
+        techniques->setCursorWrapEnabled(TRUE);
         techniques->getViewportSetTechniques()->setListener(this);
 
         // The renderer presents the same gizmos the techniques manipulate
@@ -109,7 +110,7 @@ public:
         delete model;
     }
 
-    void useXlibRendering(bool useXlib)
+    void useXlibRendering(BOOLEAN useXlib)
     {
         ViewportSet* set = model->getDrawingArea()->getViewportSet();
         if (set->isRenderModeAvailable(Viewport::RENDER_MODE_HIDDEN_LINES)
@@ -146,7 +147,7 @@ public:
         Ray ray(Vector3Dd(0, -3, 0), Vector3Dd(0, 1, 0));
         model->setVisualDebugRay(&ray);
         model->setVisualDebugRayLevels(2);
-        model->setWithVisualDebugRay(false);
+        model->setWithVisualDebugRay(FALSE);
     }
 
     /**
@@ -155,12 +156,12 @@ public:
     `AwtJogl4SceneEditorApplication.prepareRaytracedImage`).
     @return false if the requested size is empty
     */
-    bool prepareRaytracedImage()
+    BOOLEAN prepareRaytracedImage()
     {
         int width = model->getRaytracedImageWidth();
         int height = model->getRaytracedImageHeight();
         if ( width <= 0 || height <= 0 ) {
-            return false;
+            return FALSE;
         }
 
         RGBImageUncompressed* image = model->getRaytracedImage();
@@ -176,19 +177,19 @@ public:
              scene->fixedBackground != NULL ) {
             ImageProcessing::resize(scene->fixedBackground->getImage(), image);
         }
-        return true;
+        return TRUE;
     }
 
-    bool isKnownViewport(Viewport* viewport) const
+    BOOLEAN isKnownViewport(Viewport* viewport) const
     {
         const ArrayList<Viewport*>& viewports =
             model->getDrawingArea()->getViewportSet()->getViewports();
         for ( long i = 0; i < viewports.size(); i++ ) {
             if ( viewports[i] == viewport ) {
-                return true;
+                return TRUE;
             }
         }
-        return false;
+        return FALSE;
     }
 
     void addMenuItems(ArrayList<ViewportMenuItem>& items,
@@ -211,7 +212,7 @@ public:
             }
             ViewportMenuItem item;
             item.separator = definition->isSeparator();
-            item.current = false;
+            item.current = FALSE;
             if ( !item.separator ) {
                 item.label = definition->getName().c_str();
                 item.command = definition->getCommandName().c_str();
@@ -224,7 +225,7 @@ public:
 
     //= DrawingAreaHost ===================================================
     void beforeFrame() {}
-    bool isFullScreenGuiMode()
+    BOOLEAN isFullScreenGuiMode()
     {
         return model->getGuiState()->isFullScreenGuiMode();
     }
@@ -356,7 +357,7 @@ void XtOpenGL1SceneBridge::displayXlib(Display* display, Window window,
     impl->xlibRenderer->display(display, window, visual, depth, width, height);
 }
 
-bool XtOpenGL1SceneBridge::usesXlibRendering() const
+BOOLEAN XtOpenGL1SceneBridge::usesXlibRendering() const
 {
     return impl->model->getDrawingArea()->getViewportSet()->isRenderModeAvailable(
         Viewport::RENDER_MODE_HIDDEN_LINES);
@@ -402,7 +403,7 @@ RGBImageUncompressed* XtOpenGL1SceneBridge::getRaytracedImage()
 }
 
 void XtOpenGL1SceneBridge::requestViewportExport(const File& file,
-                                                 bool jpg)
+                                                 BOOLEAN jpg)
 {
     impl->model->getDrawingArea()->requestViewportExport(file, jpg);
 }
@@ -412,7 +413,7 @@ void XtOpenGL1SceneBridge::requestWorkspaceExport(const File& file)
     impl->model->getDrawingArea()->requestWorkspaceExport(file);
 }
 
-bool XtOpenGL1SceneBridge::projectToCanvas(Viewport* viewport,
+BOOLEAN XtOpenGL1SceneBridge::projectToCanvas(Viewport* viewport,
                                            const Vector3Dd& point,
                                            double outCanvas[2])
 {
@@ -498,8 +499,8 @@ XtOpenGL1SceneBridge::getViewportMenuItems() const
                        viewport->getRenderModeCommand());
     if ( !items.isEmpty() && !renderModes.isEmpty() ) {
         ViewportMenuItem separator;
-        separator.separator = true;
-        separator.current = false;
+        separator.separator = TRUE;
+        separator.current = FALSE;
         items.add(separator);
     }
     items.addAll(renderModes);
@@ -513,15 +514,15 @@ void XtOpenGL1SceneBridge::executeViewportCommand(const String& command)
         return;
     }
     if (command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES)
-        impl->useXlibRendering(true);
+        impl->useXlibRendering(TRUE);
     else if (command == ViewportSetCommands::IDV_RENDER_MODE_GPU)
-        impl->useXlibRendering(false);
+        impl->useXlibRendering(FALSE);
     impl->techniques->processViewportCommand(command.c_str(), viewport);
 }
 
 //= Modify panel ==========================================================
 
-void XtOpenGL1SceneBridge::setModifyPanelSelected(bool selected)
+void XtOpenGL1SceneBridge::setModifyPanelSelected(BOOLEAN selected)
 {
     impl->model->getGuiState()->setModifyPanelSelected(selected);
 }

@@ -112,6 +112,32 @@ rules:
 - C library headers in their C form (`<stdio.h>`, not `<cstdio>`).
 - Conventional casts and runtime type descriptions supplied by
   `java/lang/Class`.
+- The language subset of Turbo C++ 3.0, through the macros of
+  `vsdk/toolkit/common/VSDK.h` (included directly by every file that uses
+  them):
+  - No `bool`, `true` and `false`: `BOOLEAN` (an `int`), `TRUE` and
+    `FALSE`. A `BOOLEAN` does not overload an `int` (i.e.
+    `StringBuilder::appendBoolean`). Building with
+    `EXTRA_CXXFLAGS=-DVSDK_CHECK_BOOLEAN` (gcc) makes `BOOLEAN` a class that
+    only takes `bool` values, so the compiler reports any other value stored
+    in one (an `int` keeps i.e. `flags & MASK` where a `bool` kept 1).
+  - No initializers for the static members in a class: integral constants
+    are enumerators (`enum { MAX_STEPS = 16 };`, in a 16 bit `int` on
+    Turbo C++), other constants are defined in a `.cpp`.
+  - No `mutable` (const methods cast `this`), no declarations in
+    conditions (`if ( T* x = ... )`), and a variable declared in a `for`
+    lives until the end of the enclosing block, so it is not declared
+    again there (declare it before the first loop).
+  - `long long` is a 32 bit `long` on Turbo C++: its literals are written
+    `VSDK_LL(...)` / `VSDK_ULL(...)`, and overloads for both `long` and
+    `long long` only declare the `long long` one with `VSDK_HAS_LONG_LONG`.
+  - `explicit` and `__attribute__` are macros without effect on Turbo C++,
+    and `snprintf` / `vsnprintf` are supplied there (without size checks).
+  - Identifiers, including macros and include guards, are distinct within
+    their first 32 characters.
+  - `NAN`, `copysign`, `strcasecmp`, `gettimeofday`, `nanosleep` and
+    `<unistd.h>` only behind `#ifdef __TURBOC__` alternatives
+    (`Cpp98Support::nan`, `String::equalsIgnoreCase`, `ftime`, `delay`).
 - No member templates, no `template <>` specializations, no `typename`
   and no static data members in class templates.
 - `#include "java/lang/PosixThreads.h"` instead of `<pthread.h>`.

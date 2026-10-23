@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include <java/lang/Math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -23,7 +24,7 @@ MeshModel::MeshModel()
     // Applied right away (rendering has not started), so the keyboard
     // interaction reads this ray as its starting state
     rayGizmo.acquireSnapshot();
-    rayGizmo.setVisible(false);
+    rayGizmo.setVisible(FALSE);
 
     Light* light0 = new PointLight(Vector3Dd(10, -20, 50), ColorRgb(1, 1, 1));
     light0->setId(0);

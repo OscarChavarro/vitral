@@ -1,15 +1,16 @@
 #ifndef __LIGHTING_SHADER__
 #define __LIGHTING_SHADER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/shaders/Shader.h"
 class LightingShader : public Shader {
 private:
-    bool specularEnabled;
-    bool textureEnabled;
-    bool bumpMapEnabled;
+    BOOLEAN specularEnabled;
+    BOOLEAN textureEnabled;
+    BOOLEAN bumpMapEnabled;
 
 public:
-    LightingShader(bool specularEnabled, bool textureEnabled, bool bumpMapEnabled);
+    LightingShader(BOOLEAN specularEnabled, BOOLEAN textureEnabled, BOOLEAN bumpMapEnabled);
     virtual ~LightingShader() {}
 
     virtual LocalShadingResult shadeLocal(

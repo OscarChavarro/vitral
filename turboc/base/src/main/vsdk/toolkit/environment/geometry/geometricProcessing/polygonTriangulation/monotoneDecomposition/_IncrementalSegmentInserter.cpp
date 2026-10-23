@@ -1,12 +1,13 @@
 // References: [SEID1991] Seidel, R. "A simple and Fast Randomized Algorithm
 // for Computing Trapezoidal Decompositions and for Triangulating Polygons".
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_IncrementalSegmentInserter.h"
 void _IncrementalSegmentInserter::normalizeSegmentForInsertion(_TriangulationSegment &segment,
-                                                               bool &isSwapped) {
-    isSwapped = false;
+                                                               BOOLEAN &isSwapped) {
+    isSwapped = FALSE;
     if (_Construct::greaterThan(&segment.endPoint, &segment.startPoint)) {
         Vector2Dd swapPoint = segment.startPoint;
         _TriangulationTrapezoidQueryNode *tmp = segment.startPointQueryNode;
@@ -14,7 +15,7 @@ void _IncrementalSegmentInserter::normalizeSegmentForInsertion(_TriangulationSeg
         segment.endPoint = swapPoint;
         segment.startPointQueryNode = segment.endPointQueryNode;
         segment.endPointQueryNode = tmp;
-        isSwapped = true;
+        isSwapped = TRUE;
     }
 }
 
@@ -39,7 +40,7 @@ void _IncrementalSegmentInserter::updateLowerNeighbourLinksAfterSplit(
 
 int _IncrementalSegmentInserter::splitTrapezoidAtEndpoint(int segmentIndex,
                                                           _TriangulationSegment &segment,
-                                                          bool useFirstEndpoint) {
+                                                          BOOLEAN useFirstEndpoint) {
     _TriangulationTrapezoidQueryNode *upperSinkNode;
     _TriangulationTrapezoidQueryNode *lowerSinkNode;
     _TriangulationTrapezoidQueryNode *querySplitNode;
@@ -97,22 +98,22 @@ int _IncrementalSegmentInserter::splitTrapezoidAtEndpoint(int segmentIndex,
 }
 
 int _IncrementalSegmentInserter::locateOrInsertEndpointTrapezoid(
-        int segmentIndex, _TriangulationSegment &segment, bool useFirstEndpoint,
-        bool endpointAlreadyInserted, bool &wasEndpointInserted) {
+        int segmentIndex, _TriangulationSegment &segment, BOOLEAN useFirstEndpoint,
+        BOOLEAN endpointAlreadyInserted, BOOLEAN &wasEndpointInserted) {
     Vector2Dd *endpoint = useFirstEndpoint ? &segment.startPoint : &segment.endPoint;
     Vector2Dd *otherEndpoint = useFirstEndpoint ? &segment.endPoint : &segment.startPoint;
 
-    wasEndpointInserted = false;
+    wasEndpointInserted = FALSE;
     if (endpointAlreadyInserted) {
         return (useFirstEndpoint ? segment.startPointQueryNode : segment.endPointQueryNode)
             ->locateEndpoint(endpoint, otherEndpoint);
     }
 
-    wasEndpointInserted = true;
+    wasEndpointInserted = TRUE;
     return splitTrapezoidAtEndpoint(segmentIndex, segment, useFirstEndpoint);
 }
 
-bool
+BOOLEAN
 _IncrementalSegmentInserter::isLeftOf(int segmentIndex, Vector2Dd *queryPoint) {
     // [SEID1991].3 X-node decision primitive: point vs segment sided-ness.
     _TriangulationSegment *s = &_Construct::segments[segmentIndex];
@@ -149,15 +150,15 @@ _IncrementalSegmentInserter::isLeftOf(int segmentIndex, Vector2Dd *queryPoint) {
     }
 
     if (area > 0.0)
-        return true;
+        return TRUE;
     else
-        return false;
+        return FALSE;
 }
 
 /* Returns true if the corresponding endpoint of the given segment is */
 /* already inserted into the segment tree. Use the simple test of */
 /* whether the segment which shares this endpoint is already inserted */
-bool _IncrementalSegmentInserter::inserted(int segmentIndex, int whichpt) {
+BOOLEAN _IncrementalSegmentInserter::inserted(int segmentIndex, int whichpt) {
     if (whichpt == SEGMENT_FIRST_ENDPOINT)
         return _Construct::segments[_Construct::segments[segmentIndex].previousSegmentIndex].hasBeenInserted;
     else
@@ -176,7 +177,7 @@ _IncrementalSegmentInserter::mergeTrapezoids(int segmentIndex, int tfirst, int t
     // [SEID1991].3 Merge contiguous trapezoids with compatible boundaries.
     int t;
     int tnext;
-    bool cond;
+    BOOLEAN cond;
     _TriangulationTrapezoidQueryNode *ptnext;
 
     /* First merge polys on the LHS */
@@ -257,27 +258,27 @@ _IncrementalSegmentInserter::addSegment(int segmentIndex) {
     int t;
     int tn;
     int tribot = 0;
-    bool isSwapped = false;
+    BOOLEAN isSwapped = FALSE;
     int tmptriseg;
 
     s = _Construct::segments[segmentIndex];
     normalizeSegmentForInsertion(s, isSwapped);
 
-    bool insertedFirstEndpoint;
-    const bool endpoint0AlreadyInserted =
+    BOOLEAN insertedFirstEndpoint;
+    const BOOLEAN endpoint0AlreadyInserted =
         (isSwapped) ? inserted(segmentIndex, SEGMENT_LAST_ENDPOINT)
                     : inserted(segmentIndex, SEGMENT_FIRST_ENDPOINT);
-    tfirst = locateOrInsertEndpointTrapezoid(segmentIndex, s, true,
+    tfirst = locateOrInsertEndpointTrapezoid(segmentIndex, s, TRUE,
                                              endpoint0AlreadyInserted,
                                              insertedFirstEndpoint);
     if (tfirst < 0)
         return -1;
 
-    bool insertedLastEndpoint;
-    const bool endpoint1AlreadyInserted =
+    BOOLEAN insertedLastEndpoint;
+    const BOOLEAN endpoint1AlreadyInserted =
         (isSwapped) ? inserted(segmentIndex, SEGMENT_FIRST_ENDPOINT)
                     : inserted(segmentIndex, SEGMENT_LAST_ENDPOINT);
-    tlast = locateOrInsertEndpointTrapezoid(segmentIndex, s, false,
+    tlast = locateOrInsertEndpointTrapezoid(segmentIndex, s, FALSE,
                                             endpoint1AlreadyInserted,
                                             insertedLastEndpoint);
     if (tlast < 0)
@@ -535,19 +536,19 @@ _IncrementalSegmentInserter::addSegment(int segmentIndex) {
             double yt;
             Vector2Dd tmpPoint;
             int tnext;
-            bool isD0;
+            BOOLEAN isD0;
 
-            isD0 = false;
+            isD0 = FALSE;
             if (_Construct::fpEqual(_Construct::trapezoids[t]->lowerPoint.y, s.startPoint.y)) {
                 if ( _Construct::trapezoids[t]->lowerPoint.x > s.startPoint.x)
-                    isD0 = true;
+                    isD0 = TRUE;
             } else {
                 tmpPoint.y = y0 = _Construct::trapezoids[t]->lowerPoint.y;
                 yt = (y0 - s.startPoint.y) / (s.endPoint.y - s.startPoint.y);
                 tmpPoint.x = s.startPoint.x + yt * (s.endPoint.x - s.startPoint.x);
 
                 if (_Construct::lessThan(&tmpPoint, &_Construct::trapezoids[t]->lowerPoint))
-                    isD0 = true;
+                    isD0 = TRUE;
             }
 
             /* check continuity from the top so that the lower-neighbour */
@@ -670,6 +671,6 @@ _IncrementalSegmentInserter::addSegment(int segmentIndex) {
     mergeTrapezoids(segmentIndex, tfirstl, tlastl, S_LEFT);
     mergeTrapezoids(segmentIndex, tfirstr, tlastr, S_RIGHT);
 
-    _Construct::segments[segmentIndex].hasBeenInserted = true;
+    _Construct::segments[segmentIndex].hasBeenInserted = TRUE;
     return 0;
 }

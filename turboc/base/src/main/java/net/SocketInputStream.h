@@ -1,6 +1,7 @@
 #ifndef __SOCKET_INPUT_STREAM__
 #define __SOCKET_INPUT_STREAM__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/InputStream.h"
 
 class SocketInputStream : public InputStream {

@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/FileInputStream.h"
 #include "java/io/FileOutputStream.h"
 #include "java/util/Formatter.h"
@@ -13,23 +14,23 @@ FileUncompressWrapper::modeToLogAction(StreamOpenMode mode) {
     return mode == StreamOpenMode::READ ? "reading" : "writing";
 }
 
-bool
+BOOLEAN
 FileUncompressWrapper::isInvalidFileName(const char *fileName) {
     if ( fileName == NULL || fileName[0] == '\0' || fileName[strlen(fileName) - 1] == '/' ) {
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
-bool
+BOOLEAN
 FileUncompressWrapper::buildPipeCommand(const char *fileName, StreamOpenMode openMode, char *command, int commandLength) {
     if ( fileName == NULL || command == NULL || commandLength <= 0 ) {
-        return false;
+        return FALSE;
     }
 
     if ( fileName[0] == '|' ) {
         Formatter::format(command, commandLength, "%s", &fileName[1]);
-        return true;
+        return TRUE;
     }
 
     const char *ext = strrchr(fileName, '.');
@@ -58,9 +59,9 @@ FileUncompressWrapper::buildPipeCommand(const char *fileName, StreamOpenMode ope
             Formatter::format(command, commandLength, "bzip2 > %s", fileName);
         }
     } else {
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 InputStream *
@@ -94,7 +95,7 @@ FileUncompressWrapper::openInputStreamCompressWrapper(const char *fileName, int 
 
     const int commandLength = ((int)(strlen(fileName))) + 20;
     char *command = new char[commandLength];
-    const bool pipeFlag = buildPipeCommand(fileName, StreamOpenMode::READ, command, commandLength);
+    const BOOLEAN pipeFlag = buildPipeCommand(fileName, StreamOpenMode::READ, command, commandLength);
 
     InputStream *stream = NULL;
     if ( pipeFlag ) {
@@ -132,7 +133,7 @@ FileUncompressWrapper::openOutputStreamCompressWrapper(const char *fileName, int
 
     const int commandLength = ((int)(strlen(fileName))) + 20;
     char *command = new char[commandLength];
-    const bool pipeFlag = buildPipeCommand(fileName, StreamOpenMode::WRITE, command, commandLength);
+    const BOOLEAN pipeFlag = buildPipeCommand(fileName, StreamOpenMode::WRITE, command, commandLength);
 
     OutputStream *stream = NULL;
     if ( pipeFlag ) {

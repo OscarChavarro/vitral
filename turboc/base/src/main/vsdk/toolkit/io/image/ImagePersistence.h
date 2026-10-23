@@ -1,6 +1,7 @@
 #ifndef __IMAGE_PERSISTENCE__
 #define __IMAGE_PERSISTENCE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 class Image;
@@ -54,7 +55,7 @@ public:
     @param img
     @return true if export was successful, false otherwise
     */
-    static bool exportPPM(const File& fd, Image* img);
+    static BOOLEAN exportPPM(const File& fd, Image* img);
 
     /**
     This method writes the contents of the specified image to a file in
@@ -65,7 +66,7 @@ public:
     @param quality JPEG quality (0-100)
     @return true if export was successful, false otherwise
     */
-    static bool exportJPEG(const File& fd, Image* img, int quality = 85);
+    static BOOLEAN exportJPEG(const File& fd, Image* img, int quality = 85);
 
     /**
     This method writes the contents of the specified image to a file in
@@ -75,10 +76,10 @@ public:
     @param img
     @return true if export was successful, false otherwise
     */
-    static bool exportPNG(const File& fd, Image* img);
+    static BOOLEAN exportPNG(const File& fd, Image* img);
 
 private:
-    static bool isTextComment(const String& line);
+    static BOOLEAN isTextComment(const String& line);
     static String* extractExtensionFromFile(const File& fd);
 };
 

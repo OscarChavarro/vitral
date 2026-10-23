@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
@@ -108,7 +109,7 @@ double PolyhedralBoundedSolidNumericPolicy::estimateFaceScale(_PolyhedralBounded
     double maxX = -HUGE_VAL;
     double maxY = -HUGE_VAL;
     double maxZ = -HUGE_VAL;
-    bool found = false;
+    BOOLEAN found = FALSE;
 
     for ( long int i = 0; i < face->boundariesList.size(); ++i ) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
@@ -121,7 +122,7 @@ double PolyhedralBoundedSolidNumericPolicy::estimateFaceScale(_PolyhedralBounded
                 continue;
             }
             Vector3Dd p = he->startingVertex->position;
-            found = true;
+            found = TRUE;
             if ( p.x() < minX ) minX = p.x();
             if ( p.y() < minY ) minY = p.y();
             if ( p.z() < minZ ) minZ = p.z();
@@ -226,25 +227,25 @@ int PolyhedralBoundedSolidNumericPolicy::compareToZeroBig(double value,
     return compare(value, 0.0, context.bigEpsilon());
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::isZero(double value,
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::isZero(double value,
     const ToleranceContext& context)
 {
     return Cpp98Support::abs(value) <= context.epsilon();
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::isZeroBig(double value,
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::isZeroBig(double value,
     const ToleranceContext& context)
 {
     return Cpp98Support::abs(value) <= context.bigEpsilon();
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::pointsCoincident(const Vector3Dd& a,
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::pointsCoincident(const Vector3Dd& a,
     const Vector3Dd& b, const ToleranceContext& context)
 {
     return a.subtract(b).length() <= context.bigEpsilon();
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::pointsSeparated(const Vector3Dd& a,
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::pointsSeparated(const Vector3Dd& a,
     const Vector3Dd& b, const ToleranceContext& context)
 {
     return a.subtract(b).length() > context.bigEpsilon();
@@ -257,27 +258,27 @@ int PolyhedralBoundedSolidNumericPolicy::testPointInside(
     return face->testPointInside(point, context.bigEpsilon());
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::vectorsColinear(const Vector3Dd& a,
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::vectorsColinear(const Vector3Dd& a,
     const Vector3Dd& b, const ToleranceContext& context)
 {
     double scale = Math::max(1.0, Math::max(a.length(), b.length()));
     return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::unitVectorsParallel(
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::unitVectorsParallel(
     const Vector3Dd& a, const Vector3Dd& b, const ToleranceContext& context)
 {
     return a.crossProduct(b).length() <= context.unitVectorTolerance();
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::angleIntervalsOverlap(double upperA,
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::angleIntervalsOverlap(double upperA,
     double lowerB, const ToleranceContext& context)
 {
     double tolerance = context.angleTolerance();
     return upperA + tolerance > lowerB - tolerance;
 }
 
-bool PolyhedralBoundedSolidNumericPolicy::unitIntervalContainsStrictly(
+BOOLEAN PolyhedralBoundedSolidNumericPolicy::unitIntervalContainsStrictly(
     double t, const ToleranceContext& context)
 {
     return t > context.unitIntervalTolerance() &&

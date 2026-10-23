@@ -1,6 +1,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Monotone.h"
 _MonotoneChainNode _Monotone::monotoneChainNodes[TRAPEZOID_TABLE_SIZE]; /* Table to hold all the monotone */
 /* polygons . Each monotone polygon */
@@ -239,7 +240,7 @@ int _Monotone::traversePolygon(int mcur, int trnum, int from, int dir) {
         return 0;
     trapezoid = _Construct::trapezoidAt(trnum);
 
-    visitedTrapezoids[trnum] = true;
+    visitedTrapezoids[trnum] = TRUE;
 
     /* We have much more information available here. */
     /* rightSegmentIndex: goes upwards   */
@@ -468,23 +469,23 @@ int _Monotone::triangulateMonotonePolygons(int numberOfVertices,
     int posmax;
     int v;
     int vcount;
-    bool processed;
+    BOOLEAN processed;
 
     nextOutputTriangleIndex = 0;
     for (i = 0; i < numberOfMonotonePolygons; i++) {
         vcount = 1;
-        processed = false;
+        processed = FALSE;
         vfirst = monotoneChainNodes[monotonePolygonEntryNode[i]].vertexIndex;
         yMaxPoint = yMinPoint = vertexChains[vfirst].point;
         posmax = monotonePolygonEntryNode[i];
-        monotoneChainNodes[monotonePolygonEntryNode[i]].isMarked = true;
+        monotoneChainNodes[monotonePolygonEntryNode[i]].isMarked = TRUE;
         p = monotoneChainNodes[monotonePolygonEntryNode[i]].nextNodeIndex;
         while ((v = monotoneChainNodes[p].vertexIndex) != vfirst) {
             if (monotoneChainNodes[p].isMarked) {
-                processed = true;
+                processed = TRUE;
                 break; /* break from while */
             } else
-                monotoneChainNodes[p].isMarked = true;
+                monotoneChainNodes[p].isMarked = TRUE;
 
             if (_Construct::greaterThan(&vertexChains[v].point, &yMaxPoint)) {
                 yMaxPoint = vertexChains[v].point;

@@ -1,6 +1,7 @@
 #ifndef __IMAGE_PROCESSING__
 #define __IMAGE_PROCESSING__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/processing/ProcessingElement.h"
 
 class Image;
@@ -77,7 +78,7 @@ public:
     processDistanceFieldWithArray instead.
     @return false if images are null or of different sizes
     */
-    static bool processDistanceField(Image* inInput,
+    static BOOLEAN processDistanceField(Image* inInput,
         IndexedColorImageUncompressed* outOutput, int threshold);
 
     /**
@@ -93,7 +94,7 @@ public:
     where K is usually N*0.06 in contour type images.
     @return false if images are null or of different sizes
     */
-    static bool processDistanceFieldWithArray(Image* inInput,
+    static BOOLEAN processDistanceFieldWithArray(Image* inInput,
         IndexedColorImageUncompressed* outOutput, int threshold);
 };
 

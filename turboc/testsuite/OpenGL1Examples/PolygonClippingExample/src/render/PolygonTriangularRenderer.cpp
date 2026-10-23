@@ -35,14 +35,15 @@ void PolygonTriangularRenderer::fillPolygonSurface(
     // Flatten polygon vertices into a lookup array.
     // Seidel 1-based indices: triangle.get(j) - 1 = 0-based flat index.
     int totalVertices = 0;
-    for (long int i = 0; i < polygon->loops.size(); ++i)
+    long int i;
+    for (i = 0; i < polygon->loops.size(); ++i)
         totalVertices += (int)polygon->loops[i]->vertices.size();
     if (totalVertices <= 0) return;
 
     double* vx = new double[(size_t)totalVertices];
     double* vz = new double[(size_t)totalVertices];
     int vi = 0;
-    for (long int i = 0; i < polygon->loops.size(); ++i) {
+    for (i = 0; i < polygon->loops.size(); ++i) {
         _Polygon2DContour* loop = polygon->loops[i];
         for (long int j = 0; j < loop->vertices.size(); ++j) {
             vx[vi] = loop->vertices[j].x;
@@ -72,7 +73,7 @@ void PolygonTriangularRenderer::fillPolygonSurface(
     // Draw filled triangles with the constant-color program.
     if (config->isSurfacesSet()) {
         ArrayList<float> pos;
-        for (int i = 0; i < triangleCount; ++i) {
+        for (i = 0; i < triangleCount; ++i) {
             const MonotoneDecompositionTriangulator::Triangle& t = triangles.get(i);
             // C++ Seidel indices are 1-based
             int a = t.get(0) - 1;
@@ -106,7 +107,7 @@ void PolygonTriangularRenderer::fillPolygonSurface(
     // Draw triangle-edge wires with the line program.
     if (config->isWiresSet()) {
         ArrayList<float> wPos, wCol;
-        for (int i = 0; i < triangleCount; ++i) {
+        for (i = 0; i < triangleCount; ++i) {
             const MonotoneDecompositionTriangulator::Triangle& t = triangles.get(i);
             int a = t.get(0) - 1;
             int b = t.get(1) - 1;
@@ -137,7 +138,7 @@ void PolygonTriangularRenderer::fillPolygonSurface(
     // Draw triangle vertex points with the line program.
     if (config->isPointsSet()) {
         ArrayList<float> pPos, pCol;
-        for (int i = 0; i < triangleCount; ++i) {
+        for (i = 0; i < triangleCount; ++i) {
             const MonotoneDecompositionTriangulator::Triangle& t = triangles.get(i);
             for (int j = 0; j < 3; ++j) {
                 int idx = t.get(j) - 1;

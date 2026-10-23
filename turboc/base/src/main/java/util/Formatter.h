@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/OutputStream.h"
 #include "java/lang/String.h"
 class Formatter {
@@ -38,7 +39,7 @@ class Formatter {
 
     OutputStream *outputStream;
     String content;
-    bool closed;
+    BOOLEAN closed;
 };
 
 

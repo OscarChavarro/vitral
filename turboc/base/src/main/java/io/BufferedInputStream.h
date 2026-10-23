@@ -2,6 +2,7 @@
 #define __BUFFERED_INPUT_STREAM__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/io/InputStream.h"
 

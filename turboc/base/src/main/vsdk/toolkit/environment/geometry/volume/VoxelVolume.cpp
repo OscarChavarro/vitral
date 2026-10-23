@@ -46,17 +46,17 @@ void VoxelVolume::setThreshold(int threshold)
     this->threshold = threshold;
 }
 
-bool VoxelVolume::isFilled(int x, int y, int z) const
+BOOLEAN VoxelVolume::isFilled(int x, int y, int z) const
 {
     if ( x < 0 || y < 0 || z < 0 || x >= getXSize() ||
          y >= getYSize() || z >= getZSize() ) {
-        return false;
+        return FALSE;
     }
     return getVoxel(x, y, z) >= threshold;
 }
 
-bool VoxelVolume::init(int xs, int ys, int zs) {
-    if (xs <= 0 || ys <= 0 || zs <= 0) return false;
+BOOLEAN VoxelVolume::init(int xs, int ys, int zs) {
+    if (xs <= 0 || ys <= 0 || zs <= 0) return FALSE;
 
     if (data != NULL) {
         for (int z = 0; z < zSize; z++) delete data[z];
@@ -74,10 +74,10 @@ bool VoxelVolume::init(int xs, int ys, int zs) {
             delete[] data;
             data = NULL;
             xSize = ySize = zSize = 0;
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 void VoxelVolume::putVoxel(int x, int y, int z, char val) {
@@ -158,12 +158,12 @@ with the number of voxels of the volume.
 @param outHit receives the hit, or null if only the test is needed
 @return true if the ray hits a filled voxel
 */
-bool VoxelVolume::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN VoxelVolume::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     VoxelFaceHit hit;
 
     if ( !traceFirstFilledVoxel(inRay, hit) ) {
-        return false;
+        return FALSE;
     }
     if ( outHit != NULL ) {
         if ( outHit->shouldStoreRay() || outHit->needsAnySurfaceData() ) {
@@ -178,7 +178,7 @@ bool VoxelVolume::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
             outHit->setHitDistance(hit.t);
         }
     }
-    return true;
+    return TRUE;
 }
 
 /**
@@ -210,13 +210,13 @@ voxel whose boundary is nearest.
 @param outHit receives the face entered
 @return false if the ray enters no filled voxel (Java returns null)
 */
-bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
+BOOLEAN VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
                                         VoxelFaceHit& outHit) const
 {
     int size[3] = { getXSize(), getYSize(), getZSize() };
 
     if ( size[0] <= 0 || size[1] <= 0 || size[2] <= 0 ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd o = ray.getOrigin();
@@ -234,7 +234,7 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
         cellSize[i] = 2.0 / size[i];
         if ( Cpp98Support::abs(direction[i]) < PARALLEL_EPSILON ) {
             if ( origin[i] < -1.0 || origin[i] > 1.0 ) {
-                return false;
+                return FALSE;
             }
             continue;
         }
@@ -249,9 +249,9 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
         tExit = Math::min(tExit, tFar);
     }
     if ( tExit < Math::max(tEnter, 0.0) ) {
-        return false;
+        return FALSE;
     }
-    bool startsInside = tEnter < 0.0;
+    BOOLEAN startsInside = tEnter < 0.0;
     double t = startsInside ? 0.0 : tEnter;
 
     //- Setup of the traversal, from the voxel where the ray starts ----
@@ -286,16 +286,16 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
         }
     }
 
-    bool previousFilled = isFilled(g[0], g[1], g[2]);
+    BOOLEAN previousFilled = isFilled(g[0], g[1], g[2]);
     if ( previousFilled && !startsInside ) {
         outHit.t = t;
         outHit.axis = enterAxis;
         outHit.side = direction[enterAxis] > 0 ? -1 : 1;
-        return true;
+        return TRUE;
     }
 
     //- Visit the voxels crossed by the ray -----------------------------
-    while ( true ) {
+    while ( TRUE ) {
         int axis;
         if ( tNext[0] <= tNext[1] && tNext[0] <= tNext[2] ) {
             axis = 0;
@@ -307,20 +307,20 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
             axis = 2;
         }
         if ( tNext[axis] > tExit ) {
-            return false;
+            return FALSE;
         }
         double tCell = tNext[axis];
         g[axis] += step[axis];
         tNext[axis] += tDelta[axis];
         if ( g[axis] < 0 || g[axis] >= size[axis] ) {
-            return false;
+            return FALSE;
         }
-        bool filled = isFilled(g[0], g[1], g[2]);
+        BOOLEAN filled = isFilled(g[0], g[1], g[2]);
         if ( filled && !previousFilled ) {
             outHit.t = tCell;
             outHit.axis = axis;
             outHit.side = -step[axis];
-            return true;
+            return TRUE;
         }
         previousFilled = filled;
     }
@@ -387,10 +387,6 @@ Vector3Dd VoxelVolume::doCenterOfMass() {
     if (Cpp98Support::abs(M) < VSDK::EPSILON) return Vector3Dd(0,0,0);
     return Vector3Dd(cmx/M, cmy/M, cmz/M);
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int VoxelVolume::DEFAULT_THRESHOLD;
 
 const Class VoxelVolume::CLASS = { "VoxelVolume", &Solid::CLASS };
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
 #ifdef __APPLE__
@@ -137,7 +138,7 @@ static void mouseCallback(int button, int state, int x, int y)
 
     GlutSystem::updateMouseButtonsState(button, state);
     MouseEvent e = GlutSystem::glut2vsdkMouseEvent(button, state, x, y);
-    bool changed;
+    BOOLEAN changed;
     if ( state == GLUT_DOWN ) {
         changed = cameraController->processMousePressedEvent(e);
     }

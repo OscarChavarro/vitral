@@ -1,6 +1,7 @@
 #ifndef __XT_UI_FACTORY__
 #define __XT_UI_FACTORY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -43,7 +44,7 @@ public:
     @param outPath the chosen file, when approved
     @return true if the user approved a file (`APPROVE_OPTION`)
     */
-    virtual bool showFileDialog(XtApplicationHost* host,
+    virtual BOOLEAN showFileDialog(XtApplicationHost* host,
                                 const String& title,
                                 const String& folder,
                                 const ArrayList<FileSuffixFilter>& filters,

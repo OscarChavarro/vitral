@@ -1,6 +1,7 @@
 #ifndef __TRIANGLE_MESH__
 #define __TRIANGLE_MESH__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
@@ -22,7 +23,7 @@ private:
     ArrayList<double> vertexBinormals;
     ArrayList<double> vertexTangents;
     ArrayList<double> vertexColors;
-    ArrayList<bool> vertexSelections;
+    ArrayList<BOOLEAN> vertexSelections;
     ArrayList<double> vertexUvs;
 
     ArrayList< ArrayList<int> > incidentTrianglesPerVertexArray;
@@ -37,12 +38,12 @@ private:
     ArrayList< ArrayList<int> > materialRanges;
 
     int intersectionTriangleIndex;
-    bool ownsMaterials;
+    BOOLEAN ownsMaterials;
 
-    static bool intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2, double& t, double& u, double& v);
+    static BOOLEAN intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2, double& t, double& u, double& v);
     void interpolateTriangleData(int triangleIndex, double u, double v, RayHit* outHit, const Vector3Dd& rayDirection);
     void fillMaterialAndTexture(int triangleIndex, RayHit* outHit);
-    bool doIntersectionInternal(const Ray& inRay, RayHit* outHit, int* outTriangleIndex);
+    BOOLEAN doIntersectionInternal(const Ray& inRay, RayHit* outHit, int* outTriangleIndex);
 
     double* calculateMinMaxPositions();
 
@@ -86,14 +87,14 @@ public:
     void detachNormals();
     void detachUvs();
 
-    void setVertexes(const ArrayList<Vertex>& vertexes, bool withNormals, bool withBinormals, bool withTangents, bool withUvs);
+    void setVertexes(const ArrayList<Vertex>& vertexes, BOOLEAN withNormals, BOOLEAN withBinormals, BOOLEAN withTangents, BOOLEAN withUvs);
 
     void initTriangleArrays(int n);
     void setTriangles(const ArrayList<Triangle>& triangles);
 
     void setTextures(const ArrayList<Image*>& textures);
     void setMaterials(const ArrayList<SimpleMaterial*>& materials);
-    void setOwnsMaterials(bool owns);
+    void setOwnsMaterials(BOOLEAN owns);
 
     void setVertexAt(int i, const Vertex& vertex);
     void setTriangleAt(int i, const Triangle& triangle);
@@ -101,7 +102,7 @@ public:
     int getNumVertices() const;
     int getNumTriangles() const;
 
-    ArrayList<bool>& getVertexSelections();
+    ArrayList<BOOLEAN>& getVertexSelections();
 
     ArrayList<double>& getVertexPositions();
     ArrayList<double>& getVertexNormals();
@@ -131,8 +132,8 @@ public:
     int doIntersectionInformation() const;
 
     Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
-    bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit, int* outTriangleIndex);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit, int* outTriangleIndex);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);

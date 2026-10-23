@@ -23,8 +23,9 @@ MatrixNxM::MatrixNxM(int n, int m)
     numRows_ = n;
     numColumns_ = m;
     m_ = new double[numRows_ * numColumns_];
-    for ( int i = 0; i < numRows_ * numColumns_; ++i ) m_[i] = 0.0;
-    for ( int i = 0; i < numRows_ && i < numColumns_; ++i ) m_[index(i, i)] = 1.0;
+    int i;
+    for ( i = 0; i < numRows_ * numColumns_; ++i ) m_[i] = 0.0;
+    for ( i = 0; i < numRows_ && i < numColumns_; ++i ) m_[index(i, i)] = 1.0;
 }
 
 MatrixNxM::MatrixNxM(const MatrixNxM& other)
@@ -181,26 +182,26 @@ String* MatrixNxM::toString() const
     return new String(msg);
 }
 
-bool MatrixNxM::epsilonEquals(const MatrixNxM& other) const { return epsilonEquals(other, 1e-6); }
+BOOLEAN MatrixNxM::epsilonEquals(const MatrixNxM& other) const { return epsilonEquals(other, 1e-6); }
 
-bool MatrixNxM::epsilonEquals(const MatrixNxM& other, double epsilon) const
+BOOLEAN MatrixNxM::epsilonEquals(const MatrixNxM& other, double epsilon) const
 {
     if ( epsilon < 0.0 ) {
         Logger::reportMessage("MatrixNxM", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
         throw VSDKFatalException("epsilon must be >= 0");
     }
-    if ( numRows_ != other.numRows_ || numColumns_ != other.numColumns_ ) return false;
+    if ( numRows_ != other.numRows_ || numColumns_ != other.numColumns_ ) return FALSE;
     for ( int i = 0; i < numRows_ * numColumns_; ++i ) {
-        if ( Cpp98Support::abs(m_[i] - other.m_[i]) > epsilon ) return false;
+        if ( Cpp98Support::abs(m_[i] - other.m_[i]) > epsilon ) return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
-bool MatrixNxM::operator==(const MatrixNxM& other) const
+BOOLEAN MatrixNxM::operator==(const MatrixNxM& other) const
 {
-    if ( numRows_ != other.numRows_ || numColumns_ != other.numColumns_ ) return false;
-    for ( int i = 0; i < numRows_ * numColumns_; ++i ) if ( m_[i] != other.m_[i] ) return false;
-    return true;
+    if ( numRows_ != other.numRows_ || numColumns_ != other.numColumns_ ) return FALSE;
+    for ( int i = 0; i < numRows_ * numColumns_; ++i ) if ( m_[i] != other.m_[i] ) return FALSE;
+    return TRUE;
 }
 
 static unsigned int hashDouble(double val) {

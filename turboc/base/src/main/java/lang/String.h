@@ -2,6 +2,7 @@
 #define __STRING__
 
 #include <stdarg.h>
+#include "vsdk/toolkit/common/VSDK.h"
 
 class String {
   private:
@@ -11,7 +12,7 @@ void
 assignText(const char *text);
 
   public:
-static const int npos = -1;
+enum { npos = -1 };
 
 String();
 String(const String &other);
@@ -42,10 +43,10 @@ length() const;
 int
 size() const;
 
-bool
+BOOLEAN
 isEmpty() const;
 
-bool
+BOOLEAN
 empty() const;
 
 char
@@ -69,10 +70,10 @@ begin() const;
 const char *
 end() const;
 
-bool
+BOOLEAN
 equals(const String &other) const;
 
-bool
+BOOLEAN
 equals(const char *other) const;
 
 String
@@ -99,7 +100,7 @@ find_last_of(const char *tokens) const;
 String &
 erase(int index, int count = 1);
 
-bool
+BOOLEAN
 startsWith(const char *prefix) const;
 
 /**
@@ -108,10 +109,10 @@ startsWith(const char *prefix) const;
 int
 indexOf(const String &text, int fromIndex = 0) const;
 
-bool
+BOOLEAN
 contains(const String &text) const;
 
-bool
+BOOLEAN
 endsWith(const String &suffix) const;
 
 /**
@@ -129,7 +130,7 @@ toUpperCase() const;
 String
 toLowerCase() const;
 
-bool
+BOOLEAN
 equalsIgnoreCase(const String &other) const;
 
 /**
@@ -169,35 +170,37 @@ operator+=(const String &other);
 String &
 operator+=(const char *other);
 
-bool
+BOOLEAN
 operator==(const String &other) const;
 
-bool
+BOOLEAN
 operator==(const char *other) const;
 
-bool
+BOOLEAN
 operator!=(const String &other) const;
 
-bool
+BOOLEAN
 operator!=(const char *other) const;
 
-bool
+BOOLEAN
 operator<(const String &other) const;
 
-bool
+BOOLEAN
 operator<=(const String &other) const;
 
-bool
+BOOLEAN
 operator>(const String &other) const;
 
-bool
+BOOLEAN
 operator>=(const String &other) const;
 
+#ifdef VSDK_HAS_LONG_LONG
 static String
 valueOf(long long value);
 
 static String
 valueOf(unsigned long long value);
+#endif
 
 static String
 valueOf(long value);

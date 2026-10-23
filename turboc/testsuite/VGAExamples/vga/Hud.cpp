@@ -4,6 +4,7 @@
 
 #include <vga.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vga/Hud.h"
 #include "programs/vga/HudPatch.h"
 #include "programs/vga/Mouse.h"
@@ -99,19 +100,20 @@ Hud::text(const Picture &picture, const PaletteSet &palettes, const Mouse &mouse
 }
 
 // The character a text-mode HUD line shows at a cell (drawText() pads the lines to HUD_COLUMNS), if one covers it.
-bool
+BOOLEAN
 Hud::cellAt(int column, int row, char &c) const {
     if (row < 0 || row >= HUD_LINES || column < 0 || column >= HUD_COLUMNS || !shown[row][0]) {
-        return false;
+        return FALSE;
     }
     c = column < (int)strlen(shown[row]) ? shown[row][column] : ' ';
-    return true;
+    return TRUE;
 }
 
 void
 Hud::drawText(const Picture &picture, char lines[HUD_LINES][HUD_TEXT + 1]) {
     int cleared = 0;
-    for (int i = 0; i < HUD_LINES; i++) {
+    int i;
+    for (i = 0; i < HUD_LINES; i++) {
         if (shown[i][0] && !lines[i][0]) {
             printf("\033[%d;1H%-*s", i + 1, HUD_COLUMNS, "");
             cleared = 1;
@@ -122,7 +124,7 @@ Hud::drawText(const Picture &picture, char lines[HUD_LINES][HUD_TEXT + 1]) {
         picture.circle(NULL);
         fputs("\033[0m", stdout);
     }
-    for (int i = 0; i < HUD_LINES; i++) {
+    for (i = 0; i < HUD_LINES; i++) {
         if (lines[i][0]) {
             printf("\033[%d;1H\033[7m%-*s\033[0m", i + 1, HUD_COLUMNS, lines[i]);
         }
@@ -169,7 +171,8 @@ Hud::draw(const Picture &picture, const PaletteSet &palettes, Mouse &mouse) {
     }
     HudPatch patches[HUD_LINES];
     int count = 0;
-    for (int i = 0; i < HUD_LINES; i++) {
+    int i;
+    for (i = 0; i < HUD_LINES; i++) {
         int first;
         int last;
         if (!changedCells(shown[i], lines[i], &first, &last)) {
@@ -183,7 +186,7 @@ Hud::draw(const Picture &picture, const PaletteSet &palettes, Mouse &mouse) {
     }
     int x0 = patches[0].minX();
     int x1 = patches[0].maxX();
-    for (int i = 1; i < count; i++) {
+    for (i = 1; i < count; i++) {
         x0 = patches[i].minX() < x0 ? patches[i].minX() : x0;
         x1 = patches[i].maxX() > x1 ? patches[i].maxX() : x1;
     }
@@ -193,7 +196,7 @@ Hud::draw(const Picture &picture, const PaletteSet &palettes, Mouse &mouse) {
     if (covered) {
         mouse.cursor().hide();
     }
-    for (int i = 0; i < count; i++) {
+    for (i = 0; i < count; i++) {
         patches[i].draw(picture);
     }
     if (covered) {

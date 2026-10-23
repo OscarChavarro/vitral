@@ -1,4 +1,5 @@
 #include <string.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -26,13 +27,13 @@ static int javaDoubleCompare(double a, double b)
     long long aBits;
     long long bBits;
     if ( a != a ) {
-        aBits = ((long long)0x7ff8000000000000LL);
+        aBits = ((long long)VSDK_LL(0x7ff8000000000000));
     }
     else {
         memcpy(&aBits, &a, sizeof(aBits));
     }
     if ( b != b ) {
-        bBits = ((long long)0x7ff8000000000000LL);
+        bBits = ((long long)VSDK_LL(0x7ff8000000000000));
     }
     else {
         memcpy(&bBits, &b, sizeof(bBits));
@@ -141,7 +142,7 @@ int _PolyhedralBoundedSolidSetOperatorNullEdge::compareTo(
     return comparePoint(midpoint(this->e), midpoint(other.e));
 }
 
-bool _PolyhedralBoundedSolidSetOperatorNullEdge::operator<(
+BOOLEAN _PolyhedralBoundedSolidSetOperatorNullEdge::operator<(
     const _PolyhedralBoundedSolidSetOperatorNullEdge& other) const
 {
     return compareTo(other) < 0;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -51,7 +52,7 @@ double* TriangleMeshGroup::computeMinMaxPositions()
 {
     double* minMax = new double[6];
 
-    bool first = true;
+    BOOLEAN first = TRUE;
     double minX = 1e308, minY = 1e308, minZ = 1e308;
     double maxX = -1e308, maxY = -1e308, maxZ = -1e308;
 
@@ -64,7 +65,7 @@ double* TriangleMeshGroup::computeMinMaxPositions()
             minX = x; maxX = X;
             minY = y; maxY = Y;
             minZ = z; maxZ = Z;
-            first = false;
+            first = FALSE;
         }
 
         if (x < minX) minX = x;
@@ -122,18 +123,18 @@ Geometry.doIntersectionFirstHit.
 */
 Ray* TriangleMeshGroup::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
-    RayHit hit(RayHit::DETAIL_NONE, true);
+    RayHit hit(RayHit::DETAIL_NONE, TRUE);
     if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.getRay() != 0) {
         return new Ray(*hit.getRay());
     }
     return 0;
 }
 
-bool TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     double minT = 1e308;
     RayHit bestHit;
-    bool hasBestHit = false;
+    BOOLEAN hasBestHit = FALSE;
     int bestMesh = -1;
     int bestTriangle = -1;
     int triangleInformation = -1;
@@ -147,14 +148,14 @@ bool TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
             bestHit.clone(meshHit);
             bestMesh = (int)i;
             bestTriangle = triangleInformation;
-            hasBestHit = true;
+            hasBestHit = TRUE;
         }
     }
 
     if (!hasBestHit) {
         intersectionMeshIndex = -1;
         intersectionTriangleIndex = -1;
-        return false;
+        return FALSE;
     }
 
     intersectionMeshIndex = bestMesh;
@@ -163,7 +164,7 @@ bool TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
     if (outHit != 0) {
         outHit->clone(bestHit);
     }
-    return true;
+    return TRUE;
 }
 
 /*

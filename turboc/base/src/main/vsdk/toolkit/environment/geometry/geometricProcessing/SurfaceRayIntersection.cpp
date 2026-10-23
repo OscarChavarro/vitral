@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -7,7 +8,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
-static bool rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
+static BOOLEAN rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
 {
     double* mm = geometry->getMinMax();
     Vector3Dd size(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
@@ -27,17 +28,17 @@ static bool rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
     return boundingVolume.doIntersectionFirstHit(localRay, 0);
 }
 
-bool SurfaceRayIntersection::doIntersectionFirstHit(Geometry* geometry, const Ray& inRay, RayHit* outHit)
+BOOLEAN SurfaceRayIntersection::doIntersectionFirstHit(Geometry* geometry, const Ray& inRay, RayHit* outHit)
 {
     if ( geometry == 0 ) {
-        return false;
+        return FALSE;
     }
 
     if ( (geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS)) ||
          (geometry != NULL && geometry->instanceOf(TriangleMeshGroup::CLASS)) ||
          (geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS)) ) {
         if ( !rayIntersectsGeometryBounds(geometry, inRay) ) {
-            return false;
+            return FALSE;
         }
     }
 

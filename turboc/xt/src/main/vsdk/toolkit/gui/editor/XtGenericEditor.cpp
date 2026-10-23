@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/gui/editor/XtGenericEditor.h"
@@ -104,7 +105,7 @@ void XtGenericEditor::fieldActivated(Widget field, void* clientData)
         // refreshes the field
         if (!self->updateValue(self->fieldSpecifications[i],
                                self->widgets->getText(field).c_str()))
-            self->widgets->setInvalid(field, true);
+            self->widgets->setInvalid(field, TRUE);
         return;
     }
 }

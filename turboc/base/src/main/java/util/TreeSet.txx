@@ -1,6 +1,7 @@
 #ifndef __TREE_SET_TXX__
 #define __TREE_SET_TXX__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/TreeSet.h"
 
@@ -63,14 +64,14 @@ TreeSet<T>::size() const
 }
 
 template <class T>
-bool
+BOOLEAN
 TreeSet<T>::isEmpty() const
 {
     return elements.size() == 0;
 }
 
 template <class T>
-bool
+BOOLEAN
 TreeSet<T>::contains(const T &element) const
 {
     long index = lowerBound(element);
@@ -78,12 +79,12 @@ TreeSet<T>::contains(const T &element) const
 }
 
 template <class T>
-bool
+BOOLEAN
 TreeSet<T>::add(const T &element)
 {
     long index = lowerBound(element);
     if ( index < elements.size() && !(element < elements[index]) ) {
-        return false;
+        return FALSE;
     }
     if ( index == elements.size() ) {
         elements.add(element);
@@ -91,35 +92,35 @@ TreeSet<T>::add(const T &element)
     else {
         elements.add(index, element);
     }
-    return true;
+    return TRUE;
 }
 
 template <class T>
-bool
+BOOLEAN
 TreeSet<T>::remove(const T &element)
 {
     long index = lowerBound(element);
     if ( index < elements.size() && !(element < elements[index]) ) {
         elements.remove(index);
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 template <class T>
-bool
+BOOLEAN
 TreeSet<T>::equals(const TreeSet<T> &other) const
 {
     if ( elements.size() != other.elements.size() ) {
-        return false;
+        return FALSE;
     }
     for ( long i = 0; i < elements.size(); i++ ) {
         if ( elements[i] < other.elements[i] ||
              other.elements[i] < elements[i] ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 template <class T>

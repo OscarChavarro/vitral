@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_FACE_CLASSIFIER__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_FACE_CLASSIFIER__
+#ifndef ___PBS_SET_VERTEX_FACE_CLASSIFIER__
+#define ___PBS_SET_VERTEX_FACE_CLASSIFIER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -61,7 +62,7 @@ private:
         InfinitePlane* referencePlane,
         int BvsA,
         int op,
-        bool useMirrorFace);
+        BOOLEAN useMirrorFace);
     static int nextVertexId(PolyhedralBoundedSolid* current,
                             PolyhedralBoundedSolid* other);
     static Vector3Dd inside(_PolyhedralBoundedSolidHalfEdge* he);
@@ -76,7 +77,7 @@ private:
         int BvsA,
         int op);
     static void printNbr(const ArrayList<SectorOnFace>& neighborSectorsInfo);
-    static bool inplaneEdgesOn(const ArrayList<SectorOnFace>& nbr);
+    static BOOLEAN inplaneEdgesOn(const ArrayList<SectorOnFace>& nbr);
     static void vertexFaceReclassifyOnEdges(ArrayList<SectorOnFace>& nbr,
                                             int op);
     void vertexFaceInsertNullEdges(ArrayList<SectorOnFace>& nbr,

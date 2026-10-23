@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "model/selection/EntityListView.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -36,17 +37,17 @@ public:
         return list->get(index);
     }
 
-    virtual bool insert(long index, Entity* element)
+    virtual BOOLEAN insert(long index, Entity* element)
     {
         T* typed = element != NULL && element->instanceOf(T::CLASS) ?
             (T*)element : NULL;
         if ( element != NULL && typed == NULL ) {
             Logger::reportMessage("EntityListView", Logger::ERROR, "insert",
                 "Element of a wrong type for this list, not inserted.");
-            return false;
+            return FALSE;
         }
         list->add(index, typed);
-        return true;
+        return TRUE;
     }
 
     virtual Entity* remove(long index)

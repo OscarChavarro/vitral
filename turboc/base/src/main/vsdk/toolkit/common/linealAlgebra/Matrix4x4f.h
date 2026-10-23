@@ -2,6 +2,7 @@
 #define __MATRIX_4_X_4_F__
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Df.h"
@@ -62,11 +63,11 @@ public:
     float obtainEulerPitchAngle() const;
     float obtainEulerRollAngle() const;
 
-    bool epsilonEquals(const Matrix4x4f& other) const { return epsilonEquals(other, 1e-6f); }
-    bool epsilonEquals(const Matrix4x4f& other, float eps) const;
+    BOOLEAN epsilonEquals(const Matrix4x4f& other) const { return epsilonEquals(other, 1e-6f); }
+    BOOLEAN epsilonEquals(const Matrix4x4f& other, float eps) const;
 
-    bool operator==(const Matrix4x4f& other) const { return d_ == other.d_; }
-    bool equals(const Matrix4x4f& other) const { return (*this) == other; }
+    BOOLEAN operator==(const Matrix4x4f& other) const { return d_ == other.d_; }
+    BOOLEAN equals(const Matrix4x4f& other) const { return (*this) == other; }
     int hashCode() const;
 };
 

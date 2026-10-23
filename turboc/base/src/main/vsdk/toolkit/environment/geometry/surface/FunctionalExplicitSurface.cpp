@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -160,9 +161,9 @@ Ray* FunctionalExplicitSurface::doIntersectionFirstHit(const Ray& inOut_Ray)
     return 0;
 }
 
-bool FunctionalExplicitSurface::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN FunctionalExplicitSurface::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
-    return internalTriangleMesh ? internalTriangleMesh->doIntersectionFirstHit(inRay, outHit) : false;
+    return internalTriangleMesh ? internalTriangleMesh->doIntersectionFirstHit(inRay, outHit) : FALSE;
 }
 
 /*

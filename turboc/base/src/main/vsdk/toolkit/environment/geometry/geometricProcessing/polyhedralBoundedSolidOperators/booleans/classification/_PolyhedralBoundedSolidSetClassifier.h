@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_CLASSIFIER__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_CLASSIFIER__
+#ifndef ___PBS_SET_CLASSIFIER__
+#define ___PBS_SET_CLASSIFIER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -70,43 +71,43 @@ private:
         _PolyhedralBoundedSolidHalfEdge* avoid);
     static _PolyhedralBoundedSolidHalfEdge* resolveBEndpointCandidate(
         const VertexVertexClassificationData& data, int sectorIndex,
-        bool selectHb1, _PolyhedralBoundedSolidHalfEdge* hb1,
+        BOOLEAN selectHb1, _PolyhedralBoundedSolidHalfEdge* hb1,
         _PolyhedralBoundedSolidHalfEdge* hb2);
     static void traceIntersectingSectorsSnapshot(
         const VertexVertexClassificationData& data, int cursor);
     static int pointInFace(_PolyhedralBoundedSolidFace* face, const Vector3Dd& point);
-    static int resolveCoplanarVertexVertexClass(int op, bool sameOrientation,
-                                                bool sideA);
+    static int resolveCoplanarVertexVertexClass(int op, BOOLEAN sameOrientation,
+                                                BOOLEAN sideA);
     static int nextVertexId(PolyhedralBoundedSolid* current,
                             PolyhedralBoundedSolid* other);
-    static bool sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
+    static BOOLEAN sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
                             const Vector3Dd& ref2, const Vector3Dd& ref12);
     static _PolyhedralBoundedSolidHalfEdge* recoverEdgeSequenceEndpointFromStrut(
-        _PolyhedralBoundedSolidHalfEdge* endpoint, bool isFromEndpoint);
+        _PolyhedralBoundedSolidHalfEdge* endpoint, BOOLEAN isFromEndpoint);
     static void separateEdgeSequence(_SetOperationContext& ctx,
         _PolyhedralBoundedSolidHalfEdge* from,
         _PolyhedralBoundedSolidHalfEdge* to,
         int type, const String& traceContext,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
     static void flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
-        _PolyhedralBoundedSolidHalfEdge* he, int type, bool orient,
+        _PolyhedralBoundedSolidHalfEdge* he, int type, BOOLEAN orient,
         const String& traceContext,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
-    static bool nulledge(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool strutnulledge(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool convexedg(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool sectorwide(_PolyhedralBoundedSolidHalfEdge* he, int ind);
-    static bool getOrientation(_PolyhedralBoundedSolidHalfEdge* ref,
+    static BOOLEAN nulledge(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN strutnulledge(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN convexedg(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN sectorwide(_PolyhedralBoundedSolidHalfEdge* he, int ind);
+    static BOOLEAN getOrientation(_PolyhedralBoundedSolidHalfEdge* ref,
                                _PolyhedralBoundedSolidHalfEdge* he1,
                                _PolyhedralBoundedSolidHalfEdge* he2);
-    static bool sectorContainsAState(
+    static BOOLEAN sectorContainsAState(
         const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector& sector,
         int wantedState);
-    static bool sectorContainsBState(
+    static BOOLEAN sectorContainsBState(
         const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector& sector,
         int wantedState);
     static _PolyhedralBoundedSolidHalfEdge* selectMissingEndpoint(
-        const VertexVertexClassificationData& data, bool fromSolidA,
+        const VertexVertexClassificationData& data, BOOLEAN fromSolidA,
         int wantedState, _PolyhedralBoundedSolidHalfEdge* avoid);
     static void recoverMissingCoplanarEndpoints(
         const VertexVertexClassificationData& data,

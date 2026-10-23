@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "model/ProjectedViewsDebugPlan.h"
 
@@ -26,7 +27,7 @@ Vector3Dd ProjectedViewsDebugPlan::diagonalPosition(double x, double y,
     return Vector3Dd(x, y, z).normalized().multiply(1.5);
 }
 
-bool ProjectedViewsDebugPlan::getPlacement(int view,
+BOOLEAN ProjectedViewsDebugPlan::getPlacement(int view,
                                            ViewPlacement* outPlacement)
 {
     Vector3Dd unit(1, 1, 1);
@@ -36,57 +37,57 @@ bool ProjectedViewsDebugPlan::getPlacement(int view,
       case 1:
         *outPlacement = ViewPlacement(Vector3Dd(0, -2, 0), unit,
             rotation(90, 1, 0, 0));
-        return true;
+        return TRUE;
       case 2:
         *outPlacement = ViewPlacement(Vector3Dd(-2, 0, 0), unit,
             composed(rotation(90, 0, 0, -1), rotation(90, 0, -1, 0)));
-        return true;
+        return TRUE;
       case 3:
         *outPlacement = ViewPlacement(Vector3Dd(0, 0, -2), unit,
             rotation(180, 0, 1, 0));
-        return true;
+        return TRUE;
       case 4:
         *outPlacement = ViewPlacement(diagonalPosition(-1, -1, 1), half,
             composed(rotation(45, 0, 0, -1), rotation(35, 1, -1, 0)));
-        return true;
+        return TRUE;
       case 5:
         *outPlacement = ViewPlacement(diagonalPosition(1, -1, 1), half,
             composed(rotation(45, 0, 0, 1), rotation(35, 1, 1, 0)));
-        return true;
+        return TRUE;
       case 6:
         *outPlacement = ViewPlacement(diagonalPosition(1, 1, 1), half,
             composed(rotation(135, 0, 0, 1), rotation(35, -1, 1, 0)));
-        return true;
+        return TRUE;
       case 7:
         *outPlacement = ViewPlacement(diagonalPosition(-1, 1, 1), half,
             composed(rotation(135, 0, 0, -1), rotation(35, -1, -1, 0)));
-        return true;
+        return TRUE;
       case 8:
         *outPlacement = ViewPlacement(diagonalPosition(0, 1, -1), half,
             composed(rotation(180, 0, 0, 1), rotation(135, -1, 0, 0)));
-        return true;
+        return TRUE;
       case 9:
         *outPlacement = ViewPlacement(diagonalPosition(-1, 0, -1), half,
             composed(rotation(90, 0, 0, -1), rotation(135, 0, -1, 0)));
-        return true;
+        return TRUE;
       case 10:
         *outPlacement = ViewPlacement(diagonalPosition(0, -1, -1), half,
             rotation(135, 1, 0, 0));
-        return true;
+        return TRUE;
       case 11:
         *outPlacement = ViewPlacement(diagonalPosition(1, 0, -1), half,
             composed(rotation(90, 0, 0, 1), rotation(135, 0, 1, 0)));
-        return true;
+        return TRUE;
       case 12:
         *outPlacement = ViewPlacement(diagonalPosition(1, -1, 0), half,
             composed(rotation(90, 1, 0, 0), rotation(45, 0, 0, 1)));
-        return true;
+        return TRUE;
       case 13:
         *outPlacement = ViewPlacement(diagonalPosition(1, 1, 0), half,
             composed(rotation(90, 1, 0, 0), rotation(135, 0, 0, 1)));
-        return true;
+        return TRUE;
       default:
-        return false;
+        return FALSE;
     }
 }
 
@@ -168,4 +169,3 @@ Camera* ProjectedViewsDebugPlan::createCamera(int view)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int ProjectedViewsDebugPlan::VIEW_COUNT;

@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -68,14 +69,14 @@ Viewport::Viewport()
         RendererConfiguration::SHADING_TYPE_PHONG);
     title = activeCamera->getName();
     renderMode = RENDER_MODE_Z_BUFFER;
-    showGrid = true;
+    showGrid = TRUE;
 
     startXPercent = 0.0;
     startYPercent = 0.0;
     sizeXPercent = 1.0;
     sizeYPercent = 1.0;
     border = 2;
-    active = true;
+    active = TRUE;
 
     pixelStartX = 0;
     pixelStartY = 0;
@@ -177,12 +178,12 @@ void Viewport::setRenderMode(int renderMode)
     this->renderMode = renderMode;
 }
 
-bool Viewport::isShowGrid() const
+BOOLEAN Viewport::isShowGrid() const
 {
     return showGrid;
 }
 
-void Viewport::setShowGrid(bool showGrid)
+void Viewport::setShowGrid(BOOLEAN showGrid)
 {
     this->showGrid = showGrid;
 }
@@ -284,12 +285,12 @@ void Viewport::setBorder(int border)
     this->border = border;
 }
 
-bool Viewport::isActive() const
+BOOLEAN Viewport::isActive() const
 {
     return active;
 }
 
-void Viewport::setActive(bool active)
+void Viewport::setActive(BOOLEAN active)
 {
     this->active = active;
 }
@@ -342,7 +343,7 @@ int Viewport::getTitleAreaSizeY() const
     return titleAreaSizeY;
 }
 
-bool Viewport::isOverTitle(int x, int y) const
+BOOLEAN Viewport::isOverTitle(int x, int y) const
 {
     return x >= titleAreaStartX && x < titleAreaStartX + titleAreaSizeX &&
            y >= titleAreaStartY && y < titleAreaStartY + titleAreaSizeY;
@@ -357,13 +358,13 @@ void Viewport::setPercentArea(double startXPercent, double startYPercent,
     this->sizeYPercent = sizeYPercent;
 }
 
-bool Viewport::contains(double x, double y) const
+BOOLEAN Viewport::contains(double x, double y) const
 {
     return x >= startXPercent && x <= startXPercent + sizeXPercent &&
            y >= startYPercent && y <= startYPercent + sizeYPercent;
 }
 
-bool Viewport::useFullContainerArea() const
+BOOLEAN Viewport::useFullContainerArea() const
 {
     return requestedSizeXInPixels == 0 || requestedSizeYInPixels == 0;
 }
@@ -445,37 +446,37 @@ int Viewport::renderModeForCommand(const String& command)
     return 0;
 }
 
-bool Viewport::selectRenderMode(const String& command)
+BOOLEAN Viewport::selectRenderMode(const String& command)
 {
     int mode = renderModeForCommand(command);
-    if ( mode == 0 ) return false;
+    if ( mode == 0 ) return FALSE;
     renderMode = mode;
-    return true;
+    return TRUE;
 }
 
-bool Viewport::selectProjectionLocation(const String& command)
+BOOLEAN Viewport::selectProjectionLocation(const String& command)
 {
     if ( command.equals(ViewportSetCommands::IDV_PROJECTION_LOCATION_PERSPECTIVE) ) {
         setActiveCamera(perspectiveCamera);
-        return true;
+        return TRUE;
     }
     if ( command.equals(ViewportSetCommands::IDV_PROJECTION_LOCATION_TOP) ) {
         setActiveCamera(topCamera);
-        return true;
+        return TRUE;
     }
     if ( command.equals(ViewportSetCommands::IDV_PROJECTION_LOCATION_BOTTOM) ) {
         setActiveCamera(bottomCamera);
-        return true;
+        return TRUE;
     }
     if ( command.equals(ViewportSetCommands::IDV_PROJECTION_LOCATION_LEFT) ) {
         setActiveCamera(leftCamera);
-        return true;
+        return TRUE;
     }
     if ( command.equals(ViewportSetCommands::IDV_PROJECTION_LOCATION_FRONT) ) {
         setActiveCamera(frontCamera);
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 void Viewport::applyDefaultConfiguration(int numViews, int id)
@@ -486,30 +487,24 @@ void Viewport::applyDefaultConfiguration(int numViews, int id)
     switch ( id ) {
       case 0:
         setActiveCamera(leftCamera);
-        rendererConfiguration->setSurfaces(false);
-        rendererConfiguration->setWires(true);
+        rendererConfiguration->setSurfaces(FALSE);
+        rendererConfiguration->setWires(TRUE);
         break;
       case 1:
         setActiveCamera(perspectiveCamera);
         break;
       case 2:
         setActiveCamera(topCamera);
-        rendererConfiguration->setSurfaces(false);
-        rendererConfiguration->setWires(true);
+        rendererConfiguration->setSurfaces(FALSE);
+        rendererConfiguration->setWires(TRUE);
         break;
       case 3: default:
         setActiveCamera(frontCamera);
-        rendererConfiguration->setSurfaces(false);
-        rendererConfiguration->setWires(true);
+        rendererConfiguration->setSurfaces(FALSE);
+        rendererConfiguration->setWires(TRUE);
         break;
     }
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int Viewport::RENDER_MODE_Z_BUFFER;
-const int Viewport::RENDER_MODE_HIDDEN_LINES;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int Viewport::RENDER_MODE_RAYTRACING;

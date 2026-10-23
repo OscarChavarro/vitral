@@ -40,7 +40,7 @@ public:
 
     AppelEdgeSegment() : lineParameter(0.0), deltaQI(0) {}
 
-    bool samePosition(const AppelEdgeSegment& other) const
+    BOOLEAN samePosition(const AppelEdgeSegment& other) const
     {
         return Cpp98Support::abs(lineParameter - other.lineParameter) <= VSDK::EPSILON;
     }
@@ -56,12 +56,14 @@ int AppelEdgeSegmentOrder::compare(const AppelEdgeSegment& a,
 
 class AppelEdgeCache {
 public:
-    static const int HIDDEN_LINE = 0;
-    static const int VISIBLE_LINE = 1;
-    static const int CONTOUR_LINE = 2;
+    enum {
+        HIDDEN_LINE = 0,
+        VISIBLE_LINE = 1,
+        CONTOUR_LINE = 2
+    };
 
     int edgeType;
-    bool onSequence;
+    BOOLEAN onSequence;
     Vector3Dd start;
     Vector3Dd end;
     Vector3Dd direction;
@@ -75,7 +77,7 @@ public:
 
     AppelEdgeCache()
         : edgeType(VISIBLE_LINE),
-          onSequence(false),
+          onSequence(FALSE),
           start(),
           end(),
           direction(),
@@ -113,7 +115,7 @@ static Vector4Dd interpolate(const Vector4Dd& start, const Vector4Dd& end, doubl
     return start.multiply(1.0 - t).add(end.multiply(t));
 }
 
-static bool clipLineToClipVolume(
+static BOOLEAN clipLineToClipVolume(
     const Vector4Dd& start,
     const Vector4Dd& end,
     Vector4Dd& outStart,
@@ -127,12 +129,12 @@ static bool clipLineToClipVolume(
         double d1 = evaluateClipPlane(CLIP_PLANES[i], outEnd);
 
         if (d0 < 0.0 && d1 < 0.0) {
-            return false;
+            return FALSE;
         }
         if (d0 < 0.0 || d1 < 0.0) {
             double denominator = d0 - d1;
             if (Cpp98Support::abs(denominator) < VSDK::EPSILON) {
-                return false;
+                return FALSE;
             }
             double t = d0 / denominator;
             Vector4Dd intersection = interpolate(outStart, outEnd, t);
@@ -144,7 +146,7 @@ static bool clipLineToClipVolume(
             }
         }
     }
-    return true;
+    return TRUE;
 }
 
 static void addProjectedLine(
@@ -209,14 +211,14 @@ static InfinitePlane* getWorldContainingPlane(
     }
 
     Vector3Dd pointOnFace;
-    bool foundPoint = false;
+    BOOLEAN foundPoint = FALSE;
     for (long int i = 0; i < face->boundariesList.size() && !foundPoint; ++i) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
         _PolyhedralBoundedSolidHalfEdge* he =
             loop != 0 ? loop->boundaryStartHalfEdge : 0;
         if (he != 0 && he->startingVertex != 0) {
             pointOnFace = he->startingVertex->position;
-            foundPoint = true;
+            foundPoint = TRUE;
         }
     }
 
@@ -310,7 +312,7 @@ static void buildCache(
     ArrayList<AppelEdgeCache>& cache,
     ArrayList<AppelEdgeCache*>& contourCache,
     const Camera* camera,
-    bool ownsSolid)
+    BOOLEAN ownsSolid)
 {
     if (body == 0 || solid == 0) {
         return;
@@ -323,7 +325,7 @@ static void buildCache(
     solids.add(querySolid);
 
     Vector3Dd prevEnd;
-    bool hasPrevEnd = false;
+    BOOLEAN hasPrevEnd = FALSE;
     ArrayList<_PolyhedralBoundedSolidEdge*>& edges = solid->getEdgesList();
 
     for (long int i = 0; i < edges.size(); ++i) {
@@ -346,8 +348,8 @@ static void buildCache(
             transformToWorld(body, edge->leftHalf->startingVertex->position);
         Vector3Dd endPosition =
             transformToWorld(body, edge->rightHalf->startingVertex->position);
-        bool f1 = isFaceVisibleFromCameraTransformed(face1, body, camera) >= 0;
-        bool f2 = isFaceVisibleFromCameraTransformed(face2, body, camera) >= 0;
+        BOOLEAN f1 = isFaceVisibleFromCameraTransformed(face1, body, camera) >= 0;
+        BOOLEAN f2 = isFaceVisibleFromCameraTransformed(face2, body, camera) >= 0;
 
         cache.add(AppelEdgeCache());
         AppelEdgeCache& materialLine = cache[cache.size() - 1];
@@ -376,7 +378,7 @@ static void buildCache(
         }
 
         prevEnd = Vector3Dd::copyOf(endPosition);
-        hasPrevEnd = true;
+        hasPrevEnd = TRUE;
     }
 }
 
@@ -401,7 +403,7 @@ static int computeMidpointQuantitativeInvisibility(
     return qi;
 }
 
-static bool isUnitInterval(double t)
+static BOOLEAN isUnitInterval(double t)
 {
     return t >= VSDK::EPSILON && t <= 1.0 - VSDK::EPSILON;
 }
@@ -423,7 +425,8 @@ static void processLineToBeDrawn(
     ArrayList<AppelEdgeSegment> segments;
     segments.add(AppelEdgeSegment());
 
-    for (long int i = 0; i < contourCache.size(); ++i) {
+    long i;
+    for (i = 0; i < contourCache.size(); ++i) {
         AppelEdgeCache* cl = contourCache[i];
         if (cl == 0 || cl == &inEdge) {
             continue;
@@ -458,7 +461,7 @@ static void processLineToBeDrawn(
 
     segments.sort(AppelEdgeSegmentOrder());
 
-    for (long i = 0; i + 1 < segments.size(); ) {
+    for (i = 0; i + 1 < segments.size(); ) {
         if (segments[i].samePosition(segments[i + 1])) {
             segments[i + 1].deltaQI += segments[i].deltaQI;
             segments.remove(i);
@@ -468,7 +471,7 @@ static void processLineToBeDrawn(
         }
     }
 
-    for (long i = 0; i + 1 < segments.size(); ++i) {
+    for (i = 0; i + 1 < segments.size(); ++i) {
         double t1 = segments[i].lineParameter;
         double t2 = segments[i + 1].lineParameter;
         Vector3Dd pos1 = inEdge.start.add(inEdge.direction.multiply(t1));
@@ -562,7 +565,8 @@ void HiddenLineRenderer::executeAppelAlgorithm(
     ArrayList<AppelEdgeCache> cache;
     ArrayList<AppelEdgeCache*> contourCache;
 
-    for (long int i = 0; i < inSimpleBodyArray.size(); ++i) {
+    long int i;
+    for (i = 0; i < inSimpleBodyArray.size(); ++i) {
         SimpleBody* body = inSimpleBodyArray.get(i);
         if (body == 0 || body->getGeometry() == 0) {
             continue;
@@ -577,7 +581,7 @@ void HiddenLineRenderer::executeAppelAlgorithm(
             continue;
         }
 
-        bool ownsSolid = ((Geometry*)(solid)) != body->getGeometry();
+        BOOLEAN ownsSolid = ((Geometry*)(solid)) != body->getGeometry();
         buildCache(
             querySolids,
             body,
@@ -588,13 +592,13 @@ void HiddenLineRenderer::executeAppelAlgorithm(
             ownsSolid);
     }
 
-    for (long int i = 0; i < querySolids.size(); ++i) {
+    for (i = 0; i < querySolids.size(); ++i) {
         if (querySolids[i].solid != 0) {
             querySolids[i].solid->beginVisibilityQueries();
         }
     }
 
-    for (long int i = 0; i < cache.size(); ++i) {
+    for (i = 0; i < cache.size(); ++i) {
         AppelEdgeCache& edge = cache[i];
         switch (edge.edgeType) {
           case AppelEdgeCache::HIDDEN_LINE:
@@ -609,7 +613,7 @@ void HiddenLineRenderer::executeAppelAlgorithm(
         }
     }
 
-    for (long int i = 0; i < querySolids.size(); ++i) {
+    for (i = 0; i < querySolids.size(); ++i) {
         if (querySolids[i].solid != 0) {
             querySolids[i].solid->endVisibilityQueries();
         }

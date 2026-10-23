@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include <java/lang/Math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/media/RGBAImageCompressed.h"
@@ -233,7 +234,7 @@ ArrayList<unsigned char> OpenGL1RGBAImageCompressedRenderer::decompressToRGBA(co
                         int alphaTable[8];
                         buildAlphaTable(a0, a1, alphaTable);
                         unsigned long long alphaBits = readAlphaBits(src, alphaOffset + 2);
-                        int aIdx = ((int)((alphaBits >> (3 * (py * 4 + px))) & 0x7ULL));
+                        int aIdx = ((int)((alphaBits >> (3 * (py * 4 + px))) & VSDK_ULL(0x7)));
                         rgba[dstBase + 3] = ((unsigned char)(alphaTable[aIdx]));
                     }
                 }

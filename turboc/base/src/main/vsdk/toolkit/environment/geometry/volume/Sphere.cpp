@@ -38,7 +38,7 @@ Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
     return new Ray(r);
 }
 
-bool
+BOOLEAN
 Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     double dx = -inRay.getOrigin().x();
     double dy = -inRay.getOrigin().y();
@@ -48,12 +48,12 @@ Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
 
     double discriminant = radiusSquared + projection * projection - dx * dx - dy * dy - dz * dz;
     if (discriminant < 0) {
-        return false;
+        return FALSE;
     }
 
     double t = projection - sqrt(discriminant);
     if (t < 0) {
-        return false;
+        return FALSE;
     }
 
     if (outHit != NULL) {
@@ -69,7 +69,7 @@ Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
             outHit->setHitDistance(t);
         }
     }
-    return true;
+    return TRUE;
 }
 
 void
@@ -79,7 +79,7 @@ Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     }
 
     RaytraceStatistics::recordGeometryDetailComputation();
-    bool needsNormalVector = outData->needsNormal() || outData->needsTextureCoordinates() || outData->needsTangent();
+    BOOLEAN needsNormalVector = outData->needsNormal() || outData->needsTextureCoordinates() || outData->needsTangent();
     if (!outData->needsPoint() && !needsNormalVector) {
         return;
     }
@@ -149,10 +149,11 @@ Sphere::doContainmentTest(const Vector3Dd& p, double distanceTolerance) {
 double*
 Sphere::getMinMax() {
     double* minmax = new double[6];
-    for (int i = 0; i < 3; i++) {
+    int i;
+    for (i = 0; i < 3; i++) {
         minmax[i] = -radius;
     }
-    for (int i = 3; i < 6; i++) {
+    for (i = 3; i < 6; i++) {
         minmax[i] = radius;
     }
     return minmax;
@@ -308,13 +309,6 @@ Vector3Dd Sphere::sphereBinormal(double theta, double phi) {
         cos(phi) * cos(theta) * cos(theta) +
         cos(phi) * sin(theta) * sin(theta));
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int Sphere::DEFAULT_PARALLELS;
-const int Sphere::DEFAULT_MERIDIANS;
-const int Sphere::MIN_PARALLELS;
-const int Sphere::MIN_MERIDIANS;
 
 const Class Sphere::CLASS = { "Sphere", &Solid::CLASS };
 

@@ -1,6 +1,7 @@
 #ifndef __GEOMETRY_STATISTICS__
 #define __GEOMETRY_STATISTICS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 class GeometryStatistics {

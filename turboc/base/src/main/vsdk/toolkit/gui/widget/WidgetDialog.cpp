@@ -1,11 +1,12 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/gui/widget/WidgetDialog.h"
 
 WidgetDialog::WidgetDialog()
-    : id(""), name(""), orientation(ORIENTATION_VERTICAL), collapsable(false),
-      titleKey(""), modal(false)
+    : id(""), name(""), orientation(ORIENTATION_VERTICAL), collapsable(FALSE),
+      titleKey(""), modal(FALSE)
 {
 }
 
@@ -19,12 +20,12 @@ void WidgetDialog::setTitleKey(const String& titleKey)
     this->titleKey = titleKey;
 }
 
-bool WidgetDialog::isModal() const
+BOOLEAN WidgetDialog::isModal() const
 {
     return modal;
 }
 
-void WidgetDialog::setModal(bool modal)
+void WidgetDialog::setModal(BOOLEAN modal)
 {
     this->modal = modal;
 }
@@ -51,12 +52,12 @@ const WidgetDialogElement* WidgetDialog::getElementByAction(
     return NULL;
 }
 
-bool WidgetDialog::isCollapsable() const
+BOOLEAN WidgetDialog::isCollapsable() const
 {
     return collapsable;
 }
 
-void WidgetDialog::setCollapsable(bool collapsable)
+void WidgetDialog::setCollapsable(BOOLEAN collapsable)
 {
     this->collapsable = collapsable;
 }
@@ -169,27 +170,23 @@ String WidgetDialog::toString() const
     String msg = "";
 
     msg = msg + "    DIALOG: " + getId() + "\n";
-    for ( int j = 0; j < widgetElementList.size(); j++ ) {
+    int j;
+    for ( j = 0; j < widgetElementList.size(); j++ ) {
         msg = msg + "    " + widgetElementList.get(j)->toString() + "\n";
     }
-    for ( int j = 0; j < pendingCommandNames.size(); j++ ) {
+    for ( j = 0; j < pendingCommandNames.size(); j++ ) {
         msg = msg + "    Commandname: " + pendingCommandNames.get(j) + "\n";
     }
 
-    for ( int j = 0; j < pendingDialogRefNames.size(); j++ ) {
+    for ( j = 0; j < pendingDialogRefNames.size(); j++ ) {
         msg = msg + "    DialogRefNames: " + pendingDialogRefNames.get(j) + "\n";
     }
 
-    for ( int j = 0; j < pendingVariableNames.size(); j++ ) {
+    for ( j = 0; j < pendingVariableNames.size(); j++ ) {
         msg = msg + "    VariableNames: " + pendingVariableNames.get(j) + "\n";
     }
     return msg;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int WidgetDialog::ORIENTATION_HORIZONTAL;
-const int WidgetDialog::ORIENTATION_VERTICAL;
 
 const Class WidgetDialog::CLASS = { "WidgetDialog", &WidgetElement::CLASS };
 

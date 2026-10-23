@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/media/GeometryMetadata.h"
@@ -40,7 +41,8 @@ double GeometryMetadata::doMinskowskiDistance(
     ShapeDescriptor* a = NULL;
     ShapeDescriptor* b = NULL;
 
-    for (long int i = 0; i < descriptors.size(); i++) {
+    long i;
+    for (i = 0; i < descriptors.size(); i++) {
         ShapeDescriptor* aa = descriptors.get(i);
         if (aa != NULL) {
             String* label = aa->getLabel();
@@ -54,7 +56,7 @@ double GeometryMetadata::doMinskowskiDistance(
         return DBL_MAX;
     }
 
-    for (long int i = 0; i < other->descriptors.size(); i++) {
+    for (i = 0; i < other->descriptors.size(); i++) {
         ShapeDescriptor* bb = other->descriptors.get(i);
         if (bb != NULL) {
             String* label = bb->getLabel();
@@ -80,14 +82,14 @@ double GeometryMetadata::doMinskowskiDistance(
     int avLength = 0;
     int bvLength = 0;
 
-    for (int i = 0; i < 1024; i++) {
+    for (i = 0; i < 1024; i++) {
         if (av[i] == 0 && i > 0) {
             avLength = i;
             break;
         }
     }
 
-    for (int i = 0; i < 1024; i++) {
+    for (i = 0; i < 1024; i++) {
         if (bv[i] == 0 && i > 0) {
             bvLength = i;
             break;

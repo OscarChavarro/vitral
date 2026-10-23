@@ -1,6 +1,7 @@
 #ifndef __CAMERA_CONTROLLER__
 #define __CAMERA_CONTROLLER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/Controller.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
@@ -13,14 +14,14 @@ public:
 
     virtual ~CameraController() {}
 
-    virtual bool processKeyPressedEvent(const KeyEvent& keyEvent) = 0;
-    virtual bool processKeyReleasedEvent(const KeyEvent& keyEvent) = 0;
-    virtual bool processMousePressedEvent(const MouseEvent& e) = 0;
-    virtual bool processMouseReleasedEvent(const MouseEvent& e) = 0;
-    virtual bool processMouseClickedEvent(const MouseEvent& e) = 0;
-    virtual bool processMouseMovedEvent(const MouseEvent& e) = 0;
-    virtual bool processMouseDraggedEvent(const MouseEvent& e) = 0;
-    virtual bool processMouseWheelEvent(const MouseEvent& e) = 0;
+    virtual BOOLEAN processKeyPressedEvent(const KeyEvent& keyEvent) = 0;
+    virtual BOOLEAN processKeyReleasedEvent(const KeyEvent& keyEvent) = 0;
+    virtual BOOLEAN processMousePressedEvent(const MouseEvent& e) = 0;
+    virtual BOOLEAN processMouseReleasedEvent(const MouseEvent& e) = 0;
+    virtual BOOLEAN processMouseClickedEvent(const MouseEvent& e) = 0;
+    virtual BOOLEAN processMouseMovedEvent(const MouseEvent& e) = 0;
+    virtual BOOLEAN processMouseDraggedEvent(const MouseEvent& e) = 0;
+    virtual BOOLEAN processMouseWheelEvent(const MouseEvent& e) = 0;
 
     virtual Camera* getCamera() = 0;
     virtual void setCamera(Camera* camera) = 0;

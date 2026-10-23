@@ -1,6 +1,8 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_STATISTICS__
 #define __POLYHEDRAL_BOUNDED_SOLID_STATISTICS__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 Counters of the operations over `PolyhedralBoundedSolid`s (Euler operators,
 set operations, splits and their problematic cases), enabled with the
@@ -12,7 +14,7 @@ reads it when the class is loaded).
 */
 class PolyhedralBoundedSolidStatistics {
 public:
-    static bool isEnabled();
+    static BOOLEAN isEnabled();
 
     static void recordLmevCall();
     static void recordLkevCall();

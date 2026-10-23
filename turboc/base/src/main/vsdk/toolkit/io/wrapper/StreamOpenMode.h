@@ -1,6 +1,8 @@
 #ifndef __STREAM_OPEN_MODE__
 #define __STREAM_OPEN_MODE__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 C++98 replacement for a scoped enumeration: values are accessed as
 `StreamOpenMode::VALUE` and objects convert implicitly to the plain `Value` enum,

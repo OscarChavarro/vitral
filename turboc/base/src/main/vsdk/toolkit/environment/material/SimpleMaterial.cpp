@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 SimpleMaterial::SimpleMaterial()
@@ -8,7 +9,7 @@ SimpleMaterial::SimpleMaterial()
       specular(ColorRgb(1.0, 1.0, 1.0)),
       emission(ColorRgb(0.0, 0.0, 0.0)),
       transmittance(ColorRgb(0.0, 0.0, 0.0)),
-      doubleSided(true),
+      doubleSided(TRUE),
       reflectionCoefficient(0.0),
       refractionCoefficient(0.0),
       indexOfRefraction(1.0),
@@ -41,7 +42,7 @@ SimpleMaterial::SimpleMaterial(
     const ColorRgb& inSpecular,
     const ColorRgb& inEmission,
     const ColorRgb& inTransmittance,
-    bool inDoubleSided,
+    BOOLEAN inDoubleSided,
     double inReflectionCoefficient,
     double inRefractionCoefficient,
     double inIndexOfRefraction,
@@ -67,7 +68,7 @@ SimpleMaterial::SimpleMaterial(
     const ColorRgb& inAmbient,
     const ColorRgb& inDiffuse,
     const ColorRgb& inSpecular,
-    bool inDoubleSided,
+    BOOLEAN inDoubleSided,
     double inReflectionCoefficient,
     double inRefractionCoefficient,
     double inOpacity,
@@ -100,9 +101,9 @@ SimpleMaterial SimpleMaterial::withReflectionCoefficient(double kr) const { retu
 SimpleMaterial SimpleMaterial::withRefractionCoefficient(double kr) const { return SimpleMaterial(name, ambient, diffuse, specular, emission, transmittance, doubleSided, reflectionCoefficient, kr, indexOfRefraction, opacity, phongExponent); }
 SimpleMaterial SimpleMaterial::withIndexOfRefraction(double ior) const { return SimpleMaterial(name, ambient, diffuse, specular, emission, transmittance, doubleSided, reflectionCoefficient, refractionCoefficient, ior, opacity, phongExponent); }
 SimpleMaterial SimpleMaterial::withOpacity(double a) const { return SimpleMaterial(name, ambient, diffuse, specular, emission, transmittance, doubleSided, reflectionCoefficient, refractionCoefficient, indexOfRefraction, a, phongExponent); }
-SimpleMaterial SimpleMaterial::withDoubleSided(bool b) const { return SimpleMaterial(name, ambient, diffuse, specular, emission, transmittance, b, reflectionCoefficient, refractionCoefficient, indexOfRefraction, opacity, phongExponent); }
+SimpleMaterial SimpleMaterial::withDoubleSided(BOOLEAN b) const { return SimpleMaterial(name, ambient, diffuse, specular, emission, transmittance, b, reflectionCoefficient, refractionCoefficient, indexOfRefraction, opacity, phongExponent); }
 
-bool SimpleMaterial::isDoubleSided() const { return doubleSided; }
+BOOLEAN SimpleMaterial::isDoubleSided() const { return doubleSided; }
 
 ColorRgb SimpleMaterial::getAmbient() const { return ColorRgb(ambient); }
 const ColorRgb& SimpleMaterial::getAmbientReference() const { return ambient; }

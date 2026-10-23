@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -52,8 +53,8 @@ DrawingAreaInteractionTechniques::DrawingAreaInteractionTechniques(
                                                viewportSet);
     undoRedoTechnique = new UndoRedoInteractionTechnique(
         model->getEditHistory());
-    viewportTitleGesture = false;
-    viewportTitleClickConsumed = false;
+    viewportTitleGesture = FALSE;
+    viewportTitleClickConsumed = FALSE;
 }
 
 DrawingAreaInteractionTechniques::~DrawingAreaInteractionTechniques()
@@ -89,7 +90,7 @@ ScaleGizmo* DrawingAreaInteractionTechniques::getScaleGizmo() const
     return scaleGizmo;
 }
 
-void DrawingAreaInteractionTechniques::setCursorWrapEnabled(bool enabled)
+void DrawingAreaInteractionTechniques::setCursorWrapEnabled(BOOLEAN enabled)
 {
     interactionTechniques->setTranslationCursorWrapEnabled(enabled);
 }
@@ -187,7 +188,7 @@ Viewport* DrawingAreaInteractionTechniques::getGestureViewport()
     return interactionTechniques->getRotationDragViewport();
 }
 
-bool DrawingAreaInteractionTechniques::isTranslationGestureConfined()
+BOOLEAN DrawingAreaInteractionTechniques::isTranslationGestureConfined()
 {
     return getGestureViewport() != NULL;
 }
@@ -215,11 +216,11 @@ void DrawingAreaInteractionTechniques::wrapCursorIfRequested(
         viewportSet->toSetY(viewport, warp.y()));
 }
 
-bool DrawingAreaInteractionTechniques::MouseTechnique::apply(
+BOOLEAN DrawingAreaInteractionTechniques::MouseTechnique::apply(
     const MouseEvent& e) const
 {
     ViewportInteractionTechniques* t = owner->interactionTechniques;
-    bool changed = false;
+    BOOLEAN changed = FALSE;
     switch ( kind ) {
       case ROTATION_PRESSED:
         return t->processRotationMousePressedEvent(e, viewport);
@@ -259,7 +260,7 @@ bool DrawingAreaInteractionTechniques::MouseTechnique::apply(
         }
         return changed;
     }
-    return false;
+    return FALSE;
 }
 
 void DrawingAreaInteractionTechniques::ClickRecording::run()
@@ -267,7 +268,7 @@ void DrawingAreaInteractionTechniques::ClickRecording::run()
     owner->processMouseClickedEventWithoutRecording(event);
 }
 
-bool DrawingAreaInteractionTechniques::processTranslationEvent(
+BOOLEAN DrawingAreaInteractionTechniques::processTranslationEvent(
     const MouseEvent& event, Viewport* viewport, const Vector3Dd& centroid,
     const MouseTechnique& technique)
 {
@@ -275,7 +276,7 @@ bool DrawingAreaInteractionTechniques::processTranslationEvent(
     // the viewport, and lets the technique process the event. If the gizmo
     // moves the selection, it is moved with it.
     if ( viewport == NULL ) {
-        return false;
+        return FALSE;
     }
     translationGizmo->setCamera(viewport->getActiveCamera());
     translationGizmo->setTransformationMatrix(
@@ -285,10 +286,10 @@ bool DrawingAreaInteractionTechniques::processTranslationEvent(
             translationGizmo->getPosition());
         listener->repaintRequested();
     }
-    return true;
+    return TRUE;
 }
 
-bool DrawingAreaInteractionTechniques::processRotationEvent(
+BOOLEAN DrawingAreaInteractionTechniques::processRotationEvent(
     const MouseEvent& event, Viewport* viewport,
     const MouseTechnique& technique)
 {
@@ -297,7 +298,7 @@ bool DrawingAreaInteractionTechniques::processRotationEvent(
     SimpleBody* body = selectionEditor->getFirstSelectedBody();
 
     if ( viewport == NULL || body == NULL ) {
-        return false;
+        return FALSE;
     }
     rotateGizmo->setCamera(viewport->getActiveCamera());
     rotateGizmo->setTransformationMatrix(
@@ -305,10 +306,10 @@ bool DrawingAreaInteractionTechniques::processRotationEvent(
     if ( technique.apply(toViewportEvent(event, viewport)) ) {
         listener->repaintRequested();
     }
-    return true;
+    return TRUE;
 }
 
-bool DrawingAreaInteractionTechniques::processScaleEvent(
+BOOLEAN DrawingAreaInteractionTechniques::processScaleEvent(
     const MouseEvent& event, Viewport* viewport,
     const MouseTechnique& technique)
 {
@@ -318,7 +319,7 @@ bool DrawingAreaInteractionTechniques::processScaleEvent(
     SimpleBody* body = selectionEditor->getFirstSelectedBody();
 
     if ( viewport == NULL || body == NULL ) {
-        return false;
+        return FALSE;
     }
     scaleGizmo->setCamera(viewport->getActiveCamera());
     scaleGizmo->setTransformationMatrix(
@@ -327,7 +328,7 @@ bool DrawingAreaInteractionTechniques::processScaleEvent(
     if ( technique.apply(toViewportEvent(event, viewport)) ) {
         listener->repaintRequested();
     }
-    return true;
+    return TRUE;
 }
 
 void DrawingAreaInteractionTechniques::cancelInputGizmoEditing()
@@ -363,7 +364,7 @@ void DrawingAreaInteractionTechniques::processMouseEnteredEvent(
 void DrawingAreaInteractionTechniques::processMousePressedEvent(
     const MouseEvent& event)
 {
-    viewportTitleClickConsumed = false;
+    viewportTitleClickConsumed = FALSE;
     Viewport* mouseView = getViewportAtPointer(event);
     InteractionMode mode = drawingArea->getInteractionMode();
 
@@ -413,7 +414,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
          interactionTechniques->processCameraMousePressedEvent(event) ) {
     }
     else if ( mode != InteractionMode::CAMERA ) {
-        bool composite = (m & MouseEvent::CTRL_DOWN_MASK) != 0;
+        BOOLEAN composite = (m & MouseEvent::CTRL_DOWN_MASK) != 0;
         MouseEvent viewportEvent = toViewportEvent(event, mouseView);
         Vector3Dd centroid;
 
@@ -421,7 +422,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
 
         // A press over a gizmo handle grabs the gizmo: the ray selection
         // is skipped, so the whole selected group is kept
-        bool gizmoGrabbed =
+        BOOLEAN gizmoGrabbed =
             mode == InteractionMode::TRANSLATE &&
             interactionTechniques->getTranslationTechnique()->isActive() &&
             selectionEditor->computeSelectionCentroid(&centroid);
@@ -446,7 +447,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
             cancelInputGizmoEditing();
             // The picking ray aims the visual debug ray, but only the
             // IDC_TOOLS_RAY command (or the keypad) shows or hides it
-            bool rayVisible = model->isWithVisualDebugRay();
+            BOOLEAN rayVisible = model->isWithVisualDebugRay();
             Ray selectedRay = scenePicker->selectObjectWithMouse(
                 viewportEvent.getX(), viewportEvent.getY(), composite);
             rayGizmoTechniques->setRay(&selectedRay);
@@ -476,10 +477,10 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
 void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     const MouseEvent& event)
 {
-    bool titleGesture = viewportTitleGesture;
-    viewportTitleGesture = false;
+    BOOLEAN titleGesture = viewportTitleGesture;
+    viewportTitleGesture = FALSE;
     Viewport* mouseView = getInteractionViewportAtPointer(event);
-    bool confinedGesture = isTranslationGestureConfined();
+    BOOLEAN confinedGesture = isTranslationGestureConfined();
     InteractionMode mode = drawingArea->getInteractionMode();
 
     if ( mouseView != NULL && !confinedGesture ) {
@@ -489,7 +490,7 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     activateViewport(mouseView);
 
     if ( titleGesture ) {
-        viewportTitleClickConsumed = true;
+        viewportTitleClickConsumed = TRUE;
         updateModeCursor(event);
         editRecorder->endGesture();
         listener->repaintRequested();
@@ -502,7 +503,7 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     // assumed and hard-coded
 
     Vector3Dd centroid;
-    bool withSelection = selectionEditor->computeSelectionCentroid(&centroid);
+    BOOLEAN withSelection = selectionEditor->computeSelectionCentroid(&centroid);
 
     updateModeCursor(event);
 
@@ -529,7 +530,7 @@ void DrawingAreaInteractionTechniques::processMouseClickedEvent(
     const MouseEvent& event)
 {
     if ( viewportTitleClickConsumed ) {
-        viewportTitleClickConsumed = false;
+        viewportTitleClickConsumed = FALSE;
         return;
     }
     InteractionMode mode = drawingArea->getInteractionMode();
@@ -551,7 +552,7 @@ void DrawingAreaInteractionTechniques::processMouseClickedEventWithoutRecording(
     activateViewport(mouseView);
 
     Vector3Dd centroid;
-    bool withSelection = selectionEditor->computeSelectionCentroid(&centroid);
+    BOOLEAN withSelection = selectionEditor->computeSelectionCentroid(&centroid);
 
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraMouseClickedEvent(event) ) {
@@ -575,7 +576,7 @@ void DrawingAreaInteractionTechniques::processMouseMovedEvent(
     const MouseEvent& event)
 {
     Viewport* mouseView = getInteractionViewportAtPointer(event);
-    bool confinedGesture = isTranslationGestureConfined();
+    BOOLEAN confinedGesture = isTranslationGestureConfined();
     InteractionMode mode = drawingArea->getInteractionMode();
 
     // Moved events can come while dragging the gizmo (i.e. when the cursor
@@ -586,7 +587,7 @@ void DrawingAreaInteractionTechniques::processMouseMovedEvent(
 
     //-----------------------------------------------------------------
     Vector3Dd centroid;
-    bool withSelection = selectionEditor->computeSelectionCentroid(&centroid);
+    BOOLEAN withSelection = selectionEditor->computeSelectionCentroid(&centroid);
 
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraMouseMovedEvent(event) ) {
@@ -610,7 +611,7 @@ void DrawingAreaInteractionTechniques::processMouseDraggedEvent(
     const MouseEvent& event)
 {
     Viewport* mouseView = getInteractionViewportAtPointer(event);
-    bool confinedGesture = isTranslationGestureConfined();
+    BOOLEAN confinedGesture = isTranslationGestureConfined();
     InteractionMode mode = drawingArea->getInteractionMode();
 
     // While dragging the gizmo, the pointer over other viewport does not
@@ -622,7 +623,7 @@ void DrawingAreaInteractionTechniques::processMouseDraggedEvent(
     activateViewport(mouseView);
 
     Vector3Dd centroid;
-    bool withSelection = selectionEditor->computeSelectionCentroid(&centroid);
+    BOOLEAN withSelection = selectionEditor->computeSelectionCentroid(&centroid);
 
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraMouseDraggedEvent(event) ) {
@@ -662,10 +663,10 @@ void DrawingAreaInteractionTechniques::processMouseWheelEvent(
         }
     }
     catch ( ... ) {
-        editRecorder->endAction(sceneOperationName(mode), true);
+        editRecorder->endAction(sceneOperationName(mode), TRUE);
         throw;
     }
-    editRecorder->endAction(sceneOperationName(mode), true);
+    editRecorder->endAction(sceneOperationName(mode), TRUE);
 }
 
 //= Keyboard ==============================================================
@@ -691,10 +692,10 @@ void DrawingAreaInteractionTechniques::processKeyPressedEvent(
         processEditionKeyPressedEvent(event);
     }
     catch ( ... ) {
-        editRecorder->endAction(keyOperationName(mode, event), true);
+        editRecorder->endAction(keyOperationName(mode, event), TRUE);
         throw;
     }
-    editRecorder->endAction(keyOperationName(mode, event), true);
+    editRecorder->endAction(keyOperationName(mode, event), TRUE);
 }
 
 void DrawingAreaInteractionTechniques::processEditionKeyPressedEvent(
@@ -733,7 +734,7 @@ void DrawingAreaInteractionTechniques::processEditionKeyPressedEvent(
     listener->repaintRequested();
 }
 
-bool DrawingAreaInteractionTechniques::processInputGizmoKeyPressedEvent(
+BOOLEAN DrawingAreaInteractionTechniques::processInputGizmoKeyPressedEvent(
     InteractionMode mode, const KeyEvent& event)
 {
     // Lets the input gizmo of the gizmo of the interaction mode use a key,
@@ -748,7 +749,7 @@ bool DrawingAreaInteractionTechniques::processInputGizmoKeyPressedEvent(
     return processTranslationInputGizmoKeyPressedEvent(event);
 }
 
-bool DrawingAreaInteractionTechniques::processRotationInputGizmoKeyPressedEvent(
+BOOLEAN DrawingAreaInteractionTechniques::processRotationInputGizmoKeyPressedEvent(
     const KeyEvent& event)
 {
     // If the user accepts what was typed, the first selected body takes the
@@ -756,20 +757,20 @@ bool DrawingAreaInteractionTechniques::processRotationInputGizmoKeyPressedEvent(
     SimpleBody* body = selectionEditor->getFirstSelectedBody();
 
     if ( body == NULL ) {
-        return false;
+        return FALSE;
     }
     rotateGizmo->setTransformationMatrix(
         SceneSelectionEditor::createRotationGizmoMatrix(body));
     if ( !interactionTechniques->isRotationInputGizmoKey(event) ) {
-        return false;
+        return FALSE;
     }
     if ( interactionTechniques->processRotateKeyPressedEvent(event) ) {
         applyRotationGizmoToBody(body);
     }
-    return true;
+    return TRUE;
 }
 
-bool DrawingAreaInteractionTechniques::processScaleInputGizmoKeyPressedEvent(
+BOOLEAN DrawingAreaInteractionTechniques::processScaleInputGizmoKeyPressedEvent(
     const KeyEvent& event)
 {
     // If the user accepts what was typed, the first selected body takes the
@@ -777,21 +778,21 @@ bool DrawingAreaInteractionTechniques::processScaleInputGizmoKeyPressedEvent(
     SimpleBody* body = selectionEditor->getFirstSelectedBody();
 
     if ( body == NULL ) {
-        return false;
+        return FALSE;
     }
     scaleGizmo->setTransformationMatrix(
         SceneSelectionEditor::createRotationGizmoMatrix(body));
     scaleGizmo->setScale(body->getScale());
     if ( !interactionTechniques->isScaleInputGizmoKey(event) ) {
-        return false;
+        return FALSE;
     }
     if ( interactionTechniques->processScaleKeyPressedEvent(event) ) {
         body->setScale(scaleGizmo->getScale());
     }
-    return true;
+    return TRUE;
 }
 
-bool DrawingAreaInteractionTechniques::processTranslationInputGizmoKeyPressedEvent(
+BOOLEAN DrawingAreaInteractionTechniques::processTranslationInputGizmoKeyPressedEvent(
     const KeyEvent& event)
 {
     // If the user accepts what was typed, the selection is moved so the
@@ -799,18 +800,18 @@ bool DrawingAreaInteractionTechniques::processTranslationInputGizmoKeyPressedEve
     Vector3Dd centroid;
 
     if ( !selectionEditor->computeSelectionCentroid(&centroid) ) {
-        return false;
+        return FALSE;
     }
     translationGizmo->setTransformationMatrix(
         SceneSelectionEditor::createTranslationGizmoMatrix(centroid));
     if ( !interactionTechniques->isTranslationInputGizmoKey(event) ) {
-        return false;
+        return FALSE;
     }
     if ( interactionTechniques->processTranslationKeyPressedEvent(event) ) {
         selectionEditor->applyTranslationToSelectedObjects(centroid,
             translationGizmo->getPosition());
     }
-    return true;
+    return TRUE;
 }
 
 void DrawingAreaInteractionTechniques::processModeKeyPressedEvent(
@@ -1007,18 +1008,18 @@ void DrawingAreaInteractionTechniques::processKeyReleasedEvent(
         }
     }
     catch ( ... ) {
-        editRecorder->endAction(sceneOperationName(mode), true);
+        editRecorder->endAction(sceneOperationName(mode), TRUE);
         throw;
     }
-    editRecorder->endAction(sceneOperationName(mode), true);
+    editRecorder->endAction(sceneOperationName(mode), TRUE);
 }
 
 //= Viewport commands =====================================================
 
-bool DrawingAreaInteractionTechniques::processViewportCommand(
+BOOLEAN DrawingAreaInteractionTechniques::processViewportCommand(
     const String& command, Viewport* viewport)
 {
-    bool processed;
+    BOOLEAN processed;
 
     editRecorder->beginAction();
     try {
@@ -1026,11 +1027,11 @@ bool DrawingAreaInteractionTechniques::processViewportCommand(
     }
     catch ( ... ) {
         editRecorder->endAction(
-            sceneOperationName(drawingArea->getInteractionMode()), false);
+            sceneOperationName(drawingArea->getInteractionMode()), FALSE);
         throw;
     }
     editRecorder->endAction(
-        sceneOperationName(drawingArea->getInteractionMode()), false);
+        sceneOperationName(drawingArea->getInteractionMode()), FALSE);
     if ( processed && viewport == viewportSet->getSelectedViewport() ) {
         activateViewport(viewport);
     }
@@ -1065,7 +1066,7 @@ void DrawingAreaInteractionTechniques::processUndoRedoCommand(
     listener->repaintRequested();
 }
 
-bool DrawingAreaInteractionTechniques::isControlLetterChord(
+BOOLEAN DrawingAreaInteractionTechniques::isControlLetterChord(
     const KeyEvent& event)
 {
     return (event.modifierMask & KeyEvent::MASK_CTRL) != 0 &&

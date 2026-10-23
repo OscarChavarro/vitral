@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID__
 #define __POLYHEDRAL_BOUNDED_SOLID__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
@@ -17,8 +18,10 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int PLUS = 1;
-    static const int MINUS = 0;
+    enum {
+        PLUS = 1,
+        MINUS = 0
+    };
 
 private:
     ArrayList<_PolyhedralBoundedSolidFace*> polygonsList;
@@ -26,7 +29,7 @@ private:
     ArrayList<_PolyhedralBoundedSolidVertex*> verticesList;
     int maxVertexId;
     int maxFaceId;
-    bool modelIsValid;
+    BOOLEAN modelIsValid;
 
     InfinitePlane** queryPlaneCache;
     double* queryFaceAabb;
@@ -34,7 +37,7 @@ private:
     int queryFaceCount;
 
     void computeFaceAabb(_PolyhedralBoundedSolidFace* face, int index);
-    bool rayReachesFaceAabb(
+    BOOLEAN rayReachesFaceAabb(
         const Vector3Dd& origin,
         double dirX,
         double dirY,
@@ -64,21 +67,21 @@ public:
     void setMaxFaceId(int maxFaceId);
 
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual double* getMinMax();
 
-    bool isValid() const;
-    void setValidationState(bool flag);
+    BOOLEAN isValid() const;
+    void setValidationState(BOOLEAN flag);
 
     void merge(PolyhedralBoundedSolid* other);
 
     void beginVisibilityQueries();
     void endVisibilityQueries();
-    bool visibilityQueriesActive() const;
+    BOOLEAN visibilityQueriesActive() const;
     InfinitePlane* cachedFacePlane(int faceIndex);
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext queryToleranceContext();
-    bool queryRayReachesFace(
+    BOOLEAN queryRayReachesFace(
         const Vector3Dd& origin,
         double dirX,
         double dirY,
@@ -86,7 +89,7 @@ public:
         double maxT,
         int faceIndex,
         double pad);
-    bool queryPointNearFace(
+    BOOLEAN queryPointNearFace(
         const Vector3Dd& point,
         int faceIndex,
         double pad);

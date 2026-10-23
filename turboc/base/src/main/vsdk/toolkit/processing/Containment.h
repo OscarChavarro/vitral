@@ -1,6 +1,8 @@
 #ifndef __CONTAINMENT__
 #define __CONTAINMENT__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 C++98 replacement for a scoped enumeration: values are accessed as
 `Containment::VALUE` and objects convert implicitly to the plain `Value` enum,

@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
 #include "java/lang/Integer.h"
@@ -15,7 +16,7 @@
 #include "vsdk/toolkit/gui/editor/GenericEditorListener.h"
 
 
-static bool typeIsSupported(const String &type)
+static BOOLEAN typeIsSupported(const String &type)
 {
     return type == "double" || type == "float" || type == "int" ||
         type == "long";
@@ -44,7 +45,7 @@ static double parseValue(const String &type, const String &text)
 
 
 GenericEditor::GenericEditor() :
-    listener(NULL), entityDeleted(false), entity(NULL)
+    listener(NULL), entityDeleted(FALSE), entity(NULL)
 {
 }
 
@@ -133,10 +134,10 @@ GenericEditor::detach()
         entity->removeEntityListener(this);
     }
     entity = NULL;
-    entityDeleted = false;
+    entityDeleted = FALSE;
 }
 
-bool
+BOOLEAN
 GenericEditor::isEntityDeleted() const
 {
     return entityDeleted;
@@ -155,7 +156,7 @@ GenericEditor::notifyEntityEvent(const EntityEvent &event)
         entity->removeEntityListener(this);
         entity = NULL;
         clearSpecifications();
-        entityDeleted = true;
+        entityDeleted = TRUE;
         clearControls(String("Entity deleted (") + className + ").");
     }
     else if ( event.getType() == EntityEvent::UPDATED ) {
@@ -174,30 +175,30 @@ GenericEditor::getEntity() const
     return entity;
 }
 
-bool
+BOOLEAN
 GenericEditor::readValue(const ControlSpecification &specification,
                          String &outValue) const
 {
     const EntityControlAccessor *getter = findGetter(specification);
     if ( getter == NULL ) {
-        return false;
+        return FALSE;
     }
     if ( !getter->readValue(*entity, outValue) ) {
         Logger::reportMessage("GenericEditor", Logger::WARNING,
             "GenericEditor.readValue",
             String("Cannot call get") + specification.getLabel() +
             "() on an object of class " + entityClassName + ".");
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
-bool
+BOOLEAN
 GenericEditor::updateValue(const ControlSpecification *specification,
                            const String &text)
 {
     if ( entity == NULL || specification == NULL ) {
-        return false;
+        return FALSE;
     }
 
     int begin = 0;
@@ -217,20 +218,20 @@ GenericEditor::updateValue(const ControlSpecification *specification,
     catch ( const NumberFormatException & ) {
         showValidationMessage((specification->getLabel() + ": \"" + text +
             "\" is not a valid " + specification->getType() + ".").c_str());
-        return false;
+        return FALSE;
     }
 
     if ( !specification->contains(numeric) ) {
         showValidationMessage((specification->getLabel() + " must be in " +
             specification->getIntervalText() + ".").c_str());
-        return false;
+        return FALSE;
     }
 
     const EntityControlAccessor *setter = findSetter(*specification);
     if ( setter == NULL ) {
         showValidationMessage((specification->getLabel() +
             " cannot be changed.").c_str());
-        return false;
+        return FALSE;
     }
     if ( !setter->writeValue(*entity, trimmed) ) {
         Logger::reportMessage("GenericEditor", Logger::WARNING,
@@ -239,7 +240,7 @@ GenericEditor::updateValue(const ControlSpecification *specification,
             " on an object of class " + entityClassName + ".");
         showValidationMessage((specification->getLabel() +
             " could not be changed.").c_str());
-        return false;
+        return FALSE;
     }
 
     showValidationMessage(NULL);
@@ -248,7 +249,7 @@ GenericEditor::updateValue(const ControlSpecification *specification,
     if ( listener != NULL ) {
         listener->notifyEntityChanged(changed);
     }
-    return true;
+    return TRUE;
 }
 
 const EntityControlAccessor *

@@ -72,12 +72,13 @@ TextureUtils::initializeNoise(int numberOfWaves)
     frequencyInstance.reserve(numberOfWaves);
     waveSourcesInstance.reserve(numberOfWaves);
 
-    for (int i = 0; i < numberOfWaves; i++) {
+    int i;
+    for (i = 0; i < numberOfWaves; i++) {
         frequencyInstance.add(0.0);
         waveSourcesInstance.add(Vector3Dd());
     }
 
-    for (int i = 0; i < numberOfWaves; i++) {
+    for (i = 0; i < numberOfWaves; i++) {
         proceduralNoise->differentialNoise(&point, (double)i, 0.0, 0.0);
         this->waveSources()[i] = point.normalizedFast();
         this->waveFrequency()[i] = (rand() & kWaveRandomMask) / kWaveRandomDivisor + 0.01;

@@ -1,4 +1,5 @@
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/Collections.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -12,7 +13,7 @@
 
 static const char* const CLASS_NAME = "_PolyhedralBoundedSolidTopologicalValidator";
 
-bool _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
+BOOLEAN _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
     PolyhedralBoundedSolid* solid)
 {
     long int i;
@@ -31,14 +32,14 @@ bool _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
         if ( h1 == 0 || h2 == 0 ) {
             Logger::reportMessage(CLASS_NAME, Logger::WARNING,
                 "validateTopologicalIntegrity", "Edge with null halfedge!");
-            return false;
+            return FALSE;
         }
         if ( h1->parentLoop->parentFace->parentSolid !=
              h2->parentLoop->parentFace->parentSolid ) {
             Logger::reportMessage(CLASS_NAME, Logger::WARNING,
                 "validateTopologicalIntegrity",
                 "Edge belonging to two different solids!");
-            return false;
+            return FALSE;
         }
     }
 
@@ -57,7 +58,7 @@ bool _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
                     "validateTopologicalIntegrity",
                     String("Loop without starting halfedge\n") +
                     "Offending solid:\n" + solid->toString());
-                return false;
+                return FALSE;
             }
             heStart = he;
             do {
@@ -65,7 +66,7 @@ bool _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
                 if ( he == 0 ) {
                     Logger::reportMessage(CLASS_NAME, Logger::WARNING,
                         "validateTopologicalIntegrity", "Not closed loop!");
-                    return false;
+                    return FALSE;
                 }
                 for ( k = 0; k < (long int)edgeCount.size(); k++ ) {
                     if ( he->parentEdge == solid->getEdgesList().get(k) ) {
@@ -82,10 +83,10 @@ bool _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
             Logger::reportMessage(CLASS_NAME, Logger::WARNING,
                 "validateTopologicalIntegrity",
                 "Edges with different halfedges than 2!");
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 void _PolyhedralBoundedSolidTopologicalValidator::remakeEmanatingHalfedgesReferences(

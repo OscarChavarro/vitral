@@ -76,9 +76,9 @@ static double smithSchlickGeometry(double ndotV, double ndotL, double alpha)
     return gV * gL;
 }
 
-static LightDirection resolveLightDirection(const Light* light, const RayHit* info, bool* ok)
+static LightDirection resolveLightDirection(const Light* light, const RayHit* info, BOOLEAN* ok)
 {
-    *ok = false;
+    *ok = FALSE;
     LightDirection ld = {0, 0, 0, 0};
     if ( light == 0 || info == 0 ) return ld;
     Vector3Dd direction;
@@ -87,37 +87,37 @@ static LightDirection resolveLightDirection(const Light* light, const RayHit* in
     if ( maxShadowDistance <= VSDK::EPSILON ) return ld;
     ld.x = direction.x(); ld.y = direction.y(); ld.z = direction.z();
     ld.maxShadowDistance = maxShadowDistance;
-    *ok = true;
+    *ok = TRUE;
     return ld;
 }
 
-static bool isShadowed(
+static BOOLEAN isShadowed(
     const RayHit* info,
     double lightDirX, double lightDirY, double lightDirZ,
     double maxShadowDistance,
     ArrayList<SimpleBody*>& objects,
     TraceWorkspace* workspace)
 {
-    if ( maxShadowDistance <= VSDK::EPSILON ) return true;
-    if ( workspace == 0 ) return false;
+    if ( maxShadowDistance <= VSDK::EPSILON ) return TRUE;
+    if ( workspace == 0 ) return FALSE;
     Vector3Dd shadowOrigin(
         info->point.x() + VSDK::EPSILON * lightDirX,
         info->point.y() + VSDK::EPSILON * lightDirY,
         info->point.z() + VSDK::EPSILON * lightDirZ);
     Ray shadowRay(shadowOrigin, Vector3Dd(lightDirX, lightDirY, lightDirZ));
     RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
-    shadowCandidateHit->setStoreRay(false);
+    shadowCandidateHit->setStoreRay(FALSE);
     for ( long int i = 0; i < objects.size(); i++ ) {
         SimpleBody* candidateObject = objects.get(i);
         shadowCandidateHit->resetForDistanceOnly();
         if ( candidateObject && candidateObject->doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
             double hitDistance = shadowCandidateHit->getHitDistance();
             if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
-                return true;
+                return TRUE;
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
 static MicrofacetParams resolveMicrofacetParams(SimpleMaterial* material)
@@ -138,7 +138,7 @@ static MicrofacetParams resolveMicrofacetParams(SimpleMaterial* material)
     }
     return p;
 }
-CookTorranceShader::CookTorranceShader(bool textureEnabledIn, bool bumpMapEnabledIn)
+CookTorranceShader::CookTorranceShader(BOOLEAN textureEnabledIn, BOOLEAN bumpMapEnabledIn)
     : textureEnabled(textureEnabledIn), bumpMapEnabled(bumpMapEnabledIn)
 {
 }
@@ -178,7 +178,7 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
             continue;
         }
 
-        bool ok = false;
+        BOOLEAN ok = FALSE;
         LightDirection ld = resolveLightDirection(light, info, &ok);
         if ( !ok ) continue;
 

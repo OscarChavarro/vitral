@@ -9,10 +9,11 @@ PolynomialSolver::PolynomialSolver() : order(0)
 
 PolynomialSolver::PolynomialSolver(int order, const double *coefficients) : order(order)
 {
-    for (int coefficientIndex = 0; coefficientIndex <= MAX_ORDER; coefficientIndex++) {
+    int coefficientIndex;
+    for (coefficientIndex = 0; coefficientIndex <= MAX_ORDER; coefficientIndex++) {
         this->coefficients[coefficientIndex] = 0.0;
     }
-    for (int coefficientIndex = 0; coefficientIndex <= order; coefficientIndex++) {
+    for (coefficientIndex = 0; coefficientIndex <= order; coefficientIndex++) {
         this->coefficients[order - coefficientIndex] = coefficients[coefficientIndex];
     }
 }
@@ -29,10 +30,11 @@ PolynomialSolver::polynomialRemainder(
 {
     int quotientIndex;
     int coefficientIndex;
-    for (int dividendIndex = 0; dividendIndex <= order; dividendIndex++) {
+    int dividendIndex;
+    for (dividendIndex = 0; dividendIndex <= order; dividendIndex++) {
         remainder->coefficients[dividendIndex] = coefficients[dividendIndex];
     }
-    for (int dividendIndex = order + 1; dividendIndex <= MAX_ORDER; dividendIndex++) {
+    for (dividendIndex = order + 1; dividendIndex <= MAX_ORDER; dividendIndex++) {
         remainder->coefficients[dividendIndex] = 0.0;
     }
 
@@ -380,5 +382,3 @@ const double PolynomialSolver::POLYNOMIAL_MAX_DISTANCE = 1.0e7;
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int PolynomialSolver::MAX_ORDER;
-const int PolynomialSolver::MAX_ITERATIONS;

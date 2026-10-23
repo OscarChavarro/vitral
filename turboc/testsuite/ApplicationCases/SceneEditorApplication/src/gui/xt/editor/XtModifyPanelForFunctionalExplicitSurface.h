@@ -1,6 +1,7 @@
 #ifndef __XT_MODIFY_PANEL_FOR_FUNCTIONAL_EXPLICIT_SURFACE__
 #define __XT_MODIFY_PANEL_FOR_FUNCTIONAL_EXPLICIT_SURFACE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 

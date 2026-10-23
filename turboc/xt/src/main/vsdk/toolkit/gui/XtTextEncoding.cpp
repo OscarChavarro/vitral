@@ -4,6 +4,7 @@
 // First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
 #include <X11/Xlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/StringBuilder.h"
 #include "vsdk/toolkit/gui/XtTextEncoding.h"
 
@@ -14,16 +15,16 @@ extern "C" char* _Xsetlocale(int category, const char* name);
 static const int X_LOCALE_LC_CTYPE = 2;
 #endif
 
-static bool utf8Locale = true;
+static BOOLEAN utf8Locale = TRUE;
 
 /**
 @return true if the locale name tells a UTF-8 encoding (i.e. "C.UTF-8",
 "en_US.utf8")
 */
-static bool isUtf8LocaleName(const char* name)
+static BOOLEAN isUtf8LocaleName(const char* name)
 {
     if ( name == NULL ) {
-        return false;
+        return FALSE;
     }
     for ( const char* p = name; *p != '\0'; p++ ) {
         if ( tolower((unsigned char)p[0]) == 'u' &&
@@ -36,17 +37,17 @@ static bool isUtf8LocaleName(const char* name)
             return digits[0] == '8' && !isdigit((unsigned char)digits[1]);
         }
     }
-    return false;
+    return FALSE;
 }
 
-static bool selectUtf8Locale(const char* name)
+static BOOLEAN selectUtf8Locale(const char* name)
 {
     const char* selected = setlocale(LC_CTYPE, name);
     return selected != NULL && isUtf8LocaleName(selected) &&
         XSupportsLocale();
 }
 
-bool XtTextEncoding::selectLocale(const char* overrideLocale)
+BOOLEAN XtTextEncoding::selectLocale(const char* overrideLocale)
 {
     if ( overrideLocale != NULL ) {
         const char* selected = setlocale(LC_CTYPE, overrideLocale);
@@ -59,12 +60,12 @@ bool XtTextEncoding::selectLocale(const char* overrideLocale)
     // Unicode locale lets English labels such as "Español" and future
     // translations share one FontSet encoding.
     if ( selectUtf8Locale("C.UTF-8") || selectUtf8Locale("") ) {
-        utf8Locale = true;
-        return true;
+        utf8Locale = TRUE;
+        return TRUE;
     }
 
     // No UTF-8 locale: Latin-1, whose fonts X always has
-    utf8Locale = false;
+    utf8Locale = FALSE;
 #ifdef VITRAL_X_LOCALE
     _Xsetlocale(X_LOCALE_LC_CTYPE, "en_US.ISO8859-1");
 #else
@@ -73,10 +74,10 @@ bool XtTextEncoding::selectLocale(const char* overrideLocale)
         setlocale(LC_CTYPE, "");
     }
 #endif
-    return false;
+    return FALSE;
 }
 
-bool XtTextEncoding::isUtf8()
+BOOLEAN XtTextEncoding::isUtf8()
 {
     return utf8Locale;
 }

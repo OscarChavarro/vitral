@@ -1,6 +1,7 @@
 #ifndef __CURVE__
 #define __CURVE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 class Ray;
 class RayHit;
@@ -13,7 +14,7 @@ public:
     virtual ~Curve() {}
 
     virtual Ray* doIntersectionFirstHit(const Ray& r);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 };
 

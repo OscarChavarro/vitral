@@ -1,6 +1,7 @@
 #ifndef __VITRAL_RASTERIZER__
 #define __VITRAL_RASTERIZER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "lib/dithering/Dithering.h"
 #include "lib/vgaModes/VgaModes.h"
 #include "ColorMode.h"

@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/lang/Boolean.h"
@@ -54,7 +55,7 @@ int Finisher::getLastTriangulatedFaceCount()
     return lastTriangulatedFaceCount;
 }
 
-bool Finisher::isPipelineSummaryTraceEnabled()
+BOOLEAN Finisher::isPipelineSummaryTraceEnabled()
 {
     return Boolean::getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
 }
@@ -67,7 +68,7 @@ void Finisher::tracePipelineSummary(const String& message)
     printf("[SetOpPipelineTrace] %s\n", message.c_str());
 }
 
-bool Finisher::hasUsableIntegrationRing(_PolyhedralBoundedSolidFace* face)
+BOOLEAN Finisher::hasUsableIntegrationRing(_PolyhedralBoundedSolidFace* face)
 {
     _PolyhedralBoundedSolidLoop* ring;
     _PolyhedralBoundedSolidHalfEdge* start;
@@ -79,15 +80,15 @@ bool Finisher::hasUsableIntegrationRing(_PolyhedralBoundedSolidFace* face)
          !hasCompleteHalfEdgeConnectivity(face) ||
          face->boundariesList.size() < 2 ||
          face->boundariesList.get(1) == 0 ) {
-        return false;
+        return FALSE;
     }
     ring = face->boundariesList.get(1);
     if ( ring->halfEdgesList.size() < 2 ) {
-        return false;
+        return FALSE;
     }
     start = ring->boundaryStartHalfEdge;
     if ( start == 0 || start->startingVertex == 0 ) {
-        return false;
+        return FALSE;
     }
     reference = start->startingVertex->position;
     ToleranceContext context = PolyhedralBoundedSolidNumericPolicy::forFace(face);
@@ -98,20 +99,20 @@ bool Finisher::hasUsableIntegrationRing(_PolyhedralBoundedSolidFace* face)
         if ( current->startingVertex != 0 &&
              !PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
                  reference, current->startingVertex->position, context) ) {
-            return true;
+            return TRUE;
         }
         current = current->next();
         guard++;
     }
-    return false;
+    return FALSE;
 }
 
-bool Finisher::hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face)
+BOOLEAN Finisher::hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face)
 {
     long int i;
 
     if ( face == 0 ) {
-        return false;
+        return FALSE;
     }
     for ( i = 0; i < face->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
@@ -120,7 +121,7 @@ bool Finisher::hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face
         long int guard;
 
         if ( loop == 0 || loop->boundaryStartHalfEdge == 0 ) {
-            return false;
+            return FALSE;
         }
         start = loop->boundaryStartHalfEdge;
         current = start;
@@ -133,17 +134,17 @@ bool Finisher::hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face
                  current->mirrorHalfEdge() == 0 ||
                  current->next() == 0 ||
                  current->previous() == 0 ) {
-                return false;
+                return FALSE;
             }
             current = current->next();
             guard++;
         } while ( current != start &&
                   guard <= loop->halfEdgesList.size() + 1 );
         if ( current != start ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 String Finisher::integrationRingSummary(_PolyhedralBoundedSolidFace* face)
@@ -179,12 +180,12 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
 
     lastLegacyFallbackCount = 0;
 
-    ArrayList<bool> usedB(Collections<bool>::nCopies(sonfb.size(), false));
+    ArrayList<BOOLEAN> usedB(Collections<BOOLEAN>::nCopies(sonfb.size(), FALSE));
 
     for ( i = 0; i < sonfa.size(); i++ ) {
         _PolyhedralBoundedSolidFace* faceA = sonfa[i];
         int pairIndexA;
-        bool validA = hasUsableIntegrationRing(faceA);
+        BOOLEAN validA = hasUsableIntegrationRing(faceA);
 
         if ( !validA ) {
             if ( isPipelineSummaryTraceEnabled() ) {
@@ -199,7 +200,7 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
         for ( j = 0; j < sonfb.size(); j++ ) {
             _PolyhedralBoundedSolidFace* faceB = sonfb[j];
             int pairIndexB;
-            bool validB;
+            BOOLEAN validB;
 
             if ( usedB[j] ) {
                 continue;
@@ -222,7 +223,7 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
                 }
                 matchedA.add(faceA);
                 matchedB.add(faceB);
-                usedB[j] = true;
+                usedB[j] = TRUE;
                 break;
             }
         }
@@ -326,11 +327,11 @@ self-touching / figure-8). A self-touching inner ring cannot be extracted as
 a valid face via lmfkrh because the resulting face would be a degenerate
 inverted membrane.
 */
-bool Finisher::hasSelfTouchingVertex(_PolyhedralBoundedSolidLoop* loop,
+BOOLEAN Finisher::hasSelfTouchingVertex(_PolyhedralBoundedSolidLoop* loop,
     const ToleranceContext& tol)
 {
     if ( loop == 0 ) {
-        return false;
+        return FALSE;
     }
     long int size = loop->halfEdgesList.size();
     long int i;
@@ -341,11 +342,11 @@ bool Finisher::hasSelfTouchingVertex(_PolyhedralBoundedSolidLoop* loop,
                     loop->halfEdgesList.get(i)->startingVertex->position,
                     loop->halfEdgesList.get(j)->startingVertex->position,
                     tol) ) {
-                return true;
+                return TRUE;
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
 void Finisher::extractInnerLoopsOfNonPlanarFace(PolyhedralBoundedSolid* solid,
@@ -413,13 +414,13 @@ void Finisher::triangulateNonPlanarFaces(PolyhedralBoundedSolid* solid)
         // self-touching BEFORE the planarity check, as a self-touching inner
         // ring can be coplanar with the outer boundary.
         if ( face->boundariesList.size() > 1 ) {
-            bool hasSelfTouching = false;
+            BOOLEAN hasSelfTouching = FALSE;
             ToleranceContext tol =
                 PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
             long int li;
             for ( li = 1; li < face->boundariesList.size(); li++ ) {
                 if ( hasSelfTouchingVertex(face->boundariesList.get(li), tol) ) {
-                    hasSelfTouching = true;
+                    hasSelfTouching = TRUE;
                     break;
                 }
             }
@@ -476,7 +477,7 @@ void Finisher::triangulateNonPlanarFaces(PolyhedralBoundedSolid* solid)
             // Try to absorb into adjacent face via lkef. When lkef
             // succeeds, restart the scan from index 0 so faces that absorbed
             // the triangle are re-checked.
-            bool killed = false;
+            BOOLEAN killed = FALSE;
             long int k;
             for ( k = 0; k < loop0->halfEdgesList.size(); k++ ) {
                 _PolyhedralBoundedSolidHalfEdge* h = loop0->halfEdgesList.get(k);
@@ -486,7 +487,7 @@ void Finisher::triangulateNonPlanarFaces(PolyhedralBoundedSolid* solid)
                      h->mirrorHalfEdge()->parentLoop->parentFace != face ) {
                     PolyhedralBoundedSolidEulerOperators::lkef(
                         solid, h->mirrorHalfEdge(), h);
-                    killed = true;
+                    killed = TRUE;
                     break;
                 }
             }
@@ -599,5 +600,3 @@ void Finisher::finish(PolyhedralBoundedSolid* inSolidA,
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidSetFinisher::DEBUG_01_STRUCTURE;
-const int _PolyhedralBoundedSolidSetFinisher::DEBUG_06_FINISH;

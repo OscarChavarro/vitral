@@ -1,6 +1,7 @@
 #ifndef __SOLID_TEXTURE_STATISTICS__
 #define __SOLID_TEXTURE_STATISTICS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 class SolidTextureStatistics {

@@ -1,6 +1,7 @@
 #ifndef __JAVAX_XML_TRANSFORM_TRANSFORMER__
 #define __JAVAX_XML_TRANSFORM_TRANSFORMER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 
@@ -15,7 +16,7 @@ the ones of `OutputKeys`: `doctype-system`, `indent` and `encoding`.
 class Transformer {
 private:
     String doctypeSystem;
-    bool indent;
+    BOOLEAN indent;
     String encoding;
 
 public:
@@ -39,7 +40,7 @@ public:
     @param file output file
     @return true on success
     */
-    bool transform(const Document* document,
+    BOOLEAN transform(const Document* document,
                    const File& file) const;
 };
 

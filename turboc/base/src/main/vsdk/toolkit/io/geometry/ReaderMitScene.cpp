@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -56,10 +57,10 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
     Vector3Dd eye = Vector3Dd(0, 0, 10);
     Vector3Dd up = Vector3Dd(0, 1, 0);
     Vector3Dd lookat = camera->getFocusedPosition();
-    bool hasEye = false;
-    bool hasUp = false;
-    bool hasLookat = false;
-    bool hasViewport = false;
+    BOOLEAN hasEye = FALSE;
+    BOOLEAN hasUp = FALSE;
+    BOOLEAN hasLookat = FALSE;
+    BOOLEAN hasViewport = FALSE;
     int viewportXSize = 320;
     int viewportYSize = 240;
     double importedHorizontalFov = 30.0;
@@ -88,28 +89,28 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
             if ( sscanf(javaLine.toCString(), "%*s %d %d", &w, &h) == 2 ) {
                 viewportXSize = w;
                 viewportYSize = h;
-                hasViewport = true;
+                hasViewport = TRUE;
             }
         }
         else if ( cmd == "eye" ) {
             double x, y, z;
             if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &x, &y, &z) == 3 ) {
                 eye = Vector3Dd(x, y, z);
-                hasEye = true;
+                hasEye = TRUE;
             }
         }
         else if ( cmd == "up" ) {
             double x, y, z;
             if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &x, &y, &z) == 3 ) {
                 up = Vector3Dd(x, y, z);
-                hasUp = true;
+                hasUp = TRUE;
             }
         }
         else if ( cmd == "lookat" ) {
             double x, y, z;
             if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &x, &y, &z) == 3 ) {
                 lookat = Vector3Dd(x, y, z);
-                hasLookat = true;
+                hasLookat = TRUE;
             }
         }
         else if ( cmd == "fov" ) {
@@ -137,7 +138,7 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
                     ColorRgb(r * ka, g * ka, b * ka),
                     ColorRgb(r * kd, g * kd, b * kd),
                     ColorRgb(ks, ks, ks),
-                    true,
+                    TRUE,
                     kr,
                     kt,
                     1.0,

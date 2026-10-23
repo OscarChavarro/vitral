@@ -1,4 +1,5 @@
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -44,11 +45,11 @@ void CameraState::restore() const
     camera->updateVectors();
 }
 
-bool CameraState::isSameState(const EntityTransformState* other) const
+BOOLEAN CameraState::isSameState(const EntityTransformState* other) const
 {
     const CameraState* state = (other != NULL && other->instanceOf(CameraState::CLASS) ? (const CameraState*)other : NULL);
     if ( state == NULL ) {
-        return false;
+        return FALSE;
     }
     return state->camera == camera &&
         sameVector(state->position, position) &&
@@ -68,7 +69,7 @@ EntityTransformState* CameraState::clone() const
     return new CameraState(*this);
 }
 
-bool CameraState::sameVector(const Vector3Dd& a, const Vector3Dd& b)
+BOOLEAN CameraState::sameVector(const Vector3Dd& a, const Vector3Dd& b)
 {
     double scale = Cpp98Support::fmax(1.0, Cpp98Support::fmax(a.length(), b.length()));
 

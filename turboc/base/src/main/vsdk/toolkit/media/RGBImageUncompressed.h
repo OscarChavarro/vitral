@@ -1,6 +1,7 @@
 #ifndef __RGB_IMAGE_UNCOMPRESSED__
 #define __RGB_IMAGE_UNCOMPRESSED__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/Image.h"
 class RGBPixel;
 class RGBAImageUncompressed;
@@ -14,7 +15,7 @@ row).
 class RGBImageUncompressed : public Image {
 
 private:
-    static const int BYTES_PER_PIXEL = 3;
+    enum { BYTES_PER_PIXEL = 3 };
 
     char* data;
     int xSize;
@@ -34,9 +35,9 @@ public:
 
     virtual int getSizeInBytes() const;
 
-    virtual bool init(int width, int height);
+    virtual BOOLEAN init(int width, int height);
 
-    virtual bool initNoFill(int width, int height);
+    virtual BOOLEAN initNoFill(int width, int height);
 
     void putPixel(int x, int y, char r, char g, char b);
     void putPixel(int x, int y, const RGBPixel* p);

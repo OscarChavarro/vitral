@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgba.h"
 #include "vsdk/toolkit/media/RGBAColorPalette.h"
@@ -18,7 +19,8 @@ RGBAColorPalette::~RGBAColorPalette() {
 }
 
 void RGBAColorPalette::init(int size) {
-    for (long int i = 0; i < colors.size(); i++) {
+    long i;
+    for (i = 0; i < colors.size(); i++) {
         if (colors[i] != NULL) {
             delete colors[i];
             colors[i] = NULL;
@@ -27,7 +29,7 @@ void RGBAColorPalette::init(int size) {
     colors.clear();
     positions.clear();
 
-    for (int i = 0; i < size; i++) {
+    for (i = 0; i < size; i++) {
         colors.add(new ColorRgba(0.0, 0.0, 0.0, 0.0));
     }
 }
@@ -36,7 +38,7 @@ int RGBAColorPalette::size() const {
     return (int)colors.size();
 }
 
-bool RGBAColorPalette::hasPositions() const {
+BOOLEAN RGBAColorPalette::hasPositions() const {
     return positions.size() > 0;
 }
 

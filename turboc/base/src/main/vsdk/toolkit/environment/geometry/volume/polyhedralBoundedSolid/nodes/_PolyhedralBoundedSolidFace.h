@@ -1,6 +1,7 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_FACE__
-#define __POLYHEDRAL_BOUNDED_SOLID_FACE__
+#ifndef __PBS_FACE__
+#define __PBS_FACE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.h"
@@ -50,7 +51,7 @@ public:
 
     _PolyhedralBoundedSolidHalfEdge* findHalfEdge(int vn1, int vn2);
     _PolyhedralBoundedSolidHalfEdge* findHalfEdge(int vn1);
-    bool calculatePlane();
+    BOOLEAN calculatePlane();
     InfinitePlane* getContainingPlane();
     int testPointInside(const Vector3Dd& point, double tolerance);
     int testPointInside(

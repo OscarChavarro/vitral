@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/Formatter.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
@@ -87,12 +88,12 @@ String::size() const {
     return length();
 }
 
-bool
+BOOLEAN
 String::isEmpty() const {
     return toCString()[0] == '\0';
 }
 
-bool
+BOOLEAN
 String::empty() const {
     return isEmpty();
 }
@@ -139,12 +140,12 @@ String::end() const {
     return toCString() + length();
 }
 
-bool
+BOOLEAN
 String::equals(const String &other) const {
     return strcmp(toCString(), other.toCString()) == 0;
 }
 
-bool
+BOOLEAN
 String::equals(const char *other) const {
     return strcmp(toCString(), other == NULL ? "" : other) == 0;
 }
@@ -259,15 +260,15 @@ String::erase(int index, int count) {
     return *this;
 }
 
-bool
+BOOLEAN
 String::startsWith(const char *prefix) const {
     if ( prefix == NULL ) {
-        return false;
+        return FALSE;
     }
     const size_t prefixLength = strlen(prefix);
     const size_t sourceLength = strlen(toCString());
     if ( prefixLength > sourceLength ) {
-        return false;
+        return FALSE;
     }
     return strncmp(toCString(), prefix, prefixLength) == 0;
 }
@@ -374,46 +375,47 @@ String::operator+=(const char *other) {
     return *this;
 }
 
-bool
+BOOLEAN
 String::operator==(const String &other) const {
     return equals(other);
 }
 
-bool
+BOOLEAN
 String::operator==(const char *other) const {
     return equals(other);
 }
 
-bool
+BOOLEAN
 String::operator!=(const String &other) const {
     return !equals(other);
 }
 
-bool
+BOOLEAN
 String::operator!=(const char *other) const {
     return !equals(other);
 }
 
-bool
+BOOLEAN
 String::operator<(const String &other) const {
     return strcmp(toCString(), other.toCString()) < 0;
 }
 
-bool
+BOOLEAN
 String::operator<=(const String &other) const {
     return strcmp(toCString(), other.toCString()) <= 0;
 }
 
-bool
+BOOLEAN
 String::operator>(const String &other) const {
     return strcmp(toCString(), other.toCString()) > 0;
 }
 
-bool
+BOOLEAN
 String::operator>=(const String &other) const {
     return strcmp(toCString(), other.toCString()) >= 0;
 }
 
+#ifdef VSDK_HAS_LONG_LONG
 String
 String::valueOf(long long value) {
     char buffer[64];
@@ -427,6 +429,7 @@ String::valueOf(unsigned long long value) {
     snprintf(buffer, sizeof(buffer), "%llu", value);
     return String(buffer);
 }
+#endif
 
 String
 String::valueOf(long value) {
@@ -517,12 +520,12 @@ String::indexOf(const String &text, int fromIndex) const {
     return found == NULL ? -1 : ((int)(found - source));
 }
 
-bool
+BOOLEAN
 String::contains(const String &text) const {
     return indexOf(text) >= 0;
 }
 
-bool
+BOOLEAN
 String::endsWith(const String &suffix) const {
     const int sourceLength = length();
     const int suffixLength = suffix.length();
@@ -573,7 +576,7 @@ String::toLowerCase() const {
     return result;
 }
 
-bool
+BOOLEAN
 String::equalsIgnoreCase(const String &other) const {
     return toLowerCase().equals(other.toLowerCase());
 }
@@ -601,4 +604,3 @@ operator+(const char *left, const String &right) {
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int String::npos;

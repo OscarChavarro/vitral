@@ -2,6 +2,7 @@
 #define __WEILER_ATHERTON_POLYGON_CLIPPER__
 
 // First: gcc 2.7.2 fails if _DoubleLinkedListNode is defined before it
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_VertexNode2D.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
@@ -14,9 +15,9 @@ class WeilerAthertonPolygonClipper {
 private:
     _Polygon2DWA* clipPolyWA;
     _Polygon2DWA* subjectPolyWA;
-    bool firstIntersection;
-    bool previousOut;
-    bool coincidentPoints[4];
+    BOOLEAN firstIntersection;
+    BOOLEAN previousOut;
+    BOOLEAN coincidentPoints[4];
     PolygonTopologicalMerger topologicalMerger;
 
     void makeCut(
@@ -31,10 +32,10 @@ private:
         _Polygon2DContourWA* p2DContClip, _Polygon2DContourWA* p2DContSubj,
         _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodePrevC, _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeC,
         _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodePrevS, _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeS,
-        _VertexNode2D& nodeIntersecS, bool firstCutOutOfSubject,
+        _VertexNode2D& nodeIntersecS, BOOLEAN firstCutOutOfSubject,
         ArrayList<_DoubleLinkedListNode<_VertexNode2D>*>& intersecVertListOut,
         ArrayList<_DoubleLinkedListNode<_VertexNode2D>*>& intersecVertListIn,
-        bool operateOnFirstPointsOfLines);
+        BOOLEAN operateOnFirstPointsOfLines);
 
     void classifyHolesAndContours(_Polygon2DWA* polygon);
     signed char are3VectorsOrderedCounterclockwise2D(_VertexNode2D v1, _VertexNode2D v2, _VertexNode2D v3);
@@ -47,13 +48,13 @@ private:
         _CircularDoubleLinkedList<_VertexNode2D>& linkedList,
         _DoubleLinkedListNode<_VertexNode2D>* dllnVertNode, _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeNext,
         const _VertexNode2D& nodeIntersec);
-    bool intersecLineLine2D(
+    BOOLEAN intersecLineLine2D(
         const _VertexNode2D& inP0, const _VertexNode2D& inP1, const _VertexNode2D& inP2, const _VertexNode2D& inP3,
-        _VertexNode2D& outPIntersec, bool outCoincidentPoints[4]);
+        _VertexNode2D& outPIntersec, BOOLEAN outCoincidentPoints[4]);
 
     static void resetOutputPolygon(Polygon2D* polygon);
     static void appendNonEmptyContours(const Polygon2D* source, Polygon2D* target);
-    static bool hasAnyVertex(const Polygon2D* polygon);
+    static BOOLEAN hasAnyVertex(const Polygon2D* polygon);
 
 public:
     WeilerAthertonPolygonClipper();

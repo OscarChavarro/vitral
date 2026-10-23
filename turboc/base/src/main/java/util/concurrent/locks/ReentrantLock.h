@@ -1,6 +1,7 @@
 #ifndef __REENTRANT_LOCK__
 #define __REENTRANT_LOCK__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 
 

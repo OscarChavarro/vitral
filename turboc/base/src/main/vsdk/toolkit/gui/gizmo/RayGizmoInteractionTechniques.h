@@ -1,6 +1,7 @@
 #ifndef __RAY_GIZMO_INTERACTION_TECHNIQUES__
 #define __RAY_GIZMO_INTERACTION_TECHNIQUES__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -23,14 +24,14 @@ private:
 
     RayGizmo* gizmo;
     ArrayList<int> activationKeys;
-    bool active;
+    BOOLEAN active;
     Vector3Dd origin;
     double yawInDegrees;
     double pitchInDegrees;
 
     void initialize();
-    bool processNumericPadCommand(const KeyEvent& event);
-    bool isActivationKey(const KeyEvent& event) const;
+    BOOLEAN processNumericPadCommand(const KeyEvent& event);
+    BOOLEAN isActivationKey(const KeyEvent& event) const;
     Ray currentRay() const;
     void applyRay();
     void applyInputGizmoValues();
@@ -46,10 +47,10 @@ public:
                                   int activationKey2);
     ~RayGizmoInteractionTechniques();
 
-    bool isActive() const;
-    void setActive(bool active);
+    BOOLEAN isActive() const;
+    void setActive(BOOLEAN active);
     InputGizmo* getInputGizmo();
-    bool processKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& event);
     void setRay(const Ray* ray);
 };
 

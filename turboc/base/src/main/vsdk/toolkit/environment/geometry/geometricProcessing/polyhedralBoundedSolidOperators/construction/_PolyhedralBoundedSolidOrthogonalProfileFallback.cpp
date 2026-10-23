@@ -1,6 +1,7 @@
 #include <float.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/Collections.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidOrthogonalProfileFallback.h"
@@ -20,7 +21,7 @@ typedef _PolyhedralBoundedSolidFallbackGeometry FallbackGeometry;
 
 //= Operand spec ====================================================
 
-bool ProfileFallback::OrthogonalProfileOperandSpec::contains(
+BOOLEAN ProfileFallback::OrthogonalProfileOperandSpec::contains(
     double x, double y, double z) const
 {
     double eps = numericContext.bigEpsilon();
@@ -162,15 +163,15 @@ void ProfileFallback::ProfileCellBooleanBuilder::attachEdge(
     he->parentEdge = edge;
 }
 
-bool ProfileFallback::ProfileCellBooleanBuilder::degenerateQuad(
+BOOLEAN ProfileFallback::ProfileCellBooleanBuilder::degenerateQuad(
     const Vector3Dd corners[4])
 {
     for ( int i = 0; i < 4; i++ ) {
         if ( FallbackGeometry::sameProfilePoint(corners[i], corners[(i + 1) % 4]) ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 void ProfileFallback::ProfileCellBooleanBuilder::addQuad(const Vector3Dd corners[4])
@@ -212,18 +213,18 @@ PolyhedralBoundedSolid* ProfileFallback::ProfileCellBooleanBuilder::result()
 
 //= Fallback ========================================================
 
-bool ProfileFallback::pointInsideYZProfile(const ArrayList<Vector3Dd>& profile,
+BOOLEAN ProfileFallback::pointInsideYZProfile(const ArrayList<Vector3Dd>& profile,
     double y, double z)
 {
-    bool inside;
+    BOOLEAN inside;
     long i;
     long j;
 
     if ( profile.size() < 3 ) {
-        return false;
+        return FALSE;
     }
 
-    inside = false;
+    inside = FALSE;
     j = profile.size() - 1;
     for ( i = 0; i < profile.size(); i++ ) {
         double yi = profile[i].y();
@@ -239,7 +240,7 @@ bool ProfileFallback::pointInsideYZProfile(const ArrayList<Vector3Dd>& profile,
     return inside;
 }
 
-bool ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
+BOOLEAN ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
     const ArrayList<double>& xCoordinates,
     const ArrayList<double>& yCoordinates,
     const ArrayList<double>& zCoordinates,
@@ -247,7 +248,7 @@ bool ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
 {
     if ( xCoordinates.size() != 2 || yCoordinates.size() != 4 ||
          zCoordinates.size() != 3 || solid->getVerticesList().size() != 16 ) {
-        return false;
+        return FALSE;
     }
     double* bounds = solid->getMinMax();
     ArrayList<Vector3Dd> profile =
@@ -257,7 +258,7 @@ bool ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
     }
     if ( profile.size() < 3 ) {
         delete[] bounds;
-        return false;
+        return FALSE;
     }
     outSpec.type = PROFILE_X_EXTRUDED_YZ;
     for ( int i = 0; i < 6; i++ ) {
@@ -267,10 +268,10 @@ bool ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
     outSpec.yzProfile = profile;
     outSpec.rightBoundaryZ.clear();
     outSpec.rightBoundaryX.clear();
-    return true;
+    return TRUE;
 }
 
-bool ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
+BOOLEAN ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
     const ArrayList<double>& xCoordinates,
     const ArrayList<double>& yCoordinates,
     const ArrayList<double>& zCoordinates,
@@ -282,7 +283,7 @@ bool ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
 
     if ( xCoordinates.size() != 3 || yCoordinates.size() != 2 ||
          zCoordinates.size() != 3 || solid->getVerticesList().size() != 10 ) {
-        return false;
+        return FALSE;
     }
 
     for ( i = 0; i < zCoordinates.size(); i++ ) {
@@ -297,7 +298,7 @@ bool ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
             }
         }
         if ( maxX <= -DBL_MAX / 2.0 ) {
-            return false;
+            return FALSE;
         }
         rightZ.add(z);
         rightX.add(maxX);
@@ -312,10 +313,10 @@ bool ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
     outSpec.yzProfile.clear();
     outSpec.rightBoundaryZ = rightZ;
     outSpec.rightBoundaryX = rightX;
-    return true;
+    return TRUE;
 }
 
-bool ProfileFallback::createOrthogonalProfileSpec(PolyhedralBoundedSolid* solid,
+BOOLEAN ProfileFallback::createOrthogonalProfileSpec(PolyhedralBoundedSolid* solid,
     OrthogonalProfileOperandSpec& outSpec)
 {
     ArrayList<double> xCoordinates =
@@ -327,13 +328,13 @@ bool ProfileFallback::createOrthogonalProfileSpec(PolyhedralBoundedSolid* solid,
 
     if ( createYExtrudedXZSpec(solid, xCoordinates, yCoordinates, zCoordinates,
              outSpec) ) {
-        return true;
+        return TRUE;
     }
     return createXExtrudedYZSpec(solid, xCoordinates, yCoordinates,
         zCoordinates, outSpec);
 }
 
-bool ProfileFallback::prepareOrthogonalProfileBooleanFallbackSpec(
+BOOLEAN ProfileFallback::prepareOrthogonalProfileBooleanFallbackSpec(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
     OrthogonalProfileBooleanFallbackSpec& outSpec)
@@ -345,7 +346,7 @@ bool ProfileFallback::prepareOrthogonalProfileBooleanFallbackSpec(
     if ( !createOrthogonalProfileSpec(inSolidA, specA) ||
          !createOrthogonalProfileSpec(inSolidB, specB) ||
          specA.type == specB.type ) {
-        return false;
+        return FALSE;
     }
     const OrthogonalProfileOperandSpec& yExtruded =
         specA.type == PROFILE_Y_EXTRUDED_XZ ? specA : specB;
@@ -358,7 +359,7 @@ bool ProfileFallback::prepareOrthogonalProfileBooleanFallbackSpec(
          !FallbackGeometry::sameCoordinate(yExtruded.bounds[4], xExtruded.bounds[4]) ||
          !FallbackGeometry::sameCoordinate(yExtruded.bounds[5], xExtruded.bounds[5]) ||
          yExtruded.bounds[3] >= xExtruded.bounds[3] - numericContext.bigEpsilon() ) {
-        return false;
+        return FALSE;
     }
 
     ArrayList<double> yCoordinates =
@@ -372,7 +373,7 @@ bool ProfileFallback::prepareOrthogonalProfileBooleanFallbackSpec(
     }
     if ( yCoordinates.size() < 2 || zCoordinates.size() < 2 ||
          yCoordinates.size() > 8 || zCoordinates.size() > 8 ) {
-        return false;
+        return FALSE;
     }
 
     outSpec.operandA = specA;
@@ -382,10 +383,10 @@ bool ProfileFallback::prepareOrthogonalProfileBooleanFallbackSpec(
     outSpec.xMax = xExtruded.bounds[3];
     outSpec.yCoordinates = yCoordinates;
     outSpec.zCoordinates = zCoordinates;
-    return true;
+    return TRUE;
 }
 
-bool ProfileFallback::profileCellSelected(
+BOOLEAN ProfileFallback::profileCellSelected(
     const OrthogonalProfileBooleanFallbackSpec& spec,
     int op, int zone, int iy, int iz)
 {
@@ -394,11 +395,11 @@ bool ProfileFallback::profileCellSelected(
     double x0 = spec.xAtBoundary(zone, z);
     double x1 = spec.xAtBoundary(zone + 1, z);
     if ( x1 <= x0 + numericContext.bigEpsilon() ) {
-        return false;
+        return FALSE;
     }
     double x = (x0 + x1) * 0.5;
-    bool insideA = spec.operandA.contains(x, y, z);
-    bool insideB = spec.operandB.contains(x, y, z);
+    BOOLEAN insideA = spec.operandA.contains(x, y, z);
+    BOOLEAN insideB = spec.operandB.contains(x, y, z);
     return _PolyhedralBoundedSolidAxisAlignedCellFallback::axisAlignedCellSelected(
         insideA, insideB, op);
 }
@@ -464,7 +465,7 @@ PolyhedralBoundedSolid* ProfileFallback::buildOrthogonalProfileBooleanFallback(
 
     int ny = (int)spec.yCoordinates.size() - 1;
     int nz = (int)spec.zCoordinates.size() - 1;
-    ArrayList<bool> occupied(Collections<bool>::nCopies(2 * ny * nz, false));
+    ArrayList<BOOLEAN> occupied(Collections<BOOLEAN>::nCopies(2 * ny * nz, FALSE));
 #define OCC(z0, y0, w0) occupied[((size_t)(z0)*ny + (y0))*nz + (w0)]
     for ( zone = 0; zone < 2; zone++ ) {
         for ( iy = 0; iy < ny; iy++ ) {
@@ -508,5 +509,3 @@ PolyhedralBoundedSolid* ProfileFallback::buildOrthogonalProfileBooleanFallback(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidOrthogonalProfileFallback::PROFILE_X_EXTRUDED_YZ;
-const int _PolyhedralBoundedSolidOrthogonalProfileFallback::PROFILE_Y_EXTRUDED_XZ;

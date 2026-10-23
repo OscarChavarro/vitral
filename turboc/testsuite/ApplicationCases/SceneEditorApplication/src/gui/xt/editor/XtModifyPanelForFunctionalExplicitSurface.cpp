@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/NumberFormatException.h"
 #include "java/util/ArrayList.txx"
 #include "gui/xt/XtModifyPanelHost.h"
@@ -51,7 +52,8 @@ void XtModifyPanelForFunctionalExplicitSurface::notifyTargetBeginEdit(
     ArrayList<String> presetNames =
         FunctionalExplicitSurfaceEditor::getPresets();
     presets.clear();
-    for (long i = 0; i < presetNames.size(); ++i)
+    long i;
+    for (i = 0; i < presetNames.size(); ++i)
         presets.add(presetNames.get(i).c_str());
     widgets->createOptionButton(
         parentPanel, FunctionalExplicitSurfaceEditor::NO_PRESET, presets,
@@ -60,7 +62,7 @@ void XtModifyPanelForFunctionalExplicitSurface::notifyTargetBeginEdit(
     y += ROW_HEIGHT + ROW_SPACING;
 
     //-----------------------------------------------------------------
-    for (int i = 0; i < FunctionalExplicitSurfaceEditor::PARAMETER_COUNT; ++i) {
+    for (i = 0; i < FunctionalExplicitSurfaceEditor::PARAMETER_COUNT; ++i) {
         FunctionalExplicitSurfaceEditor::Parameter parameter =
             ((FunctionalExplicitSurfaceEditor::Parameter)(i));
         const String label =
@@ -132,10 +134,10 @@ void XtModifyPanelForFunctionalExplicitSurface::fieldActivated(Widget field)
             Logger::reportMessage("XtModifyPanelForFunctionalExplicitSurface",
                                   Logger::WARNING, "fieldActivated",
                                   e.getMessage());
-            widgets->setInvalid(field, true);
+            widgets->setInvalid(field, TRUE);
             return;
         }
-        widgets->setInvalid(field, false);
+        widgets->setInvalid(field, FALSE);
         parent->repaintDrawingArea();
         return;
     }

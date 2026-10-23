@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/net/WebSocket.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.h"
@@ -19,8 +20,8 @@ static int findText(const String& text, const char* needle, int fromIndex = 0)
 
 TangibleInterfaceNetworkClient::TangibleInterfaceNetworkClient(const String& serviceUrl)
     : serviceUrl(serviceUrl),
-      threadStarted(false),
-      stopRequested(false),
+      threadStarted(FALSE),
+      stopRequested(FALSE),
       webSocket(0),
       connectionListener(NULL)
 {
@@ -57,7 +58,7 @@ void TangibleInterfaceNetworkClient::run()
 }
 
 void TangibleInterfaceNetworkClient::run(
-    Consumer<bool>* connectionListener)
+    Consumer<BOOLEAN>* connectionListener)
 {
     if ( threadStarted ) {
         return;
@@ -68,13 +69,13 @@ void TangibleInterfaceNetworkClient::run(
 
 void TangibleInterfaceNetworkClient::disconnect()
 {
-    stopRequested = true;
+    stopRequested = TRUE;
     if ( webSocket != 0 ) {
         webSocket->close();
     }
     if ( threadStarted && !pthread_equal(pthread_self(), connectionThread) ) {
         pthread_join(connectionThread, 0);
-        threadStarted = false;
+        threadStarted = FALSE;
     }
     delete webSocket;
     webSocket = 0;
@@ -95,7 +96,7 @@ void TangibleInterfaceNetworkClient::connectAndListen()
     if ( webSocket == 0 ) {
         printf("Tangible interface server not found at %s\n", serviceUrl.c_str());
         if ( connectionListener != NULL ) {
-            connectionListener->accept(false);
+            connectionListener->accept(FALSE);
         }
         return;
     }
@@ -104,7 +105,7 @@ void TangibleInterfaceNetworkClient::connectAndListen()
         return;
     }
     if ( connectionListener != NULL ) {
-        connectionListener->accept(true);
+        connectionListener->accept(TRUE);
     }
 
     while ( !stopRequested ) {
@@ -124,12 +125,13 @@ void TangibleInterfaceNetworkClient::notifyListeners(const TangibleInterfaceEven
     ArrayList<TangibleInterfaceListener*> snapshot;
 
     pthread_mutex_lock(&listenersMutex);
-    for ( long i = 0; i < listeners.size(); i++ ) {
+    long i;
+    for ( i = 0; i < listeners.size(); i++ ) {
         snapshot.add(listeners.get(i));
     }
     pthread_mutex_unlock(&listenersMutex);
 
-    for ( long i = 0; i < snapshot.size(); i++ ) {
+    for ( i = 0; i < snapshot.size(); i++ ) {
         TangibleInterfaceListener* listener = snapshot.get(i);
         if ( listener != 0 ) {
             listener->tangibleInterfaceEventReceived(event);
@@ -159,7 +161,7 @@ void TangibleInterfaceNetworkClient::processMessage(const String& message)
     }
 }
 
-bool TangibleInterfaceNetworkClient::parseEvent(const String& groupJson, TangibleInterfaceEvent* outEvent)
+BOOLEAN TangibleInterfaceNetworkClient::parseEvent(const String& groupJson, TangibleInterfaceEvent* outEvent)
 {
     String id;
     double positionValues[3];
@@ -168,50 +170,50 @@ bool TangibleInterfaceNetworkClient::parseEvent(const String& groupJson, Tangibl
     if ( !extractString(groupJson, "label", &id) ||
          !extractNumbers(groupJson, "position", positionValues, 3) ||
          !extractNumbers(groupJson, "quaternion", quaternionValues, 4) ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd position(positionValues[0], positionValues[1], positionValues[2]);
     Vector3Dd direction(quaternionValues[1], quaternionValues[2], quaternionValues[3]);
     Quaterniond rotation(direction, quaternionValues[0]);
     *outEvent = TangibleInterfaceEvent(id, position, rotation);
-    return true;
+    return TRUE;
 }
 
-bool TangibleInterfaceNetworkClient::extractString(const String& text, const char* key, String* out)
+BOOLEAN TangibleInterfaceNetworkClient::extractString(const String& text, const char* key, String* out)
 {
     String needle = String("\"") + key + "\"";
     int p = findText(text, needle.c_str());
     if ( p == String::npos ) {
-        return false;
+        return FALSE;
     }
     p = text.find(':', p + needle.length());
     if ( p == String::npos ) {
-        return false;
+        return FALSE;
     }
     p = text.find('"', p);
     if ( p == String::npos ) {
-        return false;
+        return FALSE;
     }
     int e = text.find('"', p + 1);
     if ( e == String::npos ) {
-        return false;
+        return FALSE;
     }
     *out = text.substr(p + 1, e - p - 1);
-    return true;
+    return TRUE;
 }
 
-bool TangibleInterfaceNetworkClient::extractNumbers(const String& text, const char* key, double* values, int count)
+BOOLEAN TangibleInterfaceNetworkClient::extractNumbers(const String& text, const char* key, double* values, int count)
 {
     String needle = String("\"") + key + "\"";
     int p = findText(text, needle.c_str());
     if ( p == String::npos ) {
-        return false;
+        return FALSE;
     }
     p = text.find('[', p + needle.length());
     int e = text.find(']', p);
     if ( p == String::npos || e == String::npos ) {
-        return false;
+        return FALSE;
     }
 
     String payload = text.substr(p + 1, e - p - 1);
@@ -221,10 +223,10 @@ bool TangibleInterfaceNetworkClient::extractNumbers(const String& text, const ch
         String token = (i == count - 1) ?
             payload.substr(start) : payload.substr(start, comma - start);
         if ( i != count - 1 && comma == String::npos ) {
-            return false;
+            return FALSE;
         }
         values[i] = atof(token.c_str());
         start = comma + 1;
     }
-    return true;
+    return TRUE;
 }

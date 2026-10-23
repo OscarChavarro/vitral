@@ -1,6 +1,7 @@
 #ifndef __DRAWING_AREA_INTERACTION_TECHNIQUES__
 #define __DRAWING_AREA_INTERACTION_TECHNIQUES__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
@@ -94,7 +95,7 @@ private:
         /**
         @return true if the gizmo changed
         */
-        bool apply(const MouseEvent& e) const;
+        BOOLEAN apply(const MouseEvent& e) const;
 
     private:
         DrawingAreaInteractionTechniques* owner;
@@ -136,9 +137,9 @@ private:
 
     RendererConfiguration* qualitySelection;
     /// A viewport title belongs to the HUD, never to the camera controller.
-    bool viewportTitleGesture;
+    BOOLEAN viewportTitleGesture;
     /// Suppresses the synthetic click following a title press/release.
-    bool viewportTitleClickConsumed;
+    BOOLEAN viewportTitleClickConsumed;
 
     //= Pointer shape =====================================================
     PointerCursor::Value getModeCursor();
@@ -149,15 +150,15 @@ private:
     Viewport* getViewportAtPointer(const MouseEvent& event);
     Viewport* getInteractionViewportAtPointer(const MouseEvent& event);
     Viewport* getGestureViewport();
-    bool isTranslationGestureConfined();
+    BOOLEAN isTranslationGestureConfined();
     MouseEvent toViewportEvent(const MouseEvent& event, Viewport* viewport);
     void wrapCursorIfRequested(Viewport* viewport);
-    bool processTranslationEvent(const MouseEvent& event, Viewport* viewport,
+    BOOLEAN processTranslationEvent(const MouseEvent& event, Viewport* viewport,
                                  const Vector3Dd& centroid,
                                  const MouseTechnique& technique);
-    bool processRotationEvent(const MouseEvent& event, Viewport* viewport,
+    BOOLEAN processRotationEvent(const MouseEvent& event, Viewport* viewport,
                               const MouseTechnique& technique);
-    bool processScaleEvent(const MouseEvent& event, Viewport* viewport,
+    BOOLEAN processScaleEvent(const MouseEvent& event, Viewport* viewport,
                            const MouseTechnique& technique);
     void cancelInputGizmoEditing();
     void applyRotationGizmoToBody(SimpleBody* body);
@@ -166,18 +167,18 @@ private:
 
     //= Keyboard ==========================================================
     void processEditionKeyPressedEvent(const KeyEvent& event);
-    bool processInputGizmoKeyPressedEvent(InteractionMode mode,
+    BOOLEAN processInputGizmoKeyPressedEvent(InteractionMode mode,
                                           const KeyEvent& event);
-    bool processRotationInputGizmoKeyPressedEvent(const KeyEvent& event);
-    bool processScaleInputGizmoKeyPressedEvent(const KeyEvent& event);
-    bool processTranslationInputGizmoKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processRotationInputGizmoKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processScaleInputGizmoKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processTranslationInputGizmoKeyPressedEvent(const KeyEvent& event);
     void processModeKeyPressedEvent(InteractionMode mode,
                                     const KeyEvent& event);
     void processGlobalKeyPressedEvent(const KeyEvent& event);
     void processCharacterKeyPressedEvent(const KeyEvent& event);
     void switchMode(InteractionMode mode, const String& message);
     void printBodyNames();
-    static bool isControlLetterChord(const KeyEvent& event);
+    static BOOLEAN isControlLetterChord(const KeyEvent& event);
     static String sceneOperationName(InteractionMode mode);
     static String keyOperationName(InteractionMode mode,
                                          const KeyEvent& event);
@@ -209,7 +210,7 @@ public:
     translation gizmo technique requests it (see
     `DrawingAreaInteractionListener::cursorWarpRequested`)
     */
-    void setCursorWrapEnabled(bool enabled);
+    void setCursorWrapEnabled(BOOLEAN enabled);
 
     /**
     Makes the camera controllers work over the camera and configuration of
@@ -265,7 +266,7 @@ public:
     @param viewport viewport to change
     @return true if the command was a viewport set one and was processed
     */
-    bool processViewportCommand(const String& command,
+    BOOLEAN processViewportCommand(const String& command,
                                 Viewport* viewport);
 
     /**

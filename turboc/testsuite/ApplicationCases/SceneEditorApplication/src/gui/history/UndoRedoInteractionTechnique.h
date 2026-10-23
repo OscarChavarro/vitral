@@ -1,6 +1,7 @@
 #ifndef __UNDO_REDO_INTERACTION_TECHNIQUE__
 #define __UNDO_REDO_INTERACTION_TECHNIQUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "gui/history/UndoRedoCommand.h"
@@ -56,7 +57,7 @@ public:
         /**
         @return true if an operation was undone or redone
         */
-        bool isDone() const
+        BOOLEAN isDone() const
         {
             return operationValue != NULL;
         }
@@ -82,7 +83,7 @@ public:
     @return false if the key chord is not an undo/redo one (the Java
     version returns null)
     */
-    static bool recognize(const KeyEvent& event,
+    static BOOLEAN recognize(const KeyEvent& event,
                           UndoRedoCommand::Value* outCommand);
 
     /**
@@ -94,7 +95,7 @@ public:
     @return false if the key is not an undo/redo one (the Java version
     returns null)
     */
-    bool processKeyPressedEvent(const KeyEvent& event, Viewport* viewport,
+    BOOLEAN processKeyPressedEvent(const KeyEvent& event, Viewport* viewport,
                                 Result* outResult);
 
     /**

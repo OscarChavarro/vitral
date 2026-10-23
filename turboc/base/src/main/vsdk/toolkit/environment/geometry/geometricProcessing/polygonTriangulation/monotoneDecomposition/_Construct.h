@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationSegment.h"
@@ -51,15 +52,15 @@ class _Construct {
     static int findNewRoots(int segmentIndex);
 
   public:
-    static bool greaterThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint);
-    static bool equalTo(Vector2Dd *firstPoint, Vector2Dd *secondPoint);
-    static bool greaterThanEqualTo(Vector2Dd *firstPoint,
+    static BOOLEAN greaterThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint);
+    static BOOLEAN equalTo(Vector2Dd *firstPoint, Vector2Dd *secondPoint);
+    static BOOLEAN greaterThanEqualTo(Vector2Dd *firstPoint,
                                    Vector2Dd *secondPoint);
-    static bool lessThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint);
+    static BOOLEAN lessThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint);
     static double cross(const Vector2Dd &v0, const Vector2Dd &v1,
                         const Vector2Dd &v2);
     static double dot(const Vector2Dd &v0, const Vector2Dd &v1);
-    static bool fpEqual(double firstValue, double secondValue);
+    static BOOLEAN fpEqual(double firstValue, double secondValue);
     static int constructTrapezoids(int nseg);
     static _TriangulationSegment &segmentAt(int index);
     static _TriangulationTrapezoid *trapezoidAt(int index);

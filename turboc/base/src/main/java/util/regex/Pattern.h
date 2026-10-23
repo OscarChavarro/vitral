@@ -1,6 +1,7 @@
 #ifndef __PATTERN__
 #define __PATTERN__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/regex/Matcher.h"
 #include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"

@@ -1,6 +1,7 @@
 #ifndef __GEOMETRY_CREATION_COMMANDS_EXECUTOR__
 #define __GEOMETRY_CREATION_COMMANDS_EXECUTOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "application/commands/CommandResult.h"
@@ -24,8 +25,8 @@ private:
     String message(const char* id) const;
     void createPlane();
     void createSphericalHarmonicDebugSpheres();
-    bool createVolume();
-    static bool hasFilledVoxels(const VoxelVolume& vv);
+    BOOLEAN createVolume();
+    static BOOLEAN hasFilledVoxels(const VoxelVolume& vv);
     void createBrep();
     void createParametricCubicCurve();
     void createFunctionalExplicitSurface();

@@ -1,6 +1,7 @@
 #ifndef __ENTITY_TRANSFORM_STATE__
 #define __ENTITY_TRANSFORM_STATE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Class.h"
 
 class Entity;
@@ -27,7 +28,7 @@ public:
     @return true if this object is an instance of the class or of one of
     its subclasses (Java `instanceof`)
     */
-    bool instanceOf(const Class &type) const;
+    BOOLEAN instanceOf(const Class &type) const;
 
 
     /**
@@ -44,7 +45,7 @@ public:
     @param other state captured from the same entity
     @return true if both states are the same placement
     */
-    virtual bool isSameState(const EntityTransformState* other) const = 0;
+    virtual BOOLEAN isSameState(const EntityTransformState* other) const = 0;
 
     /**
     C++ port helper: states are immutable values, shared by reference in

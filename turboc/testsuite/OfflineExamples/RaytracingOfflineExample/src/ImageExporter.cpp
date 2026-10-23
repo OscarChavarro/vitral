@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "ImageExporter.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-bool ImageExporter::exportImage(const String& outputFileName, RGBImageUncompressed* image)
+BOOLEAN ImageExporter::exportImage(const String& outputFileName, RGBImageUncompressed* image)
 {
     File outFile(outputFileName.c_str());
     printf("Exporting result image to file \"%s\": ", outputFileName.c_str());
@@ -18,8 +19,8 @@ bool ImageExporter::exportImage(const String& outputFileName, RGBImageUncompress
 
     // C++ port note: the extensions are taken into locals, as gcc 2.7.2
     // crashes on String temporaries inside && / || operands
-    bool isPng = false;
-    bool isJpeg = false;
+    BOOLEAN isPng = FALSE;
+    BOOLEAN isJpeg = FALSE;
     if ( lower.size() >= 4 ) {
         String extension = lower.substr(lower.size()-4);
         isPng = extension == ".png";
@@ -28,11 +29,11 @@ bool ImageExporter::exportImage(const String& outputFileName, RGBImageUncompress
     if ( lower.size() >= 5 ) {
         String extension = lower.substr(lower.size()-5);
         if ( extension == ".jpeg" ) {
-            isJpeg = true;
+            isJpeg = TRUE;
         }
     }
 
-    bool ok = false;
+    BOOLEAN ok = FALSE;
     if ( isPng ) {
         ok = ImagePersistence::exportPNG(outFile, image);
     }

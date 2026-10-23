@@ -1,6 +1,7 @@
 #ifndef __SPHERE__
 #define __SPHERE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Ray;
 class RayHit;
@@ -11,10 +12,12 @@ private:
     double radius;
     double radiusSquared;
 
-    static const int DEFAULT_PARALLELS = 8;
-    static const int DEFAULT_MERIDIANS = 16;
-    static const int MIN_PARALLELS = 2;
-    static const int MIN_MERIDIANS = 3;
+    enum {
+        DEFAULT_PARALLELS = 8,
+        DEFAULT_MERIDIANS = 16,
+        MIN_PARALLELS = 2,
+        MIN_MERIDIANS = 3
+    };
 
     static Vector3Dd spherePosition(double theta, double t, double r);
     PolyhedralBoundedSolid* buildPolyhedralBoundedSolid(int nmeridians, int nparalels);
@@ -27,7 +30,7 @@ public:
     virtual ~Sphere() {}
 
     Ray* doIntersectionFirstHit(const Ray& inoutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
     virtual double* getMinMax();

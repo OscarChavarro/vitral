@@ -1,6 +1,7 @@
 #ifndef __POLYGON_2_D__
 #define __POLYGON_2_D__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 class _Polygon2DContour;
@@ -36,7 +37,7 @@ public:
     virtual double* getMinMax();
 
     Ray* doIntersectionFirstHit(const Ray& inOut_ray);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double intT, RayHit* outData);
 
     BinaryTreeNode<_Polygon2DContour*>* getHeadNode();

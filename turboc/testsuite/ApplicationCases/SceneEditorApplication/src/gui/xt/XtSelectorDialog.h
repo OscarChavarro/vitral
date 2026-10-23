@@ -1,6 +1,7 @@
 #ifndef __XT_SELECTOR_DIALOG__
 #define __XT_SELECTOR_DIALOG__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 // Xt names its strings and objects as the vitral String and Object
@@ -44,8 +45,8 @@ public:
     /**
     @param visible true to show the dialog, false to hide it
     */
-    void setVisible(bool visible);
-    bool isVisible() const;
+    void setVisible(BOOLEAN visible);
+    BOOLEAN isVisible() const;
 
     /**
     Selects only a geometry object in the tree (automation service), as a
@@ -107,7 +108,7 @@ private:
     SceneHierarchyPresenter presenter;
     XtDialogHost::Form* form;
     DialogTreeNode hierarchy;
-    bool updating;
+    BOOLEAN updating;
     Widget popupMenu;
 
     // XtDialogHost::MessageSource

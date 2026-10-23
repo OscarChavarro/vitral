@@ -1,6 +1,7 @@
 #ifndef __POLYGON_2_DWA__
 #define __POLYGON_2_DWA__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
@@ -12,11 +13,11 @@ public:
 private:
     _Polygon2DContourWA* currentLoop;
 
-    bool areCollinearAndOposite2DVectors(const Vertex2D& vEndA, const Vertex2D& vStartAB, const Vertex2D& vEndB);
+    BOOLEAN areCollinearAndOposite2DVectors(const Vertex2D& vEndA, const Vertex2D& vStartAB, const Vertex2D& vEndB);
 
 public:
     _Polygon2DWA();
-    _Polygon2DWA(const Polygon2D& polyToCopy, bool copyClean);
+    _Polygon2DWA(const Polygon2D& polyToCopy, BOOLEAN copyClean);
     ~_Polygon2DWA();
 
     void addVertex(double x, double y, double r, double g, double b);

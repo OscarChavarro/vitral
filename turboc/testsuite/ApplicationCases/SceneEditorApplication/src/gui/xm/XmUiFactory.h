@@ -1,6 +1,7 @@
 #ifndef __XM_UI_FACTORY__
 #define __XM_UI_FACTORY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/xt/XtUiFactory.h"
 #include "vsdk/toolkit/gui/XmWidgetSet.h"
 
@@ -21,7 +22,7 @@ public:
     */
     virtual const char* getResourceFile();
 
-    virtual bool showFileDialog(XtApplicationHost* host,
+    virtual BOOLEAN showFileDialog(XtApplicationHost* host,
                                 const String& title,
                                 const String& folder,
                                 const ArrayList<FileSuffixFilter>& filters,

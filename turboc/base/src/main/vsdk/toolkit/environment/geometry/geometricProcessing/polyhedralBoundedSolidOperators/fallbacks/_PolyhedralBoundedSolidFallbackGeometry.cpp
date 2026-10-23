@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidFallbackGeometry.h"
@@ -34,24 +35,24 @@ double FallbackGeometry::coordinate(const Vector3Dd& p, int axis)
     return p.z();
 }
 
-bool FallbackGeometry::sameCoordinate(double a, double b)
+BOOLEAN FallbackGeometry::sameCoordinate(double a, double b)
 {
     return fabs(a - b) <= numericContext.bigEpsilon();
 }
 
-bool FallbackGeometry::boundsMatch(const double* a, const double* b)
+BOOLEAN FallbackGeometry::boundsMatch(const double* a, const double* b)
 {
     int i;
 
     if ( a == 0 || b == 0 ) {
-        return false;
+        return FALSE;
     }
     for ( i = 0; i < 6; i++ ) {
         if ( !sameCoordinate(a[i], b[i]) ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 void FallbackGeometry::addUniqueCoordinate(ArrayList<double>& values,
@@ -113,16 +114,16 @@ FallbackGeometry::Profile FallbackGeometry::extractProfileAtX(
             Profile profile;
             double area;
             long int k;
-            bool onPlane;
+            BOOLEAN onPlane;
 
             if ( loop->halfEdgesList.size() < 3 ) {
                 continue;
             }
-            onPlane = true;
+            onPlane = TRUE;
             for ( k = 0; k < loop->halfEdgesList.size(); k++ ) {
                 Vector3Dd p = loop->halfEdgesList.get(k)->startingVertex->position;
                 if ( !sameCoordinate(p.x(), x) ) {
-                    onPlane = false;
+                    onPlane = FALSE;
                     break;
                 }
                 profile.add(p);
@@ -140,7 +141,7 @@ FallbackGeometry::Profile FallbackGeometry::extractProfileAtX(
     return best;
 }
 
-bool FallbackGeometry::sameProfilePoint(const Vector3Dd& a, const Vector3Dd& b)
+BOOLEAN FallbackGeometry::sameProfilePoint(const Vector3Dd& a, const Vector3Dd& b)
 {
     return sameCoordinate(a.x(), b.x()) &&
            sameCoordinate(a.y(), b.y()) &&
@@ -186,7 +187,7 @@ FallbackGeometry::Profile FallbackGeometry::clipProfileAboveZ(
 {
     Profile clipped;
     Vector3Dd previous;
-    bool previousInside;
+    BOOLEAN previousInside;
     long i;
 
     if ( profile.size() < 3 ) {
@@ -197,7 +198,7 @@ FallbackGeometry::Profile FallbackGeometry::clipProfileAboveZ(
     previousInside = previous.z() + numericContext.bigEpsilon() >= zCut;
     for ( i = 0; i < profile.size(); i++ ) {
         Vector3Dd current = profile[i];
-        bool currentInside = current.z() + numericContext.bigEpsilon() >= zCut;
+        BOOLEAN currentInside = current.z() + numericContext.bigEpsilon() >= zCut;
 
         if ( currentInside ) {
             if ( !previousInside ) {

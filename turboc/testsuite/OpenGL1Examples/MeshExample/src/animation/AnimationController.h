@@ -1,6 +1,7 @@
 #ifndef __ANIMATION_CONTROLLER__
 #define __ANIMATION_CONTROLLER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 
 class MeshModel;
@@ -10,8 +11,8 @@ class AnimationController {
 private:
     MeshModel* model;
     Runnable* repaintCallback;
-    bool started;
-    volatile bool stopRequested;
+    BOOLEAN started;
+    volatile BOOLEAN stopRequested;
     pthread_t thread;
 
     static void* threadEntry(void* arg);

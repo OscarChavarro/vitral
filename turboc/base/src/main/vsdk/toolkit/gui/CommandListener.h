@@ -1,6 +1,7 @@
 #ifndef __COMMAND_LISTENER__
 #define __COMMAND_LISTENER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/PresentationElement.h"
 
@@ -14,7 +15,7 @@ public:
     virtual const Class *getClass() const;
 
     virtual ~CommandListener() {}
-    virtual bool executeCommand(const String& commandId) = 0;
+    virtual BOOLEAN executeCommand(const String& commandId) = 0;
 };
 
 #endif

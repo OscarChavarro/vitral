@@ -61,14 +61,16 @@ public:
 
 private:
     // Sizes, in pixels, designed for legacy resolutions
-    static const int BASE_FONT_SIZE = 14;
-    static const int BASE_MARGIN = 10;
-    static const int BASE_GAP = 4;
-    static const int BASE_PADDING_X = 3;
-    static const int BASE_PADDING_Y = 1;
-    static const int BASE_FRAME_THICKNESS = 1;
-    static const int BASE_UNDERLINE_DISTANCE = 2;
-    static const int BASE_UNDERLINE_THICKNESS = 2;
+    enum {
+        BASE_FONT_SIZE = 14,
+        BASE_MARGIN = 10,
+        BASE_GAP = 4,
+        BASE_PADDING_X = 3,
+        BASE_PADDING_Y = 1,
+        BASE_FRAME_THICKNESS = 1,
+        BASE_UNDERLINE_DISTANCE = 2,
+        BASE_UNDERLINE_THICKNESS = 2
+    };
 
     /// Rectangle {x0, y0, x1, y1, r, g, b}, in pixels of the viewport,
     /// measured from its lower left corner

@@ -1,6 +1,7 @@
 #ifndef __FUNCTIONAL_EXPLICIT_SURFACE__
 #define __FUNCTIONAL_EXPLICIT_SURFACE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 class AlgebraicExpression;
@@ -54,7 +55,7 @@ public:
     virtual double* getMinMax();
 
     Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
 };

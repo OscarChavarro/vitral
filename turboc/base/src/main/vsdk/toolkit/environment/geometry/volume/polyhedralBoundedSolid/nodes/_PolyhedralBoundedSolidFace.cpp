@@ -137,7 +137,7 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(
     return 0;
 }
 
-bool _PolyhedralBoundedSolidFace::calculatePlane()
+BOOLEAN _PolyhedralBoundedSolidFace::calculatePlane()
 {
     return getContainingPlane() == 0;
 }
@@ -212,7 +212,8 @@ _PolyhedralBoundedSolidFace::testPointInsideDetailed(
         dominantCoordinate = 3;
     }
 
-    for (long int i = 0; i < boundariesList.size(); ++i) {
+    long int i;
+    for (i = 0; i < boundariesList.size(); ++i) {
         _PolyhedralBoundedSolidLoop* loop = boundariesList.get(i);
         _PolyhedralBoundedSolidHalfEdge* he =
             loop != 0 ? loop->boundaryStartHalfEdge : 0;
@@ -266,13 +267,13 @@ _PolyhedralBoundedSolidFace::testPointInsideDetailed(
     double u = projectedPoint.x();
     double v = projectedPoint.y();
 
-    for (long int i = 0; i < polygon2Du.size(); ++i) {
+    for (i = 0; i < polygon2Du.size(); ++i) {
         polygon2Du.set(i, polygon2Du.get(i) - u);
         polygon2Dv.set(i, polygon2Dv.get(i) - v);
     }
     nc = 0;
 
-    for (long int i = 0; i < polygon2Du.size() - 1; i += 2) {
+    for (i = 0; i < polygon2Du.size() - 1; i += 2) {
         double ua = polygon2Du.get(i);
         double va = polygon2Dv.get(i);
         double ub = polygon2Du.get(i + 1);
@@ -315,8 +316,8 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
     Vector3Dd b;
     Vector3Dd n1;
     Vector3Dd temp;
-    bool readyVecA;
-    bool readyVecB;
+    BOOLEAN readyVecA;
+    BOOLEAN readyVecB;
     double dotP;
     unsigned char domPlane;
     Vector3Dd vPrev;
@@ -335,8 +336,8 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
     }
     heStart = he;
 
-    readyVecA = false;
-    readyVecB = false;
+    readyVecA = FALSE;
+    readyVecB = FALSE;
 
     do {
         p0 = he->startingVertex->position;
@@ -345,7 +346,7 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
         if (!readyVecA) {
             if (temp.length() > tolerance) {
                 a = temp.normalized();
-                readyVecA = true;
+                readyVecA = TRUE;
             }
         }
         else if (!readyVecB) {
@@ -354,7 +355,7 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
                 dotP = Cpp98Support::abs(temp.dotProduct(a));
                 if (dotP < 1 - nonColinearDotTolerance) {
                     b = temp;
-                    readyVecB = true;
+                    readyVecB = TRUE;
                 }
             }
         }

@@ -1,4 +1,5 @@
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.h"
@@ -12,7 +13,7 @@
 typedef _PolyhedralBoundedSolidProfileDifferenceFallback ProfileFallback;
 typedef _PolyhedralBoundedSolidFallbackGeometry FallbackGeometry;
 
-bool ProfileFallback::isBetween(double value, double min, double max)
+BOOLEAN ProfileFallback::isBetween(double value, double min, double max)
 {
     return value > min + numericContext.bigEpsilon() &&
            value < max - numericContext.bigEpsilon();
@@ -34,7 +35,7 @@ ProfileFallback::prepareProfileDifferenceFallbackSpec(
 
     double* minuendBounds = minuend->getMinMax();
     double* subtrahendBounds = subtrahend->getMinMax();
-    bool sameBounds = FallbackGeometry::boundsMatch(minuendBounds, subtrahendBounds);
+    BOOLEAN sameBounds = FallbackGeometry::boundsMatch(minuendBounds, subtrahendBounds);
     delete[] subtrahendBounds;
     _PolyhedralBoundedSolidProfileDifferenceFallbackSpec* spec = 0;
 
@@ -108,7 +109,7 @@ PolyhedralBoundedSolid* ProfileFallback::applyProfileDifferenceFallbackIfNeeded(
         return result;
     }
     double* resultBounds = result->getMinMax();
-    bool sameBounds = FallbackGeometry::boundsMatch(resultBounds, spec->minuendBounds);
+    BOOLEAN sameBounds = FallbackGeometry::boundsMatch(resultBounds, spec->minuendBounds);
     delete[] resultBounds;
     if ( !sameBounds ) {
         return result;

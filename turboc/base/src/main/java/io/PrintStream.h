@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/OutputStream.h"
 
 class PrintStream {

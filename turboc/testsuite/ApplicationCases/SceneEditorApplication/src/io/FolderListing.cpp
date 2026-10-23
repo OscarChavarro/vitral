@@ -5,11 +5,12 @@
 // realpath, which old C libraries (i.e. libc 5) declare there
 #include <unistd.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "io/FolderListing.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/Comparator.h"
 
-bool FolderListing::isFolder(const String& path)
+BOOLEAN FolderListing::isFolder(const String& path)
 {
     struct stat status;
     return stat(path.c_str(), &status) == 0 && S_ISDIR(status.st_mode);
@@ -24,19 +25,19 @@ String FolderListing::normalizeFolder(const String& folder)
     return folder;
 }
 
-bool FolderListing::accepts(const ArrayList<FileSuffixFilter>& filters,
+BOOLEAN FolderListing::accepts(const ArrayList<FileSuffixFilter>& filters,
                             const String& path)
 {
     if ( filters.isEmpty() || isFolder(path) ) {
-        return true;
+        return TRUE;
     }
     File file(path.c_str());
     for ( long i = 0; i < filters.size(); i++ ) {
         if ( filters[i].accept(file) ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 void FolderListing::list(const String& folder,

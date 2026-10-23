@@ -1,6 +1,7 @@
 #ifndef __VIEWPORT_STATE__
 #define __VIEWPORT_STATE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class Camera;
@@ -17,14 +18,14 @@ viewport in its viewport set (layout, maximization) is not part of it.
 */
 class ViewportState {
 public:
-    static const int CAMERA_COUNT = 5;
+    enum { CAMERA_COUNT = 5 };
 
 private:
     Viewport* viewport;
     Camera* activeCamera;
     CameraState* cameraStates[CAMERA_COUNT];
     int renderMode;
-    bool showGrid;
+    BOOLEAN showGrid;
     int requestedSizeXInPixels;
     int requestedSizeYInPixels;
     RendererConfiguration* rendererConfiguration;
@@ -66,7 +67,7 @@ public:
     @param other state captured from the same viewport
     @return true if both states show the scene the same way
     */
-    bool isSameState(const ViewportState* other) const;
+    BOOLEAN isSameState(const ViewportState* other) const;
 };
 
 #endif

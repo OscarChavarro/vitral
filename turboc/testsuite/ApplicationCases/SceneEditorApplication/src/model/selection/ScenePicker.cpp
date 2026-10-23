@@ -1,5 +1,6 @@
 #include <float.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -15,7 +16,7 @@ ScenePicker::ScenePicker(Scene* scene) : scene(scene)
 {
 }
 
-Ray ScenePicker::selectObjectWithMouse(int x, int y, bool composite)
+Ray ScenePicker::selectObjectWithMouse(int x, int y, BOOLEAN composite)
 {
     Camera* camera = scene->activeCamera;
     SimpleBody* gi;

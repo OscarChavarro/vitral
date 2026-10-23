@@ -419,7 +419,3 @@ const double ProceduralNoise::REAL_SCALE = (2.0 / 65535.0);
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int ProceduralNoise::MIN_X;
-const int ProceduralNoise::MIN_Y;
-const int ProceduralNoise::MIN_Z;
-const int ProceduralNoise::MAXSIZE;

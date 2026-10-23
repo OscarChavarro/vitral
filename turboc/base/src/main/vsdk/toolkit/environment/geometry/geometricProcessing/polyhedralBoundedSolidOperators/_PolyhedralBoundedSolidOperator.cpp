@@ -29,29 +29,29 @@ _PolyhedralBoundedSolidIdNamespace* _PolyhedralBoundedSolidOperator::idNamespace
 /// Name of the system property that enables the pipeline traces
 static const char* const TRACE_PIPELINE_SUMMARY = "vsdk.setop.tracePipelineSummary";
 
-static bool searchForEdge(ArrayList<_PolyhedralBoundedSolidEdge*>& l,
+static BOOLEAN searchForEdge(ArrayList<_PolyhedralBoundedSolidEdge*>& l,
                    _PolyhedralBoundedSolidEdge* e)
 {
     long i;
 
     for ( i = 0; i < l.size(); i++ ) {
-        if ( l.get(i) == e ) return true;
+        if ( l.get(i) == e ) return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
-static bool searchForVertex(ArrayList<_PolyhedralBoundedSolidVertex*>& l,
+static BOOLEAN searchForVertex(ArrayList<_PolyhedralBoundedSolidVertex*>& l,
                      _PolyhedralBoundedSolidVertex* v)
 {
     long i;
 
     for ( i = 0; i < l.size(); i++ ) {
-        if ( l.get(i) == v ) return true;
+        if ( l.get(i) == v ) return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
-static const char* booleanName(bool value)
+static const char* booleanName(BOOLEAN value)
 {
     return value ? "true" : "false";
 }
@@ -74,7 +74,7 @@ void _PolyhedralBoundedSolidOperator::setIdNamespace(
     idNamespace = ns;
 }
 
-bool _PolyhedralBoundedSolidOperator::neighbor(
+BOOLEAN _PolyhedralBoundedSolidOperator::neighbor(
     _PolyhedralBoundedSolidHalfEdge* h1, _PolyhedralBoundedSolidHalfEdge* h2)
 {
     return (h1->parentLoop->parentFace == h2->parentLoop->parentFace) &&
@@ -150,12 +150,12 @@ void _PolyhedralBoundedSolidOperator::movefac(_PolyhedralBoundedSolidFace* f,
     }
 }
 
-bool _PolyhedralBoundedSolidOperator::canMoveFace(_PolyhedralBoundedSolidFace* f)
+BOOLEAN _PolyhedralBoundedSolidOperator::canMoveFace(_PolyhedralBoundedSolidFace* f)
 {
     long i;
 
     if ( f == NULL ) {
-        return false;
+        return FALSE;
     }
     for ( i = 0; i < f->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidLoop* l = f->boundariesList.get(i);
@@ -164,7 +164,7 @@ bool _PolyhedralBoundedSolidOperator::canMoveFace(_PolyhedralBoundedSolidFace* f
         long guard;
 
         if ( l == NULL || l->boundaryStartHalfEdge == NULL ) {
-            return false;
+            return FALSE;
         }
         start = l->boundaryStartHalfEdge;
         he = start;
@@ -176,16 +176,16 @@ bool _PolyhedralBoundedSolidOperator::canMoveFace(_PolyhedralBoundedSolidFace* f
                  he->startingVertex == NULL ||
                  he->mirrorHalfEdge() == NULL ||
                  he->next() == NULL ) {
-                return false;
+                return FALSE;
             }
             he = he->next();
             guard++;
         } while ( he != start && guard <= l->halfEdgesList.size() + 1 );
         if ( he != start ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 Vector3Dd _PolyhedralBoundedSolidOperator::bisector(
@@ -235,7 +235,7 @@ void _PolyhedralBoundedSolidOperator::laringmv(_PolyhedralBoundedSolidFace* f1,
                 String("laringmv MOVE wouldMove=") +
                 booleanName(ringBelongsToOtherHalf(f1, f2, l)));
         }
-        if ( PolyhedralBoundedSolidEulerOperators::lringmv(f1->parentSolid, l, f2, false) ) {
+        if ( PolyhedralBoundedSolidEulerOperators::lringmv(f1->parentSolid, l, f2, FALSE) ) {
             i--;
         }
     }
@@ -263,7 +263,7 @@ Phase 3 shadow study):
 @param l pending ring currently parented by `f1`
 @return true when the ring must move to `f2`
 */
-bool _PolyhedralBoundedSolidOperator::ringBelongsToOtherHalf(
+BOOLEAN _PolyhedralBoundedSolidOperator::ringBelongsToOtherHalf(
     _PolyhedralBoundedSolidFace* f1,
     _PolyhedralBoundedSolidFace* f2,
     _PolyhedralBoundedSolidLoop* l)
@@ -271,13 +271,13 @@ bool _PolyhedralBoundedSolidOperator::ringBelongsToOtherHalf(
     if ( f1 == NULL || f2 == NULL || l == NULL ||
          l->boundaryStartHalfEdge == NULL ||
          l->boundaryStartHalfEdge->startingVertex == NULL ) {
-        return true;
+        return TRUE;
     }
     Vector3Dd point = l->boundaryStartHalfEdge->startingVertex->position;
     int insideF1 = outerLoopParityContains(f1, point);
     int insideF2 = outerLoopParityContains(f2, point);
     if ( insideF1 < 0 || insideF2 < 0 ) {
-        return true;
+        return TRUE;
     }
     if ( insideF1 != insideF2 ) {
         return insideF2 == 1;
@@ -290,17 +290,17 @@ bool _PolyhedralBoundedSolidOperator::ringBelongsToOtherHalf(
             ? f2->boundariesList.get(0) : NULL;
         if ( f2Outer == NULL || f2Outer->boundaryStartHalfEdge == NULL ||
              f2Outer->boundaryStartHalfEdge->startingVertex == NULL ) {
-            return true;
+            return TRUE;
         }
         int f2NestedInF1 = outerLoopParityContains(f1,
             f2Outer->boundaryStartHalfEdge->startingVertex->position);
         if ( f2NestedInF1 < 0 ) {
-            return true;
+            return TRUE;
         }
         return f2NestedInF1 == 1;
     }
     // Outside both (on the dividing boundary or degenerate): legacy.
-    return true;
+    return TRUE;
 }
 
 /**
@@ -341,7 +341,7 @@ int _PolyhedralBoundedSolidOperator::outerLoopParityContains(
 
     double pu = shadowProjectedU(point, dropAxis);
     double pv = shadowProjectedV(point, dropAxis);
-    bool inside = false;
+    BOOLEAN inside = FALSE;
     int guard = 0;
     _PolyhedralBoundedSolidHalfEdge* start = outerLoop->boundaryStartHalfEdge;
     _PolyhedralBoundedSolidHalfEdge* he = start;
@@ -426,17 +426,17 @@ void _PolyhedralBoundedSolidOperator::traceRingMoveShadowDecision(
     double pu = shadowProjectedU(point, dropAxis);
     double pv = shadowProjectedV(point, dropAxis);
 
-    bool inside = false;
+    BOOLEAN inside = FALSE;
     double minClearance = DBL_MAX;
     int outerSize = 0;
     _PolyhedralBoundedSolidHalfEdge* start = outerLoop->boundaryStartHalfEdge;
     _PolyhedralBoundedSolidHalfEdge* he = start;
-    bool walkable = true;
+    BOOLEAN walkable = TRUE;
     do {
         _PolyhedralBoundedSolidHalfEdge* next = he->next();
         if ( next == NULL || he->startingVertex == NULL ||
              next->startingVertex == NULL ) {
-            walkable = false;
+            walkable = FALSE;
             break;
         }
         double au = shadowProjectedU(he->startingVertex->position, dropAxis);
@@ -504,15 +504,15 @@ double _PolyhedralBoundedSolidOperator::shadowProjectedV(const Vector3Dd& p,
 
 void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
                                            _PolyhedralBoundedSolidHalfEdge* h2,
-                                           bool withDebug)
+                                           BOOLEAN withDebug)
 {
-    join(h1, h2, withDebug, true);
+    join(h1, h2, withDebug, TRUE);
 }
 
 void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
                                            _PolyhedralBoundedSolidHalfEdge* h2,
-                                           bool withDebug,
-                                           bool allowRingMove)
+                                           BOOLEAN withDebug,
+                                           BOOLEAN allowRingMove)
 {
     PolyhedralBoundedSolidStatistics::recordJoinCall();
     _PolyhedralBoundedSolidFace* oldf;
@@ -575,14 +575,14 @@ void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
     }
 }
 
-bool _PolyhedralBoundedSolidOperator::checkWideness(
+BOOLEAN _PolyhedralBoundedSolidOperator::checkWideness(
     _PolyhedralBoundedSolidHalfEdge* he)
 {
     if ( he == NULL || he->parentLoop == NULL ||
          he->parentLoop->parentFace == NULL ||
          he->parentLoop->parentFace->getContainingPlane() == NULL ||
          he->previous() == NULL || he->next() == NULL ) {
-        return true;
+        return TRUE;
     }
 
     Vector3Dd ref1;
@@ -595,7 +595,7 @@ bool _PolyhedralBoundedSolidOperator::checkWideness(
         he->startingVertex->position);
     ref12 = ref1.crossProduct(ref2);
     if ( ref12.length() < VSDK::EPSILON ) {
-        return true;
+        return TRUE;
     }
     return ref12.dotProduct(
         he->parentLoop->parentFace->getContainingPlane()->getNormal()) <= 0.0;
@@ -603,7 +603,3 @@ bool _PolyhedralBoundedSolidOperator::checkWideness(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidOperator::UNION;
-const int _PolyhedralBoundedSolidOperator::INTERSECTION;
-const int _PolyhedralBoundedSolidOperator::SUBTRACT;
-const int _PolyhedralBoundedSolidOperator::DIFFERENCE;

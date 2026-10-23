@@ -466,7 +466,7 @@ CameraSnapshot* Camera::exportToCameraSnapshot(int viewportXSizeIn, int viewport
         tmp.farPlaneDistance);
 }
 
-bool Camera::projectPointUsingRayMethod(const Vector3Dd& inPoint,
+BOOLEAN Camera::projectPointUsingRayMethod(const Vector3Dd& inPoint,
                                         Vector3Dd* outProjected)
 {
     // 1. Calculate vectors
@@ -514,14 +514,14 @@ bool Camera::projectPointUsingRayMethod(const Vector3Dd& inPoint,
         if ( hit == NULL ||
              r.getDirection().length() < VSDK::EPSILON ) {
             delete hit;
-            return false;
+            return FALSE;
         }
         projected = hit->getOrigin().add(hit->getDirection().multiply(hit->getT())).subtract(center);
         delete hit;
         // 3.4. Clip projected point in viewport
         if ( projected.x() < -1 || projected.x() > 1 ||
              projected.y() < -1 || projected.y() > 1 ) {
-            return false;
+            return FALSE;
         }
     }
 
@@ -539,22 +539,8 @@ bool Camera::projectPointUsingRayMethod(const Vector3Dd& inPoint,
     }
 
     *outProjected = Vector3Dd(x, y, 0.0);
-    return true;
+    return TRUE;
 }
-
-// Definitions of integral constants initialized in the class (C++98 needs
-// them when the constants are bound to references)
-const int Camera::PROJECTION_MODE_ORTHOGONAL;
-const int Camera::PROJECTION_MODE_PERSPECTIVE;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int Camera::OPCODE_FAR;
-const int Camera::OPCODE_NEAR;
-const int Camera::OPCODE_RIGHT;
-const int Camera::OPCODE_LEFT;
-const int Camera::OPCODE_UP;
-const int Camera::OPCODE_DOWN;
 
 const Class Camera::CLASS = { "Camera", &Entity::CLASS };
 

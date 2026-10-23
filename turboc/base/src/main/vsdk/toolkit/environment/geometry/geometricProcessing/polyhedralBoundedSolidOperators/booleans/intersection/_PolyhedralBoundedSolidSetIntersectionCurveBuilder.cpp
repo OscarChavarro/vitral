@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 #include <float.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/util/TreeSet.h"
 #include "java/lang/String.h"
@@ -76,7 +77,7 @@ struct FacePairGroup {
     ArrayList<int> nodes;
 };
 
-static bool containsValue(const ArrayList<int>& values, int value)
+static BOOLEAN containsValue(const ArrayList<int>& values, int value)
 {
     return values.contains(value);
 }
@@ -89,7 +90,7 @@ Builder::Report::Report()
 {
 }
 
-bool Builder::Report::isCleanlyClosed() const
+BOOLEAN Builder::Report::isCleanlyClosed() const
 {
     long coveredByCycles;
     long i;
@@ -97,7 +98,7 @@ bool Builder::Report::isCleanlyClosed() const
     if ( !openChains.isEmpty() || !isolatedNodes.isEmpty() ||
          !pinchNodes.isEmpty() || oddFacePairGroupCount > 0 ||
          degenerateDirectionGroupCount > 0 ) {
-        return false;
+        return FALSE;
     }
     coveredByCycles = 0;
     for ( i = 0; i < cycles.size(); i++ ) {
@@ -169,31 +170,31 @@ void Builder::collectFaces(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
     }
 }
 
-bool Builder::nodePosition(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
+BOOLEAN Builder::nodePosition(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
     Vector3Dd& outPosition)
 {
     if ( ne.e == 0 || ne.e->rightHalf == 0 ||
          ne.e->rightHalf->startingVertex == 0 ) {
-        return false;
+        return FALSE;
     }
     outPosition = ne.e->rightHalf->startingVertex->position;
-    return true;
+    return TRUE;
 }
 
-bool Builder::faceNormal(_PolyhedralBoundedSolidFace* face, Vector3Dd& outNormal)
+BOOLEAN Builder::faceNormal(_PolyhedralBoundedSolidFace* face, Vector3Dd& outNormal)
 {
     InfinitePlane* plane;
 
     if ( face == 0 ) {
-        return false;
+        return FALSE;
     }
     plane = face->getContainingPlane();
     if ( plane == 0 ) {
-        return false;
+        return FALSE;
     }
     outNormal = plane->getNormal();
     delete plane;
-    return true;
+    return TRUE;
 }
 
 void Builder::link(ArrayList<IndexList>& neighbors, int i, int j)
@@ -257,7 +258,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
             for ( long b = 0; b < facesB.size(); b++ ) {
                 _PolyhedralBoundedSolidFace* fb = facesB[b];
                 long long key = (((long long)fa->id) << 32) ^
-                    ((long long)fb->id & 0xffffffffLL);
+                    ((long long)fb->id & VSDK_LL(0xffffffff));
                 long* found = groupIndex.get(key);
                 long index;
                 if ( found == NULL ) {
@@ -296,7 +297,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
         Vector3Dd normalA;
         Vector3Dd normalB;
         Vector3Dd direction;
-        bool hasDirection = false;
+        BOOLEAN hasDirection = FALSE;
         if ( faceNormal(group.faceA, normalA) &&
              faceNormal(group.faceB, normalB) ) {
             direction = normalA.crossProduct(normalB);
@@ -327,13 +328,13 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
     //-----------------------------------------------------------------
     // 3. Classify nodes and extract chains (from terminals) and cycles.
     //-----------------------------------------------------------------
-    ArrayList<bool> visited(Collections<bool>::nCopies(n, false));
+    ArrayList<BOOLEAN> visited(Collections<BOOLEAN>::nCopies(n, FALSE));
 
     for ( k = 0; k < n; k++ ) {
         long degree = neighbors[k].size();
         if ( degree == 0 ) {
             report.isolatedNodes.add(k);
-            visited[k] = true;
+            visited[k] = TRUE;
         }
         else if ( degree > 2 ) {
             report.pinchNodes.add(k);
@@ -372,7 +373,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
             int prev = k;
             int cur = nb;
             while ( neighbors[cur].size() == 2 && !visited[cur] ) {
-                visited[cur] = true;
+                visited[cur] = TRUE;
                 path.add(cur);
                 int next = -1;
                 for ( long c = 0; c < neighbors[cur].size(); c++ ) {
@@ -402,16 +403,16 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
         }
         IndexList path;
         path.add(k);
-        visited[k] = true;
+        visited[k] = TRUE;
         int prev = k;
         int cur = neighbors[k][0];
-        bool closed = true;
+        BOOLEAN closed = TRUE;
         while ( cur != k ) {
             if ( visited[cur] || neighbors[cur].size() != 2 ) {
-                closed = false;
+                closed = FALSE;
                 break;
             }
-            visited[cur] = true;
+            visited[cur] = TRUE;
             path.add(cur);
             int next = -1;
             for ( long c = 0; c < neighbors[cur].size(); c++ ) {
@@ -421,7 +422,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
                 }
             }
             if ( next < 0 ) {
-                closed = false;
+                closed = FALSE;
                 break;
             }
             prev = cur;
@@ -441,7 +442,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
 
 //= Traversal order =================================================
 
-bool Builder::computeTraversalOrder(const ArrayList<IndexList>& cycles,
+BOOLEAN Builder::computeTraversalOrder(const ArrayList<IndexList>& cycles,
     int nodeCount,
     IndexList& outPermutation)
 {
@@ -450,22 +451,22 @@ bool Builder::computeTraversalOrder(const ArrayList<IndexList>& cycles,
     long j;
 
     if ( nodeCount <= 0 ) {
-        return false;
+        return FALSE;
     }
-    ArrayList<bool> seen(Collections<bool>::nCopies(nodeCount, false));
+    ArrayList<BOOLEAN> seen(Collections<BOOLEAN>::nCopies(nodeCount, FALSE));
     covered = 0;
     for ( i = 0; i < cycles.size(); i++ ) {
         const IndexList& cycle = cycles[i];
         for ( j = 0; j < cycle.size(); j++ ) {
             if ( cycle[j] < 0 || cycle[j] >= nodeCount || seen[cycle[j]] ) {
-                return false;
+                return FALSE;
             }
-            seen[cycle[j]] = true;
+            seen[cycle[j]] = TRUE;
             covered++;
         }
     }
     if ( covered != nodeCount ) {
-        return false;
+        return FALSE;
     }
 
     ArrayList<IndexList> ordered = cycles;
@@ -487,10 +488,10 @@ bool Builder::computeTraversalOrder(const ArrayList<IndexList>& cycles,
             position++;
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
+BOOLEAN Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
     int nodeCount,
     NullEdgeList& sonea,
     NullEdgeList& soneb,
@@ -502,7 +503,7 @@ bool Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
 
     lastTraversalNeighborPositions.clear();
     if ( !computeTraversalOrder(cycles, nodeCount, validation) ) {
-        return false;
+        return FALSE;
     }
 
     ArrayList<IndexList> ordered = cycles;
@@ -560,8 +561,8 @@ bool Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
         for ( j = 0; j < len; j++ ) {
             int current = directedCycle[j];
             int successor = directedCycle[(j + 1) % len];
-            orientTowardSuccessor(sonea[current], sonea[successor], false);
-            orientTowardSuccessor(soneb[current], soneb[successor], true);
+            orientTowardSuccessor(sonea[current], sonea[successor], FALSE);
+            orientTowardSuccessor(soneb[current], soneb[successor], TRUE);
         }
 
         // Rotation: the first cycle starts at its minimum member index;
@@ -577,7 +578,7 @@ bool Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
         }
         else {
             Vector3Dd anchor;
-            bool hasAnchor = nodePosition(sonea[directedCycles[0][0]], anchor);
+            BOOLEAN hasAnchor = nodePosition(sonea[directedCycles[0][0]], anchor);
             double bestDistance = DBL_MAX;
             for ( j = 0; j < len; j++ ) {
                 Vector3Dd p;
@@ -638,7 +639,7 @@ bool Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
         }
     }
     lastTraversalNeighborPositions = neighborPositions;
-    return true;
+    return TRUE;
 }
 
 int Builder::successorSharedHalfIsRight(
@@ -661,9 +662,9 @@ int Builder::successorSharedHalfIsRight(
         halfEdgeFace(successor.e->rightHalf);
     _PolyhedralBoundedSolidFace* successorLeftFace =
         halfEdgeFace(successor.e->leftHalf);
-    bool rightShared = currentRightFace == successorRightFace ||
+    BOOLEAN rightShared = currentRightFace == successorRightFace ||
         currentRightFace == successorLeftFace;
-    bool leftShared = currentLeftFace == successorRightFace ||
+    BOOLEAN leftShared = currentLeftFace == successorRightFace ||
         currentLeftFace == successorLeftFace;
     if ( rightShared == leftShared ) {
         return -1;
@@ -674,7 +675,7 @@ int Builder::successorSharedHalfIsRight(
 void Builder::orientTowardSuccessor(
     _PolyhedralBoundedSolidSetOperatorNullEdge& current,
     const _PolyhedralBoundedSolidSetOperatorNullEdge& successor,
-    bool successorSideIsRight)
+    BOOLEAN successorSideIsRight)
 {
     int sharedIsRight = successorSharedHalfIsRight(current, successor);
 

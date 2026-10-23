@@ -1,6 +1,7 @@
 #ifndef __PARALLEL_PROGRESS_MONITOR_PRODUCER__
 #define __PARALLEL_PROGRESS_MONITOR_PRODUCER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"
 #include "java/util/concurrent/atomic/AtomicLong.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"

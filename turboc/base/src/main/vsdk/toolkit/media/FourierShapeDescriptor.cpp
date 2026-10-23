@@ -62,11 +62,6 @@ String* FourierShapeDescriptor::toString() const {
     return result;
 }
 
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int FourierShapeDescriptor::numberOfElements;
-const int FourierShapeDescriptor::numberOfHarmonics;
-
 const Class FourierShapeDescriptor::CLASS = { "FourierShapeDescriptor", &ShapeDescriptor::CLASS };
 
 const Class *

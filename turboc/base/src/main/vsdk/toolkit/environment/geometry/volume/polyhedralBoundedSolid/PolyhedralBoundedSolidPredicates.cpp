@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -31,17 +32,17 @@ static const ArrayList<Vector3Dd>& probeDirections()
     return probes;
 }
 
-static bool containsApproxDistance(
+static BOOLEAN containsApproxDistance(
     const ArrayList<double>& values,
     double value,
     double tolerance)
 {
     for ( long i = 0; i < values.size(); ++i) {
         if (Cpp98Support::abs(values[i] - value) < tolerance) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 static int countBoundaryCrossingsToInfinity(
@@ -53,7 +54,7 @@ static int countBoundaryCrossingsToInfinity(
 {
     Ray ray(point, direction);
     ArrayList<double> crossings;
-    bool borrowedPlanes = solid->visibilityQueriesActive();
+    BOOLEAN borrowedPlanes = solid->visibilityQueriesActive();
 
     for (long int i = 0; i < solid->getPolygonsList().size(); ++i) {
         if (!solid->queryRayReachesFace(
@@ -115,7 +116,7 @@ static ArrayList<double> collectBoundaryCrossings(
     Ray ray(eye, direction);
     double bigEps = context.bigEpsilon();
     ArrayList<double> crossings;
-    bool borrowedPlanes = solid->visibilityQueriesActive();
+    BOOLEAN borrowedPlanes = solid->visibilityQueriesActive();
 
     for (long int i = 0; i < solid->getPolygonsList().size(); ++i) {
         if (!solid->queryRayReachesFace(
@@ -165,7 +166,7 @@ static ArrayList<double> collectBoundaryCrossings(
 }
 
 
-bool PolyhedralBoundedSolidPredicates::isPointInside(
+BOOLEAN PolyhedralBoundedSolidPredicates::isPointInside(
     PolyhedralBoundedSolid* solid,
     const Vector3Dd& point)
 {
@@ -237,7 +238,7 @@ int PolyhedralBoundedSolidPredicates::quantitativeInvisibility(
     }
 
     int qi = 0;
-    bool previousInterior = false;
+    BOOLEAN previousInterior = FALSE;
     double previousBound = 0.0;
     for (long i = 0; i <= crossings.size(); ++i) {
         double upper = i < crossings.size() ? crossings[i] : reach;
@@ -245,7 +246,7 @@ int PolyhedralBoundedSolidPredicates::quantitativeInvisibility(
             Vector3Dd mid = eye.add(
                 direction.multiply((previousBound + upper) * 0.5));
             int state = classifyOnSegment(solid, mid, context);
-            bool interior = state == INTERIOR;
+            BOOLEAN interior = state == INTERIOR;
             if (interior && !previousInterior) {
                 qi++;
             }
@@ -263,7 +264,7 @@ int PolyhedralBoundedSolidPredicates::classifyOnSegment(
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context)
 {
     double bigEps = context.bigEpsilon();
-    bool borrowedPlanes = solid->visibilityQueriesActive();
+    BOOLEAN borrowedPlanes = solid->visibilityQueriesActive();
 
     for (long int i = 0; i < solid->getPolygonsList().size(); ++i) {
         if (!solid->queryPointNearFace(point, ((int)(i)), bigEps)) {
@@ -276,7 +277,7 @@ int PolyhedralBoundedSolidPredicates::classifyOnSegment(
             continue;
         }
 
-        bool onSurface =
+        BOOLEAN onSurface =
             Cpp98Support::abs(plane->pointDistance(point)) < bigEps &&
             face->testPointInside(point, bigEps, plane) != Geometry::OUTSIDE;
         if (!borrowedPlanes) delete plane;
@@ -289,11 +290,5 @@ int PolyhedralBoundedSolidPredicates::classifyOnSegment(
     return isPointInside(solid, point) ? INTERIOR : OUTSIDE;
 }
 
-// Definitions of integral constants initialized in the class (C++98 needs
-// them when the constants are bound to references)
-const int PolyhedralBoundedSolidPredicates::OUTSIDE;
-const int PolyhedralBoundedSolidPredicates::INTERIOR;
-
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int PolyhedralBoundedSolidPredicates::ON_SURFACE;

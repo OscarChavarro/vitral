@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -38,8 +39,8 @@ public:
     Vector2Dd withX(double nx) const { return Vector2Dd(nx, y); }
     Vector2Dd withY(double ny) const { return Vector2Dd(x, ny); }
 
-    bool epsilonEquals(const Vector2Dd& other) const { return epsilonEquals(other, 1e-6); }
-    bool epsilonEquals(const Vector2Dd& other, double epsilon) const {
+    BOOLEAN epsilonEquals(const Vector2Dd& other) const { return epsilonEquals(other, 1e-6); }
+    BOOLEAN epsilonEquals(const Vector2Dd& other, double epsilon) const {
         if ( epsilon < 0.0 ) {
             Logger::reportMessage("Vector2Dd", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
             throw VSDKFatalException("epsilon must be >= 0");
@@ -47,8 +48,8 @@ public:
         return Cpp98Support::abs(x - other.x) <= epsilon && Cpp98Support::abs(y - other.y) <= epsilon;
     }
 
-    bool operator==(const Vector2Dd& other) const { return x == other.x && y == other.y; }
-    bool equals(const Vector2Dd& other) const { return (*this) == other; }
+    BOOLEAN operator==(const Vector2Dd& other) const { return x == other.x && y == other.y; }
+    BOOLEAN equals(const Vector2Dd& other) const { return (*this) == other; }
     int hashCode() const {
         unsigned int result = hashDouble(x);
         result = 31u * result + hashDouble(y);

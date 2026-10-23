@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "lib/mouseCursor/MouseCursor.h"
 
 class Hud;
@@ -15,7 +16,7 @@ class Mouse : private MouseCursor::TextScreen {
 
     void open();
     void close();
-    bool isConnected() const { return connected; }
+    BOOLEAN isConnected() const { return connected; }
     MouseCursor &cursor() { return pointer; }
     int waitInput();
     void follow();
@@ -29,12 +30,12 @@ class Mouse : private MouseCursor::TextScreen {
     Mouse(const Mouse &);
     Mouse &operator=(const Mouse &);
 
-    bool connected;
+    BOOLEAN connected;
     const Picture *picture;
     const Hud *hud;
     MouseCursor pointer;
 
-    char cellAt(int column, int row, bool &bold, bool &inverse) const;
+    char cellAt(int column, int row, BOOLEAN &bold, BOOLEAN &inverse) const;
 };
 
 #endif

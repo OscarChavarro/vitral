@@ -2,6 +2,7 @@
 #define __CONTROLLED_RGBA_IMAGE_HDR_UNCOMPRESSED__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/IndexedColorImageHDRUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageHDRUncompressed.h"
@@ -11,8 +12,8 @@ class ControlledRGBAImageHDRUncompressed : public RGBAImageHDRUncompressed {
   private:
     ImageToSolidTextureProjectionMethods mapType;
     ImageToSolidTextureInterpolationTypes interpolationType;
-    bool onceFlag;
-    bool useColorFlag;
+    BOOLEAN onceFlag;
+    BOOLEAN useColorFlag;
     Vector3Dd imageGradient;
     IndexedColorImageHDRUncompressed *indexedData;
 
@@ -25,10 +26,10 @@ class ControlledRGBAImageHDRUncompressed : public RGBAImageHDRUncompressed {
     int getInterpolationType() const;
     void setInterpolationType(ImageToSolidTextureInterpolationTypes v);
     void setInterpolationType(int v);
-    bool getOnceFlag() const;
-    void setOnceFlag(bool v);
-    bool getUseColorFlag() const;
-    void setUseColorFlag(bool v);
+    BOOLEAN getOnceFlag() const;
+    void setOnceFlag(BOOLEAN v);
+    BOOLEAN getUseColorFlag() const;
+    void setUseColorFlag(BOOLEAN v);
     const Vector3Dd& getImageGradient() const;
     void setImageGradient(const Vector3Dd& v);
     IndexedColorImageHDRUncompressed* getIndexedData() const;

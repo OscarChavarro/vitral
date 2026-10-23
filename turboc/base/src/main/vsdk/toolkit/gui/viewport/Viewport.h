@@ -1,6 +1,7 @@
 #ifndef __VIEWPORT__
 #define __VIEWPORT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class Camera;
@@ -28,9 +29,11 @@ The area occupied is specified in two ways:
 */
 class Viewport {
 public:
-    static const int RENDER_MODE_Z_BUFFER = 1;
-    static const int RENDER_MODE_RAYTRACING = 2;
-    static const int RENDER_MODE_HIDDEN_LINES = 3;
+    enum {
+        RENDER_MODE_Z_BUFFER = 1,
+        RENDER_MODE_RAYTRACING = 2,
+        RENDER_MODE_HIDDEN_LINES = 3
+    };
 
 private:
     int requestedSizeXInPixels;
@@ -44,14 +47,14 @@ private:
     RendererConfiguration* rendererConfiguration;
     String title;
     int renderMode;
-    bool showGrid;
+    BOOLEAN showGrid;
 
     double startXPercent;
     double startYPercent;
     double sizeXPercent;
     double sizeYPercent;
     int border;
-    bool active;
+    BOOLEAN active;
 
     int pixelStartX;
     int pixelStartY;
@@ -89,8 +92,8 @@ public:
     const String& getTitle() const;
     int getRenderMode() const;
     void setRenderMode(int renderMode);
-    bool isShowGrid() const;
-    void setShowGrid(bool showGrid);
+    BOOLEAN isShowGrid() const;
+    void setShowGrid(BOOLEAN showGrid);
     void toggleGrid();
     void cycleRequestedSize();
     void toggleRenderMode();
@@ -115,8 +118,8 @@ public:
     hidden (for example when another viewport is maximized).
     @return true if this viewport is visible
     */
-    bool isActive() const;
-    void setActive(bool active);
+    BOOLEAN isActive() const;
+    void setActive(BOOLEAN active);
     int getPixelStartX() const;
     int getPixelStartY() const;
     int getPixelSizeX() const;
@@ -142,7 +145,7 @@ public:
     corner
     @return true if the point is over the area where the title is presented
     */
-    bool isOverTitle(int x, int y) const;
+    BOOLEAN isOverTitle(int x, int y) const;
 
     /**
     Assigns the percent-based area of this viewport inside its container.
@@ -155,13 +158,13 @@ public:
     lower left corner), determines if the point is inside this viewport.
     @return true if the point is inside the percent-based area
     */
-    bool contains(double x, double y) const;
+    BOOLEAN contains(double x, double y) const;
 
     /**
     @return true if no specific size in pixels is requested, so the viewport
     uses all the area assigned to it
     */
-    bool useFullContainerArea() const;
+    BOOLEAN useFullContainerArea() const;
 
     /**
     A container area has valid pixel coordinates from (0, 0) to
@@ -191,14 +194,14 @@ public:
     graphics API, CPU is raytracing.
     @return true if the command was a render mode one and was applied
     */
-    bool selectRenderMode(const String& command);
+    BOOLEAN selectRenderMode(const String& command);
 
     /**
     Selects the projection location given by one of the standard commands of
     the projection location popup (see `ViewportSetCommands`).
     @return true if the command was a projection location one and was applied
     */
-    bool selectProjectionLocation(const String& command);
+    BOOLEAN selectProjectionLocation(const String& command);
 
     /**
     Selects a default camera and rendering configuration for this viewport,

@@ -1,6 +1,7 @@
 #ifndef __STREAM_TOKENIZER__
 #define __STREAM_TOKENIZER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/Reader.h"
 #include "java/lang/String.h"
 
@@ -18,9 +19,9 @@ class StreamTokenizer {
   private:
     Reader &reader;
     int peekc;
-    bool eolIsSignificantP;
-    bool slashSlashCommentsP;
-    bool slashStarCommentsP;
+    BOOLEAN eolIsSignificantP;
+    BOOLEAN slashSlashCommentsP;
+    BOOLEAN slashStarCommentsP;
     unsigned char ctype[256];
 
     enum {
@@ -31,10 +32,12 @@ class StreamTokenizer {
     typeOf(int c) const;
 
   public:
-    static const int TT_EOF = -1;
-    static const int TT_EOL = '\n';
-    static const int TT_NUMBER = -2;
-    static const int TT_WORD = -3;
+    enum {
+        TT_EOF = -1,
+        TT_EOL = '\n',
+        TT_NUMBER = -2,
+        TT_WORD = -3
+    };
 
     int ttype;
     double nval;
@@ -43,9 +46,9 @@ class StreamTokenizer {
     explicit StreamTokenizer(Reader &reader);
 
     void resetSyntax();
-    void eolIsSignificant(bool flag);
-    void slashSlashComments(bool flag);
-    void slashStarComments(bool flag);
+    void eolIsSignificant(BOOLEAN flag);
+    void slashSlashComments(BOOLEAN flag);
+    void slashStarComments(BOOLEAN flag);
     void commentChar(int ch);
     void whitespaceChars(int low, int hi);
     void wordChars(int low, int hi);

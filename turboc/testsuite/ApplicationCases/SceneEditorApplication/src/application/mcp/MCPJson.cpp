@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/StringBuilder.h"
 #include "java/util/regex/Matcher.h"
@@ -9,7 +10,7 @@
 
 //= Request properties ====================================================
 
-bool MCPJson::hasProperty(const String& json, const String& key)
+BOOLEAN MCPJson::hasProperty(const String& json, const String& key)
 {
     return Pattern::compile(String("\"") + Pattern::quote(key) +
         "\"\\s*:").matcher(json).find();
@@ -51,17 +52,17 @@ double MCPJson::numberProperty(const String& json,
     return Double::parseDouble(matcher.group(1));
 }
 
-bool MCPJson::booleanProperty(const String& json,
-                              const String& key, bool& outValue)
+BOOLEAN MCPJson::booleanProperty(const String& json,
+                              const String& key, BOOLEAN& outValue)
 {
     Pattern pattern = Pattern::compile(String("\"") + Pattern::quote(key)
         + "\"\\s*:\\s*(true|false)");
     Matcher matcher = pattern.matcher(json);
     if ( !matcher.find() ) {
-        return false;
+        return FALSE;
     }
     outValue = matcher.group(1).equals("true");
-    return true;
+    return TRUE;
 }
 
 //= Answers ===============================================================

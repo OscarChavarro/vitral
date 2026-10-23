@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "model/history/BodyTransformState.h"
 
@@ -25,12 +26,12 @@ void BodyTransformState::restore() const
     body->setPosition(position);
 }
 
-bool BodyTransformState::isSameState(const EntityTransformState* other) const
+BOOLEAN BodyTransformState::isSameState(const EntityTransformState* other) const
 {
     const BodyTransformState* state =
         (other != NULL && other->instanceOf(BodyTransformState::CLASS) ? (const BodyTransformState*)other : NULL);
     if ( state == NULL ) {
-        return false;
+        return FALSE;
     }
     return state->body == body &&
         state->position.equals(position) &&

@@ -1,6 +1,7 @@
 #ifndef __DRAWING_AREA_HOST__
 #define __DRAWING_AREA_HOST__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class BodyEditFeedbackProvider;
@@ -24,7 +25,7 @@ public:
     /**
     @return true if the GUI is in full screen mode
     */
-    virtual bool isFullScreenGuiMode() = 0;
+    virtual BOOLEAN isFullScreenGuiMode() = 0;
 
     /**
     @return the editor of the selected body (which presents feedback over

@@ -1,6 +1,7 @@
 #ifndef __PARAMETRIC_CURVE__
 #define __PARAMETRIC_CURVE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -10,14 +11,16 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int BREAK = 1;
-    static const int CORNER = 2;
-    static const int QUAD = 3;
-    static const int HERMITE = 4;
-    static const int BEZIER = 5;
-    static const int UNRBSPLINE = 6;
-    static const int NUNRBSPLINE = 7;
-    static const int CATMULLROM = 8;
+    enum {
+        BREAK = 1,
+        CORNER = 2,
+        QUAD = 3,
+        HERMITE = 4,
+        BEZIER = 5,
+        UNRBSPLINE = 6,
+        NUNRBSPLINE = 7,
+        CATMULLROM = 8
+    };
 
     static const Matrix4x4d LINEAR_MATRIX;
     static const Matrix4x4d HERMITE_MATRIX;
@@ -48,24 +51,24 @@ public:
 
     int getNumPieces() const;
 
-    bool evaluate(int endingSegment, double t, Vector3Dd& outPoint) const;
-    ArrayList<Vector3Dd> calculatePoints(int endingPointForSegment, bool withBrokenRects) const;
+    BOOLEAN evaluate(int endingSegment, double t, Vector3Dd& outPoint) const;
+    ArrayList<Vector3Dd> calculatePoints(int endingPointForSegment, BOOLEAN withBrokenRects) const;
 
     virtual double* getMinMax();
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
 
 private:
-    static const int INITIAL_APPROXIMATION_STEPS = 50;
+    enum { INITIAL_APPROXIMATION_STEPS = 50 };
 
     ArrayList< ArrayList<Vector3Dd> > points;
     ArrayList<int> types;
     int approximationSteps;
 
-    bool evaluateLinear(int nseg, double t, Vector3Dd& outPoint) const;
-    bool evaluateQuadratic(int nseg, double t, Vector3Dd& outPoint) const;
-    bool evaluateHermite(int nseg, double t, Vector3Dd& outPoint) const;
-    bool evaluateBezier(int nseg, double t, Vector3Dd& outPoint) const;
-    bool evaluateBspline(int nseg, double t, Vector3Dd& outPoint) const;
+    BOOLEAN evaluateLinear(int nseg, double t, Vector3Dd& outPoint) const;
+    BOOLEAN evaluateQuadratic(int nseg, double t, Vector3Dd& outPoint) const;
+    BOOLEAN evaluateHermite(int nseg, double t, Vector3Dd& outPoint) const;
+    BOOLEAN evaluateBezier(int nseg, double t, Vector3Dd& outPoint) const;
+    BOOLEAN evaluateBspline(int nseg, double t, Vector3Dd& outPoint) const;
 
     int calculatePointPosition(int pin) const;
     static double matrixTerm(const Matrix4x4d& m, int col, double t);

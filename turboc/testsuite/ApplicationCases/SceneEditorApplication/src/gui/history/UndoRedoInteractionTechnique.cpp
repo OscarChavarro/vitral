@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "model/history/EditHistory.h"
 #include "model/history/UndoQueue.h"
@@ -14,16 +15,16 @@ UndoRedoInteractionTechnique::UndoRedoInteractionTechnique(
 {
 }
 
-bool UndoRedoInteractionTechnique::recognize(
+BOOLEAN UndoRedoInteractionTechnique::recognize(
     const KeyEvent& event, UndoRedoCommand::Value* outCommand)
 {
-    bool shift;
-    bool z;
-    bool y;
+    BOOLEAN shift;
+    BOOLEAN z;
+    BOOLEAN y;
 
     if ( (event.modifierMask & KeyEvent::MASK_CTRL) == 0 ||
          (event.modifierMask & KeyEvent::MASK_ALT) != 0 ) {
-        return false;
+        return FALSE;
     }
     shift = (event.modifierMask & KeyEvent::MASK_SHIFT) != 0;
     z = event.keycode == KeyEvent::KEY_z || event.keycode == KeyEvent::KEY_Z;
@@ -36,26 +37,26 @@ bool UndoRedoInteractionTechnique::recognize(
     if ( z ) {
         *outCommand = shift ? UndoRedoCommand::UNDO_VIEWPORT :
                               UndoRedoCommand::UNDO_SCENE;
-        return true;
+        return TRUE;
     }
     if ( y ) {
         *outCommand = shift ? UndoRedoCommand::REDO_VIEWPORT :
                               UndoRedoCommand::REDO_SCENE;
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
-bool UndoRedoInteractionTechnique::processKeyPressedEvent(
+BOOLEAN UndoRedoInteractionTechnique::processKeyPressedEvent(
     const KeyEvent& event, Viewport* viewport, Result* outResult)
 {
     UndoRedoCommand::Value command;
 
     if ( !recognize(event, &command) ) {
-        return false;
+        return FALSE;
     }
     *outResult = execute(command, viewport);
-    return true;
+    return TRUE;
 }
 
 UndoRedoInteractionTechnique::Result UndoRedoInteractionTechnique::execute(
@@ -64,7 +65,7 @@ UndoRedoInteractionTechnique::Result UndoRedoInteractionTechnique::execute(
     UndoableOperation* operation;
     UndoQueue* queue;
     String target;
-    bool undo = UndoRedoCommand::isUndoCommand(command);
+    BOOLEAN undo = UndoRedoCommand::isUndoCommand(command);
 
     if ( UndoRedoCommand::isViewportCommand(command) ) {
         if ( viewport == NULL ) {
@@ -93,7 +94,7 @@ String UndoRedoInteractionTechnique::describe(
     UndoRedoCommand::Value command, const UndoableOperation* operation,
     const UndoQueue* queue, const String& target)
 {
-    bool undo = UndoRedoCommand::isUndoCommand(command);
+    BOOLEAN undo = UndoRedoCommand::isUndoCommand(command);
     String verb = undo ? "undo" : "redo";
 
     if ( operation == NULL ) {

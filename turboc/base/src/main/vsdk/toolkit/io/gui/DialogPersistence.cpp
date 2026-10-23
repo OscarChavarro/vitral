@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/IllegalArgumentException.h"
 #include "java/lang/StringBuilder.h"
 #include "java/util/ArrayList.txx"
@@ -21,23 +22,24 @@ compilers (gcc 2.7.2) instantiate the containers of a recursive type
 before the type is complete.
 */
 struct JsonValue {
-    enum Type { NUL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT };
+    enum Type { NUL, BOOLEAN_VALUE, NUMBER, STRING, ARRAY, OBJECT };
 
     Type type;
-    bool booleanValue;
+    BOOLEAN booleanValue;
     double numberValue;
     String stringValue;
     ArrayList<JsonValue*> items;
     TreeMap<String, JsonValue*> members;
 
-    JsonValue() : type(NUL), booleanValue(false), numberValue(0) {}
+    JsonValue() : type(NUL), booleanValue(FALSE), numberValue(0) {}
 
     ~JsonValue()
     {
-        for ( long i = 0; i < items.size(); i++ ) {
+        long i;
+        for ( i = 0; i < items.size(); i++ ) {
             delete items[i];
         }
-        for ( long i = 0; i < members.size(); i++ ) {
+        for ( i = 0; i < members.size(); i++ ) {
             delete members.getValue(i);
         }
     }
@@ -86,14 +88,14 @@ private:
         }
     }
 
-    bool consume(char expected)
+    BOOLEAN consume(char expected)
     {
         skipBlanks();
         if ( position < length && text[position] == expected ) {
             position++;
-            return true;
+            return TRUE;
         }
-        return false;
+        return FALSE;
     }
 
     void expect(char expected)
@@ -105,15 +107,15 @@ private:
         }
     }
 
-    bool consumeWord(const char* word)
+    BOOLEAN consumeWord(const char* word)
     {
         long wordLength = (long)strlen(word);
         if ( position + wordLength <= length &&
              strncmp(text + position, word, (size_t)wordLength) == 0 ) {
             position += wordLength;
-            return true;
+            return TRUE;
         }
-        return false;
+        return FALSE;
     }
 
     static void appendUtf8(StringBuilder& out, unsigned long code)
@@ -159,7 +161,7 @@ private:
     {
         expect('"');
         StringBuilder out;
-        while ( true ) {
+        while ( TRUE ) {
             if ( position >= length ) {
                 fail("unterminated string");
             }
@@ -252,11 +254,11 @@ private:
             value.stringValue = readString();
         }
         else if ( consumeWord("true") ) {
-            value.type = JsonValue::BOOLEAN;
-            value.booleanValue = true;
+            value.type = JsonValue::BOOLEAN_VALUE;
+            value.booleanValue = TRUE;
         }
         else if ( consumeWord("false") ) {
-            value.type = JsonValue::BOOLEAN;
+            value.type = JsonValue::BOOLEAN_VALUE;
         }
         else if ( consumeWord("null") ) {
             value.type = JsonValue::NUL;
@@ -296,14 +298,14 @@ static void invalid(const String& message)
 @return the text of a non blank string member, or an empty string (null in
 Java)
 */
-static bool isBlank(const String& text)
+static BOOLEAN isBlank(const String& text)
 {
     for ( const char* c = text.c_str(); *c != '\0'; c++ ) {
         if ( strchr(" \t\r\n", *c) == NULL ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 static String optional(const JsonValue& node, const char* field)
@@ -326,14 +328,14 @@ static String required(const JsonValue& node, const char* field,
     return value;
 }
 
-static bool isOneOf(const String& kind, const char* const* kinds)
+static BOOLEAN isOneOf(const String& kind, const char* const* kinds)
 {
     for ( int i = 0; kinds[i] != NULL; i++ ) {
         if ( kind == kinds[i] ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 static WidgetDialogElement element(const JsonValue& node, const String& path,
@@ -406,7 +408,8 @@ void DialogPersistence::importDialogs(const String& source,
         }
         TreeSet<String> elementIds;
         ArrayList<WidgetDialogElement> elements;
-        for ( long j = 0; j < content->items.size(); j++ ) {
+        long j;
+        for ( j = 0; j < content->items.size(); j++ ) {
             elements.add(element(*content->items[j],
                 path + ".content[" + Cpp98Support::toString(j) + "]", elementIds));
         }
@@ -415,9 +418,9 @@ void DialogPersistence::importDialogs(const String& source,
         dialog->setId(id);
         dialog->setTitleKey(titleKey);
         dialog->setModal(modal != NULL &&
-                         modal->type == JsonValue::BOOLEAN &&
+                         modal->type == JsonValue::BOOLEAN_VALUE &&
                          modal->booleanValue);
-        for ( long j = 0; j < elements.size(); j++ ) {
+        for ( j = 0; j < elements.size(); j++ ) {
             dialog->addElement(elements[j]);
         }
         widget->addDialog(dialog);

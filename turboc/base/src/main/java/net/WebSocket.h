@@ -1,6 +1,7 @@
 #ifndef __WEB_SOCKET__
 #define __WEB_SOCKET__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 
@@ -15,24 +16,24 @@ private:
     };
 
     Socket* socket_;
-    bool open_;
+    BOOLEAN open_;
 
     explicit WebSocket(Socket* socket);
 
-    static bool parseUrl(const String& url, ParsedUrl* outUrl);
-    static bool extractStringPrefix(const String& text, const char* prefix);
-    static bool readHttpHeader(Socket* socket, String* outHeader);
-    static bool sendHandshake(Socket* socket, const ParsedUrl& url);
-    static bool readExact(Socket* socket, unsigned char* buffer, int length);
-    static bool discard(Socket* socket, unsigned long long length);
+    static BOOLEAN parseUrl(const String& url, ParsedUrl* outUrl);
+    static BOOLEAN extractStringPrefix(const String& text, const char* prefix);
+    static BOOLEAN readHttpHeader(Socket* socket, String* outHeader);
+    static BOOLEAN sendHandshake(Socket* socket, const ParsedUrl& url);
+    static BOOLEAN readExact(Socket* socket, unsigned char* buffer, int length);
+    static BOOLEAN discard(Socket* socket, unsigned long long length);
 
 public:
     ~WebSocket();
 
     static WebSocket* connect(const String& serviceUrl);
-    bool readText(String* outPayload);
+    BOOLEAN readText(String* outPayload);
     void close();
-    bool isOpen() const;
+    BOOLEAN isOpen() const;
 };
 
 

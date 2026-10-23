@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/lang/Math.h"
@@ -53,7 +54,7 @@ C++ ownership: the operands are released after the operation.
 PolyhedralBoundedSolid* CsgKurlanderBowlFixture::booleanOp(
     PolyhedralBoundedSolid* a, PolyhedralBoundedSolid* b, int op)
 {
-    PolyhedralBoundedSolid* result = Modeler::setOp(a, b, op, false);
+    PolyhedralBoundedSolid* result = Modeler::setOp(a, b, op, FALSE);
     delete a;
     delete b;
     return result;
@@ -62,7 +63,7 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::booleanOp(
 PolyhedralBoundedSolid* CsgKurlanderBowlFixture::booleanOpWithoutFaceMaximization(
     PolyhedralBoundedSolid* a, PolyhedralBoundedSolid* b, int op)
 {
-    PolyhedralBoundedSolid* result = Modeler::setOp(a, b, op, false, false);
+    PolyhedralBoundedSolid* result = Modeler::setOp(a, b, op, FALSE, FALSE);
     delete a;
     delete b;
     return result;

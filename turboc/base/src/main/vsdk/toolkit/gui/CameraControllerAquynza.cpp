@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Math.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -64,7 +65,7 @@ double CameraControllerAquynza::diminishLogarithmic(double val, double EPSILON) 
     return val;
 }
 
-bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
+BOOLEAN CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
     Vector3Dd eyePosition = camera->getPosition();
     Vector3Dd focusedPosition = camera->getFocusedPosition();
     Matrix4x4d R = camera->getRotation();
@@ -79,7 +80,7 @@ bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
     double roll = R.obtainEulerRollAngle();
 
     double angleInc;
-    bool updated = false;
+    BOOLEAN updated = FALSE;
     const double EPSILON = 0.0001;
 
     if (fov > 90) angleInc = degreesToRadians(10);
@@ -92,64 +93,64 @@ bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
         case KeyEvent::KEY_UP:
             pitch -= angleInc;
             if (pitch < degreesToRadians(-90)) pitch = degreesToRadians(-90);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_DOWN:
             pitch += angleInc;
             if (pitch > degreesToRadians(90)) pitch = degreesToRadians(90);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_LEFT:
             yaw += angleInc;
             while (yaw >= degreesToRadians(360)) yaw -= degreesToRadians(360);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_RIGHT:
             yaw -= angleInc;
             while (yaw < 0) yaw += degreesToRadians(360);
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_x:
             eyePosition = eyePosition.withX(eyePosition.x() - deltaMovement);
             focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMovement);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_X:
             eyePosition = eyePosition.withX(eyePosition.x() + deltaMovement);
             focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMovement);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_y:
             eyePosition = eyePosition.withY(eyePosition.y() - deltaMovement);
             focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMovement);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_Y:
             eyePosition = eyePosition.withY(eyePosition.y() + deltaMovement);
             focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMovement);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_z:
             eyePosition = eyePosition.withZ(eyePosition.z() - deltaMovement);
             focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMovement);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_Z:
             eyePosition = eyePosition.withZ(eyePosition.z() + deltaMovement);
             focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMovement);
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_S:
             roll -= degreesToRadians(5);
             while (roll < 0) roll += degreesToRadians(360);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_s:
             roll += degreesToRadians(5);
             while (roll > degreesToRadians(360)) roll -= degreesToRadians(360);
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_A:
@@ -160,7 +161,7 @@ bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
                 else if (fov < 1 - EPSILON) fov++;
                 else if (fov < 175 - EPSILON) fov += 5;
             }
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_a:
             if (camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL) {
@@ -170,25 +171,25 @@ bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
                 else if (fov > 1 + EPSILON) fov--;
                 else if (fov > 0.1 + EPSILON) fov -= 0.1;
             }
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_N:
             nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, EPSILON);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_n:
             nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, EPSILON);
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_F:
             farPlaneDistance = augmentLogarithmic(farPlaneDistance, EPSILON);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_f:
             farPlaneDistance = diminishLogarithmic(farPlaneDistance, EPSILON);
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_p:
@@ -200,7 +201,7 @@ bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
                     projectionMode = Camera::PROJECTION_MODE_PERSPECTIVE;
                     break;
             }
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_i:
@@ -222,32 +223,32 @@ bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
     return updated;
 }
 
-bool CameraControllerAquynza::processKeyReleasedEvent(const KeyEvent& keyEvent) {
-    return false;
+BOOLEAN CameraControllerAquynza::processKeyReleasedEvent(const KeyEvent& keyEvent) {
+    return FALSE;
 }
 
-bool CameraControllerAquynza::processMousePressedEvent(const MouseEvent& e) {
+BOOLEAN CameraControllerAquynza::processMousePressedEvent(const MouseEvent& e) {
     oldMouseX = e.getX();
     oldMouseY = e.getY();
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerAquynza::processMouseReleasedEvent(const MouseEvent& e) {
-    return false;
+BOOLEAN CameraControllerAquynza::processMouseReleasedEvent(const MouseEvent& e) {
+    return FALSE;
 }
 
-bool CameraControllerAquynza::processMouseClickedEvent(const MouseEvent& e) {
-    return false;
+BOOLEAN CameraControllerAquynza::processMouseClickedEvent(const MouseEvent& e) {
+    return FALSE;
 }
 
-bool CameraControllerAquynza::processMouseMovedEvent(const MouseEvent& e) {
-    return false;
+BOOLEAN CameraControllerAquynza::processMouseMovedEvent(const MouseEvent& e) {
+    return FALSE;
 }
 
-bool CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
+BOOLEAN CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
     int deltaX = e.getX() - oldMouseX;
     int deltaY = e.getY() - oldMouseY;
-    bool updated = false;
+    BOOLEAN updated = FALSE;
     double senseFactor = deltaMovement / 5.0;
 
     deltaX = Math::max(-5, Math::min(5, deltaX));
@@ -273,19 +274,19 @@ bool CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
         DR = Matrix4x4d().axisRotation(ax, w.x(), w.y(), w.z());
         R = DR.multiply(R);
 
-        updated = true;
+        updated = TRUE;
     } else if ((modifiers & MouseEvent::BUTTON2_DOWN_MASK) != 0) {
         eyePosition = eyePosition.subtract(v.multiply(senseFactor * deltaX));
         eyePosition = eyePosition.subtract(w.multiply(senseFactor * deltaY));
         focusedPosition = focusedPosition.subtract(v.multiply(senseFactor * deltaX));
         focusedPosition = focusedPosition.subtract(w.multiply(senseFactor * deltaY));
-        updated = true;
+        updated = TRUE;
     } else if ((modifiers & MouseEvent::BUTTON3_DOWN_MASK) != 0) {
         eyePosition = eyePosition.subtract(u.multiply(senseFactor * deltaY));
         double ax = Math::min(2.0, 0.01 * deltaX);
         Matrix4x4d DR = Matrix4x4d().axisRotation(ax, u.x(), u.y(), u.z());
         R = DR.multiply(R);
-        updated = true;
+        updated = TRUE;
     }
 
     camera->setPosition(eyePosition);
@@ -297,7 +298,7 @@ bool CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
     return updated;
 }
 
-bool CameraControllerAquynza::processMouseWheelEvent(const MouseEvent& e) {
+BOOLEAN CameraControllerAquynza::processMouseWheelEvent(const MouseEvent& e) {
     double fov = camera->getFov();
     double orthogonalZoom = camera->getOrthogonalZoom();
     const double EPSILON = 0.0001;

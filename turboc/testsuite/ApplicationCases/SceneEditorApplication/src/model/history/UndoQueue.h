@@ -1,6 +1,7 @@
 #ifndef __UNDO_QUEUE__
 #define __UNDO_QUEUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -17,7 +18,7 @@ capacity is exceeded. The queue owns its operations.
 class UndoQueue {
 public:
     /// Default maximum number of operations kept
-    static const int DEFAULT_CAPACITY = 256;
+    enum { DEFAULT_CAPACITY = 256 };
 
 private:
     ArrayList<UndoableOperation*> operations;
@@ -44,8 +45,8 @@ public:
     @param operation operation to record; null is ignored
     */
     void record(UndoableOperation* operation);
-    bool canUndo() const;
-    bool canRedo() const;
+    BOOLEAN canUndo() const;
+    BOOLEAN canRedo() const;
 
     /**
     Reverts the last done operation.

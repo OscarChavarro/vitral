@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "model/history/UndoQueue.h"
 #include "model/history/UndoableOperation.h"
@@ -38,12 +39,12 @@ void UndoQueue::record(UndoableOperation* operation)
     }
 }
 
-bool UndoQueue::canUndo() const
+BOOLEAN UndoQueue::canUndo() const
 {
     return cursor > 0;
 }
 
-bool UndoQueue::canRedo() const
+BOOLEAN UndoQueue::canRedo() const
 {
     return cursor < operations.size();
 }
@@ -106,4 +107,3 @@ void UndoQueue::clear()
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int UndoQueue::DEFAULT_CAPACITY;

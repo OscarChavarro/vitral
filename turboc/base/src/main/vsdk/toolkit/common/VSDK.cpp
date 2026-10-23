@@ -4,6 +4,23 @@
 #include "vsdk/toolkit/common/VSDK.h"
 const double VSDK::EPSILON = 1e-6;
 
+#ifdef __TURBOC__
+int snprintf(char *buffer, size_t size, const char *format, ...)
+{
+    va_list arguments;
+    va_start(arguments, format);
+    int written = vsnprintf(buffer, size, format, arguments);
+    va_end(arguments);
+    return written;
+}
+
+int vsnprintf(char *buffer, size_t /*size*/, const char *format,
+    va_list arguments)
+{
+    return vsprintf(buffer, format, arguments);
+}
+#endif
+
 String VSDK::formatDouble(double a)
 {
     char buf[64];

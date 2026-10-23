@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vitralRaytracer/RaytracerRenderer.h"
 #include <math.h>
 #include <stdio.h>
@@ -22,15 +23,15 @@
 void
 RaytracerRenderer::optimizeRendererConfigurationForScene(SimpleScene *scene,
                                                          RendererConfiguration *rendererConfiguration) {
-    bool hasTextures = false;
-    bool hasNormalMaps = false;
+    BOOLEAN hasTextures = FALSE;
+    BOOLEAN hasNormalMaps = FALSE;
     ArrayList<SimpleBody *> &bodies = scene->getSimpleBodies();
     for (long int i = 0; i < bodies.size(); i++) {
         if (bodies[i]->getTexture() != 0) {
-            hasTextures = true;
+            hasTextures = TRUE;
         }
         if (bodies[i]->getNormalMap() != 0) {
-            hasNormalMaps = true;
+            hasNormalMaps = TRUE;
         }
     }
     rendererConfiguration->setTexture(hasTextures);
@@ -81,7 +82,7 @@ RaytracerRenderer::render(const char *path, int width, int height, int parallel,
         clock.start();
         if (parallel) {
             ParallelRaytracer parallelRaytracer;
-            parallelRaytracer.execute(img, &configuration, snapshot, true);
+            parallelRaytracer.execute(img, &configuration, snapshot, TRUE);
             parallelRaytracer.dispose();
         } else {
             engine->execute(img, &configuration, snapshot, reporter, (ZBuffer *)0);

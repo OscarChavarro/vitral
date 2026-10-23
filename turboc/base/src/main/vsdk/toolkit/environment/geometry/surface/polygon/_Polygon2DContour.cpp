@@ -1,8 +1,9 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-_Polygon2DContour::_Polygon2DContour() : exteriorContour(NULL), fleetingFlag(false) {}
+_Polygon2DContour::_Polygon2DContour() : exteriorContour(NULL), fleetingFlag(FALSE) {}
 
 void _Polygon2DContour::addVertex(double x, double y, double r, double g, double b) { vertices.add(Vertex2D(x, y, r, g, b)); }
 void _Polygon2DContour::addVertex(double x, double y) { vertices.add(Vertex2D(x, y)); }
@@ -36,7 +37,7 @@ double* _Polygon2DContour::getMinMax()
     return minMax;
 }
 
-double _Polygon2DContour::calcMinMaxArea(bool)
+double _Polygon2DContour::calcMinMaxArea(BOOLEAN)
 {
     double* minMax = getMinMax();
     double area = (minMax[3]-minMax[0])*(minMax[4]-minMax[1]);
@@ -49,8 +50,8 @@ void _Polygon2DContour::setExteriorContour(_Polygon2DContour* contour) { exterio
 
 int _Polygon2DContour::compareTo(_Polygon2DContour* obj)
 {
-    double area = calcMinMaxArea(false);
-    double otherArea = obj->calcMinMaxArea(false);
+    double area = calcMinMaxArea(FALSE);
+    double otherArea = obj->calcMinMaxArea(FALSE);
     if (area == otherArea) return 0;
     if (area < otherArea) return -1;
     return 1;

@@ -1,6 +1,7 @@
 #ifndef __RASTERIZER_HUD__
 #define __RASTERIZER_HUD__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "ColorMode.h"
 #include "RasterizerShown.h"
 
@@ -8,9 +9,9 @@ class RasterizerHud {
   public:
     RasterizerHud();
     void loadFont();
-    bool hasFont() const;
+    BOOLEAN hasFont() const;
     void toggle();
-    void draw(const RasterizerShown *shown, ColorMode::Value colorMode, int width, int height, bool text) const;
+    void draw(const RasterizerShown *shown, ColorMode::Value colorMode, int width, int height, BOOLEAN text) const;
 
   private:
     enum {

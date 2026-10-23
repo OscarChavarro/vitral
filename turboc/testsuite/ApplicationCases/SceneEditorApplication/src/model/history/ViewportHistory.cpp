@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
@@ -30,7 +31,7 @@ UndoQueue* ViewportHistory::getQueue(Viewport* viewport)
     return queue;
 }
 
-bool ViewportHistory::isRecording() const
+BOOLEAN ViewportHistory::isRecording() const
 {
     return depth > 0;
 }
@@ -52,7 +53,7 @@ void ViewportHistory::begin(ViewportSet* viewportSet)
     depth++;
 }
 
-int ViewportHistory::end(bool mergeable)
+int ViewportHistory::end(BOOLEAN mergeable)
 {
     int recorded = 0;
     long i;

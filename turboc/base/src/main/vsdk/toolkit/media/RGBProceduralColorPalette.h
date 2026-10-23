@@ -1,6 +1,7 @@
 #ifndef __RGB_PROCEDURAL_COLOR_PALETTE__
 #define __RGB_PROCEDURAL_COLOR_PALETTE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 /**
 The RGBProceduralColorPalette abstract class provides an interface for
@@ -23,7 +24,7 @@ protected:
     /// if they are modified in any other way. A pure procedural palette may
     /// have a property that allows for faster calculation of some operation,
     /// whereas a non-pure equivalent will work equally, but slower.
-    bool pure;
+    BOOLEAN pure;
 
 public:
     static const Class CLASS;
@@ -40,7 +41,7 @@ public:
     virtual void addColor(ColorRgb* c);
     virtual void addColor(double r, double g, double b);
 
-    bool isPure() const { return pure; }
+    BOOLEAN isPure() const { return pure; }
 };
 
 #endif

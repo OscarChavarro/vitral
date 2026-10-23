@@ -3,7 +3,12 @@
 
 #include <stddef.h>
 
+#ifdef __TURBOC__
+#include <sys/timeb.h>
+#else
 #include <sys/time.h>
+#endif
+#include "vsdk/toolkit/common/VSDK.h"
 
 
 /**
@@ -13,9 +18,9 @@ generator, so a given seed produces the same sequence as in the Java port.
 class Random {
 private:
     // Unsigned arithmetic wraps as Java long arithmetic does
-    static const unsigned long long MULTIPLIER = 0x5DEECE66DULL;
-    static const unsigned long long ADDEND = 0xBULL;
-    static const unsigned long long MASK = (1ULL << 48) - 1;
+    static const unsigned long long MULTIPLIER;
+    static const unsigned long long ADDEND;
+    static const unsigned long long MASK;
 
     unsigned long long seed;
 
@@ -26,10 +31,18 @@ private:
 
     static unsigned long long currentTimeNanoseconds()
     {
+#ifdef __TURBOC__
+        // DOS has no gettimeofday: millisecond resolution
+        struct timeb now;
+        ftime(&now);
+        return (unsigned long long)now.time * VSDK_ULL(1000000000) +
+            (unsigned long long)now.millitm * VSDK_ULL(1000000);
+#else
         struct timeval now;
         gettimeofday(&now, NULL);
-        return (unsigned long long)now.tv_sec * 1000000000ULL +
-            (unsigned long long)now.tv_usec * 1000ULL;
+        return (unsigned long long)now.tv_sec * VSDK_ULL(1000000000) +
+            (unsigned long long)now.tv_usec * VSDK_ULL(1000);
+#endif
     }
 
     int next(int bits)
@@ -42,7 +55,7 @@ public:
     Random()
         : seed(initialScramble((long long)(
               currentTimeNanoseconds() ^
-              (8682522807148012ULL * 181783497276652981ULL))))
+              (VSDK_ULL(8682522807148012) * VSDK_ULL(181783497276652981)))))
     {
     }
 
@@ -87,10 +100,10 @@ public:
     double nextDouble()
     {
         return (double)(((long long)next(26) << 27) + next(27)) *
-            (1.0 / (double)(1LL << 53));
+            (1.0 / (double)(VSDK_LL(1) << 53));
     }
 
-    bool nextBoolean()
+    BOOLEAN nextBoolean()
     {
         return next(1) != 0;
     }

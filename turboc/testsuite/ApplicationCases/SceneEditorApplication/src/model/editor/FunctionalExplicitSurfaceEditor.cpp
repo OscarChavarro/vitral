@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/Integer.h"
 #include "java/util/ArrayList.txx"
@@ -109,7 +110,7 @@ void FunctionalExplicitSurfaceEditor::setValue(Parameter parameter,
     rebuild(values);
 }
 
-bool FunctionalExplicitSurfaceEditor::applyPreset(const String& preset)
+BOOLEAN FunctionalExplicitSurfaceEditor::applyPreset(const String& preset)
 {
     ArrayList<String> values = currentValues();
     StringTokenizer parser(preset, ";");
@@ -118,12 +119,12 @@ bool FunctionalExplicitSurfaceEditor::applyPreset(const String& preset)
     for ( i = 0; parser.hasMoreTokens() && i < values.size(); i++ ) {
         String token = parser.nextToken();
         if ( i == 0 && token.equals(NO_PRESET) ) {
-            return false;
+            return FALSE;
         }
         values.set(i, token);
     }
     rebuild(values);
-    return true;
+    return TRUE;
 }
 
 void FunctionalExplicitSurfaceEditor::rebuild(
@@ -149,4 +150,3 @@ void FunctionalExplicitSurfaceEditor::rebuild(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int FunctionalExplicitSurfaceEditor::PARAMETER_COUNT;

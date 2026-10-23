@@ -1,6 +1,7 @@
 #ifndef __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 #define __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 
 #include "java/lang/String.h"
@@ -16,18 +17,18 @@ private:
     ArrayList<TangibleInterfaceListener*> listeners;
     pthread_mutex_t listenersMutex;
     pthread_t connectionThread;
-    bool threadStarted;
-    bool stopRequested;
+    BOOLEAN threadStarted;
+    BOOLEAN stopRequested;
     WebSocket* webSocket;
-    Consumer<bool>* connectionListener;
+    Consumer<BOOLEAN>* connectionListener;
 
     static void* threadEntry(void* arg);
     void connectAndListen();
     void notifyListeners(const TangibleInterfaceEvent& event);
     void processMessage(const String& message);
-    bool parseEvent(const String& groupJson, TangibleInterfaceEvent* outEvent);
-    static bool extractString(const String& text, const char* key, String* out);
-    static bool extractNumbers(const String& text, const char* key, double* values, int count);
+    BOOLEAN parseEvent(const String& groupJson, TangibleInterfaceEvent* outEvent);
+    static BOOLEAN extractString(const String& text, const char* key, String* out);
+    static BOOLEAN extractNumbers(const String& text, const char* key, double* values, int count);
 
 public:
     explicit TangibleInterfaceNetworkClient(const String& serviceUrl);
@@ -44,7 +45,7 @@ public:
     @param connectionListener receives true once the client is ready to
     receive websocket messages, or false on failure (not owned, may be null)
     */
-    void run(Consumer<bool>* connectionListener);
+    void run(Consumer<BOOLEAN>* connectionListener);
     void disconnect();
 };
 

@@ -27,10 +27,10 @@ The primitives returned follow these conventions:
 class GizmoSolidTessellator {
 public:
     /// Number of subdivisions used around the axis of a revolution solid
-    static const int SLICES = 16;
+    enum { SLICES = 16 };
 
     /// Number of faces of a box, as given by `buildBoxFaceStrips`
-    static const int BOX_NUMBER_OF_FACES = 6;
+    enum { BOX_NUMBER_OF_FACES = 6 };
 
     /**
     @param element element of a gizmo

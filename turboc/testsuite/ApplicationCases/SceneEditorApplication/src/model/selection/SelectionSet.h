@@ -1,6 +1,7 @@
 #ifndef __SELECTION_SET__
 #define __SELECTION_SET__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "model/selection/EntityListView.h"
@@ -17,7 +18,7 @@ class SelectionSet {
 private:
     // This is an association to an external list
     EntityListView elements;
-    ArrayList<bool> selection;
+    ArrayList<BOOLEAN> selection;
 
 public:
     /**
@@ -36,7 +37,7 @@ public:
     */
     void sync();
     String toString() const;
-    bool isSelected(int i) const;
+    BOOLEAN isSelected(int i) const;
     int firstSelected() const;
     void selectAll();
     void unselectAll();
@@ -62,7 +63,7 @@ public:
     @param element element to insert
     @param selected true if the inserted element must be selected
     */
-    void insertElement(int index, Entity* element, bool selected);
+    void insertElement(int index, Entity* element, BOOLEAN selected);
 
     /**
     Removes an element from the external list, keeping the selection marks of

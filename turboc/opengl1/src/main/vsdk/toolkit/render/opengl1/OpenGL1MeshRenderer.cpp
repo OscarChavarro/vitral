@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 
 #include "java/util/ArrayList.txx"
@@ -56,7 +57,7 @@ static void addLine(ArrayList<float>& lines, float sx, float sy, float sz,
 
 OpenGL1MeshRenderer::Mesh::Mesh(double characteristicSize)
     : vertexCount(0), frontVertexCount(0),
-      characteristicSize(characteristicSize), displayListId(0), uploaded(false)
+      characteristicSize(characteristicSize), displayListId(0), uploaded(FALSE)
 {
 }
 
@@ -95,7 +96,7 @@ void OpenGL1MeshRenderer::draw(Mesh* mesh, Geometry* geometry, Camera* camera,
     }
 
     upload(mesh);
-    bool hasTexture = textureMap != NULL;
+    BOOLEAN hasTexture = textureMap != NULL;
     int textureId = hasTexture ? OpenGL1ImageRenderer::activate(textureMap) : 0;
     // Bump mapping is not available in OpenGL 1.2 (reported by the selector)
     (void)normalMap;
@@ -179,7 +180,7 @@ void OpenGL1MeshRenderer::release(Mesh* mesh)
     if ( mesh->displayListId != 0 ) {
         glDeleteLists(mesh->displayListId, 1);
     }
-    mesh->uploaded = false;
+    mesh->uploaded = FALSE;
     mesh->displayListId = 0;
 }
 
@@ -229,7 +230,7 @@ void OpenGL1MeshRenderer::upload(Mesh* mesh)
     if ( mesh->uploaded ) {
         return;
     }
-    mesh->uploaded = true;
+    mesh->uploaded = TRUE;
     if ( mesh->vertexCount <= 0 ) {
         return;
     }
@@ -318,4 +319,3 @@ void OpenGL1MeshRenderer::drawNormalOverlays(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int OpenGL1MeshRenderer::MAX_LIGHTS;

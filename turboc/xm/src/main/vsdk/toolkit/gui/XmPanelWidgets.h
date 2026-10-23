@@ -1,6 +1,7 @@
 #ifndef __XM_PANEL_WIDGETS__
 #define __XM_PANEL_WIDGETS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
 
 /**
@@ -17,7 +18,7 @@ keyboard focus in the drawing area of the application.
 class XmPanelWidgets : public XtPanelWidgets {
 public:
     virtual Widget createPanel(Widget parent, const char* name, int x, int y,
-                               int width, int height, bool managed);
+                               int width, int height, BOOLEAN managed);
     virtual Widget createLabel(Widget parent, const String& text,
                                XFontSet fontSet, Justify justify,
                                int x, int y, int width, int height);
@@ -29,7 +30,7 @@ public:
                                    void* clientData);
     virtual String getText(Widget field);
     virtual void setText(Widget field, const String& text);
-    virtual void setInvalid(Widget field, bool invalid);
+    virtual void setInvalid(Widget field, BOOLEAN invalid);
     virtual void setForeground(Widget widget, const char* colorName);
     virtual Widget createPushButton(Widget parent, const String& label,
                                     XFontSet fontSet,

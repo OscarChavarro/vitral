@@ -1,6 +1,7 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_VALIDATION_ENGINE__
-#define __POLYHEDRAL_BOUNDED_SOLID_VALIDATION_ENGINE__
+#ifndef __PBS_VALIDATION_ENGINE__
+#define __PBS_VALIDATION_ENGINE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/concurrent/atomic/AtomicLong.h"
 
 #include "java/lang/String.h"
@@ -21,7 +22,7 @@ public:
     @param solid solid to validate; its validation state is updated
     @return true when the solid is valid
     */
-    static bool validateIntermediate(PolyhedralBoundedSolid* solid);
+    static BOOLEAN validateIntermediate(PolyhedralBoundedSolid* solid);
 
     /**
     Validates both operands of a boolean operation before the pipeline starts:
@@ -34,7 +35,7 @@ public:
     @throws IllegalArgumentException (Java IllegalArgumentException) when a
     solid remains invalid after the automated repair
     */
-    static bool validateBooleanInputs(PolyhedralBoundedSolid* solidA,
+    static BOOLEAN validateBooleanInputs(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB, String* msg);
 
     /**
@@ -44,7 +45,7 @@ public:
     @param solid solid to validate; its validation state is updated
     @return true when the solid is valid
     */
-    static bool validateStrict(PolyhedralBoundedSolid* solid);
+    static BOOLEAN validateStrict(PolyhedralBoundedSolid* solid);
 
     /**
     Runs strict validation and appends actionable failure detail to `msg`.
@@ -52,7 +53,7 @@ public:
     @param msg receives failure details, can be null
     @return true when the solid is valid
     */
-    static bool validateStrict(PolyhedralBoundedSolid* solid, String* msg);
+    static BOOLEAN validateStrict(PolyhedralBoundedSolid* solid, String* msg);
 
     /**
     @return number of strict validation invocations, a diagnostic counter
@@ -74,7 +75,7 @@ public:
     @param tolerance vertex coincidence epsilon
     @return true if the two solids are interchangeable as boolean operands
     */
-    static bool areGeometricallyIdentical(PolyhedralBoundedSolid* a,
+    static BOOLEAN areGeometricallyIdentical(PolyhedralBoundedSolid* a,
         PolyhedralBoundedSolid* b, double tolerance);
 
 private:

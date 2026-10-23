@@ -1,6 +1,7 @@
 #ifndef __RGBA_IMAGE_COMPRESSED__
 #define __RGBA_IMAGE_COMPRESSED__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/Image.h"
 class RGBPixel;
 
@@ -14,10 +15,12 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int COMPRESSION_UNKNOWN = 0;
-    static const int COMPRESSION_DXT1 = 1;
-    static const int COMPRESSION_DXT3 = 3;
-    static const int COMPRESSION_DXT5 = 5;
+    enum {
+        COMPRESSION_UNKNOWN = 0,
+        COMPRESSION_DXT1 = 1,
+        COMPRESSION_DXT3 = 3,
+        COMPRESSION_DXT5 = 5
+    };
 
 private:
     char* data;
@@ -34,11 +37,11 @@ public:
 
     virtual int getSizeInBytes() const;
 
-    virtual bool init(int width, int height);
+    virtual BOOLEAN init(int width, int height);
 
-    virtual bool initNoFill(int width, int height);
+    virtual BOOLEAN initNoFill(int width, int height);
 
-    bool initCompressed(
+    BOOLEAN initCompressed(
         int width,
         int height,
         int compressionFormat,

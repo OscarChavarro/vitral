@@ -1,9 +1,10 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/BufferedReader.h"
 #include "java/lang/StringBuilder.h"
 
 
 BufferedReader::BufferedReader(InputStream *in) :
-    in(in), position(0), count(0), skipLF(false)
+    in(in), position(0), count(0), skipLF(FALSE)
 {
 }
 
@@ -21,7 +22,7 @@ BufferedReader::readByte()
     return buffer[position++];
 }
 
-bool
+BOOLEAN
 BufferedReader::readLine(String &outLine)
 {
     StringBuilder line;
@@ -30,9 +31,9 @@ BufferedReader::readLine(String &outLine)
     if ( skipLF && c == '\n' ) {
         c = readByte();
     }
-    skipLF = false;
+    skipLF = FALSE;
     if ( c < 0 ) {
-        return false;
+        return FALSE;
     }
     while ( c >= 0 && c != '\n' && c != '\r' ) {
         line.append((char)c);
@@ -42,6 +43,6 @@ BufferedReader::readLine(String &outLine)
     // one does not block waiting for it
     skipLF = c == '\r';
     outLine = line.toString();
-    return true;
+    return TRUE;
 }
 

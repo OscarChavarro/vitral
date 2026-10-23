@@ -1,5 +1,6 @@
 #include <ctype.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/dialog/components/DialogFileFilter.h"
 #include "vsdk/toolkit/gui/widget/WidgetDialog.h"
 #include "io/FileSuffixFilter.h"
@@ -59,10 +60,10 @@ ArrayList<FileSuffixFilter> FileSuffixFilter::fromDialog(
     return filters;
 }
 
-bool FileSuffixFilter::accept(const File& file) const
+BOOLEAN FileSuffixFilter::accept(const File& file) const
 {
     if ( file.isDirectory() ) {
-        return true;
+        return TRUE;
     }
     return !suffix.isEmpty() && suffix.equals(getSuffix(file.getPath()));
 }

@@ -8,9 +8,10 @@
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR__
+#ifndef ___PBS_SET_OPERATOR__
+#define ___PBS_SET_OPERATOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
@@ -80,7 +81,7 @@ public:
     */
     static Vector3Dd inside(_PolyhedralBoundedSolidHalfEdge* he);
 
-    static bool colinearVectorsWithDirection(const Vector3Dd& a,
+    static BOOLEAN colinearVectorsWithDirection(const Vector3Dd& a,
                                              const Vector3Dd& b);
 
     /**
@@ -113,7 +114,7 @@ public:
     @return true when `result` has faces, none degenerate, and passes the
     intermediate validation
     */
-    static bool isStructurallyUsableSetOpResult(PolyhedralBoundedSolid* result);
+    static BOOLEAN isStructurallyUsableSetOpResult(PolyhedralBoundedSolid* result);
 
     /**
     Following program [MANT1988].15.1.
@@ -131,20 +132,22 @@ public:
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
         int op,
-        bool withDebug = false,
-        bool maximizeResultFaces = true,
-        bool doStrictValidation = true);
+        BOOLEAN withDebug = FALSE,
+        BOOLEAN maximizeResultFaces = TRUE,
+        BOOLEAN doStrictValidation = TRUE);
 
 private:
     typedef _PolyhedralBoundedSolidSetNonIntersectingClassifier::_PreflightCache PreflightCache;
 
-    static const int DEBUG_01_STRUCTURE = 0x01;
-    static const int DEBUG_02_GENERATOR = 0x02;
-    static const int DEBUG_03_VERTEXFACECLASIFFIER = 0x04;
-    static const int DEBUG_04_VERTEXVERTEXCLASIFFIER = 0x08;
-    static const int DEBUG_05_CONNECT = 0x10;
-    static const int DEBUG_06_FINISH = 0x20;
-    static const int DEBUG_99_SHOWOPERATIONS = 0x40;
+    enum {
+        DEBUG_01_STRUCTURE = 0x01,
+        DEBUG_02_GENERATOR = 0x02,
+        DEBUG_03_VERTEXFACECLASIFFIER = 0x04,
+        DEBUG_04_VERTEXVERTEXCLASIFFIER = 0x08,
+        DEBUG_05_CONNECT = 0x10,
+        DEBUG_06_FINISH = 0x20,
+        DEBUG_99_SHOWOPERATIONS = 0x40
+    };
     static int debugFlags;
     static DebugSolidExporter debugSolidExporter;
 
@@ -160,13 +163,13 @@ private:
     static void pruneStaleVertexFaceEntries(
         ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>& list,
         PolyhedralBoundedSolid* solid);
-    static bool sectoroverlap(
+    static BOOLEAN sectoroverlap(
         const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex& na,
         const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex& nb);
     static _PolyhedralBoundedSolidHalfEdge* recoverEdgeSequenceEndpointFromStrut(
-        _PolyhedralBoundedSolidHalfEdge* endpoint, bool isFromEndpoint);
-    static bool nulledge(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool strutnulledge(_PolyhedralBoundedSolidHalfEdge* he);
+        _PolyhedralBoundedSolidHalfEdge* endpoint, BOOLEAN isFromEndpoint);
+    static BOOLEAN nulledge(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN strutnulledge(_PolyhedralBoundedSolidHalfEdge* he);
     static void setOpClassify(_SetOperationContext& ctx, int op,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
     static void traceSelfTouchingLoops(PolyhedralBoundedSolid* solid,
@@ -178,25 +181,25 @@ private:
         PolyhedralBoundedSolid* outRes, int op);
     static void debugSolid(PolyhedralBoundedSolid* solid, const char* pattern);
     static void postProcessResult(PolyhedralBoundedSolid* res,
-        bool maximizeResultFaces);
+        BOOLEAN maximizeResultFaces);
     static PolyhedralBoundedSolid* completeSetOpResult(
         PolyhedralBoundedSolid* result,
         const String& operandADiagnostics,
         const String& operandBDiagnostics,
         int op,
         const char* resultPath,
-        bool maximizeResultFaces,
-        bool doStrictValidation);
+        BOOLEAN maximizeResultFaces,
+        BOOLEAN doStrictValidation);
     static String operationName(int op);
     static String cardinalitiesAndBounds(PolyhedralBoundedSolid* solid);
     static PolyhedralBoundedSolid* deepCloneSolid(PolyhedralBoundedSolid* solid,
         const char* solidLabel);
-    static bool hasDegenerateFace(PolyhedralBoundedSolid* solid);
-    static bool shouldUseAxisAlignedCellBooleanFallback(
+    static BOOLEAN hasDegenerateFace(PolyhedralBoundedSolid* solid);
+    static BOOLEAN shouldUseAxisAlignedCellBooleanFallback(
         PolyhedralBoundedSolid* fallback, PolyhedralBoundedSolid* result);
-    static bool hasIncompleteConnectState();
-    static bool hasBasicSetOpShapeData(PolyhedralBoundedSolid* result);
-    static bool hasSameShapeData(PolyhedralBoundedSolid* first,
+    static BOOLEAN hasIncompleteConnectState();
+    static BOOLEAN hasBasicSetOpShapeData(PolyhedralBoundedSolid* result);
+    static BOOLEAN hasSameShapeData(PolyhedralBoundedSolid* first,
         PolyhedralBoundedSolid* second);
 
     /**

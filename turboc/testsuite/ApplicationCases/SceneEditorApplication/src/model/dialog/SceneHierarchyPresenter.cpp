@@ -1,4 +1,5 @@
 #include <string.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
@@ -54,14 +55,14 @@ private:
     Scene* scene;
 };
 
-static bool isBlank(const String& text)
+static BOOLEAN isBlank(const String& text)
 {
     for ( const char* c = text.c_str(); *c != '\0'; c++ ) {
         if ( strchr(" \t\r\n", *c) == NULL ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 
@@ -160,11 +161,11 @@ const SceneHierarchyPresenter::Entry* SceneHierarchyPresenter::entryOf(
     return NULL;
 }
 
-bool SceneHierarchyPresenter::isSelected(const DialogTreeNode* node) const
+BOOLEAN SceneHierarchyPresenter::isSelected(const DialogTreeNode* node) const
 {
     const Entry* entry = entryOf(node);
     if ( entry == NULL ) {
-        return false;
+        return FALSE;
     }
     Scene* scene = model->getScene();
     SelectionSet* selection = NULL;
@@ -183,7 +184,7 @@ bool SceneHierarchyPresenter::isSelected(const DialogTreeNode* node) const
         index = indexOf(scene->debugThingGroups, entry->element);
         break;
       default:
-        return false;
+        return FALSE;
     }
     selection->sync();
     return index >= 0 && selection->isSelected(index);
@@ -193,9 +194,9 @@ void SceneHierarchyPresenter::select(
     const ArrayList<const DialogTreeNode*>& nodes)
 {
     Scene* scene = model->getScene();
-    ArrayList<bool> beforeB = SceneSelectionOperation::capture(scene->selectedThings);
-    ArrayList<bool> beforeL = SceneSelectionOperation::capture(scene->selectedLights);
-    ArrayList<bool> beforeG =
+    ArrayList<BOOLEAN> beforeB = SceneSelectionOperation::capture(scene->selectedThings);
+    ArrayList<BOOLEAN> beforeL = SceneSelectionOperation::capture(scene->selectedLights);
+    ArrayList<BOOLEAN> beforeG =
         SceneSelectionOperation::capture(scene->selectedDebugThingGroups);
     scene->selectedThings->unselectAll();
     scene->selectedLights->unselectAll();
@@ -221,9 +222,9 @@ void SceneHierarchyPresenter::select(
             break;
         }
     }
-    ArrayList<bool> afterB = SceneSelectionOperation::capture(scene->selectedThings);
-    ArrayList<bool> afterL = SceneSelectionOperation::capture(scene->selectedLights);
-    ArrayList<bool> afterG =
+    ArrayList<BOOLEAN> afterB = SceneSelectionOperation::capture(scene->selectedThings);
+    ArrayList<BOOLEAN> afterL = SceneSelectionOperation::capture(scene->selectedLights);
+    ArrayList<BOOLEAN> afterG =
         SceneSelectionOperation::capture(scene->selectedDebugThingGroups);
     if ( !SceneSelectionOperation::isSame(beforeB, afterB) ||
          !SceneSelectionOperation::isSame(beforeL, afterL) ||
@@ -263,19 +264,19 @@ ArrayList<SimpleBody*> SceneHierarchyPresenter::selectedBodies(
     return result;
 }
 
-bool SceneHierarchyPresenter::anyHidden(
+BOOLEAN SceneHierarchyPresenter::anyHidden(
     const ArrayList<SimpleBody*>& bodies) const
 {
     for ( long i = 0; i < bodies.size(); i++ ) {
         if ( model->getScene()->isHidden(bodies[i]) ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 void SceneHierarchyPresenter::setHidden(const ArrayList<SimpleBody*>& bodies,
-                                        bool hidden)
+                                        BOOLEAN hidden)
 {
     for ( long i = 0; i < bodies.size(); i++ ) {
         model->getScene()->setHidden(bodies[i], hidden);

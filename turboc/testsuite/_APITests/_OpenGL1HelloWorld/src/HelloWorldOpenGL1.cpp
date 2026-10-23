@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
 #ifdef __APPLE__
@@ -25,7 +26,7 @@ public:
     static HelloWorldOpenGL1* instance;
 
     HelloWorldOpenGL1()
-        : ready(false)
+        : ready(FALSE)
     {
     }
 
@@ -41,7 +42,7 @@ public:
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        ready = true;
+        ready = TRUE;
     }
 
     void display()
@@ -104,7 +105,7 @@ public:
     }
 
 private:
-    bool ready;
+    BOOLEAN ready;
 
     static void displayCallback()
     {
@@ -140,7 +141,7 @@ private:
         if (ready) {
             OpenGL1RendererConfigurationStateSelector::dispose();
         }
-        ready = false;
+        ready = FALSE;
     }
 };
 

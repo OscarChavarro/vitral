@@ -1,6 +1,7 @@
 #ifndef __WIDGET_DIALOG__
 #define __WIDGET_DIALOG__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "java/util/ArrayList.h"
@@ -28,17 +29,19 @@ private:
     ArrayList<String> pendingCommandNames;
     ArrayList<String> pendingDialogNames;
     ArrayList<String> pendingDialogRefNames;
-    bool collapsable;
+    BOOLEAN collapsable;
     String titleKey;
-    bool modal;
+    BOOLEAN modal;
     ArrayList<WidgetDialogElement> elements;
 
 public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int ORIENTATION_HORIZONTAL = 0x01;
-    static const int ORIENTATION_VERTICAL = 0x02;
+    enum {
+        ORIENTATION_HORIZONTAL = 0x01,
+        ORIENTATION_VERTICAL = 0x02
+    };
 
     WidgetDialog();
     virtual ~WidgetDialog() {}
@@ -48,8 +51,8 @@ public:
     */
     const String& getTitleKey() const;
     void setTitleKey(const String& titleKey);
-    bool isModal() const;
-    void setModal(bool modal);
+    BOOLEAN isModal() const;
+    void setModal(BOOLEAN modal);
 
     /**
     @return the ordered, toolkit-independent content of the dialog
@@ -63,8 +66,8 @@ public:
     const WidgetDialogElement* getElementByAction(
         const String& action) const;
 
-    bool isCollapsable() const;
-    void setCollapsable(bool collapsable);
+    BOOLEAN isCollapsable() const;
+    void setCollapsable(BOOLEAN collapsable);
     ArrayList<String>& getPendingCommandNames();
     void setPendingCommandNames(
         const ArrayList<String>& pendingCommandNames);

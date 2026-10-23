@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
-bool
+BOOLEAN
 Float::isFinite(float a) {
     return Cpp98Support::isFinite(a);
 }

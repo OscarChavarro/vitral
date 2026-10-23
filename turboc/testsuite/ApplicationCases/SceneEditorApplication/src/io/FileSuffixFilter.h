@@ -1,6 +1,7 @@
 #ifndef __FILE_SUFFIX_FILTER__
 #define __FILE_SUFFIX_FILTER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "java/io/File.h"
@@ -51,7 +52,7 @@ public:
     @param file file or folder
     @return true for folders and for files with the suffix of this filter
     */
-    bool accept(const File& file) const;
+    BOOLEAN accept(const File& file) const;
 
     /**
     @return the description of the kind of files, with the suffix

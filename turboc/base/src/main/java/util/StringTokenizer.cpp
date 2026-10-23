@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/StringTokenizer.h"
 
 StringTokenizer::StringTokenizer(const String &text, const char *delimiters):
@@ -33,10 +34,10 @@ StringTokenizer::dispose() {
     }
 }
 
-bool
+BOOLEAN
 StringTokenizer::isDelimiter(char ch) const {
     if ( delimiters == NULL ) {
-        return false;
+        return FALSE;
     }
     return strchr(delimiters, ch) != NULL;
 }
@@ -71,7 +72,7 @@ StringTokenizer::findTokenEnd(int from) const {
     return index;
 }
 
-bool
+BOOLEAN
 StringTokenizer::hasMoreTokens() const {
     return findTokenStart(cursor) >= 0;
 }

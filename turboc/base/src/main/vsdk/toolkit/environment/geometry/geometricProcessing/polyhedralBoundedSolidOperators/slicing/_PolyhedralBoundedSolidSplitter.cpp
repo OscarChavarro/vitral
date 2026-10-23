@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
@@ -35,7 +36,7 @@ public:
 
 _PolyhedralBoundedSolidSplitterSectorClassification::
 _PolyhedralBoundedSolidSplitterSectorClassification()
-    : sector(NULL), cl(ON), isWide(false), situation(UNDEFINED)
+    : sector(NULL), cl(ON), isWide(FALSE), situation(UNDEFINED)
 {
 }
 
@@ -234,7 +235,7 @@ _PolyhedralBoundedSolidSplitter::getNeighborhood(
         c.sector = he;
         d = inSplittingPlane.pointDistance((he->next())->startingVertex->position);
         c.cl = compareToZero(d);
-        c.isWide = false;
+        c.isWide = FALSE;
         c.position = (he->next())->startingVertex->position;
         c.situation = SectorClassification::UNDEFINED;
         if ( checkSplitterSectorWideness(he) ) {
@@ -246,7 +247,7 @@ _PolyhedralBoundedSolidSplitter::getNeighborhood(
             wide.sector = he;
             d = inSplittingPlane.pointDistance(bisect);
             wide.cl = compareToZero(d);
-            wide.isWide = true;
+            wide.isWide = TRUE;
             wide.position = bisect;
             wide.situation = SectorClassification::CROSSING_EDGE;
             neighborSectorsInfo.add(wide);
@@ -279,14 +280,14 @@ predicate inherited from `_PolyhedralBoundedSolidOperator`; that
 predicate treats degenerate/straight sectors as wide and is not
 interchangeable with the splitter classification.
 */
-bool _PolyhedralBoundedSolidSplitter::checkSplitterSectorWideness(
+BOOLEAN _PolyhedralBoundedSolidSplitter::checkSplitterSectorWideness(
     _PolyhedralBoundedSolidHalfEdge* he)
 {
     if ( he == NULL || he->parentLoop == NULL ||
          he->parentLoop->parentFace == NULL ||
          he->parentLoop->parentFace->getContainingPlane() == NULL ||
          he->previous() == NULL || he->next() == NULL ) {
-        return true;
+        return TRUE;
     }
 
     Vector3Dd vertex = he->startingVertex->position;
@@ -299,7 +300,7 @@ bool _PolyhedralBoundedSolidSplitter::checkSplitterSectorWideness(
     if ( incoming.length() <= numericContext.unitVectorTolerance() ||
          outgoing.length() <= numericContext.unitVectorTolerance() ||
          faceNormal.length() <= numericContext.unitVectorTolerance() ) {
-        return true;
+        return TRUE;
     }
 
     incoming = incoming.normalized();
@@ -316,15 +317,15 @@ bool _PolyhedralBoundedSolidSplitter::checkSplitterSectorWideness(
     return interiorAngle > M_PI + numericContext.angleTolerance();
 }
 
-bool _PolyhedralBoundedSolidSplitter::inplaneEdgesOn(
+BOOLEAN _PolyhedralBoundedSolidSplitter::inplaneEdgesOn(
     const ArrayList<SectorClassification>& nbr)
 {
     long i;
 
     for ( i = 0; i < nbr.size(); i++ ) {
-        if ( nbr[i].situation == SectorClassification::INPLANE_EDGE ) return true;
+        if ( nbr[i].situation == SectorClassification::INPLANE_EDGE ) return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 /**
@@ -436,7 +437,7 @@ void _PolyhedralBoundedSolidSplitter::insertNullEdges(
     head = nbr[i].sector;
 
     //-----------------------------------------------------------------
-    while ( true ) {
+    while ( TRUE ) {
         //- Locate the final sector of the sequence ------------------
         while ( !( nbr[i].cl == SectorClassification::ABOVE &&
                    nbr[(i+1)%nnbr].cl == SectorClassification::BELOW ) ) {
@@ -566,15 +567,15 @@ void _PolyhedralBoundedSolidSplitter::cut(_PolyhedralBoundedSolidHalfEdge* he)
     }
 }
 
-bool _PolyhedralBoundedSolidSplitter::isLoose(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN _PolyhedralBoundedSolidSplitter::isLoose(_PolyhedralBoundedSolidHalfEdge* he)
 {
     long i;
 
     for ( i = 0; i < tieds.size(); i++ ) {
-        if ( he == tieds[i] ) return false;
+        if ( he == tieds[i] ) return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 /**
@@ -602,7 +603,7 @@ void _PolyhedralBoundedSolidSplitter::splitConnect()
         h1 = canJoin(nextedge->rightHalf);
 
         if ( h1 != NULL ) {
-            join(h1, nextedge->rightHalf, false);
+            join(h1, nextedge->rightHalf, FALSE);
             tieds.add(nextedge->rightHalf);
             if ( !isLoose(h1->mirrorHalfEdge()) ) {
                 cut(h1);
@@ -611,7 +612,7 @@ void _PolyhedralBoundedSolidSplitter::splitConnect()
         h2 = canJoin(nextedge->leftHalf);
 
         if ( h2 != NULL ) {
-            join(h2, nextedge->leftHalf, false);
+            join(h2, nextedge->leftHalf, FALSE);
             tieds.add(nextedge->leftHalf);
             if ( !isLoose(h2->mirrorHalfEdge()) ) {
                 cut(h2);
@@ -642,14 +643,14 @@ void _PolyhedralBoundedSolidSplitter::classify(PolyhedralBoundedSolid* /*s*/,
     }
 }
 
-bool _PolyhedralBoundedSolidSplitter::isNullFace(_PolyhedralBoundedSolidFace* f)
+BOOLEAN _PolyhedralBoundedSolidSplitter::isNullFace(_PolyhedralBoundedSolidFace* f)
 {
     long i;
 
     for ( i = 0; i < sonf.size(); i++ ) {
-        if ( sonf[i] == f ) return true;
+        if ( sonf[i] == f ) return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 /**
@@ -670,7 +671,7 @@ all vertices from `b` are inside the polygon of `a`.
 
 PRE: given faces are coplanar.
 */
-bool _PolyhedralBoundedSolidSplitter::faceInsideFace(
+BOOLEAN _PolyhedralBoundedSolidSplitter::faceInsideFace(
     _PolyhedralBoundedSolidFace* a, _PolyhedralBoundedSolidFace* b)
 {
     long i;
@@ -683,12 +684,12 @@ bool _PolyhedralBoundedSolidSplitter::faceInsideFace(
         do {
             if ( a->testPointInside(he->startingVertex->position,
                     numericContext.bigEpsilon()) == Geometry::OUTSIDE ) {
-                return false;
+                return FALSE;
             }
             he = he->next();
         } while ( he != heStart );
     }
-    return true;
+    return TRUE;
 }
 
 void _PolyhedralBoundedSolidSplitter::fixNullFaces(
@@ -795,10 +796,3 @@ void _PolyhedralBoundedSolidSplitter::split(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidSplitterSectorClassification::ABOVE;
-const int _PolyhedralBoundedSolidSplitterSectorClassification::BELOW;
-const int _PolyhedralBoundedSolidSplitterSectorClassification::ON;
-const int _PolyhedralBoundedSolidSplitterSectorClassification::COPLANAR_FACE;
-const int _PolyhedralBoundedSolidSplitterSectorClassification::INPLANE_EDGE;
-const int _PolyhedralBoundedSolidSplitterSectorClassification::CROSSING_EDGE;
-const int _PolyhedralBoundedSolidSplitterSectorClassification::UNDEFINED;

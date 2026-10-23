@@ -4,9 +4,9 @@
 
 #include <math.h>
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeSet.h"
 #include "java/lang/String.h"
-#include <strings.h>
 
 #include "java/lang/Boolean.h"
 #include "java/lang/System.h"
@@ -58,7 +58,7 @@ Connector::HalfEdgeList Connector::endsa;
 Connector::HalfEdgeList Connector::endsb;
 TreeMap<int, int> Connector::sonfaPairIndexByFaceId;
 TreeMap<int, int> Connector::sonfbPairIndexByFaceId;
-bool Connector::hasPairIndexMaps = false;
+BOOLEAN Connector::hasPairIndexMaps = FALSE;
 int Connector::lastLooseACount = 0;
 int Connector::lastLooseBCount = 0;
 int Connector::lastSonfaCount = 0;
@@ -68,8 +68,8 @@ int Connector::currentConnectPairIndex = 0;
 int Connector::nextSyntheticPairIndex = 0;
 _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report Connector::lastCurveReport;
 ArrayList<int> Connector::testOnlyForcedConnectOrder;
-bool Connector::hasTestOnlyForcedConnectOrder = false;
-bool Connector::curveOrientationApplied = false;
+BOOLEAN Connector::hasTestOnlyForcedConnectOrder = FALSE;
+BOOLEAN Connector::curveOrientationApplied = FALSE;
 ArrayList<ArrayList<int> > Connector::curveNeighborPositions;
 ArrayList<int> Connector::endsPairIndex;
 
@@ -98,17 +98,17 @@ Connector::_PolyhedralBoundedSolidSetNullEdgesConnector()
 
 //= Traces and summaries ============================================
 
-bool Connector::isPipelineSummaryTraceEnabled()
+BOOLEAN Connector::isPipelineSummaryTraceEnabled()
 {
     return Boolean::getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
 }
 
-bool Connector::isKeepInsertionOrderEnabled()
+BOOLEAN Connector::isKeepInsertionOrderEnabled()
 {
     // As Java: an unset property means true, otherwise `Boolean.parseBoolean`
     String propertyValue = System::getProperty(
         KEEP_INSERTION_ORDER_PROPERTY, "true");
-    return strcasecmp(propertyValue.c_str(), "true") == 0;
+    return propertyValue.equalsIgnoreCase("true");
 }
 
 void Connector::tracePipelineSummary(const String& message)
@@ -222,12 +222,12 @@ String Connector::summarizeLooseEnds(const HalfEdgeList& endsA,
 
 //= Coincidence helpers =============================================
 
-bool Connector::isSamePoint(_PolyhedralBoundedSolidHalfEdge* first,
+BOOLEAN Connector::isSamePoint(_PolyhedralBoundedSolidHalfEdge* first,
     _PolyhedralBoundedSolidHalfEdge* second)
 {
     if ( first == 0 || second == 0 ||
          first->startingVertex == 0 || second->startingVertex == 0 ) {
-        return false;
+        return FALSE;
     }
     return PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
         first->startingVertex->position,
@@ -235,46 +235,46 @@ bool Connector::isSamePoint(_PolyhedralBoundedSolidHalfEdge* first,
         numericContext);
 }
 
-bool Connector::canCutCoincidentHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::canCutCoincidentHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     _PolyhedralBoundedSolidEdge* edge;
     _PolyhedralBoundedSolidLoop* loop;
 
     if ( he == 0 ) {
-        return false;
+        return FALSE;
     }
     edge = he->parentEdge;
     loop = he->parentLoop;
     if ( edge == 0 || loop == 0 ) {
-        return false;
+        return FALSE;
     }
     if ( edge->rightHalf == 0 || edge->leftHalf == 0 ) {
-        return false;
+        return FALSE;
     }
     if ( edge->rightHalf->parentLoop != edge->leftHalf->parentLoop ) {
-        return true;
+        return TRUE;
     }
     return loop->halfEdgesList.size() > 2;
 }
 
-bool Connector::hasReusableCoincidentCutFace(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::hasReusableCoincidentCutFace(_PolyhedralBoundedSolidHalfEdge* he)
 {
     _PolyhedralBoundedSolidFace* face;
 
     if ( he == 0 || he->parentLoop == 0 ) {
-        return false;
+        return FALSE;
     }
     face = he->parentLoop->parentFace;
     return face != 0 && face->boundariesList.size() > 1;
 }
 
-bool Connector::canCutCoincidentFinishFace(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::canCutCoincidentFinishFace(_PolyhedralBoundedSolidHalfEdge* he)
 {
     _PolyhedralBoundedSolidEdge* edge;
     _PolyhedralBoundedSolidLoop* loop;
 
     if ( he == 0 ) {
-        return false;
+        return FALSE;
     }
     edge = he->parentEdge;
     loop = he->parentLoop;
@@ -282,7 +282,7 @@ bool Connector::canCutCoincidentFinishFace(_PolyhedralBoundedSolidHalfEdge* he)
          edge->rightHalf == 0 || edge->leftHalf == 0 ||
          edge->rightHalf->parentLoop == 0 ||
          edge->leftHalf->parentLoop == 0 ) {
-        return false;
+        return FALSE;
     }
     // Classic case: both halves in the same loop and loop large enough for
     // an interior cut.
@@ -315,17 +315,17 @@ _PolyhedralBoundedSolidFace* Connector::registerCoincidentCutFace(
     return face;
 }
 
-bool Connector::canFinalizeCoincidentLooseA(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::canFinalizeCoincidentLooseA(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return canCutCoincidentFinishFace(he) || hasReusableCoincidentCutFace(he);
 }
 
-bool Connector::canFinalizeCoincidentLooseB(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::canFinalizeCoincidentLooseB(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return canCutCoincidentFinishFace(he) || hasReusableCoincidentCutFace(he);
 }
 
-bool Connector::isPointLikeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::isPointLikeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return isLiveHalfEdge(he) &&
         he->next() != 0 &&
@@ -333,7 +333,7 @@ bool Connector::isPointLikeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
         isSamePoint(he, he->next());
 }
 
-bool Connector::isDegenerateCoincidentLooseClosure(
+BOOLEAN Connector::isDegenerateCoincidentLooseClosure(
     _PolyhedralBoundedSolidHalfEdge* firstA,
     _PolyhedralBoundedSolidHalfEdge* secondA,
     _PolyhedralBoundedSolidHalfEdge* firstB,
@@ -404,7 +404,7 @@ void Connector::updateLastSnapshot()
     lastSonfbCount = (int)sonfb.size();
 }
 
-bool Connector::isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return he != 0 &&
         he->parentEdge != 0 &&
@@ -412,7 +412,7 @@ bool Connector::isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
         he->parentLoop->parentFace != 0;
 }
 
-bool Connector::sharesParentFace(_PolyhedralBoundedSolidHalfEdge* first,
+BOOLEAN Connector::sharesParentFace(_PolyhedralBoundedSolidHalfEdge* first,
     _PolyhedralBoundedSolidHalfEdge* second)
 {
     return isLiveHalfEdge(first) &&
@@ -420,12 +420,12 @@ bool Connector::sharesParentFace(_PolyhedralBoundedSolidHalfEdge* first,
         first->parentLoop->parentFace == second->parentLoop->parentFace;
 }
 
-bool Connector::isOppositeHalfEdgeSide(_PolyhedralBoundedSolidHalfEdge* first,
+BOOLEAN Connector::isOppositeHalfEdgeSide(_PolyhedralBoundedSolidHalfEdge* first,
     _PolyhedralBoundedSolidHalfEdge* second)
 {
     if ( first == 0 || second == 0 ||
          first->parentEdge == 0 || second->parentEdge == 0 ) {
-        return false;
+        return FALSE;
     }
 
     return (first == first->parentEdge->rightHalf &&
@@ -505,17 +505,17 @@ _PolyhedralBoundedSolidFace* Connector::findUniqueClassicRebindTargetFace(
     return candidateFace;
 }
 
-bool Connector::isStrictRebindTargetFace(_PolyhedralBoundedSolidFace* targetFace,
+BOOLEAN Connector::isStrictRebindTargetFace(_PolyhedralBoundedSolidFace* targetFace,
     _PolyhedralBoundedSolidHalfEdge* currentTarget)
 {
     if ( targetFace == 0 ||
          !isLiveHalfEdge(currentTarget) ||
          currentTarget->startingVertex == 0 ) {
-        return false;
+        return FALSE;
     }
     InfinitePlane* plane = targetFace->getContainingPlane();
     if ( plane == 0 ) {
-        return false;
+        return FALSE;
     }
 
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext faceContext =
@@ -524,7 +524,7 @@ bool Connector::isStrictRebindTargetFace(_PolyhedralBoundedSolidFace* targetFace
     double distance = fabs(plane->pointDistance(point));
     delete plane;
     if ( distance > faceContext.bigEpsilon() ) {
-        return false;
+        return FALSE;
     }
 
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
@@ -570,7 +570,7 @@ void Connector::rebindClassicCurrentNullEdgeIfNeeded(
 
     solid = currentTargetFirst->parentLoop->parentFace->parentSolid;
     if ( !PolyhedralBoundedSolidEulerOperators::lringmv(
-             solid, sourceLoop, targetFace, false) ) {
+             solid, sourceLoop, targetFace, FALSE) ) {
         tracePipelineSummary(String(("connect rebind" + String(label) +
             " failed sourceFace=" + str(sourceFace->id) + " targetFace=" +
             str(targetFace->id) + " edge=").c_str()) +
@@ -626,7 +626,7 @@ Connector::ConnectResult Connector::connect(int op, int flags,
 
 void Connector::sortNullEdges()
 {
-    curveOrientationApplied = false;
+    curveOrientationApplied = FALSE;
     curveNeighborPositions.clear();
     if ( hasTestOnlyForcedConnectOrder &&
          testOnlyForcedConnectOrder.size() == sonea->size() &&
@@ -715,7 +715,7 @@ static void nullEdgeFaceIds(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne
     ids[1] = ne.e->leftHalf->parentLoop->parentFace->id;
 }
 
-static bool nullEdgesShareFace(const long long* a, const long long* b)
+static BOOLEAN nullEdgesShareFace(const long long* a, const long long* b)
 {
     return a[0] == b[0] || a[0] == b[1] || a[1] == b[0] || a[1] == b[1];
 }
@@ -759,7 +759,7 @@ void Connector::groupNullEdgesByRing()
                  ::orderAndOrientAlongCurves(lastCurveReport.cycles, n,
                      *sonea, *soneb, curveOrder) ) {
             applyOrderPermutation(curveOrder);
-            curveOrientationApplied = true;
+            curveOrientationApplied = TRUE;
             curveNeighborPositions =
                 _PolyhedralBoundedSolidSetIntersectionCurveBuilder
                     ::lastTraversalNeighborPositions;
@@ -810,23 +810,23 @@ void Connector::groupNullEdgesByRing()
     // because after weldCoincidentVertices the coincident pairs are already
     // merged.
     TreeSet<int> vidsA;
-    bool hasSharedA = false;
+    BOOLEAN hasSharedA = FALSE;
     int ki;
     for ( ki = 0; ki < n && !hasSharedA; ki++ ) {
         int v1 = (*sonea)[ki].e->rightHalf->startingVertex->id;
         int v2 = (*sonea)[ki].e->leftHalf->startingVertex->id;
         if ( !vidsA.add(v1) || (v1 != v2 && !vidsA.add(v2)) ) {
-            hasSharedA = true;
+            hasSharedA = TRUE;
         }
     }
-    bool hasSharedB = false;
+    BOOLEAN hasSharedB = FALSE;
     if ( !hasSharedA ) {
         TreeSet<int> vidsB;
         for ( ki = 0; ki < n && !hasSharedB; ki++ ) {
             int v1 = (*soneb)[ki].e->rightHalf->startingVertex->id;
             int v2 = (*soneb)[ki].e->leftHalf->startingVertex->id;
             if ( !vidsB.add(v1) || (v1 != v2 && !vidsB.add(v2)) ) {
-                hasSharedB = true;
+                hasSharedB = TRUE;
             }
         }
     }
@@ -876,17 +876,17 @@ Implements sgetnextnulledge per [MANT1988] section 15.7, Program 15.14:
 advances the internal cursor over `sonea`/`soneb` and fills `out` with the
 next (nea, neb) pair.
 */
-bool Connector::sgetnextnulledge(NullEdgePair& out)
+BOOLEAN Connector::sgetnextnulledge(NullEdgePair& out)
 {
     if ( nextNullEdgeIndex >= (int)sonea->size() ||
          nextNullEdgeIndex >= (int)soneb->size() ) {
-        return false;
+        return FALSE;
     }
     out.nea = &(*sonea)[nextNullEdgeIndex];
     out.neb = &(*soneb)[nextNullEdgeIndex];
     out.pairIndex = nextNullEdgeIndex;
     nextNullEdgeIndex++;
-    return true;
+    return TRUE;
 }
 
 /**
@@ -895,14 +895,14 @@ loose pair `i` such that `hea` is a neighbor of `endsa[i]` AND `heb` is a
 neighbor of `endsb[i]`, removes and returns it. Otherwise `hea` and `heb`
 are appended to the loose lists and false (Java null) is returned.
 */
-bool Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
+BOOLEAN Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
     _PolyhedralBoundedSolidHalfEdge* heb,
     _PolyhedralBoundedSolidHalfEdge** outA,
     _PolyhedralBoundedSolidHalfEdge** outB)
 {
     long i;
-    bool condition1;
-    bool condition2;
+    BOOLEAN condition1;
+    BOOLEAN condition2;
 
     for ( i = 0; i < endsa.size(); i++ ) {
         condition1 = neighbor(hea, endsa[i]);
@@ -935,7 +935,7 @@ bool Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
             if ( i < endsPairIndex.size() ) {
                 endsPairIndex.remove((long)i);
             }
-            return true;
+            return TRUE;
         }
     }
 
@@ -944,21 +944,21 @@ bool Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
     // ring away from the face where its junction partner waits).
     if ( curveOrientationApplied ) {
         if ( rescueRingFaceNearMiss(hea, heb, outA, outB) ) {
-            return true;
+            return TRUE;
         }
     }
 
     endsa.add(hea);
     endsb.add(heb);
     endsPairIndex.add(currentConnectPairIndex);
-    return false;
+    return FALSE;
 }
 
-bool Connector::rolesOpposite(_PolyhedralBoundedSolidHalfEdge* h1,
+BOOLEAN Connector::rolesOpposite(_PolyhedralBoundedSolidHalfEdge* h1,
     _PolyhedralBoundedSolidHalfEdge* h2)
 {
     if ( h1 == 0 || h2 == 0 || h1->parentEdge == 0 || h2->parentEdge == 0 ) {
-        return false;
+        return FALSE;
     }
     return (h1 == h1->parentEdge->rightHalf &&
             h2 == h2->parentEdge->leftHalf) ||
@@ -971,15 +971,15 @@ True when the half-edge dangles in a pending two-half-edge strut ring (an
 inner loop holding only the null edge, as created by the vertex/face
 classifier's makeRing).
 */
-bool Connector::isPendingStrutRing(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::isPendingStrutRing(_PolyhedralBoundedSolidHalfEdge* he)
 {
     if ( he == 0 || he->parentLoop == 0 ||
          he->parentLoop->parentFace == 0 ||
          he->parentLoop->parentFace->boundariesList.size() == 0 ) {
-        return false;
+        return FALSE;
     }
     if ( he->parentLoop->halfEdgesList.size() != 2 ) {
-        return false;
+        return FALSE;
     }
     return he->parentLoop != he->parentLoop->parentFace->boundariesList.get(0);
 }
@@ -990,13 +990,13 @@ of the current pair) that matches on one solid and fails only the face
 equality on the other, with a pending strut ring on the mismatched side;
 re-parents that ring and completes the match.
 */
-bool Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
+BOOLEAN Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
     _PolyhedralBoundedSolidHalfEdge* heb,
     _PolyhedralBoundedSolidHalfEdge** outA,
     _PolyhedralBoundedSolidHalfEdge** outB)
 {
     int candidate = -1;
-    bool mismatchOnA = false;
+    BOOLEAN mismatchOnA = FALSE;
     long i;
 
     for ( i = 0; i < endsa.size(); i++ ) {
@@ -1013,25 +1013,25 @@ bool Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
              pusherPosition != curveNeighborPositions[currentConnectPairIndex][1] ) {
             continue;
         }
-        bool aOk = neighbor(hea, endsa[i]);
-        bool bOk = neighbor(heb, endsb[i]);
-        bool nearMissA = !aOk && bOk &&
+        BOOLEAN aOk = neighbor(hea, endsa[i]);
+        BOOLEAN bOk = neighbor(heb, endsb[i]);
+        BOOLEAN nearMissA = !aOk && bOk &&
             rolesOpposite(hea, endsa[i]) &&
             (isPendingStrutRing(hea) || isPendingStrutRing(endsa[i]));
-        bool nearMissB = aOk && !bOk &&
+        BOOLEAN nearMissB = aOk && !bOk &&
             rolesOpposite(heb, endsb[i]) &&
             (isPendingStrutRing(heb) || isPendingStrutRing(endsb[i]));
         if ( nearMissA || nearMissB ) {
             if ( candidate >= 0 ) {
                 tracePipelineSummary("connect ring-rescue ambiguous; skipped");
-                return false;
+                return FALSE;
             }
             candidate = (int)i;
             mismatchOnA = nearMissA;
         }
     }
     if ( candidate < 0 ) {
-        return false;
+        return FALSE;
     }
 
     _PolyhedralBoundedSolidHalfEdge* query = mismatchOnA ? hea : heb;
@@ -1049,18 +1049,18 @@ bool Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
     }
     _PolyhedralBoundedSolidFace* targetFace = anchorSide->parentLoop->parentFace;
     if ( targetFace == 0 || targetFace->parentSolid == 0 ) {
-        return false;
+        return FALSE;
     }
     if ( !PolyhedralBoundedSolidEulerOperators::lringmv(
              targetFace->parentSolid, ringSide->parentLoop,
-             targetFace, false) ) {
-        return false;
+             targetFace, FALSE) ) {
+        return FALSE;
     }
     if ( !neighbor(hea, endsa[candidate]) ||
          !neighbor(heb, endsb[candidate]) ) {
         tracePipelineSummary(
             "connect ring-rescue re-parent did not complete the match");
-        return false;
+        return FALSE;
     }
     tracePipelineSummary(("connect ring-rescue applied: ring v=" +
         (ringSide->startingVertex == 0 ? String("?") :
@@ -1073,15 +1073,15 @@ bool Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
     if ( candidate < (int)endsPairIndex.size() ) {
         endsPairIndex.remove((long)candidate);
     }
-    return true;
+    return TRUE;
 }
 
-bool Connector::isLooseA(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::isLooseA(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return endsa.contains(he);
 }
 
-bool Connector::isLooseB(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::isLooseB(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return endsb.contains(he);
 }
@@ -1092,7 +1092,7 @@ _PolyhedralBoundedSolidFace* Connector::cutA(_PolyhedralBoundedSolidHalfEdge* he
 {
     PolyhedralBoundedSolid* s;
     _PolyhedralBoundedSolidFace* addedFace = 0;
-    bool withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
+    BOOLEAN withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                      ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
     if ( withDebug ) {
@@ -1127,7 +1127,7 @@ _PolyhedralBoundedSolidFace* Connector::cutB(_PolyhedralBoundedSolidHalfEdge* he
 {
     PolyhedralBoundedSolid* s;
     _PolyhedralBoundedSolidFace* addedFace = 0;
-    bool withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
+    BOOLEAN withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                      ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
     if ( withDebug ) {
@@ -1195,7 +1195,8 @@ void Connector::setOpConnect()
     if ( isPipelineSummaryTraceEnabled() ) {
         int sameLoopA = 0;
         int diffLoopA = 0;
-        for ( long k = 0; k < sonea->size(); k++ ) {
+        long k;
+        for ( k = 0; k < sonea->size(); k++ ) {
             _PolyhedralBoundedSolidEdge* e = (*sonea)[k].e;
             if ( e->rightHalf != 0 && e->leftHalf != 0 &&
                  e->rightHalf->parentLoop == e->leftHalf->parentLoop ) {
@@ -1207,7 +1208,7 @@ void Connector::setOpConnect()
         }
         int sameLoopB = 0;
         int diffLoopB = 0;
-        for ( long k = 0; k < soneb->size(); k++ ) {
+        for ( k = 0; k < soneb->size(); k++ ) {
             _PolyhedralBoundedSolidEdge* e = (*soneb)[k].e;
             if ( e->rightHalf != 0 && e->leftHalf != 0 &&
                  e->rightHalf->parentLoop == e->leftHalf->parentLoop ) {
@@ -1231,8 +1232,8 @@ void Connector::setOpConnect()
     _PolyhedralBoundedSolidHalfEdge* h2b = 0;
     _PolyhedralBoundedSolidHalfEdge* r0;
     _PolyhedralBoundedSolidHalfEdge* r1;
-    bool allowRingMoveOnAJoin = (operation == INTERSECTION);
-    bool withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
+    BOOLEAN allowRingMoveOnAJoin = (operation == INTERSECTION);
+    BOOLEAN withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                      ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
     endsa.clear();
@@ -1243,7 +1244,7 @@ void Connector::setOpConnect()
     sonfb.clear();
     sonfaPairIndexByFaceId.clear();
     sonfbPairIndexByFaceId.clear();
-    hasPairIndexMaps = true;
+    hasPairIndexMaps = TRUE;
     setCurrentConnectContext(-1);
     long j;
 
@@ -1418,8 +1419,3 @@ void Connector::setOpConnect()
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidSetNullEdgesConnector::DEBUG_01_STRUCTURE;
-const int _PolyhedralBoundedSolidSetNullEdgesConnector::DEBUG_05_CONNECT;
-const int _PolyhedralBoundedSolidSetNullEdgesConnector::DEBUG_99_SHOWOPERATIONS;
-const int _PolyhedralBoundedSolidSetNullEdgesConnector::ENDPOINT_SOLID_A;
-const int _PolyhedralBoundedSolidSetNullEdgesConnector::ENDPOINT_SOLID_B;

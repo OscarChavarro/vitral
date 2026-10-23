@@ -14,8 +14,9 @@ void OpenGL1BackgroundRenderer::draw(Background* background)
     ColorRgb color = simple->colorInDireccion(Vector3Dd(1, 0, 0));
     const float coordinates[] = {-1,-1,0, 1,-1,0, -1,1,0, 1,1,0};
     ArrayList<float> positions, colors;
-    for ( int i = 0; i < 12; ++i ) positions.add(coordinates[i]);
-    for ( int i = 0; i < 4; ++i ) {
+    int i;
+    for ( i = 0; i < 12; ++i ) positions.add(coordinates[i]);
+    for ( i = 0; i < 4; ++i ) {
         colors.add((float)color.r()); colors.add((float)color.g());
         colors.add((float)color.b()); colors.add(1.0f);
     }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/Integer.h"
 #include "java/lang/Long.h"
@@ -11,7 +12,7 @@
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 
-static bool isSpace(char c)
+static BOOLEAN isSpace(char c)
 {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
 }
@@ -22,9 +23,9 @@ Parses an optional sign followed by decimal digits (already validated), as
 value as Java's `Long.parseLong` does, so `Long.MIN_VALUE` is covered.
 @return false on overflow of `long long`
 */
-static bool parseDecimalLongLong(const char* text, long long* outValue)
+static BOOLEAN parseDecimalLongLong(const char* text, long long* outValue)
 {
-    bool negative = false;
+    BOOLEAN negative = FALSE;
     if ( *text == '+' || *text == '-' ) {
         negative = *text == '-';
         text++;
@@ -35,16 +36,16 @@ static bool parseDecimalLongLong(const char* text, long long* outValue)
     for ( ; *text != '\0'; text++ ) {
         int digit = *text - '0';
         if ( value < multiplyLimit ) {
-            return false;
+            return FALSE;
         }
         value *= 10;
         if ( value < limit + digit ) {
-            return false;
+            return FALSE;
         }
         value -= digit;
     }
     *outValue = negative ? value : -value;
-    return true;
+    return TRUE;
 }
 
 double Double::parseDouble(const String& text)
@@ -103,7 +104,7 @@ String Double::toString(double value)
     }
 
     // buffer is "[-]d.ddde[+-]xx": split digits and exponent
-    bool negative = buffer[0] == '-';
+    BOOLEAN negative = buffer[0] == '-';
     const char* p = negative ? buffer + 1 : buffer;
     char digits[32];
     int digitCount = 0;
@@ -226,13 +227,13 @@ int Double::compare(double d1, double d2)
     // Values are equal or some of them is NaN: compare as Java
     // `doubleToLongBits`, where NaN is canonical and sorts last, and -0.0
     // sorts before 0.0
-    bool nan1 = Cpp98Support::isNaN(d1);
-    bool nan2 = Cpp98Support::isNaN(d2);
+    BOOLEAN nan1 = Cpp98Support::isNaN(d1);
+    BOOLEAN nan2 = Cpp98Support::isNaN(d2);
     if ( nan1 || nan2 ) {
         return nan1 == nan2 ? 0 : (nan1 ? 1 : -1);
     }
-    bool negative1 = Cpp98Support::signBit(d1);
-    bool negative2 = Cpp98Support::signBit(d2);
+    BOOLEAN negative1 = Cpp98Support::signBit(d1);
+    BOOLEAN negative2 = Cpp98Support::signBit(d2);
     if ( negative1 == negative2 ) {
         return 0;
     }

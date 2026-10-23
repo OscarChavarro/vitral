@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
+#ifdef __TURBOC__
+#include <sys/timeb.h>
+#else
 #include <sys/time.h>
+#endif
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/concurrent/locks/ReentrantLock.h"
 #include "java/util/TreeMap.h"
 
@@ -17,20 +22,46 @@ System::exit(int status) {
     ::exit(status);
 }
 
+#ifdef __TURBOC__
+// DOS has no gettimeofday: millisecond resolution wall clock (its 32 bit
+// long long holds milliseconds since 1970 until 1994 only, so the times
+// count from the first call)
+static long long
+millisecondsSinceFirstCall() {
+    static long firstSecond = -1;
+    struct timeb now;
+    ftime(&now);
+    if ( firstSecond < 0 ) {
+        firstSecond = (long)now.time;
+    }
+    return ((long long)now.time - firstSecond) * 1000 + now.millitm;
+}
+
+long long
+System::nanoTime() {
+    return millisecondsSinceFirstCall() * 1000000;
+}
+
+long long
+System::currentTimeMillis() {
+    return millisecondsSinceFirstCall();
+}
+#else
 long long
 System::nanoTime() {
     // C++98 has no monotonic clock: microsecond resolution wall clock
     struct timeval now;
     gettimeofday(&now, NULL);
-    return (long long)now.tv_sec * 1000000000LL + (long long)now.tv_usec * 1000LL;
+    return (long long)now.tv_sec * VSDK_LL(1000000000) + (long long)now.tv_usec * VSDK_LL(1000);
 }
 
 long long
 System::currentTimeMillis() {
     struct timeval now;
     gettimeofday(&now, NULL);
-    return (long long)now.tv_sec * 1000LL + (long long)now.tv_usec / 1000LL;
+    return (long long)now.tv_sec * VSDK_LL(1000) + (long long)now.tv_usec / VSDK_LL(1000);
 }
+#endif
 
 
 static TreeMap<String, String>& properties()

@@ -392,7 +392,7 @@ double Matrix4x4d::obtainEulerRollAngle() const
     return -acos(r1.get(1, 1));
 }
 
-bool Matrix4x4d::epsilonEquals(const Matrix4x4d& other, double epsilon) const
+BOOLEAN Matrix4x4d::epsilonEquals(const Matrix4x4d& other, double epsilon) const
 {
     if ( epsilon < 0.0 ) {
         Logger::reportMessage("Matrix4x4d", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
@@ -400,16 +400,16 @@ bool Matrix4x4d::epsilonEquals(const Matrix4x4d& other, double epsilon) const
     }
     for ( int i = 0; i < 4; ++i ) {
         for ( int j = 0; j < 4; ++j ) {
-            if ( Cpp98Support::abs(m_[i][j] - other.m_[i][j]) > epsilon ) return false;
+            if ( Cpp98Support::abs(m_[i][j] - other.m_[i][j]) > epsilon ) return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool Matrix4x4d::operator==(const Matrix4x4d& other) const
+BOOLEAN Matrix4x4d::operator==(const Matrix4x4d& other) const
 {
-    for ( int i = 0; i < 4; ++i ) for ( int j = 0; j < 4; ++j ) if ( m_[i][j] != other.m_[i][j] ) return false;
-    return true;
+    for ( int i = 0; i < 4; ++i ) for ( int j = 0; j < 4; ++j ) if ( m_[i][j] != other.m_[i][j] ) return FALSE;
+    return TRUE;
 }
 
 static unsigned int hashDouble(double val) {

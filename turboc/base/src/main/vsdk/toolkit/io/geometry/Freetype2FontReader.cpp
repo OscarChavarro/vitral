@@ -26,7 +26,7 @@ struct OutlineSegment {
 
 struct DecomposeState {
     ArrayList<OutlineSegment>* segments;
-    bool open;
+    BOOLEAN open;
 };
 
 /** AWT's `F26Dot6ToFloat`, with its Y negation, into a path coordinate. */
@@ -41,7 +41,7 @@ static void closeIfOpen(DecomposeState* state)
     if ( state->open ) {
         OutlineSegment close = { SEG_CLOSE, { 0, 0, 0, 0, 0, 0 } };
         state->segments->add(close);
-        state->open = false;
+        state->open = FALSE;
     }
 }
 
@@ -52,7 +52,7 @@ static int moveTo(const FT_Vector* to, void* user)
     OutlineSegment segment = { SEG_MOVETO, { 0, 0, 0, 0, 0, 0 } };
     setCoordinates(segment, 0, to);
     state->segments->add(segment);
-    state->open = true;
+    state->open = TRUE;
     return 0;
 }
 
@@ -115,7 +115,7 @@ static unsigned long firstCodePoint(const String& text)
     return s[0];
 }
 
-static bool shouldAddEndpoint(const Vector3Dd* lastAddedEndpoint,
+static BOOLEAN shouldAddEndpoint(const Vector3Dd* lastAddedEndpoint,
     const Vector3Dd& candidateEndpoint)
 {
     return lastAddedEndpoint == 0 ||
@@ -215,7 +215,7 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
     ArrayList<OutlineSegment> p;
     DecomposeState state;
     state.segments = &p;
-    state.open = false;
+    state.open = FALSE;
     FT_Outline_Funcs funcs;
     funcs.move_to = moveTo;
     funcs.line_to = lineTo;
@@ -231,9 +231,9 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
     closeIfOpen(&state);
 
     ParametricCurve* curve = new ParametricCurve();
-    bool endIt = false;
+    BOOLEAN endIt = FALSE;
     int code;
-    bool hasLastAddedEndpoint = false;
+    BOOLEAN hasLastAddedEndpoint = FALSE;
     Vector3Dd lastAddedEndpoint;
 
     for ( long s = 0; s < p.size(); s++ ) {
@@ -267,14 +267,14 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
             switch ( code ) {
               case 0:
                 curve->addPoint(ArrayList<Vector3Dd>(), ParametricCurve::BREAK);
-                hasLastAddedEndpoint = false;
+                hasLastAddedEndpoint = FALSE;
 
                 pointParameters.add(Vector3Dd(coords[0]/factor, -coords[1]/factor, 0));
                 if ( shouldAddEndpoint(hasLastAddedEndpoint ? &lastAddedEndpoint : 0,
                          pointParameters.get(0)) ) {
                     curve->addPoint(pointParameters, ParametricCurve::CORNER);
                     lastAddedEndpoint = pointParameters.get(0);
-                    hasLastAddedEndpoint = true;
+                    hasLastAddedEndpoint = TRUE;
                 }
                 break;
               case 1:
@@ -283,7 +283,7 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
                          pointParameters.get(0)) ) {
                     curve->addPoint(pointParameters, ParametricCurve::CORNER);
                     lastAddedEndpoint = pointParameters.get(0);
-                    hasLastAddedEndpoint = true;
+                    hasLastAddedEndpoint = TRUE;
                 }
                 break;
               case 2:
@@ -294,7 +294,7 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
                          pointParameters.get(0)) ) {
                     curve->addPoint(pointParameters, ParametricCurve::QUAD);
                     lastAddedEndpoint = pointParameters.get(0);
-                    hasLastAddedEndpoint = true;
+                    hasLastAddedEndpoint = TRUE;
                 }
                 break;
               case 3:
@@ -309,7 +309,7 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
                         Vector3Dd(coords[0]/factor, -coords[1]/factor, 0));
                     curve->addPoint(pointParameters, ParametricCurve::BEZIER);
                     lastAddedEndpoint = pointParameters.get(0);
-                    hasLastAddedEndpoint = true;
+                    hasLastAddedEndpoint = TRUE;
                 }
                 break;
               default:

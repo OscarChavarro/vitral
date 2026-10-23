@@ -63,7 +63,8 @@ double* SimpleBodyGroup::getMinMax()
 {
     ArrayList<Vector3Dd> points;
 
-    for (long int i = 0; i < bodies.size(); i++) {
+    long int i;
+    for (i = 0; i < bodies.size(); i++) {
         SimpleBody* bi = bodies[i];
         if ( bi == 0 || bi->getGeometry() == 0 ) continue;
         double* minmaxSub = bi->getGeometry()->getMinMax();
@@ -88,7 +89,7 @@ double* SimpleBodyGroup::getMinMax()
     double minX = DBL_MAX, minY = DBL_MAX, minZ = DBL_MAX;
     double maxX = -DBL_MAX, maxY = -DBL_MAX, maxZ = -DBL_MAX;
 
-    for (long int i = 0; i < points.size(); i++) {
+    for (i = 0; i < points.size(); i++) {
         const Vector3Dd& p = points[i];
         if ( p.x() < minX ) minX = p.x();
         if ( p.y() < minY ) minY = p.y();

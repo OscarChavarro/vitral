@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_MCP_APPLICATION_TOOLS__
 #define __XT_OPENGL1_MCP_APPLICATION_TOOLS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class XtOpenGL1ApplicationController;

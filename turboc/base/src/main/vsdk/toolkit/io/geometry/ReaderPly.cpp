@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/FileInputStream.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -28,14 +29,14 @@ enum ReaderPlyFormat {
 };
 
 struct ReaderPlyProperty {
-    bool isList;
+    BOOLEAN isList;
     String name;
     String type;
     String countType;
     String valueType;
 
     ReaderPlyProperty()
-        : isList(false), name(), type(), countType(), valueType()
+        : isList(FALSE), name(), type(), countType(), valueType()
     {
     }
 };
@@ -95,35 +96,35 @@ static ArrayList<String> splitWhitespace(const String& line)
     return tokens;
 }
 
-static bool readPlyAsciiLine(InputStream& inputStream, String* outLine)
+static BOOLEAN readPlyAsciiLine(InputStream& inputStream, String* outLine)
 {
     if ( outLine == 0 ) {
-        return false;
+        return FALSE;
     }
 
     char* rawLine = PersistenceElement::readAsciiLine(inputStream);
     if ( rawLine == 0 ) {
-        return false;
+        return FALSE;
     }
     *outLine = String(rawLine);
     free(rawLine);
-    return true;
+    return TRUE;
 }
 
-static bool readHeader(InputStream& inputStream, ReaderPlyHeader* header)
+static BOOLEAN readHeader(InputStream& inputStream, ReaderPlyHeader* header)
 {
     if ( header == 0 ) {
-        return false;
+        return FALSE;
     }
 
     String line;
     if ( !readPlyAsciiLine(inputStream, &line) ) {
-        return false;
+        return FALSE;
     }
     ArrayList<String> tokens = splitWhitespace(line);
     if ( tokens.size() < 1 || tokens[0] != "ply" ) {
         Logger::reportMessage("ReaderPly", Logger::ERROR, "readHeader", "input is not a PLY stream");
-        return false;
+        return FALSE;
     }
 
     int currentElement = -1;
@@ -134,7 +135,7 @@ static bool readHeader(InputStream& inputStream, ReaderPlyHeader* header)
         }
 
         if ( tokens[0] == "end_header" ) {
-            return true;
+            return TRUE;
         }
         if ( tokens[0] == "comment" || tokens[0] == "obj_info" ) {
             continue;
@@ -151,7 +152,7 @@ static bool readHeader(InputStream& inputStream, ReaderPlyHeader* header)
             }
             else {
                 Logger::reportMessage("ReaderPly", Logger::ERROR, "readHeader", "unsupported PLY format");
-                return false;
+                return FALSE;
             }
             continue;
         }
@@ -166,13 +167,13 @@ static bool readHeader(InputStream& inputStream, ReaderPlyHeader* header)
         if ( tokens[0] == "property" && currentElement >= 0 ) {
             ReaderPlyProperty property;
             if ( tokens.size() >= 5 && tokens[1] == "list" ) {
-                property.isList = true;
+                property.isList = TRUE;
                 property.countType = tokens[2];
                 property.valueType = tokens[3];
                 property.name = tokens[4];
             }
             else if ( tokens.size() >= 3 ) {
-                property.isList = false;
+                property.isList = FALSE;
                 property.type = tokens[1];
                 property.name = tokens[2];
             }
@@ -181,7 +182,7 @@ static bool readHeader(InputStream& inputStream, ReaderPlyHeader* header)
     }
 
     Logger::reportMessage("ReaderPly", Logger::ERROR, "readHeader", "missing end_header");
-    return false;
+    return FALSE;
 }
 
 static int plyTypeSize(const String& type)
@@ -203,7 +204,7 @@ static int plyTypeSize(const String& type)
 }
 
 static unsigned long long readUnsignedIntegerBytes(
-    InputStream& inputStream, int bytes, bool bigEndian)
+    InputStream& inputStream, int bytes, BOOLEAN bigEndian)
 {
     unsigned char buffer[8];
     for ( int i = 0; i < 8; i++ ) {
@@ -228,32 +229,32 @@ static unsigned long long readUnsignedIntegerBytes(
 
 static long long unsignedToSigned(unsigned long long value, int bytes)
 {
-    if ( bytes == 1 && value >= 128ULL ) {
-        return (long long)value - 256LL;
+    if ( bytes == 1 && value >= VSDK_ULL(128) ) {
+        return (long long)value - VSDK_LL(256);
     }
-    if ( bytes == 2 && value >= 32768ULL ) {
-        return (long long)value - 65536LL;
+    if ( bytes == 2 && value >= VSDK_ULL(32768) ) {
+        return (long long)value - VSDK_LL(65536);
     }
-    if ( bytes == 4 && value >= 2147483648ULL ) {
-        return (long long)value - 4294967296LL;
+    if ( bytes == 4 && value >= VSDK_ULL(2147483648) ) {
+        return (long long)value - VSDK_LL(4294967296);
     }
     return (long long)value;
 }
 
-static bool isSignedIntegerType(const String& type)
+static BOOLEAN isSignedIntegerType(const String& type)
 {
     return type == "char" || type == "int8" ||
            type == "short" || type == "int16" ||
            type == "int" || type == "int32";
 }
 
-static bool isFloatType(const String& type)
+static BOOLEAN isFloatType(const String& type)
 {
     return type == "float" || type == "float32" || type == "double" || type == "float64";
 }
 
 static double readBinaryScalarAsDouble(
-    InputStream& inputStream, const String& type, bool bigEndian)
+    InputStream& inputStream, const String& type, BOOLEAN bigEndian)
 {
     const int bytes = plyTypeSize(type);
     if ( bytes <= 0 ) {
@@ -281,7 +282,7 @@ static double readBinaryScalarAsDouble(
 }
 
 static int readBinaryScalarAsInt(
-    InputStream& inputStream, const String& type, bool bigEndian)
+    InputStream& inputStream, const String& type, BOOLEAN bigEndian)
 {
     return (int)readBinaryScalarAsDouble(inputStream, type, bigEndian);
 }
@@ -382,7 +383,7 @@ static void skipAsciiElementRecord(const ReaderPlyElement&, const String&)
 static void readVertexBinary(
     InputStream& inputStream,
     const ReaderPlyElement& element,
-    bool bigEndian,
+    BOOLEAN bigEndian,
     ArrayList<Vector3Dd>* vertices)
 {
     double x = 0.0;
@@ -417,7 +418,7 @@ static void readVertexBinary(
 static void readFaceBinary(
     InputStream& inputStream,
     const ReaderPlyElement& element,
-    bool bigEndian,
+    BOOLEAN bigEndian,
     ArrayList<ReaderPlyTriangleIndices>* triangles)
 {
     for ( long int i = 0; i < element.properties.size(); i++ ) {
@@ -444,7 +445,7 @@ static void readFaceBinary(
 static void skipBinaryElementRecord(
     InputStream& inputStream,
     const ReaderPlyElement& element,
-    bool bigEndian)
+    BOOLEAN bigEndian)
 {
     for ( long int i = 0; i < element.properties.size(); i++ ) {
         const ReaderPlyProperty& property = element.properties[i];
@@ -466,7 +467,7 @@ static SimpleMaterial* makeDefaultPlyMaterial()
     *material = material->withAmbient(ColorRgb(0.18, 0.18, 0.18));
     *material = material->withDiffuse(ColorRgb(0.72, 0.76, 0.70));
     *material = material->withSpecular(ColorRgb(0.2, 0.2, 0.2));
-    *material = material->withDoubleSided(false);
+    *material = material->withDoubleSided(FALSE);
     return material;
 }
 
@@ -550,14 +551,14 @@ static TriangleMesh* buildTriangleMesh(
 
     TriangleMesh* mesh = new TriangleMesh();
     mesh->setName("PLY mesh");
-    mesh->setVertexes(*meshVertices, false, false, false, false);
+    mesh->setVertexes(*meshVertices, FALSE, FALSE, FALSE, FALSE);
     mesh->setTriangles(*meshTriangles);
     mesh->calculateNormals();
 
     ArrayList<SimpleMaterial*> materials;
     materials.add(makeDefaultPlyMaterial());
     mesh->setMaterials(materials);
-    mesh->setOwnsMaterials(true);
+    mesh->setOwnsMaterials(TRUE);
     ArrayList< ArrayList<int> > materialRanges;
     ArrayList<int> materialRange;
     materialRange.add(0);
@@ -598,8 +599,8 @@ ReaderPlyResult* ReaderPly::importGeometry(InputStream& inputStream)
 
     ArrayList<Vector3Dd> vertices;
     ArrayList<ReaderPlyTriangleIndices> triangles;
-    const bool binary = header.format != READER_PLY_ASCII;
-    const bool bigEndian = header.format == READER_PLY_BINARY_BIG_ENDIAN;
+    const BOOLEAN binary = header.format != READER_PLY_ASCII;
+    const BOOLEAN bigEndian = header.format == READER_PLY_BINARY_BIG_ENDIAN;
 
     for ( long int i = 0; i < header.elements.size(); i++ ) {
         const ReaderPlyElement& element = header.elements[i];

@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidBooleanTopologyPredicates.h"
@@ -7,7 +8,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
-bool _PolyhedralBoundedSolidBooleanTopologyPredicates::planesCoincidentIgnoringOrientation(
+BOOLEAN _PolyhedralBoundedSolidBooleanTopologyPredicates::planesCoincidentIgnoringOrientation(
     const InfinitePlane* a,
     const InfinitePlane* b,
     double tolerance)
@@ -24,7 +25,7 @@ bool _PolyhedralBoundedSolidBooleanTopologyPredicates::planesCoincidentIgnoringO
     double l2;
 
     if ( a == 0 || b == 0 ) {
-        return false;
+        return FALSE;
     }
 
     a1 = a->getA();
@@ -39,7 +40,7 @@ bool _PolyhedralBoundedSolidBooleanTopologyPredicates::planesCoincidentIgnoringO
     l1 = sqrt(a1*a1 + b1*b1 + c1*c1);
     l2 = sqrt(a2*a2 + b2*b2 + c2*c2);
     if ( l1 <= tolerance || l2 <= tolerance ) {
-        return false;
+        return FALSE;
     }
 
     a1 /= l1;
@@ -51,13 +52,13 @@ bool _PolyhedralBoundedSolidBooleanTopologyPredicates::planesCoincidentIgnoringO
     c2 /= l2;
     d2 /= l2;
 
-    bool sameOrientation =
+    BOOLEAN sameOrientation =
         fabs(a2 - a1) <= tolerance &&
         fabs(b2 - b1) <= tolerance &&
         fabs(c2 - c1) <= tolerance &&
         fabs(d2 - d1) <= tolerance;
 
-    bool oppositeOrientation =
+    BOOLEAN oppositeOrientation =
         fabs(a2 + a1) <= tolerance &&
         fabs(b2 + b1) <= tolerance &&
         fabs(c2 + c1) <= tolerance &&
@@ -66,10 +67,10 @@ bool _PolyhedralBoundedSolidBooleanTopologyPredicates::planesCoincidentIgnoringO
     return sameOrientation || oppositeOrientation;
 }
 
-bool _PolyhedralBoundedSolidBooleanTopologyPredicates::loopsCoincidentFrom(
+BOOLEAN _PolyhedralBoundedSolidBooleanTopologyPredicates::loopsCoincidentFrom(
     _PolyhedralBoundedSolidHalfEdge* startA,
     _PolyhedralBoundedSolidHalfEdge* startB,
-    bool reverse,
+    BOOLEAN reverse,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext)
 {
     _PolyhedralBoundedSolidHalfEdge* heA;
@@ -81,16 +82,16 @@ bool _PolyhedralBoundedSolidBooleanTopologyPredicates::loopsCoincidentFrom(
         if ( !PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
             heA->startingVertex->position, heB->startingVertex->position,
             numericContext) ) {
-            return false;
+            return FALSE;
         }
         heA = heA->next();
         heB = reverse ? heB->previous() : heB->next();
     } while ( heA != startA );
 
-    return true;
+    return TRUE;
 }
 
-bool _PolyhedralBoundedSolidBooleanTopologyPredicates::loopsCoincident(
+BOOLEAN _PolyhedralBoundedSolidBooleanTopologyPredicates::loopsCoincident(
     _PolyhedralBoundedSolidLoop* a,
     _PolyhedralBoundedSolidLoop* b,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext)
@@ -101,10 +102,10 @@ bool _PolyhedralBoundedSolidBooleanTopologyPredicates::loopsCoincident(
 
     if ( a == 0 || b == 0 ||
          a->boundaryStartHalfEdge == 0 || b->boundaryStartHalfEdge == 0 ) {
-        return false;
+        return FALSE;
     }
     if ( a->halfEdgesList.size() != b->halfEdgesList.size() ) {
-        return false;
+        return FALSE;
     }
 
     startA = a->boundaryStartHalfEdge;
@@ -113,13 +114,13 @@ bool _PolyhedralBoundedSolidBooleanTopologyPredicates::loopsCoincident(
         if ( PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
             startA->startingVertex->position, scanB->startingVertex->position,
             numericContext) ) {
-            if ( loopsCoincidentFrom(startA, scanB, false, numericContext) ||
-                 loopsCoincidentFrom(startA, scanB, true, numericContext) ) {
-                return true;
+            if ( loopsCoincidentFrom(startA, scanB, FALSE, numericContext) ||
+                 loopsCoincidentFrom(startA, scanB, TRUE, numericContext) ) {
+                return TRUE;
             }
         }
         scanB = scanB->next();
     }
 
-    return false;
+    return FALSE;
 }

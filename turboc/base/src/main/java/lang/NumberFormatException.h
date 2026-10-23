@@ -1,6 +1,7 @@
 #ifndef __NUMBER_FORMAT_EXCEPTION__
 #define __NUMBER_FORMAT_EXCEPTION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/IllegalArgumentException.h"
 
 /**

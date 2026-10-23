@@ -15,10 +15,12 @@ owns its children and its attributes.
 */
 class Node {
 public:
-    static const short ELEMENT_NODE = 1;
-    static const short ATTRIBUTE_NODE = 2;
-    static const short TEXT_NODE = 3;
-    static const short DOCUMENT_NODE = 9;
+    enum {
+        ELEMENT_NODE = 1,
+        ATTRIBUTE_NODE = 2,
+        TEXT_NODE = 3,
+        DOCUMENT_NODE = 9
+    };
 
     Node(short nodeType, const String& nodeName,
          const String& nodeValue);

@@ -2,6 +2,7 @@
 #define __ARRAY_LIST__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 #include "java/util/Comparator.h"
 
@@ -60,10 +61,10 @@ public:
     void dispose();
 
     long int size() const;
-    bool isEmpty() const;
+    BOOLEAN isEmpty() const;
     T get(long int i) const;
 
-    bool add(T elem);
+    BOOLEAN add(T elem);
     T &operator[](long int i);
     const T &operator[](long int i) const;
     T *data();
@@ -80,14 +81,14 @@ public:
     or -1
     */
     long int indexOf(const T &elem) const;
-    bool contains(const T &elem) const;
+    BOOLEAN contains(const T &elem) const;
     void addAll(const ArrayList &other);
 
     /**
     @return true if both lists have equal (`operator==`) elements in the
     same order (Java `List.equals`)
     */
-    bool equals(const ArrayList &other) const;
+    BOOLEAN equals(const ArrayList &other) const;
 
     /**
     Emulation of `java.util.List.sort`: stable merge sort (equal elements

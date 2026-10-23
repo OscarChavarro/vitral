@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vga/Menu.h"
 #include "programs/vga/PaletteSet.h"
 #include "programs/vga/VgaKeyboard.h"

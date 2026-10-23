@@ -1,9 +1,10 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "model/history/EditHistory.h"
 #include "gui/history/InteractionEditRecorder.h"
 
 InteractionEditRecorder::InteractionEditRecorder(EditHistory* history,
                                                  ViewportSet* viewportSet)
-    : history(history), viewportSet(viewportSet), gestureOpen(false)
+    : history(history), viewportSet(viewportSet), gestureOpen(FALSE)
 {
 }
 
@@ -12,7 +13,7 @@ EditHistory* InteractionEditRecorder::getHistory() const
     return history;
 }
 
-bool InteractionEditRecorder::isGestureOpen() const
+BOOLEAN InteractionEditRecorder::isGestureOpen() const
 {
     return gestureOpen;
 }
@@ -23,7 +24,7 @@ void InteractionEditRecorder::beginGesture(
     endGesture();
     gestureSceneOperationName = sceneOperationName;
     beginAction();
-    gestureOpen = true;
+    gestureOpen = TRUE;
 }
 
 void InteractionEditRecorder::endGesture()
@@ -31,8 +32,8 @@ void InteractionEditRecorder::endGesture()
     if ( !gestureOpen ) {
         return;
     }
-    gestureOpen = false;
-    endAction(gestureSceneOperationName, false);
+    gestureOpen = FALSE;
+    endAction(gestureSceneOperationName, FALSE);
 }
 
 void InteractionEditRecorder::beginAction()
@@ -42,7 +43,7 @@ void InteractionEditRecorder::beginAction()
 }
 
 void InteractionEditRecorder::endAction(
-    const String& sceneOperationName, bool mergeable)
+    const String& sceneOperationName, BOOLEAN mergeable)
 {
     history->getSceneHistory()->end(sceneOperationName, mergeable);
     history->getViewportHistory()->end(mergeable);
@@ -56,8 +57,8 @@ void InteractionEditRecorder::record(const String& sceneOperationName,
         action->run();
     }
     catch ( ... ) {
-        endAction(sceneOperationName, false);
+        endAction(sceneOperationName, FALSE);
         throw;
     }
-    endAction(sceneOperationName, false);
+    endAction(sceneOperationName, FALSE);
 }

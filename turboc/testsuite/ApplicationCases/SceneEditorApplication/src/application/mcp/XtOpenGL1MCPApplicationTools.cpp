@@ -1,4 +1,5 @@
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
@@ -93,8 +94,8 @@ void XtOpenGL1MCPApplicationTools::injectKey(const String& request)
 {
     XtOpenGL1ApplicationController* drawingArea = getDrawingAreaController();
     String key = MCPJson::stringProperty(request, "key", "");
-    bool shift = false;
-    bool ctrl = false;
+    BOOLEAN shift = FALSE;
+    BOOLEAN ctrl = FALSE;
 
     MCPJson::booleanProperty(request, "shift", shift);
     MCPJson::booleanProperty(request, "ctrl", ctrl);
@@ -236,10 +237,10 @@ String XtOpenGL1MCPApplicationTools::dialogState()
 {
     StringBuilder sb;
     sb.append("{\"dialogs\":[");
-    bool first = true;
+    BOOLEAN first = TRUE;
     if ( parent->isSelectorDialogVisible() ) {
         sb.append("{\"id\":\"scene.selector\"}");
-        first = false;
+        first = FALSE;
     }
     if ( parent->isTangibleInterfaceDialogVisible() ) {
         if ( !first ) {
@@ -263,7 +264,7 @@ String XtOpenGL1MCPApplicationTools::tangibleAction(
     }
     String action = MCPJson::stringProperty(request, "action", "cancel");
     String serviceUrl;
-    bool withServiceUrl = action.equals("connect") &&
+    BOOLEAN withServiceUrl = action.equals("connect") &&
         MCPJson::hasProperty(request, "serviceUrl");
     if ( withServiceUrl ) {
         serviceUrl = MCPJson::stringProperty(request, "serviceUrl", "");
@@ -283,7 +284,7 @@ String XtOpenGL1MCPApplicationTools::listLanguages()
     StringBuilder sb;
     String current = parent->getCurrentGuiLanguage();
     ArrayList<String> languages = parent->getGuiLanguages();
-    bool first = true;
+    BOOLEAN first = TRUE;
 
     sb.append("{\"current\":\"").append(MCPJson::escape(current))
         .append("\",\"languages\":[");
@@ -292,9 +293,9 @@ String XtOpenGL1MCPApplicationTools::listLanguages()
         if ( !first ) {
             sb.append(',');
         }
-        first = false;
+        first = FALSE;
         sb.append("{\"id\":\"").append(MCPJson::escape(language)).append('"')
-            .append(",\"current\":").append(language.equals(current)).append('}');
+            .append(",\"current\":").appendBoolean(language.equals(current)).append('}');
     }
     sb.append("]}");
     return sb.toString();

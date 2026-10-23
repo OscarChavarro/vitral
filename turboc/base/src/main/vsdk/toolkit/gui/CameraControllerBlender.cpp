@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -51,7 +52,7 @@ double CameraControllerBlender::diminishLogarithmic(double val, double epsilon)
     return val;
 }
 
-bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
+BOOLEAN CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
 {
     Vector3Dd eyePosition = camera->getPosition();
     Vector3Dd focusedPosition = camera->getFocusedPosition();
@@ -63,7 +64,7 @@ bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
     double farPlaneDistance = camera->getFarPlaneDistance();
 
     const double deltaMov = 100.0;
-    bool updated = false;
+    BOOLEAN updated = FALSE;
     const int shiftMask = KeyEvent::MASK_SHIFT;
     const int ctrlMask = KeyEvent::MASK_CTRL;
 
@@ -85,14 +86,14 @@ bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
             eyePosition = eyePosition.withX(eyePosition.x() + deltaMov);
             focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMov);
         }
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUM5:
         projectionMode = (projectionMode == Camera::PROJECTION_MODE_PERSPECTIVE)
             ? Camera::PROJECTION_MODE_ORTHOGONAL
             : Camera::PROJECTION_MODE_PERSPECTIVE;
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUM4:
@@ -105,7 +106,7 @@ bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
             eyePosition = eyePosition.add(v.multiply(deltaMov));
             focusedPosition = focusedPosition.add(v.multiply(deltaMov));
         }
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUM6:
@@ -118,7 +119,7 @@ bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
             eyePosition = eyePosition.subtract(v.multiply(deltaMov));
             focusedPosition = focusedPosition.subtract(v.multiply(deltaMov));
         }
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUM2:
@@ -131,7 +132,7 @@ bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
             eyePosition = eyePosition.subtract(w.multiply(deltaMov));
             focusedPosition = focusedPosition.subtract(w.multiply(deltaMov));
         }
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUM8:
@@ -144,41 +145,41 @@ bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
             eyePosition = eyePosition.add(w.multiply(deltaMov));
             focusedPosition = focusedPosition.add(w.multiply(deltaMov));
         }
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUM1:
         R = R.axisRotation(0, 0, 0, 1);
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUMPLUS:
         eyePosition = eyePosition.add(u.multiply(deltaMov));
         focusedPosition = focusedPosition.add(u.multiply(deltaMov));
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_NUMMINUS:
         eyePosition = eyePosition.subtract(u.multiply(deltaMov));
         focusedPosition = focusedPosition.subtract(u.multiply(deltaMov));
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_N:
         nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, 0.0001);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_n:
         nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, 0.0001);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_F:
         farPlaneDistance = augmentLogarithmic(farPlaneDistance, 0.0001);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_f:
         farPlaneDistance = diminishLogarithmic(farPlaneDistance, 0.0001);
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_i:
@@ -202,39 +203,39 @@ bool CameraControllerBlender::processKeyPressedEvent(const KeyEvent& keyEvent)
     return updated;
 }
 
-bool CameraControllerBlender::processKeyReleasedEvent(const KeyEvent&)
+BOOLEAN CameraControllerBlender::processKeyReleasedEvent(const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerBlender::processMousePressedEvent(const MouseEvent&)
+BOOLEAN CameraControllerBlender::processMousePressedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerBlender::processMouseReleasedEvent(const MouseEvent&)
+BOOLEAN CameraControllerBlender::processMouseReleasedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerBlender::processMouseClickedEvent(const MouseEvent&)
+BOOLEAN CameraControllerBlender::processMouseClickedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerBlender::processMouseMovedEvent(const MouseEvent&)
+BOOLEAN CameraControllerBlender::processMouseMovedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerBlender::processMouseDraggedEvent(const MouseEvent&)
+BOOLEAN CameraControllerBlender::processMouseDraggedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerBlender::processMouseWheelEvent(const MouseEvent&)
+BOOLEAN CameraControllerBlender::processMouseWheelEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
 Camera* CameraControllerBlender::getCamera()

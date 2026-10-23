@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 #include <float.h>
@@ -58,17 +59,6 @@ static Matrix4x4d buildCatmullRomMatrix()
     };
     return Matrix4x4d::copyOf(m);
 }
-
-// Out-of-class definitions, needed when the constants are bound to
-// references (e.g. by test assertions)
-const int ParametricCurve::BREAK;
-const int ParametricCurve::CORNER;
-const int ParametricCurve::QUAD;
-const int ParametricCurve::HERMITE;
-const int ParametricCurve::BEZIER;
-const int ParametricCurve::UNRBSPLINE;
-const int ParametricCurve::NUNRBSPLINE;
-const int ParametricCurve::CATMULLROM;
 
 const Matrix4x4d ParametricCurve::LINEAR_MATRIX = buildLinearMatrix();
 const Matrix4x4d ParametricCurve::HERMITE_MATRIX = buildHermiteMatrix();
@@ -167,10 +157,10 @@ double ParametricCurve::matrixTerm(const Matrix4x4d& m, int col, double t)
     return vt;
 }
 
-bool ParametricCurve::evaluate(int endingSegment, double t, Vector3Dd& outPoint) const
+BOOLEAN ParametricCurve::evaluate(int endingSegment, double t, Vector3Dd& outPoint) const
 {
     if ( endingSegment < 0 || endingSegment >= (int)types.size() ) {
-        return false;
+        return FALSE;
     }
 
     if ( types.get(endingSegment) == CORNER ) return evaluateLinear(endingSegment, t, outPoint);
@@ -179,15 +169,15 @@ bool ParametricCurve::evaluate(int endingSegment, double t, Vector3Dd& outPoint)
     if ( types.get(endingSegment) == BEZIER ) return evaluateBezier(endingSegment, t, outPoint);
     if ( types.get(endingSegment) == UNRBSPLINE ) return evaluateBspline(endingSegment, t, outPoint);
 
-    return false;
+    return FALSE;
 }
 
-bool ParametricCurve::evaluateLinear(int nseg, double t, Vector3Dd& outPoint) const
+BOOLEAN ParametricCurve::evaluateLinear(int nseg, double t, Vector3Dd& outPoint) const
 {
     if ( nseg <= 0 || nseg >= (int)points.size()
         || points.get(nseg - 1).size() == 0
         || points.get(nseg).size() == 0 ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd p1 = points.get(nseg - 1).get(0);
@@ -196,15 +186,15 @@ bool ParametricCurve::evaluateLinear(int nseg, double t, Vector3Dd& outPoint) co
     Vector3Dd result = p1.multiply(matrixTerm(LINEAR_MATRIX, 0, t));
     result = result.add(p2.multiply(matrixTerm(LINEAR_MATRIX, 1, t)));
     outPoint = result;
-    return true;
+    return TRUE;
 }
 
-bool ParametricCurve::evaluateQuadratic(int nseg, double t, Vector3Dd& outPoint) const
+BOOLEAN ParametricCurve::evaluateQuadratic(int nseg, double t, Vector3Dd& outPoint) const
 {
     if ( nseg <= 0 || nseg >= (int)points.size()
         || points.get(nseg - 1).size() == 0
         || points.get(nseg).size() < 2 ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd qp0 = points.get(nseg - 1).get(0);
@@ -220,15 +210,15 @@ bool ParametricCurve::evaluateQuadratic(int nseg, double t, Vector3Dd& outPoint)
     result = result.add(qp2.multiply(matrixTerm(BEZIER_MATRIX, 3, t)));
 
     outPoint = result;
-    return true;
+    return TRUE;
 }
 
-bool ParametricCurve::evaluateHermite(int nseg, double t, Vector3Dd& outPoint) const
+BOOLEAN ParametricCurve::evaluateHermite(int nseg, double t, Vector3Dd& outPoint) const
 {
     if ( nseg <= 0 || nseg >= (int)points.size()
         || points.get(nseg - 1).size() < 3
         || points.get(nseg).size() < 2 ) {
-        return false;
+        return FALSE;
     }
 
     ArrayList<Vector3Dd> start = points.get(nseg - 1);
@@ -240,15 +230,15 @@ bool ParametricCurve::evaluateHermite(int nseg, double t, Vector3Dd& outPoint) c
     result = result.add(end.get(1).multiply(matrixTerm(HERMITE_MATRIX, 3, t)));
 
     outPoint = result;
-    return true;
+    return TRUE;
 }
 
-bool ParametricCurve::evaluateBezier(int nseg, double t, Vector3Dd& outPoint) const
+BOOLEAN ParametricCurve::evaluateBezier(int nseg, double t, Vector3Dd& outPoint) const
 {
     if ( nseg <= 0 || nseg >= (int)points.size()
         || points.get(nseg - 1).size() < 3
         || points.get(nseg).size() < 2 ) {
-        return false;
+        return FALSE;
     }
 
     ArrayList<Vector3Dd> start = points.get(nseg - 1);
@@ -260,27 +250,27 @@ bool ParametricCurve::evaluateBezier(int nseg, double t, Vector3Dd& outPoint) co
     result = result.add(end.get(0).multiply(matrixTerm(BEZIER_MATRIX, 3, t)));
 
     outPoint = result;
-    return true;
+    return TRUE;
 }
 
-bool ParametricCurve::evaluateBspline(int nseg, double t, Vector3Dd& outPoint) const
+BOOLEAN ParametricCurve::evaluateBspline(int nseg, double t, Vector3Dd& outPoint) const
 {
     if ( points.size() < 4 ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd result(0.0, 0.0, 0.0);
     for ( int np = 0; np < 4; ++np ) {
         int idx = nseg - np;
         if ( idx < 0 || idx >= (int)points.size() || points.get(idx).size() == 0 ) {
-            return false;
+            return FALSE;
         }
         double vt = matrixTerm(UNRBSPLINE_MATRIX, np, t);
         result = result.add(points.get(idx).get(0).multiply(vt / 6.0));
     }
 
     outPoint = result;
-    return true;
+    return TRUE;
 }
 
 int ParametricCurve::calculatePointPosition(int pin) const
@@ -297,7 +287,7 @@ int ParametricCurve::calculatePointPosition(int pin) const
     return pout;
 }
 
-ArrayList<Vector3Dd> ParametricCurve::calculatePoints(int endingPointForSegment, bool withBrokenRects) const
+ArrayList<Vector3Dd> ParametricCurve::calculatePoints(int endingPointForSegment, BOOLEAN withBrokenRects) const
 {
     ArrayList<Vector3Dd> pol;
 
@@ -342,7 +332,7 @@ double* ParametricCurve::getMinMax()
     minmax[3] = minmax[4] = minmax[5] = -DBL_MAX;
 
     for ( int i = 1; i < (int)types.size(); ++i ) {
-        ArrayList<Vector3Dd> polyline = calculatePoints(i, false);
+        ArrayList<Vector3Dd> polyline = calculatePoints(i, FALSE);
         for ( long int j = 0; j < polyline.size(); ++j ) {
             Vector3Dd p = polyline.get(j);
             if ( p.x() < minmax[0] ) minmax[0] = p.x();
@@ -365,7 +355,7 @@ int ParametricCurve::doContainmentTest(const Vector3Dd& p, double distanceTolera
             continue;
         }
 
-        ArrayList<Vector3Dd> polyline = calculatePoints(i, false);
+        ArrayList<Vector3Dd> polyline = calculatePoints(i, FALSE);
         for ( long int j = 0; j < polyline.size(); ++j ) {
             if ( polyline[(long int)j].subtract(p).length() < distanceTolerance ) {
                 return LIMIT;
@@ -375,10 +365,6 @@ int ParametricCurve::doContainmentTest(const Vector3Dd& p, double distanceTolera
 
     return OUTSIDE;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int ParametricCurve::INITIAL_APPROXIMATION_STEPS;
 
 const Class ParametricCurve::CLASS = { "ParametricCurve", &Curve::CLASS };
 

@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_LOOP__
 #define __POLYHEDRAL_BOUNDED_SOLID_LOOP__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.h"

@@ -1,6 +1,7 @@
 #ifndef __CONTROL_SPECIFICATION__
 #define __CONTROL_SPECIFICATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 /**
@@ -25,12 +26,12 @@ private:
     String intervalText;
     double lowerBound;
     double upperBound;
-    bool lowerInclusive;
-    bool upperInclusive;
+    BOOLEAN lowerInclusive;
+    BOOLEAN upperInclusive;
 
     ControlSpecification(const String &type, const String &name,
         const String &intervalText, double lowerBound,
-        double upperBound, bool lowerInclusive, bool upperInclusive);
+        double upperBound, BOOLEAN lowerInclusive, BOOLEAN upperInclusive);
 
     static void reportMalformed(const String &specification,
                                 const char *reason);
@@ -70,7 +71,7 @@ public:
     @param value value to test
     @return true if the value lies inside the valid interval
     */
-    bool contains(double value) const;
+    BOOLEAN contains(double value) const;
 };
 
 #endif

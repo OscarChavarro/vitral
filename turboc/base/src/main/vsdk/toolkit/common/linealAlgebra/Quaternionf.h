@@ -2,6 +2,7 @@
 #define __QUATERNIONF__
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Df.h"
@@ -29,8 +30,8 @@ public:
     Vector3Df direction() const { return direction_; }
     float magnitude() const { return magnitude_; }
 
-    bool epsilonEquals(const Quaternionf& other) const { return epsilonEquals(other, 1e-6f); }
-    bool epsilonEquals(const Quaternionf& other, float epsilon) const;
+    BOOLEAN epsilonEquals(const Quaternionf& other) const { return epsilonEquals(other, 1e-6f); }
+    BOOLEAN epsilonEquals(const Quaternionf& other, float epsilon) const;
     String* toString() const;
 };
 

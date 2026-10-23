@@ -131,7 +131,7 @@ ArrayList<Classifier::SectorOnVertex> Classifier::nbrpreproc(
     do {
         SectorOnVertex n;
         n.he = he;
-        n.wide = false;
+        n.wide = FALSE;
 
         n.ref1 = he->previous()->startingVertex->position.subtract(
             he->startingVertex->position);
@@ -161,7 +161,7 @@ ArrayList<Classifier::SectorOnVertex> Classifier::nbrpreproc(
             n.ref2 = oldref2;
             n.ref1 = bisec;
             n.ref12 = n.ref1.crossProduct(n.ref2);
-            n.wide = true;
+            n.wide = TRUE;
         }
 
         nb.add(n);
@@ -172,13 +172,13 @@ ArrayList<Classifier::SectorOnVertex> Classifier::nbrpreproc(
     return nb;
 }
 
-bool Classifier::sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb)
+BOOLEAN Classifier::sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb)
 {
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor::sectoroverlap(
         na, nb, (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0);
 }
 
-bool Classifier::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
+BOOLEAN Classifier::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
                              const Vector3Dd& ref2, const Vector3Dd& ref12)
 {
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor::sctrwitthin(
@@ -190,8 +190,8 @@ int Classifier::compareToZero(double value)
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor::compareToZero(value);
 }
 
-int Classifier::resolveCoplanarVertexVertexClass(int op, bool sameOrientation,
-                                                 bool sideA)
+int Classifier::resolveCoplanarVertexVertexClass(int op, BOOLEAN sameOrientation,
+                                                 BOOLEAN sideA)
 {
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         ::resolveCoplanarVertexVertexClass(op, sameOrientation, sideA);
@@ -201,12 +201,12 @@ int Classifier::resolveCoplanarVertexVertexClass(int op, bool sameOrientation,
 Sector intersection test.
 Following program [MANT1988].15.9 and section [MANT1988].15.6.2.
 */
-bool Classifier::vertexVertexSectorIntersectionTest(int i, int j)
+BOOLEAN Classifier::vertexVertexSectorIntersectionTest(int i, int j)
 {
     _PolyhedralBoundedSolidHalfEdge* h1;
     _PolyhedralBoundedSolidHalfEdge* h2;
-    bool c1;
-    bool c2;
+    BOOLEAN c1;
+    BOOLEAN c2;
 
     const SectorOnVertex& na = nba[i];
     const SectorOnVertex& nb = nbb[j];
@@ -235,7 +235,7 @@ bool Classifier::vertexVertexSectorIntersectionTest(int i, int j)
         if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0 ) {
             printf(" <TRUE>");
         }
-        return true;
+        return TRUE;
     }
     else {
         intrs = intrs.multiply(-1);
@@ -245,7 +245,7 @@ bool Classifier::vertexVertexSectorIntersectionTest(int i, int j)
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0 ) {
                 printf(" <TRUE>");
             }
-            return true;
+            return TRUE;
         }
     }
 
@@ -253,7 +253,7 @@ bool Classifier::vertexVertexSectorIntersectionTest(int i, int j)
         printf(" <FALSE>");
     }
 
-    return false;
+    return FALSE;
 }
 
 /**
@@ -320,7 +320,7 @@ void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
                 s.s2a = compareToZero(d2);
                 s.s1b = compareToZero(d3);
                 s.s2b = compareToZero(d4);
-                s.intersect = true;
+                s.intersect = TRUE;
                 sectors.add(s);
             }
 
@@ -342,7 +342,7 @@ void Classifier::vertexVertexReclassifyOnSectors(int op)
     long j;
     int newsa;
     int newsb;
-    bool nonopposite;
+    BOOLEAN nonopposite;
     int secta;
     int prevsecta;
     int nextsecta;
@@ -406,17 +406,17 @@ void Classifier::vertexVertexReclassifyOnSectors(int op)
                 }
                 if ( (sj.s1a == sj.s2a) &&
                      (sj.s1a == OnSector::IN || sj.s1a == OnSector::OUT) ) {
-                    sj.intersect = false;
+                    sj.intersect = FALSE;
                 }
                 if ( (sj.s1b == sj.s2b) &&
                      (sj.s1b == OnSector::IN || sj.s1b == OnSector::OUT) ) {
-                    sj.intersect = false;
+                    sj.intersect = FALSE;
                 }
             }
 
             si.s1a = si.s2a = newsa;
             si.s1b = si.s2b = newsb;
-            si.intersect = false;
+            si.intersect = FALSE;
             _SetOperationTrace::traceCoplanarTangential(
                 String(("  deactivated vv sector pair sectA=" +
                 Cpp98Support::toString(secta) + " sectB=" + Cpp98Support::toString(sectb)).c_str()));
@@ -480,11 +480,11 @@ void Classifier::vertexVertexReclassifyOnEdges(int op)
 
                     if ( sj.s1a == sj.s2a &&
                          (sj.s1a == OnSector::IN || sj.s1a == OnSector::OUT) ) {
-                        sj.intersect = false;
+                        sj.intersect = FALSE;
                     }
                     if ( sj.s1b == sj.s2b &&
                          (sj.s1b == OnSector::IN || sj.s1b == OnSector::OUT) ) {
-                        sj.intersect = false;
+                        sj.intersect = FALSE;
                     }
                 }
             }
@@ -513,7 +513,7 @@ void Classifier::vertexVertexReclassifyOnEdges(int op)
 
                     if ( sj.s1a == sj.s2a &&
                          (sj.s1a == OnSector::IN || sj.s1a == OnSector::OUT) ) {
-                        sj.intersect = false;
+                        sj.intersect = FALSE;
                     }
                 }
             }
@@ -539,7 +539,7 @@ void Classifier::vertexVertexReclassifyOnEdges(int op)
 
                     if ( sj.s1b == sj.s2b &&
                          (sj.s1b == OnSector::IN || sj.s1b == OnSector::OUT) ) {
-                        sj.intersect = false;
+                        sj.intersect = FALSE;
                     }
                 }
             }

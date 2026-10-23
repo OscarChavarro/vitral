@@ -1,6 +1,7 @@
 #ifndef __SIMPLE_RAYTRACER__
 #define __SIMPLE_RAYTRACER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/RenderContext.h"
 #include "vsdk/toolkit/render/RenderingElement.h"
@@ -28,9 +29,9 @@ class DepthBufferEncoder;
 
 class SimpleRaytracer : public RenderingElement {
 private:
-    static const int MAX_RECURSION_LEVEL = TraceWorkspace::DEFAULT_MAX_RECURSION_LEVEL;
+    enum { MAX_RECURSION_LEVEL = TraceWorkspace::DEFAULT_MAX_RECURSION_LEVEL };
     static const RasterTileGenerationStrategy::Value TILE_STRATEGY = RasterTileGenerationStrategy::SERIAL;
-    static const int TILE_WORKERS_HINT = 1;
+    enum { TILE_WORKERS_HINT = 1 };
 
     struct SceneObjectRenderData {
         SimpleMaterial* material;
@@ -46,8 +47,8 @@ private:
 
     TraceWorkspace workspace;
 
-    static bool hasNonAmbientLights(ArrayList<Light*>& lights);
-    static bool isReflective(SimpleMaterial* material);
+    static BOOLEAN hasNonAmbientLights(ArrayList<Light*>& lights);
+    static BOOLEAN isReflective(SimpleMaterial* material);
     static RenderContext buildRenderContext(const RendererConfiguration* qualitySelection,ArrayList<Light*>& lights);
     static int buildSurfaceDetailMask(SimpleMaterial* material, Image* texture, NormalMap* normalMap, const RenderContext& renderContext);
     static void captureBodyVersions(ArrayList<SimpleBody*>& bodies, ArrayList<long long>& out);

@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/net/Socket.h"
 #include <stdio.h>
 #include <string.h>
@@ -39,7 +40,7 @@ int Socket::connectToHost(const String& host, int port)
 }
 
 Socket::Socket(const String& host, int port)
-    : fd_(connectToHost(host, port)), in_(fd_), out_(fd_), ownsSocket_(true)
+    : fd_(connectToHost(host, port)), in_(fd_), out_(fd_), ownsSocket_(TRUE)
 {
 }
 

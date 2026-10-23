@@ -1,6 +1,7 @@
 #ifndef __OPEN_GL_1_SIMPLE_CORRIDOR_SAMPLE__
 #define __OPEN_GL_1_SIMPLE_CORRIDOR_SAMPLE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 class OpenGL1SimpleCorridorSample {
@@ -20,7 +21,7 @@ private:
     int heightTiles;
     double interSpace;
 
-    bool initialized;
+    BOOLEAN initialized;
     unsigned int displayListId;
     int vertexCount;
 
@@ -31,13 +32,13 @@ private:
         ArrayList<float>& positions,
         ArrayList<float>& colors,
         float r, float g, float bColor,
-        double rotZDeg, bool flipYZ, double translateZ);
+        double rotZDeg, BOOLEAN flipYZ, double translateZ);
 
     void appendTilesLong(
         ArrayList<float>& positions,
         ArrayList<float>& colors,
         float r, float g, float bColor,
-        double rotZDeg, bool flipYZ, double translateZ);
+        double rotZDeg, BOOLEAN flipYZ, double translateZ);
 
     void appendTilesWallA(
         ArrayList<float>& positions,
@@ -65,14 +66,14 @@ private:
         double x2, double y2, double z2,
         double x3, double y3, double z3,
         double x4, double y4, double z4,
-        double rotZDeg, bool flipYZ, double translateZ);
+        double rotZDeg, BOOLEAN flipYZ, double translateZ);
 
     void addVertex(
         ArrayList<float>& positions,
         ArrayList<float>& colors,
         double x, double y, double z,
         float r, float g, float bColor,
-        double rotZDeg, bool flipYZ, double translateZ);
+        double rotZDeg, BOOLEAN flipYZ, double translateZ);
 };
 
 #endif

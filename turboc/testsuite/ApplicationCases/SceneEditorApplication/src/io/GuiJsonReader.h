@@ -1,6 +1,7 @@
 #ifndef __GUI_JSON_READER__
 #define __GUI_JSON_READER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -34,7 +35,7 @@ struct GuiCommand {
         return value != NULL ? (*value) : String();
     }
 
-    bool has(const String& property) const
+    BOOLEAN has(const String& property) const
     {
         return properties.containsKey(property);
     }
@@ -45,18 +46,18 @@ Group of command buttons of the GUI definition (i.e. the ones of a tab of
 the side panel).
 */
 struct GuiButtonGroup {
-    bool found;
+    BOOLEAN found;
     String name;
     String title;
-    bool horizontal;
-    bool showTitle;
-    bool showIcons;
-    bool showText;
+    BOOLEAN horizontal;
+    BOOLEAN showTitle;
+    BOOLEAN showIcons;
+    BOOLEAN showText;
     ArrayList<String> commands;
 
     GuiButtonGroup()
-        : found(false), horizontal(false), showTitle(false),
-          showIcons(false), showText(false) {}
+        : found(FALSE), horizontal(FALSE), showTitle(FALSE),
+          showIcons(FALSE), showText(FALSE) {}
 };
 
 /**
@@ -138,9 +139,9 @@ private:
     long indexOf(char token, long from) const;
 
     void whitespace();
-    bool consume(char c);
+    BOOLEAN consume(char c);
     String stringValue();
-    bool booleanValue();
+    BOOLEAN booleanValue();
     void skipValueStart();
     void skipValue();
     ArrayList<String> readStrings();

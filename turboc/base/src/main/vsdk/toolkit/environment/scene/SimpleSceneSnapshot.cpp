@@ -8,8 +8,9 @@ SimpleSceneSnapshot::SimpleSceneSnapshot(
     CameraSnapshot* inCameraSnapshot)
     : background(inBackground), cameraSnapshot(inCameraSnapshot)
 {
-    for (long int i = 0; i < inSimpleBodies.size(); i++) simpleBodies.add(inSimpleBodies.get(i));
-    for (long int i = 0; i < inLights.size(); i++) lights.add(inLights.get(i));
+    long int i;
+    for (i = 0; i < inSimpleBodies.size(); i++) simpleBodies.add(inSimpleBodies.get(i));
+    for (i = 0; i < inLights.size(); i++) lights.add(inLights.get(i));
 }
 
 SimpleSceneSnapshot::~SimpleSceneSnapshot()

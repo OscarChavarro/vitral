@@ -1,6 +1,7 @@
 #ifndef __ORG_W3C_DOM_ELEMENT__
 #define __ORG_W3C_DOM_ELEMENT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "org/w3c/dom/Node.h"
 
 
@@ -19,7 +20,7 @@ public:
     @return attribute value, or empty string if not present
     */
     String getAttribute(const String& name) const;
-    bool hasAttribute(const String& name) const;
+    BOOLEAN hasAttribute(const String& name) const;
     void setAttribute(const String& name, const String& value);
 };
 

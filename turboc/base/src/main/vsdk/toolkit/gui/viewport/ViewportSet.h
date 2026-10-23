@@ -1,6 +1,7 @@
 #ifndef __VIEWPORT_SET__
 #define __VIEWPORT_SET__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -36,7 +37,7 @@ private:
     ArrayList<Viewport*> viewports;
     int selectedViewportIndex;
     int layoutStyle;
-    bool fullViewport;
+    BOOLEAN fullViewport;
     int sizeXInPixels;
     int sizeYInPixels;
     ColorRgb titleColor;
@@ -89,7 +90,7 @@ public:
     ArrayList<int> getAvailableRenderModes() const;
     void setAvailableRenderModes(const ArrayList<int>& modes);
     void enforceAvailableRenderModes();
-    bool isRenderModeAvailable(int renderMode) const;
+    BOOLEAN isRenderModeAvailable(int renderMode) const;
     void cycleRenderMode(Viewport* viewport);
 
     /**
@@ -106,13 +107,13 @@ public:
     @return the selected viewport, or null if the set is empty
     */
     Viewport* getSelectedViewport();
-    bool isSelected(const Viewport* viewport);
+    BOOLEAN isSelected(const Viewport* viewport);
 
     /**
     Makes the given viewport the selected one, if it belongs to this set.
     @return true if the selection was applied
     */
-    bool selectViewport(const Viewport* viewport);
+    BOOLEAN selectViewport(const Viewport* viewport);
 
     /**
     Selects the next viewport, cyclically, and updates the layout (which, if
@@ -134,8 +135,8 @@ public:
     The last arrangement shows only the selected viewport.
     */
     void selectNextLayoutStyle();
-    bool isFullViewport() const;
-    void setFullViewport(bool fullViewport);
+    BOOLEAN isFullViewport() const;
+    void setFullViewport(BOOLEAN fullViewport);
 
     /**
     Maximizes the selected viewport, or restores the layout if it is already

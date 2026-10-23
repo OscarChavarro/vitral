@@ -1,6 +1,7 @@
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_PROFILE_DIFFERENCE_FALLBACK__
-#define ___POLYHEDRAL_BOUNDED_SOLID_PROFILE_DIFFERENCE_FALLBACK__
+#ifndef ___PBS_PROFILE_DIFF_FALLBACK__
+#define ___PBS_PROFILE_DIFF_FALLBACK__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidProfileDifferenceFallbackSpec.h"
 
@@ -39,7 +40,7 @@ public:
 
 private:
     _PolyhedralBoundedSolidProfileDifferenceFallback();
-    static bool isBetween(double value, double min, double max);
+    static BOOLEAN isBetween(double value, double min, double max);
     static PolyhedralBoundedSolid* buildProfileDifferenceFallback(
         _PolyhedralBoundedSolidProfileDifferenceFallbackSpec* spec);
 };

@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "javax/xml/transform/Transformer.h"
 #include "org/w3c/dom/Document.h"
@@ -13,7 +14,7 @@ const char* const Transformer::INDENT = "indent";
 const char* const Transformer::ENCODING = "encoding";
 
 
-static String escape(const String& in, bool inAttribute)
+static String escape(const String& in, BOOLEAN inAttribute)
 {
 String out;
 char buffer[2] = {'\0', '\0'};
@@ -40,7 +41,7 @@ for ( i = 0; i < in.length(); i++ ) {
 return out;
 }
 
-static void writeIndent(String& out, bool indent, int level)
+static void writeIndent(String& out, BOOLEAN indent, int level)
 {
 if ( !indent ) {
     return;
@@ -52,10 +53,10 @@ for ( i = 0; i < level; i++ ) {
 }
 
 static void writeNode(String& out, const Node* node,
-           bool indent, int level)
+           BOOLEAN indent, int level)
 {
 if ( node->getNodeType() == Node::TEXT_NODE ) {
-    out += escape(node->getNodeValue(), false);
+    out += escape(node->getNodeValue(), FALSE);
     return;
 }
 if ( node->getNodeType() != Node::ELEMENT_NODE ) {
@@ -71,7 +72,7 @@ for ( i = 0; attributes != NULL && i < attributes->getLength(); i++ ) {
     out += " ";
     out += attributes->item(i)->getNodeName();
     out += "=\"";
-    out += escape(attributes->item(i)->getNodeValue(), true);
+    out += escape(attributes->item(i)->getNodeValue(), TRUE);
     out += "\"";
 }
 
@@ -84,11 +85,11 @@ if ( children.getLength() == 0 ) {
     return;
 }
 
-bool onlyText = true;
+BOOLEAN onlyText = TRUE;
 for ( i = 0; i < children.getLength(); i++ ) {
     if ( children.item(i)->getNodeType() !=
          Node::TEXT_NODE ) {
-        onlyText = false;
+        onlyText = FALSE;
     }
 }
 
@@ -116,7 +117,7 @@ if ( indent ) {
 }
 
 
-Transformer::Transformer() : doctypeSystem(""), indent(false),
+Transformer::Transformer() : doctypeSystem(""), indent(FALSE),
     encoding("UTF-8")
 {
 }
@@ -165,16 +166,16 @@ String Transformer::toXmlText(
     return out;
 }
 
-bool Transformer::transform(const Document* document,
+BOOLEAN Transformer::transform(const Document* document,
                             const File& file) const
 {
     String xmlText = toXmlText(document);
     FILE* fd = fopen(file.getPath().c_str(), "wb");
     if ( fd == NULL ) {
-        return false;
+        return FALSE;
     }
     size_t n = (size_t)xmlText.length();
-    bool ok = fwrite(xmlText.c_str(), 1, n, fd) == n;
+    BOOLEAN ok = fwrite(xmlText.c_str(), 1, n, fd) == n;
     fclose(fd);
     return ok;
 }

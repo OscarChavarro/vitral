@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/OutputStream.h"
 #include "java/util/Formatter.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
@@ -55,14 +56,14 @@ Formatter::formatToString(const char *formatText, va_list arguments) {
 Formatter::Formatter():
     outputStream(NULL),
     content(),
-    closed(false)
+    closed(FALSE)
 {
 }
 
 Formatter::Formatter(OutputStream *outputStream):
     outputStream(outputStream),
     content(),
-    closed(false)
+    closed(FALSE)
 {
 }
 
@@ -90,7 +91,7 @@ Formatter::close() {
     }
     flush();
     outputStream = NULL;
-    closed = true;
+    closed = TRUE;
 }
 
 Formatter &

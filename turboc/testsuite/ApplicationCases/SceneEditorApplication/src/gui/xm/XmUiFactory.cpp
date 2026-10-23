@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/xm/XmFileDialog.h"
 #include "gui/xm/XmUiFactory.h"
 #include "java/util/ArrayList.txx"
@@ -17,7 +18,7 @@ const char* XmUiFactory::getResourceFile()
     return NULL;
 }
 
-bool XmUiFactory::showFileDialog(XtApplicationHost* host,
+BOOLEAN XmUiFactory::showFileDialog(XtApplicationHost* host,
                                  const String& title,
                                  const String& folder,
                                  const ArrayList<FileSuffixFilter>& filters,

@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
@@ -26,14 +27,11 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidHalfEdge::mirrorHalfEdge
     return parentEdge->rightHalf;
 }
 
-bool _PolyhedralBoundedSolidHalfEdge::vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge* other, double tolerance)
+BOOLEAN _PolyhedralBoundedSolidHalfEdge::vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge* other, double tolerance)
 {
-    if ( other == 0 || startingVertex == 0 || other->startingVertex == 0 ) return false;
+    if ( other == 0 || startingVertex == 0 || other->startingVertex == 0 ) return FALSE;
     return startingVertex->position.subtract(other->startingVertex->position).length() <= tolerance;
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidHalfEdge::LEFT_SIDE;
-const int _PolyhedralBoundedSolidHalfEdge::RIGHT_SIDE;
-const int _PolyhedralBoundedSolidHalfEdge::NO_SIDE;

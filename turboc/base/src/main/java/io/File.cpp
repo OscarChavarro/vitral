@@ -2,18 +2,25 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include <dirent.h>
 #include <sys/stat.h>
+#ifdef __TURBOC__
+// getcwd and mkdir, without permissions on DOS
+#include <dir.h>
+#define mkdir(path, mode) mkdir(path)
+#else
 #include <unistd.h>
+#endif
 #include "java/util/ArrayList.txx"
 
-bool
+BOOLEAN
 File::isValidPath(const char *rawPath) {
     return rawPath != NULL && rawPath[0] != '\0';
 }
 
-bool
+BOOLEAN
 File::canOpenWithMode(const char *rawPath, const char *mode, int *errorCode) {
     errno = 0;
     FILE *probe = fopen(rawPath, mode);
@@ -21,34 +28,34 @@ File::canOpenWithMode(const char *rawPath, const char *mode, int *errorCode) {
         if ( errorCode != NULL ) {
             *errorCode = errno;
         }
-        return false;
+        return FALSE;
     }
     fclose(probe);
     if ( errorCode != NULL ) {
         *errorCode = 0;
     }
-    return true;
+    return TRUE;
 }
 
-bool
+BOOLEAN
 File::isDirectoryByReadProbe(const char *rawPath) {
     int openError = 0;
     if ( canOpenWithMode(rawPath, "rb", &openError) ) {
         errno = 0;
         FILE *probe = fopen(rawPath, "rb");
         if ( probe == NULL ) {
-            return false;
+            return FALSE;
         }
         unsigned char byteProbe = 0;
         errno = 0;
         const size_t readCount = fread(&byteProbe, 1, 1, probe);
-        const bool isDirectory = (readCount == 0) && (ferror(probe) != 0) && (errno == EISDIR);
+        const BOOLEAN isDirectory = (readCount == 0) && (ferror(probe) != 0) && (errno == EISDIR);
         fclose(probe);
         return isDirectory;
     }
 
     if ( openError == EISDIR ) {
-        return true;
+        return TRUE;
     }
 
     const size_t pathLength = strlen(rawPath);
@@ -58,10 +65,10 @@ File::isDirectoryByReadProbe(const char *rawPath) {
     slashPath[pathLength + 1] = '\0';
 
     int slashError = 0;
-    const bool slashOpenOk = canOpenWithMode(slashPath, "rb", &slashError);
+    const BOOLEAN slashOpenOk = canOpenWithMode(slashPath, "rb", &slashError);
     delete[] slashPath;
     if ( slashOpenOk ) {
-        return true;
+        return TRUE;
     }
     return slashError == EISDIR || slashError == EACCES || slashError == EPERM;
 }
@@ -119,7 +126,7 @@ File::getName() const {
     }
     int tailStart = separator + 1;
     int lastSeparator = separator;
-    while ( true ) {
+    while ( TRUE ) {
         const int nextSeparator = path.indexOf('/', tailStart);
         if ( nextSeparator < 0 ) {
             break;
@@ -130,69 +137,69 @@ File::getName() const {
     return path.substring(lastSeparator + 1);
 }
 
-bool
+BOOLEAN
 File::exists() const {
     const char *rawPath = path.toCString();
     if ( !isValidPath(rawPath) ) {
-        return false;
+        return FALSE;
     }
 
     int readError = 0;
     if ( canOpenWithMode(rawPath, "rb", &readError) ) {
-        return true;
+        return TRUE;
     }
     if ( readError == EACCES || readError == EPERM || readError == EISDIR ) {
-        return true;
+        return TRUE;
     }
     return isDirectoryByReadProbe(rawPath);
 }
 
-bool
+BOOLEAN
 File::isDirectory() const {
     const char *rawPath = path.toCString();
     if ( !isValidPath(rawPath) ) {
-        return false;
+        return FALSE;
     }
 
     return isDirectoryByReadProbe(rawPath);
 }
 
-bool
+BOOLEAN
 File::isFile() const {
     if ( !exists() ) {
-        return false;
+        return FALSE;
     }
     return !isDirectory();
 }
 
-bool
+BOOLEAN
 File::canRead() const {
     const char *rawPath = path.toCString();
     if ( !isValidPath(rawPath) ) {
-        return false;
+        return FALSE;
     }
     return canOpenWithMode(rawPath, "rb");
 }
 
-bool
+BOOLEAN
 File::canWrite() const {
     const char *rawPath = path.toCString();
     if ( !isValidPath(rawPath) ) {
-        return false;
+        return FALSE;
     }
 
     return canOpenWithMode(rawPath, "ab");
 }
 
-bool
+BOOLEAN
 File::mkdirs() const {
     const char *rawPath = path.toCString();
     if ( !isValidPath(rawPath) ) {
-        return false;
+        return FALSE;
     }
 
     if ( isDirectoryByReadProbe(rawPath) ) {
-        return true;
+        return TRUE;
     }
 
     const size_t len = strlen(rawPath);
@@ -208,7 +215,7 @@ File::mkdirs() const {
     }
 
     errno = 0;
-    const bool created = (mkdir(tmp, 0775) == 0);
+    const BOOLEAN created = (mkdir(tmp, 0775) == 0);
     delete[] tmp;
 
     return created || isDirectoryByReadProbe(rawPath);
@@ -241,7 +248,7 @@ File::listFiles() const {
     ArrayList<File*> files;
     ArrayList<String> names = list();
     const String base = path;
-    const bool needsSlash = base.length() > 0 && base.charAt(base.length() - 1) != '/';
+    const BOOLEAN needsSlash = base.length() > 0 && base.charAt(base.length() - 1) != '/';
     for ( long int i = 0; i < names.size(); i++ ) {
         size_t total = strlen(base.c_str()) + strlen(names[i].c_str()) + 2;
         char *full = new char[total];

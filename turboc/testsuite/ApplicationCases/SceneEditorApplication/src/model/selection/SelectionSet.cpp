@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "model/selection/SelectionSet.h"
 
@@ -7,7 +8,7 @@ void SelectionSet::sync()
         return;
     }
     while ( elements.size() > selection.size() ) {
-        selection.add(false);
+        selection.add(FALSE);
     }
     while ( elements.size() < selection.size() ) {
         selection.remove((long)(selection.size()-1));
@@ -26,12 +27,12 @@ String SelectionSet::toString() const
     return msg;
 }
 
-bool SelectionSet::isSelected(int i) const
+BOOLEAN SelectionSet::isSelected(int i) const
 {
     if ( i < 0 || i >= selection.size() || !selection.get(i) ) {
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 int SelectionSet::firstSelected() const
@@ -53,7 +54,7 @@ void SelectionSet::selectAll()
     int i;
 
     for ( i = 0; i < selection.size(); i++ ) {
-        selection.set(i, true);
+        selection.set(i, TRUE);
     }
 }
 
@@ -62,7 +63,7 @@ void SelectionSet::unselectAll()
     int i;
 
     for ( i = 0; i < selection.size(); i++ ) {
-        selection.set(i, false);
+        selection.set(i, FALSE);
     }
 }
 
@@ -70,14 +71,14 @@ void SelectionSet::select(int i)
 {
     sync();
     if ( i < 0 || i >= selection.size() ) return;
-    selection.set(i, true);
+    selection.set(i, TRUE);
 }
 
 void SelectionSet::unselect(int i)
 {
     sync();
     if ( i < 0 || i >= selection.size() ) return;
-    selection.set(i, false);
+    selection.set(i, FALSE);
 }
 
 void SelectionSet::change(int i)
@@ -85,10 +86,10 @@ void SelectionSet::change(int i)
     sync();
     if ( i < 0 || i >= selection.size() ) return;
     if ( isSelected(i) ) {
-        selection.set(i, false);
+        selection.set(i, FALSE);
     }
     else {
-        selection.set(i, true);
+        selection.set(i, TRUE);
     }
 }
 
@@ -145,7 +146,7 @@ ArrayList<Entity*> SelectionSet::removeSelected()
     return removed;
 }
 
-void SelectionSet::insertElement(int index, Entity* element, bool selected)
+void SelectionSet::insertElement(int index, Entity* element, BOOLEAN selected)
 {
     sync();
     if ( elements.insert(index, element) ) {

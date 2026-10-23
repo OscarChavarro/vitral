@@ -2,15 +2,16 @@
 #define __POLYGON_2_D_CONTOUR_WA__
 
 // First: gcc 2.7.2 fails if _DoubleLinkedListNode is defined before it
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_VertexNode2D.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_CircularDoubleLinkedList.h"
 class _Polygon2DContourWA {
 public:
     _CircularDoubleLinkedList<_VertexNode2D> vertices;
-    bool isClipped;
-    bool isHole;
+    BOOLEAN isClipped;
+    BOOLEAN isHole;
 
-    _Polygon2DContourWA() : isClipped(false), isHole(false) {}
+    _Polygon2DContourWA() : isClipped(FALSE), isHole(FALSE) {}
     void addVertex(double x, double y, double r, double g, double b) { vertices.add(_VertexNode2D(x, y, r, g, b)); }
     void addVertex(double x, double y) { vertices.add(_VertexNode2D(x, y)); }
     void removeVertex(int ind) { vertices.remove(ind); }

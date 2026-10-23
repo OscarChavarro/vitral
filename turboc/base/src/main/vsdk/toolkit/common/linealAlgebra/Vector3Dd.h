@@ -86,11 +86,11 @@ public:
     double y() const { return y_; }
     double z() const { return z_; }
 
-    bool epsilonEquals(const Vector3Dd& other) const { return epsilonEquals(other, 1e-6); }
-    bool epsilonEquals(const Vector3Dd& other, double epsilon) const;
+    BOOLEAN epsilonEquals(const Vector3Dd& other) const { return epsilonEquals(other, 1e-6); }
+    BOOLEAN epsilonEquals(const Vector3Dd& other, double epsilon) const;
 
-    bool operator==(const Vector3Dd& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_; }
-    bool equals(const Vector3Dd& other) const { return (*this) == other; }
+    BOOLEAN operator==(const Vector3Dd& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_; }
+    BOOLEAN equals(const Vector3Dd& other) const { return (*this) == other; }
     int hashCode() const {
         unsigned int result = hashDouble(x_);
         result = 31u * result + hashDouble(y_);

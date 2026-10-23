@@ -1,6 +1,7 @@
 #ifndef __INPUT_GIZMO__
 #define __INPUT_GIZMO__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -36,26 +37,26 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int DECIMALS = 3;
+    enum { DECIMALS = 3 };
     static const ColorRgb HIGHLIGHT_COLOR;
 
 private:
     int decimals;
     int integerDigits;
-    bool limitTypedDecimals;
+    BOOLEAN limitTypedDecimals;
     ArrayList<double> values;
     ArrayList<ColorRgb> colors;
-    ArrayList<bool> highlighted;
+    ArrayList<BOOLEAN> highlighted;
     ArrayList<String> editTexts;
-    ArrayList<bool> editing;
+    ArrayList<BOOLEAN> editing;
     int selectedField;
-    bool commitPending;
+    BOOLEAN commitPending;
     InputGizmoValueChangeRules valueChangeRules;
 
     void init(int numberOfFields);
     static int digitOf(const KeyEvent& event);
-    static bool isDecimalPoint(const KeyEvent& event);
-    static bool isMinus(const KeyEvent& event);
+    static BOOLEAN isDecimalPoint(const KeyEvent& event);
+    static BOOLEAN isMinus(const KeyEvent& event);
     double stepOf(const KeyEvent& event) const;
     void stepSelected(double step);
     void appendToSelected(char character);
@@ -129,13 +130,13 @@ public:
     void setValue(int field, double value);
     const ColorRgb& getFieldColor(int field) const;
     void setFieldColor(int field, const ColorRgb& color);
-    bool isFieldHighlighted(int field) const;
+    BOOLEAN isFieldHighlighted(int field) const;
 
     /**
     @param field index of a box
     @param highlighted true to draw the box with `HIGHLIGHT_COLOR`
     */
-    void setFieldHighlighted(int field, bool highlighted);
+    void setFieldHighlighted(int field, BOOLEAN highlighted);
 
     /**
     @return the color the box must be drawn with
@@ -156,12 +157,12 @@ public:
     @return true if the user has typed something in the box, and it has not
     been accepted or discarded yet
     */
-    bool isEditing(int field) const;
+    BOOLEAN isEditing(int field) const;
 
     /**
     @return true if any box is being edited
     */
-    bool isEditing() const;
+    BOOLEAN isEditing() const;
 
     /**
     @param field index of a box
@@ -189,20 +190,20 @@ public:
     and ESC are only taken while some box is being edited.
     @return true if `processKeyPressedEvent` would use the event
     */
-    bool consumesKey(const KeyEvent& event) const;
+    BOOLEAN consumesKey(const KeyEvent& event) const;
 
     /**
     Edits the boxes as requested by a key press.
     @return true if the event was used (see `consumesKey`)
     */
-    bool processKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& event);
 
     /**
     @return true (once) if the user accepted the edition with ENTER (or
     stepped a value with the arrow keys) since the last call; the owner must
     then use the numbers (see `getValuesWithEdits`) and discard the edition
     */
-    bool consumeCommit();
+    BOOLEAN consumeCommit();
 
     /**
     @return the values of the boxes, replacing the ones of the boxes edited by
@@ -216,7 +217,7 @@ public:
     @param outValue the number it represents, when valid
     @return true if the text is a valid (finite) number
     */
-    static bool parse(const String& text, double* outValue);
+    static BOOLEAN parse(const String& text, double* outValue);
 };
 
 #endif

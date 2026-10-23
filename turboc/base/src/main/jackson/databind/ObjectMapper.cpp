@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "jackson/databind/ObjectMapper.h"
 
 class JsonParser {
@@ -22,11 +23,11 @@ void skipWs() {
     while (text_[pos_] != '\0' && isspace(((unsigned char)(text_[pos_])))) pos_++;
 }
 
-bool startsWith(const char* token) const {
+BOOLEAN startsWith(const char* token) const {
     for (int i = 0; token[i] != '\0'; ++i) {
-        if (text_[pos_ + i] != token[i]) return false;
+        if (text_[pos_ + i] != token[i]) return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 JsonNode parseValue() {
@@ -35,8 +36,8 @@ JsonNode parseValue() {
     if (c == '{') return parseObject();
     if (c == '[') return parseArray();
     if (c == '"') return JsonNode::newString(parseString());
-    if (c == 't' && startsWith("true")) { pos_ += 4; return JsonNode::newBoolean(true); }
-    if (c == 'f' && startsWith("false")) { pos_ += 5; return JsonNode::newBoolean(false); }
+    if (c == 't' && startsWith("true")) { pos_ += 4; return JsonNode::newBoolean(TRUE); }
+    if (c == 'f' && startsWith("false")) { pos_ += 5; return JsonNode::newBoolean(FALSE); }
     if (c == 'n' && startsWith("null")) { pos_ += 4; return JsonNode::newNull(); }
     return JsonNode::newNumber(parseNumber());
 }

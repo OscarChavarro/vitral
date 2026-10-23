@@ -1,12 +1,13 @@
 #include <stddef.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/lang/Thread.h"
 #include "animation/AnimationController.h"
 #include "model/MeshModel.h"
 
 AnimationController::AnimationController()
-    : model(NULL), repaintCallback(NULL), started(false), stopRequested(false)
+    : model(NULL), repaintCallback(NULL), started(FALSE), stopRequested(FALSE)
 {
 }
 
@@ -24,16 +25,16 @@ void AnimationController::start(MeshModel* model, Runnable* repaintCallback)
     this->model = model;
     this->repaintCallback = repaintCallback;
     if ( pthread_create(&thread, NULL, threadEntry, this) == 0 ) {
-        started = true;
+        started = TRUE;
     }
 }
 
 void AnimationController::stop()
 {
-    stopRequested = true;
+    stopRequested = TRUE;
     if ( started && !pthread_equal(pthread_self(), thread) ) {
         pthread_join(thread, NULL);
-        started = false;
+        started = FALSE;
     }
 }
 

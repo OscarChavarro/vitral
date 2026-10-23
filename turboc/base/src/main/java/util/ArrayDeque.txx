@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayDeque.h"
 
 template <class E>
@@ -87,7 +88,7 @@ long ArrayDeque<E>::size() const {
 }
 
 template <class E>
-bool ArrayDeque<E>::isEmpty() const {
+BOOLEAN ArrayDeque<E>::isEmpty() const {
     return head == tail;
 }
 
@@ -106,10 +107,11 @@ void ArrayDeque<E>::doubleCapacity() {
 
     E *a = new E[newCapacity];
 
-    for (long i = 0; i < r; i++) {
+    long i;
+    for (i = 0; i < r; i++) {
         a[i] = elements[p + i];
     }
-    for (long i = 0; i < p; i++) {
+    for (i = 0; i < p; i++) {
         a[r + i] = elements[i];
     }
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
@@ -111,32 +112,32 @@ Gives the result of a connection to its listener, as a task of
 */
 class TangibleConnectionResultTask : public Runnable {
 public:
-    TangibleConnectionResultTask(Consumer<bool>* listener, bool connected)
+    TangibleConnectionResultTask(Consumer<BOOLEAN>* listener, BOOLEAN connected)
         : listener(listener), connected(connected) {}
     virtual void run()
     {
         listener->accept(connected);
     }
 private:
-    Consumer<bool>* listener;
-    bool connected;
+    Consumer<BOOLEAN>* listener;
+    BOOLEAN connected;
 };
 
 /**
 Receives the result of a connection in the thread of the network client,
 and gives it to the listener of the GUI in the thread of the Xt event loop.
 */
-class TangibleConnectionForwarder : public Consumer<bool> {
+class TangibleConnectionForwarder : public Consumer<BOOLEAN> {
 public:
-    explicit TangibleConnectionForwarder(Consumer<bool>* listener)
+    explicit TangibleConnectionForwarder(Consumer<BOOLEAN>* listener)
         : listener(listener) {}
-    virtual void accept(bool connected)
+    virtual void accept(BOOLEAN connected)
     {
         XtEventQueue::invokeLater(
             new TangibleConnectionResultTask(listener, connected));
     }
 private:
-    Consumer<bool>* listener;
+    Consumer<BOOLEAN>* listener;
 };
 
 /**
@@ -213,7 +214,7 @@ public:
         , viewportMenu(NULL)
         , labelProvider(NULL)
         , window(0)
-        , cpuShellMode(false)
+        , cpuShellMode(FALSE)
         , fbConfig(NULL)
         , context(NULL)
         , width(640)
@@ -222,18 +223,18 @@ public:
         , canvasHeight(452)
         , guiLanguage(selectedGuiLanguage())
         , pendingGuiLanguage()
-        , guiRebuildQueued(false)
+        , guiRebuildQueued(FALSE)
         , sceneBridge(NULL)
-        , ready(false)
-        , closing(false)
-        , repaintQueued(false)
+        , ready(FALSE)
+        , closing(FALSE)
+        , repaintQueued(FALSE)
         , currentCursor(PointerCursor::SELECT)
         , viewportMenuX(0)
         , viewportMenuY(0)
         , pressButton(0)
         , pressX(0)
         , pressY(0)
-        , pressMoved(false)
+        , pressMoved(FALSE)
         , lastClickButton(0)
         , lastClickTime(0)
         , clickCount(0)
@@ -304,9 +305,9 @@ public:
     int run(int argc, char** argv)
     {
         // Before Xt takes its own options from the command line
-        bool withAutomationService = false;
+        BOOLEAN withAutomationService = FALSE;
         for (int i = 1; i < argc; ++i)
-            if (String(argv[i]) == "-s") withAutomationService = true;
+            if (String(argv[i]) == "-s") withAutomationService = TRUE;
         tangibleConnection.processArguments(argc, argv);
         try {
             createWindow(argc, argv);
@@ -372,7 +373,7 @@ private:
     ArrayList<String> viewportMenuCommands;
     XlibLabelImageProvider* labelProvider;
     Window window;
-    bool cpuShellMode;
+    BOOLEAN cpuShellMode;
     SceneEditorGlxConfig fbConfig;
     GLXContext context;
     int width;
@@ -382,13 +383,13 @@ private:
     String guiLanguage;
     String guiDefinition;
     String pendingGuiLanguage;
-    bool guiRebuildQueued;
+    BOOLEAN guiRebuildQueued;
     ArrayList<TabBinding*> tabBindings;
     TreeMap<String, String> messages;
     XtOpenGLSceneBridge* sceneBridge;
-    bool ready;
-    bool closing;
-    bool repaintQueued;
+    BOOLEAN ready;
+    BOOLEAN closing;
+    BOOLEAN repaintQueued;
     TreeMap<int, Cursor> cursors;
     PointerCursor::Value currentCursor;
     PopupDismissClickFilter popupDismissFilter;
@@ -398,7 +399,7 @@ private:
     unsigned int pressButton;
     int pressX;
     int pressY;
-    bool pressMoved;
+    BOOLEAN pressMoved;
     unsigned int lastClickButton;
     long long lastClickTime;
     int clickCount;
@@ -474,16 +475,18 @@ private:
         return message != NULL ? (*message) : String(id);
     }
 
-    static const int CREATION_PAGE = 0;
-    static const int MODIFY_PAGE = 1;
-    static const int GUI_PAGE = 2;
-    static const int OTHERS_PAGE = 3;
-    static const int RENDER_PAGE = 4;
-    static const int MENU_BAR_HEIGHT = 28;
-    static const int SIDE_TAB_HEIGHT = 28;
-    static const int SIDE_TAB_WIDTH = 64;
-    static const int SIDE_PANEL_WIDTH = 320;
-    static const int STATUS_BAR_HEIGHT = 24;
+    enum {
+        CREATION_PAGE = 0,
+        MODIFY_PAGE = 1,
+        GUI_PAGE = 2,
+        OTHERS_PAGE = 3,
+        RENDER_PAGE = 4,
+        MENU_BAR_HEIGHT = 28,
+        SIDE_TAB_HEIGHT = 28,
+        SIDE_TAB_WIDTH = 64,
+        SIDE_PANEL_WIDTH = 320,
+        STATUS_BAR_HEIGHT = 24
+    };
 
     /**
     @return the vertical position where the canvas and the side panel start:
@@ -505,15 +508,16 @@ private:
     void showSidePage(int page)
     {
         Widget pages[] = { creationPage, modifyPage, guiPage, othersPage, renderPage };
-        for (int i = 0; i < 5; ++i)
+        int i;
+        for (i = 0; i < 5; ++i)
             if (pages[i] == NULL) return;
-        for (int i = 0; i < 5; ++i)
+        for (i = 0; i < 5; ++i)
             if (i != page) XtUnmanageChild(pages[i]);
         XtManageChild(pages[page]);
         setModifyPanelSelected(page == MODIFY_PAGE);
     }
 
-    void setModifyPanelSelected(bool selected)
+    void setModifyPanelSelected(BOOLEAN selected)
     {
         if (sceneBridge == NULL) return;
         sceneBridge->setModifyPanelSelected(selected);
@@ -535,7 +539,7 @@ private:
         requestRedraw();
     }
 
-    Widget createSidePage(const char* name, bool managed)
+    Widget createSidePage(const char* name, BOOLEAN managed)
     {
         return panelWidgets->createPanel(
             rightPanel, name, 0, SIDE_TAB_HEIGHT, SIDE_PANEL_WIDTH,
@@ -552,13 +556,14 @@ private:
         const int top = contentTop();
         rightPanel = panelWidgets->createPanel(
             workspace, "rightPanel", width - SIDE_PANEL_WIDTH, top,
-            SIDE_PANEL_WIDTH, height - top - STATUS_BAR_HEIGHT, true);
+            SIDE_PANEL_WIDTH, height - top - STATUS_BAR_HEIGHT, TRUE);
 
         const char* tabs[] = {
             "IDM_CREATION_TAB", "IDM_MODIFY_TAB", "IDM_GUI_TAB",
             "IDM_OTHERS_TAB", "IDM_RENDER_TAB"
         };
-        for (int i = 0; i < 5; ++i) {
+        int i;
+        for (i = 0; i < 5; ++i) {
             TabBinding* binding = new TabBinding;
             binding->application = this;
             binding->page = i;
@@ -569,15 +574,15 @@ private:
                 &SceneEditorApplication::selectSideTab, binding);
         }
 
-        creationPage = createSidePage("creationPage", true);
-        modifyPage = createSidePage("modifyPage", false);
-        guiPage = createSidePage("guiPage", false);
-        othersPage = createSidePage("othersPage", false);
-        renderPage = createSidePage("renderPage", false);
+        creationPage = createSidePage("creationPage", TRUE);
+        modifyPage = createSidePage("modifyPage", FALSE);
+        guiPage = createSidePage("guiPage", FALSE);
+        othersPage = createSidePage("othersPage", FALSE);
+        renderPage = createSidePage("renderPage", FALSE);
         modifyPanel = new XtModifyPanel(this, modifyPage, SIDE_PANEL_WIDTH);
         if (sceneBridge != NULL) {
             sceneBridge->setBodyEditFeedbackProvider(modifyPanel);
-            sceneBridge->setModifyPanelSelected(false);
+            sceneBridge->setModifyPanelSelected(FALSE);
         }
 
         // As the `AwtButtonsPanel`s of the tabs
@@ -585,7 +590,7 @@ private:
 
         const char* groups[] = { "GUI", "OTHER", "RENDER" };
         Widget pages[] = { guiPage, othersPage, renderPage };
-        for (int i = 0; i < 3; ++i) {
+        for (i = 0; i < 3; ++i) {
             guiRenderer->buildButtonGroup(
                 pages[i], sceneBridge->getButtonGroup(groups[i]), executor,
                 menuFontSet, 0, 0, SIDE_PANEL_WIDTH);
@@ -608,7 +613,7 @@ private:
             XtCollapsibleSection* section = new XtCollapsibleSection(
                 panelWidgets, creationPage, text(titles[i]),
                 sectionFontSet != NULL ? sectionFontSet : menuFontSet,
-                y, SIDE_PANEL_WIDTH, true);
+                y, SIDE_PANEL_WIDTH, TRUE);
             section->setContent(guiRenderer->buildButtonGroup(
                 section->getContainer(), sceneBridge->getButtonGroup(groups[i]),
                 executor, menuFontSet, 0, 0, SIDE_PANEL_WIDTH));
@@ -698,7 +703,7 @@ private:
     {
         SceneEditorApplication* self = ((SceneEditorApplication*)(clientData));
         if (self == NULL) return;
-        self->guiRebuildQueued = false;
+        self->guiRebuildQueued = FALSE;
         self->rebuildMenus(self->pendingGuiLanguage);
     }
 
@@ -706,7 +711,7 @@ private:
     {
         if (language == guiLanguage || guiRebuildQueued) return;
         pendingGuiLanguage = language;
-        guiRebuildQueued = true;
+        guiRebuildQueued = TRUE;
         XtAppAddTimeOut(
             appContext, 0, &SceneEditorApplication::rebuildMenusAfterCallback,
             ((XtPointer)(this)));
@@ -804,10 +809,10 @@ private:
         width = DisplayWidth(display, screen);
         height = DisplayHeight(display, screen);
         createMenuFontSet();
-        buildShell(false);
+        buildShell(FALSE);
     }
 
-    void buildShell(bool cpu)
+    void buildShell(BOOLEAN cpu)
     {
         const int screen = DefaultScreen(display);
         if (cpu) {
@@ -845,7 +850,7 @@ private:
         if (shell == NULL)
             throw VSDKFatalException("Could not create Xt shell");
         workspace = panelWidgets->createPanel(shell, "workspace", 0, 0,
-                                              width, height, true);
+                                              width, height, TRUE);
         widgetSet->setWindowCloseHandler(shell,
             &SceneEditorApplication::closeRequestedByWindowManager, this);
 
@@ -876,10 +881,10 @@ private:
         cpuShellMode = cpu;
     }
 
-    void rebuildShell(bool cpu)
+    void rebuildShell(BOOLEAN cpu)
     {
         if (cpu == cpuShellMode) return;
-        ready = false;
+        ready = FALSE;
         if (context != NULL) {
             glXMakeCurrent(display, window, context);
             sceneBridge->dispose();
@@ -915,7 +920,7 @@ private:
             initOpenGL();
         }
         else {
-            ready = true;
+            ready = TRUE;
         }
     }
 
@@ -1036,23 +1041,23 @@ private:
 #endif
     }
 
-    bool hasGlxExtension(const char* name)
+    BOOLEAN hasGlxExtension(const char* name)
     {
         const char* extensions =
             glXQueryExtensionsString(display, DefaultScreen(display));
         if (extensions == NULL) {
-            return false;
+            return FALSE;
         }
         size_t length = strlen(name);
         const char* found = extensions;
         while ((found = strstr(found, name)) != NULL) {
             if ((found == extensions || found[-1] == ' ') &&
                 (found[length] == ' ' || found[length] == '\0')) {
-                return true;
+                return TRUE;
             }
             found += length;
         }
-        return false;
+        return FALSE;
     }
 
     void initOpenGL()
@@ -1070,7 +1075,7 @@ private:
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glViewport(0, 0, canvasWidth, canvasHeight);
-        ready = true;
+        ready = TRUE;
     }
 
     void checkOpenGLVersion()
@@ -1146,7 +1151,7 @@ private:
         if (closing) {
             return;
         }
-        closing = true;
+        closing = TRUE;
         XtAppSetExitFlag(appContext);
     }
 
@@ -1254,16 +1259,16 @@ private:
     X repeats a held key as release / press pairs: the release of such a
     pair is not reported, so the key is seen as held (as with AWT).
     */
-    bool isAutoRepeatRelease(const XKeyEvent& release)
+    BOOLEAN isAutoRepeatRelease(const XKeyEvent& release)
     {
-        if (XEventsQueued(display, QueuedAfterReading) == 0) return false;
+        if (XEventsQueued(display, QueuedAfterReading) == 0) return FALSE;
         XEvent next;
         XPeekEvent(display, &next);
         return next.type == KeyPress && next.xkey.window == release.window &&
             next.xkey.keycode == release.keycode && next.xkey.time == release.time;
     }
 
-    bool consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind kind)
+    BOOLEAN consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind kind)
     {
         return popupDismissFilter.consumes(kind, currentTimeMillis());
     }
@@ -1285,7 +1290,7 @@ private:
         pressButton = event.xbutton.button;
         pressX = event.xbutton.x;
         pressY = event.xbutton.y;
-        pressMoved = false;
+        pressMoved = FALSE;
         sceneBridge->mousePressed(XtSystem::xt2vsdkMouseEvent(event));
         requestRedraw();
     }
@@ -1294,7 +1299,7 @@ private:
     {
         if (sceneBridge == NULL || XtSystem::isWheelButton(event)) return;
         if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::RELEASE)) return;
-        const bool clicked = event.xbutton.button == pressButton && !pressMoved;
+        const BOOLEAN clicked = event.xbutton.button == pressButton && !pressMoved;
         pressButton = 0;
         // The release may request the viewport menu, that grabs the pointer
         sceneBridge->mouseReleased(XtSystem::xt2vsdkMouseEvent(event));
@@ -1335,7 +1340,7 @@ private:
         }
         if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::DRAG)) return;
         // As in AWT, a press followed by any motion is not a click
-        if (event->xmotion.x != pressX || event->xmotion.y != pressY) pressMoved = true;
+        if (event->xmotion.x != pressX || event->xmotion.y != pressY) pressMoved = TRUE;
         sceneBridge->mouseDragged(XtSystem::xt2vsdkMouseEvent(*event));
         requestRedraw();
     }
@@ -1344,7 +1349,7 @@ private:
     {
         SceneEditorApplication* self = ((SceneEditorApplication*)(clientData));
         if (self == NULL) return;
-        self->repaintQueued = false;
+        self->repaintQueued = FALSE;
         self->redraw();
     }
 
@@ -1355,7 +1360,7 @@ private:
     void requestRedraw()
     {
         if (repaintQueued || appContext == NULL) return;
-        repaintQueued = true;
+        repaintQueued = TRUE;
         XtAppAddTimeOut(appContext, 0, &SceneEditorApplication::redrawAfterEvents,
                         ((XtPointer)(this)));
     }
@@ -1492,7 +1497,7 @@ private:
     void applyFullScreenGuiMode()
     {
         if (sceneBridge == NULL || activeCanvas() == NULL) return;
-        const bool fullScreen = sceneBridge->getGuiState()->isFullScreenGuiMode();
+        const BOOLEAN fullScreen = sceneBridge->getGuiState()->isFullScreenGuiMode();
         Widget others[] = {
             menuBar, globalBar,
             rightPanel, statusBar
@@ -1520,7 +1525,7 @@ private:
     Asks the window manager (EWMH) to show the window without decorations
     over the whole screen, as the undecorated frame of the Java application.
     */
-    void setWindowManagerFullScreen(bool fullScreen)
+    void setWindowManagerFullScreen(BOOLEAN fullScreen)
     {
         if (shell == NULL || !XtIsRealized(shell)) return;
         XEvent event;
@@ -1548,7 +1553,7 @@ private:
     {
         if (selectorDialog == NULL) selectorDialog = new XtSelectorDialog(this);
         selectorDialog->rebuild();
-        selectorDialog->setVisible(true);
+        selectorDialog->setVisible(TRUE);
     }
 
     void imageRequested(RGBImageUncompressed* image)
@@ -1627,7 +1632,7 @@ private:
     }
 
     void connectTangibleInterface(const String& serviceUrl,
-        Consumer<bool>* connectionListener)
+        Consumer<BOOLEAN>* connectionListener)
     {
         TangibleConnectionForwarder* previous =
             tangibleConnectionForwarder.forwarder;
@@ -1666,16 +1671,16 @@ private:
         return guiLanguage.c_str();
     }
 
-    bool setGuiLanguageById(const String& language)
+    BOOLEAN setGuiLanguageById(const String& language)
     {
         ArrayList<String> languages = getGuiLanguages();
-        bool known = false;
+        BOOLEAN known = FALSE;
         for (long i = 0; i < languages.size(); ++i)
-            if (languages.get(i).equals(language)) known = true;
-        if (!known) return false;
+            if (languages.get(i).equals(language)) known = TRUE;
+        if (!known) return FALSE;
         // Not called from a widget callback: the GUI is rebuilt now
         rebuildMenus(language.c_str());
-        return true;
+        return TRUE;
     }
 
     void doRaytracingImage()
@@ -1683,7 +1688,7 @@ private:
         if (sceneBridge != NULL) sceneBridge->doRaytracingImage();
     }
 
-    bool showImportSceneDialog()
+    BOOLEAN showImportSceneDialog()
     {
         return executor != NULL &&
             executor->executeCommand("IDC_IMPORT_OBJECTS_FROM_FILE");
@@ -1694,7 +1699,7 @@ private:
         selectorDialogRequested();
     }
 
-    bool isSelectorDialogVisible()
+    BOOLEAN isSelectorDialogVisible()
     {
         return selectorDialog != NULL && selectorDialog->isVisible();
     }
@@ -1715,7 +1720,7 @@ private:
             executor->executeCommand("IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT");
     }
 
-    bool isTangibleInterfaceDialogVisible()
+    BOOLEAN isTangibleInterfaceDialogVisible()
     {
         return tangibleDialog != NULL && tangibleDialog->isVisible();
     }
@@ -1732,10 +1737,10 @@ private:
             tangibleDialog->getConnectLabel().c_str() : "";
     }
 
-    bool tangibleInterfaceDialogAction(const String& action,
+    BOOLEAN tangibleInterfaceDialogAction(const String& action,
                                        const String* serviceUrl)
     {
-        if (tangibleDialog == NULL) return false;
+        if (tangibleDialog == NULL) return FALSE;
         String url = serviceUrl != NULL ? serviceUrl->c_str() : "";
         return tangibleDialog->performAction(action.c_str(),
                                              serviceUrl != NULL ? &url :
@@ -1749,7 +1754,7 @@ private:
 
     //= XtOpenGLApplicationController =====================================
 
-    bool isDrawingAreaCreated()
+    BOOLEAN isDrawingAreaCreated()
     {
         return ready && sceneBridge != NULL;
     }
@@ -1761,13 +1766,13 @@ private:
 
     void exportViewportPng(const File& file)
     {
-        sceneBridge->requestViewportExport(file, false);
+        sceneBridge->requestViewportExport(file, FALSE);
         redraw();
     }
 
     void exportViewportJpg(const File& file)
     {
-        sceneBridge->requestViewportExport(file, true);
+        sceneBridge->requestViewportExport(file, TRUE);
         redraw();
     }
 
@@ -1831,7 +1836,7 @@ private:
     As `AwtDrawingAreaController.injectKeyEvent`: the key is mapped as the
     ones of the keyboard (see `XtSystem`), from its symbol.
     */
-    void injectKeyEvent(const String& key, bool shift, bool ctrl)
+    void injectKeyEvent(const String& key, BOOLEAN shift, BOOLEAN ctrl)
     {
         KeySym keysym;
         char keyChar = 0;
@@ -1888,7 +1893,7 @@ private:
                    baseKeysym, state);
     }
 
-    bool projectToCanvas(Viewport* viewport, const Vector3Dd& point,
+    BOOLEAN projectToCanvas(Viewport* viewport, const Vector3Dd& point,
                          double outCanvas[2])
     {
         sceneBridge->setCanvasSize(canvasWidth, canvasHeight);
@@ -1936,7 +1941,7 @@ private:
         if (display != NULL && context != NULL && window != 0) {
             glXMakeCurrent(display, window, context);
         }
-        ready = false;
+        ready = FALSE;
     }
 };
 

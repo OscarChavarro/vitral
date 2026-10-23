@@ -40,4 +40,3 @@ String PointerCursor::getDisplayName(Value cursor)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int PointerCursor::COUNT;

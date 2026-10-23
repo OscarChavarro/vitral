@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_SegmentTableBuilder.h"
 int _SegmentTableBuilder::prepareSegments(double *vertices,
@@ -34,7 +35,7 @@ int _SegmentTableBuilder::prepareSegments(double *vertices,
                     _Construct::segmentAt(i).nextSegmentIndex = i + 1;
                     _Construct::segmentAt(i - 1).endPoint = _Construct::segmentAt(i).startPoint;
             }
-            _Construct::segmentAt(i).hasBeenInserted = false;
+            _Construct::segmentAt(i).hasBeenInserted = FALSE;
         }
     }
 

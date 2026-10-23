@@ -1,6 +1,7 @@
 #ifndef __MCP_SCENE_TOOLS__
 #define __MCP_SCENE_TOOLS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 
 #include "java/lang/String.h"

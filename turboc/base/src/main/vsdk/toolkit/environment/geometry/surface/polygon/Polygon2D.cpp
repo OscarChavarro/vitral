@@ -81,14 +81,14 @@ double* Polygon2D::getMinMax()
     return minMax;
 }
 
-static bool pointInLoop(const _Polygon2DContour* loop, double x, double y)
+static BOOLEAN pointInLoop(const _Polygon2DContour* loop, double x, double y)
 {
-    bool inside = false;
+    BOOLEAN inside = FALSE;
     ArrayList<Vertex2D>& v = ((_Polygon2DContour*)(loop))->vertices;
     long int n = v.size();
-    if (n < 3) return false;
+    if (n < 3) return FALSE;
     for (long int i = 0, j = n - 1; i < n; j = i++) {
-        bool inter = ((v[i].y > y) != (v[j].y > y)) &&
+        BOOLEAN inter = ((v[i].y > y) != (v[j].y > y)) &&
                      (x < (v[j].x - v[i].x) * (y - v[i].y) / ((v[j].y - v[i].y) + 1e-30) + v[i].x);
         if (inter) inside = !inside;
     }
@@ -104,21 +104,21 @@ Ray* Polygon2D::doIntersectionFirstHit(const Ray& inOut_ray)
     return NULL;
 }
 
-bool Polygon2D::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN Polygon2D::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
-    if (Cpp98Support::abs(inRay.getDirection().z()) < VSDK::EPSILON) return false;
+    if (Cpp98Support::abs(inRay.getDirection().z()) < VSDK::EPSILON) return FALSE;
     double t = -inRay.getOrigin().z() / inRay.getDirection().z();
-    if (t < 0) return false;
+    if (t < 0) return FALSE;
 
     Vector3Dd p = inRay.getOrigin().add(inRay.getDirection().multiply(t));
-    bool inside = false;
+    BOOLEAN inside = FALSE;
     for (long int i = 0; i < loops.size(); i++) {
         if (pointInLoop(loops[i], p.x(), p.y())) {
-            if (loops[i]->getExteriorContour() == NULL) inside = true;
-            else inside = false;
+            if (loops[i]->getExteriorContour() == NULL) inside = TRUE;
+            else inside = FALSE;
         }
     }
-    if (!inside) return false;
+    if (!inside) return FALSE;
 
     if (outHit != NULL) {
         if (outHit->shouldStoreRay() || outHit->needsAnySurfaceData()) outHit->setRay(inRay.withT(t));
@@ -126,7 +126,7 @@ bool Polygon2D::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
         if (outHit->needsPoint()) outHit->point = p;
         if (outHit->needsNormal()) outHit->normal = Vector3Dd(0,0,1);
     }
-    return true;
+    return TRUE;
 }
 
 void Polygon2D::doExtraInformation(const Ray& inRay, double intT, RayHit* outData)

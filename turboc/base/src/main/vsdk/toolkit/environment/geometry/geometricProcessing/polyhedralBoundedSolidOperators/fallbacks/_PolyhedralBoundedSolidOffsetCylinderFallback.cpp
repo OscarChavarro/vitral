@@ -1,4 +1,5 @@
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
@@ -31,7 +32,7 @@ static void addUniqueXy(ArrayList<Vector3Dd>& values, const Vector3Dd& point)
 }
 
 
-bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
+BOOLEAN CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
     VerticalCylinderOperandSpec& outSpec)
 {
     double centerX;
@@ -42,7 +43,7 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
     long int i;
 
     if ( solid == 0 || solid->getVerticesList().size() < 6 ) {
-        return false;
+        return FALSE;
     }
 
     double* bounds = solid->getMinMax();
@@ -52,7 +53,7 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
     }
     delete[] bounds;
     if ( b[5] <= b[2] + numericContext.bigEpsilon() ) {
-        return false;
+        return FALSE;
     }
 
     centerX = (b[0] + b[3]) * 0.5;
@@ -74,7 +75,7 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
 
     if ( xy.size() < 3 || zs.size() < 2 ||
          radius <= numericContext.bigEpsilon() ) {
-        return false;
+        return FALSE;
     }
 
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
@@ -85,7 +86,7 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
 
         if ( fabs(radialDistance - radius) >
              Math::max(numericContext.bigEpsilon(), radius * 1.0e-6) ) {
-            return false;
+            return FALSE;
         }
     }
 
@@ -96,7 +97,7 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
     outSpec.height = b[5] - b[2];
     outSpec.radialDivisions = (int)xy.size();
     outSpec.heightDivisions = Math::max(1, (int)zs.size() - 1);
-    return true;
+    return TRUE;
 }
 
 CylinderFallback::OffsetCylinderDifferenceFallbackSpec*
@@ -184,7 +185,7 @@ PolyhedralBoundedSolid* CylinderFallback::buildOffsetCylinderDifferenceFallback(
 
     try {
         result = _PolyhedralBoundedSolidSetOperator::setOp(fallbackA, fallbackB,
-            SUBTRACT, false, true);
+            SUBTRACT, FALSE, TRUE);
     }
     catch ( const Exception& e ) {
         _SetOperationTrace::tracePipelineSummary(

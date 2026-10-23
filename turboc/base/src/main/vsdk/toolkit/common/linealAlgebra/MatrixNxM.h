@@ -1,5 +1,6 @@
 #ifndef __MATRIX_NX_M__
 #define __MATRIX_NX_M__
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 class MatrixNxM {
 private:
@@ -32,11 +33,11 @@ public:
     double determinant() const;
     String* toString() const;
 
-    bool epsilonEquals(const MatrixNxM& other) const;
-    bool epsilonEquals(const MatrixNxM& other, double epsilon) const;
+    BOOLEAN epsilonEquals(const MatrixNxM& other) const;
+    BOOLEAN epsilonEquals(const MatrixNxM& other, double epsilon) const;
 
-    bool operator==(const MatrixNxM& other) const;
-    bool equals(const MatrixNxM& other) const { return (*this) == other; }
+    BOOLEAN operator==(const MatrixNxM& other) const;
+    BOOLEAN equals(const MatrixNxM& other) const { return (*this) == other; }
     int hashCode() const;
 };
 

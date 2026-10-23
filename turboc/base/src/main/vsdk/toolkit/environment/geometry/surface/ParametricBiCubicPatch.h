@@ -1,6 +1,7 @@
 #ifndef __PARAMETRIC_BI_CUBIC_PATCH__
 #define __PARAMETRIC_BI_CUBIC_PATCH__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -20,7 +21,7 @@ public:
     Matrix4x4d geometryMatrixY;
     Matrix4x4d geometryMatrixZ;
 
-    static const int FERGUSON = 7;
+    enum { FERGUSON = 7 };
 
     /// Note that the contourCurve must have 4 points with its respective
     /// control parameters.
@@ -38,17 +39,17 @@ private:
     Matrix4x4d coefficientMatrixZ;
 
     Vector3Dd controlMeshPoints[4][4];
-    bool hasControlMeshPoints;
+    BOOLEAN hasControlMeshPoints;
     /// C++ port note: the coefficient matrices are values, so this tells
     /// when they were built (Java checks for null matrices)
-    bool hasCoefficientMatrices;
+    BOOLEAN hasCoefficientMatrices;
 
     int approximationSteps;
 
     // Lazily built ray intersection structures, discarded each time the
     // patch matrices are rebuilt. Shared by the copies of the patch, as it
     // is immutable
-    mutable SharedPointer<const _ParametricBiCubicPatchIntersector> rayIntersector;
+    SharedPointer<const _ParametricBiCubicPatchIntersector> rayIntersector;
 
     SharedPointer<const _ParametricBiCubicPatchIntersector> getRayIntersector() const;
     static void fillHitInformation(
@@ -74,7 +75,7 @@ public:
     @param outPoint receives the Bezier control point (i, j)
     @return false if the patch has not been built (Java returns null)
     */
-    bool getBezierControlPoint(int i, int j, Vector3Dd& outPoint) const;
+    BOOLEAN getBezierControlPoint(int i, int j, Vector3Dd& outPoint) const;
 
     int getApproximationSteps() const;
     void setApproximationSteps(int n);
@@ -90,12 +91,12 @@ public:
     Vector3Dd evaluateNormal(double s, double t);
 
     Ray* doIntersectionFirstHit(const Ray& r);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double intT, RayHit* outData);
     virtual double* getMinMax();
 
 private:
-    static const int INITIAL_APPROXIMATION_STEPS = 12;
+    enum { INITIAL_APPROXIMATION_STEPS = 12 };
 
     void calculateMatrices();
     void buildGeometryMatricesXYZ_Bezier();

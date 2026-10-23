@@ -5,78 +5,79 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "model/PolygonClippingFixtures.h"
 #include "options/CommandLineOptions.h"
 CommandLineOptions::CommandLineOptions()
-    : offlineMode(false)
-    , hasFixtureIndex(false)
+    : offlineMode(FALSE)
+    , hasFixtureIndex(FALSE)
     , fixtureIndex(0)
-    , hasWires(false)
-    , wires(true)
-    , hasSurfaces(false)
-    , surfaces(true)
-    , hasPoints(false)
-    , points(true)
-    , hasTessellationMode(false)
+    , hasWires(FALSE)
+    , wires(TRUE)
+    , hasSurfaces(FALSE)
+    , surfaces(TRUE)
+    , hasPoints(FALSE)
+    , points(TRUE)
+    , hasTessellationMode(FALSE)
     , tessellationMode(PolygonSurfaceTessellationMode::GLU)
 {}
 
-static bool strEqI(const char* a, const char* b)
+static BOOLEAN strEqI(const char* a, const char* b)
 {
     while (*a && *b) {
-        if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) return false;
+        if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) return FALSE;
         a++; b++;
     }
     return *a == '\0' && *b == '\0';
 }
 
-static bool parseBoolean(const char* raw, bool& out)
+static BOOLEAN parseBoolean(const char* raw, BOOLEAN& out)
 {
     if (strEqI(raw, "true") || strEqI(raw, "on") || strEqI(raw, "1") || strEqI(raw, "yes")) {
-        out = true; return true;
+        out = TRUE; return TRUE;
     }
     if (strEqI(raw, "false") || strEqI(raw, "off") || strEqI(raw, "0") || strEqI(raw, "no")) {
-        out = false; return true;
+        out = FALSE; return TRUE;
     }
     fprintf(stderr, "[PolygonClippingExample] Invalid boolean value: %s\n", raw);
-    return false;
+    return FALSE;
 }
 
-static bool looksNumeric(const char* raw)
+static BOOLEAN looksNumeric(const char* raw)
 {
-    if (!raw || !*raw) return false;
+    if (!raw || !*raw) return FALSE;
     const char* p = raw;
     if (*p == '-') p++;
-    if (!*p) return false;
+    if (!*p) return FALSE;
     while (*p) {
-        if (!isdigit((unsigned char)*p)) return false;
+        if (!isdigit((unsigned char)*p)) return FALSE;
         p++;
     }
-    return true;
+    return TRUE;
 }
 
-static bool parseInt(const char* raw, int& out)
+static BOOLEAN parseInt(const char* raw, int& out)
 {
     if (!looksNumeric(raw)) {
         fprintf(stderr, "[PolygonClippingExample] Invalid integer: %s\n", raw);
-        return false;
+        return FALSE;
     }
     errno = 0;
     char* end = NULL;
     long v = strtol(raw, &end, 10);
     if (errno != 0 || end == raw || *end != '\0' || v < INT_MIN || v > INT_MAX) {
         fprintf(stderr, "[PolygonClippingExample] Integer out of range: %s\n", raw);
-        return false;
+        return FALSE;
     }
     out = (int)v;
-    return true;
+    return TRUE;
 }
 
-static bool parseTessellationMode(const char* raw, PolygonSurfaceTessellationMode& out)
+static BOOLEAN parseTessellationMode(const char* raw, PolygonSurfaceTessellationMode& out)
 {
     if (strEqI(raw, "GLU")) {
         out = PolygonSurfaceTessellationMode::GLU;
-        return true;
+        return TRUE;
     }
 
     if (strEqI(raw, "MONOTONE_DECOMPOSITION")
@@ -84,13 +85,13 @@ static bool parseTessellationMode(const char* raw, PolygonSurfaceTessellationMod
         || strEqI(raw, "Monotone decomposition")
         || strEqI(raw, "monotone_decomposition")) {
         out = PolygonSurfaceTessellationMode::MONOTONE_DECOMPOSITION;
-        return true;
+        return TRUE;
     }
 
     fprintf(stderr,
         "[PolygonClippingExample] Invalid tessellation mode: %s"
         " (expected GLU or MONOTONE_DECOMPOSITION)\n", raw);
-    return false;
+    return FALSE;
 }
 
 static int findFixtureIndexByName(const char* name)
@@ -101,27 +102,27 @@ static int findFixtureIndexByName(const char* name)
     return -1;
 }
 
-static bool applyFixtureByValue(const char* raw, bool oneBased, int& indexOut)
+static BOOLEAN applyFixtureByValue(const char* raw, BOOLEAN oneBased, int& indexOut)
 {
     if (looksNumeric(raw)) {
         int v = 0;
-        if (!parseInt(raw, v)) return false;
+        if (!parseInt(raw, v)) return FALSE;
         if (oneBased) v--;
         if (v < 0 || v >= PolygonClippingFixtures::COUNT) {
             fprintf(stderr,
                 "[PolygonClippingExample] Fixture index out of range: %s\n", raw);
-            return false;
+            return FALSE;
         }
         indexOut = v;
-        return true;
+        return TRUE;
     }
     int idx = findFixtureIndexByName(raw);
     if (idx < 0) {
         fprintf(stderr, "[PolygonClippingExample] Unknown fixture name: %s\n", raw);
-        return false;
+        return FALSE;
     }
     indexOut = idx;
-    return true;
+    return TRUE;
 }
 
 static const char* startsWith(const char* str, const char* prefix)
@@ -133,7 +134,7 @@ static const char* startsWith(const char* str, const char* prefix)
     return str;
 }
 
-bool CommandLineOptions::parse(int argc, char** argv, CommandLineOptions& out)
+BOOLEAN CommandLineOptions::parse(int argc, char** argv, CommandLineOptions& out)
 {
     out = CommandLineOptions();
 
@@ -142,84 +143,84 @@ bool CommandLineOptions::parse(int argc, char** argv, CommandLineOptions& out)
         const char* val = NULL;
 
         if (strcmp(arg, "--offline") == 0 || strcmp(arg, "-offline") == 0) {
-            out.offlineMode = true;
+            out.offlineMode = TRUE;
             continue;
         }
 
         if (strcmp(arg, "--help") == 0 || strcmp(arg, "-h") == 0) {
             printUsage();
-            return false;
+            return FALSE;
         }
 
         if (strcmp(arg, "--fixture") == 0 || strcmp(arg, "--fixture-index") == 0) {
             if (i + 1 >= argc) {
                 fprintf(stderr, "[PolygonClippingExample] Missing value for %s\n", arg);
-                return false;
+                return FALSE;
             }
             val = argv[++i];
-            bool zeroBased = (strcmp(arg, "--fixture-index") == 0);
+            BOOLEAN zeroBased = (strcmp(arg, "--fixture-index") == 0);
             out.hasFixtureIndex = applyFixtureByValue(val, !zeroBased, out.fixtureIndex);
-            if (!out.hasFixtureIndex) return false;
+            if (!out.hasFixtureIndex) return FALSE;
             continue;
         }
 
         if ((val = startsWith(arg, "--fixture=")) != NULL) {
-            out.hasFixtureIndex = applyFixtureByValue(val, true, out.fixtureIndex);
-            if (!out.hasFixtureIndex) return false;
+            out.hasFixtureIndex = applyFixtureByValue(val, TRUE, out.fixtureIndex);
+            if (!out.hasFixtureIndex) return FALSE;
             continue;
         }
 
         if ((val = startsWith(arg, "--fixture-index=")) != NULL) {
-            out.hasFixtureIndex = applyFixtureByValue(val, false, out.fixtureIndex);
-            if (!out.hasFixtureIndex) return false;
+            out.hasFixtureIndex = applyFixtureByValue(val, FALSE, out.fixtureIndex);
+            if (!out.hasFixtureIndex) return FALSE;
             continue;
         }
 
         if (strcmp(arg, "--wires") == 0) {
             if (i + 1 >= argc) {
                 fprintf(stderr, "[PolygonClippingExample] Missing value for --wires\n");
-                return false;
+                return FALSE;
             }
             out.hasWires = parseBoolean(argv[++i], out.wires);
-            if (!out.hasWires) return false;
+            if (!out.hasWires) return FALSE;
             continue;
         }
 
         if ((val = startsWith(arg, "--wires=")) != NULL) {
             out.hasWires = parseBoolean(val, out.wires);
-            if (!out.hasWires) return false;
+            if (!out.hasWires) return FALSE;
             continue;
         }
 
         if (strcmp(arg, "--surfaces") == 0) {
             if (i + 1 >= argc) {
                 fprintf(stderr, "[PolygonClippingExample] Missing value for --surfaces\n");
-                return false;
+                return FALSE;
             }
             out.hasSurfaces = parseBoolean(argv[++i], out.surfaces);
-            if (!out.hasSurfaces) return false;
+            if (!out.hasSurfaces) return FALSE;
             continue;
         }
 
         if ((val = startsWith(arg, "--surfaces=")) != NULL) {
             out.hasSurfaces = parseBoolean(val, out.surfaces);
-            if (!out.hasSurfaces) return false;
+            if (!out.hasSurfaces) return FALSE;
             continue;
         }
 
         if (strcmp(arg, "--points") == 0) {
             if (i + 1 >= argc) {
                 fprintf(stderr, "[PolygonClippingExample] Missing value for --points\n");
-                return false;
+                return FALSE;
             }
             out.hasPoints = parseBoolean(argv[++i], out.points);
-            if (!out.hasPoints) return false;
+            if (!out.hasPoints) return FALSE;
             continue;
         }
 
         if ((val = startsWith(arg, "--points=")) != NULL) {
             out.hasPoints = parseBoolean(val, out.points);
-            if (!out.hasPoints) return false;
+            if (!out.hasPoints) return FALSE;
             continue;
         }
 
@@ -227,30 +228,30 @@ bool CommandLineOptions::parse(int argc, char** argv, CommandLineOptions& out)
             || strcmp(arg, "--polygon-surface-tessellation-mode") == 0) {
             if (i + 1 >= argc) {
                 fprintf(stderr, "[PolygonClippingExample] Missing value for %s\n", arg);
-                return false;
+                return FALSE;
             }
             out.hasTessellationMode = parseTessellationMode(argv[++i], out.tessellationMode);
-            if (!out.hasTessellationMode) return false;
+            if (!out.hasTessellationMode) return FALSE;
             continue;
         }
 
         if ((val = startsWith(arg, "--tessellation-mode=")) != NULL) {
             out.hasTessellationMode = parseTessellationMode(val, out.tessellationMode);
-            if (!out.hasTessellationMode) return false;
+            if (!out.hasTessellationMode) return FALSE;
             continue;
         }
 
         if ((val = startsWith(arg, "--polygon-surface-tessellation-mode=")) != NULL) {
             out.hasTessellationMode = parseTessellationMode(val, out.tessellationMode);
-            if (!out.hasTessellationMode) return false;
+            if (!out.hasTessellationMode) return FALSE;
             continue;
         }
 
         fprintf(stderr, "[PolygonClippingExample] Unknown argument: %s\n", arg);
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 void CommandLineOptions::printUsage()

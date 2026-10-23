@@ -1,6 +1,7 @@
 #ifndef __CONCURRENT_LINKED_QUEUE__
 #define __CONCURRENT_LINKED_QUEUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayDeque.h"
 #include "java/util/ArrayList.h"
 #include "java/lang/PosixThreads.h"
@@ -9,7 +10,7 @@ template<class T>
 class ConcurrentLinkedQueue {
 private:
     ArrayDeque<T> data_;
-    mutable pthread_mutex_t mutex_;
+    pthread_mutex_t mutex_;
 
 public:
     ConcurrentLinkedQueue() { pthread_mutex_init(&mutex_, 0); }
@@ -31,25 +32,27 @@ public:
         pthread_mutex_unlock(&mutex_);
     }
 
-    bool poll(T* out)
+    BOOLEAN poll(T* out)
     {
-        if ( out == 0 ) return false;
+        if ( out == 0 ) return FALSE;
         pthread_mutex_lock(&mutex_);
         if ( data_.isEmpty() ) {
             pthread_mutex_unlock(&mutex_);
-            return false;
+            return FALSE;
         }
         *out = data_.peekFirst();
         data_.removeFirst();
         pthread_mutex_unlock(&mutex_);
-        return true;
+        return TRUE;
     }
 
-    bool isEmpty() const
+    BOOLEAN isEmpty() const
     {
-        pthread_mutex_lock(&mutex_);
-        bool empty = data_.isEmpty();
-        pthread_mutex_unlock(&mutex_);
+        // Locking changes the mutex (no `mutable` in Turbo C++ 3.0)
+        pthread_mutex_t *mutex = (pthread_mutex_t *)&mutex_;
+        pthread_mutex_lock(mutex);
+        BOOLEAN empty = data_.isEmpty();
+        pthread_mutex_unlock(mutex);
         return empty;
     }
 };

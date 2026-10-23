@@ -1,28 +1,29 @@
 #ifndef __COMMAND_LINE_OPTIONS__
 #define __COMMAND_LINE_OPTIONS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "model/PolygonSurfaceTessellationMode.h"
 struct CommandLineOptions {
-    bool offlineMode;
+    BOOLEAN offlineMode;
 
-    bool hasFixtureIndex;
+    BOOLEAN hasFixtureIndex;
     int  fixtureIndex;
 
-    bool hasWires;
-    bool wires;
+    BOOLEAN hasWires;
+    BOOLEAN wires;
 
-    bool hasSurfaces;
-    bool surfaces;
+    BOOLEAN hasSurfaces;
+    BOOLEAN surfaces;
 
-    bool hasPoints;
-    bool points;
+    BOOLEAN hasPoints;
+    BOOLEAN points;
 
-    bool hasTessellationMode;
+    BOOLEAN hasTessellationMode;
     PolygonSurfaceTessellationMode tessellationMode;
 
     CommandLineOptions();
 
-    static bool parse(int argc, char** argv, CommandLineOptions& out);
+    static BOOLEAN parse(int argc, char** argv, CommandLineOptions& out);
     static void printUsage();
 };
 

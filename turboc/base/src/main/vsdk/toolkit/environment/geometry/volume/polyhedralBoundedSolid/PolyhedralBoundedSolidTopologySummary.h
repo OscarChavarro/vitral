@@ -1,6 +1,7 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGY_SUMMARY__
-#define __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGY_SUMMARY__
+#ifndef __PBS_TOPOLOGY_SUMMARY__
+#define __PBS_TOPOLOGY_SUMMARY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
@@ -28,8 +29,8 @@ public:
         int edgeCount;
         int vertexCount;
         int adjustedEulerCharacteristic;
-        bool closed;
-        bool closedOrientableEulerCompatible;
+        BOOLEAN closed;
+        BOOLEAN closedOrientableEulerCompatible;
 
     public:
         /**
@@ -38,14 +39,14 @@ public:
         Shell();
 
         Shell(int faceCount, int edgeCount, int vertexCount,
-              int adjustedEulerCharacteristic, bool closed);
+              int adjustedEulerCharacteristic, BOOLEAN closed);
 
         int getFaceCount() const;
         int getEdgeCount() const;
         int getVertexCount() const;
         int getAdjustedEulerCharacteristic() const;
-        bool isClosed() const;
-        bool isClosedOrientableEulerCompatible() const;
+        BOOLEAN isClosed() const;
+        BOOLEAN isClosedOrientableEulerCompatible() const;
         String toString() const;
     };
 
@@ -60,10 +61,10 @@ public:
     int getVertexCount() const;
     int getShellCount() const;
     int getAdjustedEulerCharacteristic() const;
-    bool isEveryFaceReachedExactlyOnce() const;
+    BOOLEAN isEveryFaceReachedExactlyOnce() const;
     int getInvalidEdgeAdjacencyCount() const;
     const ArrayList<Shell>& getShells() const;
-    bool hasUniversalContradiction() const;
+    BOOLEAN hasUniversalContradiction() const;
     String toString() const;
 
 private:
@@ -71,7 +72,7 @@ private:
     int edgeCount;
     int vertexCount;
     int adjustedEulerCharacteristic;
-    bool everyFaceReachedExactlyOnce;
+    BOOLEAN everyFaceReachedExactlyOnce;
     int invalidEdgeAdjacencyCount;
     ArrayList<Shell> shells;
 

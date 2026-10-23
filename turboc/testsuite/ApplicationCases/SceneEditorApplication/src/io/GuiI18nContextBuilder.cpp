@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 
 #include "java/io/File.h"
@@ -20,7 +21,7 @@
 
 
 static WidgetMenu* buildMenu(Widget* context, const GuiNode& definition,
-                      bool registerChildPopups)
+                      BOOLEAN registerChildPopups)
 {
     WidgetMenu* menu = new WidgetMenu(context);
     menu->setName(definition.name.c_str());
@@ -151,11 +152,11 @@ Widget* GuiI18nContextBuilder::build(const String& json,
 
     importCommands(context, json, globalDataPath);
     context->setMenubar(buildMenu(context, GuiJsonReader(json).readMenuBar(),
-                                  true));
+                                  TRUE));
 
     const ArrayList<GuiNode> popups = GuiJsonReader(json).readPopups();
     for ( long i = 0; i < popups.size(); i++ ) {
-        context->addPopupMenu(buildMenu(context, popups[i], true));
+        context->addPopupMenu(buildMenu(context, popups[i], TRUE));
     }
 
     importButtonGroups(context, json);

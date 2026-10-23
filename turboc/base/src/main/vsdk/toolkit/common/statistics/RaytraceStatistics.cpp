@@ -1,5 +1,6 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
-bool RaytraceStatistics::isEnabled() { return false; }
+BOOLEAN RaytraceStatistics::isEnabled() { return FALSE; }
 void RaytraceStatistics::recordPrimaryRay() {}
 void RaytraceStatistics::recordShadowRay() {}
 void RaytraceStatistics::recordReflectionRay() {}

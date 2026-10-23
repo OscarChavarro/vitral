@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/util/ArrayList.txx"
 #include "model/GuiState.h"
@@ -11,7 +12,7 @@ const char* const GuiState::GUI_LANGUAGE_FOLDER = "../../../../etc/gui/";
 const char* const GuiState::JSON_EXTENSION = ".json";
 const char* const GuiState::APPLICATION_DATA_FOLDER = "../../../../";
 
-static bool endsWith(const String& text, const String& suffix)
+static BOOLEAN endsWith(const String& text, const String& suffix)
 {
     return text.length() >= suffix.length() &&
         text.substring(text.length() - suffix.length()).equals(suffix);
@@ -30,8 +31,8 @@ GuiState::GuiState()
 {
     languageGuiFile = String(GUI_LANGUAGE_FOLDER) + "english" +
         JSON_EXTENSION;
-    modifyPanelSelected = false;
-    fullScreenGuiMode = false;
+    modifyPanelSelected = FALSE;
+    fullScreenGuiMode = FALSE;
     readFolder = currentDirectory() + "/../../../../etc/geometry";
     writeFolder = ".";
 }
@@ -66,22 +67,22 @@ void GuiState::setLanguageGuiFile(const String& languageGuiFile)
     this->languageGuiFile = languageGuiFile;
 }
 
-bool GuiState::isModifyPanelSelected() const
+BOOLEAN GuiState::isModifyPanelSelected() const
 {
     return modifyPanelSelected;
 }
 
-void GuiState::setModifyPanelSelected(bool modifyPanelSelected)
+void GuiState::setModifyPanelSelected(BOOLEAN modifyPanelSelected)
 {
     this->modifyPanelSelected = modifyPanelSelected;
 }
 
-bool GuiState::isFullScreenGuiMode() const
+BOOLEAN GuiState::isFullScreenGuiMode() const
 {
     return fullScreenGuiMode;
 }
 
-void GuiState::setFullScreenGuiMode(bool fullScreenGuiMode)
+void GuiState::setFullScreenGuiMode(BOOLEAN fullScreenGuiMode)
 {
     this->fullScreenGuiMode = fullScreenGuiMode;
 }

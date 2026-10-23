@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_SECTOR_CLASSIFICATION_ON_VERTEX__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_SECTOR_CLASSIFICATION_ON_VERTEX__
+#ifndef ___PBS_SET_OP_SECTOR_ON_VERTEX__
+#define ___PBS_SET_OP_SECTOR_ON_VERTEX__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
@@ -26,11 +27,11 @@ public:
     Vector3Dd ref1;
     Vector3Dd ref2;
     Vector3Dd ref12;
-    bool hasReferenceFrame;
+    BOOLEAN hasReferenceFrame;
     Vector3Dd referenceLine;
     Vector3Dd referenceU;
     Vector3Dd referenceV;
-    bool wide;
+    BOOLEAN wide;
 
     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex();
 

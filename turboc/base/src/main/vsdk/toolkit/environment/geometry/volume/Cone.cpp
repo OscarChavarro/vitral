@@ -29,7 +29,7 @@ Cone::Cone(double bottomRadius, double topRadius, double height) :
 }
 
 double Cone::sq(double v){ return v*v; }
-bool Cone::approxEq(double a, double b){ return Cpp98Support::abs(a-b) <= VSDK::EPSILON; }
+BOOLEAN Cone::approxEq(double a, double b){ return Cpp98Support::abs(a-b) <= VSDK::EPSILON; }
 
 double Cone::getBottomRadius() const { return bottomRadius; }
 double Cone::getTopRadius() const { return topRadius; }
@@ -114,7 +114,7 @@ Ray* Cone::doIntersectionFirstHit(const Ray& inOutRay) {
     return NULL;
 }
 
-bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
+BOOLEAN Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
     RayHit infoTap1, infoTap2, infoBody;
     Ray* bodyHit = NULL;
     Ray* tap1Hit = NULL;
@@ -159,7 +159,7 @@ bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
     if (tap1Hit) delete tap1Hit;
     if (tap2Hit) delete tap2Hit;
 
-    if (winner == NULL) return false;
+    if (winner == NULL) return FALSE;
 
     if (outHit != NULL) {
         outHit->setRay(*winner);
@@ -173,7 +173,7 @@ bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
         outHit->normalMap = winnerInfo->normalMap;
     }
     delete winner;
-    return true;
+    return TRUE;
 }
 
 void Cone::doExtraInformation(const Ray& inRay, double, RayHit* outData) {
@@ -354,13 +354,6 @@ PolyhedralBoundedSolid* Cone::buildPolyhedralBoundedSolid(int nsides,
     }
     return solid;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int Cone::DEFAULT_CIRCUMFERENCE_DIVISIONS;
-const int Cone::DEFAULT_HEIGHT_DIVISIONS;
-const int Cone::MIN_CIRCUMFERENCE_DIVISIONS;
-const int Cone::MIN_HEIGHT_DIVISIONS;
 
 const Class Cone::CLASS = { "Cone", &Solid::CLASS };
 

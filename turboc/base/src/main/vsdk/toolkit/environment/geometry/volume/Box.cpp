@@ -31,7 +31,7 @@ Ray* Box::doIntersectionFirstHit(const Ray& inOutRay) {
     return NULL;
 }
 
-bool Box::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
+BOOLEAN Box::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     double minT = 1e308;
     int hitPlane = 0;
     double x2 = size.x()/2, y2 = size.y()/2, z2 = size.z()/2;
@@ -81,8 +81,8 @@ bool Box::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
         }
     }
 
-    if (minT == 1e308) return false;
-    if (outHit == NULL) return true;
+    if (minT == 1e308) return FALSE;
+    if (outHit == NULL) return TRUE;
 
     if (outHit->shouldStoreRay() || outHit->needsAnySurfaceData()) outHit->setRay(inRay.withT(minT));
     else outHit->setHitDistance(minT);
@@ -104,7 +104,7 @@ bool Box::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
         if (outHit->needsNormal()) outHit->normal = planeNormal(hitPlane);
         if (outHit->needsTangent()) outHit->tangent = planeTangent(hitPlane);
     }
-    return true;
+    return TRUE;
 }
 
 void Box::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
@@ -141,7 +141,7 @@ int Box::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
 {
     double half[3] = { size.x() / 2, size.y() / 2, size.z() / 2 };
     double coordinates[3] = { p.x(), p.y(), p.z() };
-    bool inside = true;
+    BOOLEAN inside = TRUE;
 
     for ( int i = 0; i < 3; i++ ) {
         double distance = Cpp98Support::abs(coordinates[i]);
@@ -149,7 +149,7 @@ int Box::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
             return OUTSIDE;
         }
         if ( distance >= half[i] - distanceTolerance ) {
-            inside = false;
+            inside = FALSE;
         }
     }
     return inside ? INSIDE : LIMIT;

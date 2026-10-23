@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/Image.h"
@@ -260,18 +261,18 @@ void ImageProcessing::extractRoi(Image* source, Image* roi,
     }
 }
 
-bool ImageProcessing::processDistanceField(Image* inInput,
+BOOLEAN ImageProcessing::processDistanceField(Image* inInput,
     IndexedColorImageUncompressed* outOutput, int threshold)
 {
     if ( inInput == NULL || outOutput == NULL ) {
-        return false;
+        return FALSE;
     }
 
     int dx = inInput->getXSize();
     int dy = inInput->getYSize();
 
     if ( dx != outOutput->getXSize() || dy != outOutput->getYSize() ) {
-        return false;
+        return FALSE;
     }
 
     int x;
@@ -313,21 +314,21 @@ bool ImageProcessing::processDistanceField(Image* inInput,
         }
     }
 
-    return true;
+    return TRUE;
 }
 
-bool ImageProcessing::processDistanceFieldWithArray(Image* inInput,
+BOOLEAN ImageProcessing::processDistanceFieldWithArray(Image* inInput,
     IndexedColorImageUncompressed* outOutput, int threshold)
 {
     if ( inInput == NULL || outOutput == NULL ) {
-        return false;
+        return FALSE;
     }
 
     int dx = inInput->getXSize();
     int dy = inInput->getYSize();
 
     if ( dx != outOutput->getXSize() || dy != outOutput->getYSize() ) {
-        return false;
+        return FALSE;
     }
 
     int x;
@@ -377,5 +378,5 @@ bool ImageProcessing::processDistanceFieldWithArray(Image* inInput,
             outOutput->putPixel(x, y, signedByte(val));
         }
     }
-    return true;
+    return TRUE;
 }

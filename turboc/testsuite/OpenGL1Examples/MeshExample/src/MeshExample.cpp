@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
 #ifdef __APPLE__
@@ -44,16 +45,16 @@ raise this flag, and the GLUT thread asks for the repaint.
 */
 class RepaintRequest : public Runnable {
 public:
-    RepaintRequest() : requested(false) {}
-    virtual void run() { requested = true; }
-    bool consume()
+    RepaintRequest() : requested(FALSE) {}
+    virtual void run() { requested = TRUE; }
+    BOOLEAN consume()
     {
-        bool r = requested;
-        requested = false;
+        BOOLEAN r = requested;
+        requested = FALSE;
         return r;
     }
 private:
-    volatile bool requested;
+    volatile BOOLEAN requested;
 };
 
 class MeshExampleApp {
@@ -67,7 +68,7 @@ public:
           tangibleInterfaceClient(0),
           tangibleInteractionTechniques(0),
           renderer(&model, &labelImageProvider),
-          shouldClose(false)
+          shouldClose(FALSE)
     {
     }
 
@@ -76,7 +77,7 @@ public:
         cleanup();
     }
 
-    bool init(int* argc, char** argv)
+    BOOLEAN init(int* argc, char** argv)
     {
         glutInit(argc, argv);
         glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -94,12 +95,12 @@ public:
         glutCreateWindow("VITRAL mesh test - OpenGL1");
 
         if ( !OpenGL1Loader::load() ) {
-            return false;
+            return FALSE;
         }
 
         const char* fileName = extractFileName(*argc, argv);
         if ( !loadScene(fileName) ) {
-            return false;
+            return FALSE;
         }
 
         commandLineOptions.processArguments(*argc, argv);
@@ -111,7 +112,7 @@ public:
 
         if ( !renderer.init() ) {
             fprintf(stderr, "Failed to initialize mesh renderer\n");
-            return false;
+            return FALSE;
         }
         configureOverlayScreenResolution();
 
@@ -124,7 +125,7 @@ public:
         tangibleInterfaceClient->addListener(tangibleInteractionTechniques);
         tangibleInterfaceClient->run();
 
-        return true;
+        return TRUE;
     }
 
     void display()
@@ -180,7 +181,7 @@ public:
 
         GlutSystem::updateMouseButtonsState(button, state);
         MouseEvent event = GlutSystem::glut2vsdkMouseEvent(button, state, x, y);
-        bool repaint;
+        BOOLEAN repaint;
         if ( state == GLUT_DOWN ) {
             repaint = mouseInteractionTechniques->processMousePressedEvent(event);
         }
@@ -192,12 +193,12 @@ public:
         }
     }
 
-    void motion(int x, int y, bool dragged)
+    void motion(int x, int y, BOOLEAN dragged)
     {
         if ( mouseInteractionTechniques == 0 ) return;
 
         MouseEvent event = GlutSystem::glut2vsdkMotionEvent(x, y);
-        bool repaint;
+        BOOLEAN repaint;
         if ( dragged ) {
             event.setModifiers(GlutSystem::getMouseButtonsDownMask());
             repaint = mouseInteractionTechniques->processMouseDraggedEvent(event);
@@ -223,19 +224,19 @@ private:
     OpenGL1DebuggerRenderer renderer;
     AnimationController animationController;
     RepaintRequest repaintRequest;
-    bool shouldClose;
+    BOOLEAN shouldClose;
 
-    bool loadScene(const char* fileName)
+    BOOLEAN loadScene(const char* fileName)
     {
         if ( fileName == 0 ) {
             fprintf(stderr, "File not specified\n");
-            return false;
+            return FALSE;
         }
 
         File file(fileName);
         if ( !file.exists() || !file.canRead() ) {
             fprintf(stderr, "Failed to read file: %s\n", fileName);
-            return false;
+            return FALSE;
         }
 
         try {
@@ -244,10 +245,10 @@ private:
         }
         catch ( ... ) {
             fprintf(stderr, "Failed to import scene\n");
-            return false;
+            return FALSE;
         }
 
-        return true;
+        return TRUE;
     }
 
     /**
@@ -367,12 +368,12 @@ static void mouseCallback(int button, int state, int x, int y)
 
 static void motionCallback(int x, int y)
 {
-    app->motion(x, y, true);
+    app->motion(x, y, TRUE);
 }
 
 static void passiveMotionCallback(int x, int y)
 {
-    app->motion(x, y, false);
+    app->motion(x, y, FALSE);
 }
 
 int main(int argc, char** argv)

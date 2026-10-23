@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include <java/lang/Math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -59,7 +60,7 @@ void OpenGL1SphereRenderer::draw(
         return;
     }
 
-    bool hasTexture = (textureMap != NULL);
+    BOOLEAN hasTexture = (textureMap != NULL);
     int textureId = hasTexture ? OpenGL1ImageRenderer::activate(textureMap) : 0;
     // Bump mapping is not available in OpenGL 1.2 (reported by the selector)
     (void)bumpMapHeightRgb;

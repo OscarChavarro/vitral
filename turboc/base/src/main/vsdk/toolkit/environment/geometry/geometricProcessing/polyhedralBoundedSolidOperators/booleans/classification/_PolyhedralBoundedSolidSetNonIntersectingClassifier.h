@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_NON_INTERSECTING_CLASSIFIER__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_NON_INTERSECTING_CLASSIFIER__
+#ifndef ___PBS_SET_NON_INTERSECTING_CLASSIFIER__
+#define ___PBS_SET_NON_INTERSECTING_CLASSIFIER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
@@ -45,9 +46,9 @@ public:
 
         int aInB();
         int bInA();
-        bool hasInteriorOverlap();
-        bool hasEdgeFaceIntersectionAB();
-        bool hasEdgeFaceIntersectionBA();
+        BOOLEAN hasInteriorOverlap();
+        BOOLEAN hasEdgeFaceIntersectionAB();
+        BOOLEAN hasEdgeFaceIntersectionBA();
 
     private:
         static const int UNSET;
@@ -82,10 +83,10 @@ public:
     @param inSolidB second operand
     @return true when the no-intersection dispatch applies
     */
-    static bool runContainmentOnlyPreflightCase(
+    static BOOLEAN runContainmentOnlyPreflightCase(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB);
-    static bool runContainmentOnlyPreflightCase(
+    static BOOLEAN runContainmentOnlyPreflightCase(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
         _PreflightCache& cache);
@@ -97,10 +98,10 @@ public:
     @param inSolidB second operand
     @return true when the no-intersection dispatch applies
     */
-    static bool runTouchingOnlyPreflightCase(
+    static BOOLEAN runTouchingOnlyPreflightCase(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB);
-    static bool runTouchingOnlyPreflightCase(
+    static BOOLEAN runTouchingOnlyPreflightCase(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
         _PreflightCache& cache);
@@ -167,10 +168,12 @@ private:
         FacePlanes& operator=(const FacePlanes&);
     };
 
-    static const int NO_INT_RELATION_DISJOINT = 0;
-    static const int NO_INT_RELATION_TOUCHING = 1;
-    static const int NO_INT_RELATION_A_IN_B = 2;
-    static const int NO_INT_RELATION_B_IN_A = 3;
+    enum {
+        NO_INT_RELATION_DISJOINT = 0,
+        NO_INT_RELATION_TOUCHING = 1,
+        NO_INT_RELATION_A_IN_B = 2,
+        NO_INT_RELATION_B_IN_A = 3
+    };
 
     _PolyhedralBoundedSolidSetNonIntersectingClassifier();
 
@@ -181,8 +184,8 @@ private:
         const FacePlanes& facePlanes, const Vector3Dd& point);
     static ArrayList<double> overlappingBounds(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB);
-    static bool hasPositiveOverlapVolume(const ArrayList<double>& bounds);
-    static bool hasInteriorOverlapWitnessInAabb(
+    static BOOLEAN hasPositiveOverlapVolume(const ArrayList<double>& bounds);
+    static BOOLEAN hasInteriorOverlapWitnessInAabb(
         const ArrayList<double>& bounds,
         PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB,
@@ -199,20 +202,20 @@ private:
     static ArrayList<double> sampleCoordinates(double min, double max,
         PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB,
         int axis);
-    static bool hasConfirmedInteriorOverlap(PolyhedralBoundedSolid* solidA,
+    static BOOLEAN hasConfirmedInteriorOverlap(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB);
     static int classifySolidAgainstSolid(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB);
     static int classifyNoIntersectionRelation(int aInB, int bInA);
-    static bool hasProperEdgeFaceIntersection(PolyhedralBoundedSolid* current,
+    static BOOLEAN hasProperEdgeFaceIntersection(PolyhedralBoundedSolid* current,
         PolyhedralBoundedSolid* other);
-    static bool hasPartialCoplanarFaceAreaOverlap(
+    static BOOLEAN hasPartialCoplanarFaceAreaOverlap(
         PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
     static ArrayList<Polygon> partialCoplanarFaceAreaOverlapPolygons(
         PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
-    static bool coplanarFaces(_PolyhedralBoundedSolidFace* faceA,
+    static BOOLEAN coplanarFaces(_PolyhedralBoundedSolidFace* faceA,
         _PolyhedralBoundedSolidFace* faceB);
-    static bool partialCoplanarFaceAreaOverlap(
+    static BOOLEAN partialCoplanarFaceAreaOverlap(
         _PolyhedralBoundedSolidFace* faceA,
         _PolyhedralBoundedSolidFace* faceB);
     static Polygon coplanarFaceIntersectionPolygon(
@@ -239,20 +242,20 @@ private:
         const Vector3Dd& normal);
     static PolyhedralBoundedSolid* createLaminaFromPolygon(
         const Polygon& points);
-    static bool faceHasInteriorVertexOrEdgeMidpoint(
+    static BOOLEAN faceHasInteriorVertexOrEdgeMidpoint(
         _PolyhedralBoundedSolidFace* source,
         _PolyhedralBoundedSolidFace* target);
-    static bool faceBoundariesCrossProperly(
+    static BOOLEAN faceBoundariesCrossProperly(
         _PolyhedralBoundedSolidFace* faceA,
         _PolyhedralBoundedSolidFace* faceB);
-    static bool loopsCrossProperly(_PolyhedralBoundedSolidLoop* loopA,
+    static BOOLEAN loopsCrossProperly(_PolyhedralBoundedSolidLoop* loopA,
         _PolyhedralBoundedSolidLoop* loopB, int dominantCoordinate);
     static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace* face);
     static Vector2Dd projectPointTo2D(const Vector3Dd& in,
         int dominantCoordinate);
     static double orientation2D(const Vector2Dd& a, const Vector2Dd& b,
         const Vector2Dd& c);
-    static bool segmentsCrossProperly2D(const Vector2Dd& a1,
+    static BOOLEAN segmentsCrossProperly2D(const Vector2Dd& a1,
         const Vector2Dd& a2, const Vector2Dd& b1, const Vector2Dd& b2);
 };
 

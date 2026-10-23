@@ -2,6 +2,7 @@
 #define __QUATERNIOND__
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class Quaterniond {
@@ -27,8 +28,8 @@ public:
     Vector3Dd direction() const { return direction_; }
     double magnitude() const { return magnitude_; }
 
-    bool epsilonEquals(const Quaterniond& other) const { return epsilonEquals(other, 1e-6); }
-    bool epsilonEquals(const Quaterniond& other, double epsilon) const;
+    BOOLEAN epsilonEquals(const Quaterniond& other) const { return epsilonEquals(other, 1e-6); }
+    BOOLEAN epsilonEquals(const Quaterniond& other, double epsilon) const;
     String* toString() const;
 };
 

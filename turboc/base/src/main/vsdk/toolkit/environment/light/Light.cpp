@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 
 Light::Light(const Vector3Dd &position, const ColorRgb &emission) :
@@ -65,10 +66,10 @@ Light::setEmission(const ColorRgb &newEmission)
     emission = ColorRgb(newEmission);
 }
 
-bool
+BOOLEAN
 Light::isAmbient() const
 {
-    return false;
+    return FALSE;
 }
 
 const Class Light::CLASS = { "Light", &Entity::CLASS };

@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
@@ -21,13 +22,13 @@ FrameCaptureService::FrameCaptureService(ApplicationModel* model,
 }
 
 void FrameCaptureService::copyColorBufferIfNeeded(FrameBufferSource* source,
-                                                  bool selectedView)
+                                                  BOOLEAN selectedView)
 {
     if ( drawingArea->isColorCaptureRequested() && selectedView ) {
         model->setZbufferImage(source->readColor());
         host->showImage(model->getZbufferImage());
         host->showStatusMessage("ZBuffer Color Image obtained!");
-        drawingArea->setColorCaptureRequested(false);
+        drawingArea->setColorCaptureRequested(FALSE);
     }
 }
 
@@ -53,11 +54,11 @@ void FrameCaptureService::copyZBufferIfNeeded(FrameBufferSource* source)
 
     host->showImage(model->getZbufferImage());
     host->showStatusMessage("ZBuffer depth map obtained!");
-    drawingArea->setDepthCaptureRequested(false);
-    drawingArea->setContoursRequested(false);
+    drawingArea->setDepthCaptureRequested(FALSE);
+    drawingArea->setContoursRequested(FALSE);
 }
 
-bool FrameCaptureService::isFrameExportPending() const
+BOOLEAN FrameCaptureService::isFrameExportPending() const
 {
     return drawingArea->getPendingViewportExportFile() != NULL ||
         drawingArea->getPendingWorkspaceExportFile() != NULL;

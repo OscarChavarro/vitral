@@ -1,6 +1,7 @@
 #ifndef __ROTATE_GIZMO__
 #define __ROTATE_GIZMO__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -63,35 +64,39 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int NULL_GROUP = 0;
-    static const int X_RING_GROUP = 1;
-    static const int Y_RING_GROUP = 2;
-    static const int Z_RING_GROUP = 3;
-    static const int CAMERA_RING_GROUP = 4;
+    enum {
+        NULL_GROUP = 0,
+        X_RING_GROUP = 1,
+        Y_RING_GROUP = 2,
+        Z_RING_GROUP = 3,
+        CAMERA_RING_GROUP = 4
+    };
 
     /// Number of colored axis rings (X, Y, Z), and of their input gizmo fields
-    static const int RING_COUNT = 3;
+    enum { RING_COUNT = 3 };
     /// Index of the camera ring where a ring index is expected (i.e. in
     /// `setArc`, or the `ring` argument of `RotateGizmoInteractionTechnique`)
-    static const int CAMERA_RING_INDEX = RING_COUNT;
+    enum { CAMERA_RING_INDEX = RING_COUNT };
     /// Number of input gizmo fields, the axis ones plus the camera one
-    static const int INPUT_FIELD_COUNT = RING_COUNT + 1;
+    enum { INPUT_FIELD_COUNT = RING_COUNT + 1 };
     /// Index of the (always 0, relative) field of the camera ring
-    static const int CAMERA_INPUT_FIELD_INDEX = RING_COUNT;
+    enum { CAMERA_INPUT_FIELD_INDEX = RING_COUNT };
 
     /// Size and line width designed for legacy resolutions; the width
     /// matches TranslateGizmo::DEFAULT_LINE_WIDTH so both gizmos look
     /// visually consistent (same ribbon thickness) in the 3D UI
-    static const int DEFAULT_APPARENT_SIZE_IN_PIXELS = 100;
+    enum { DEFAULT_APPARENT_SIZE_IN_PIXELS = 100 };
     static const double DEFAULT_LINE_WIDTH;
 
     /// Decimals of the angles of the input gizmo, and maximum digits of the
     /// integer part (-180 to 180)
-    static const int ANGLE_DECIMALS = 2;
-    static const int ANGLE_INTEGER_DIGITS = 3;
+    enum {
+        ANGLE_DECIMALS = 2,
+        ANGLE_INTEGER_DIGITS = 3
+    };
 
     /// Number of straight pieces of the strip of a ring
-    static const int RING_SEGMENTS = 96;
+    enum { RING_SEGMENTS = 96 };
 
     /// Maximum angle of each triangle of the sector that shows the rotation
     /// arc
@@ -134,7 +139,7 @@ private:
     int volatileSelection;
 
     void updateScale();
-    bool needsHemisphereClipping(const Vector3Dd& axis,
+    BOOLEAN needsHemisphereClipping(const Vector3Dd& axis,
                                  const Vector3Dd& center) const;
     double visibilityMetric(const Vector3Dd& point,
                             const Vector3Dd& center) const;
@@ -258,7 +263,7 @@ public:
     position of the gizmo) that faces the camera, so an axis ring is only
     drawn and picked where this is true
     */
-    bool isPointOnVisibleHemisphere(const Vector3Dd& point) const;
+    BOOLEAN isPointOnVisibleHemisphere(const Vector3Dd& point) const;
 
     /**
     Builds the geometry to draw a ring as one or more strips of quads facing
@@ -295,8 +300,8 @@ public:
     int getVolatileSelection() const;
     void setVolatileSelection(int selection);
     int getCurrentSelection() const;
-    bool isRingHighlighted(int ring) const;
-    bool isCameraRingHighlighted() const;
+    BOOLEAN isRingHighlighted(int ring) const;
+    BOOLEAN isCameraRingHighlighted() const;
     ColorRgb getRingColor(int ring) const;
     ColorRgb getCameraRingColor() const;
 
@@ -315,7 +320,7 @@ public:
     void setArc(int ring, const Vector3Dd& u, const Vector3Dd& v,
                 double startAngle, double sweep);
     void clearArc();
-    bool isArcVisible() const;
+    BOOLEAN isArcVisible() const;
     int getArcRing() const;
     double getArcSweep() const;
     double getArcSweepInDegrees() const;
@@ -337,7 +342,7 @@ public:
     of the arc
     @return false if there is no arc to show (the Java version returns null)
     */
-    bool getArcLabelPosition(Vector3Dd* outPosition) const;
+    BOOLEAN getArcLabelPosition(Vector3Dd* outPosition) const;
 
     //= Numeric input =====================================================
 

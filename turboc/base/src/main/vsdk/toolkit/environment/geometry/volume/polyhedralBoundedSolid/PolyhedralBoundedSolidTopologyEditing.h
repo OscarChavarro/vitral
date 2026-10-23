@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGY_EDITING__
-#define __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGY_EDITING__
+#ifndef __PBS_TOPOLOGY_EDITING__
+#define __PBS_TOPOLOGY_EDITING__
 
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 class PolyhedralBoundedSolid;

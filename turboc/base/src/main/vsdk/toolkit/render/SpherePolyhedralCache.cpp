@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/util/concurrent/locks/ReentrantLock.h"
 #include "java/lang/String.h"
@@ -46,19 +47,20 @@ Makes the angles of the corners of a triangle continuous across the seam
 small ones are taken one turn further), and gives the poles the mean
 angle of the other corners.
 */
-static void makeContinuous(double theta[3], const bool pole[3])
+static void makeContinuous(double theta[3], const BOOLEAN pole[3])
 {
     double min = 1.0e300;
     double max = -1.0e300;
 
-    for (int k = 0; k < 3; k++) {
+    int k;
+    for (k = 0; k < 3; k++) {
         if (!pole[k]) {
             min = Cpp98Support::fmin(min, theta[k]);
             max = Cpp98Support::fmax(max, theta[k]);
         }
     }
     if (max - min > M_PI) {
-        for (int k = 0; k < 3; k++) {
+        for (k = 0; k < 3; k++) {
             if (!pole[k] && theta[k] < M_PI) {
                 theta[k] += 2 * M_PI;
             }
@@ -68,13 +70,13 @@ static void makeContinuous(double theta[3], const bool pole[3])
     double sum = 0;
     int count = 0;
 
-    for (int k = 0; k < 3; k++) {
+    for (k = 0; k < 3; k++) {
         if (!pole[k]) {
             sum += theta[k];
             count++;
         }
     }
-    for (int k = 0; k < 3; k++) {
+    for (k = 0; k < 3; k++) {
         if (pole[k]) {
             theta[k] = count > 0 ? sum / count : 0;
         }
@@ -220,9 +222,10 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
     for (long t = 0; t + 2 < vertexCount; t += 3) {
         double theta[3];
         double phi[3];
-        bool pole[3];
+        BOOLEAN pole[3];
 
-        for (int k = 0; k < 3; k++) {
+        int k;
+        for (k = 0; k < 3; k++) {
             const Vector3Dd& p = triangles[t + k];
             double z = radius > 0 ? p.z() / radius : 0;
 
@@ -235,7 +238,7 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
         }
         makeContinuous(theta, pole);
 
-        for (int k = 0; k < 3; k++) {
+        for (k = 0; k < 3; k++) {
             long i = t + k;
 
             put(entry->positions, i, triangles[i]);

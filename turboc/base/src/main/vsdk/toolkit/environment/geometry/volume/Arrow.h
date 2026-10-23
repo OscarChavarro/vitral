@@ -1,6 +1,7 @@
 #ifndef __ARROW__
 #define __ARROW__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Cone;
 class Matrix4x4d;
@@ -12,10 +13,12 @@ class _PolyhedralBoundedSolidFace;
 class Arrow : public Solid {
 private:
     static const double NO_HIT;
-    static const int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36 / 4;
-    static const int DEFAULT_HEIGHT_DIVISIONS = 1;
-    static const int MIN_CIRCUMFERENCE_DIVISIONS = 3;
-    static const int MIN_HEIGHT_DIVISIONS = 1;
+    enum {
+        DEFAULT_CIRCUMFERENCE_DIVISIONS = 36 / 4,
+        DEFAULT_HEIGHT_DIVISIONS = 1,
+        MIN_CIRCUMFERENCE_DIVISIONS = 3,
+        MIN_HEIGHT_DIVISIONS = 1
+    };
 
     double baseLength;
     double headLength;
@@ -26,7 +29,7 @@ private:
     Cone* headCone;
     Cone* lastElement;
 
-    bool doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit);
+    BOOLEAN doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit);
     static void closeTopFaceToApex(
         PolyhedralBoundedSolid* solid, int nsides, double apexZ);
     static int normalizedSweepSides();
@@ -68,7 +71,7 @@ public:
     void setHeadRadius(double val);
 
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual double* getMinMax();
     virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();

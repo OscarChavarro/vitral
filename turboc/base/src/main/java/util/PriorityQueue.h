@@ -1,6 +1,7 @@
 #ifndef __PRIORITY_QUEUE__
 #define __PRIORITY_QUEUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Predicate.h"
@@ -24,7 +25,7 @@ class PriorityQueue : public Object {
     void ensureCapacity(int requiredCapacity);
     void siftUp(int index);
     void siftDown(int index);
-    bool lessThan(const T& a, const T& b) const;
+    BOOLEAN lessThan(const T& a, const T& b) const;
 
     friend class PriorityQueueAccess<T>;
 
@@ -39,7 +40,7 @@ class PriorityQueue : public Object {
         Iterator(const PriorityQueue<T>* q, int start) : owner(q), cursor(start) {}
 
       public:
-        bool hasNext() const
+        BOOLEAN hasNext() const
         {
             return cursor <= owner->currentSize;
         }
@@ -54,8 +55,8 @@ class PriorityQueue : public Object {
     PriorityQueue(int initialCapacity);
     virtual ~PriorityQueue();
 
-    bool add(const T& elem);
-    bool offer(const T& elem);
+    BOOLEAN add(const T& elem);
+    BOOLEAN offer(const T& elem);
     T peek();
     T poll();
     int size() const;
@@ -66,11 +67,11 @@ class PriorityQueue : public Object {
         return Iterator(this, 1);
     }
 
-    bool removeIf(Predicate<T>& p);
+    BOOLEAN removeIf(Predicate<T>& p);
     void forEach(Consumer<T>& action) const;
 
-    bool contains(const T& elem) const;
-    bool remove(const T& elem);
+    BOOLEAN contains(const T& elem) const;
+    BOOLEAN remove(const T& elem);
     T* toArray() const;
     T* toArray(T* target) const;
 

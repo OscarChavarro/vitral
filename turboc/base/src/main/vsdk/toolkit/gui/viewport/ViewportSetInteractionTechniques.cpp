@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSetInteractionListener.h"
@@ -6,7 +7,7 @@
 
 ViewportSetInteractionTechniques::ViewportSetInteractionTechniques(
     ViewportSet* viewportSet)
-    : viewportSet(viewportSet), listener(NULL), titlePressArmed(false)
+    : viewportSet(viewportSet), listener(NULL), titlePressArmed(FALSE)
 {
 }
 
@@ -21,91 +22,91 @@ ViewportSet* ViewportSetInteractionTechniques::getViewportSet() const
     return viewportSet;
 }
 
-bool ViewportSetInteractionTechniques::processCommand(
+BOOLEAN ViewportSetInteractionTechniques::processCommand(
     const String& command)
 {
     return processCommand(command, viewportSet->getSelectedViewport());
 }
 
-bool ViewportSetInteractionTechniques::processCommand(
+BOOLEAN ViewportSetInteractionTechniques::processCommand(
     const String& command, Viewport* viewport)
 {
     if ( viewport == NULL ) {
-        return false;
+        return FALSE;
     }
-    if ( viewport->selectProjectionLocation(command) ) return true;
+    if ( viewport->selectProjectionLocation(command) ) return TRUE;
     int mode = Viewport::renderModeForCommand(command);
-    if ( mode == 0 || !viewportSet->isRenderModeAvailable(mode) ) return false;
+    if ( mode == 0 || !viewportSet->isRenderModeAvailable(mode) ) return FALSE;
     viewport->setRenderMode(mode);
-    return true;
+    return TRUE;
 }
 
-bool ViewportSetInteractionTechniques::processKeyPressedEvent(
+BOOLEAN ViewportSetInteractionTechniques::processKeyPressedEvent(
     const KeyEvent& event)
 {
     switch ( event.unicodeId ) {
       case ';':
         viewportSet->selectNextViewport();
-        return true;
+        return TRUE;
       case ',':
         viewportSet->selectNextLayoutStyle();
-        return true;
+        return TRUE;
       case 'w':
         if ( (event.modifierMask & KeyEvent::MASK_ALT) != 0 ) {
             viewportSet->toggleFullViewport();
-            return true;
+            return TRUE;
         }
-        return false;
+        return FALSE;
       default:
         return processSelectedViewportCommand(event);
     }
 }
 
-bool ViewportSetInteractionTechniques::processSelectedViewportCommand(
+BOOLEAN ViewportSetInteractionTechniques::processSelectedViewportCommand(
     const KeyEvent& event)
 {
     Viewport* viewport = viewportSet->getSelectedViewport();
 
     if ( viewport == NULL ) {
-        return false;
+        return FALSE;
     }
 
     if ( event.keycode == KeyEvent::KEY_9 ) {
         viewport->toggleRenderMode();
-        return true;
+        return TRUE;
     }
     if ( event.keycode == KeyEvent::KEY_NUM0 ) {
         viewport->cycleRequestedSize();
-        return true;
+        return TRUE;
     }
 
     switch ( event.unicodeId ) {
       case '.':
         viewport->toggleRenderMode();
-        return true;
+        return TRUE;
       case 'g':
         viewport->toggleGrid();
-        return true;
+        return TRUE;
       case 't':
         viewport->setActiveCamera(viewport->getTopCamera());
-        return true;
+        return TRUE;
       case 'l':
         viewport->setActiveCamera(viewport->getLeftCamera());
-        return true;
+        return TRUE;
       case 'f':
         viewport->setActiveCamera(viewport->getFrontCamera());
-        return true;
+        return TRUE;
       case 'b':
         viewport->setActiveCamera(viewport->getBottomCamera());
-        return true;
+        return TRUE;
       case 'p':
         viewport->setActiveCamera(viewport->getPerspectiveCamera());
-        return true;
+        return TRUE;
       case '0':
         viewport->cycleRequestedSize();
-        return true;
+        return TRUE;
       default:
-        return false;
+        return FALSE;
     }
 }
 
@@ -115,7 +116,7 @@ Viewport* ViewportSetInteractionTechniques::findViewportAt(
     return viewportSet->findViewportAt(event.getX(), event.getY());
 }
 
-bool ViewportSetInteractionTechniques::isPointerOverTitle(
+BOOLEAN ViewportSetInteractionTechniques::isPointerOverTitle(
     const MouseEvent& event) const
 {
     Viewport* viewport = findViewportAt(event);
@@ -123,7 +124,7 @@ bool ViewportSetInteractionTechniques::isPointerOverTitle(
     return viewport != NULL && isOverTitle(event, viewport);
 }
 
-bool ViewportSetInteractionTechniques::processMousePressedEvent(
+BOOLEAN ViewportSetInteractionTechniques::processMousePressedEvent(
     const MouseEvent& event)
 {
     Viewport* viewport = findViewportAt(event);
@@ -137,14 +138,14 @@ bool ViewportSetInteractionTechniques::processMousePressedEvent(
     return selectViewportUnderPointer(event);
 }
 
-bool ViewportSetInteractionTechniques::processMouseReleasedEvent(
+BOOLEAN ViewportSetInteractionTechniques::processMouseReleasedEvent(
     const MouseEvent& event)
 {
-    bool titleClick = titlePressArmed;
+    BOOLEAN titleClick = titlePressArmed;
     Viewport* viewport = findViewportAt(event);
 
-    titlePressArmed = false;
-    bool selected = selectViewportUnderPointer(event);
+    titlePressArmed = FALSE;
+    BOOLEAN selected = selectViewportUnderPointer(event);
 
     if ( titleClick && viewport != NULL && listener != NULL &&
          viewportSet->isSelected(viewport) && isOverTitle(event, viewport) ) {
@@ -159,31 +160,31 @@ bool ViewportSetInteractionTechniques::processMouseReleasedEvent(
     return selected;
 }
 
-bool ViewportSetInteractionTechniques::processMouseClickedEvent(
+BOOLEAN ViewportSetInteractionTechniques::processMouseClickedEvent(
     const MouseEvent& event)
 {
-    titlePressArmed = false;
+    titlePressArmed = FALSE;
     return selectViewportUnderPointer(event);
 }
 
-bool ViewportSetInteractionTechniques::processMouseDraggedEvent(
+BOOLEAN ViewportSetInteractionTechniques::processMouseDraggedEvent(
     const MouseEvent& event)
 {
     return selectViewportUnderPointer(event);
 }
 
-bool ViewportSetInteractionTechniques::selectViewportUnderPointer(
+BOOLEAN ViewportSetInteractionTechniques::selectViewportUnderPointer(
     const MouseEvent& event)
 {
     Viewport* viewport = findViewportAt(event);
 
     if ( viewport == NULL ) {
-        return false;
+        return FALSE;
     }
     return viewportSet->selectViewport(viewport);
 }
 
-bool ViewportSetInteractionTechniques::isOverTitle(
+BOOLEAN ViewportSetInteractionTechniques::isOverTitle(
     const MouseEvent& event, const Viewport* viewport) const
 {
     return viewport->isOverTitle(

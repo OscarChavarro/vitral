@@ -1,6 +1,7 @@
 #ifndef __GEOMETRIC_STRICT_FACE_INTERSECTIONS_STRATEGY__
 #define __GEOMETRIC_STRICT_FACE_INTERSECTIONS_STRATEGY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"
 
 /**
@@ -10,7 +11,7 @@ chapter [MANT1988].13.
 */
 class _GeometricStrictFaceIntersectionsStrategy : public _PolyhedralBoundedSolidValidationStrategy {
 public:
-    virtual bool validate(PolyhedralBoundedSolid* solid,
+    virtual BOOLEAN validate(PolyhedralBoundedSolid* solid,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
         String* msg);
 };

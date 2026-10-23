@@ -1,7 +1,8 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
-bool _TriangulationTrapezoidQueryNode::isLeftOf(int segmentIndex, Vector2Dd *queryPoint) {
+BOOLEAN _TriangulationTrapezoidQueryNode::isLeftOf(int segmentIndex, Vector2Dd *queryPoint) {
     _TriangulationSegment *segment = &_Construct::segmentAt(segmentIndex);
     double area;
 

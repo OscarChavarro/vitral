@@ -1,6 +1,7 @@
 #ifndef __PICTURE__
 #define __PICTURE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "lib/vgaModes/VgaModes.h"
 
 class HudPatch;
@@ -11,8 +12,8 @@ class Picture {
 
     void draw() const;
     void circle(const HudPatch *patch) const;
-    bool covers(int x, int y) const;
-    bool isGraphics() const { return graphics; }
+    BOOLEAN covers(int x, int y) const;
+    BOOLEAN isGraphics() const { return graphics; }
     int getWidth() const { return width; }
     int getHeight() const { return height; }
     int getColors() const { return colors; }
@@ -33,7 +34,7 @@ class Picture {
 
     void plot(int x, int y, const HudPatch *patch) const;
     void plot8(int x, int y, const HudPatch *patch) const;
-    bool hits8(int x, int y, int px, int py) const;
+    BOOLEAN hits8(int x, int y, int px, int py) const;
     int rows(int v) const;
     int legendHeight() const;
     void drawLegend() const;

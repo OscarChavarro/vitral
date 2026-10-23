@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/Collections.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
@@ -128,12 +129,12 @@ PolyhedralBoundedSolid* CellFallback::AxisAlignedCellBooleanBuilder::result()
 
 //= Fallback ========================================================
 
-bool CellFallback::isAxisAlignedEdge(_PolyhedralBoundedSolidEdge* edge)
+BOOLEAN CellFallback::isAxisAlignedEdge(_PolyhedralBoundedSolidEdge* edge)
 {
     int changingAxes;
 
     if ( edge == 0 || edge->rightHalf == 0 || edge->leftHalf == 0 ) {
-        return false;
+        return FALSE;
     }
     Vector3Dd a = edge->rightHalf->startingVertex->position;
     Vector3Dd b = edge->leftHalf->startingVertex->position;
@@ -150,19 +151,19 @@ bool CellFallback::isAxisAlignedEdge(_PolyhedralBoundedSolidEdge* edge)
     return changingAxes <= 1;
 }
 
-bool CellFallback::isAxisAlignedSolid(PolyhedralBoundedSolid* solid)
+BOOLEAN CellFallback::isAxisAlignedSolid(PolyhedralBoundedSolid* solid)
 {
     long int i;
 
     if ( solid == 0 || solid->getEdgesList().size() <= 0 ) {
-        return false;
+        return FALSE;
     }
     for ( i = 0; i < solid->getEdgesList().size(); i++ ) {
         if ( !isAxisAlignedEdge(solid->getEdgesList().get(i)) ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 int CellFallback::classifyPointForAxisAlignedFallback(
@@ -203,10 +204,10 @@ int CellFallback::classifyPointForAxisAlignedFallback(
             continue;
         }
 
-        bool duplicate = false;
+        BOOLEAN duplicate = FALSE;
         for ( long j = 0; j < distances.size(); j++ ) {
             if ( fabs(distances[j] - t) <= eps ) {
-                duplicate = true;
+                duplicate = TRUE;
                 break;
             }
         }
@@ -219,7 +220,7 @@ int CellFallback::classifyPointForAxisAlignedFallback(
     return (hits % 2) == 1 ? Geometry::INSIDE : Geometry::OUTSIDE;
 }
 
-bool CellFallback::axisAlignedCellSelected(bool insideA, bool insideB, int op)
+BOOLEAN CellFallback::axisAlignedCellSelected(BOOLEAN insideA, BOOLEAN insideB, int op)
 {
     if ( op == UNION ) {
         return insideA || insideB;
@@ -232,7 +233,7 @@ bool CellFallback::axisAlignedCellSelected(bool insideA, bool insideB, int op)
 
 void CellFallback::addAxisAlignedBoundaryQuad(
     AxisAlignedCellBooleanBuilder& builder,
-    int axis, bool positiveSide, int ix, int iy, int iz)
+    int axis, BOOLEAN positiveSide, int ix, int iy, int iz)
 {
     if ( axis == 0 && !positiveSide ) {
         const int c[4][3] = {
@@ -277,7 +278,7 @@ Adds the boundary quads of the occupied cells of a `nx * ny * nz` grid
 (flattened as `(ix*ny + iy)*nz + iz`), in the Java emission order.
 */
 void CellFallback::addOccupiedCellQuads(AxisAlignedCellBooleanBuilder& builder,
-    const ArrayList<bool>& occupied, int nx, int ny, int nz)
+    const ArrayList<BOOLEAN>& occupied, int nx, int ny, int nz)
 {
     int ix;
     int iy;
@@ -291,22 +292,22 @@ void CellFallback::addOccupiedCellQuads(AxisAlignedCellBooleanBuilder& builder,
                     continue;
                 }
                 if ( ix == 0 || !OCC(ix - 1, iy, iz) ) {
-                    addAxisAlignedBoundaryQuad(builder, 0, false, ix, iy, iz);
+                    addAxisAlignedBoundaryQuad(builder, 0, FALSE, ix, iy, iz);
                 }
                 if ( ix == nx - 1 || !OCC(ix + 1, iy, iz) ) {
-                    addAxisAlignedBoundaryQuad(builder, 0, true, ix, iy, iz);
+                    addAxisAlignedBoundaryQuad(builder, 0, TRUE, ix, iy, iz);
                 }
                 if ( iy == 0 || !OCC(ix, iy - 1, iz) ) {
-                    addAxisAlignedBoundaryQuad(builder, 1, false, ix, iy, iz);
+                    addAxisAlignedBoundaryQuad(builder, 1, FALSE, ix, iy, iz);
                 }
                 if ( iy == ny - 1 || !OCC(ix, iy + 1, iz) ) {
-                    addAxisAlignedBoundaryQuad(builder, 1, true, ix, iy, iz);
+                    addAxisAlignedBoundaryQuad(builder, 1, TRUE, ix, iy, iz);
                 }
                 if ( iz == 0 || !OCC(ix, iy, iz - 1) ) {
-                    addAxisAlignedBoundaryQuad(builder, 2, false, ix, iy, iz);
+                    addAxisAlignedBoundaryQuad(builder, 2, FALSE, ix, iy, iz);
                 }
                 if ( iz == nz - 1 || !OCC(ix, iy, iz + 1) ) {
-                    addAxisAlignedBoundaryQuad(builder, 2, true, ix, iy, iz);
+                    addAxisAlignedBoundaryQuad(builder, 2, TRUE, ix, iy, iz);
                 }
             }
         }
@@ -351,7 +352,7 @@ PolyhedralBoundedSolid* CellFallback::buildAxisAlignedCellBooleanFallback(
     int nx = (int)xCoordinates.size() - 1;
     int ny = (int)yCoordinates.size() - 1;
     int nz = (int)zCoordinates.size() - 1;
-    ArrayList<bool> occupied(Collections<bool>::nCopies(nx * ny * nz, false));
+    ArrayList<BOOLEAN> occupied(Collections<BOOLEAN>::nCopies(nx * ny * nz, FALSE));
     for ( ix = 0; ix < nx; ix++ ) {
         for ( iy = 0; iy < ny; iy++ ) {
             for ( iz = 0; iz < nz; iz++ ) {
@@ -359,9 +360,9 @@ PolyhedralBoundedSolid* CellFallback::buildAxisAlignedCellBooleanFallback(
                     (xCoordinates[ix] + xCoordinates[ix + 1]) * 0.5,
                     (yCoordinates[iy] + yCoordinates[iy + 1]) * 0.5,
                     (zCoordinates[iz] + zCoordinates[iz + 1]) * 0.5);
-                bool insideA = classifyPointForAxisAlignedFallback(
+                BOOLEAN insideA = classifyPointForAxisAlignedFallback(
                     inSolidA, sample) == Geometry::INSIDE;
-                bool insideB = classifyPointForAxisAlignedFallback(
+                BOOLEAN insideB = classifyPointForAxisAlignedFallback(
                     inSolidB, sample) == Geometry::INSIDE;
                 occupied[((size_t)ix*ny + iy)*nz + iz] =
                     axisAlignedCellSelected(insideA, insideB, op);
@@ -392,7 +393,7 @@ PolyhedralBoundedSolid* CellFallback::buildUniformSampledCellBooleanFallback(
     int op)
 {
     const int divisions = 12;
-    bool anyOccupied;
+    BOOLEAN anyOccupied;
     int ix;
     int iy;
     int iz;
@@ -420,8 +421,8 @@ PolyhedralBoundedSolid* CellFallback::buildUniformSampledCellBooleanFallback(
     ArrayList<double> yCoordinates = uniformCoordinates(bounds[1], bounds[4], divisions);
     ArrayList<double> zCoordinates = uniformCoordinates(bounds[2], bounds[5], divisions);
     delete[] bounds;
-    ArrayList<bool> occupied(Collections<bool>::nCopies(divisions * divisions * divisions, false));
-    anyOccupied = false;
+    ArrayList<BOOLEAN> occupied(Collections<BOOLEAN>::nCopies(divisions * divisions * divisions, FALSE));
+    anyOccupied = FALSE;
 
     for ( ix = 0; ix < divisions; ix++ ) {
         for ( iy = 0; iy < divisions; iy++ ) {
@@ -430,11 +431,11 @@ PolyhedralBoundedSolid* CellFallback::buildUniformSampledCellBooleanFallback(
                     (xCoordinates[ix] + xCoordinates[ix + 1]) * 0.5,
                     (yCoordinates[iy] + yCoordinates[iy + 1]) * 0.5,
                     (zCoordinates[iz] + zCoordinates[iz + 1]) * 0.5);
-                bool insideA = classifyPointForAxisAlignedFallback(
+                BOOLEAN insideA = classifyPointForAxisAlignedFallback(
                     inSolidA, sample) == Geometry::INSIDE;
-                bool insideB = classifyPointForAxisAlignedFallback(
+                BOOLEAN insideB = classifyPointForAxisAlignedFallback(
                     inSolidB, sample) == Geometry::INSIDE;
-                bool selected = axisAlignedCellSelected(insideA, insideB, op);
+                BOOLEAN selected = axisAlignedCellSelected(insideA, insideB, op);
                 occupied[((size_t)ix*divisions + iy)*divisions + iz] = selected;
                 anyOccupied |= selected;
             }

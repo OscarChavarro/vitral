@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Math.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -19,32 +20,32 @@ CameraControllerGoogleEarth::CameraControllerGoogleEarth(Camera* camera)
 {
 }
 
-bool CameraControllerGoogleEarth::processMousePressedEvent(const MouseEvent& e)
+BOOLEAN CameraControllerGoogleEarth::processMousePressedEvent(const MouseEvent& e)
 {
     xOld = e.getX();
     yOld = e.getY();
     camera->updateVectors();
     Ray rayA = camera->generateRay(xOld, yOld);
     (void)rayA;
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerGoogleEarth::processMouseReleasedEvent(const MouseEvent&)
+BOOLEAN CameraControllerGoogleEarth::processMouseReleasedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerGoogleEarth::processMouseClickedEvent(const MouseEvent&)
+BOOLEAN CameraControllerGoogleEarth::processMouseClickedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerGoogleEarth::processMouseMovedEvent(const MouseEvent&)
+BOOLEAN CameraControllerGoogleEarth::processMouseMovedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerGoogleEarth::processMouseDraggedEvent(const MouseEvent& e)
+BOOLEAN CameraControllerGoogleEarth::processMouseDraggedEvent(const MouseEvent& e)
 {
     int prevX = xOld;
     int prevY = yOld;
@@ -59,7 +60,7 @@ bool CameraControllerGoogleEarth::processMouseDraggedEvent(const MouseEvent& e)
     if ( hitA == NULL || hitB == NULL ) {
         delete hitA;
         delete hitB;
-        return false;
+        return FALSE;
     }
 
     Vector3Dd pA(
@@ -83,10 +84,10 @@ bool CameraControllerGoogleEarth::processMouseDraggedEvent(const MouseEvent& e)
     delete hitA;
     delete hitB;
 
-    return true;
+    return TRUE;
 }
 
-bool CameraControllerGoogleEarth::processMouseWheelEvent(const MouseEvent& e)
+BOOLEAN CameraControllerGoogleEarth::processMouseWheelEvent(const MouseEvent& e)
 {
     Vector3Dd eyePosition = camera->getPosition();
     Vector3Dd focusedPosition = camera->getFocusedPosition();
@@ -98,14 +99,14 @@ bool CameraControllerGoogleEarth::processMouseWheelEvent(const MouseEvent& e)
     double farPlaneDistance = camera->getFarPlaneDistance();
 
     int clicks = e.getClicks();
-    bool updated = false;
+    BOOLEAN updated = FALSE;
 
     if ( clicks < 0 ) {
         double expo = Cpp98Support::round(log10(Math::max(eyePosition.z(), 1e-9))) - 1;
         jumpStep = pow(10, expo);
 
         if ( (eyePosition.z() - jumpStep) <= 12 ) {
-            return false;
+            return FALSE;
         }
 
         double h = eyePosition.z();
@@ -114,11 +115,11 @@ bool CameraControllerGoogleEarth::processMouseWheelEvent(const MouseEvent& e)
 
         eyePosition = eyePosition.withZ(eyePosition.z() - jumpStep);
         focusedPosition = focusedPosition.withZ(focusedPosition.z() - jumpStep);
-        updated = true;
+        updated = TRUE;
     }
     else if ( clicks > 0 ) {
         if ( (eyePosition.z() + jumpStep) >= pow(10.0, 24.0) ) {
-            return false;
+            return FALSE;
         }
 
         jumpStep = pow(10, Cpp98Support::round(log10(Math::max(eyePosition.z(), 1e-9))) - 1);
@@ -129,7 +130,7 @@ bool CameraControllerGoogleEarth::processMouseWheelEvent(const MouseEvent& e)
 
         eyePosition = eyePosition.withZ(eyePosition.z() + jumpStep);
         focusedPosition = focusedPosition.withZ(focusedPosition.z() + jumpStep);
-        updated = true;
+        updated = TRUE;
     }
 
     camera->setPosition(eyePosition);
@@ -154,7 +155,7 @@ void CameraControllerGoogleEarth::setCamera(Camera* camera)
     this->camera = camera;
 }
 
-bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEvent)
+BOOLEAN CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEvent)
 {
     Vector3Dd eyePosition = camera->getPosition();
     Vector3Dd focusedPosition = camera->getFocusedPosition();
@@ -170,7 +171,7 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
     double roll = R.obtainEulerRollAngle();
 
     double angleInc;
-    bool updated = false;
+    BOOLEAN updated = FALSE;
     double epsilon = 0.0001;
 
     if (fov > 90) angleInc = PI * 10.0 / 180.0;
@@ -183,42 +184,42 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
         case KeyEvent::KEY_UP:
             pitch -= angleInc;
             if (pitch < -PI / 2.0) pitch = -PI / 2.0;
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_DOWN:
             pitch += angleInc;
             if (pitch > PI / 2.0) pitch = PI / 2.0;
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_LEFT:
             yaw += angleInc;
             while (yaw >= 2.0 * PI) yaw -= 2.0 * PI;
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_RIGHT:
             yaw -= angleInc;
             while (yaw < 0) yaw += 2.0 * PI;
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_x:
             eyePosition = eyePosition.withX(eyePosition.x() - jumpStep);
             focusedPosition = focusedPosition.withX(focusedPosition.x() - jumpStep);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_X:
             eyePosition = eyePosition.withX(eyePosition.x() + jumpStep);
             focusedPosition = focusedPosition.withX(focusedPosition.x() + jumpStep);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_y:
             eyePosition = eyePosition.withY(eyePosition.y() - jumpStep);
             focusedPosition = focusedPosition.withY(focusedPosition.y() - jumpStep);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_Y:
             eyePosition = eyePosition.withY(eyePosition.y() + jumpStep);
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_z: {
             double expo = Cpp98Support::round(log10(Math::max(eyePosition.z(), 1e-9))) - 1;
@@ -234,7 +235,7 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
 
             eyePosition = eyePosition.withZ(eyePosition.z() - jumpStep);
             focusedPosition = focusedPosition.withZ(focusedPosition.z() - jumpStep);
-            updated = true;
+            updated = TRUE;
             break;
         }
         case KeyEvent::KEY_Z: {
@@ -249,18 +250,18 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
 
             eyePosition = eyePosition.withZ(eyePosition.z() + jumpStep);
             focusedPosition = focusedPosition.withZ(focusedPosition.z() + jumpStep);
-            updated = true;
+            updated = TRUE;
             break;
         }
         case KeyEvent::KEY_S:
             roll -= PI * 5.0 / 180.0;
             while (roll < 0) roll += 2.0 * PI;
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_s:
             roll += PI * 5.0 / 180.0;
             while (roll > 2.0 * PI) roll -= 2.0 * PI;
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_A:
@@ -272,7 +273,7 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
                 else if (fov < 1 - epsilon) fov++;
                 else if (fov < 175 - epsilon) fov += 5;
             }
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_a:
             if (camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL) {
@@ -283,32 +284,32 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
                 else if (fov > 1 + epsilon) fov--;
                 else if (fov > 0.1 + epsilon) fov -= 0.1;
             }
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_N:
             nearPlaneDistance += 0.5;
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_n:
             nearPlaneDistance -= 0.5;
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_F:
             farPlaneDistance += 0.5;
-            updated = true;
+            updated = TRUE;
             break;
         case KeyEvent::KEY_f:
             farPlaneDistance -= 0.5;
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_p:
             projectionMode = (projectionMode == Camera::PROJECTION_MODE_PERSPECTIVE)
                 ? Camera::PROJECTION_MODE_ORTHOGONAL
                 : Camera::PROJECTION_MODE_PERSPECTIVE;
-            updated = true;
+            updated = TRUE;
             break;
 
         case KeyEvent::KEY_i:
@@ -330,9 +331,9 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
     return updated;
 }
 
-bool CameraControllerGoogleEarth::processKeyReleasedEvent(const KeyEvent&)
+BOOLEAN CameraControllerGoogleEarth::processKeyReleasedEvent(const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
 void CameraControllerGoogleEarth::setDeltaMovement(double factor)

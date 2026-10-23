@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/Entity.h"
 #include "vsdk/toolkit/common/EntityListener.h"
@@ -212,7 +213,7 @@ Entity::getClass() const
     return &CLASS;
 }
 
-bool
+BOOLEAN
 Entity::instanceOf(const Class &type) const
 {
     return type.isAssignableFrom(getClass());
@@ -226,11 +227,3 @@ Entity::getClassSimpleName() const
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int Entity::BYTE_SIZE_IN_BYTES;
-const int Entity::INT_SIZE_IN_BYTES;
-const int Entity::LONG_SIZE_IN_BYTES;
-const int Entity::FLOAT_SIZE_IN_BYTES;
-const int Entity::DOUBLE_SIZE_IN_BYTES;
-const int Entity::VECTOR3D_SIZE_IN_BYTES;
-const int Entity::COLORRGB_SIZE_IN_BYTES;
-const int Entity::POINTER_SIZE_IN_BYTES;

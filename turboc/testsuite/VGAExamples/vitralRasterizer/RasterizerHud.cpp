@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "RasterizerHud.h"
 #include "RasterizerPalette.h"
 #include <stdio.h>
@@ -18,7 +19,7 @@ RasterizerHud::loadFont() {
     }
 }
 
-bool
+BOOLEAN
 RasterizerHud::hasFont() const {
     return glyphHeight != 0;
 }
@@ -76,7 +77,7 @@ RasterizerHud::drawText(int x, int y, const char *text) const {
 }
 
 void
-RasterizerHud::draw(const RasterizerShown *shown, ColorMode::Value colorMode, int width, int height, bool text) const {
+RasterizerHud::draw(const RasterizerShown *shown, ColorMode::Value colorMode, int width, int height, BOOLEAN text) const {
     if (!visible) {
         return;
     }

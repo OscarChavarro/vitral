@@ -81,23 +81,24 @@ IndexedColorImageUncompressed* importSgiIndexed(const File& inImageFd)
     const int tables = (int)ySize * (int)channels;
     ArrayList<unsigned int> starts;
     starts.reserve((long int)tables);
-    for (long int i = 0; i < (long int)tables; i++) starts.add(0u);
+    long i;
+    for (i = 0; i < (long int)tables; i++) starts.add(0u);
     ArrayList<unsigned int> lengths;
     lengths.reserve((long int)tables);
-    for (long int i = 0; i < (long int)tables; i++) lengths.add(0u);
+    for (i = 0; i < (long int)tables; i++) lengths.add(0u);
     ArrayList<unsigned char> tmp;
     tmp.reserve((long int)tables * 4);
-    for (long int i = 0; i < (long int)tables * 4; i++) tmp.add(0u);
+    for (i = 0; i < (long int)tables * 4; i++) tmp.add(0u);
     if (fread(tmp.data(), 1, (size_t)tmp.size(), f) != (size_t)tmp.size()) {
         fclose(f);
         return NULL;
     }
-    for (int i = 0; i < tables; i++) starts[(long int)i] = readU32BE(&tmp[(long int)i * 4]);
+    for (i = 0; i < tables; i++) starts[(long int)i] = readU32BE(&tmp[(long int)i * 4]);
     if (fread(tmp.data(), 1, (size_t)tmp.size(), f) != (size_t)tmp.size()) {
         fclose(f);
         return NULL;
     }
-    for (int i = 0; i < tables; i++) lengths[(long int)i] = readU32BE(&tmp[(long int)i * 4]);
+    for (i = 0; i < tables; i++) lengths[(long int)i] = readU32BE(&tmp[(long int)i * 4]);
 
     IndexedColorImageUncompressed* img = new IndexedColorImageUncompressed(new GrayScalePalette());
     if (!img->init((int)xSize, (int)ySize)) {
@@ -118,12 +119,12 @@ IndexedColorImageUncompressed* importSgiIndexed(const File& inImageFd)
 
         int x = 0;
         for (unsigned int pos = 0; pos < length && x < (int)xSize; pos++) {
-            bool literal = (line[(long int)pos] & 0x80) != 0;
+            BOOLEAN literal = (line[(long int)pos] & 0x80) != 0;
             int count = (line[(long int)pos] & 0x7F);
             if (count == 0) break;
 
             if (literal) {
-                for (int i = 0; i < count && x < (int)xSize; i++) {
+                for (i = 0; i < count && x < (int)xSize; i++) {
                     pos++;
                     if (pos >= length) break;
                     img->putPixel(x, (int)ySize - y - 1, (char)line[(long int)pos]);
@@ -134,7 +135,7 @@ IndexedColorImageUncompressed* importSgiIndexed(const File& inImageFd)
                 pos++;
                 if (pos >= length) break;
                 char v = (char)line[(long int)pos];
-                for (int i = 0; i < count && x < (int)xSize; i++) {
+                for (i = 0; i < count && x < (int)xSize; i++) {
                     img->putPixel(x, (int)ySize - y - 1, v);
                     x++;
                 }
@@ -229,9 +230,9 @@ RGBAImageCompressed* importDDSCompressed(const File& inImageFd) {
 #include <png.h>
 #endif
 
-bool ImagePersistence::isTextComment(const String& line) {
+BOOLEAN ImagePersistence::isTextComment(const String& line) {
     if (line.isEmpty()) {
-        return false;
+        return FALSE;
     }
 
     int i = 0;
@@ -373,11 +374,13 @@ RGBImageUncompressed* ImagePersistence::importRGB(const File& inImageFd) {
 
         ArrayList<unsigned char> pixels;
         pixels.reserve((long int)width * (long int)height * 3);
-        for (long int i = 0; i < (long int)width * (long int)height * 3; i++) pixels.add(0u);
+        long int i;
+        for (i = 0; i < (long int)width * (long int)height * 3; i++) pixels.add(0u);
         ArrayList<png_bytep> row_ptrs;
         row_ptrs.reserve((long int)height);
-        for (long int i = 0; i < (long int)height; i++) row_ptrs.add(NULL);
-        for (int y = 0; y < height; y++) {
+        for (i = 0; i < (long int)height; i++) row_ptrs.add(NULL);
+        int y;
+        for (y = 0; y < height; y++) {
             row_ptrs[(long int)y] = ((png_bytep)(&pixels[(long int)y * (long int)width * 3]));
         }
         png_read_image(png_ptr, row_ptrs.data());
@@ -393,7 +396,7 @@ RGBImageUncompressed* ImagePersistence::importRGB(const File& inImageFd) {
         }
 
         long int pos = 0;
-        for (int y = 0; y < height; y++) {
+        for (y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 retImage->putPixel(x, y,
                     (char)pixels[pos + 0],
@@ -413,7 +416,7 @@ RGBImageUncompressed* ImagePersistence::importRGB(const File& inImageFd) {
         FileInputStream fis(ppmNameStr.toCString());
         BufferedInputStream bis(&fis);
 
-        bool exit = false;
+        BOOLEAN exit = FALSE;
         char* lineStr = NULL;
         int stage = 1;
         int xSize = 0, ySize = 0;
@@ -430,7 +433,7 @@ RGBImageUncompressed* ImagePersistence::importRGB(const File& inImageFd) {
             }
 
             if (strcmp(lineStr, "255") == 0) {
-                exit = true;
+                exit = TRUE;
             }
 
             if (isTextComment(String(lineStr))) {
@@ -561,7 +564,7 @@ IndexedColorImageUncompressed* ImagePersistence::importIndexedColor(const File& 
 RGBAImageUncompressed* ImagePersistence::importRGBA(const File& inImageFd) {
 #ifdef VITRAL_WITH_PNG
     String* type = extractExtensionFromFile(inImageFd);
-    bool isPng = type->equals("png");
+    BOOLEAN isPng = type->equals("png");
     delete type;
     if (isPng) {
         String pngNameStr = inImageFd.getPath();
@@ -605,7 +608,8 @@ RGBAImageUncompressed* ImagePersistence::importRGBA(const File& inImageFd) {
         unsigned char* pixels =
             new unsigned char[(size_t)width * (size_t)height * 4];
         png_bytep* rows = new png_bytep[(size_t)height];
-        for (int y = 0; y < height; y++) {
+        int y;
+        for (y = 0; y < height; y++) {
             rows[y] = &pixels[(size_t)y * (size_t)width * 4];
         }
         png_read_image(png_ptr, rows);
@@ -620,7 +624,7 @@ RGBAImageUncompressed* ImagePersistence::importRGBA(const File& inImageFd) {
             return NULL;
         }
         size_t pos = 0;
-        for (int y = 0; y < height; y++) {
+        for (y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 retImage->putPixel(x, y, (char)pixels[pos], (char)pixels[pos + 1],
                                    (char)pixels[pos + 2], (char)pixels[pos + 3]);
@@ -662,9 +666,9 @@ Image* ImagePersistence::importImage(const File& inImageFd) {
     return importRGB(inImageFd);
 }
 
-bool ImagePersistence::exportPPM(const File& fd, Image* img) {
+BOOLEAN ImagePersistence::exportPPM(const File& fd, Image* img) {
     if (img == NULL) {
-        return false;
+        return FALSE;
     }
 
     String ppmExportName = fd.getPath();
@@ -705,7 +709,7 @@ bool ImagePersistence::exportPPM(const File& fd, Image* img) {
             RGBPixel* p = img->getPixelRgb(x, y);
             if (p == NULL) {
                 fprintf(stderr, "Failed to get pixel at (%d, %d)\n", x, y);
-                return false;
+                return FALSE;
             }
             PersistenceElement::writeByte(writer, (unsigned char)p->r);
             PersistenceElement::writeByte(writer, (unsigned char)p->g);
@@ -714,17 +718,17 @@ bool ImagePersistence::exportPPM(const File& fd, Image* img) {
         }
     }
 
-    return true;
+    return TRUE;
 }
 
-bool ImagePersistence::exportJPEG(const File& fd, Image* img, int quality) {
+BOOLEAN ImagePersistence::exportJPEG(const File& fd, Image* img, int quality) {
 #ifndef VITRAL_WITH_JPEG
     fprintf(stderr, "ERROR: ImagePersistence: JPEG support not compiled in.\n");
     fprintf(stderr, "       Recompile with -DWITH_JPEG=ON to enable JPEG support.\n");
-    return false;
+    return FALSE;
 #else
     if (img == NULL) {
-        return false;
+        return FALSE;
     }
 
     struct jpeg_compress_struct cinfo;
@@ -738,7 +742,7 @@ bool ImagePersistence::exportJPEG(const File& fd, Image* img, int quality) {
     const char* filename = jpegExportName.toCString();
     if ((outfile = fopen(filename, "wb")) == NULL) {
         fprintf(stderr, "Cannot open file %s for writing\n", filename);
-        return false;
+        return FALSE;
     }
 
     jpeg_stdio_dest(&cinfo, outfile);
@@ -761,7 +765,7 @@ bool ImagePersistence::exportJPEG(const File& fd, Image* img, int quality) {
         fprintf(stderr, "Failed to allocate row buffer\n");
         fclose(outfile);
         jpeg_destroy_compress(&cinfo);
-        return false;
+        return FALSE;
     }
 
     for (int y = 0; y < img->getYSize(); y++) {
@@ -772,7 +776,7 @@ bool ImagePersistence::exportJPEG(const File& fd, Image* img, int quality) {
                 delete[] row_buffer;
                 fclose(outfile);
                 jpeg_destroy_compress(&cinfo);
-                return false;
+                return FALSE;
             }
             row_buffer[x * 3 + 0] = (unsigned char)p->r;
             row_buffer[x * 3 + 1] = (unsigned char)p->g;
@@ -789,18 +793,18 @@ bool ImagePersistence::exportJPEG(const File& fd, Image* img, int quality) {
     fclose(outfile);
     jpeg_destroy_compress(&cinfo);
 
-    return true;
+    return TRUE;
 #endif
 }
 
-bool ImagePersistence::exportPNG(const File& fd, Image* img) {
+BOOLEAN ImagePersistence::exportPNG(const File& fd, Image* img) {
 #ifndef VITRAL_WITH_PNG
     fprintf(stderr, "ERROR: ImagePersistence: PNG support not compiled in.\n");
     fprintf(stderr, "       Recompile with -DWITH_PNG=ON to enable PNG support.\n");
-    return false;
+    return FALSE;
 #else
     if (img == NULL) {
-        return false;
+        return FALSE;
     }
 
     FILE* fp = NULL;
@@ -812,20 +816,20 @@ bool ImagePersistence::exportPNG(const File& fd, Image* img) {
     fp = fopen(filename, "wb");
     if (!fp) {
         fprintf(stderr, "Cannot open file %s for writing\n", filename);
-        return false;
+        return FALSE;
     }
 
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png_ptr) {
         fclose(fp);
-        return false;
+        return FALSE;
     }
 
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
         png_destroy_write_struct(&png_ptr, NULL);
         fclose(fp);
-        return false;
+        return FALSE;
     }
 
     png_init_io(png_ptr, fp);
@@ -844,7 +848,7 @@ bool ImagePersistence::exportPNG(const File& fd, Image* img) {
         fprintf(stderr, "Failed to allocate row pointers\n");
         png_destroy_write_struct(&png_ptr, &info_ptr);
         fclose(fp);
-        return false;
+        return FALSE;
     }
 
     unsigned char* image_data = new unsigned char[img->getXSize() * img->getYSize() * 3];
@@ -853,7 +857,7 @@ bool ImagePersistence::exportPNG(const File& fd, Image* img) {
         delete[] row_pointers;
         png_destroy_write_struct(&png_ptr, &info_ptr);
         fclose(fp);
-        return false;
+        return FALSE;
     }
 
     for (int y = 0; y < img->getYSize(); y++) {
@@ -866,7 +870,7 @@ bool ImagePersistence::exportPNG(const File& fd, Image* img) {
                 delete[] row_pointers;
                 png_destroy_write_struct(&png_ptr, &info_ptr);
                 fclose(fp);
-                return false;
+                return FALSE;
             }
             row_pointers[y][x * 3 + 0] = (unsigned char)p->r;
             row_pointers[y][x * 3 + 1] = (unsigned char)p->g;
@@ -884,6 +888,6 @@ bool ImagePersistence::exportPNG(const File& fd, Image* img) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
     fclose(fp);
 
-    return true;
+    return TRUE;
 #endif
 }

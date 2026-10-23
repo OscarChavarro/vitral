@@ -1,6 +1,7 @@
 #ifndef VITRAL_OPEN_GL_1_ARROW_RENDERER_H
 #define VITRAL_OPEN_GL_1_ARROW_RENDERER_H
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 
@@ -34,9 +35,9 @@ private:
     static const int SLICES;
     static unsigned int displayListId;
     static int vertexCount;
-    static bool initialized;
+    static BOOLEAN initialized;
 
-    static bool ensureMesh(const Arrow* arrow);
+    static BOOLEAN ensureMesh(const Arrow* arrow);
     static ArrowMesh buildArrowMesh(
         double baseRadius,
         double headRadius,

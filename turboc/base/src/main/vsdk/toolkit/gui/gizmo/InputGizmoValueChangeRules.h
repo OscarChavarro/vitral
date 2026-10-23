@@ -1,6 +1,8 @@
 #ifndef __INPUT_GIZMO_VALUE_CHANGE_RULES__
 #define __INPUT_GIZMO_VALUE_CHANGE_RULES__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 Rules that define how the value of a box of an `InputGizmo` changes when it is
 stepped with the keyboard (see `InputGizmo::processKeyPressedEvent`).
@@ -34,13 +36,13 @@ private:
 
     /// True if stepped values are rounded to the nearest multiple of
     /// `gridSize`; meant to be toggled at runtime
-    bool gridRestrictionEnabled;
+    BOOLEAN gridRestrictionEnabled;
     /// Size of the grid the stepped values are rounded to, while the grid
     /// restriction is enabled; always positive
     double gridSize;
 
     /// True if stepped values are wrapped into [minValue, maxValue)
-    bool circular;
+    BOOLEAN circular;
     /// Lower bound (included) of the circular range
     double minValue;
     /// Upper bound (excluded) of the circular range
@@ -88,8 +90,8 @@ public:
     double getLevelOneStep() const;
     double getLevelTwoStep() const;
     double getLevelThreeStep() const;
-    bool isGridRestrictionEnabled() const;
-    void setGridRestrictionEnabled(bool enabled);
+    BOOLEAN isGridRestrictionEnabled() const;
+    void setGridRestrictionEnabled(BOOLEAN enabled);
     double getGridSize() const;
 
     /**
@@ -97,7 +99,7 @@ public:
     positive values are ignored
     */
     void setGridSize(double gridSize);
-    bool isCircular() const;
+    BOOLEAN isCircular() const;
     double getMinValue() const;
     double getMaxValue() const;
 

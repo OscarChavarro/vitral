@@ -1,10 +1,11 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/solidTexture/from2d/ControlledRGBAImageHDRUncompressed.h"
 
 ControlledRGBAImageHDRUncompressed::ControlledRGBAImageHDRUncompressed() :
     mapType(PLANAR_MAP),
     interpolationType(NO_INTERPOLATION),
-    onceFlag(false),
-    useColorFlag(true),
+    onceFlag(FALSE),
+    useColorFlag(TRUE),
     imageGradient(),
     indexedData(NULL)
 {
@@ -80,26 +81,26 @@ ControlledRGBAImageHDRUncompressed::setInterpolationType(int v)
     }
 }
 
-bool
+BOOLEAN
 ControlledRGBAImageHDRUncompressed::getOnceFlag() const
 {
     return onceFlag;
 }
 
 void
-ControlledRGBAImageHDRUncompressed::setOnceFlag(bool v)
+ControlledRGBAImageHDRUncompressed::setOnceFlag(BOOLEAN v)
 {
     onceFlag = v;
 }
 
-bool
+BOOLEAN
 ControlledRGBAImageHDRUncompressed::getUseColorFlag() const
 {
     return useColorFlag;
 }
 
 void
-ControlledRGBAImageHDRUncompressed::setUseColorFlag(bool v)
+ControlledRGBAImageHDRUncompressed::setUseColorFlag(BOOLEAN v)
 {
     useColorFlag = v;
 }

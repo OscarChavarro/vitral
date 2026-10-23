@@ -1,6 +1,7 @@
 #ifndef __VIEWPORT_STATE_OPERATION__
 #define __VIEWPORT_STATE_OPERATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "model/history/UndoableOperation.h"
 
 class Viewport;
@@ -21,13 +22,13 @@ public:
     virtual const Class *getClass() const;
 
     /// Maximum time between two mergeable operations to be merged
-    static const long long MERGE_INTERVAL_MILLISECONDS = 1000;
+    static const long long MERGE_INTERVAL_MILLISECONDS;
 
 private:
     String name;
     ViewportState* before;
     ViewportState* after;
-    bool mergeable;
+    BOOLEAN mergeable;
     long long lastChangeTime;
 
     ViewportStateOperation(const ViewportStateOperation& other);
@@ -42,7 +43,7 @@ public:
     can be merged into this one
     */
     ViewportStateOperation(const String& name, ViewportState* before,
-                           ViewportState* after, bool mergeable);
+                           ViewportState* after, BOOLEAN mergeable);
     virtual ~ViewportStateOperation();
 
     /**
@@ -52,7 +53,7 @@ public:
     virtual void undo();
     virtual void redo();
     virtual String getName() const;
-    virtual bool absorb(UndoableOperation* next);
+    virtual BOOLEAN absorb(UndoableOperation* next);
 };
 
 #endif

@@ -10,6 +10,7 @@
 #undef Object
 #undef String
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/xm/XmFileDialog.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtUiFactory.h"
@@ -30,8 +31,8 @@ static String withoutTrailingSlash(const String& folder)
 }
 
 XmFileDialog::XmFileDialog(const ArrayList<FileSuffixFilter>& filters)
-    : filters(filters), shell(NULL), box(NULL), done(false),
-      approved(false)
+    : filters(filters), shell(NULL), box(NULL), done(FALSE),
+      approved(FALSE)
 {
 }
 
@@ -42,7 +43,7 @@ XmFileDialog::~XmFileDialog()
     }
 }
 
-bool XmFileDialog::showDialog(XtApplicationHost* host,
+BOOLEAN XmFileDialog::showDialog(XtApplicationHost* host,
                               const String& title,
                               const String& folder,
                               const ArrayList<FileSuffixFilter>& filters,
@@ -139,7 +140,8 @@ void XmFileDialog::searchFiles(Widget box, XtPointer callData)
     FolderListing::list(folder, filters, folders, files);
 
     ArrayList<XmString> items;
-    for ( long i = 0; i < files.size(); i++ ) {
+    long i;
+    for ( i = 0; i < files.size(); i++ ) {
         // Relative to the folder, as the path mode of the box asks
         items.add(XmWidgetSupport::createString(files[i]));
     }
@@ -147,7 +149,7 @@ void XmFileDialog::searchFiles(Widget box, XtPointer callData)
                   XmNfileListItems, items.isEmpty() ? NULL : items.data(),
                   XmNfileListItemCount, ((int)(items.size())),
                   XmNlistUpdated, True, NULL);
-    for ( long i = 0; i < items.size(); i++ ) {
+    for ( i = 0; i < items.size(); i++ ) {
         XmStringFree(items[i]);
     }
 }
@@ -174,20 +176,20 @@ void XmFileDialog::approve(Widget, XtPointer clientData, XtPointer callData)
         return;
     }
     self->path = chosen;
-    self->approved = true;
-    self->done = true;
+    self->approved = TRUE;
+    self->done = TRUE;
 }
 
 void XmFileDialog::cancel(Widget, XtPointer clientData, XtPointer)
 {
     XmFileDialog* self = ((XmFileDialog*)(clientData));
-    self->approved = false;
-    self->done = true;
+    self->approved = FALSE;
+    self->done = TRUE;
 }
 
 void XmFileDialog::closeRequested(void* clientData)
 {
     XmFileDialog* self = ((XmFileDialog*)(clientData));
-    self->approved = false;
-    self->done = true;
+    self->approved = FALSE;
+    self->done = TRUE;
 }

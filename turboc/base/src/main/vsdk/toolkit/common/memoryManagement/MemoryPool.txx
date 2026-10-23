@@ -1,11 +1,12 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/memoryManagement/MemoryPool.h"
 template <class T>
 MemoryPool<T>::MemoryPool():
     head(NULL),
     tail(NULL),
     current(NULL),
-    initialized(false)
+    initialized(FALSE)
 {
 }
 
@@ -20,7 +21,7 @@ MemoryPool<T>::~MemoryPool() {
     head = NULL;
     tail = NULL;
     current = NULL;
-    initialized = false;
+    initialized = FALSE;
 }
 
 template <class T>
@@ -80,7 +81,7 @@ MemoryPool<T>::init(long int sizeInBytes) {
     head = first;
     tail = first;
     current = first;
-    initialized = true;
+    initialized = TRUE;
 }
 
 template <class T>
@@ -148,20 +149,20 @@ MemoryPool<T>::clear() {
 }
 
 template <class T>
-bool
+BOOLEAN
 MemoryPool<T>::expand(int numberOfElements) {
     if ( numberOfElements <= 0 ) {
-        return true;
+        return TRUE;
     }
 
     const long int grow = ((long int)(numberOfElements));
     if ( grow <= 0 ) {
-        return false;
+        return FALSE;
     }
 
     Block *newBlock = createBlock(grow);
     if ( newBlock == NULL ) {
-        return false;
+        return FALSE;
     }
 
     if ( head == NULL ) {
@@ -174,6 +175,6 @@ MemoryPool<T>::expand(int numberOfElements) {
         tail = newBlock;
         current = newBlock;
     }
-    initialized = true;
-    return true;
+    initialized = TRUE;
+    return TRUE;
 }

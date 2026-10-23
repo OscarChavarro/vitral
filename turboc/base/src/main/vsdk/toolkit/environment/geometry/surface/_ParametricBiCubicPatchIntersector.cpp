@@ -45,7 +45,7 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
     double vMin;
     double vMax;
 
-    PatchNode(const double net[48], bool leaf,
+    PatchNode(const double net[48], BOOLEAN leaf,
               double u0, double u1, double v0, double v1)
         : uMin(u0), uMax(u1), vMin(v0), vMax(v1)
     {
@@ -71,7 +71,7 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
         }
     }
 
-    bool isLeaf() const
+    BOOLEAN isLeaf() const
     {
         return children.isEmpty();
     }
@@ -151,7 +151,7 @@ void _ParametricBiCubicPatchIntersector::getMinMax(double minMax[6]) const
     }
 }
 
-bool _ParametricBiCubicPatchIntersector::intersect(const Ray& ray,
+BOOLEAN _ParametricBiCubicPatchIntersector::intersect(const Ray& ray,
                                                    PatchHit& outHit) const
 {
     Vector3Dd origin = ray.getOrigin();
@@ -161,16 +161,16 @@ bool _ParametricBiCubicPatchIntersector::intersect(const Ray& ray,
     double directionLengthSquared = d[0]*d[0] + d[1]*d[1] + d[2]*d[2];
 
     if ( directionLengthSquared <= 0.0 ) {
-        return false;
+        return FALSE;
     }
 
     PatchHit best;
     walkTree(root, o, d, directionLengthSquared, best);
     if ( best.t == DBL_MAX ) {
-        return false;
+        return FALSE;
     }
     outHit = best;
-    return true;
+    return TRUE;
 }
 
 void _ParametricBiCubicPatchIntersector::evaluate(double u, double v,
@@ -213,7 +213,8 @@ void _ParametricBiCubicPatchIntersector::storeBezierCoordinate(
     const Matrix4x4d& coefficients, int coordinate)
 {
     double temp[4][4];
-    for ( int i = 0; i < 4; i++ ) {
+    int i;
+    for ( i = 0; i < 4; i++ ) {
         for ( int j = 0; j < 4; j++ ) {
             double accum = 0.0;
             for ( int k = 0; k < 4; k++ ) {
@@ -222,7 +223,7 @@ void _ParametricBiCubicPatchIntersector::storeBezierCoordinate(
             temp[i][j] = accum;
         }
     }
-    for ( int i = 0; i < 4; i++ ) {
+    for ( i = 0; i < 4; i++ ) {
         for ( int j = 0; j < 4; j++ ) {
             double accum = 0.0;
             for ( int k = 0; k < 4; k++ ) {
@@ -266,13 +267,13 @@ _ParametricBiCubicPatchIntersector::buildTree(
     double u0, double u1, double v0, double v1) const
 {
     if ( depth >= subdivisionDepth ) {
-        return new PatchNode(net, true, u0, u1, v0, v1);
+        return new PatchNode(net, TRUE, u0, u1, v0, v1);
     }
     double um = (u0 + u1) / 2.0;
     double vm = (v0 + v1) / 2.0;
     double quarters[4][48];
     splitInFour(net, quarters);
-    PatchNode* node = new PatchNode(net, false, u0, u1, v0, v1);
+    PatchNode* node = new PatchNode(net, FALSE, u0, u1, v0, v1);
     node->children.reserve(4);
     node->children.add(
         buildTree(quarters[0], depth + 1, u0, um, v0, vm));
@@ -399,7 +400,8 @@ void _ParametricBiCubicPatchIntersector::boundingSphere(const double net[48],
     double xc = 0.0;
     double yc = 0.0;
     double zc = 0.0;
-    for ( int k = 0; k < 16; k++ ) {
+    int k;
+    for ( k = 0; k < 16; k++ ) {
         xc += net[3*k];
         yc += net[3*k + 1];
         zc += net[3*k + 2];
@@ -408,7 +410,7 @@ void _ParametricBiCubicPatchIntersector::boundingSphere(const double net[48],
     yc /= 16.0;
     zc /= 16.0;
     double r0 = 0.0;
-    for ( int k = 0; k < 16; k++ ) {
+    for ( k = 0; k < 16; k++ ) {
         double x0 = net[3*k] - xc;
         double y0 = net[3*k + 1] - yc;
         double z0 = net[3*k + 2] - zc;
@@ -483,7 +485,7 @@ void _ParametricBiCubicPatchIntersector::walkTree(
 Port of povCpp `sphericalBoundsCheck`, extended to reject spheres whose
 entry point lies beyond the nearest hit already found.
 */
-bool _ParametricBiCubicPatchIntersector::sphericalBoundsCheck(
+BOOLEAN _ParametricBiCubicPatchIntersector::sphericalBoundsCheck(
     const PatchNode* node, const double o[3], const double d[3],
     double directionLengthSquared, double maxT)
 {
@@ -493,16 +495,16 @@ bool _ParametricBiCubicPatchIntersector::sphericalBoundsCheck(
     double distanceSquared = x*x + y*y + z*z;
     if ( distanceSquared < node->radiusSquared ) {
         // Ray starts inside sphere - assume it intersects
-        return true;
+        return TRUE;
     }
     double projection = x*d[0] + y*d[1] + z*d[2];
     if ( projection <= 0.0 ) {
-        return false;
+        return FALSE;
     }
     double closestDistanceSquared =
         distanceSquared - (projection * projection) / directionLengthSquared;
     if ( closestDistanceSquared >= node->radiusSquared ) {
-        return false;
+        return FALSE;
     }
     double halfChord = sqrt(
         (node->radiusSquared - closestDistanceSquared) / directionLengthSquared);
@@ -516,7 +518,7 @@ Moller-Trumbore ray/triangle test over the leaf corners a, b and c.
 with respect to b (1) and c (2)
 @return true if the ray hits the triangle at a positive distance
 */
-bool _ParametricBiCubicPatchIntersector::intersectTriangle(
+BOOLEAN _ParametricBiCubicPatchIntersector::intersectTriangle(
     const double o[3], const double d[3], const double corners[12],
     int a, int b, int c, double result[3])
 {
@@ -538,7 +540,7 @@ bool _ParametricBiCubicPatchIntersector::intersectTriangle(
         Cpp98Support::abs(e2x) + Cpp98Support::abs(e2y) + Cpp98Support::abs(e2z);
     if ( Cpp98Support::abs(determinant) <= 1.0e-14 * scale * scale ) {
         // Degenerate triangle or ray parallel to its plane
-        return false;
+        return FALSE;
     }
     double inverse = 1.0 / determinant;
 
@@ -547,7 +549,7 @@ bool _ParametricBiCubicPatchIntersector::intersectTriangle(
     double sz = o[2] - az;
     double b1 = (sx*px + sy*py + sz*pz) * inverse;
     if ( b1 < -BARYCENTRIC_TOLERANCE || b1 > 1.0 + BARYCENTRIC_TOLERANCE ) {
-        return false;
+        return FALSE;
     }
     double qx = sy*e1z - sz*e1y;
     double qy = sz*e1x - sx*e1z;
@@ -555,16 +557,16 @@ bool _ParametricBiCubicPatchIntersector::intersectTriangle(
     double b2 = (d[0]*qx + d[1]*qy + d[2]*qz) * inverse;
     if ( b2 < -BARYCENTRIC_TOLERANCE ||
          b1 + b2 > 1.0 + BARYCENTRIC_TOLERANCE ) {
-        return false;
+        return FALSE;
     }
     double t = (e2x*qx + e2y*qy + e2z*qz) * inverse;
     if ( t <= VSDK::EPSILON ) {
-        return false;
+        return FALSE;
     }
     result[0] = t;
     result[1] = Math::max(0.0, b1);
     result[2] = Math::max(0.0, b2);
-    return true;
+    return TRUE;
 }
 
 /**
@@ -619,7 +621,7 @@ Newton iteration over F(u, v, t) = S(u, v) - (o + t * d) = 0.
 @param uvt initial guess as input, solution as output
 @return true if the iteration converged
 */
-bool _ParametricBiCubicPatchIntersector::refineOnSurface(
+BOOLEAN _ParametricBiCubicPatchIntersector::refineOnSurface(
     const double o[3], const double d[3], double uvt[3]) const
 {
     double s[9];
@@ -636,7 +638,7 @@ bool _ParametricBiCubicPatchIntersector::refineOnSurface(
             s[4], s[7], -d[1],
             s[5], s[8], -d[2]);
         if ( Cpp98Support::abs(determinant) < 1.0e-30 ) {
-            return false;
+            return FALSE;
         }
         double deltaU = determinant3x3(
             fx, s[6], -d[0],
@@ -655,13 +657,13 @@ bool _ParametricBiCubicPatchIntersector::refineOnSurface(
         uvt[2] -= deltaT;
         if ( Cpp98Support::isNaN(uvt[0]) || Cpp98Support::isNaN(uvt[1]) ||
              Cpp98Support::isNaN(uvt[2]) ) {
-            return false;
+            return FALSE;
         }
         if ( Cpp98Support::abs(deltaU) + Cpp98Support::abs(deltaV) < NEWTON_TOLERANCE ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 double _ParametricBiCubicPatchIntersector::determinant3x3(

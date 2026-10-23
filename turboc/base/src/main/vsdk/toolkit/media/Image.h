@@ -1,6 +1,7 @@
 #ifndef __IMAGE__
 #define __IMAGE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
 class RGBPixel;
 class ColorRgb;
@@ -28,7 +29,7 @@ public:
     than 0.
     @return true if image memory could be allocated, false otherwise
     */
-    virtual bool init(int width, int height) = 0;
+    virtual BOOLEAN init(int width, int height) = 0;
 
     /**
     Given the width and height of the desired new size for this image, this
@@ -40,7 +41,7 @@ public:
     than 0.
     @return true if image memory could be allocated, false otherwise
     */
-    virtual bool initNoFill(int width, int height) = 0;
+    virtual BOOLEAN initNoFill(int width, int height) = 0;
 
     /**
     Returns current image width in pixels

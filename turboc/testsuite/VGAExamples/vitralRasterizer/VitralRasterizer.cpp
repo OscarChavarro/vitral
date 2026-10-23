@@ -1,5 +1,6 @@
 #include <vga.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "VitralRasterizer.h"
 #include "RasterizerDisplay.h"
 #include "RasterizerExamples.h"
@@ -57,7 +58,7 @@ VitralRasterizer::run(int mode) {
             int step = key == ((int)(RasterizerKey::Right)) ? 1 : RasterizerExamples::COUNT - 1;
             example = (example + step) % RasterizerExamples::COUNT;
         } else {
-            bool down = key == 'R' || key == ((int)(RasterizerKey::Down));
+            BOOLEAN down = key == 'R' || key == ((int)(RasterizerKey::Down));
             VgaModes::Change change = key == 'b' || key == 'B' ? modes->nextDepth() : modes->step(down ? 1 : -1);
             if (change == VgaModes::Change::None) {
                 continue;
@@ -78,7 +79,7 @@ VitralRasterizer::run(int mode) {
 int
 VitralRasterizer::start(int argc, char *argv[]) {
     vga_init();
-    VgaModes modes(false);
+    VgaModes modes(FALSE);
     int mode;
     int fallback = modes.count() > 0 ? modes.highest() : G320x240x256;
     switch (modes.select("vitral_rasterizer", argc - 1, argv + 1, fallback, &mode)) {

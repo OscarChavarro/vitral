@@ -1,6 +1,7 @@
 #ifndef __LIGHT__
 #define __LIGHT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -34,7 +35,7 @@ class Light : public Entity {
     const ColorRgb &getEmission() const;
     void setEmission(const ColorRgb &emission);
 
-    virtual bool isAmbient() const;
+    virtual BOOLEAN isAmbient() const;
 
     virtual void getDirectionAndDistance(const Vector3Dd &surfacePoint,
         Vector3Dd *directionOut, double *maxShadowDistanceOut) const = 0;

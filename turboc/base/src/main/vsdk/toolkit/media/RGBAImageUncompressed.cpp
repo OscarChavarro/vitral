@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAPixel.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
@@ -24,7 +25,7 @@ int RGBAImageUncompressed::getSizeInBytes() const {
     return xSize * ySize * 4 + 2 * INT_SIZE_IN_BYTES + POINTER_SIZE_IN_BYTES;
 }
 
-bool RGBAImageUncompressed::init(int width, int height) {
+BOOLEAN RGBAImageUncompressed::init(int width, int height) {
     try {
         if (data != NULL) {
             delete[] data;
@@ -35,16 +36,16 @@ bool RGBAImageUncompressed::init(int width, int height) {
         }
     } catch (...) {
         data = NULL;
-        return false;
+        return FALSE;
     }
     xSize = width;
     ySize = height;
-    return true;
+    return TRUE;
 }
 
-bool RGBAImageUncompressed::initNoFill(int width, int height) {
+BOOLEAN RGBAImageUncompressed::initNoFill(int width, int height) {
     if (data != NULL && width == xSize && height == ySize) {
-        return true;
+        return TRUE;
     }
 
     try {
@@ -54,11 +55,11 @@ bool RGBAImageUncompressed::initNoFill(int width, int height) {
         data = new char[width * height * BYTES_PER_PIXEL];
     } catch (...) {
         data = NULL;
-        return false;
+        return FALSE;
     }
     xSize = width;
     ySize = height;
-    return true;
+    return TRUE;
 }
 
 int RGBAImageUncompressed::pixelBaseIndex(int x, int y) const {
@@ -187,10 +188,6 @@ RGBAImageUncompressed* RGBAImageUncompressed::clone() const {
 void RGBAImageUncompressed::dispose() {
     Entity::dispose();
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int RGBAImageUncompressed::BYTES_PER_PIXEL;
 
 const Class RGBAImageUncompressed::CLASS = { "RGBAImageUncompressed", &Image::CLASS };
 

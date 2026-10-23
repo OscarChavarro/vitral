@@ -1,6 +1,7 @@
 #ifndef __FOLDER_LISTING__
 #define __FOLDER_LISTING__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -17,7 +18,7 @@ public:
     /**
     @return true if the path exists and is a folder
     */
-    static bool isFolder(const String& path);
+    static BOOLEAN isFolder(const String& path);
 
     /**
     @return the folder without "." and ".." components, as
@@ -30,7 +31,7 @@ public:
     @param path path of a file or folder
     @return true if the path is a folder or a file accepted by any filter
     */
-    static bool accepts(const ArrayList<FileSuffixFilter>& filters,
+    static BOOLEAN accepts(const ArrayList<FileSuffixFilter>& filters,
                         const String& path);
 
     /**

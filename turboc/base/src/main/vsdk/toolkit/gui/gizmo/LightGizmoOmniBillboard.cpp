@@ -51,7 +51,8 @@ Calligraphic2DBuffer LightGizmoOmniBillboard::createLinePattern()
     const double cx = 0.5;
     const double cy = 0.5;
 
-    for (int i = 0; i < NUMBER_OF_SIDES; i++) {
+    int i;
+    for (i = 0; i < NUMBER_OF_SIDES; i++) {
         double a0 = 2.0 * M_PI * (double)i / (double)NUMBER_OF_SIDES;
         double a1 = 2.0 * M_PI * (double)(i + 1) / (double)NUMBER_OF_SIDES;
 
@@ -63,7 +64,7 @@ Calligraphic2DBuffer LightGizmoOmniBillboard::createLinePattern()
         lines.add2DLine(x0, y0, x1, y1);
     }
 
-    for (int i = 0; i < NUMBER_OF_RAYS; i++) {
+    for (i = 0; i < NUMBER_OF_RAYS; i++) {
         double a = 2.0 * M_PI * (double)i / (double)NUMBER_OF_RAYS;
 
         double x0 = cx + RAY_INNER_RADIUS * cos(a);

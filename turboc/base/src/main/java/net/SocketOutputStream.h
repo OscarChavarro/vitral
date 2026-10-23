@@ -1,6 +1,7 @@
 #ifndef __SOCKET_OUTPUT_STREAM__
 #define __SOCKET_OUTPUT_STREAM__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/OutputStream.h"
 
 class SocketOutputStream : public OutputStream {

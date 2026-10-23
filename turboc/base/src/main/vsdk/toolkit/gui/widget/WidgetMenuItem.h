@@ -1,15 +1,16 @@
 #ifndef __WIDGET_MENU_ITEM__
 #define __WIDGET_MENU_ITEM__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuElement.h"
 
 class WidgetMenuItem : public WidgetMenuElement {
 private:
     String name;
-    bool hasName;
+    BOOLEAN hasName;
     String commandName;
-    bool hasCommandName;
-    bool isSeparatorFlag;
+    BOOLEAN hasCommandName;
+    BOOLEAN isSeparatorFlag;
     char mnemonic;
     String accelerator;
 
@@ -20,7 +21,7 @@ public:
     explicit WidgetMenuItem(Widget* c);
     virtual ~WidgetMenuItem() {}
 
-    bool isSeparator() const;
+    BOOLEAN isSeparator() const;
     void setName(const String& n);
     String getName() const;
     String getCommandName() const;

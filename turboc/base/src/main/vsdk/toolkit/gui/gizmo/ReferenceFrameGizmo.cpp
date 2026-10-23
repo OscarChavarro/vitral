@@ -11,7 +11,7 @@ const double ReferenceFrameGizmo::DEFAULT_LINE_WIDTH = 1.0;
 
 ReferenceFrameGizmo::ReferenceFrameGizmo()
     : sizeInPixels(DEFAULT_SIZE_IN_PIXELS), axisLength(1.0), lineWidth(1.0),
-      visible(true)
+      visible(TRUE)
 {
     axisColors[AXIS_X] = ColorRgb(0.78, 0, 0);
     axisColors[AXIS_Y] = ColorRgb(0, 0.61, 0);
@@ -66,12 +66,12 @@ void ReferenceFrameGizmo::applyScale(const ViewportElementScaler* scaler)
     setLineWidth(scaler->scaleLength(DEFAULT_LINE_WIDTH));
 }
 
-bool ReferenceFrameGizmo::isVisible() const
+BOOLEAN ReferenceFrameGizmo::isVisible() const
 {
     return visible;
 }
 
-void ReferenceFrameGizmo::setVisible(bool visible)
+void ReferenceFrameGizmo::setVisible(BOOLEAN visible)
 {
     this->visible = visible;
 }
@@ -168,17 +168,6 @@ void ReferenceFrameGizmo::checkAxis(int axis)
         throw VSDKFatalException("axis must be AXIS_X, AXIS_Y or AXIS_Z");
     }
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int ReferenceFrameGizmo::AXIS_X;
-const int ReferenceFrameGizmo::AXIS_Y;
-const int ReferenceFrameGizmo::AXIS_Z;
-const int ReferenceFrameGizmo::DEFAULT_SIZE_IN_PIXELS;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int ReferenceFrameGizmo::NUMBER_OF_AXES;
 
 const Class ReferenceFrameGizmo::CLASS = { "ReferenceFrameGizmo", &Gizmo::CLASS };
 

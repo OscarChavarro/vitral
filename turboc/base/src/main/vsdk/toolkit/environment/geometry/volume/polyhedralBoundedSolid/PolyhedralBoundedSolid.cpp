@@ -1,5 +1,6 @@
 #include <float.h>
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/StringBuilder.h"
 
 #include "java/util/ArrayList.txx"
@@ -141,7 +142,7 @@ static String intPreSpaces(int val, int fieldSize)
 PolyhedralBoundedSolid::PolyhedralBoundedSolid()
     : maxVertexId(-1),
       maxFaceId(-1),
-      modelIsValid(false),
+      modelIsValid(FALSE),
       queryPlaneCache(0),
       queryFaceAabb(0),
       queryNumericContext(0),
@@ -152,9 +153,10 @@ PolyhedralBoundedSolid::PolyhedralBoundedSolid()
 PolyhedralBoundedSolid::~PolyhedralBoundedSolid()
 {
     clearVisibilityQueryCache();
-    for (long int i = 0; i < polygonsList.size(); ++i) delete polygonsList[i];
-    for (long int i = 0; i < edgesList.size(); ++i) delete edgesList[i];
-    for (long int i = 0; i < verticesList.size(); ++i) delete verticesList[i];
+    long int i;
+    for (i = 0; i < polygonsList.size(); ++i) delete polygonsList[i];
+    for (i = 0; i < edgesList.size(); ++i) delete edgesList[i];
+    for (i = 0; i < verticesList.size(); ++i) delete verticesList[i];
 }
 
 _PolyhedralBoundedSolidFace* PolyhedralBoundedSolid::findFace(int id)
@@ -229,18 +231,18 @@ void PolyhedralBoundedSolid::setMaxFaceId(int v) { maxFaceId = v; }
 
 Ray* PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inOutRay)
 {
-    RayHit hit(RayHit::DETAIL_NONE, true);
+    RayHit hit(RayHit::DETAIL_NONE, TRUE);
     if (doIntersectionFirstHit(inOutRay, &hit) && hit.getRay() != 0) {
         return new Ray(*hit.getRay());
     }
     return 0;
 }
 
-bool PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     double minT = DBL_MAX;
     RayHit bestInfo;
-    bool found = false;
+    BOOLEAN found = FALSE;
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext =
         PolyhedralBoundedSolidNumericPolicy::forSolid(this);
 
@@ -256,7 +258,7 @@ bool PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* ou
         }
 
         RayHit planeHit;
-        bool hitsPlane = containingPlane->doIntersectionFirstHit(inRay, &planeHit);
+        BOOLEAN hitsPlane = containingPlane->doIntersectionFirstHit(inRay, &planeHit);
         if (hitsPlane && planeHit.getRay() != 0 && planeHit.getRay()->getT() < minT) {
             Ray hit = *(planeHit.getRay());
             hit = hit.withDirection(hit.getDirection().normalized());
@@ -266,7 +268,7 @@ bool PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* ou
             if (pos == Geometry::INSIDE || pos == Geometry::LIMIT) {
                 minT = hit.getT();
                 bestInfo = planeHit;
-                found = true;
+                found = TRUE;
             }
         }
 
@@ -274,14 +276,14 @@ bool PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* ou
     }
 
     if (!found) {
-        return false;
+        return FALSE;
     }
 
     if (outHit != 0) {
         outHit->clone(bestInfo);
         outHit->setRay(inRay.withT(minT));
     }
-    return true;
+    return TRUE;
 }
 
 void PolyhedralBoundedSolid::doExtraInformation(
@@ -331,8 +333,8 @@ double* PolyhedralBoundedSolid::getMinMax()
     return minMax;
 }
 
-bool PolyhedralBoundedSolid::isValid() const { return modelIsValid; }
-void PolyhedralBoundedSolid::setValidationState(bool flag) { modelIsValid = flag; }
+BOOLEAN PolyhedralBoundedSolid::isValid() const { return modelIsValid; }
+void PolyhedralBoundedSolid::setValidationState(BOOLEAN flag) { modelIsValid = flag; }
 
 void PolyhedralBoundedSolid::merge(PolyhedralBoundedSolid* other)
 {
@@ -412,7 +414,7 @@ void PolyhedralBoundedSolid::computeFaceAabb(
     queryFaceAabb[o + 5] = maxZ;
 }
 
-bool PolyhedralBoundedSolid::rayReachesFaceAabb(
+BOOLEAN PolyhedralBoundedSolid::rayReachesFaceAabb(
     const Vector3Dd& origin,
     double dirX,
     double dirY,
@@ -428,7 +430,7 @@ bool PolyhedralBoundedSolid::rayReachesFaceAabb(
     if (Cpp98Support::abs(dirX) < 1.0e-12) {
         if (origin.x() < queryFaceAabb[o] - pad ||
             origin.x() > queryFaceAabb[o + 3] + pad) {
-            return false;
+            return FALSE;
         }
     }
     else {
@@ -437,13 +439,13 @@ bool PolyhedralBoundedSolid::rayReachesFaceAabb(
         if (t1 > t2) { double t = t1; t1 = t2; t2 = t; }
         if (t1 > tMin) tMin = t1;
         if (t2 < tMax) tMax = t2;
-        if (tMin > tMax) return false;
+        if (tMin > tMax) return FALSE;
     }
 
     if (Cpp98Support::abs(dirY) < 1.0e-12) {
         if (origin.y() < queryFaceAabb[o + 1] - pad ||
             origin.y() > queryFaceAabb[o + 4] + pad) {
-            return false;
+            return FALSE;
         }
     }
     else {
@@ -452,13 +454,13 @@ bool PolyhedralBoundedSolid::rayReachesFaceAabb(
         if (t1 > t2) { double t = t1; t1 = t2; t2 = t; }
         if (t1 > tMin) tMin = t1;
         if (t2 < tMax) tMax = t2;
-        if (tMin > tMax) return false;
+        if (tMin > tMax) return FALSE;
     }
 
     if (Cpp98Support::abs(dirZ) < 1.0e-12) {
         if (origin.z() < queryFaceAabb[o + 2] - pad ||
             origin.z() > queryFaceAabb[o + 5] + pad) {
-            return false;
+            return FALSE;
         }
     }
     else {
@@ -467,10 +469,10 @@ bool PolyhedralBoundedSolid::rayReachesFaceAabb(
         if (t1 > t2) { double t = t1; t1 = t2; t2 = t; }
         if (t1 > tMin) tMin = t1;
         if (t2 < tMax) tMax = t2;
-        if (tMin > tMax) return false;
+        if (tMin > tMax) return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 void PolyhedralBoundedSolid::clearVisibilityQueryCache()
@@ -514,7 +516,7 @@ void PolyhedralBoundedSolid::endVisibilityQueries()
     clearVisibilityQueryCache();
 }
 
-bool PolyhedralBoundedSolid::visibilityQueriesActive() const
+BOOLEAN PolyhedralBoundedSolid::visibilityQueriesActive() const
 {
     return queryPlaneCache != 0;
 }
@@ -541,7 +543,7 @@ PolyhedralBoundedSolid::queryToleranceContext()
     return PolyhedralBoundedSolidNumericPolicy::forSolid(this);
 }
 
-bool PolyhedralBoundedSolid::queryRayReachesFace(
+BOOLEAN PolyhedralBoundedSolid::queryRayReachesFace(
     const Vector3Dd& origin,
     double dirX,
     double dirY,
@@ -551,19 +553,19 @@ bool PolyhedralBoundedSolid::queryRayReachesFace(
     double pad)
 {
     if (queryFaceAabb == 0) {
-        return true;
+        return TRUE;
     }
     return rayReachesFaceAabb(
         origin, dirX, dirY, dirZ, maxT, faceIndex, pad);
 }
 
-bool PolyhedralBoundedSolid::queryPointNearFace(
+BOOLEAN PolyhedralBoundedSolid::queryPointNearFace(
     const Vector3Dd& point,
     int faceIndex,
     double pad)
 {
     if (queryFaceAabb == 0) {
-        return true;
+        return TRUE;
     }
     int o = faceIndex * 6;
     return point.x() >= queryFaceAabb[o] - pad &&
@@ -706,11 +708,6 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolid::exportToPolyhedralBoundedSolid()
 {
     return this;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int PolyhedralBoundedSolid::PLUS;
-const int PolyhedralBoundedSolid::MINUS;
 
 const Class PolyhedralBoundedSolid::CLASS = { "PolyhedralBoundedSolid", &Solid::CLASS };
 

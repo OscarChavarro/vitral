@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/FileReader.h"
 #include "java/io/FileOutputStream.h"
 #include "java/util/ArrayList.txx"
@@ -38,7 +39,7 @@ String GuiEventExecutor::message(const char* id) const
     return context != NULL ? context->getMessage(id) : String(id);
 }
 
-bool GuiEventExecutor::executeCommand(const String& label)
+BOOLEAN GuiEventExecutor::executeCommand(const String& label)
 {
     return execute(label) == CommandResult::DONE;
 }
@@ -54,10 +55,10 @@ CommandResult GuiEventExecutor::execute(
         result = executeModelCommand(label);
     }
     catch ( ... ) {
-        history->end(label, false);
+        history->end(label, FALSE);
         throw;
     }
-    history->end(label, false);
+    history->end(label, FALSE);
     return result;
 }
 
@@ -74,7 +75,7 @@ CommandResult GuiEventExecutor::executeModelCommand(
     }
 
     if ( label.equals("IDC_CREATE_PROJECTED_VIEWS") ) {
-        model->getDrawingArea()->setProjectedViewsDebugRequested(true);
+        model->getDrawingArea()->setProjectedViewsDebugRequested(TRUE);
     }
     else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
         light = model->addNewLight();
@@ -87,16 +88,16 @@ CommandResult GuiEventExecutor::executeModelCommand(
     //- RENDERING -----------------------------------------------------
     else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
         presenter->showStatusMessage(message("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
-        model->getDrawingArea()->setColorCaptureRequested(true);
+        model->getDrawingArea()->setColorCaptureRequested(TRUE);
     }
     else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
         presenter->showStatusMessage(message("IDM_PENDING_ZBUFFER_DEPTH"));
-        model->getDrawingArea()->setDepthCaptureRequested(true);
+        model->getDrawingArea()->setDepthCaptureRequested(TRUE);
     }
     else if ( label.equals("IDC_RENDERING_OBTAINCONTOURNS") ) {
         presenter->showStatusMessage(message("IDM_PENDING_CONTOURNS"));
-        model->getDrawingArea()->setDepthCaptureRequested(true);
-        model->getDrawingArea()->setContoursRequested(true);
+        model->getDrawingArea()->setDepthCaptureRequested(TRUE);
+        model->getDrawingArea()->setContoursRequested(TRUE);
     }
     //-----------------------------------------------------------------
     else if ( label.equals("IDC_OTHERS_CYCLE_BACKGROUND") ) {
@@ -147,17 +148,17 @@ CommandResult GuiEventExecutor::executeModelCommand(
     return CommandResult::DONE;
 }
 
-bool GuiEventExecutor::importObjects(const File& file)
+BOOLEAN GuiEventExecutor::importObjects(const File& file)
 {
     if ( !file.canRead() ) {
-        return false;
+        return FALSE;
     }
     if ( FileSuffixFilter::getSuffix(file.getName()).equals("ray") ) {
         scene()->importMitScene(file);
         model->getEditHistory()->getSceneHistory()->clear();
         model->useImportedSceneCameraInViewports();
-        model->setWithVisualDebugRay(false);
-        return true;
+        model->setWithVisualDebugRay(FALSE);
+        return TRUE;
     }
     SceneHistory* history = model->getEditHistory()->getSceneHistory();
 
@@ -166,19 +167,19 @@ bool GuiEventExecutor::importObjects(const File& file)
         EnvironmentPersistence::importEnvironment(file, scene()->scene);
     }
     catch ( ... ) {
-        history->end(String("Import of ") + file.getName(), false);
+        history->end(String("Import of ") + file.getName(), FALSE);
         throw;
     }
-    history->end(String("Import of ") + file.getName(), false);
-    return true;
+    history->end(String("Import of ") + file.getName(), FALSE);
+    return TRUE;
 }
 
-bool GuiEventExecutor::exportObjects(const File& file,
+BOOLEAN GuiEventExecutor::exportObjects(const File& file,
                                      ExportFormat format)
 {
     FileOutputStream fos(file.getPath().c_str());
     if ( !file.canWrite() ) {
-        return false;
+        return FALSE;
     }
 
     switch ( format ) {
@@ -194,18 +195,18 @@ bool GuiEventExecutor::exportObjects(const File& file,
     }
 
     fos.close();
-    return true;
+    return TRUE;
 }
 
-bool GuiEventExecutor::loadPalette(const File& file)
+BOOLEAN GuiEventExecutor::loadPalette(const File& file)
 {
     if ( !file.canRead() ) {
-        return false;
+        return FALSE;
     }
     FileReader source(file);
     model->setPalette(RGBColorPalettePersistence::importGimpPalette(source));
     source.close();
-    return true;
+    return TRUE;
 }
 
 const Class GuiEventExecutor::CLASS = { "GuiEventExecutor", &CommandListener::CLASS };

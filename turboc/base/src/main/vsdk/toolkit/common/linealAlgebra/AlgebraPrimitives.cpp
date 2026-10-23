@@ -15,7 +15,7 @@
 #include "java/lang/IllegalArgumentException.h"
 Vector2Df::Vector2Df(const Vector2Dd& other) : x_((float)other.x), y_((float)other.y) {}
 
-bool Vector3Dd::epsilonEquals(const Vector3Dd& other, double epsilon) const
+BOOLEAN Vector3Dd::epsilonEquals(const Vector3Dd& other, double epsilon) const
 {
     if ( epsilon < 0.0 ) throw IllegalArgumentException("epsilon must be >= 0");
     return Cpp98Support::abs(x_ - other.x_) <= epsilon && Cpp98Support::abs(y_ - other.y_) <= epsilon && Cpp98Support::abs(z_ - other.z_) <= epsilon;
@@ -64,7 +64,7 @@ Vector3Df Vector3Df::normalized() const
 }
 Vector3Df Vector3Df::add(const Vector3Df& b) const { return Vector3Df(x_ + b.x_, y_ + b.y_, z_ + b.z_); }
 Vector3Df Vector3Df::subtract(const Vector3Df& b) const { return Vector3Df(x_ - b.x_, y_ - b.y_, z_ - b.z_); }
-bool Vector3Df::epsilonEquals(const Vector3Df& other, float epsilon) const
+BOOLEAN Vector3Df::epsilonEquals(const Vector3Df& other, float epsilon) const
 {
     if ( epsilon < 0.0f ) throw IllegalArgumentException("epsilon must be >= 0");
     return Cpp98Support::abs(x_ - other.x_) <= epsilon && Cpp98Support::abs(y_ - other.y_) <= epsilon && Cpp98Support::abs(z_ - other.z_) <= epsilon;
@@ -75,7 +75,7 @@ Vector4Dd Vector4Dd::multiply(double a) const { return Vector4Dd(a * x_, a * y_,
 Vector4Dd Vector4Dd::dividedByW() const { if ( Cpp98Support::abs(w_) < VSDK::EPSILON ) return *this; return Vector4Dd(x_ / w_, y_ / w_, z_ / w_, 1.0); }
 double Vector4Dd::length() const { return sqrt(x_ * x_ + y_ * y_ + z_ * z_ + w_ * w_); }
 Vector4Dd Vector4Dd::add(const Vector4Dd& b) const { return Vector4Dd(x_ + b.x_, y_ + b.y_, z_ + b.z_, w_ + b.w_); }
-bool Vector4Dd::epsilonEquals(const Vector4Dd& other, double epsilon) const
+BOOLEAN Vector4Dd::epsilonEquals(const Vector4Dd& other, double epsilon) const
 {
     if ( epsilon < 0.0 ) throw IllegalArgumentException("epsilon must be >= 0");
     return Cpp98Support::abs(x_ - other.x_) <= epsilon && Cpp98Support::abs(y_ - other.y_) <= epsilon && Cpp98Support::abs(z_ - other.z_) <= epsilon && Cpp98Support::abs(w_ - other.w_) <= epsilon;
@@ -87,7 +87,7 @@ Vector4Df Vector4Df::multiply(float a) const { return Vector4Df(a * x_, a * y_, 
 Vector4Df Vector4Df::dividedByW() const { if ( Cpp98Support::abs(w_) < (float)VSDK::EPSILON ) return *this; return Vector4Df(x_ / w_, y_ / w_, z_ / w_, 1.0f); }
 float Vector4Df::length() const { return sqrt(x_ * x_ + y_ * y_ + z_ * z_ + w_ * w_); }
 Vector4Df Vector4Df::add(const Vector4Df& b) const { return Vector4Df(x_ + b.x_, y_ + b.y_, z_ + b.z_, w_ + b.w_); }
-bool Vector4Df::epsilonEquals(const Vector4Df& other, float epsilon) const
+BOOLEAN Vector4Df::epsilonEquals(const Vector4Df& other, float epsilon) const
 {
     if ( epsilon < 0.0f ) throw IllegalArgumentException("epsilon must be >= 0");
     return Cpp98Support::abs(x_ - other.x_) <= epsilon && Cpp98Support::abs(y_ - other.y_) <= epsilon && Cpp98Support::abs(z_ - other.z_) <= epsilon && Cpp98Support::abs(w_ - other.w_) <= epsilon;
@@ -108,7 +108,7 @@ Vector3Dd Quaterniond::rotate(const Vector3Dd& vector) const
     Vector3Dd uuv = direction_.crossProduct(uv);
     return vector.add(uv.multiply(2.0 * magnitude_)).add(uuv.multiply(2.0));
 }
-bool Quaterniond::epsilonEquals(const Quaterniond& other, double epsilon) const
+BOOLEAN Quaterniond::epsilonEquals(const Quaterniond& other, double epsilon) const
 {
     if ( epsilon < 0.0 ) throw IllegalArgumentException("epsilon must be >= 0");
     return direction_.epsilonEquals(other.direction_, epsilon) && Cpp98Support::abs(magnitude_ - other.magnitude_) <= epsilon;
@@ -131,7 +131,7 @@ Vector3Df Quaternionf::rotate(const Vector3Df& vector) const
     Vector3Df uuv = direction_.crossProduct(uv);
     return vector.add(uv.multiply(2.0f * magnitude_)).add(uuv.multiply(2.0f));
 }
-bool Quaternionf::epsilonEquals(const Quaternionf& other, float epsilon) const
+BOOLEAN Quaternionf::epsilonEquals(const Quaternionf& other, float epsilon) const
 {
     if ( epsilon < 0.0f ) throw IllegalArgumentException("epsilon must be >= 0");
     return direction_.epsilonEquals(other.direction_, epsilon) && Cpp98Support::abs(magnitude_ - other.magnitude_) <= epsilon;

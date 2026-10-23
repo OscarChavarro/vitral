@@ -3,6 +3,7 @@
 
 #include <vga.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vga/Picture.h"
 #include "programs/vga/HudPatch.h"
 #include "programs/vga/VgaConstant.h"
@@ -77,14 +78,14 @@ Picture::circle(const HudPatch *patch) const {
 }
 
 // Whether the circle has a point at (px, py): the walk of circle(), comparing instead of plotting.
-bool
+BOOLEAN
 Picture::covers(int px, int py) const {
     int x = 0;
     int y = radius;
     int d = 3 - 2 * radius;
     while (x <= y) {
         if (hits8(x, y, px, py)) {
-            return true;
+            return TRUE;
         }
         if (d < 0) {
             d += 4 * x + 6;
@@ -94,13 +95,13 @@ Picture::covers(int px, int py) const {
         }
         x++;
     }
-    return false;
+    return FALSE;
 }
 
-bool
+BOOLEAN
 Picture::hits8(int x, int y, int px, int py) const {
-    bool steep = (px == centerX + x || px == centerX - x) && (py == centerY + rows(y) || py == centerY - rows(y));
-    bool flat = (px == centerX + y || px == centerX - y) && (py == centerY + rows(x) || py == centerY - rows(x));
+    BOOLEAN steep = (px == centerX + x || px == centerX - x) && (py == centerY + rows(y) || py == centerY - rows(y));
+    BOOLEAN flat = (px == centerX + y || px == centerX - y) && (py == centerY + rows(x) || py == centerY - rows(x));
     return steep || flat;
 }
 

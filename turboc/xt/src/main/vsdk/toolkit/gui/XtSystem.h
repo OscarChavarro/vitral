@@ -3,6 +3,7 @@
 
 #include <X11/Xlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
@@ -28,8 +29,10 @@ Events:
 class XtSystem {
 public:
     /** AWT extended masks not named by `MouseEvent` */
-    static const int SHIFT_DOWN_MASK = 64;
-    static const int ALT_DOWN_MASK = 512;
+    enum {
+        SHIFT_DOWN_MASK = 64,
+        ALT_DOWN_MASK = 512
+    };
 
     /**
     @param event X ButtonPress, ButtonRelease, MotionNotify, EnterNotify or
@@ -49,7 +52,7 @@ public:
     @param event X ButtonPress or ButtonRelease
     @return true if the button is one of the wheel ones
     */
-    static bool isWheelButton(const XEvent& event);
+    static BOOLEAN isWheelButton(const XEvent& event);
 
     /**
     @param event X KeyPress or KeyRelease

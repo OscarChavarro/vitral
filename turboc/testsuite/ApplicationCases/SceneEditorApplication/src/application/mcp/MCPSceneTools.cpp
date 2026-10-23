@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
@@ -68,7 +69,8 @@ String MCPSceneTools::describeScene()
     StringBuilder sb;
     sb.append("{\"bodies\":[");
     ArrayList<SimpleBody*>& bodies = scene->scene->getSimpleBodies();
-    for ( int i = 0; i < bodies.size(); i++ ) {
+    int i;
+    for ( i = 0; i < bodies.size(); i++ ) {
         if ( i > 0 ) {
             sb.append(',');
         }
@@ -89,7 +91,7 @@ String MCPSceneTools::describeScene()
     }
     sb.append("],\"lights\":[");
     ArrayList<Light*>& lights = scene->scene->getLights();
-    for ( int i = 0; i < lights.size(); i++ ) {
+    for ( i = 0; i < lights.size(); i++ ) {
         if ( i > 0 ) {
             sb.append(',');
         }
@@ -132,9 +134,9 @@ void MCPSceneTools::addPointLight(const String& request)
 void MCPSceneTools::createPointLight(Geometry* /*unused*/,
                                      const String& request)
 {
-    bool explicitPosition = MCPJson::hasProperty(request, "x") ||
+    BOOLEAN explicitPosition = MCPJson::hasProperty(request, "x") ||
         MCPJson::hasProperty(request, "y") || MCPJson::hasProperty(request, "z");
-    bool explicitColor = MCPJson::hasProperty(request, "r") ||
+    BOOLEAN explicitColor = MCPJson::hasProperty(request, "r") ||
         MCPJson::hasProperty(request, "g") || MCPJson::hasProperty(request, "b");
 
     if ( !explicitPosition && !explicitColor ) {
@@ -263,7 +265,7 @@ String MCPSceneTools::describeEditHistory()
         sb.append("{\"index\":").append(i)
             .append(",\"title\":\"").append(MCPJson::escape(viewport->getTitle())).append('"')
             .append(",\"selected\":")
-            .append(viewport == viewportSet->getSelectedViewport())
+            .appendBoolean(viewport == viewportSet->getSelectedViewport())
             .append(",\"history\":")
             .append(queueJson(history->getViewportHistory()->getQueue(viewport)))
             .append('}');
@@ -275,8 +277,8 @@ String MCPSceneTools::describeEditHistory()
 String MCPSceneTools::queueJson(UndoQueue* queue)
 {
     // The C++ queue names no operation with an empty name (Java: null)
-    bool withUndo = queue->getUndoCount() > 0;
-    bool withRedo = queue->getRedoCount() > 0;
+    BOOLEAN withUndo = queue->getUndoCount() > 0;
+    BOOLEAN withRedo = queue->getRedoCount() > 0;
     StringBuilder sb;
 
     sb.append("{\"undo\":").append(queue->getUndoCount())

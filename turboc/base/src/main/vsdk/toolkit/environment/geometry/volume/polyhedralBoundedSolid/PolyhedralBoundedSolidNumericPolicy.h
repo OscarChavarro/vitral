@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_NUMERIC_POLICY__
 #define __POLYHEDRAL_BOUNDED_SOLID_NUMERIC_POLICY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -59,20 +60,20 @@ public:
     static int compare(double a, double b, const ToleranceContext& context);
     static int compareToZero(double value, const ToleranceContext& context);
     static int compareToZeroBig(double value, const ToleranceContext& context);
-    static bool isZero(double value, const ToleranceContext& context);
-    static bool isZeroBig(double value, const ToleranceContext& context);
-    static bool pointsCoincident(const Vector3Dd& a, const Vector3Dd& b, const ToleranceContext& context);
-    static bool pointsSeparated(const Vector3Dd& a, const Vector3Dd& b, const ToleranceContext& context);
+    static BOOLEAN isZero(double value, const ToleranceContext& context);
+    static BOOLEAN isZeroBig(double value, const ToleranceContext& context);
+    static BOOLEAN pointsCoincident(const Vector3Dd& a, const Vector3Dd& b, const ToleranceContext& context);
+    static BOOLEAN pointsSeparated(const Vector3Dd& a, const Vector3Dd& b, const ToleranceContext& context);
     static int testPointInside(_PolyhedralBoundedSolidFace* face,
                                const Vector3Dd& point,
                                const ToleranceContext& context);
-    static bool vectorsColinear(const Vector3Dd& a, const Vector3Dd& b,
+    static BOOLEAN vectorsColinear(const Vector3Dd& a, const Vector3Dd& b,
                                 const ToleranceContext& context);
-    static bool unitVectorsParallel(const Vector3Dd& a, const Vector3Dd& b,
+    static BOOLEAN unitVectorsParallel(const Vector3Dd& a, const Vector3Dd& b,
                                     const ToleranceContext& context);
-    static bool angleIntervalsOverlap(double upperA, double lowerB,
+    static BOOLEAN angleIntervalsOverlap(double upperA, double lowerB,
                                       const ToleranceContext& context);
-    static bool unitIntervalContainsStrictly(double t,
+    static BOOLEAN unitIntervalContainsStrictly(double t,
                                              const ToleranceContext& context);
     static double orientationTolerance2D(const Vector2Dd& a, const Vector2Dd& b,
                                          const Vector2Dd& c,

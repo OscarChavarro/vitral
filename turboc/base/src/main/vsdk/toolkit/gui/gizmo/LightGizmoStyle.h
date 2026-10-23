@@ -1,6 +1,8 @@
 #ifndef __LIGHT_GIZMO_STYLE__
 #define __LIGHT_GIZMO_STYLE__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 C++98 replacement for a scoped enumeration: values are accessed as
 `LightGizmoStyle::VALUE` and objects convert implicitly to the plain `Value` enum,

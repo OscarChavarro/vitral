@@ -1,6 +1,7 @@
 #ifndef __SCENE_SELECTION_OPERATION__
 #define __SCENE_SELECTION_OPERATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "model/history/UndoableOperation.h"
@@ -17,29 +18,29 @@ class SceneSelectionOperation : public UndoableOperation {
 private:
     Scene* scene;
     String name;
-    ArrayList<bool> beforeBodies;
-    ArrayList<bool> beforeLights;
-    ArrayList<bool> beforeGizmos;
-    ArrayList<bool> afterBodies;
-    ArrayList<bool> afterLights;
-    ArrayList<bool> afterGizmos;
+    ArrayList<BOOLEAN> beforeBodies;
+    ArrayList<BOOLEAN> beforeLights;
+    ArrayList<BOOLEAN> beforeGizmos;
+    ArrayList<BOOLEAN> afterBodies;
+    ArrayList<BOOLEAN> afterLights;
+    ArrayList<BOOLEAN> afterGizmos;
 
-    void apply(const ArrayList<bool>& bodies,
-               const ArrayList<bool>& lights,
-               const ArrayList<bool>& gizmos);
-    static void apply(SelectionSet* selection, const ArrayList<bool>& state);
+    void apply(const ArrayList<BOOLEAN>& bodies,
+               const ArrayList<BOOLEAN>& lights,
+               const ArrayList<BOOLEAN>& gizmos);
+    static void apply(SelectionSet* selection, const ArrayList<BOOLEAN>& state);
 
 public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
     SceneSelectionOperation(const String& name, Scene* scene,
-                            const ArrayList<bool>& beforeBodies,
-                            const ArrayList<bool>& beforeLights,
-                            const ArrayList<bool>& beforeGizmos,
-                            const ArrayList<bool>& afterBodies,
-                            const ArrayList<bool>& afterLights,
-                            const ArrayList<bool>& afterGizmos);
+                            const ArrayList<BOOLEAN>& beforeBodies,
+                            const ArrayList<BOOLEAN>& beforeLights,
+                            const ArrayList<BOOLEAN>& beforeGizmos,
+                            const ArrayList<BOOLEAN>& afterBodies,
+                            const ArrayList<BOOLEAN>& afterLights,
+                            const ArrayList<BOOLEAN>& afterGizmos);
 
     virtual void undo();
     virtual void redo();
@@ -48,9 +49,9 @@ public:
     /**
     @return the selection state of each element of the selection set
     */
-    static ArrayList<bool> capture(SelectionSet* selection);
+    static ArrayList<BOOLEAN> capture(SelectionSet* selection);
 
-    static bool isSame(const ArrayList<bool>& a, const ArrayList<bool>& b);
+    static BOOLEAN isSame(const ArrayList<BOOLEAN>& a, const ArrayList<BOOLEAN>& b);
 };
 
 #endif

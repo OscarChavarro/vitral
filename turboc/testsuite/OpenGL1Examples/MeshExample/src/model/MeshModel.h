@@ -1,6 +1,7 @@
 #ifndef __MESH_MODEL__
 #define __MESH_MODEL__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"

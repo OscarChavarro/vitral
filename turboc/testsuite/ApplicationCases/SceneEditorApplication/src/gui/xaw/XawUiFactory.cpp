@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/xaw/XawFileDialog.h"
 #include "gui/xaw/XawUiFactory.h"
 #include "java/util/ArrayList.txx"
@@ -20,7 +21,7 @@ const char* XawUiFactory::getResourceFile()
     return path != NULL ? path : "XResources";
 }
 
-bool XawUiFactory::showFileDialog(XtApplicationHost* host,
+BOOLEAN XawUiFactory::showFileDialog(XtApplicationHost* host,
                                   const String& title,
                                   const String& folder,
                                   const ArrayList<FileSuffixFilter>& filters,

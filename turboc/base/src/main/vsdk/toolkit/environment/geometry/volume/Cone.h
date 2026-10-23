@@ -1,6 +1,7 @@
 #ifndef __CONE__
 #define __CONE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class PolyhedralBoundedSolid;
 class Ray;
@@ -12,13 +13,15 @@ private:
     double topRadius;    // Radius at the top
     double height;       // Height
 
-    static const int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
-    static const int DEFAULT_HEIGHT_DIVISIONS = 1;
-    static const int MIN_CIRCUMFERENCE_DIVISIONS = 3;
-    static const int MIN_HEIGHT_DIVISIONS = 1;
+    enum {
+        DEFAULT_CIRCUMFERENCE_DIVISIONS = 36,
+        DEFAULT_HEIGHT_DIVISIONS = 1,
+        MIN_CIRCUMFERENCE_DIVISIONS = 3,
+        MIN_HEIGHT_DIVISIONS = 1
+    };
 
     static double sq(double v);
-    static bool approxEq(double a, double b);
+    static BOOLEAN approxEq(double a, double b);
 
     Ray* doIntersectionCylinder(const Ray& inOutRay, double inR, double inH, RayHit* outInfo);
     Ray* doIntersectionCone(const Ray& inOutRay, double inR, double inH, RayHit* outInfo);
@@ -43,7 +46,7 @@ public:
     void setHeight(double value);
 
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
     virtual double* getMinMax();

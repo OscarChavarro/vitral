@@ -1,6 +1,7 @@
 #ifndef __WIDGET_MENU__
 #define __WIDGET_MENU__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuElement.h"
 

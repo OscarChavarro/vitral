@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "io/GuiJsonReader.h"
 #include "java/lang/RuntimeException.h"
 #include "java/lang/StringBuilder.h"
@@ -127,7 +128,7 @@ ArrayList<GuiButtonGroup> GuiJsonReader::readButtonGroups()
             else skipValue();
             consume(',');
         }
-        group.found = true;
+        group.found = TRUE;
         result.add(group);
         consume(',');
     }
@@ -158,7 +159,7 @@ GuiButtonGroup GuiJsonReader::readButtonGroup(const String& name)
             consume(',');
         }
         if (group.name == name) {
-            group.found = true;
+            group.found = TRUE;
             return group;
         }
         consume(',');
@@ -166,13 +167,13 @@ GuiButtonGroup GuiJsonReader::readButtonGroup(const String& name)
     return notFound;
 }
 
-bool GuiJsonReader::booleanValue()
+BOOLEAN GuiJsonReader::booleanValue()
 {
     whitespace();
-    if (position + 4 <= length && strncmp(data + position, "true", 4) == 0) { position += 4; return true; }
-    if (position + 5 <= length && strncmp(data + position, "false", 5) == 0) { position += 5; return false; }
+    if (position + 4 <= length && strncmp(data + position, "true", 4) == 0) { position += 4; return TRUE; }
+    if (position + 5 <= length && strncmp(data + position, "false", 5) == 0) { position += 5; return FALSE; }
     skipValue();
-    return false;
+    return FALSE;
 }
 
 void GuiJsonReader::whitespace()
@@ -180,11 +181,11 @@ void GuiJsonReader::whitespace()
     while (position < length && isspace(((unsigned char)(data[position])))) ++position;
 }
 
-bool GuiJsonReader::consume(char c)
+BOOLEAN GuiJsonReader::consume(char c)
 {
     whitespace();
-    if (position < length && data[position] == c) { ++position; return true; }
-    return false;
+    if (position < length && data[position] == c) { ++position; return TRUE; }
+    return FALSE;
 }
 
 String GuiJsonReader::stringValue()
@@ -256,12 +257,12 @@ TreeMap<String, String> GuiJsonReader::readCommandArray(
     while (!consume(']')) {
         String id;
         String value;
-        bool found = false;
+        BOOLEAN found = FALSE;
         consume('{');
         while (!consume('}')) {
             const String key = stringValue(); consume(':');
             if (key == "id") id = stringValue();
-            else if (key == property) { value = stringValue(); found = true; }
+            else if (key == property) { value = stringValue(); found = TRUE; }
             else skipValue();
             consume(',');
         }

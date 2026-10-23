@@ -76,7 +76,7 @@ Vector3Dd Ray::normalizeDirection(const Vector3Dd& direction)
     return direction.multiply(1.0 / sqrt(lengthSquared));
 }
 
-bool Ray::equals(const Ray& other) const
+BOOLEAN Ray::equals(const Ray& other) const
 {
     return t == other.t && origin == other.origin && direction == other.direction;
 }

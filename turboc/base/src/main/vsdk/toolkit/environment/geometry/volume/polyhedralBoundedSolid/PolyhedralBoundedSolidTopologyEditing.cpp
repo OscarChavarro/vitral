@@ -6,6 +6,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
@@ -67,7 +68,7 @@ leaves valid loops with arbitrary boundary start half-edges.
 @param outH2 receives the matching half-edge of the second loop
 @return true when a match exists (Java returns a non null pair)
 */
-static bool findMatchingLoopVertices(
+static BOOLEAN findMatchingLoopVertices(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidHalfEdge* first,
     _PolyhedralBoundedSolidHalfEdge* second,
@@ -77,7 +78,7 @@ static bool findMatchingLoopVertices(
     ToleranceContext numericContext =
         PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
     if ( first == 0 || second == 0 ) {
-        return false;
+        return FALSE;
     }
 
     _PolyhedralBoundedSolidHalfEdge* h1 = first;
@@ -87,14 +88,14 @@ static bool findMatchingLoopVertices(
             if ( h1->vertexPositionMatch(h2, numericContext.bigEpsilon()) ) {
                 *outH1 = h1;
                 *outH2 = h2;
-                return true;
+                return TRUE;
             }
             h2 = h2->next();
         } while ( h2 != second );
         h1 = h1->next();
     } while ( h1 != first );
 
-    return false;
+    return FALSE;
 }
 
 /**
@@ -108,12 +109,12 @@ loops that should be removed instead of glued as regular rings.
 @param loop loop to evaluate
 @return true when the loop is degenerate, false otherwise
 */
-static bool isDegenerateLoop(
+static BOOLEAN isDegenerateLoop(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidLoop* loop)
 {
     if ( loop == 0 || loop->halfEdgesList.size() < 3 ) {
-        return true;
+        return TRUE;
     }
 
     ToleranceContext numericContext =
@@ -135,7 +136,7 @@ static bool isDegenerateLoop(
                     "(vertex " + str(loop->halfEdgesList.get(i)->startingVertex->id) +
                     " coincides with vertex " +
                     str(loop->halfEdgesList.get(j)->startingVertex->id) + ")");
-                return true;
+                return TRUE;
             }
         }
         distinctCount++;
@@ -166,7 +167,7 @@ static void removeLoop(_PolyhedralBoundedSolidFace* face,
     }
 }
 
-static bool planesCoincidentIgnoringOrientation(
+static BOOLEAN planesCoincidentIgnoringOrientation(
     const InfinitePlane* a,
     const InfinitePlane* b,
     double tolerance)
@@ -175,7 +176,7 @@ static bool planesCoincidentIgnoringOrientation(
         ::planesCoincidentIgnoringOrientation(a, b, tolerance);
 }
 
-static bool loopsCoincident(
+static BOOLEAN loopsCoincident(
     _PolyhedralBoundedSolidLoop* a,
     _PolyhedralBoundedSolidLoop* b,
     const ToleranceContext& numericContext)
@@ -196,7 +197,7 @@ pair of coincident loops that `loopglue` consumes in section
 @param numericContext numeric tolerance context
 @return true when a reduction was applied, false otherwise
 */
-static bool reduceCoincidentSimpleFaceOnMultiLoopFace(
+static BOOLEAN reduceCoincidentSimpleFaceOnMultiLoopFace(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidFace* multiLoopFace,
     _PolyhedralBoundedSolidFace* simpleFace,
@@ -211,21 +212,21 @@ static bool reduceCoincidentSimpleFaceOnMultiLoopFace(
 
     if ( multiLoopFace == 0 || simpleFace == 0 ||
          multiLoopFace == simpleFace ) {
-        return false;
+        return FALSE;
     }
     if ( multiLoopFace->boundariesList.size() < 2 ||
          simpleFace->boundariesList.size() != 1 ) {
-        return false;
+        return FALSE;
     }
     InfinitePlane* multiLoopPlane = multiLoopFace->getContainingPlane();
     InfinitePlane* simplePlane = simpleFace->getContainingPlane();
-    bool coincidentPlanes = multiLoopPlane != 0 && simplePlane != 0 &&
+    BOOLEAN coincidentPlanes = multiLoopPlane != 0 && simplePlane != 0 &&
         planesCoincidentIgnoringOrientation(multiLoopPlane, simplePlane,
             numericContext.epsilon());
     delete multiLoopPlane;
     delete simplePlane;
     if ( !coincidentPlanes ) {
-        return false;
+        return FALSE;
     }
 
     simpleLoop = simpleFace->boundariesList.get(0);
@@ -238,7 +239,7 @@ static bool reduceCoincidentSimpleFaceOnMultiLoopFace(
     }
 
     if ( coincidentLoops.size() < 2 ) {
-        return false;
+        return FALSE;
     }
 
     outerGlueLoop = coincidentLoops.get(0);
@@ -252,24 +253,24 @@ static bool reduceCoincidentSimpleFaceOnMultiLoopFace(
     }
 
     if ( loopsToMove.size() == 0 ) {
-        return false;
+        return FALSE;
     }
 
     for ( i = 0; i < loopsToMove.size(); i++ ) {
         if ( !PolyhedralBoundedSolidEulerOperators::lringmv(
-                solid, loopsToMove.get(i), simpleFace, false) ) {
-            return false;
+                solid, loopsToMove.get(i), simpleFace, FALSE) ) {
+            return FALSE;
         }
     }
 
     if ( multiLoopFace->boundariesList.size() != 2 ) {
-        return false;
+        return FALSE;
     }
 
     PolyhedralBoundedSolidEulerOperators::lringmv(
-        solid, outerGlueLoop, multiLoopFace, true);
+        solid, outerGlueLoop, multiLoopFace, TRUE);
     PolyhedralBoundedSolidTopologyEditing::loopGlue(solid, multiLoopFace->id);
-    return true;
+    return TRUE;
 }
 
 static int countCoincidentLoops(
@@ -298,7 +299,7 @@ static int countCoincidentLoops(
     return coincidentCount;
 }
 
-static bool hasCoincidentMultiLoopReductionCandidate(
+static BOOLEAN hasCoincidentMultiLoopReductionCandidate(
     _PolyhedralBoundedSolidFace* faceA,
     _PolyhedralBoundedSolidFace* faceB,
     const ToleranceContext& numericContext)
@@ -368,7 +369,7 @@ kind of duplicated geometric strut that can survive Boolean connect/finish.
 @param iteration current cleanup iteration
 @return true when a repair was applied, false otherwise
 */
-static bool zipConsecutiveGeometricDanglingEdgePair(
+static BOOLEAN zipConsecutiveGeometricDanglingEdgePair(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidHalfEdge* first,
     _PolyhedralBoundedSolidHalfEdge* second,
@@ -390,7 +391,7 @@ static bool zipConsecutiveGeometricDanglingEdgePair(
          secondMirror->parentLoop->parentFace == 0 ||
          firstMirror->parentLoop->parentFace ==
          secondMirror->parentLoop->parentFace ) {
-        return false;
+        return FALSE;
     }
 
     keptEdge = first->parentEdge;
@@ -409,7 +410,7 @@ static bool zipConsecutiveGeometricDanglingEdgePair(
 
     PolyhedralBoundedSolidEulerOperators::lkef(solid, firstMirror, secondMirror);
     removeEmptyLoopAndFaceIfNeeded(solid, degenerateFace, degenerateLoop);
-    return true;
+    return TRUE;
 }
 
 /**
@@ -424,7 +425,7 @@ beyond the exact topological cases described in the book.
 @param iteration current cleanup iteration
 @return true when a repair was applied, false otherwise
 */
-static bool zipConsecutiveGeometricDanglingEdgePairs(
+static BOOLEAN zipConsecutiveGeometricDanglingEdgePairs(
     PolyhedralBoundedSolid* solid,
     const ToleranceContext& numericContext,
     int iteration)
@@ -481,7 +482,7 @@ static bool zipConsecutiveGeometricDanglingEdgePairs(
                     firstMirror->parentLoop->parentFace->getContainingPlane();
                 InfinitePlane* secondMirrorPlane =
                     secondMirror->parentLoop->parentFace->getContainingPlane();
-                bool coincident = firstMirrorPlane != 0 &&
+                BOOLEAN coincident = firstMirrorPlane != 0 &&
                     secondMirrorPlane != 0 &&
                     planesCoincidentIgnoringOrientation(
                         firstMirrorPlane,
@@ -498,7 +499,7 @@ static bool zipConsecutiveGeometricDanglingEdgePairs(
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
 static void remakeEmanatingHalfedgesReferences(PolyhedralBoundedSolid* solid)
@@ -527,7 +528,7 @@ two adjacent faces and checks that all combined points are coplanar.
 Prevents `maximizeFaces` from merging two faces whose union would be
 non-planar even though their individual planes nominally overlap.
 */
-static bool wouldMergedFaceBeCoplanar(
+static BOOLEAN wouldMergedFaceBeCoplanar(
     _PolyhedralBoundedSolidHalfEdge* rightHalf,
     _PolyhedralBoundedSolidHalfEdge* leftHalf,
     const ToleranceContext& numericContext)
@@ -607,7 +608,7 @@ void PolyhedralBoundedSolidTopologyEditing::loopGlue(
     _PolyhedralBoundedSolidHalfEdge* h2 = 0;
     _PolyhedralBoundedSolidHalfEdge* h1next;
 
-    bool gluePairFound = false;
+    BOOLEAN gluePairFound = FALSE;
     long int i;
     long int j;
     for ( i = 0; i < face->boundariesList.size() && !gluePairFound; i++ ) {
@@ -730,13 +731,13 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
     Vector3Dd p1;
     Vector3Dd p2;
     _PolyhedralBoundedSolidHalfEdge* heStart;
-    bool restart;
+    BOOLEAN restart;
     int iteration;
 
-    restart = true;
+    restart = TRUE;
     iteration = 0;
     while ( restart ) {
-        restart = false;
+        restart = FALSE;
         iteration++;
         ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
@@ -769,7 +770,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
             }
             PolyhedralBoundedSolidEulerOperators::lkef(
                 solid, collapseHe, neighborHe);
-            restart = true;
+            restart = TRUE;
             break;
         }
         if ( restart ) {
@@ -785,7 +786,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                 ::pointsCoincident(p1, p2, numericContext) ) {
                 PolyhedralBoundedSolidEulerOperators::lkev(
                     solid, e->rightHalf, e->leftHalf);
-                restart = true;
+                restart = TRUE;
                 break;
             }
         }
@@ -796,7 +797,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
         //- Zip duplicated geometric struts ---------------------------
         if ( zipConsecutiveGeometricDanglingEdgePairs(
                 solid, numericContext, iteration) ) {
-            restart = true;
+            restart = TRUE;
             continue;
         }
 
@@ -807,7 +808,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                 e->rightHalf->parentLoop->parentFace->getContainingPlane();
             InfinitePlane* b =
                 e->leftHalf->parentLoop->parentFace->getContainingPlane();
-            bool planesOverlap = a != 0 && b != 0 &&
+            BOOLEAN planesOverlap = a != 0 && b != 0 &&
                 a->overlapsWith(*b, numericContext.epsilon());
             delete a;
             delete b;
@@ -819,7 +820,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                 // matter.
                 PolyhedralBoundedSolidEulerOperators::lkemr(
                     solid, e->rightHalf, e->leftHalf);
-                restart = true;
+                restart = TRUE;
                 break;
             }
             else if ( planesOverlap &&
@@ -840,7 +841,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                 }
                 PolyhedralBoundedSolidEulerOperators::lkef(
                     solid, e->rightHalf, e->leftHalf);
-                restart = true;
+                restart = TRUE;
                 break;
             }
             else if ( e->rightHalf->parentLoop->parentFace ==
@@ -862,7 +863,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                 }
                 PolyhedralBoundedSolidEulerOperators::lkev(
                     solid, heStart, heStart->mirrorHalfEdge());
-                restart = true;
+                restart = TRUE;
                 break;
             }
             else if ( e->rightHalf->parentLoop->parentFace ==
@@ -903,7 +904,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                 }
                 PolyhedralBoundedSolidEulerOperators::lkemr(
                     solid, heInner, heOuter);
-                restart = true;
+                restart = TRUE;
                 break;
             }
         }
@@ -933,7 +934,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                          solid, faceA, faceB, numericContext) ||
                      reduceCoincidentSimpleFaceOnMultiLoopFace(
                          solid, faceB, faceA, numericContext) ) {
-                    restart = true;
+                    restart = TRUE;
                     break;
                 }
             }
@@ -992,7 +993,7 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                     if ( p1.dotProduct(p2) < 0 ) {
                         PolyhedralBoundedSolidEulerOperators::lkev(
                             solid, heStart, heStart->mirrorHalfEdge());
-                        restart = true;
+                        restart = TRUE;
                         break;
                     }
                 }
@@ -1046,7 +1047,7 @@ int PolyhedralBoundedSolidTopologyEditing::weldCoincidentVertices(
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context)
 {
     int weldCount;
-    bool found;
+    BOOLEAN found;
     long int i;
     _PolyhedralBoundedSolidEdge* edge;
     _PolyhedralBoundedSolidVertex* v1;
@@ -1054,7 +1055,7 @@ int PolyhedralBoundedSolidTopologyEditing::weldCoincidentVertices(
 
     weldCount = 0;
     do {
-        found = false;
+        found = FALSE;
         for ( i = 0; i < solid->getEdgesList().size(); i++ ) {
             edge = solid->getEdgesList().get(i);
             if ( edge == 0 ||
@@ -1071,7 +1072,7 @@ int PolyhedralBoundedSolidTopologyEditing::weldCoincidentVertices(
                 PolyhedralBoundedSolidEulerOperators::lkev(
                     solid, edge->rightHalf, edge->leftHalf);
                 weldCount++;
-                found = true;
+                found = TRUE;
                 break;
             }
         }

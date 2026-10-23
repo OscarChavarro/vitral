@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
@@ -16,10 +17,10 @@ DrawingArea::DrawingArea(ViewportSet* viewportSet)
       // As in 3ds Max, the application starts in selection mode
       interactionMode(InteractionMode::SELECT),
       lastInteractionMode(InteractionMode::SELECT),
-      colorCaptureRequested(false), depthCaptureRequested(false),
-      contoursRequested(false), projectedViewsDebugRequested(false),
-      hasPendingViewportExport(false), pendingViewportExportJpg(false),
-      hasPendingWorkspaceExport(false), canvasWidth(0), canvasHeight(0)
+      colorCaptureRequested(FALSE), depthCaptureRequested(FALSE),
+      contoursRequested(FALSE), projectedViewsDebugRequested(FALSE),
+      hasPendingViewportExport(FALSE), pendingViewportExportJpg(FALSE),
+      hasPendingWorkspaceExport(FALSE), canvasWidth(0), canvasHeight(0)
 {
 }
 
@@ -49,65 +50,65 @@ void DrawingArea::switchInteractionMode(InteractionMode interactionMode)
     this->interactionMode = interactionMode;
 }
 
-bool DrawingArea::shouldDrawTranslationGizmo() const
+BOOLEAN DrawingArea::shouldDrawTranslationGizmo() const
 {
     return interactionMode == InteractionMode::TRANSLATE ||
         (interactionMode == InteractionMode::CAMERA &&
          lastInteractionMode == InteractionMode::TRANSLATE);
 }
 
-bool DrawingArea::isColorCaptureRequested() const
+BOOLEAN DrawingArea::isColorCaptureRequested() const
 {
     return colorCaptureRequested;
 }
 
-void DrawingArea::setColorCaptureRequested(bool colorCaptureRequested)
+void DrawingArea::setColorCaptureRequested(BOOLEAN colorCaptureRequested)
 {
     this->colorCaptureRequested = colorCaptureRequested;
 }
 
-bool DrawingArea::isDepthCaptureRequested() const
+BOOLEAN DrawingArea::isDepthCaptureRequested() const
 {
     return depthCaptureRequested;
 }
 
-void DrawingArea::setDepthCaptureRequested(bool depthCaptureRequested)
+void DrawingArea::setDepthCaptureRequested(BOOLEAN depthCaptureRequested)
 {
     this->depthCaptureRequested = depthCaptureRequested;
 }
 
-bool DrawingArea::isContoursRequested() const
+BOOLEAN DrawingArea::isContoursRequested() const
 {
     return contoursRequested;
 }
 
-void DrawingArea::setContoursRequested(bool contoursRequested)
+void DrawingArea::setContoursRequested(BOOLEAN contoursRequested)
 {
     this->contoursRequested = contoursRequested;
 }
 
-bool DrawingArea::isProjectedViewsDebugRequested() const
+BOOLEAN DrawingArea::isProjectedViewsDebugRequested() const
 {
     return projectedViewsDebugRequested;
 }
 
 void DrawingArea::setProjectedViewsDebugRequested(
-    bool projectedViewsDebugRequested)
+    BOOLEAN projectedViewsDebugRequested)
 {
     this->projectedViewsDebugRequested = projectedViewsDebugRequested;
 }
 
-void DrawingArea::requestViewportExport(const File& file, bool jpg)
+void DrawingArea::requestViewportExport(const File& file, BOOLEAN jpg)
 {
     pendingViewportExportFile = File(file.getPath());
-    hasPendingViewportExport = true;
+    hasPendingViewportExport = TRUE;
     pendingViewportExportJpg = jpg;
 }
 
 void DrawingArea::requestWorkspaceExport(const File& file)
 {
     pendingWorkspaceExportFile = File(file.getPath());
-    hasPendingWorkspaceExport = true;
+    hasPendingWorkspaceExport = TRUE;
 }
 
 const File* DrawingArea::getPendingViewportExportFile() const
@@ -115,7 +116,7 @@ const File* DrawingArea::getPendingViewportExportFile() const
     return hasPendingViewportExport ? &pendingViewportExportFile : NULL;
 }
 
-bool DrawingArea::isPendingViewportExportJpg() const
+BOOLEAN DrawingArea::isPendingViewportExportJpg() const
 {
     return pendingViewportExportJpg;
 }
@@ -127,12 +128,12 @@ const File* DrawingArea::getPendingWorkspaceExportFile() const
 
 void DrawingArea::clearPendingViewportExport()
 {
-    hasPendingViewportExport = false;
+    hasPendingViewportExport = FALSE;
 }
 
 void DrawingArea::clearPendingWorkspaceExport()
 {
-    hasPendingWorkspaceExport = false;
+    hasPendingWorkspaceExport = FALSE;
 }
 
 void DrawingArea::toggleSelectedViewportGrid()
@@ -241,7 +242,7 @@ MouseEvent DrawingArea::toSurfaceEvent(const MouseEvent& canvasEvent) const
     return surfaceEvent;
 }
 
-bool DrawingArea::projectToCanvas(Viewport* viewport, const Vector3Dd& point,
+BOOLEAN DrawingArea::projectToCanvas(Viewport* viewport, const Vector3Dd& point,
                                   double outCanvas[2]) const
 {
     Camera* camera = viewport->getActiveCamera();
@@ -254,7 +255,7 @@ bool DrawingArea::projectToCanvas(Viewport* viewport, const Vector3Dd& point,
     double depth = d.dotProduct(front);
 
     if ( depth <= 0 ) {
-        return false;
+        return FALSE;
     }
     double u = d.dotProduct(right) / depth * 0.5 /
         camera->getRightWithScale().length();
@@ -267,5 +268,5 @@ bool DrawingArea::projectToCanvas(Viewport* viewport, const Vector3Dd& point,
 
     outCanvas[0] = surfaceX * canvasWidth / viewportSet->getSizeXInPixels();
     outCanvas[1] = surfaceY * canvasHeight / viewportSet->getSizeYInPixels();
-    return true;
+    return TRUE;
 }

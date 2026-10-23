@@ -11,6 +11,7 @@
 #undef Object
 #undef String
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/xaw/XawFileDialog.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtUiFactory.h"
@@ -26,7 +27,7 @@ XawFileDialog::XawFileDialog(XtApplicationHost* host,
                              const ArrayList<FileSuffixFilter>& filters)
     : host(host), widgets(host->getPanelWidgets()), filters(filters),
       shell(NULL), folderLabel(NULL), list(NULL), pathField(NULL),
-      done(false), approved(false)
+      done(FALSE), approved(FALSE)
 {
 }
 
@@ -37,7 +38,7 @@ XawFileDialog::~XawFileDialog()
     }
 }
 
-bool XawFileDialog::showDialog(XtApplicationHost* host,
+BOOLEAN XawFileDialog::showDialog(XtApplicationHost* host,
                                const String& title,
                                const String& folder,
                                const ArrayList<FileSuffixFilter>& filters,
@@ -60,7 +61,7 @@ bool XawFileDialog::showDialog(XtApplicationHost* host,
     if ( dialog.approved ) {
         String path = dialog.widgets->getText(dialog.pathField);
         if ( path.isEmpty() ) {
-            return false;
+            return FALSE;
         }
         if ( path[0] != '/' ) {
             path = dialog.folder + "/" + path;
@@ -79,7 +80,7 @@ void XawFileDialog::create(const String& title)
         shell, &XawFileDialog::closeRequested, this);
 
     Widget form = widgets->createPanel(shell, "fileDialogForm", 0, 0,
-                                       DIALOG_WIDTH, DIALOG_HEIGHT, true);
+                                       DIALOG_WIDTH, DIALOG_HEIGHT, TRUE);
 
     folderLabel = widgets->createLabel(form, "", fontSet,
         XtPanelWidgets::LEFT, 8, 8, DIALOG_WIDTH - 16, 24);
@@ -130,12 +131,13 @@ void XawFileDialog::showFolder(const String& newFolder)
 
     entries.clear();
     entries.add("../");
-    for ( long i = 0; i < folders.size(); i++ ) {
+    long i;
+    for ( i = 0; i < folders.size(); i++ ) {
         entries.add(folders[i] + "/");
     }
     entries.addAll(files);
     entryTexts.clear();
-    for ( long i = 0; i < entries.size(); i++ ) {
+    for ( i = 0; i < entries.size(); i++ ) {
         entryTexts.add(entries[i].c_str());
     }
     // Older Xaw (i.e. 1.0.3, XawVersion 6700002, of Ubuntu 7.04 and
@@ -150,10 +152,10 @@ void XawFileDialog::showFolder(const String& newFolder)
                   ((int)(entryTexts.size())), 0, True);
 }
 
-void XawFileDialog::close(bool approve)
+void XawFileDialog::close(BOOLEAN approve)
 {
     approved = approve;
-    done = true;
+    done = TRUE;
 }
 
 void XawFileDialog::entrySelected(Widget, XtPointer clientData,
@@ -178,12 +180,12 @@ void XawFileDialog::entrySelected(Widget, XtPointer clientData,
 
 void XawFileDialog::approve(Widget, void* clientData)
 {
-    ((XawFileDialog*)(clientData))->close(true);
+    ((XawFileDialog*)(clientData))->close(TRUE);
 }
 
 void XawFileDialog::cancel(Widget, void* clientData)
 {
-    ((XawFileDialog*)(clientData))->close(false);
+    ((XawFileDialog*)(clientData))->close(FALSE);
 }
 
 void XawFileDialog::pathActivated(Widget, void* clientData)
@@ -198,10 +200,10 @@ void XawFileDialog::pathActivated(Widget, void* clientData)
         self->widgets->setText(self->pathField, "");
         return;
     }
-    self->close(true);
+    self->close(TRUE);
 }
 
 void XawFileDialog::closeRequested(void* clientData)
 {
-    ((XawFileDialog*)(clientData))->close(false);
+    ((XawFileDialog*)(clientData))->close(FALSE);
 }

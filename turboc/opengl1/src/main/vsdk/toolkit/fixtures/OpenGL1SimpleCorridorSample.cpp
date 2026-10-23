@@ -1,13 +1,14 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/fixtures/OpenGL1SimpleCorridorSample.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 OpenGL1SimpleCorridorSample::OpenGL1SimpleCorridorSample()
     : width(6), widthTiles(6), length(20), lengthTiles(20), height(4), heightTiles(4), interSpace(0.05),
-      initialized(false), displayListId(0), vertexCount(0) {
+      initialized(FALSE), displayListId(0), vertexCount(0) {
 }
 
 OpenGL1SimpleCorridorSample::~OpenGL1SimpleCorridorSample() {
@@ -42,7 +43,7 @@ void OpenGL1SimpleCorridorSample::initialize() {
     glDisableClientState(GL_COLOR_ARRAY);
     glEndList();
 
-    initialized = true;
+    initialized = TRUE;
 }
 
 void OpenGL1SimpleCorridorSample::drawGL(const float* mvpColumnMajor16, const Matrix4x4d& modelViewProjection) {
@@ -82,22 +83,23 @@ void OpenGL1SimpleCorridorSample::dispose() {
         glDeleteLists(displayListId, 1);
         displayListId = 0;
     }
-    initialized = false;
+    initialized = FALSE;
     vertexCount = 0;
 }
 
 void OpenGL1SimpleCorridorSample::buildGeometry(ArrayList<float>& positions, ArrayList<float>& colors) {
-    appendTilesCenter(positions, colors, 0.5f, 0.5f, 0.9f, 0, false, 0);
-    for (int i = 0; i < 4; i++) {
-        appendTilesLong(positions, colors, 0.5f, 0.5f, 0.9f, 90 * i, false, 0);
+    appendTilesCenter(positions, colors, 0.5f, 0.5f, 0.9f, 0, FALSE, 0);
+    int i;
+    for (i = 0; i < 4; i++) {
+        appendTilesLong(positions, colors, 0.5f, 0.5f, 0.9f, 90 * i, FALSE, 0);
     }
 
-    appendTilesCenter(positions, colors, 0.0f, 0.0f, 1.0f, 0, true, height);
-    for (int i = 0; i < 4; i++) {
-        appendTilesLong(positions, colors, 0.0f, 0.0f, 1.0f, 90 * i, true, height);
+    appendTilesCenter(positions, colors, 0.0f, 0.0f, 1.0f, 0, TRUE, height);
+    for (i = 0; i < 4; i++) {
+        appendTilesLong(positions, colors, 0.0f, 0.0f, 1.0f, 90 * i, TRUE, height);
     }
 
-    for (int i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++) {
         switch (i) {
             case 0:
                 appendTilesWallA(positions, colors, 0.9f, 0.5f, 0.5f, 90 * i);
@@ -114,7 +116,7 @@ void OpenGL1SimpleCorridorSample::buildGeometry(ArrayList<float>& positions, Arr
         }
     }
 
-    for (int i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++) {
         appendTilesWallB(positions, colors, 0.9f, 0.5f, 0.8f, 90 * i);
         appendTilesWallC(positions, colors, 0.9f, 0.5f, 0.8f, 90 * i);
     }
@@ -124,7 +126,7 @@ void OpenGL1SimpleCorridorSample::appendTilesCenter(
     ArrayList<float>& positions,
     ArrayList<float>& colors,
     float r, float g, float bColor,
-    double rotZDeg, bool flipYZ, double translateZ) {
+    double rotZDeg, BOOLEAN flipYZ, double translateZ) {
 
     double da = width / ((double)widthTiles);
     double epsilon = 0.005;
@@ -147,7 +149,7 @@ void OpenGL1SimpleCorridorSample::appendTilesLong(
     ArrayList<float>& positions,
     ArrayList<float>& colors,
     float r, float g, float bColor,
-    double rotZDeg, bool flipYZ, double translateZ) {
+    double rotZDeg, BOOLEAN flipYZ, double translateZ) {
 
     double da = width / ((double)widthTiles);
     double db = length / ((double)lengthTiles);
@@ -185,7 +187,7 @@ void OpenGL1SimpleCorridorSample::appendTilesWallA(
                 -width / 2 - length, y + interSpace / 2, z + interSpace / 2,
                 -width / 2 - length, y + da - interSpace / 2, z + interSpace / 2,
                 -width / 2 - length, y + da - interSpace / 2, z + dc - interSpace / 2,
-                rotZDeg, false, 0);
+                rotZDeg, FALSE, 0);
         }
     }
 }
@@ -208,7 +210,7 @@ void OpenGL1SimpleCorridorSample::appendTilesWallB(
                 -width / 2, y + interSpace / 2, z + interSpace / 2,
                 -width / 2, y + db - interSpace / 2, z + interSpace / 2,
                 -width / 2, y + db - interSpace / 2, z + dc - interSpace / 2,
-                rotZDeg, false, 0);
+                rotZDeg, FALSE, 0);
         }
     }
 }
@@ -231,7 +233,7 @@ void OpenGL1SimpleCorridorSample::appendTilesWallC(
                 x + db - interSpace / 2, width / 2, z + interSpace / 2,
                 x + db - interSpace / 2, width / 2, z + dc - interSpace / 2,
                 x + interSpace / 2, width / 2, z + dc - interSpace / 2,
-                rotZDeg, false, 0);
+                rotZDeg, FALSE, 0);
         }
     }
 }
@@ -244,7 +246,7 @@ void OpenGL1SimpleCorridorSample::addQuad(
     double x2, double y2, double z2,
     double x3, double y3, double z3,
     double x4, double y4, double z4,
-    double rotZDeg, bool flipYZ, double translateZ) {
+    double rotZDeg, BOOLEAN flipYZ, double translateZ) {
 
     addVertex(positions, colors, x1, y1, z1, r, g, bColor, rotZDeg, flipYZ, translateZ);
     addVertex(positions, colors, x2, y2, z2, r, g, bColor, rotZDeg, flipYZ, translateZ);
@@ -260,7 +262,7 @@ void OpenGL1SimpleCorridorSample::addVertex(
     ArrayList<float>& colors,
     double x, double y, double z,
     float r, float g, float bColor,
-    double rotZDeg, bool flipYZ, double translateZ) {
+    double rotZDeg, BOOLEAN flipYZ, double translateZ) {
 
     double tx = x;
     double ty = y;

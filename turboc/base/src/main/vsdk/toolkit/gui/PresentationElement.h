@@ -1,6 +1,7 @@
 #ifndef __PRESENTATION_ELEMENT__
 #define __PRESENTATION_ELEMENT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Class.h"
 
 class PresentationElement {
@@ -19,7 +20,7 @@ public:
     @return true if this object is an instance of the class or of one of
     its subclasses (Java `instanceof`)
     */
-    bool instanceOf(const Class &type) const;
+    BOOLEAN instanceOf(const Class &type) const;
 };
 
 

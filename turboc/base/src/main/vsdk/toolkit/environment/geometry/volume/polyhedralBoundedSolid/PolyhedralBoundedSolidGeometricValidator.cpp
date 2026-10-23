@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
@@ -68,12 +69,12 @@ static double orientation2D(const Vector2Dd& a, const Vector2Dd& b, const Vector
     return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
 }
 
-static bool pointOnSegment2D(const Vector2Dd& p, const Vector2Dd& a, const Vector2Dd& b,
+static BOOLEAN pointOnSegment2D(const Vector2Dd& p, const Vector2Dd& a, const Vector2Dd& b,
                       double orientationTolerance,
                       double linearTolerance)
 {
     if ( fabs(orientation2D(a, b, p)) > orientationTolerance ) {
-        return false;
+        return FALSE;
     }
     double minX = Math::min(a.x, b.x) - linearTolerance;
     double maxX = Math::max(a.x, b.x) + linearTolerance;
@@ -82,7 +83,7 @@ static bool pointOnSegment2D(const Vector2Dd& p, const Vector2Dd& a, const Vecto
     return p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY;
 }
 
-static bool segmentsIntersect2D(const Vector2Dd& a1, const Vector2Dd& a2,
+static BOOLEAN segmentsIntersect2D(const Vector2Dd& a1, const Vector2Dd& a2,
                          const Vector2Dd& b1, const Vector2Dd& b2,
                          const ToleranceContext& numericContext)
 {
@@ -105,12 +106,12 @@ static bool segmentsIntersect2D(const Vector2Dd& a1, const Vector2Dd& a2,
     double linearTolerance =
         PolyhedralBoundedSolidNumericPolicy::linearTolerance2D(numericContext);
 
-    bool proper = ((o1 > orientationTolerance && o2 < -orientationTolerance) ||
+    BOOLEAN proper = ((o1 > orientationTolerance && o2 < -orientationTolerance) ||
                    (o1 < -orientationTolerance && o2 > orientationTolerance)) &&
                   ((o3 > orientationTolerance && o4 < -orientationTolerance) ||
                    (o3 < -orientationTolerance && o4 > orientationTolerance));
     if ( proper ) {
-        return true;
+        return TRUE;
     }
 
     return pointOnSegment2D(b1, a1, a2, orientationTolerance, linearTolerance) ||
@@ -119,7 +120,7 @@ static bool segmentsIntersect2D(const Vector2Dd& a1, const Vector2Dd& a2,
            pointOnSegment2D(a2, b1, b2, orientationTolerance, linearTolerance);
 }
 
-static bool loopHasSelfIntersection(_PolyhedralBoundedSolidFace* face,
+static BOOLEAN loopHasSelfIntersection(_PolyhedralBoundedSolidFace* face,
                              _PolyhedralBoundedSolidLoop* loop,
                              const ToleranceContext& numericContext,
                              String* msg)
@@ -128,7 +129,7 @@ static bool loopHasSelfIntersection(_PolyhedralBoundedSolidFace* face,
     if ( n < 3 ) {
         append(msg, "  - Face [" + str(face->id) +
             "] has a loop with fewer than 3 edges.\n");
-        return true;
+        return TRUE;
     }
 
     int dominantCoordinate = dominantCoordinateForFace(face);
@@ -140,7 +141,7 @@ static bool loopHasSelfIntersection(_PolyhedralBoundedSolidFace* face,
         if ( heANext == 0 ) {
             append(msg, "  - Face [" + str(face->id) +
                 "] has a non-closed loop during strict validation.\n");
-            return true;
+            return TRUE;
         }
         Vector2Dd a1 = projectPointTo2D(heA->startingVertex->position, dominantCoordinate);
         Vector2Dd a2 = projectPointTo2D(heANext->startingVertex->position, dominantCoordinate);
@@ -154,7 +155,7 @@ static bool loopHasSelfIntersection(_PolyhedralBoundedSolidFace* face,
             if ( heBNext == 0 ) {
                 append(msg, "  - Face [" + str(face->id) +
                     "] has a non-closed loop during strict validation.\n");
-                return true;
+                return TRUE;
             }
             Vector2Dd b1 = projectPointTo2D(heB->startingVertex->position, dominantCoordinate);
             Vector2Dd b2 = projectPointTo2D(heBNext->startingVertex->position, dominantCoordinate);
@@ -162,14 +163,14 @@ static bool loopHasSelfIntersection(_PolyhedralBoundedSolidFace* face,
             if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) ) {
                 append(msg, "  - Face [" + str(face->id) +
                     "] has a self-intersecting loop.\n");
-                return true;
+                return TRUE;
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
-static bool loopsIntersect(_PolyhedralBoundedSolidFace* face,
+static BOOLEAN loopsIntersect(_PolyhedralBoundedSolidFace* face,
                     _PolyhedralBoundedSolidLoop* loopA,
                     _PolyhedralBoundedSolidLoop* loopB,
                     const ToleranceContext& numericContext,
@@ -184,7 +185,7 @@ static bool loopsIntersect(_PolyhedralBoundedSolidFace* face,
         if ( heANext == 0 ) {
             append(msg, "  - Face [" + str(face->id) +
                 "] has a non-closed loop during strict validation.\n");
-            return true;
+            return TRUE;
         }
         Vector2Dd a1 = projectPointTo2D(heA->startingVertex->position, dominantCoordinate);
         Vector2Dd a2 = projectPointTo2D(heANext->startingVertex->position, dominantCoordinate);
@@ -195,21 +196,21 @@ static bool loopsIntersect(_PolyhedralBoundedSolidFace* face,
             if ( heBNext == 0 ) {
                 append(msg, "  - Face [" + str(face->id) +
                     "] has a non-closed loop during strict validation.\n");
-                return true;
+                return TRUE;
             }
             Vector2Dd b1 = projectPointTo2D(heB->startingVertex->position, dominantCoordinate);
             Vector2Dd b2 = projectPointTo2D(heBNext->startingVertex->position, dominantCoordinate);
             if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) ) {
                 append(msg, "  - Face [" + str(face->id) +
                     "] has intersecting loops.\n");
-                return true;
+                return TRUE;
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
-static bool faceAgreesWithNeighbours(_PolyhedralBoundedSolidFace* face, String* msg)
+static BOOLEAN faceAgreesWithNeighbours(_PolyhedralBoundedSolidFace* face, String* msg)
 {
     InfinitePlane* planeF;
     Vector3Dd nF;
@@ -220,11 +221,11 @@ static bool faceAgreesWithNeighbours(_PolyhedralBoundedSolidFace* face, String* 
     double worstDot;
 
     if ( face == 0 || face->boundariesList.size() == 0 ) {
-        return true;
+        return TRUE;
     }
     planeF = face->getContainingPlane();
     if ( planeF == 0 ) {
-        return true;
+        return TRUE;
     }
     nF = planeF->getNormal();
     delete planeF;
@@ -270,23 +271,23 @@ static bool faceAgreesWithNeighbours(_PolyhedralBoundedSolidFace* face, String* 
         snprintf(worst, sizeof(worst), "%.3f", worstDot);
         append(msg, "  - Face [" + str(face->id) + "] is opposed to all " +
             str(neighbourCount) + " neighbours (worst cos=" + worst + ")\n");
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
-static bool facesAreCoplanar(_PolyhedralBoundedSolidFace* faceA,
+static BOOLEAN facesAreCoplanar(_PolyhedralBoundedSolidFace* faceA,
                       _PolyhedralBoundedSolidFace* faceB,
                       const ToleranceContext& numericContext)
 {
     InfinitePlane* planeA = faceA->getContainingPlane();
     InfinitePlane* planeB = faceB->getContainingPlane();
-    bool coplanar = false;
+    BOOLEAN coplanar = FALSE;
 
     if ( planeA == 0 || planeB == 0 ) {
         delete planeA;
         delete planeB;
-        return false;
+        return FALSE;
     }
 
     Vector3Dd nA = planeA->getNormal().multiply(1.0);
@@ -310,13 +311,13 @@ static bool facesAreCoplanar(_PolyhedralBoundedSolidFace* faceA,
     return coplanar;
 }
 
-static bool segmentSharesEndpoint(_PolyhedralBoundedSolidHalfEdge* a,
+static BOOLEAN segmentSharesEndpoint(_PolyhedralBoundedSolidHalfEdge* a,
                            _PolyhedralBoundedSolidHalfEdge* b)
 {
     _PolyhedralBoundedSolidHalfEdge* an = a->next();
     _PolyhedralBoundedSolidHalfEdge* bn = b->next();
     if ( an == 0 || bn == 0 ) {
-        return false;
+        return FALSE;
     }
     _PolyhedralBoundedSolidVertex* a0 = a->startingVertex;
     _PolyhedralBoundedSolidVertex* a1 = an->startingVertex;
@@ -325,34 +326,34 @@ static bool segmentSharesEndpoint(_PolyhedralBoundedSolidHalfEdge* a,
     return a0 == b0 || a0 == b1 || a1 == b0 || a1 == b1;
 }
 
-static bool vertexStrictlyInsideFace(_PolyhedralBoundedSolidVertex* v,
+static BOOLEAN vertexStrictlyInsideFace(_PolyhedralBoundedSolidVertex* v,
                               _PolyhedralBoundedSolidFace* face,
                               const ToleranceContext& numericContext)
 {
     InfinitePlane* plane = face->getContainingPlane();
     if ( plane == 0 ) {
-        return false;
+        return FALSE;
     }
     int status = plane->doContainmentTest(v->position, numericContext.bigEpsilon());
     delete plane;
     if ( status != Geometry::LIMIT ) {
-        return false;
+        return FALSE;
     }
     return PolyhedralBoundedSolidNumericPolicy
         ::testPointInside(face, v->position, numericContext) == Geometry::INSIDE;
 }
 
-static bool edgePiercesFaceInterior(_PolyhedralBoundedSolidHalfEdge* he,
+static BOOLEAN edgePiercesFaceInterior(_PolyhedralBoundedSolidHalfEdge* he,
                              _PolyhedralBoundedSolidFace* face,
                              const ToleranceContext& numericContext)
 {
     _PolyhedralBoundedSolidHalfEdge* next = he->next();
     if ( next == 0 ) {
-        return false;
+        return FALSE;
     }
     InfinitePlane* plane = face->getContainingPlane();
     if ( plane == 0 ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd p0 = he->startingVertex->position;
@@ -363,20 +364,20 @@ static bool edgePiercesFaceInterior(_PolyhedralBoundedSolidHalfEdge* he,
 
     if ( fabs(d0) <= numericContext.bigEpsilon() &&
          fabs(d1) <= numericContext.bigEpsilon() ) {
-        return false;
+        return FALSE;
     }
     if ( d0*d1 > 0 ) {
-        return false;
+        return FALSE;
     }
 
     double denom = d0 - d1;
     if ( PolyhedralBoundedSolidNumericPolicy::isZero(denom, numericContext) ) {
-        return false;
+        return FALSE;
     }
     double t = d0 / denom;
     if ( !PolyhedralBoundedSolidNumericPolicy
         ::unitIntervalContainsStrictly(t, numericContext) ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd p = p0.add(p1.subtract(p0).multiply(t));
@@ -391,7 +392,7 @@ static void appendImproperIntersection(String* msg,
         "] intersect improperly.\n");
 }
 
-static bool facesHaveImproperIntersection(_PolyhedralBoundedSolidFace* faceA,
+static BOOLEAN facesHaveImproperIntersection(_PolyhedralBoundedSolidFace* faceA,
                                    _PolyhedralBoundedSolidFace* faceB,
                                    const ToleranceContext& numericContext,
                                    String* msg)
@@ -408,11 +409,11 @@ static bool facesHaveImproperIntersection(_PolyhedralBoundedSolidFace* faceA,
             if ( vertexStrictlyInsideFace(he->startingVertex, faceB,
                                           numericContext) ) {
                 appendImproperIntersection(msg, faceA, faceB);
-                return true;
+                return TRUE;
             }
             if ( edgePiercesFaceInterior(he, faceB, numericContext) ) {
                 appendImproperIntersection(msg, faceA, faceB);
-                return true;
+                return TRUE;
             }
         }
     }
@@ -424,11 +425,11 @@ static bool facesHaveImproperIntersection(_PolyhedralBoundedSolidFace* faceA,
             if ( vertexStrictlyInsideFace(he->startingVertex, faceA,
                                           numericContext) ) {
                 appendImproperIntersection(msg, faceA, faceB);
-                return true;
+                return TRUE;
             }
             if ( edgePiercesFaceInterior(he, faceA, numericContext) ) {
                 appendImproperIntersection(msg, faceA, faceB);
-                return true;
+                return TRUE;
             }
         }
     }
@@ -462,7 +463,7 @@ static bool facesHaveImproperIntersection(_PolyhedralBoundedSolidFace* faceA,
                         if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) &&
                              !segmentSharesEndpoint(heA, heB) ) {
                             appendImproperIntersection(msg, faceA, faceB);
-                            return true;
+                            return TRUE;
                         }
                     }
                 }
@@ -470,11 +471,11 @@ static bool facesHaveImproperIntersection(_PolyhedralBoundedSolidFace* faceA,
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 
-bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(
     ArrayList<Vector3Dd>& points)
 {
     return validateFacePointsAreCoplanar(points,
@@ -487,31 +488,31 @@ equation ideas of [MANT1988].13.1 to a polyhedral face from
 [MANT1988].10.2.1. As in Java, the reference plane is the one defined by the
 last valid point triple found.
 */
-bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(
     ArrayList<Vector3Dd>& points,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext)
 {
     if ( points.size() < 3 ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd p0;
     Vector3Dd p1;
     Vector3Dd p2;
     p0 = points.get(0);
-    bool foundSeparatedPair = false;
+    BOOLEAN foundSeparatedPair = FALSE;
 
     long int i;
     for ( i = 1; i < points.size(); i++ ) {
         p1 = points.get(i);
         if ( PolyhedralBoundedSolidNumericPolicy::pointsSeparated(
                  p0, p1, numericContext) ) {
-            foundSeparatedPair = true;
+            foundSeparatedPair = TRUE;
             break;
         }
     }
     if ( !foundSeparatedPair ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd a;
@@ -553,15 +554,15 @@ bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(
     }
 
     if ( facePlane == 0 ) {
-        return false;
+        return FALSE;
     }
 
-    bool coplanar = true;
+    BOOLEAN coplanar = TRUE;
     for ( i = 1; i < points.size(); i++ ) {
         p0 = points.get(i);
         if ( facePlane->doContainmentTest(p0, numericContext.epsilon()) !=
              Geometry::LIMIT ) {
-            coplanar = false;
+            coplanar = FALSE;
             break;
         }
     }
@@ -570,7 +571,7 @@ bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(
     return coplanar;
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::extractPointsFromFace(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::extractPointsFromFace(
     _PolyhedralBoundedSolidFace* face,
     ArrayList<Vector3Dd>& outPoints)
 {
@@ -584,28 +585,28 @@ bool PolyhedralBoundedSolidGeometricValidator::extractPointsFromFace(
         loop = face->boundariesList.get(j);
         he = loop->boundaryStartHalfEdge;
         if ( he == 0 ) {
-            return false;
+            return FALSE;
         }
         heStart = he;
         do {
             he = he->next();
             if ( he == 0 ) {
-                return false;
+                return FALSE;
             }
             outPoints.add(he->startingVertex->position);
         } while ( he != heStart );
     }
-    return true;
+    return TRUE;
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateFaceIsPlanar(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateFaceIsPlanar(
     _PolyhedralBoundedSolidFace* face)
 {
     return validateFaceIsPlanar(face,
         PolyhedralBoundedSolidNumericPolicy::forFace(face));
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateFaceIsPlanar(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateFaceIsPlanar(
     _PolyhedralBoundedSolidFace* face,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext)
 {
@@ -614,7 +615,7 @@ bool PolyhedralBoundedSolidGeometricValidator::validateFaceIsPlanar(
         validateFacePointsAreCoplanar(points, numericContext);
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlanes(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlanes(
     PolyhedralBoundedSolid* solid, String* msg)
 {
     return validateAllFacesPlanarityAndPlanes(solid,
@@ -625,13 +626,13 @@ bool PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlane
 Applies the face-planarity and face-equation checks corresponding to
 [MANT1988].10.2.1 and [MANT1988].13.1 to every face of the solid.
 */
-bool PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlanes(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlanes(
     PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
     long int i;
-    bool test = true;
+    BOOLEAN test = TRUE;
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
         if ( validateFaceIsPlanar(face, numericContext) ) {
@@ -639,19 +640,19 @@ bool PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlane
             if ( plane == 0 ) {
                 append(msg, "  - Face [" + str(face->id) +
                     "] was not able to compute containing plane\n");
-                test = false;
+                test = FALSE;
             }
             delete plane;
         }
         else {
             append(msg, "  - Face [" + str(face->id) + "] is not coplanar\n");
-            test = false;
+            test = FALSE;
         }
     }
     return test;
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateConsistentFaceOrientations(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateConsistentFaceOrientations(
     PolyhedralBoundedSolid* solid, String* msg)
 {
     return validateConsistentFaceOrientations(solid,
@@ -664,29 +665,29 @@ the 2-manifold boundary model of [MANT1988].10.2.1: each face plane normal is
 compared against the normals of its neighbours through shared edges, and a
 face is flagged only when it is strongly opposed to all of them.
 */
-bool PolyhedralBoundedSolidGeometricValidator::validateConsistentFaceOrientations(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateConsistentFaceOrientations(
     PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
     long int i;
-    bool test;
+    BOOLEAN test;
 
     (void)numericContext;
     if ( solid == 0 || solid->getPolygonsList().size() == 0 ) {
-        return true;
+        return TRUE;
     }
-    test = true;
+    test = TRUE;
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
         if ( !faceAgreesWithNeighbours(face, msg) ) {
-            test = false;
+            test = FALSE;
         }
     }
     return test;
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(
     PolyhedralBoundedSolid* solid, String* msg)
 {
     return validateLoopsStrict(solid,
@@ -698,7 +699,7 @@ Enforces strict geometric loop consistency for the planar polygons assumed
 by [MANT1988].10.2.1 and manipulated by the geometric tools of chapter
 [MANT1988].13.
 */
-bool PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(
     PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
@@ -712,14 +713,14 @@ bool PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(
         if ( plane == 0 ) {
             append(msg, "  - Face [" + str(face->id) +
                 "] has no containing plane for strict checks.\n");
-            return false;
+            return FALSE;
         }
         delete plane;
 
         for ( j = 0; j < face->boundariesList.size(); j++ ) {
             _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(j);
             if ( loopHasSelfIntersection(face, loop, numericContext, msg) ) {
-                return false;
+                return FALSE;
             }
         }
         for ( j = 0; j < face->boundariesList.size(); j++ ) {
@@ -727,15 +728,15 @@ bool PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(
                 if ( loopsIntersect(face, face->boundariesList.get(j),
                                     face->boundariesList.get(k),
                                     numericContext, msg) ) {
-                    return false;
+                    return FALSE;
                 }
             }
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateFaceIntersectionsStrict(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateFaceIntersectionsStrict(
     PolyhedralBoundedSolid* solid, String* msg)
 {
     return validateFaceIntersectionsStrict(solid,
@@ -747,7 +748,7 @@ Applies strict face/face intersection checks to preserve the validity
 condition from [MANT1988].15.2, criterion 3, using predicates from chapter
 [MANT1988].13.
 */
-bool PolyhedralBoundedSolidGeometricValidator::validateFaceIntersectionsStrict(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateFaceIntersectionsStrict(
     PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
@@ -760,25 +761,25 @@ bool PolyhedralBoundedSolidGeometricValidator::validateFaceIntersectionsStrict(
             _PolyhedralBoundedSolidFace* faceB = solid->getPolygonsList().get(j);
             if ( facesHaveImproperIntersection(faceA, faceB, numericContext,
                                                msg) ) {
-                return false;
+                return FALSE;
             }
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(
     PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context,
     String* msg)
 {
     long int i;
     long int j;
-    bool ok;
+    BOOLEAN ok;
     _PolyhedralBoundedSolidVertex* vi;
     _PolyhedralBoundedSolidVertex* vj;
 
-    ok = true;
+    ok = TRUE;
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
         vi = solid->getVerticesList().get(i);
         if ( vi == 0 ) {
@@ -795,17 +796,17 @@ bool PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(
                 append(msg, "  coincident vertices: v" + str(vi->id) +
                     " and v" + str(vj->id) + " at " + position->c_str() + "\n");
                 delete position;
-                ok = false;
+                ok = FALSE;
             }
         }
     }
     return ok;
 }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
+BOOLEAN PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
     PolyhedralBoundedSolid* solid, String* msg)
 {
-    bool ok;
+    BOOLEAN ok;
     long int i;
     long int j;
     _PolyhedralBoundedSolidFace* fi;
@@ -813,7 +814,7 @@ bool PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
     _PolyhedralBoundedSolidVertex* vi;
     _PolyhedralBoundedSolidVertex* vj;
 
-    ok = true;
+    ok = TRUE;
 
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         fi = solid->getPolygonsList().get(i);
@@ -823,13 +824,13 @@ bool PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
         if ( fi->id > solid->getMaxFaceId() ) {
             append(msg, "  face id " + str(fi->id) + " exceeds maxFaceId=" +
                 str(solid->getMaxFaceId()) + "\n");
-            ok = false;
+            ok = FALSE;
         }
         for ( j = i + 1; j < solid->getPolygonsList().size(); j++ ) {
             fj = solid->getPolygonsList().get(j);
             if ( fj != 0 && fi->id == fj->id ) {
                 append(msg, "  duplicate face id=" + str(fi->id) + "\n");
-                ok = false;
+                ok = FALSE;
             }
         }
     }
@@ -842,13 +843,13 @@ bool PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
         if ( vi->id > solid->getMaxVertexId() ) {
             append(msg, "  vertex id " + str(vi->id) + " exceeds maxVertexId=" +
                 str(solid->getMaxVertexId()) + "\n");
-            ok = false;
+            ok = FALSE;
         }
         for ( j = i + 1; j < solid->getVerticesList().size(); j++ ) {
             vj = solid->getVerticesList().get(j);
             if ( vj != 0 && vi->id == vj->id ) {
                 append(msg, "  duplicate vertex id=" + str(vi->id) + "\n");
-                ok = false;
+                ok = FALSE;
             }
         }
     }

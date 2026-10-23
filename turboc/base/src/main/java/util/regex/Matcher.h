@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <regex.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
@@ -41,7 +42,7 @@ class Matcher {
     String input;
     ArrayList<regmatch_t> match;
     size_t searchFrom;
-    bool matched;
+    BOOLEAN matched;
 
   public:
     Matcher(const SharedPointer<CompiledExpression> &expression,
@@ -51,13 +52,13 @@ class Matcher {
     Finds the next match, after the previous one.
     @return true if one was found
     */
-    bool
+    BOOLEAN
     find();
 
     /**
     @return true if the whole text matches
     */
-    bool
+    BOOLEAN
     matches();
 
     /**

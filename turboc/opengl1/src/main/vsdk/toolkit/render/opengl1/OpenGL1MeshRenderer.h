@@ -2,6 +2,7 @@
 #define __OPEN_GL_1_MESH_RENDERER__
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 
@@ -30,7 +31,7 @@ OpenGL 1.2 counterpart of `OpenGL4MeshRenderer`.
 class OpenGL1MeshRenderer {
 public:
     /// Number of lights of the fixed function pipeline
-    static const int MAX_LIGHTS = 8;
+    enum { MAX_LIGHTS = 8 };
 
     /**
     A triangle mesh and the display list that draws it.
@@ -49,7 +50,7 @@ public:
         double characteristicSize;
 
         unsigned int displayListId;
-        bool uploaded;
+        BOOLEAN uploaded;
         ArrayList<float> vertexNormalLinePositions;
         ArrayList<float> vertexNormalLineColors;
         ArrayList<float> triangleNormalLinePositions;

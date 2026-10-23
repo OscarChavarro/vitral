@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 class Vector3Dd;
 
@@ -42,11 +43,11 @@ public:
     double z() const { return z_; }
     double w() const { return w_; }
 
-    bool epsilonEquals(const Vector4Dd& other) const { return epsilonEquals(other, 1e-6); }
-    bool epsilonEquals(const Vector4Dd& other, double epsilon) const;
+    BOOLEAN epsilonEquals(const Vector4Dd& other) const { return epsilonEquals(other, 1e-6); }
+    BOOLEAN epsilonEquals(const Vector4Dd& other, double epsilon) const;
 
-    bool operator==(const Vector4Dd& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_ && w_ == other.w_; }
-    bool equals(const Vector4Dd& other) const { return (*this) == other; }
+    BOOLEAN operator==(const Vector4Dd& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_ && w_ == other.w_; }
+    BOOLEAN equals(const Vector4Dd& other) const { return (*this) == other; }
     int hashCode() const {
         unsigned int result = hashDouble(x_);
         result = 31u * result + hashDouble(y_);

@@ -32,17 +32,17 @@ void ProgressMonitorConsole::end()
     pthread_mutex_unlock(&lock);
 }
 
-bool ProgressMonitorConsole::testLabelLimit(int limit)
+BOOLEAN ProgressMonitorConsole::testLabelLimit(int limit)
 {
-    if ( limit == lastPrintedLabel ) return false;
+    if ( limit == lastPrintedLabel ) return FALSE;
 
     if ( currentPercent - 6 * jumpPercent / 10 < limit &&
          currentPercent + 6 * jumpPercent / 10 > limit ) {
         printf(" %d%% ", limit);
         lastPrintedLabel = limit;
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 void ProgressMonitorConsole::update(double minValue, double maxValue, double currentValue)

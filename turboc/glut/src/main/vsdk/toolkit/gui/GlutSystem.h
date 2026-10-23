@@ -1,6 +1,7 @@
 #ifndef __GLUT_SYSTEM__
 #define __GLUT_SYSTEM__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
 
@@ -35,7 +36,7 @@ public:
     @param outDirection +1 for up, -1 for down
     @return true if the button is a wheel step
     */
-    static bool isWheelButton(int button, int* outDirection);
+    static BOOLEAN isWheelButton(int button, int* outDirection);
 
     /**
     Rasterizes a text label as an image: the text color with an alpha

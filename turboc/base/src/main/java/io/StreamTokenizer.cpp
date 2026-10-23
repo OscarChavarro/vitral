@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/StreamTokenizer.h"
 
 static const int NEED_CHAR = 0x7FFFFFFF;
@@ -6,9 +7,9 @@ static const int SKIP_LF = 0x7FFFFFFE;
 StreamTokenizer::StreamTokenizer(Reader &reader):
     reader(reader),
     peekc(NEED_CHAR),
-    eolIsSignificantP(false),
-    slashSlashCommentsP(false),
-    slashStarCommentsP(false),
+    eolIsSignificantP(FALSE),
+    slashSlashCommentsP(FALSE),
+    slashStarCommentsP(FALSE),
     ttype(-4), // JDK TT_NOTHING
     nval(0.0)
 {
@@ -34,17 +35,17 @@ StreamTokenizer::resetSyntax() {
 }
 
 void
-StreamTokenizer::eolIsSignificant(bool flag) {
+StreamTokenizer::eolIsSignificant(BOOLEAN flag) {
     eolIsSignificantP = flag;
 }
 
 void
-StreamTokenizer::slashSlashComments(bool flag) {
+StreamTokenizer::slashSlashComments(BOOLEAN flag) {
     slashSlashCommentsP = flag;
 }
 
 void
-StreamTokenizer::slashStarComments(bool flag) {
+StreamTokenizer::slashStarComments(BOOLEAN flag) {
     slashStarCommentsP = flag;
 }
 
@@ -130,14 +131,14 @@ StreamTokenizer::nextToken() {
         }
 
         if ( (ct & CT_DIGIT) != 0 ) {
-            bool neg = false;
+            BOOLEAN neg = FALSE;
             if ( c == '-' ) {
                 c = reader.read();
                 if ( c != '.' && (c < '0' || c > '9') ) {
                     peekc = c;
                     return ttype = '-';
                 }
-                neg = true;
+                neg = TRUE;
             }
             double v = 0;
             int decexp = 0;
@@ -209,7 +210,3 @@ StreamTokenizer::nextToken() {
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int StreamTokenizer::TT_EOF;
-const int StreamTokenizer::TT_EOL;
-const int StreamTokenizer::TT_NUMBER;
-const int StreamTokenizer::TT_WORD;

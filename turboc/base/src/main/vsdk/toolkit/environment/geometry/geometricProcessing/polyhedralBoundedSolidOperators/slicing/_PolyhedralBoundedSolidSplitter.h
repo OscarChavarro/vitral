@@ -6,6 +6,7 @@
 #define ___POLYHEDRAL_BOUNDED_SOLID_SPLITTER__
 
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -24,21 +25,25 @@ in section [MANT1988].14.5, and program [MANT1988].14.3.
 */
 class _PolyhedralBoundedSolidSplitterSectorClassification : public _PolyhedralBoundedSolidOperator {
 public:
-    static const int ABOVE = 1;
-    static const int BELOW = -1;
-    static const int ON = 0;
+    enum {
+        ABOVE = 1,
+        BELOW = -1,
+        ON = 0
+    };
 
-    static const int COPLANAR_FACE = 10;
-    static const int INPLANE_EDGE = 20;
-    static const int CROSSING_EDGE = 30;
-    static const int UNDEFINED = 40;
+    enum {
+        COPLANAR_FACE = 10,
+        INPLANE_EDGE = 20,
+        CROSSING_EDGE = 30,
+        UNDEFINED = 40
+    };
 
     _PolyhedralBoundedSolidHalfEdge* sector;
     int cl;
 
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
-    bool isWide;
+    BOOLEAN isWide;
     Vector3Dd position;
     int situation;
 
@@ -139,8 +144,8 @@ private:
     static ArrayList<SectorClassification> getNeighborhood(
         _PolyhedralBoundedSolidVertex* vtx,
         const InfinitePlane& inSplittingPlane);
-    static bool checkSplitterSectorWideness(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool inplaneEdgesOn(const ArrayList<SectorClassification>& nbr);
+    static BOOLEAN checkSplitterSectorWideness(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN inplaneEdgesOn(const ArrayList<SectorClassification>& nbr);
     static void reclassifyOnSectors(ArrayList<SectorClassification>& nbr,
                                     const InfinitePlane& inSplittingPlane);
     static void reclassifyOnEdges(ArrayList<SectorClassification>& nbr);
@@ -153,14 +158,14 @@ private:
     static void printNbr(const ArrayList<SectorClassification>& neighborSectorsInfo);
     static void printEnds();
     static void cut(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool isLoose(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN isLoose(_PolyhedralBoundedSolidHalfEdge* he);
     static void splitConnect();
     static void classify(PolyhedralBoundedSolid* s,
                          PolyhedralBoundedSolid* above,
                          PolyhedralBoundedSolid* below);
-    static bool isNullFace(_PolyhedralBoundedSolidFace* f);
+    static BOOLEAN isNullFace(_PolyhedralBoundedSolidFace* f);
     static void destroy(PolyhedralBoundedSolid* inSolid);
-    static bool faceInsideFace(_PolyhedralBoundedSolidFace* a,
+    static BOOLEAN faceInsideFace(_PolyhedralBoundedSolidFace* a,
                                _PolyhedralBoundedSolidFace* b);
     static void fixNullFaces(ArrayList<_PolyhedralBoundedSolidFace*>& l);
     static void splitFinish(PolyhedralBoundedSolid* inSolid,

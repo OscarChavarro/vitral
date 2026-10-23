@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/gizmo/InputGizmoValueChangeRules.h"
 
 /// Default values of the grid restriction, used while it is disabled
@@ -8,8 +9,8 @@ static const double DEFAULT_GRID_SIZE = 1.0;
 InputGizmoValueChangeRules::InputGizmoValueChangeRules(
     double levelOneStep, double levelTwoStep, double levelThreeStep)
     : levelOneStep(levelOneStep), levelTwoStep(levelTwoStep),
-      levelThreeStep(levelThreeStep), gridRestrictionEnabled(false),
-      gridSize(DEFAULT_GRID_SIZE), circular(false),
+      levelThreeStep(levelThreeStep), gridRestrictionEnabled(FALSE),
+      gridSize(DEFAULT_GRID_SIZE), circular(FALSE),
       minValue(0.0), maxValue(0.0)
 {
 }
@@ -18,7 +19,7 @@ InputGizmoValueChangeRules::InputGizmoValueChangeRules(
     double levelOneStep, double levelTwoStep, double levelThreeStep,
     double minValue, double maxValue)
     : levelOneStep(levelOneStep), levelTwoStep(levelTwoStep),
-      levelThreeStep(levelThreeStep), gridRestrictionEnabled(false),
+      levelThreeStep(levelThreeStep), gridRestrictionEnabled(FALSE),
       gridSize(DEFAULT_GRID_SIZE), circular(maxValue > minValue),
       minValue(minValue), maxValue(maxValue)
 {
@@ -54,12 +55,12 @@ double InputGizmoValueChangeRules::getLevelThreeStep() const
     return levelThreeStep;
 }
 
-bool InputGizmoValueChangeRules::isGridRestrictionEnabled() const
+BOOLEAN InputGizmoValueChangeRules::isGridRestrictionEnabled() const
 {
     return gridRestrictionEnabled;
 }
 
-void InputGizmoValueChangeRules::setGridRestrictionEnabled(bool enabled)
+void InputGizmoValueChangeRules::setGridRestrictionEnabled(BOOLEAN enabled)
 {
     gridRestrictionEnabled = enabled;
 }
@@ -76,7 +77,7 @@ void InputGizmoValueChangeRules::setGridSize(double gridSize)
     }
 }
 
-bool InputGizmoValueChangeRules::isCircular() const
+BOOLEAN InputGizmoValueChangeRules::isCircular() const
 {
     return circular;
 }

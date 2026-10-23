@@ -1,6 +1,7 @@
 #ifndef __PRINT_WRITER__
 #define __PRINT_WRITER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/OutputStream.h"
 #include "java/lang/String.h"
 
@@ -15,11 +16,11 @@ bytes. As in Java, it never throws: write errors are reported by
 class PrintWriter {
   private:
     OutputStream *out;
-    bool autoFlush;
-    bool error;
+    BOOLEAN autoFlush;
+    BOOLEAN error;
 
   public:
-    PrintWriter(OutputStream *out, bool autoFlush);
+    PrintWriter(OutputStream *out, BOOLEAN autoFlush);
 
     void
     print(const String &text);
@@ -38,7 +39,7 @@ class PrintWriter {
     Flushes the stream.
     @return true if a write failed (i.e. the peer closed the connection)
     */
-    bool
+    BOOLEAN
     checkError();
 };
 

@@ -10,6 +10,7 @@
 #undef String
 #include <X11/Xutil.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtImageControlWindow.h"
@@ -36,7 +37,7 @@ XtImageControlWindow::XtImageControlWindow(XtApplicationHost* host,
     XtPanelWidgets* widgets = host->getPanelWidgets();
     Widget frame = widgets->createPanel(windowWidget, "imageControlFrame",
                                         0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-                                        true);
+                                        TRUE);
 
     Arg areaArgs[4]; Cardinal areaN = 0;
     XtSetArg(areaArgs[areaN], XtNx, 0); ++areaN;

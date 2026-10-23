@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -105,7 +106,7 @@ static void freeOptionBinding(Widget, XtPointer clientData, XtPointer)
 
 
 Widget XawPanelWidgets::createPanel(Widget parent, const char* name, int x,
-                                    int y, int width, int height, bool managed)
+                                    int y, int width, int height, BOOLEAN managed)
 {
     Arg args[4]; Cardinal n = 0;
     XtSetArg(args[n], XtNx, x); ++n;
@@ -197,10 +198,10 @@ void XawPanelWidgets::setText(Widget field, const String& text)
 {
     const String shownText = XtTextEncoding::toLocale(text);
     XtVaSetValues(field, XtNstring, shownText.c_str(), NULL);
-    setInvalid(field, false);
+    setInvalid(field, FALSE);
 }
 
-void XawPanelWidgets::setInvalid(Widget field, bool invalid)
+void XawPanelWidgets::setInvalid(Widget field, BOOLEAN invalid)
 {
     XtWidgetSupport::setColor(field, XtNbackground,
                               invalid ? INVALID_BACKGROUND : NORMAL_BACKGROUND);

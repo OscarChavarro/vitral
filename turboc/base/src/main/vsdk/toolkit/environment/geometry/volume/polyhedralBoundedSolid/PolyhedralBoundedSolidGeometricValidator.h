@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_GEOMETRIC_VALIDATOR__
 #define __POLYHEDRAL_BOUNDED_SOLID_GEOMETRIC_VALIDATOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
@@ -25,8 +26,8 @@ public:
     @param points face points
     @return true when the points are coplanar
     */
-    static bool validateFacePointsAreCoplanar(ArrayList<Vector3Dd>& points);
-    static bool validateFacePointsAreCoplanar(ArrayList<Vector3Dd>& points, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
+    static BOOLEAN validateFacePointsAreCoplanar(ArrayList<Vector3Dd>& points);
+    static BOOLEAN validateFacePointsAreCoplanar(ArrayList<Vector3Dd>& points, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
 
     /**
     Appends the vertex positions of every loop of `face` to `outPoints`.
@@ -34,22 +35,22 @@ public:
     @param outPoints receives the points
     @return false when some loop is empty or not closed (Java returns null)
     */
-    static bool extractPointsFromFace(_PolyhedralBoundedSolidFace* face, ArrayList<Vector3Dd>& outPoints);
+    static BOOLEAN extractPointsFromFace(_PolyhedralBoundedSolidFace* face, ArrayList<Vector3Dd>& outPoints);
 
-    static bool validateFaceIsPlanar(_PolyhedralBoundedSolidFace* face);
-    static bool validateFaceIsPlanar(_PolyhedralBoundedSolidFace* face, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
+    static BOOLEAN validateFaceIsPlanar(_PolyhedralBoundedSolidFace* face);
+    static BOOLEAN validateFaceIsPlanar(_PolyhedralBoundedSolidFace* face, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
 
-    static bool validateAllFacesPlanarityAndPlanes(PolyhedralBoundedSolid* solid, String* msg);
-    static bool validateAllFacesPlanarityAndPlanes(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
+    static BOOLEAN validateAllFacesPlanarityAndPlanes(PolyhedralBoundedSolid* solid, String* msg);
+    static BOOLEAN validateAllFacesPlanarityAndPlanes(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
 
-    static bool validateConsistentFaceOrientations(PolyhedralBoundedSolid* solid, String* msg);
-    static bool validateConsistentFaceOrientations(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
+    static BOOLEAN validateConsistentFaceOrientations(PolyhedralBoundedSolid* solid, String* msg);
+    static BOOLEAN validateConsistentFaceOrientations(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
 
-    static bool validateLoopsStrict(PolyhedralBoundedSolid* solid, String* msg);
-    static bool validateLoopsStrict(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
+    static BOOLEAN validateLoopsStrict(PolyhedralBoundedSolid* solid, String* msg);
+    static BOOLEAN validateLoopsStrict(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
 
-    static bool validateFaceIntersectionsStrict(PolyhedralBoundedSolid* solid, String* msg);
-    static bool validateFaceIntersectionsStrict(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
+    static BOOLEAN validateFaceIntersectionsStrict(PolyhedralBoundedSolid* solid, String* msg);
+    static BOOLEAN validateFaceIntersectionsStrict(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, String* msg);
 
     /**
     Checks that no two distinct vertices of `solid` are geometrically
@@ -59,7 +60,7 @@ public:
     @param msg collects one line per coincident pair found
     @return true when no coincident vertices are found
     */
-    static bool validateNoCoincidentVertices(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context, String* msg);
+    static BOOLEAN validateNoCoincidentVertices(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context, String* msg);
 
     /**
     Checks that face and vertex ids are unique and covered by the stored
@@ -68,7 +69,7 @@ public:
     @param msg collects one line per violation found
     @return true when ids are consistent
     */
-    static bool validateUniqueFaceAndVertexIds(PolyhedralBoundedSolid* solid, String* msg);
+    static BOOLEAN validateUniqueFaceAndVertexIds(PolyhedralBoundedSolid* solid, String* msg);
 };
 
 #endif

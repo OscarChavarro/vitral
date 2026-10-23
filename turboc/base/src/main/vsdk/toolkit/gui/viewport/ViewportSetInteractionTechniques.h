@@ -1,6 +1,7 @@
 #ifndef __VIEWPORT_SET_INTERACTION_TECHNIQUES__
 #define __VIEWPORT_SET_INTERACTION_TECHNIQUES__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
@@ -35,11 +36,11 @@ class ViewportSetInteractionTechniques {
 private:
     ViewportSet* viewportSet;
     ViewportSetInteractionListener* listener;
-    bool titlePressArmed;
+    BOOLEAN titlePressArmed;
 
-    bool processSelectedViewportCommand(const KeyEvent& event);
-    bool selectViewportUnderPointer(const MouseEvent& event);
-    bool isOverTitle(const MouseEvent& event, const Viewport* viewport) const;
+    BOOLEAN processSelectedViewportCommand(const KeyEvent& event);
+    BOOLEAN selectViewportUnderPointer(const MouseEvent& event);
+    BOOLEAN isOverTitle(const MouseEvent& event, const Viewport* viewport) const;
 
 public:
     explicit ViewportSetInteractionTechniques(ViewportSet* viewportSet);
@@ -59,19 +60,19 @@ public:
     @param command the id of the command, starting with `IDV_`
     @return true if the command was a viewport set one and was processed
     */
-    bool processCommand(const String& command);
+    BOOLEAN processCommand(const String& command);
 
     /**
     Processes one of the standard commands of the viewport set (projection
     location or render mode) over the given viewport.
     @return true if the command was a viewport set one and was processed
     */
-    bool processCommand(const String& command, Viewport* viewport);
+    BOOLEAN processCommand(const String& command, Viewport* viewport);
 
     /**
     @return true if the event was a viewport set command and was processed
     */
-    bool processKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& event);
 
     /**
     @return the active viewport under the pointer, or null if none
@@ -83,7 +84,7 @@ public:
     @return true if the pointer is over the title (HUD) of a viewport, that
     is, over an area where clicking has an effect
     */
-    bool isPointerOverTitle(const MouseEvent& event) const;
+    BOOLEAN isPointerOverTitle(const MouseEvent& event) const;
 
     /**
     Selects the viewport under the pointer. If it was already the selected
@@ -91,7 +92,7 @@ public:
     will request the projection location menu.
     @return true if there is a viewport under the pointer
     */
-    bool processMousePressedEvent(const MouseEvent& event);
+    BOOLEAN processMousePressedEvent(const MouseEvent& event);
 
     /**
     Selects the viewport under the pointer. If the press was over the title
@@ -101,9 +102,9 @@ public:
     clicks if the pointer moves slightly between the press and the release.)
     @return true if there is a viewport under the pointer
     */
-    bool processMouseReleasedEvent(const MouseEvent& event);
-    bool processMouseClickedEvent(const MouseEvent& event);
-    bool processMouseDraggedEvent(const MouseEvent& event);
+    BOOLEAN processMouseReleasedEvent(const MouseEvent& event);
+    BOOLEAN processMouseClickedEvent(const MouseEvent& event);
+    BOOLEAN processMouseDraggedEvent(const MouseEvent& event);
 
     /**
     Creates a copy of a mouse event, with its coordinates translated from the

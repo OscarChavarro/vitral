@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/InputStream.h"
 class PipeInputStream : public InputStream {
   private:
@@ -13,7 +14,7 @@ class PipeInputStream : public InputStream {
     explicit PipeInputStream(const char *command);
     ~PipeInputStream();
 
-    bool
+    BOOLEAN
     isOpen() const;
 
     int

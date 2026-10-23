@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "model/history/SceneHistory.h"
 #include "model/history/SceneSnapshot.h"
@@ -18,7 +19,7 @@ UndoQueue* SceneHistory::getQueue()
     return &queue;
 }
 
-bool SceneHistory::isRecording() const
+BOOLEAN SceneHistory::isRecording() const
 {
     return depth > 0;
 }
@@ -34,7 +35,7 @@ void SceneHistory::begin()
     depth++;
 }
 
-bool SceneHistory::end(const String& name, bool mergeable)
+BOOLEAN SceneHistory::end(const String& name, BOOLEAN mergeable)
 {
     SceneSnapshot* start;
     Scene* scene;
@@ -44,11 +45,11 @@ bool SceneHistory::end(const String& name, bool mergeable)
         Logger::reportMessage("SceneHistory", Logger::WARNING, "end",
             String("Scene history end() without begin(): the action \"") +
             name + "\" is not recorded");
-        return false;
+        return FALSE;
     }
     depth--;
     if ( depth > 0 ) {
-        return false;
+        return FALSE;
     }
     start = before;
     before = NULL;
@@ -56,20 +57,20 @@ bool SceneHistory::end(const String& name, bool mergeable)
     if ( start == NULL || scene == NULL || start->getScene() != scene ) {
         // The whole scene was replaced: the action can not be undone
         delete start;
-        return false;
+        return FALSE;
     }
     SceneSnapshot* after = SceneSnapshot::capture(scene);
     operation = start->operationTo(after, name, mergeable);
     delete after;
     delete start;
     if ( operation == NULL ) {
-        return false;
+        return FALSE;
     }
     queue.record(operation);
-    return true;
+    return TRUE;
 }
 
-bool SceneHistory::perform(const String& name, Runnable* action)
+BOOLEAN SceneHistory::perform(const String& name, Runnable* action)
 {
     begin();
     try {
@@ -77,10 +78,10 @@ bool SceneHistory::perform(const String& name, Runnable* action)
     }
     catch ( ... ) {
         // What the action did before failing is still recorded
-        end(name, false);
+        end(name, FALSE);
         throw;
     }
-    return end(name, false);
+    return end(name, FALSE);
 }
 
 UndoableOperation* SceneHistory::undo()

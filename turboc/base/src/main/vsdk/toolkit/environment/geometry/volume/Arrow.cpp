@@ -80,7 +80,8 @@ void Arrow::translationalSweepExtrudeFacePlanar(
     }
 
     ArrayList<int> newFaces;
-    for ( long i = 0; i < face->boundariesList.size(); ++i ) {
+    long i;
+    for ( i = 0; i < face->boundariesList.size(); ++i ) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
         if ( loop == 0 || loop->boundaryStartHalfEdge == 0 ) {
             continue;
@@ -124,7 +125,7 @@ void Arrow::translationalSweepExtrudeFacePlanar(
         newFaces.add(newFaceId);
     }
 
-    for ( long i = 0; i < newFaces.size(); ++i ) {
+    for ( i = 0; i < newFaces.size(); ++i ) {
         int newFaceId = newFaces.get(i);
         _PolyhedralBoundedSolidFace* newFace = solid->findFace(newFaceId);
         if ( newFace == 0 ) {
@@ -193,14 +194,14 @@ Ray* Arrow::doIntersectionFirstHit(const Ray& inOutRay) {
     return result;
 }
 
-bool Arrow::doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit) {
+BOOLEAN Arrow::doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit) {
     Vector3Dd shiftedHeadOrigin(inRay.getOrigin().x(), inRay.getOrigin().y(), inRay.getOrigin().z() - baseLength);
     Ray shiftedHeadRay(shiftedHeadOrigin, inRay.getDirection(), inRay.getT());
 
-    RayHit localHit(RayHit::DETAIL_NONE, false);
+    RayHit localHit(RayHit::DETAIL_NONE, FALSE);
     RayHit* candidateHit = (outHit != NULL) ? outHit : &localHit;
-    bool shouldStoreRay = (outHit != NULL) ? outHit->shouldStoreRay() : false;
-    candidateHit->setStoreRay(false);
+    BOOLEAN shouldStoreRay = (outHit != NULL) ? outHit->shouldStoreRay() : FALSE;
+    candidateHit->setStoreRay(FALSE);
 
     double baseT = NO_HIT;
     candidateHit->resetForDistanceOnly();
@@ -211,17 +212,17 @@ bool Arrow::doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit) {
     if (headCone->doIntersectionFirstHit(shiftedHeadRay, candidateHit)) headT = candidateHit->getHitDistance();
 
     double winnerT = (baseT < headT) ? baseT : headT;
-    if (winnerT == NO_HIT) return false;
+    if (winnerT == NO_HIT) return FALSE;
 
     if (outHit != NULL) {
         if (shouldStoreRay) outHit->setRay(inRay.withT(winnerT));
         else outHit->setHitDistance(winnerT);
         outHit->setStoreRay(shouldStoreRay);
     }
-    return true;
+    return TRUE;
 }
 
-bool Arrow::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
+BOOLEAN Arrow::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     if (outHit == NULL || !outHit->needsAnySurfaceData()) {
         return doIntersectionDistanceOnly(inRay, outHit);
     }
@@ -231,9 +232,9 @@ bool Arrow::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
 
     RayHit baseHit(outHit->getRequiredDetailMask());
     RayHit headHit(outHit->getRequiredDetailMask());
-    bool hasBase = baseCylinder->doIntersectionFirstHit(inRay, &baseHit);
-    bool hasHead = headCone->doIntersectionFirstHit(shiftedHeadRay, &headHit);
-    if (!hasBase && !hasHead) return false;
+    BOOLEAN hasBase = baseCylinder->doIntersectionFirstHit(inRay, &baseHit);
+    BOOLEAN hasHead = headCone->doIntersectionFirstHit(shiftedHeadRay, &headHit);
+    if (!hasBase && !hasHead) return FALSE;
 
     double baseT = hasBase ? (baseHit.getRay()!=NULL ? baseHit.getRay()->getT() : baseHit.getHitDistance()) : NO_HIT;
     double headT = hasHead ? (headHit.getRay()!=NULL ? headHit.getRay()->getT() : headHit.getHitDistance()) : NO_HIT;
@@ -249,7 +250,7 @@ bool Arrow::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
             outHit->point = Vector3Dd(outHit->point.x(), outHit->point.y(), outHit->point.z() + baseLength);
         }
     }
-    return true;
+    return TRUE;
 }
 
 void Arrow::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
@@ -317,7 +318,8 @@ PolyhedralBoundedSolid* Arrow::buildPolyhedralBoundedSolid(
 
     Matrix4x4d transform;
     double cylinderZStep = baseLength / ((double)(heightDivisions));
-    for ( int i = 0; i < heightDivisions; ++i ) {
+    int i;
+    for ( i = 0; i < heightDivisions; ++i ) {
         transform = transform.translation(0.0, 0.0, cylinderZStep);
         translationalSweepExtrudeFacePlanar(solid, solid->findFace(1), transform);
     }
@@ -329,7 +331,7 @@ PolyhedralBoundedSolid* Arrow::buildPolyhedralBoundedSolid(
 
     double prevRadius = headRadius;
     double coneZStep = headLength / ((double)(heightDivisions));
-    for ( int i = 1; i < heightDivisions; ++i ) {
+    for ( i = 1; i < heightDivisions; ++i ) {
         double nextRadius = headRadius *
             (1.0 - (((double)(i)) / ((double)(heightDivisions))));
         double coneScale = Cpp98Support::abs(prevRadius) > VSDK::EPSILON ?
@@ -345,13 +347,6 @@ PolyhedralBoundedSolid* Arrow::buildPolyhedralBoundedSolid(
 
     return solid;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int Arrow::DEFAULT_CIRCUMFERENCE_DIVISIONS;
-const int Arrow::DEFAULT_HEIGHT_DIVISIONS;
-const int Arrow::MIN_CIRCUMFERENCE_DIVISIONS;
-const int Arrow::MIN_HEIGHT_DIVISIONS;
 
 const Class Arrow::CLASS = { "Arrow", &Solid::CLASS };
 

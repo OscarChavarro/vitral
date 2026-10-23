@@ -1,6 +1,7 @@
 #ifndef __HIDDEN_LINE_RENDERER__
 #define __HIDDEN_LINE_RENDERER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/RenderingElement.h"
 class Camera;
@@ -13,10 +14,10 @@ class HiddenLineQuerySolid {
 public:
     SimpleBody* body;
     PolyhedralBoundedSolid* solid;
-    bool ownsSolid;
+    BOOLEAN ownsSolid;
 
     HiddenLineQuerySolid()
-        : body(0), solid(0), ownsSolid(false)
+        : body(0), solid(0), ownsSolid(FALSE)
     {
     }
 };

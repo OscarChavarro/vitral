@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_IncrementalSegmentInserter.h"
@@ -100,35 +101,35 @@ int _Construct::min(Vector2Dd *yvalPoint, Vector2Dd *firstPoint,
     return 0;
 }
 
-bool _Construct::greaterThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint) {
+BOOLEAN _Construct::greaterThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint) {
     if (firstPoint->y > secondPoint->y + TRIANGULATOR_EPSILON)
-        return true;
+        return TRUE;
     else if (firstPoint->y < secondPoint->y - TRIANGULATOR_EPSILON)
-        return false;
+        return FALSE;
     else
         return (firstPoint->x > secondPoint->x);
 }
 
-bool _Construct::equalTo(Vector2Dd *firstPoint, Vector2Dd *secondPoint) {
+BOOLEAN _Construct::equalTo(Vector2Dd *firstPoint, Vector2Dd *secondPoint) {
     return (fpEqual(firstPoint->y, secondPoint->y) &&
             fpEqual(firstPoint->x, secondPoint->x));
 }
 
-bool _Construct::greaterThanEqualTo(Vector2Dd *firstPoint,
+BOOLEAN _Construct::greaterThanEqualTo(Vector2Dd *firstPoint,
                                     Vector2Dd *secondPoint) {
     if (firstPoint->y > secondPoint->y + TRIANGULATOR_EPSILON)
-        return true;
+        return TRUE;
     else if (firstPoint->y < secondPoint->y - TRIANGULATOR_EPSILON)
-        return false;
+        return FALSE;
     else
         return (firstPoint->x >= secondPoint->x);
 }
 
-bool _Construct::lessThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint) {
+BOOLEAN _Construct::lessThan(Vector2Dd *firstPoint, Vector2Dd *secondPoint) {
     if (firstPoint->y < secondPoint->y - TRIANGULATOR_EPSILON)
-        return true;
+        return TRUE;
     else if (firstPoint->y > secondPoint->y + TRIANGULATOR_EPSILON)
-        return false;
+        return FALSE;
     else
         return (firstPoint->x < secondPoint->x);
 }
@@ -142,7 +143,7 @@ double _Construct::dot(const Vector2Dd &v0, const Vector2Dd &v1) {
     return (v0.x * v1.x + v0.y * v1.y);
 }
 
-bool _Construct::fpEqual(double firstValue, double secondValue) {
+BOOLEAN _Construct::fpEqual(double firstValue, double secondValue) {
     return (fabs(firstValue - secondValue) <= TRIANGULATOR_EPSILON);
 }
 
@@ -309,7 +310,7 @@ _TriangulationTrapezoidQueryNode *_Construct::initQueryStructure(int segmentInde
     i6->trapezoidIndex = t1;
     i7->trapezoidIndex = t2;
 
-    s->hasBeenInserted = true;
+    s->hasBeenInserted = TRUE;
     return root;
 }
 

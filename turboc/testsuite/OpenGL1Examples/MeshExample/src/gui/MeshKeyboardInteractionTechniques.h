@@ -1,6 +1,8 @@
 #ifndef __MESH_KEYBOARD_INTERACTION_TECHNIQUES__
 #define __MESH_KEYBOARD_INTERACTION_TECHNIQUES__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 class CameraController;
 class KeyEvent;
 class MeshModel;
@@ -13,18 +15,18 @@ private:
     CameraController* cameraController;
     RendererConfigurationController* qualityController;
     RayGizmoInteractionTechniques* rayGizmoTechniques;
-    bool* shouldClose;
+    BOOLEAN* shouldClose;
 
 public:
     MeshKeyboardInteractionTechniques(
         MeshModel* model,
         CameraController* cameraController,
         RendererConfigurationController* qualityController,
-        bool* shouldClose);
+        BOOLEAN* shouldClose);
     ~MeshKeyboardInteractionTechniques();
 
-    bool processKeyPressedEvent(const KeyEvent& event);
-    bool processKeyReleasedEvent(const KeyEvent& event);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processKeyReleasedEvent(const KeyEvent& event);
 };
 
 #endif

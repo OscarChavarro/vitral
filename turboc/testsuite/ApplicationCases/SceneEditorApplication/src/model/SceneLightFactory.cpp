@@ -1,4 +1,5 @@
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 #include "java/util/ArrayList.txx"
@@ -34,7 +35,7 @@ SceneLightFactory::SceneLightFactory(long long randomSeed)
 PointLight* SceneLightFactory::createLight(
     const ArrayList<Light*>& existingLights, ViewportSet* viewportSet)
 {
-    bool first = existingLights.size() == 0;
+    BOOLEAN first = existingLights.size() == 0;
     Viewport* viewport = chooseViewport(viewportSet, first);
 
     if ( viewport == NULL ) {
@@ -69,7 +70,7 @@ ColorRgb SceneLightFactory::createRandomLightColor()
 }
 
 Viewport* SceneLightFactory::chooseViewport(ViewportSet* viewportSet,
-                                            bool first)
+                                            BOOLEAN first)
 {
     Viewport* selected = viewportSet->getSelectedViewport();
 

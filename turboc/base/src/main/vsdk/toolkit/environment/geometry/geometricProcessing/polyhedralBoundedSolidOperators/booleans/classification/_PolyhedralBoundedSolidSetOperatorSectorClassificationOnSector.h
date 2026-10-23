@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_SECTOR_CLASSIFICATION_ON_SECTOR__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_SECTOR_CLASSIFICATION_ON_SECTOR__
+#ifndef ___PBS_SET_OP_SECTOR_ON_SECTOR__
+#define ___PBS_SET_OP_SECTOR_ON_SECTOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class _PolyhedralBoundedSolidHalfEdge;
@@ -25,14 +26,16 @@ public:
     int s2a;
     int s1b;
     int s2b;
-    bool intersect;
+    BOOLEAN intersect;
     _PolyhedralBoundedSolidHalfEdge* hea;
     _PolyhedralBoundedSolidHalfEdge* heb;
-    bool wa;
-    bool wb;
-    static const int ON = 0;
-    static const int OUT = 1;
-    static const int IN = -1;
+    BOOLEAN wa;
+    BOOLEAN wb;
+    enum {
+        ON = 0,
+        OUT = 1,
+        IN = -1
+    };
 
     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector();
 

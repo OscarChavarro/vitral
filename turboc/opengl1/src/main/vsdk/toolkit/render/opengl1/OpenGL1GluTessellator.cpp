@@ -12,6 +12,7 @@
 #ifndef GLU_VERSION_1_2
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 
 typedef GLUtriangulatorObj GLUtesselator;
 
@@ -131,7 +132,7 @@ void vitralGluTessCallback(GLUtesselator* tess, GLenum which, void (*fn)())
     if ( event == COMBINE_CALLBACK ) {
         return;
     }
-    bool used = callbackOf(event) != NULL || callbackOf(event + 6) != NULL;
+    BOOLEAN used = callbackOf(event) != NULL || callbackOf(event + 6) != NULL;
     void (*trampoline)() = NULL;
     if ( used ) {
         switch ( event ) {

@@ -1,6 +1,7 @@
 #ifndef __SCENE_HISTORY__
 #define __SCENE_HISTORY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Supplier.h"
 
@@ -46,7 +47,7 @@ public:
     /**
     @return true if a user action is being recorded
     */
-    bool isRecording() const;
+    BOOLEAN isRecording() const;
 
     /**
     Starts recording a user action over the scene.
@@ -62,7 +63,7 @@ public:
     `SceneTransformationOperation`)
     @return true if an operation was recorded
     */
-    bool end(const String& name, bool mergeable);
+    BOOLEAN end(const String& name, BOOLEAN mergeable);
 
     /**
     Executes an action recording it as one operation.
@@ -70,7 +71,7 @@ public:
     @param action what changes the scene (run at once)
     @return true if an operation was recorded
     */
-    bool perform(const String& name, Runnable* action);
+    BOOLEAN perform(const String& name, Runnable* action);
 
     /**
     @return the undone operation, or null if there was nothing to undo or an

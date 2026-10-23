@@ -1,6 +1,7 @@
 #ifndef __GENERIC_EDITOR__
 #define __GENERIC_EDITOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/EntityListener.h"
@@ -31,7 +32,7 @@ controls are removed and an "Entity deleted" message is shown.
 class GenericEditor : public EntityListener {
 private:
     GenericEditorListener *listener;
-    bool entityDeleted;
+    BOOLEAN entityDeleted;
     /// Class of the entity under edition, known while it is fully alive
     String entityClassName;
 
@@ -125,7 +126,7 @@ public:
     @return true if the last entity under edition emitted `DELETED` and the
     editor is showing the "Entity deleted" message
     */
-    bool isEntityDeleted() const;
+    BOOLEAN isEntityDeleted() const;
 
     /**
     Reacts to the events of the entity under edition.
@@ -144,7 +145,7 @@ public:
     @param outValue the value as text
     @return false if the entity has no usable getter
     */
-    bool readValue(const ControlSpecification &specification,
+    BOOLEAN readValue(const ControlSpecification &specification,
                    String &outValue) const;
 
     /**
@@ -155,7 +156,7 @@ public:
     @param text the new value as typed by the user
     @return true if the value was accepted and written
     */
-    bool updateValue(const ControlSpecification *specification,
+    BOOLEAN updateValue(const ControlSpecification *specification,
                      const String &text);
 
     /**

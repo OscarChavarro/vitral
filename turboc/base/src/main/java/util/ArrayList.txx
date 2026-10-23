@@ -2,6 +2,7 @@
 #define __ARRAY_LIST_TXX__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 /**
@@ -70,7 +71,7 @@ ArrayList<T>::assignFrom(const ArrayList<T>& other)
     copyFrom(other);
 }
 
-template <class T> bool
+template <class T> BOOLEAN
 ArrayList<T>::add(T voxelData)
 {
     if ( currentSize >= maxSize ) {
@@ -87,7 +88,7 @@ ArrayList<T>::add(T voxelData)
 
         T *newData = new T[newMaxSize];
         if ( !newData ) {
-            return false;
+            return FALSE;
         }
 
         for ( long int i = 0; i < currentSize; i++ ) {
@@ -100,7 +101,7 @@ ArrayList<T>::add(T voxelData)
     }
     Data[currentSize] = voxelData;
     currentSize++;
-    return true;
+    return TRUE;
 }
 
 template <class T> long int
@@ -108,7 +109,7 @@ ArrayList<T>::size() const {
     return currentSize;
 }
 
-template <class T> bool
+template <class T> BOOLEAN
 ArrayList<T>::isEmpty() const {
     return currentSize == 0;
 }
@@ -184,11 +185,11 @@ ArrayList<T>::remove(long int pos)
 template <class T> void
 ArrayList<T>::remove(T data)
 {
-    bool shouldRemove = false;
+    BOOLEAN shouldRemove = FALSE;
     long int i;
     for ( i = 0; i < size(); i++ ) {
         if ( Data[i] == data ) {
-            shouldRemove = true;
+            shouldRemove = TRUE;
             break;
         }
     }
@@ -218,7 +219,7 @@ ArrayList<T>::indexOf(const T &elem) const {
     return -1;
 }
 
-template <class T> bool
+template <class T> BOOLEAN
 ArrayList<T>::contains(const T &elem) const {
     return indexOf(elem) >= 0;
 }
@@ -270,17 +271,17 @@ ArrayList<T>::sort(const Comparator<T> &comparator) {
     delete[] buffer;
 }
 
-template <class T> bool
+template <class T> BOOLEAN
 ArrayList<T>::equals(const ArrayList<T> &other) const {
     if ( currentSize != other.currentSize ) {
-        return false;
+        return FALSE;
     }
     for ( long int i = 0; i < currentSize; i++ ) {
         if ( !(Data[i] == other.Data[i]) ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 template <class T> void

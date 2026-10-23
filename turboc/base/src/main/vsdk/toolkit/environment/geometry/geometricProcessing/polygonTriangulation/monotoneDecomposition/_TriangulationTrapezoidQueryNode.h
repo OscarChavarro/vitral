@@ -2,6 +2,7 @@
 #define __TRIANGULATION_TRAPEZOID_QUERY_NODE__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 class _TriangulationTrapezoidQueryNode {
   public:
@@ -19,7 +20,7 @@ class _TriangulationTrapezoidQueryNode {
     int locateEndpoint(Vector2Dd *queryPoint, Vector2Dd *otherPoint);
 
   private:
-    static bool isLeftOf(int segmentIndex, Vector2Dd *queryPoint);
+    static BOOLEAN isLeftOf(int segmentIndex, Vector2Dd *queryPoint);
 };
 
 #endif

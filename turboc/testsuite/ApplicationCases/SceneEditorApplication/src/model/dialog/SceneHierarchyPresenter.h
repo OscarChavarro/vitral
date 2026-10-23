@@ -1,6 +1,7 @@
 #ifndef __SCENE_HIERARCHY_PRESENTER__
 #define __SCENE_HIERARCHY_PRESENTER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
@@ -76,7 +77,7 @@ public:
     /**
     @return true if the element of the row is selected in the scene
     */
-    bool isSelected(const DialogTreeNode* node) const;
+    BOOLEAN isSelected(const DialogTreeNode* node) const;
 
     /**
     Selects in the scene the elements of the rows (and only them), recording
@@ -94,12 +95,12 @@ public:
     */
     ArrayList<SimpleBody*> selectedBodies(
         const ArrayList<const DialogTreeNode*>& nodes) const;
-    bool anyHidden(const ArrayList<SimpleBody*>& bodies) const;
+    BOOLEAN anyHidden(const ArrayList<SimpleBody*>& bodies) const;
 
     /**
     Hides or shows the bodies, and repaints.
     */
-    void setHidden(const ArrayList<SimpleBody*>& bodies, bool hidden);
+    void setHidden(const ArrayList<SimpleBody*>& bodies, BOOLEAN hidden);
 };
 
 #endif

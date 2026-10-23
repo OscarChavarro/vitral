@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
@@ -33,7 +34,7 @@ int IndexedColorImageUncompressed::getSizeInBytes() const {
     return xSize * ySize + 3 * INT_SIZE_IN_BYTES + POINTER_SIZE_IN_BYTES;
 }
 
-bool IndexedColorImageUncompressed::init(int width, int height) {
+BOOLEAN IndexedColorImageUncompressed::init(int width, int height) {
     try {
         if (data != NULL) {
             delete[] data;
@@ -44,14 +45,14 @@ bool IndexedColorImageUncompressed::init(int width, int height) {
         }
     } catch (...) {
         data = NULL;
-        return false;
+        return FALSE;
     }
     xSize = width;
     ySize = height;
-    return true;
+    return TRUE;
 }
 
-bool IndexedColorImageUncompressed::initNoFill(int width, int height) {
+BOOLEAN IndexedColorImageUncompressed::initNoFill(int width, int height) {
     try {
         if (data != NULL) {
             delete[] data;
@@ -59,11 +60,11 @@ bool IndexedColorImageUncompressed::initNoFill(int width, int height) {
         data = new char[width * height];
     } catch (...) {
         data = NULL;
-        return false;
+        return FALSE;
     }
     xSize = width;
     ySize = height;
-    return true;
+    return TRUE;
 }
 
 int IndexedColorImageUncompressed::pixelBaseIndex(int x, int y) const {
@@ -101,35 +102,39 @@ char IndexedColorImageUncompressed::getPixel(int x, int y) const {
 
 RGBPixel* IndexedColorImageUncompressed::getPixelRgb(int x, int y) const {
     RGBPixel* p = new RGBPixel();
+    // The color is changed by this const method (no `mutable` in Turbo C++)
+    IndexedColorImageUncompressed *self = (IndexedColorImageUncompressed *)this;
     int index = pixelBaseIndex(x, y);
 
     double val = ((double)(unsigned char)data[index]) / 255.0;
 
-    if (staticColor != NULL) {
-        delete staticColor;
+    if (self->staticColor != NULL) {
+        delete self->staticColor;
     }
-    staticColor = colorTable->evalLinear(val);
+    self->staticColor = colorTable->evalLinear(val);
 
-    p->r = (char)((int)(staticColor->r() * 255.0));
-    p->g = (char)((int)(staticColor->g() * 255.0));
-    p->b = (char)((int)(staticColor->b() * 255.0));
+    p->r = (char)((int)(self->staticColor->r() * 255.0));
+    p->g = (char)((int)(self->staticColor->g() * 255.0));
+    p->b = (char)((int)(self->staticColor->b() * 255.0));
 
     return p;
 }
 
 void IndexedColorImageUncompressed::getPixelRgb(int x, int y, RGBPixel* p) const {
+    // The color is changed by this const method (no `mutable` in Turbo C++)
+    IndexedColorImageUncompressed *self = (IndexedColorImageUncompressed *)this;
     int index = pixelBaseIndex(x, y);
 
     double val = ((double)(unsigned char)data[index]) / 255.0;
 
-    if (staticColor != NULL) {
-        delete staticColor;
+    if (self->staticColor != NULL) {
+        delete self->staticColor;
     }
-    staticColor = colorTable->evalLinear(val);
+    self->staticColor = colorTable->evalLinear(val);
 
-    p->r = (char)((int)(staticColor->r() * 255.0));
-    p->g = (char)((int)(staticColor->g() * 255.0));
-    p->b = (char)((int)(staticColor->b() * 255.0));
+    p->r = (char)((int)(self->staticColor->r() * 255.0));
+    p->g = (char)((int)(self->staticColor->g() * 255.0));
+    p->b = (char)((int)(self->staticColor->b() * 255.0));
 }
 
 int IndexedColorImageUncompressed::getXSize() const {

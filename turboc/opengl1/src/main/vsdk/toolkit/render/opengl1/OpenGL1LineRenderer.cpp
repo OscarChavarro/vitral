@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1MatrixState.h"
@@ -26,7 +27,7 @@ Vector4Dd OpenGL1LineRenderer::interpolate(const Vector4Dd& start, const Vector4
     return start.multiply(1.0 - t).add(end.multiply(t));
 }
 
-bool OpenGL1LineRenderer::clipLineToClipVolume(
+BOOLEAN OpenGL1LineRenderer::clipLineToClipVolume(
     const Vector4Dd& start,
     const Vector4Dd& end,
     Vector4Dd& outStart,
@@ -39,12 +40,12 @@ bool OpenGL1LineRenderer::clipLineToClipVolume(
         double d0 = evaluateClipPlane(CLIP_PLANES[i], outStart);
         double d1 = evaluateClipPlane(CLIP_PLANES[i], outEnd);
         if ( d0 < 0.0 && d1 < 0.0 ) {
-            return false;
+            return FALSE;
         }
         if ( d0 < 0.0 || d1 < 0.0 ) {
             double denominator = d0 - d1;
             if ( Cpp98Support::abs(denominator) < 1.0e-12 ) {
-                return false;
+                return FALSE;
             }
             double t = d0 / denominator;
             Vector4Dd intersection = interpolate(outStart, outEnd, t);
@@ -56,7 +57,7 @@ bool OpenGL1LineRenderer::clipLineToClipVolume(
             }
         }
     }
-    return true;
+    return TRUE;
 }
 
 void OpenGL1LineRenderer::addVertex(

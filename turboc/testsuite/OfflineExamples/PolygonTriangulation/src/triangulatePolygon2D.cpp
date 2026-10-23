@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -55,14 +56,14 @@ struct CommandLineOptions {
     String outputFileName;
     int zoneWidth;
     int zoneHeight;
-    bool showHelp;
+    BOOLEAN showHelp;
 
     CommandLineOptions()
         : inputFileName(DEFAULT_INPUT_FILE)
         , outputFileName()
         , zoneWidth(DEFAULT_ZONE_WIDTH)
         , zoneHeight(DEFAULT_ZONE_HEIGHT)
-        , showHelp(false)
+        , showHelp(FALSE)
     {
     }
 
@@ -87,12 +88,12 @@ String basenameOf(const String& path)
     return path.substr(slash + 1);
 }
 
-bool startsWith(const String& value, const String& prefix)
+BOOLEAN startsWith(const String& value, const String& prefix)
 {
     return value.startsWith(prefix.c_str());
 }
 
-bool endsWith(const String& value, const String& suffix)
+BOOLEAN endsWith(const String& value, const String& suffix)
 {
     return value.size() >= suffix.size() &&
         value.substr(value.size() - suffix.size()) == suffix;
@@ -108,11 +109,11 @@ String deriveOutputFileName(const String& inputFileName)
         const String number = inputBaseName.substr(
             prefix.size(),
             inputBaseName.size() - prefix.size() - suffix.size());
-        bool allDigits = !number.isEmpty();
+        BOOLEAN allDigits = !number.isEmpty();
         for (int i = 0; allDigits && i < number.size(); ++i) {
             const char c = number[i];
             if (c < '0' || c > '9') {
-                allDigits = false;
+                allDigits = FALSE;
             }
         }
         if (allDigits) {
@@ -175,7 +176,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
         const String argument(argv[i]);
 
         if (argument == "--help" || argument == "-h") {
-            options.showHelp = true;
+            options.showHelp = TRUE;
             continue;
         }
 
@@ -398,7 +399,7 @@ ArrayList<Vertex2D> flattenVertices(const Polygon2D& polygon)
     return vertices;
 }
 
-bool isValidTriangleIndex(const MonotoneDecompositionTriangulator::Triangle& triangle,
+BOOLEAN isValidTriangleIndex(const MonotoneDecompositionTriangulator::Triangle& triangle,
     size_t vertexCount)
 {
     return triangle.get(0) >= 0 && triangle.get(1) >= 0 &&

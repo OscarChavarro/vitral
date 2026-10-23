@@ -1,6 +1,7 @@
 #ifndef __BOX__
 #define __BOX__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Ray;
 class RayHit;
@@ -22,7 +23,7 @@ public:
     virtual ~Box() {}
 
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
     virtual double* getMinMax();

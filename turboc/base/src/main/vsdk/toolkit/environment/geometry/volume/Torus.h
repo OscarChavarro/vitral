@@ -1,6 +1,7 @@
 #ifndef __TORUS__
 #define __TORUS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Ray;
@@ -34,7 +35,7 @@ private:
     @return true if the point of the ray at the distance is on the surface of
     the torus
     */
-    bool isOnSurface(const Vector3Dd& origin, const Vector3Dd& direction,
+    BOOLEAN isOnSurface(const Vector3Dd& origin, const Vector3Dd& direction,
                      double t) const;
 
 public:
@@ -50,7 +51,7 @@ public:
     void setMinorRadius(double rMinor);
 
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outHit);
     virtual double* getMinMax();
 };

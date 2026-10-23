@@ -1,6 +1,7 @@
 #ifndef __GUI_EVENT_EXECUTOR__
 #define __GUI_EVENT_EXECUTOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/CommandListener.h"
@@ -52,7 +53,7 @@ public:
     @param label identifier of the command (`IDC_*`)
     @return true if the command was executed
     */
-    virtual bool executeCommand(const String& label);
+    virtual BOOLEAN executeCommand(const String& label);
 
     /**
     @param label identifier of the command (`IDC_*`)
@@ -66,7 +67,7 @@ public:
     @param file obj or ply file (the formats read by the C++ port)
     @return false if the file can not be read (the Java version throws)
     */
-    bool importObjects(const File& file);
+    BOOLEAN importObjects(const File& file);
 
     /**
     Writes the objects of the scene to a file.
@@ -74,14 +75,14 @@ public:
     @param format format of the file
     @return false if the file can not be written (the Java version throws)
     */
-    bool exportObjects(const File& file, ExportFormat format);
+    BOOLEAN exportObjects(const File& file, ExportFormat format);
 
     /**
     Replaces the palette used to present depth maps.
     @param file Gimp palette (gpl) file
     @return false if the file can not be read (the Java version throws)
     */
-    bool loadPalette(const File& file);
+    BOOLEAN loadPalette(const File& file);
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <math.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_PolyhedralBoundedSolidSetOperator.h"
@@ -27,7 +28,7 @@ static String vectorText(const Vector3Dd& v)
 
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex::
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex()
-    : he(NULL), hasReferenceFrame(false), wide(false)
+    : he(NULL), hasReferenceFrame(FALSE), wide(FALSE)
 {
 }
 
@@ -89,8 +90,8 @@ int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex::compareTo(
 
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector()
-    : secta(0), sectb(0), s1a(0), s2a(0), s1b(0), s2b(0), intersect(false),
-      hea(NULL), heb(NULL), wa(false), wb(false)
+    : secta(0), sectb(0), s1a(0), s2a(0), s1b(0), s2b(0), intersect(FALSE),
+      hea(NULL), heb(NULL), wa(FALSE), wb(FALSE)
 {
 }
 
@@ -162,8 +163,8 @@ String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::toString(
 
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace()
-    : sector(NULL), referencePlane(NULL), cl(0), isWide(false),
-      situation(UNDEFINED), reverse(false), coplanarRelation(COPLANAR_UNKNOWN)
+    : sector(NULL), referencePlane(NULL), cl(0), isWide(FALSE),
+      situation(UNDEFINED), reverse(FALSE), coplanarRelation(COPLANAR_UNKNOWN)
 {
 }
 
@@ -274,25 +275,3 @@ String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::toString() 
 
 // Definitions of integral constants initialized in the class (C++98 needs
 // them when the constants are bound to references)
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::OUT;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::IN;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::ON;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::ABOVE;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::BELOW;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::ON;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::AinB;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::AoutB;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::BinA;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::BoutA;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::AonBplus;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::AonBminus;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::BonAplus;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::BonAminus;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::COPLANAR_FACE;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::INPLANE_EDGE;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::CROSSING_EDGE;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::UNDEFINED;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::COPLANAR_UNKNOWN;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::COPLANAR_DISJOINT;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::COPLANAR_TOUCHING;
-const int _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::COPLANAR_OVERLAP;

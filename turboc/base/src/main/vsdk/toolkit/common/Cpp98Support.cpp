@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 String
@@ -36,6 +37,7 @@ Cpp98Support::toString(unsigned long value)
     return String(buffer);
 }
 
+#ifdef VSDK_HAS_LONG_LONG
 String
 Cpp98Support::toString(long long value)
 {
@@ -51,6 +53,7 @@ Cpp98Support::toString(unsigned long long value)
     sprintf(buffer, "%llu", value);
     return String(buffer);
 }
+#endif
 
 String
 Cpp98Support::toString(float value)
@@ -147,28 +150,51 @@ Cpp98Support::ilogb(double value)
     return exponent - 1;
 }
 
-bool
+double
+Cpp98Support::nan()
+{
+#ifdef NAN
+    return NAN;
+#else
+    // IEEE 754 quiet NaN built from its bytes (x86 order): 0.0 / 0.0 traps
+    // where floating-point exceptions are enabled (i.e. Turbo C++ 3.0)
+    static const unsigned char bytes[8] = { 0, 0, 0, 0, 0, 0, 0xF8, 0x7F };
+    double value;
+    memcpy(&value, bytes, sizeof(value));
+    return value;
+#endif
+}
+
+BOOLEAN
 Cpp98Support::isNaN(double value)
 {
     return value != value;
 }
 
-bool
+BOOLEAN
 Cpp98Support::isInfinite(double value)
 {
     return !isNaN(value) && isNaN(value - value);
 }
 
-bool
+BOOLEAN
 Cpp98Support::isFinite(double value)
 {
     return !isNaN(value - value);
 }
 
-bool
+BOOLEAN
 Cpp98Support::signBit(double value)
 {
+#ifdef __TURBOC__
+    // No copysign: the sign is the highest bit of an IEEE 754 double (x86
+    // byte order)
+    unsigned char bytes[sizeof(double)];
+    memcpy(bytes, &value, sizeof(value));
+    return (bytes[sizeof(double) - 1] & 0x80) != 0;
+#else
     return copysign(1.0, value) < 0.0;
+#endif
 }
 
 int
@@ -183,11 +209,13 @@ Cpp98Support::abs(long value)
     return value < 0 ? -value : value;
 }
 
+#ifdef VSDK_HAS_LONG_LONG
 long long
 Cpp98Support::abs(long long value)
 {
     return value < 0 ? -value : value;
 }
+#endif
 
 float
 Cpp98Support::abs(float value)

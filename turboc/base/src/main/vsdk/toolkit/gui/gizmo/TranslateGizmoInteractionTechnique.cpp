@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -39,7 +40,7 @@ static int floorMod(int x, int y)
 
 TranslateGizmoInteractionTechnique::TranslateGizmoInteractionTechnique(
     TranslateGizmo* gizmo)
-    : gizmo(gizmo), active(false), cursorWrapEnabled(false)
+    : gizmo(gizmo), active(FALSE), cursorWrapEnabled(FALSE)
 {
     endGesture();
 }
@@ -49,13 +50,13 @@ TranslateGizmo* TranslateGizmoInteractionTechnique::getGizmo() const
     return gizmo;
 }
 
-bool TranslateGizmoInteractionTechnique::isInputGizmoKey(
+BOOLEAN TranslateGizmoInteractionTechnique::isInputGizmoKey(
     const KeyEvent& keyEvent)
 {
     return gizmo->getInputGizmo()->consumesKey(keyEvent);
 }
 
-bool TranslateGizmoInteractionTechnique::isActive() const
+BOOLEAN TranslateGizmoInteractionTechnique::isActive() const
 {
     return active;
 }
@@ -66,39 +67,39 @@ Viewport* TranslateGizmoInteractionTechnique::getDragViewport() const
 }
 
 void TranslateGizmoInteractionTechnique::setCursorWrapEnabled(
-    bool cursorWrapEnabled)
+    BOOLEAN cursorWrapEnabled)
 {
     this->cursorWrapEnabled = cursorWrapEnabled;
 }
 
-bool TranslateGizmoInteractionTechnique::isCursorWrapEnabled() const
+BOOLEAN TranslateGizmoInteractionTechnique::isCursorWrapEnabled() const
 {
     return cursorWrapEnabled;
 }
 
-bool TranslateGizmoInteractionTechnique::consumeCursorWarp(
+BOOLEAN TranslateGizmoInteractionTechnique::consumeCursorWarp(
     CursorWarp* outWarp)
 {
-    bool hadWarp = hasPendingWarp;
+    BOOLEAN hadWarp = hasPendingWarp;
 
     if ( hadWarp && outWarp != NULL ) {
         *outWarp = pendingWarp;
     }
-    hasPendingWarp = false;
+    hasPendingWarp = FALSE;
     return hadWarp;
 }
 
-bool TranslateGizmoInteractionTechnique::processMouseEvent(const MouseEvent&)
+BOOLEAN TranslateGizmoInteractionTechnique::processMouseEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool TranslateGizmoInteractionTechnique::processKeyPressedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processKeyPressedEvent(
     const KeyEvent& keyEvent)
 {
-    bool updateNeeded = false;
+    BOOLEAN updateNeeded = FALSE;
 
-    gizmo->setSelectedResizing(true);
+    gizmo->setSelectedResizing(TRUE);
     gizmo->updateGeometryState();
 
     InputGizmo* inputGizmo = gizmo->getInputGizmo();
@@ -109,14 +110,14 @@ bool TranslateGizmoInteractionTechnique::processKeyPressedEvent(
 
             inputGizmo->cancelEditing();
             gizmo->setPosition(Vector3Dd(target[0], target[1], target[2]));
-            return true;
+            return TRUE;
         }
-        return false;
+        return FALSE;
     }
 
     if ( keyEvent.unicodeId != KeyEvent::KEY_NONE ) {
         Vector3Dd p = gizmo->getPosition();
-        bool isMovementKey = strchr("xXyYzZ", keyEvent.unicodeId) != NULL;
+        BOOLEAN isMovementKey = strchr("xXyYzZ", keyEvent.unicodeId) != NULL;
 
         if ( isMovementKey ) {
             gizmo->getInputGizmo()->cancelEditing();
@@ -125,27 +126,27 @@ bool TranslateGizmoInteractionTechnique::processKeyPressedEvent(
         switch ( keyEvent.unicodeId ) {
           case 'x':
             gizmo->setPosition(Vector3Dd(p.x() - KEY_MOVEMENT_STEP, p.y(), p.z()));
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'X':
             gizmo->setPosition(Vector3Dd(p.x() + KEY_MOVEMENT_STEP, p.y(), p.z()));
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'y':
             gizmo->setPosition(Vector3Dd(p.x(), p.y() - KEY_MOVEMENT_STEP, p.z()));
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'Y':
             gizmo->setPosition(Vector3Dd(p.x(), p.y() + KEY_MOVEMENT_STEP, p.z()));
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'z':
             gizmo->setPosition(Vector3Dd(p.x(), p.y(), p.z() - KEY_MOVEMENT_STEP));
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           case 'Z':
             gizmo->setPosition(Vector3Dd(p.x(), p.y(), p.z() + KEY_MOVEMENT_STEP));
-            updateNeeded = true;
+            updateNeeded = TRUE;
             break;
           default:
             break;
@@ -155,16 +156,16 @@ bool TranslateGizmoInteractionTechnique::processKeyPressedEvent(
     return updateNeeded;
 }
 
-bool TranslateGizmoInteractionTechnique::processKeyReleasedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processKeyReleasedEvent(
     const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool TranslateGizmoInteractionTechnique::processMousePressedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processMousePressedEvent(
     const MouseEvent& e, Viewport* viewport)
 {
-    bool changed = processMousePressedEvent(e);
+    BOOLEAN changed = processMousePressedEvent(e);
 
     if ( viewport != NULL &&
          gizmo->getCurrentSelection() != TranslateGizmo::NULL_GROUP ) {
@@ -176,7 +177,7 @@ bool TranslateGizmoInteractionTechnique::processMousePressedEvent(
     return changed;
 }
 
-bool TranslateGizmoInteractionTechnique::processMousePressedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processMousePressedEvent(
     const MouseEvent& e)
 {
     endGesture();
@@ -188,22 +189,22 @@ bool TranslateGizmoInteractionTechnique::processMousePressedEvent(
     else {
         lastDeltaPosition = p.subtract(gizmo->getPosition());
     }
-    return false;
+    return FALSE;
 }
 
-bool TranslateGizmoInteractionTechnique::processMouseReleasedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processMouseReleasedEvent(
     const MouseEvent&)
 {
     endGesture();
-    gizmo->setSelectedResizing(true);
+    gizmo->setSelectedResizing(TRUE);
     gizmo->updateGeometryState();
-    return true;
+    return TRUE;
 }
 
-bool TranslateGizmoInteractionTechnique::processMouseClickedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processMouseClickedEvent(
     const MouseEvent& e)
 {
-    gizmo->setSelectedResizing(true);
+    gizmo->setSelectedResizing(TRUE);
     gizmo->updateGeometryState();
 
     int previousSelection = gizmo->getCurrentSelection();
@@ -217,7 +218,7 @@ bool TranslateGizmoInteractionTechnique::processMouseClickedEvent(
     return selection != previousSelection;
 }
 
-bool TranslateGizmoInteractionTechnique::processMouseMovedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processMouseMovedEvent(
     const MouseEvent& e)
 {
     if ( dragViewport != NULL ) {
@@ -225,10 +226,10 @@ bool TranslateGizmoInteractionTechnique::processMouseMovedEvent(
         // still can come (i.e. when the cursor is placed by the caller)
         // and they inform the cursor arrived to its new position
         checkWarpArrival(e.getX(), e.getY());
-        return false;
+        return FALSE;
     }
 
-    gizmo->setSelectedResizing(true);
+    gizmo->setSelectedResizing(TRUE);
     gizmo->updateGeometryState();
 
     int previousSelection = gizmo->getCurrentSelection();
@@ -239,7 +240,7 @@ bool TranslateGizmoInteractionTechnique::processMouseMovedEvent(
     return selection != previousSelection;
 }
 
-bool TranslateGizmoInteractionTechnique::processMouseDraggedEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processMouseDraggedEvent(
     const MouseEvent& e)
 {
     MouseEvent event = e;
@@ -247,47 +248,47 @@ bool TranslateGizmoInteractionTechnique::processMouseDraggedEvent(
     if ( dragViewport != NULL ) {
         if ( !toVirtualEvent(e, &event) ) {
             // Old event, received before the cursor arrives to its new place
-            return false;
+            return FALSE;
         }
     }
     Vector3Dd p;
 
     if ( !calculateInteractionPoint(event, &p) ) {
-        return false;
+        return FALSE;
     }
 
     gizmo->getInputGizmo()->cancelEditing();
     gizmo->setPosition(p.subtract(lastDeltaPosition));
-    gizmo->setSelectedResizing(false);
-    return true;
+    gizmo->setSelectedResizing(FALSE);
+    return TRUE;
 }
 
-bool TranslateGizmoInteractionTechnique::processMouseWheelEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::processMouseWheelEvent(
     const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
 void TranslateGizmoInteractionTechnique::endGesture()
 {
     dragViewport = NULL;
     dragSelection = TranslateGizmo::NULL_GROUP;
-    wrappingSuspended = false;
+    wrappingSuspended = FALSE;
     wrapOffsetX = 0;
     wrapOffsetY = 0;
     lastVirtualX = 0;
     lastVirtualY = 0;
-    awaitingWarp = false;
+    awaitingWarp = FALSE;
     warpTargetX = 0;
     warpTargetY = 0;
     staleEvents = 0;
-    hasPendingWarp = false;
+    hasPendingWarp = FALSE;
 }
 
-bool TranslateGizmoInteractionTechnique::checkWarpArrival(int x, int y)
+BOOLEAN TranslateGizmoInteractionTechnique::checkWarpArrival(int x, int y)
 {
     if ( !awaitingWarp ) {
-        return true;
+        return TRUE;
     }
     int minSize = dragViewport->getPixelSizeX() < dragViewport->getPixelSizeY() ?
         dragViewport->getPixelSizeX() : dragViewport->getPixelSizeY();
@@ -296,13 +297,13 @@ bool TranslateGizmoInteractionTechnique::checkWarpArrival(int x, int y)
 
     if ( Cpp98Support::abs(x - warpTargetX) <= tolerance &&
          Cpp98Support::abs(y - warpTargetY) <= tolerance ) {
-        awaitingWarp = false;
-        return true;
+        awaitingWarp = FALSE;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
-bool TranslateGizmoInteractionTechnique::toVirtualEvent(
+BOOLEAN TranslateGizmoInteractionTechnique::toVirtualEvent(
     const MouseEvent& e, MouseEvent* outVirtual)
 {
     int x = e.getX();
@@ -317,13 +318,13 @@ bool TranslateGizmoInteractionTechnique::toVirtualEvent(
         else if ( ++staleEvents > MAX_STALE_EVENTS_AFTER_WARP ) {
             // The cursor was not placed: go on without wrapping, keeping
             // the continuity of the virtual coordinates
-            wrappingSuspended = true;
-            awaitingWarp = false;
+            wrappingSuspended = TRUE;
+            awaitingWarp = FALSE;
             wrapOffsetX = lastVirtualX - x;
             wrapOffsetY = lastVirtualY - y;
         }
         else {
-            return false;
+            return FALSE;
         }
     }
 
@@ -340,10 +341,10 @@ bool TranslateGizmoInteractionTechnique::toVirtualEvent(
         wrapOffsetY += y - wrappedY;
         warpTargetX = wrappedX;
         warpTargetY = wrappedY;
-        awaitingWarp = true;
+        awaitingWarp = TRUE;
         staleEvents = 0;
         pendingWarp = CursorWarp(wrappedX, wrappedY);
-        hasPendingWarp = true;
+        hasPendingWarp = TRUE;
     }
     lastVirtualX = virtualX;
     lastVirtualY = virtualY;
@@ -356,7 +357,7 @@ bool TranslateGizmoInteractionTechnique::toVirtualEvent(
     virtualEvent.setModifiers(e.getModifiers());
     virtualEvent.setClicks(e.getClicks());
     *outVirtual = virtualEvent;
-    return true;
+    return TRUE;
 }
 
 int TranslateGizmoInteractionTechnique::calculateSelection(int x, int y)
@@ -419,12 +420,12 @@ int TranslateGizmoInteractionTechnique::calculateSelection(int x, int y)
     return selection;
 }
 
-bool TranslateGizmoInteractionTechnique::calculateInteractionPoint(
+BOOLEAN TranslateGizmoInteractionTechnique::calculateInteractionPoint(
     const MouseEvent& e, Vector3Dd* outPoint)
 {
     Camera* camera = gizmo->getCamera();
     Vector3Dd v;
-    bool hasDirection = true;
+    BOOLEAN hasDirection = TRUE;
     int technique = 0;
     int group = dragViewport != NULL ?
         dragSelection : gizmo->getCurrentSelection();
@@ -455,12 +456,12 @@ bool TranslateGizmoInteractionTechnique::calculateInteractionPoint(
         technique = MOVE_OVER_PLANE;
         break;
       default:
-        hasDirection = false;
+        hasDirection = FALSE;
         break;
     }
 
     if ( !hasDirection || camera == NULL ) {
-        return false;
+        return FALSE;
     }
 
     Vector3Dd o = gizmo->getPosition();
@@ -480,11 +481,11 @@ bool TranslateGizmoInteractionTechnique::calculateInteractionPoint(
 
         if ( hit == NULL ) {
             *outPoint = o;
-            return true;
+            return TRUE;
         }
         *outPoint = hit->getDirection().multiply(hit->getT()).add(hit->getOrigin());
         delete hit;
-        return true;
+        return TRUE;
     }
 
     // Move along an axis: closest point of the axis line to the cursor's
@@ -500,12 +501,12 @@ bool TranslateGizmoInteractionTechnique::calculateInteractionPoint(
 
     if ( denominator < AXIS_PARALLEL_TO_RAY_LIMIT ) {
         // Looking (almost) along the axis: cursor does not define a point
-        return false;
+        return FALSE;
     }
 
     double s = (b * rayDirection.dotProduct(w0) - axis.dotProduct(w0)) /
         denominator;
 
     *outPoint = o.add(axis.multiply(s));
-    return true;
+    return TRUE;
 }

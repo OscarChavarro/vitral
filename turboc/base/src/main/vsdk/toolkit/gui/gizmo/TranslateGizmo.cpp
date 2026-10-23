@@ -31,7 +31,7 @@ static double toRadians(double degrees)
 }
 
 TranslateGizmo::TranslateGizmo(Camera* cam)
-    : hasTransformationMatrix(false), camera(NULL),
+    : hasTransformationMatrix(FALSE), camera(NULL),
       lineModel3dsmax(NULL), segmentModel3dsmax(NULL),
       baseApparentSizeInPixels(DEFAULT_APPARENT_SIZE_IN_PIXELS),
       apparentSizeInPixels(DEFAULT_APPARENT_SIZE_IN_PIXELS),
@@ -51,16 +51,17 @@ TranslateGizmo::TranslateGizmo(Camera* cam)
     boxModel = new Box(BOX_SIDE, BOX_SIDE, BOX_HEIGHT);
     coneModel = new Cone(0.05, 0, 0.3* ARROW_LENGTH);
 
-    for ( int i = 0; i < 12; i++ ) {
+    int i;
+    for ( i = 0; i < 12; i++ ) {
         elements.add(new SimpleBody());
     }
 
-    for ( int i = 0; i < 15; i++ ) {
+    for ( i = 0; i < 15; i++ ) {
         elementInstances3dsmax.add(new SimpleBody());
     }
 
     setCamera(cam);
-    selectedResizing = true;
+    selectedResizing = TRUE;
     currentScale = 1.0;
 }
 
@@ -164,14 +165,14 @@ TranslateGizmo::getLineSegments() const
     return segments;
 }
 
-bool TranslateGizmo::buildLineStrip(const TranslateGizmoLineSegment& segment,
+BOOLEAN TranslateGizmo::buildLineStrip(const TranslateGizmoLineSegment& segment,
                                     Vector3Dd outStrip[4]) const
 {
     Vector3Dd direction = segment.end().subtract(segment.start());
     double length = direction.length();
 
     if ( length < VSDK::EPSILON || camera == NULL ) {
-        return false;
+        return FALSE;
     }
     direction = direction.multiply(1/length);
 
@@ -203,7 +204,7 @@ bool TranslateGizmo::buildLineStrip(const TranslateGizmoLineSegment& segment,
     outStrip[1] = start.subtract(side);
     outStrip[2] = end.add(side);
     outStrip[3] = end.subtract(side);
-    return true;
+    return TRUE;
 }
 
 double TranslateGizmo::getCurrentScale() const
@@ -364,7 +365,7 @@ SimpleMaterial TranslateGizmo::createMaterial(double r, double g, double b)
 void TranslateGizmo::placeElement(SimpleBody* r, const Matrix4x4d& rotation,
                                   const Matrix4x4d& subR,
                                   const Vector3Dd& subP,
-                                  bool positionFromElementRotation) const
+                                  BOOLEAN positionFromElementRotation) const
 {
     Matrix4x4d eleR = rotation.multiply(subR);
     r->setRotation(eleR);
@@ -381,7 +382,7 @@ void TranslateGizmo::placeElement(SimpleBody* r, const Matrix4x4d& rotation,
 
 void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                                             const Matrix4x4d& /*rotation*/,
-                                            bool /*autosize*/,
+                                            BOOLEAN /*autosize*/,
                                             int initialdu, Camera* camera)
 {
     //-----------------------------------------------------------------
@@ -445,10 +446,10 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
     Vector3Dd axisI(1, 0, 0);
     Vector3Dd axisJ(0, 1, 0);
     Vector3Dd axisK(0, 0, 1);
-    bool orthogonalCamera;
-    bool iPar;
-    bool jPar;
-    bool kPar;
+    BOOLEAN orthogonalCamera;
+    BOOLEAN iPar;
+    BOOLEAN jPar;
+    BOOLEAN kPar;
 
     orthogonalCamera = (camera->getProjectionMode() ==
                         Camera::PROJECTION_MODE_ORTHOGONAL);
@@ -481,7 +482,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(red));
                 }
                 placeElement(r, R, rotY,
-                    Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH), true);
+                    Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH), TRUE);
             }
             break;
           case Y_AXIS_ELEMENT:
@@ -497,7 +498,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(green));
                 }
                 placeElement(r, R, rotMinusX,
-                    Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH), true);
+                    Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH), TRUE);
             }
             break;
           case Z_AXIS_ELEMENT:
@@ -513,7 +514,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(blue));
                 }
                 placeElement(r, R, identity,
-                    Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH), true);
+                    Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH), TRUE);
             }
             break;
           case XYY_SEGMENT_ELEMENT:
@@ -527,7 +528,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(green));
                 }
                 placeElement(r, R, rotY,
-                    Vector3Dd(0, scale* SEGMENT_LENGTH, 0), true);
+                    Vector3Dd(0, scale* SEGMENT_LENGTH, 0), TRUE);
             }
             break;
           case XYX_SEGMENT_ELEMENT:
@@ -541,7 +542,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(red));
                 }
                 placeElement(r, R, rotMinusX,
-                    Vector3Dd(scale* SEGMENT_LENGTH, 0, 0), true);
+                    Vector3Dd(scale* SEGMENT_LENGTH, 0, 0), TRUE);
             }
             break;
           case YZZ_SEGMENT_ELEMENT:
@@ -555,7 +556,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(blue));
                 }
                 placeElement(r, R, rotMinusX,
-                    Vector3Dd(0, 0, scale* SEGMENT_LENGTH), false);
+                    Vector3Dd(0, 0, scale* SEGMENT_LENGTH), FALSE);
             }
             break;
           case YZY_SEGMENT_ELEMENT:
@@ -569,7 +570,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(green));
                 }
                 placeElement(r, R, identity,
-                    Vector3Dd(0, scale* SEGMENT_LENGTH, 0), false);
+                    Vector3Dd(0, scale* SEGMENT_LENGTH, 0), FALSE);
             }
             break;
           case XZZ_SEGMENT_ELEMENT:
@@ -583,7 +584,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(blue));
                 }
                 placeElement(r, R, rotY,
-                    Vector3Dd(0, 0, scale* SEGMENT_LENGTH), false);
+                    Vector3Dd(0, 0, scale* SEGMENT_LENGTH), FALSE);
             }
             break;
           case XZX_SEGMENT_ELEMENT:
@@ -597,7 +598,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                     r->setMaterial(new SimpleMaterial(red));
                 }
                 placeElement(r, R, identity,
-                    Vector3Dd(scale* SEGMENT_LENGTH, 0, 0), false);
+                    Vector3Dd(scale* SEGMENT_LENGTH, 0, 0), FALSE);
             }
             break;
           case XY_BOX_ELEMENT:
@@ -610,7 +611,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                 r->setGeometryReference(boxModel);
                 r->setMaterial(new SimpleMaterial(yellowTransparent));
                 placeElement(r, R, identity,
-                    Vector3Dd(scale*BOX_SIDE/2, scale*BOX_SIDE/2, 0), false);
+                    Vector3Dd(scale*BOX_SIDE/2, scale*BOX_SIDE/2, 0), FALSE);
             }
             break;
           case YZ_BOX_ELEMENT:
@@ -623,7 +624,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                 r->setGeometryReference(boxModel);
                 r->setMaterial(new SimpleMaterial(yellowTransparent));
                 placeElement(r, R, rotY,
-                    Vector3Dd(0, scale*BOX_SIDE/2, scale*BOX_SIDE/2), false);
+                    Vector3Dd(0, scale*BOX_SIDE/2, scale*BOX_SIDE/2), FALSE);
             }
             break;
           case XZ_BOX_ELEMENT:
@@ -636,7 +637,7 @@ void TranslateGizmo::calculateGeometryState(const Vector3Dd& /*translation*/,
                 r->setGeometryReference(boxModel);
                 r->setMaterial(new SimpleMaterial(yellowTransparent));
                 placeElement(r, R, rotX,
-                    Vector3Dd(scale*BOX_SIDE/2, 0, scale*BOX_SIDE/2), false);
+                    Vector3Dd(scale*BOX_SIDE/2, 0, scale*BOX_SIDE/2), FALSE);
             }
             break;
         }
@@ -651,14 +652,14 @@ Vector3Dd TranslateGizmo::getPosition() const
 void TranslateGizmo::setPosition(const Vector3Dd& p)
 {
     transformationMatrix = transformationMatrix.withTranslation(p);
-    hasTransformationMatrix = true;
+    hasTransformationMatrix = TRUE;
 }
 
 void TranslateGizmo::setTransformationMatrix(
     const Matrix4x4d& transformationMatrix)
 {
     this->transformationMatrix = transformationMatrix;
-    hasTransformationMatrix = true;
+    hasTransformationMatrix = TRUE;
 
     Matrix4x4d R = transformationMatrix.withoutTranslation();
     calculateGeometryState(getPosition(),
@@ -722,7 +723,7 @@ InputGizmo* TranslateGizmo::getInputGizmo()
     return &inputGizmo;
 }
 
-bool TranslateGizmo::isAxisHighlighted(int axis) const
+BOOLEAN TranslateGizmo::isAxisHighlighted(int axis) const
 {
     int currentSelection = getCurrentSelection();
 
@@ -740,45 +741,19 @@ bool TranslateGizmo::isAxisHighlighted(int axis) const
             currentSelection == YZ_PLANE_GROUP ||
             currentSelection == XZ_PLANE_GROUP;
       default:
-        return false;
+        return FALSE;
     }
 }
 
-bool TranslateGizmo::isSelectedResizing() const
+BOOLEAN TranslateGizmo::isSelectedResizing() const
 {
     return selectedResizing;
 }
 
-void TranslateGizmo::setSelectedResizing(bool selectedResizing)
+void TranslateGizmo::setSelectedResizing(BOOLEAN selectedResizing)
 {
     this->selectedResizing = selectedResizing;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int TranslateGizmo::X_AXIS_ELEMENT;
-const int TranslateGizmo::Y_AXIS_ELEMENT;
-const int TranslateGizmo::Z_AXIS_ELEMENT;
-const int TranslateGizmo::XYY_SEGMENT_ELEMENT;
-const int TranslateGizmo::XYX_SEGMENT_ELEMENT;
-const int TranslateGizmo::YZZ_SEGMENT_ELEMENT;
-const int TranslateGizmo::YZY_SEGMENT_ELEMENT;
-const int TranslateGizmo::XZZ_SEGMENT_ELEMENT;
-const int TranslateGizmo::XZX_SEGMENT_ELEMENT;
-const int TranslateGizmo::XY_BOX_ELEMENT;
-const int TranslateGizmo::YZ_BOX_ELEMENT;
-const int TranslateGizmo::XZ_BOX_ELEMENT;
-const int TranslateGizmo::DEFAULT_APPARENT_SIZE_IN_PIXELS;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int TranslateGizmo::NULL_GROUP;
-const int TranslateGizmo::X_AXIS_GROUP;
-const int TranslateGizmo::Y_AXIS_GROUP;
-const int TranslateGizmo::Z_AXIS_GROUP;
-const int TranslateGizmo::XY_PLANE_GROUP;
-const int TranslateGizmo::YZ_PLANE_GROUP;
-const int TranslateGizmo::XZ_PLANE_GROUP;
 
 const Class TranslateGizmo::CLASS = { "TranslateGizmo", &Gizmo::CLASS };
 

@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricFaceOrientationStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricPlanarityStrategy.h"
@@ -10,7 +11,7 @@
 Validates the basic incidence and cycle properties assumed by the half-edge
 representation in [MANT1988].10.2.1 and [MANT1988].10.2.2.
 */
-bool _TopologicalIntegrityStrategy::validate(PolyhedralBoundedSolid* solid,
+BOOLEAN _TopologicalIntegrityStrategy::validate(PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
@@ -22,9 +23,9 @@ bool _TopologicalIntegrityStrategy::validate(PolyhedralBoundedSolid* solid,
         if ( msg != 0 ) {
             *msg += "  - Topological integrity test failed.\n";
         }
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 /**
@@ -32,7 +33,7 @@ Validates that each face can act as the planar polygon required by
 [MANT1988].10.2.1 and can therefore support the face equation machinery of
 [MANT1988].13.1.
 */
-bool _GeometricPlanarityStrategy::validate(PolyhedralBoundedSolid* solid,
+BOOLEAN _GeometricPlanarityStrategy::validate(PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
@@ -44,7 +45,7 @@ bool _GeometricPlanarityStrategy::validate(PolyhedralBoundedSolid* solid,
 Delegates to the neighbour-based heuristic in
 `PolyhedralBoundedSolidGeometricValidator::validateConsistentFaceOrientations`.
 */
-bool _GeometricFaceOrientationStrategy::validate(PolyhedralBoundedSolid* solid,
+BOOLEAN _GeometricFaceOrientationStrategy::validate(PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
@@ -57,7 +58,7 @@ Validates that loop boundaries behave as planar polygonal contours, in the
 sense required by [MANT1988].10.2.1 for faces and by chapter [MANT1988].13
 for geometric point-in-polygon style tests.
 */
-bool _GeometricStrictLoopsStrategy::validate(PolyhedralBoundedSolid* solid,
+BOOLEAN _GeometricStrictLoopsStrategy::validate(PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
@@ -70,7 +71,7 @@ Validates that distinct faces only meet in the ways allowed by
 [MANT1988].15.2, criterion 3, relying on the geometric tests discussed in
 chapter [MANT1988].13.
 */
-bool _GeometricStrictFaceIntersectionsStrategy::validate(PolyhedralBoundedSolid* solid,
+BOOLEAN _GeometricStrictFaceIntersectionsStrategy::validate(PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {

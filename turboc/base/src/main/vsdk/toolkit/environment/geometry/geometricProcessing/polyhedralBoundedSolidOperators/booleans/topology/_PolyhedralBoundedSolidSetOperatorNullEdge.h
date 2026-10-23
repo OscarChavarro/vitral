@@ -2,11 +2,12 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_NULL_EDGE__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_NULL_EDGE__
+#ifndef ___PBS_SET_OPERATOR_NULL_EDGE__
+#define ___PBS_SET_OPERATOR_NULL_EDGE__
 
 #include <stddef.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
@@ -43,7 +44,7 @@ public:
     @return true if this edge goes before `other` (natural order, for
     `NaturalOrderComparator`)
     */
-    bool operator<(const _PolyhedralBoundedSolidSetOperatorNullEdge& other) const;
+    BOOLEAN operator<(const _PolyhedralBoundedSolidSetOperatorNullEdge& other) const;
 
     String toString() const;
 };

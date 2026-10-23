@@ -1,9 +1,10 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/PrintWriter.h"
 #include "java/lang/Exception.h"
 
 
-PrintWriter::PrintWriter(OutputStream *out, bool autoFlush) :
-    out(out), autoFlush(autoFlush), error(false)
+PrintWriter::PrintWriter(OutputStream *out, BOOLEAN autoFlush) :
+    out(out), autoFlush(autoFlush), error(FALSE)
 {
 }
 
@@ -15,7 +16,7 @@ PrintWriter::print(const String &text)
                    text.length());
     }
     catch ( const Exception & ) {
-        error = true;
+        error = TRUE;
     }
 }
 
@@ -36,11 +37,11 @@ PrintWriter::flush()
         out->flush();
     }
     catch ( const Exception & ) {
-        error = true;
+        error = TRUE;
     }
 }
 
-bool
+BOOLEAN
 PrintWriter::checkError()
 {
     flush();

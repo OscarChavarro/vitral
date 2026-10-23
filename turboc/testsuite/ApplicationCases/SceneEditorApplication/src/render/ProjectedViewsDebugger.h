@@ -7,6 +7,8 @@
 #ifndef __PROJECTED_VIEWS_DEBUGGER__
 #define __PROJECTED_VIEWS_DEBUGGER__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 class ApplicationModel;
 class DrawingArea;
 class DrawingAreaHost;
@@ -31,7 +33,7 @@ private:
     DrawingAreaHost* host;
     RendererConfiguration* quality;
     int viewSize;
-    bool isTransparent;
+    BOOLEAN isTransparent;
 
     Image* createProjectedView(ProjectedViewRenderer* renderer,
                                SimpleBodyGroup* referenceBodies, int cam);

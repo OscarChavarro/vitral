@@ -1,4 +1,5 @@
 // Before any other header that could include the Xt ones
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/XtIntrinsics.h"
 
 
@@ -80,7 +81,7 @@ XtDialogHost::Form::Form(XtWidgetSet* widgetSet, XFontSet fontSet,
                          ActionListener* onAction)
     : widgetSet(widgetSet), definition(definition), fontSet(fontSet),
       shell(shell),
-      firstField(NULL), modal(definition->isModal()), visible(false),
+      firstField(NULL), modal(definition->isModal()), visible(FALSE),
       width(DIALOG_WIDTH), buttonsY(0), dialogSession(definition),
       onAction(onAction)
 {
@@ -88,10 +89,11 @@ XtDialogHost::Form::Form(XtWidgetSet* widgetSet, XFontSet fontSet,
 
 XtDialogHost::Form::~Form()
 {
-    for ( long i = 0; i < trees.size(); i++ ) {
+    long i;
+    for ( i = 0; i < trees.size(); i++ ) {
         delete trees.getValue(i);
     }
-    for ( long i = 0; i < buttons.size(); i++ ) {
+    for ( i = 0; i < buttons.size(); i++ ) {
         delete buttons[i];
     }
     if ( shell != NULL ) {
@@ -117,12 +119,13 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
         // The elements, in order: rows and columns only group them (as the
         // Swing host does), and the buttons go to the bottom row
         ArrayList<const WidgetDialogElement*> pending;
-        for ( size_t i = definition->getElements().size(); i > 0; i-- ) {
+        long i;
+        for ( i = definition->getElements().size(); i > 0; i-- ) {
             pending.add(&definition->getElements()[i - 1]);
         }
         ArrayList<const WidgetDialogElement*> inputs;
         ArrayList<const WidgetDialogElement*> buttons;
-        bool withTree = false;
+        BOOLEAN withTree = FALSE;
         while ( !pending.isEmpty() ) {
             const WidgetDialogElement* element = pending[pending.size() - 1];
             pending.remove(pending.size() - 1);
@@ -140,7 +143,7 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
             else if ( kind == "row" || kind == "column" ) {
                 const ArrayList<WidgetDialogElement>& children =
                     element->getChildren();
-                for ( size_t i = children.size(); i > 0; i-- ) {
+                for ( i = children.size(); i > 0; i-- ) {
                     pending.add(&children[i - 1]);
                 }
             }
@@ -155,7 +158,7 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
         }
         ArrayList<ArrayList<String> > prompts;
         int height = MARGIN;
-        for ( long i = 0; i < inputs.size(); i++ ) {
+        for ( i = 0; i < inputs.size(); i++ ) {
             String labelKey = inputs[i]->getLabelKey().c_str();
             prompts.add(labelKey.isEmpty() ? ArrayList<String>() :
                 wrapText(fontSet, messages->message(labelKey), form->width - 2 * MARGIN));
@@ -170,9 +173,9 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
         }
 
         XtWidget frame = widgets->createPanel(shell, "dialogFrame", 0, 0,
-                                              form->width, height, true);
+                                              form->width, height, TRUE);
         int y = MARGIN;
-        for ( long i = 0; i < inputs.size(); i++ ) {
+        for ( i = 0; i < inputs.size(); i++ ) {
             for ( long line = 0; line < prompts[i].size(); line++ ) {
                 widgets->createLabel(frame, prompts[i][line], fontSet,
                                      XtPanelWidgets::LEFT, MARGIN, y,
@@ -201,7 +204,7 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
             }
             y += FIELD_HEIGHT + MARGIN;
         }
-        for ( long i = 0; i < buttons.size(); i++ ) {
+        for ( i = 0; i < buttons.size(); i++ ) {
             // Fully qualified (as Form::buttonPressed below): gcc 2.7.2 does
             // not find the members of Form here
             XtDialogHost::Form::Button* button =
@@ -231,13 +234,14 @@ void XtDialogHost::Form::layoutButtons()
 {
     int rowWidth = 0;
     ArrayList<int> widths;
-    for ( long i = 0; i < buttons.size(); i++ ) {
+    long i;
+    for ( i = 0; i < buttons.size(); i++ ) {
         widths.add(textWidth(fontSet, buttons[i]->label) +
                          BUTTON_PADDING);
         rowWidth += widths[i] + (i > 0 ? BUTTON_GAP : 0);
     }
     int x = Math::max(MARGIN, (width - rowWidth) / 2);
-    for ( long i = 0; i < buttons.size(); i++ ) {
+    for ( i = 0; i < buttons.size(); i++ ) {
         XtVaSetValues(buttons[i]->widget, XtNx, x, XtNy, buttonsY,
                       XtNwidth, widths[i], XtNheight, BUTTON_HEIGHT, NULL);
         x += widths[i] + BUTTON_GAP;
@@ -278,7 +282,7 @@ XtTreeView* XtDialogHost::Form::tree(const String& binding) const
     return found != NULL ? (*found) : NULL;
 }
 
-bool XtDialogHost::Form::hasAction(const String& action) const
+BOOLEAN XtDialogHost::Form::hasAction(const String& action) const
 {
     return definition->getElementByAction(action.c_str()) != NULL;
 }
@@ -325,7 +329,7 @@ void XtDialogHost::Form::setActionLabel(const String& action,
 void XtDialogHost::Form::show()
 {
     XtPopup(shell, modal ? XtGrabExclusive : XtGrabNone);
-    visible = true;
+    visible = TRUE;
     XRaiseWindow(XtDisplay(shell), XtWindow(shell));
     if ( firstField != NULL ) {
         widgetSet->setKeyboardFocus(shell, firstField);
@@ -336,12 +340,12 @@ void XtDialogHost::Form::close()
 {
     dialogSession.close();
     if ( visible ) {
-        visible = false;
+        visible = FALSE;
         XtPopdown(shell);
     }
 }
 
-bool XtDialogHost::Form::isVisible() const
+BOOLEAN XtDialogHost::Form::isVisible() const
 {
     return visible;
 }

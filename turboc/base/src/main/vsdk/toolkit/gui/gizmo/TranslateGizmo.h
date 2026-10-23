@@ -1,6 +1,7 @@
 #ifndef __TRANSLATE_GIZMO__
 #define __TRANSLATE_GIZMO__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -29,35 +30,39 @@ public:
     virtual const Class *getClass() const;
 
     /// Internal element selection state
-    static const int X_AXIS_ELEMENT = 1;
-    static const int Y_AXIS_ELEMENT = 2;
-    static const int Z_AXIS_ELEMENT = 3;
-    static const int XYY_SEGMENT_ELEMENT = 4;
-    static const int XYX_SEGMENT_ELEMENT = 5;
-    static const int YZZ_SEGMENT_ELEMENT = 6;
-    static const int YZY_SEGMENT_ELEMENT = 7;
-    static const int XZZ_SEGMENT_ELEMENT = 8;
-    static const int XZX_SEGMENT_ELEMENT = 9;
-    static const int XY_BOX_ELEMENT = 10;
-    static const int YZ_BOX_ELEMENT = 11;
-    static const int XZ_BOX_ELEMENT = 12;
+    enum {
+        X_AXIS_ELEMENT = 1,
+        Y_AXIS_ELEMENT = 2,
+        Z_AXIS_ELEMENT = 3,
+        XYY_SEGMENT_ELEMENT = 4,
+        XYX_SEGMENT_ELEMENT = 5,
+        YZZ_SEGMENT_ELEMENT = 6,
+        YZY_SEGMENT_ELEMENT = 7,
+        XZZ_SEGMENT_ELEMENT = 8,
+        XZX_SEGMENT_ELEMENT = 9,
+        XY_BOX_ELEMENT = 10,
+        YZ_BOX_ELEMENT = 11,
+        XZ_BOX_ELEMENT = 12
+    };
 
-    static const int NULL_GROUP = 0;
-    static const int X_AXIS_GROUP = 1;
-    static const int Y_AXIS_GROUP = 2;
-    static const int Z_AXIS_GROUP = 3;
-    static const int XY_PLANE_GROUP = 4;
-    static const int YZ_PLANE_GROUP = 5;
-    static const int XZ_PLANE_GROUP = 6;
+    enum {
+        NULL_GROUP = 0,
+        X_AXIS_GROUP = 1,
+        Y_AXIS_GROUP = 2,
+        Z_AXIS_GROUP = 3,
+        XY_PLANE_GROUP = 4,
+        YZ_PLANE_GROUP = 5,
+        XZ_PLANE_GROUP = 6
+    };
 
     /// Size and line width designed for legacy resolutions
-    static const int DEFAULT_APPARENT_SIZE_IN_PIXELS = 100;
+    enum { DEFAULT_APPARENT_SIZE_IN_PIXELS = 100 };
     static const double DEFAULT_LINE_WIDTH;
 
 private:
     /// Internal transformation state
     Matrix4x4d transformationMatrix;
-    bool hasTransformationMatrix;
+    BOOLEAN hasTransformationMatrix;
     Camera* camera;
 
     /// Geometric model based in primitive instancing: primitive concretions
@@ -86,13 +91,13 @@ private:
     int persistentSelection;
     int volatileSelection;
 
-    bool selectedResizing;
+    BOOLEAN selectedResizing;
     double currentScale;
 
     static SimpleMaterial createMaterial(double r, double g, double b);
     void placeElement(SimpleBody* r, const Matrix4x4d& rotation,
                       const Matrix4x4d& subR, const Vector3Dd& subP,
-                      bool positionFromElementRotation) const;
+                      BOOLEAN positionFromElementRotation) const;
 
     TranslateGizmo(const TranslateGizmo& other);
     TranslateGizmo& operator=(const TranslateGizmo& other);
@@ -161,7 +166,7 @@ public:
     @param outStrip the 4 vertices of the triangle strip
     @return false if the line has no length (the Java version returns null)
     */
-    bool buildLineStrip(const TranslateGizmoLineSegment& segment,
+    BOOLEAN buildLineStrip(const TranslateGizmoLineSegment& segment,
                         Vector3Dd outStrip[4]) const;
 
     /**
@@ -185,7 +190,7 @@ public:
       projection fit a 2D area of initialdu * initialdv pixels.
     */
     void calculateGeometryState(const Vector3Dd& translation,
-                                const Matrix4x4d& rotation, bool autosize,
+                                const Matrix4x4d& rotation, BOOLEAN autosize,
                                 int initialdu, Camera* camera);
     Vector3Dd getPosition() const;
     void setPosition(const Vector3Dd& p);
@@ -233,14 +238,14 @@ public:
     currently selected moves along it: the axis itself, or a plane that
     contains it
     */
-    bool isAxisHighlighted(int axis) const;
+    BOOLEAN isAxisHighlighted(int axis) const;
 
     /**
     @return true if the size of the gizmo is recalculated to keep its
     apparent size in pixels, false if it is kept while it is being dragged
     */
-    bool isSelectedResizing() const;
-    void setSelectedResizing(bool selectedResizing);
+    BOOLEAN isSelectedResizing() const;
+    void setSelectedResizing(BOOLEAN selectedResizing);
 };
 
 #endif

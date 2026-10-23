@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.h"
 
 TangibleInterfaceEvent::TangibleInterfaceEvent()

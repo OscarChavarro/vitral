@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 
 #include "java/util/ArrayList.txx"
@@ -12,10 +13,10 @@
 #include "vsdk/toolkit/render/opengl1/OpenGL1MatrixState.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1RendererConfigurationStateSelector.h"
 
-bool OpenGL1RendererConfigurationStateSelector::tooManyLightsReported = false;
-bool OpenGL1RendererConfigurationStateSelector::phongReported = false;
-bool OpenGL1RendererConfigurationStateSelector::cookTorranceReported = false;
-bool OpenGL1RendererConfigurationStateSelector::bumpMapReported = false;
+BOOLEAN OpenGL1RendererConfigurationStateSelector::tooManyLightsReported = FALSE;
+BOOLEAN OpenGL1RendererConfigurationStateSelector::phongReported = FALSE;
+BOOLEAN OpenGL1RendererConfigurationStateSelector::cookTorranceReported = FALSE;
+BOOLEAN OpenGL1RendererConfigurationStateSelector::bumpMapReported = FALSE;
 
 
 /// OpenGL 1.2 clamps the specular exponent to this value
@@ -28,26 +29,26 @@ static void setColor(GLenum face, GLenum parameter, const ColorRgb& c)
 }
 
 
-bool OpenGL1RendererConfigurationStateSelector::reportUnsupportedFeatures(
+BOOLEAN OpenGL1RendererConfigurationStateSelector::reportUnsupportedFeatures(
     const RendererConfiguration* quality)
 {
     if ( quality == NULL ) {
-        return false;
+        return FALSE;
     }
-    bool unsupported = false;
+    BOOLEAN unsupported = FALSE;
     int shadingType = quality->getShadingType();
     if ( shadingType == RendererConfiguration::SHADING_TYPE_PHONG ) {
-        unsupported = true;
+        unsupported = TRUE;
         if ( !phongReported ) {
-            phongReported = true;
+            phongReported = TRUE;
             fprintf(stderr, "OpenGL1RendererConfigurationStateSelector: Phong "
                     "shading is not supported by OpenGL 1.2, Gouraud used\n");
         }
     }
     if ( shadingType == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE ) {
-        unsupported = true;
+        unsupported = TRUE;
         if ( !cookTorranceReported ) {
-            cookTorranceReported = true;
+            cookTorranceReported = TRUE;
             fprintf(stderr, "OpenGL1RendererConfigurationStateSelector: "
                     "Cook-Torrance shading is not supported by OpenGL 1.2, "
                     "Gouraud used\n");
@@ -55,9 +56,9 @@ bool OpenGL1RendererConfigurationStateSelector::reportUnsupportedFeatures(
     }
     if ( quality->isBumpMapSet() &&
          shadingType != RendererConfiguration::SHADING_TYPE_NOLIGHT ) {
-        unsupported = true;
+        unsupported = TRUE;
         if ( !bumpMapReported ) {
-            bumpMapReported = true;
+            bumpMapReported = TRUE;
             fprintf(stderr, "OpenGL1RendererConfigurationStateSelector: bump "
                     "mapping is not supported by OpenGL 1.2, ignored\n");
         }
@@ -95,7 +96,7 @@ void OpenGL1RendererConfigurationStateSelector::activateState(
     reportUnsupportedFeatures(quality);
     int shadingType = quality != NULL ?
         quality->getShadingType() : RendererConfiguration::SHADING_TYPE_NOLIGHT;
-    bool withTexture = textureId > 0 &&
+    BOOLEAN withTexture = textureId > 0 &&
         (quality == NULL || quality->isTextureSet());
 
     ColorRgb diffuse = material.getDiffuse();
@@ -168,13 +169,14 @@ void OpenGL1RendererConfigurationStateSelector::activateLights(
     }
 
     int lightCount = 0;
-    for ( long i = 0; i < lights.size(); i++ ) {
+    long i;
+    for ( i = 0; i < lights.size(); i++ ) {
         if ( lights[i] == NULL ) {
             continue;
         }
         if ( lightCount >= MAX_LIGHTS ) {
             if ( !tooManyLightsReported ) {
-                tooManyLightsReported = true;
+                tooManyLightsReported = TRUE;
                 fprintf(stderr, "OpenGL1RendererConfigurationStateSelector: "
                         "scene has %ld lights, but OpenGL 1.2 uses only the "
                         "first %d\n", (long)lights.size(), MAX_LIGHTS);
@@ -197,7 +199,7 @@ void OpenGL1RendererConfigurationStateSelector::activateLights(
         glEnable(id);
         lightCount++;
     }
-    for ( int i = lightCount; i < MAX_LIGHTS; i++ ) {
+    for ( i = lightCount; i < MAX_LIGHTS; i++ ) {
         glDisable((GLenum)(GL_LIGHT0 + i));
     }
 }
@@ -223,4 +225,3 @@ void OpenGL1RendererConfigurationStateSelector::dispose()
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int OpenGL1RendererConfigurationStateSelector::MAX_LIGHTS;

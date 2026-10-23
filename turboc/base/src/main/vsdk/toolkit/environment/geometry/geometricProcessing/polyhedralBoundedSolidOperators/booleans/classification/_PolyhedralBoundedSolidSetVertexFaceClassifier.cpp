@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 #include "java/lang/Boolean.h"
@@ -29,7 +30,7 @@ static const int DEBUG_01_STRUCTURE = 0x01;
 static const int DEBUG_03_VERTEX_FACE_CLASSIFIER = 0x04;
 static const int DEBUG_99_SHOW_OPERATIONS = 0x40;
 
-static bool isCoplanarTangentialTraceEnabled()
+static BOOLEAN isCoplanarTangentialTraceEnabled()
 {
     return Boolean::getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
 }
@@ -42,7 +43,7 @@ static void traceCoplanarTangential(const String& message)
     printf("[SetOpCoplanarTrace] %s\n", message.c_str());
 }
 
-static int classFor(int op, bool inForUnion)
+static int classFor(int op, BOOLEAN inForUnion)
 {
     if ( inForUnion ) {
         return (op == _PolyhedralBoundedSolidOperator::UNION) ? OnSector::IN : OnSector::OUT;
@@ -83,7 +84,7 @@ void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
     InfinitePlane* referencePlane,
     int BvsA,
     int op,
-    bool useMirrorFace)
+    BOOLEAN useMirrorFace)
 {
     _PolyhedralBoundedSolidHalfEdge* he;
     _PolyhedralBoundedSolidFace* localFace;
@@ -126,17 +127,17 @@ void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
             referencePlane->getNormal());
         if ( compareToZero(d) == 1 ) {
             if ( BvsA != 0 ) {
-                nbr[i].cl = classFor(op, true);
-                nbr[(i + 1) % nnbr].cl = classFor(op, true);
+                nbr[i].cl = classFor(op, TRUE);
+                nbr[(i + 1) % nnbr].cl = classFor(op, TRUE);
             }
             else {
-                nbr[i].cl = classFor(op, false);
-                nbr[(i + 1) % nnbr].cl = classFor(op, false);
+                nbr[i].cl = classFor(op, FALSE);
+                nbr[(i + 1) % nnbr].cl = classFor(op, FALSE);
             }
         }
         else {
-            nbr[i].cl = classFor(op, true);
-            nbr[(i + 1) % nnbr].cl = classFor(op, true);
+            nbr[i].cl = classFor(op, TRUE);
+            nbr[(i + 1) % nnbr].cl = classFor(op, TRUE);
         }
 
         traceCoplanarTangential(
@@ -232,7 +233,7 @@ ArrayList<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
         c.sector = he;
         d = referencePlane->pointDistance((he->next())->startingVertex->position);
         c.cl = compareToZero(d);
-        c.isWide = false;
+        c.isWide = FALSE;
         c.position = (he->next())->startingVertex->position;
         c.situation = SectorOnFace::UNDEFINED;
         c.referencePlane = referencePlane;
@@ -245,7 +246,7 @@ ArrayList<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
             wide.sector = he;
             d = referencePlane->pointDistance(bisect);
             wide.cl = compareToZero(d);
-            wide.isWide = true;
+            wide.isWide = TRUE;
             wide.position = bisect;
             wide.situation = SectorOnFace::CROSSING_EDGE;
             wide.referencePlane = referencePlane;
@@ -283,7 +284,7 @@ void Classifier::vertexFaceReclassifyOnSectors(
     int op)
 {
     applyCoplanarRulesToVertexFaceNeighborhood(
-        nbr, referenceFace, referencePlane, BvsA, op, false);
+        nbr, referenceFace, referencePlane, BvsA, op, FALSE);
 }
 
 void Classifier::printNbr(const ArrayList<SectorOnFace>& neighborSectorsInfo)
@@ -295,16 +296,16 @@ void Classifier::printNbr(const ArrayList<SectorOnFace>& neighborSectorsInfo)
     }
 }
 
-bool Classifier::inplaneEdgesOn(const ArrayList<SectorOnFace>& nbr)
+BOOLEAN Classifier::inplaneEdgesOn(const ArrayList<SectorOnFace>& nbr)
 {
     long i;
 
     for ( i = 0; i < nbr.size(); i++ ) {
         if ( nbr[i].situation == SectorOnFace::INPLANE_EDGE ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 /**
@@ -322,13 +323,13 @@ void Classifier::vertexFaceReclassifyOnEdges(ArrayList<SectorOnFace>& nbr,
 }
 
 
-static bool isInClass(int cl)
+static BOOLEAN isInClass(int cl)
 {
     return cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::AinB ||
         cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::BinA;
 }
 
-static bool isOutClass(int cl)
+static BOOLEAN isOutClass(int cl)
 {
     return cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::AoutB ||
         cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::BoutA;
@@ -374,7 +375,7 @@ void Classifier::vertexFaceInsertNullEdges(ArrayList<SectorOnFace>& nbr,
     start = i;
     head = nbr[i].sector;
 
-    while ( true ) {
+    while ( TRUE ) {
         while ( !(isOutClass(nbr[i].cl) && isInClass(nbr[(i + 1) % nnbr].cl)) ) {
             i = (i + 1) % nnbr;
         }

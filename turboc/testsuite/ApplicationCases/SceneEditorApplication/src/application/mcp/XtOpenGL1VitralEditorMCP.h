@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_VITRAL_EDITOR_MCP__
 #define __XT_OPENGL1_VITRAL_EDITOR_MCP__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/lang/Thread.h"
 

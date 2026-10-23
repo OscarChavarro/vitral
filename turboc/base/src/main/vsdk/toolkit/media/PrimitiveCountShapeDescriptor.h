@@ -11,7 +11,7 @@ class PrimitiveCountShapeDescriptor : public ShapeDescriptor {
 
 private:
     double* featureVector;
-    static const int numberOfElements = 16;
+    enum { numberOfElements = 16 };
 
 public:
     static const Class CLASS;

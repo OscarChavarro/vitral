@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "model/Scene.h"
 #include "model/history/SceneSelectionOperation.h"
 #include "model/selection/SelectionSet.h"
@@ -6,12 +7,12 @@
 
 SceneSelectionOperation::SceneSelectionOperation(
     const String& name, Scene* scene,
-    const ArrayList<bool>& beforeBodies,
-    const ArrayList<bool>& beforeLights,
-    const ArrayList<bool>& beforeGizmos,
-    const ArrayList<bool>& afterBodies,
-    const ArrayList<bool>& afterLights,
-    const ArrayList<bool>& afterGizmos)
+    const ArrayList<BOOLEAN>& beforeBodies,
+    const ArrayList<BOOLEAN>& beforeLights,
+    const ArrayList<BOOLEAN>& beforeGizmos,
+    const ArrayList<BOOLEAN>& afterBodies,
+    const ArrayList<BOOLEAN>& afterLights,
+    const ArrayList<BOOLEAN>& afterGizmos)
     : scene(scene), name(name), beforeBodies(beforeBodies),
       beforeLights(beforeLights), beforeGizmos(beforeGizmos),
       afterBodies(afterBodies), afterLights(afterLights),
@@ -34,9 +35,9 @@ String SceneSelectionOperation::getName() const
     return name;
 }
 
-void SceneSelectionOperation::apply(const ArrayList<bool>& bodies,
-                                    const ArrayList<bool>& lights,
-                                    const ArrayList<bool>& gizmos)
+void SceneSelectionOperation::apply(const ArrayList<BOOLEAN>& bodies,
+                                    const ArrayList<BOOLEAN>& lights,
+                                    const ArrayList<BOOLEAN>& gizmos)
 {
     apply(scene->selectedThings, bodies);
     apply(scene->selectedLights, lights);
@@ -44,7 +45,7 @@ void SceneSelectionOperation::apply(const ArrayList<bool>& bodies,
 }
 
 void SceneSelectionOperation::apply(SelectionSet* selection,
-                                    const ArrayList<bool>& state)
+                                    const ArrayList<BOOLEAN>& state)
 {
     selection->sync();
     selection->unselectAll();
@@ -56,18 +57,18 @@ void SceneSelectionOperation::apply(SelectionSet* selection,
     }
 }
 
-ArrayList<bool> SceneSelectionOperation::capture(SelectionSet* selection)
+ArrayList<BOOLEAN> SceneSelectionOperation::capture(SelectionSet* selection)
 {
     selection->sync();
-    ArrayList<bool> result(Collections<bool>::nCopies(selection->size(), false));
+    ArrayList<BOOLEAN> result(Collections<BOOLEAN>::nCopies(selection->size(), FALSE));
     for ( int i = 0; i < ((int)(result.size())); i++ ) {
         result[i] = selection->isSelected(i);
     }
     return result;
 }
 
-bool SceneSelectionOperation::isSame(const ArrayList<bool>& a,
-                                     const ArrayList<bool>& b)
+BOOLEAN SceneSelectionOperation::isSame(const ArrayList<BOOLEAN>& a,
+                                     const ArrayList<BOOLEAN>& b)
 {
     return a.equals(b);
 }

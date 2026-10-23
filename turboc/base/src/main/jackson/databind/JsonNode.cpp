@@ -1,10 +1,11 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "jackson/databind/JsonNode.h"
 
 JsonNode::JsonNode()
     : type_(NULL_VALUE)
-    , boolValue_(false)
+    , boolValue_(FALSE)
     , numberValue_(0.0)
     , stringValue_("")
     , arrayValue_(NULL)
@@ -12,7 +13,7 @@ JsonNode::JsonNode()
 
 JsonNode::JsonNode(const JsonNode& other)
     : type_(NULL_VALUE)
-    , boolValue_(false)
+    , boolValue_(FALSE)
     , numberValue_(0.0)
     , stringValue_("")
     , arrayValue_(NULL)
@@ -33,21 +34,21 @@ JsonNode::~JsonNode() {
 }
 
 JsonNode JsonNode::newNull() { return JsonNode(); }
-JsonNode JsonNode::newBoolean(bool value) { JsonNode n; n.type_ = BOOLEAN; n.boolValue_ = value; return n; }
+JsonNode JsonNode::newBoolean(BOOLEAN value) { JsonNode n; n.type_ = BOOLEAN_VALUE; n.boolValue_ = value; return n; }
 JsonNode JsonNode::newNumber(double value) { JsonNode n; n.type_ = NUMBER; n.numberValue_ = value; return n; }
 JsonNode JsonNode::newString(const String& value) { JsonNode n; n.type_ = STRING; n.stringValue_ = value; return n; }
 JsonNode JsonNode::newArray() { JsonNode n; n.type_ = ARRAY; return n; }
 JsonNode JsonNode::newObject() { JsonNode n; n.type_ = OBJECT; return n; }
 
 JsonNode::Type JsonNode::type() const { return type_; }
-bool JsonNode::isNull() const { return type_ == NULL_VALUE; }
-bool JsonNode::isBoolean() const { return type_ == BOOLEAN; }
-bool JsonNode::isNumber() const { return type_ == NUMBER; }
-bool JsonNode::isString() const { return type_ == STRING; }
-bool JsonNode::isArray() const { return type_ == ARRAY; }
-bool JsonNode::isObject() const { return type_ == OBJECT; }
+BOOLEAN JsonNode::isNull() const { return type_ == NULL_VALUE; }
+BOOLEAN JsonNode::isBoolean() const { return type_ == BOOLEAN_VALUE; }
+BOOLEAN JsonNode::isNumber() const { return type_ == NUMBER; }
+BOOLEAN JsonNode::isString() const { return type_ == STRING; }
+BOOLEAN JsonNode::isArray() const { return type_ == ARRAY; }
+BOOLEAN JsonNode::isObject() const { return type_ == OBJECT; }
 
-bool JsonNode::asBoolean(bool defaultValue) const { return isBoolean() ? boolValue_ : defaultValue; }
+BOOLEAN JsonNode::asBoolean(BOOLEAN defaultValue) const { return isBoolean() ? boolValue_ : defaultValue; }
 double JsonNode::asDouble(double defaultValue) const { return isNumber() ? numberValue_ : defaultValue; }
 int JsonNode::asInt(int defaultValue) const { return isNumber() ? ((int)(numberValue_)) : defaultValue; }
 String JsonNode::asText(const String& defaultValue) const { return isString() ? stringValue_ : defaultValue; }

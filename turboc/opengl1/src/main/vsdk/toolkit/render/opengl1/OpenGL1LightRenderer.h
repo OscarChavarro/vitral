@@ -4,6 +4,7 @@
 class Light;
 class Camera;
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/gizmo/LightGizmoStyle.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -15,7 +16,7 @@ public:
     static void draw(const Light* light, Camera* camera);
     static void draw(const Light* light, Camera* camera, LightGizmoStyle lightGizmoStyle);
     static void draw(const Light* light, Camera* camera,
-                     LightGizmoStyle lightGizmoStyle, bool selected);
+                     LightGizmoStyle lightGizmoStyle, BOOLEAN selected);
 
     static double getScale();
     static void setScale(double newScale);
@@ -36,9 +37,9 @@ private:
                           const ArrayList<float>& positions,
                           const ArrayList<float>& colors,
                           float lineWidth);
-    static void drawCross(const Light* light, Camera* camera, bool selected);
+    static void drawCross(const Light* light, Camera* camera, BOOLEAN selected);
     static void drawOmniBillboard(const Light* light, Camera* camera,
-                                  bool selected);
+                                  BOOLEAN selected);
 };
 
 #endif

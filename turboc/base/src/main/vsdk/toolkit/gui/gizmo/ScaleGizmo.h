@@ -1,6 +1,7 @@
 #ifndef __SCALE_GIZMO__
 #define __SCALE_GIZMO__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -65,30 +66,32 @@ public:
     virtual const Class *getClass() const;
 
     /// Number of axes, and of the values of the input gizmo
-    static const int AXIS_COUNT = 3;
+    enum { AXIS_COUNT = 3 };
 
     /// Selection groups
-    static const int NULL_GROUP = 0;
-    static const int X_AXIS_GROUP = 1;
-    static const int Y_AXIS_GROUP = 2;
-    static const int Z_AXIS_GROUP = 3;
+    enum {
+        NULL_GROUP = 0,
+        X_AXIS_GROUP = 1,
+        Y_AXIS_GROUP = 2,
+        Z_AXIS_GROUP = 3
+    };
     /// Two-axis handle: the trapezoidal band in the XY plane
-    static const int XY_GROUP = 4;
+    enum { XY_GROUP = 4 };
     /// Two-axis handle: the trapezoidal band in the YZ plane
-    static const int YZ_GROUP = 5;
+    enum { YZ_GROUP = 5 };
     /// Two-axis handle: the trapezoidal band in the XZ plane
-    static const int XZ_GROUP = 6;
+    enum { XZ_GROUP = 6 };
     /// All-axis handle: the three triangles that share the origin of the
     /// frame, one in each of the XY, YZ and XZ planes
-    static const int UNIFORM_GROUP = 7;
+    enum { UNIFORM_GROUP = 7 };
 
     /// The two-axis groups, in the order `buildBandQuad` and the renderers
     /// walk them
     static const int BAND_GROUPS[3];
-    static const int BAND_GROUPS_COUNT = 3;
+    enum { BAND_GROUPS_COUNT = 3 };
 
     /// Size and contour width designed for legacy resolutions
-    static const int DEFAULT_APPARENT_SIZE_IN_PIXELS = 100;
+    enum { DEFAULT_APPARENT_SIZE_IN_PIXELS = 100 };
     static const double DEFAULT_LINE_WIDTH;
 
     /// Color the interior of the handle currently selected is filled with
@@ -150,16 +153,16 @@ private:
     void updateScale();
     void addContourEdge(ArrayList<ContourSegment>& segments,
                         const Vector3Dd& a, const Vector3Dd& b,
-                        const int axes[2], bool highlighted) const;
+                        const int axes[2], BOOLEAN highlighted) const;
     static int groupOfElement(int element);
     void calculateGeometryState();
     static SimpleMaterial createMaterial(const ColorRgb& c);
     static Matrix4x4d axisTilt(int axis);
-    static bool nearestOfTwoTriangles(const Ray& ray,
+    static BOOLEAN nearestOfTwoTriangles(const Ray& ray,
         const Vector3Dd& a1, const Vector3Dd& b1, const Vector3Dd& c1,
         const Vector3Dd& a2, const Vector3Dd& b2, const Vector3Dd& c2,
         double* outT);
-    static bool rayTriangleT(const Vector3Dd& origin, const Vector3Dd& dir,
+    static BOOLEAN rayTriangleT(const Vector3Dd& origin, const Vector3Dd& dir,
         const Vector3Dd& a, const Vector3Dd& b, const Vector3Dd& c,
         double* outT);
     static Vector3Dd unitAxis(int axis);
@@ -242,10 +245,10 @@ public:
     /**
     @return true if scaling with `group` changes `axis`
     */
-    static bool groupIncludesAxis(int group, int axis);
-    bool isAxisHighlighted(int axis) const;
-    bool isBandHighlighted(int group) const;
-    bool isUniformHighlighted() const;
+    static BOOLEAN groupIncludesAxis(int group, int axis);
+    BOOLEAN isAxisHighlighted(int axis) const;
+    BOOLEAN isBandHighlighted(int group) const;
+    BOOLEAN isUniformHighlighted() const;
     ColorRgb getAxisDisplayColor(int axis) const;
 
     /**
@@ -308,7 +311,7 @@ public:
     InputGizmo* getInputGizmo();
 
     //= Events =============================================================
-    bool processMouseEvent(const MouseEvent& mouseEvent);
+    BOOLEAN processMouseEvent(const MouseEvent& mouseEvent);
 
     /**
     Lets the numeric input gizmo use the key first; if it does not consume
@@ -316,14 +319,14 @@ public:
     arrow keys shrink/grow every axis uniformly.
     @return true if the scale factors changed
     */
-    bool processKeyPressedEvent(const KeyEvent& keyEvent);
-    bool processKeyReleasedEvent(const KeyEvent& keyEvent);
-    bool processMousePressedEvent(const MouseEvent& e);
-    bool processMouseReleasedEvent(const MouseEvent& e);
-    bool processMouseClickedEvent(const MouseEvent& e);
-    bool processMouseMovedEvent(const MouseEvent& e);
-    bool processMouseDraggedEvent(const MouseEvent& e);
-    bool processMouseWheelEvent(const MouseEvent& e);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processKeyReleasedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processMousePressedEvent(const MouseEvent& e);
+    BOOLEAN processMouseReleasedEvent(const MouseEvent& e);
+    BOOLEAN processMouseClickedEvent(const MouseEvent& e);
+    BOOLEAN processMouseMovedEvent(const MouseEvent& e);
+    BOOLEAN processMouseDraggedEvent(const MouseEvent& e);
+    BOOLEAN processMouseWheelEvent(const MouseEvent& e);
 };
 
 #endif

@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/light/AmbientLight.h"
 
 AmbientLight::AmbientLight(const ColorRgb &emission) :
@@ -10,10 +11,10 @@ AmbientLight::AmbientLight(const AmbientLight &other) :
 {
 }
 
-bool
+BOOLEAN
 AmbientLight::isAmbient() const
 {
-    return true;
+    return TRUE;
 }
 
 void

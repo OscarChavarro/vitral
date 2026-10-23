@@ -1,6 +1,7 @@
 #ifndef __ORG_W3C_DOM_NAMED_NODE_MAP__
 #define __ORG_W3C_DOM_NAMED_NODE_MAP__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 

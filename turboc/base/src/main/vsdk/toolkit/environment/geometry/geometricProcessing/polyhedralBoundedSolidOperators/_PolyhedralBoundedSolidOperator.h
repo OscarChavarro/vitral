@@ -5,6 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_OPERATOR__
 #define ___POLYHEDRAL_BOUNDED_SOLID_OPERATOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
@@ -25,10 +26,12 @@ C++ counterpart of Java's `_PolyhedralBoundedSolidOperator`.
 */
 class _PolyhedralBoundedSolidOperator : public ProcessingElement {
 public:
-    static const int UNION = 1;
-    static const int INTERSECTION = 2;
-    static const int SUBTRACT = 3;
-    static const int DIFFERENCE = SUBTRACT;
+    enum {
+        UNION = 1,
+        INTERSECTION = 2,
+        SUBTRACT = 3,
+        DIFFERENCE = SUBTRACT
+    };
 
 protected:
     static PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext;
@@ -48,7 +51,7 @@ protected:
     /**
     Following section [MANT1988].14.7.1 and program [MANT1988].14.8.
     */
-    static bool neighbor(_PolyhedralBoundedSolidHalfEdge* h1,
+    static BOOLEAN neighbor(_PolyhedralBoundedSolidHalfEdge* h1,
                          _PolyhedralBoundedSolidHalfEdge* h2);
 
     /**
@@ -87,11 +90,11 @@ protected:
     Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
     */
     static void join(_PolyhedralBoundedSolidHalfEdge* h1,
-                     _PolyhedralBoundedSolidHalfEdge* h2, bool withDebug);
+                     _PolyhedralBoundedSolidHalfEdge* h2, BOOLEAN withDebug);
 
     static void join(_PolyhedralBoundedSolidHalfEdge* h1,
                      _PolyhedralBoundedSolidHalfEdge* h2,
-                     bool withDebug, bool allowRingMove);
+                     BOOLEAN withDebug, BOOLEAN allowRingMove);
 
     /**
     This method checks whether the edges `he.previous().parentEdge` and
@@ -109,13 +112,13 @@ protected:
     This protected method is here for exclusive use of subclasses
     `_PolyhedralBoundedSolidSplitter` and `_PolyhedralBoundedSolidSetOperator`.
     */
-    static bool checkWideness(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN checkWideness(_PolyhedralBoundedSolidHalfEdge* he);
 
 private:
-    static bool canMoveFace(_PolyhedralBoundedSolidFace* f);
+    static BOOLEAN canMoveFace(_PolyhedralBoundedSolidFace* f);
     static void laringmv(_PolyhedralBoundedSolidFace* f1,
                          _PolyhedralBoundedSolidFace* f2);
-    static bool ringBelongsToOtherHalf(_PolyhedralBoundedSolidFace* f1,
+    static BOOLEAN ringBelongsToOtherHalf(_PolyhedralBoundedSolidFace* f1,
                                        _PolyhedralBoundedSolidFace* f2,
                                        _PolyhedralBoundedSolidLoop* l);
     static int outerLoopParityContains(_PolyhedralBoundedSolidFace* f,

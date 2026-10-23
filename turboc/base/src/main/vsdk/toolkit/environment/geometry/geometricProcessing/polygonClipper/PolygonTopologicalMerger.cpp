@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stddef.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/HashMap.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
@@ -11,12 +12,12 @@ static Vertex2D copyVertex(const Vertex2D& v)
     return Vertex2D(v.x, v.y, v.color.r(), v.color.g(), v.color.b());
 }
 
-static bool samePoint(const Vertex2D& a, const Vertex2D& b, double epsilon)
+static BOOLEAN samePoint(const Vertex2D& a, const Vertex2D& b, double epsilon)
 {
     return fabs(a.x - b.x) <= epsilon && fabs(a.y - b.y) <= epsilon;
 }
 
-static bool areCollinear(const Vertex2D& a, const Vertex2D& b, const Vertex2D& c, double epsilon)
+static BOOLEAN areCollinear(const Vertex2D& a, const Vertex2D& b, const Vertex2D& c, double epsilon)
 {
     double abx = b.x - a.x;
     double aby = b.y - a.y;
@@ -30,7 +31,8 @@ static ArrayList<Vertex2D> normalizeContour(_Polygon2DContour* contour, double e
 {
     ArrayList<Vertex2D> withoutDuplicates;
     ArrayList<Vertex2D> simplified;
-    for (long int i = 0; i < contour->vertices.size(); ++i) {
+    long i;
+    for (i = 0; i < contour->vertices.size(); ++i) {
         Vertex2D v = contour->vertices[i];
         if (withoutDuplicates.size() == 0 ||
             !samePoint(withoutDuplicates[withoutDuplicates.size() - 1], v, epsilon)) {
@@ -41,7 +43,7 @@ static ArrayList<Vertex2D> normalizeContour(_Polygon2DContour* contour, double e
         samePoint(withoutDuplicates[0], withoutDuplicates[withoutDuplicates.size() - 1], epsilon)) {
         withoutDuplicates.remove(withoutDuplicates.size() - 1);
     }
-    for (size_t i = 0; i < (size_t)withoutDuplicates.size(); ++i) {
+    for (i = 0; i < withoutDuplicates.size(); ++i) {
         const Vertex2D& prev = withoutDuplicates[(i + withoutDuplicates.size() - 1) % withoutDuplicates.size()];
         const Vertex2D& cur = withoutDuplicates[i];
         const Vertex2D& next = withoutDuplicates[(i + 1) % withoutDuplicates.size()];
@@ -53,33 +55,34 @@ static ArrayList<Vertex2D> normalizeContour(_Polygon2DContour* contour, double e
     return simplified;
 }
 
-static bool areEquivalentContours(const ArrayList<Vertex2D>& a, const ArrayList<Vertex2D>& b, double epsilon)
+static BOOLEAN areEquivalentContours(const ArrayList<Vertex2D>& a, const ArrayList<Vertex2D>& b, double epsilon)
 {
-    if (a.size() != b.size()) return false;
+    if (a.size() != b.size()) return FALSE;
     int n = ((int)(a.size()));
-    if (n == 0) return true;
+    if (n == 0) return TRUE;
     for (int start = 0; start < n; ++start) {
         if (!samePoint(a[0], b[start], epsilon)) continue;
-        bool forward = true;
-        for (int i = 0; i < n; ++i) {
+        BOOLEAN forward = TRUE;
+        int i;
+        for (i = 0; i < n; ++i) {
             if (!samePoint(a[i], b[(start + i) % n], epsilon)) {
-                forward = false;
+                forward = FALSE;
                 break;
             }
         }
-        if (forward) return true;
-        bool backward = true;
-        for (int i = 0; i < n; ++i) {
+        if (forward) return TRUE;
+        BOOLEAN backward = TRUE;
+        for (i = 0; i < n; ++i) {
             int index = start - i;
             while (index < 0) index += n;
             if (!samePoint(a[i], b[index], epsilon)) {
-                backward = false;
+                backward = FALSE;
                 break;
             }
         }
-        if (backward) return true;
+        if (backward) return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 struct PointKey {
@@ -88,7 +91,7 @@ struct PointKey {
     explicit PointKey(const Vertex2D& p, double epsilon)
         : quantizedX(((long long)(Cpp98Support::llround(p.x / epsilon)))),
           quantizedY(((long long)(Cpp98Support::llround(p.y / epsilon)))) {}
-    bool operator==(const PointKey& o) const { return quantizedX == o.quantizedX && quantizedY == o.quantizedY; }
+    BOOLEAN operator==(const PointKey& o) const { return quantizedX == o.quantizedX && quantizedY == o.quantizedY; }
 };
 
 struct PointKeyHasher {
@@ -96,7 +99,7 @@ struct PointKeyHasher {
     {
         size_t h = ((size_t)(k.quantizedX));
         size_t v = ((size_t)(k.quantizedY));
-        h ^= v + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+        h ^= v + VSDK_ULL(0x9e3779b97f4a7c15) + (h << 6) + (h >> 2);
         return h;
     }
 };
@@ -110,14 +113,14 @@ static int compareKeys(const PointKey& a, const PointKey& b)
     return 0;
 }
 
-static bool containsIndex(const ArrayList<int>& values, int value)
+static BOOLEAN containsIndex(const ArrayList<int>& values, int value)
 {
     for (long int i = 0; i < values.size(); ++i) {
         if (values[i] == value) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 static void addOutgoingIndex(
@@ -156,8 +159,8 @@ struct EdgeKey {
             endKey = k0;
         }
     }
-    bool isForward(const Vertex2D& candidate, double epsilon) const { return samePoint(start, candidate, epsilon); }
-    bool operator==(const EdgeKey& o) const { return startKey == o.startKey && endKey == o.endKey; }
+    BOOLEAN isForward(const Vertex2D& candidate, double epsilon) const { return samePoint(start, candidate, epsilon); }
+    BOOLEAN operator==(const EdgeKey& o) const { return startKey == o.startKey && endKey == o.endKey; }
 };
 
 struct EdgeKeyHasher {
@@ -181,7 +184,7 @@ struct SplitPoint {
     Vertex2D point;
     SplitPoint() : segmentParameter(0.0), point() {}
     SplitPoint(double segmentParameterIn, const Vertex2D& pointIn) : segmentParameter(segmentParameterIn), point(pointIn) {}
-    bool operator<(const SplitPoint& o) const { return segmentParameter < o.segmentParameter; }
+    BOOLEAN operator<(const SplitPoint& o) const { return segmentParameter < o.segmentParameter; }
 };
 
 static void sortSplitPoints(ArrayList<SplitPoint>& values)
@@ -251,13 +254,14 @@ static void splitAndAccumulateSegments(
         ArrayList<SplitPoint> splitPoints;
         splitPoints.add(SplitPoint(0.0, seg.start));
         splitPoints.add(SplitPoint(1.0, seg.end));
-        for (size_t j = 0; j < (size_t)segments.size(); ++j) {
+        size_t j;
+        for (j = 0; j < (size_t)segments.size(); ++j) {
             maybeAddPointOnSegment(seg, segments[j].start, epsilon, splitPoints);
             maybeAddPointOnSegment(seg, segments[j].end, epsilon, splitPoints);
         }
         sortSplitPoints(splitPoints);
         ArrayList<SplitPoint> dedup = dedupSplitPoints(splitPoints, epsilon);
-        for (size_t j = 0; j + 1 < (size_t)dedup.size(); ++j) {
+        for (j = 0; j + 1 < (size_t)dedup.size(); ++j) {
             const Vertex2D& p0 = dedup[j].point;
             const Vertex2D& p1 = dedup[j + 1].point;
             if (samePoint(p0, p1, epsilon)) continue;
@@ -345,11 +349,12 @@ static ArrayList< ArrayList<Vertex2D> > extractLoopsFromBoundaryEdges(
     HashMap<PointKey, ArrayList<int> > outgoing;
     ArrayList<int> used;
     ArrayList< ArrayList<Vertex2D> > loops;
-    for (size_t i = 0; i < (size_t)edges.size(); ++i) {
+    size_t i;
+    for (i = 0; i < (size_t)edges.size(); ++i) {
         PointKey key(edges[i].start, epsilon);
         addOutgoingIndex(outgoing, key, ((int)(i)));
     }
-    for (size_t i = 0; i < (size_t)edges.size(); ++i) {
+    for (i = 0; i < (size_t)edges.size(); ++i) {
         if (containsIndex(used, ((int)(i)))) continue;
         ArrayList<Vertex2D> loop = traceLoop(edges, ((int)(i)), outgoing, used, epsilon);
         if (loop.size() >= 3) loops.add(loop);
@@ -361,7 +366,8 @@ static ArrayList< ArrayList<Vertex2D> > weldInternalEdges(
     const ArrayList< ArrayList<Vertex2D> >& contours, double epsilon)
 {
     ArrayList<Segment2D> segments;
-    for (size_t i = 0; i < (size_t)contours.size(); ++i) {
+    size_t i;
+    for (i = 0; i < (size_t)contours.size(); ++i) {
         const ArrayList<Vertex2D>& contour = contours[i];
         for (size_t j = 0; j < (size_t)contour.size(); ++j) {
             const Vertex2D& a = contour[j];
@@ -376,7 +382,7 @@ static ArrayList< ArrayList<Vertex2D> > weldInternalEdges(
     splitAndAccumulateSegments(segments, epsilon, signedUsage);
 
     ArrayList<DirectedEdge> boundaryEdges;
-    for (size_t i = 0; i < (size_t)segments.size(); ++i) {
+    for (i = 0; i < (size_t)segments.size(); ++i) {
         const Segment2D& seg = segments[i];
         EdgeKey key(seg.start, seg.end, epsilon);
         const int* balance = signedUsage.get(key);
@@ -395,15 +401,16 @@ void PolygonTopologicalMerger::mergeInPlace(Polygon2D* polygon, double epsilon)
     if (polygon == 0) return;
     ArrayList< ArrayList<Vertex2D> > canonicalContours;
 
-    for (long int i = 0; i < polygon->loops.size(); ++i) {
+    long i;
+    for (i = 0; i < polygon->loops.size(); ++i) {
         _Polygon2DContour* contour = polygon->loops.get(i);
         ArrayList<Vertex2D> normalized = normalizeContour(contour, epsilon);
         if (normalized.size() < 3) continue;
 
-        bool duplicate = false;
+        BOOLEAN duplicate = FALSE;
         for (size_t j = 0; j < (size_t)canonicalContours.size(); ++j) {
             if (areEquivalentContours(canonicalContours[j], normalized, epsilon)) {
-                duplicate = true;
+                duplicate = TRUE;
                 break;
             }
         }
@@ -412,12 +419,12 @@ void PolygonTopologicalMerger::mergeInPlace(Polygon2D* polygon, double epsilon)
 
     canonicalContours = weldInternalEdges(canonicalContours, epsilon);
 
-    for (long int i = 0; i < polygon->loops.size(); ++i) {
+    for (i = 0; i < polygon->loops.size(); ++i) {
         delete polygon->loops[i];
     }
     polygon->loops.clear();
 
-    for (size_t i = 0; i < (size_t)canonicalContours.size(); ++i) {
+    for (i = 0; i < canonicalContours.size(); ++i) {
         polygon->nextLoop();
         const ArrayList<Vertex2D>& contour = canonicalContours[i];
         for (size_t j = 0; j < (size_t)contour.size(); ++j) {

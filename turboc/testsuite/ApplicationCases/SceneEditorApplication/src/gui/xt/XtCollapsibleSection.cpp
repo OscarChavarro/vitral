@@ -10,6 +10,7 @@
 #undef String
 #include <X11/cursorfont.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/xt/XtCollapsibleSection.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
 
@@ -17,7 +18,7 @@ XtCollapsibleSection::XtCollapsibleSection(XtPanelWidgets* widgets,
                                            Widget parent,
                                            const String& title,
                                            XFontSet fontSet, int y,
-                                           int width, bool expanded)
+                                           int width, BOOLEAN expanded)
     : widgets(widgets)
     , container(NULL)
     , header(NULL)
@@ -26,12 +27,12 @@ XtCollapsibleSection::XtCollapsibleSection(XtPanelWidgets* widgets,
     , width(width)
     , contentHeight(0)
     , expanded(expanded)
-    , handCursorDefined(false)
+    , handCursorDefined(FALSE)
     , layoutListener(NULL)
     , layoutClientData(NULL)
 {
     container = widgets->createPanel(parent, "collapsibleSection", 0, y,
-                                     width, HEADER_HEIGHT, true);
+                                     width, HEADER_HEIGHT, TRUE);
     header = widgets->createLabel(container, "", fontSet,
                                   XtPanelWidgets::LEFT, 4, 0, width - 8,
                                   HEADER_HEIGHT);
@@ -66,12 +67,12 @@ void XtCollapsibleSection::setContent(Widget content)
     updateGeometry();
 }
 
-bool XtCollapsibleSection::isExpanded() const
+BOOLEAN XtCollapsibleSection::isExpanded() const
 {
     return expanded;
 }
 
-void XtCollapsibleSection::setExpanded(bool expanded)
+void XtCollapsibleSection::setExpanded(BOOLEAN expanded)
 {
     this->expanded = expanded;
     updateHeader();
@@ -145,7 +146,7 @@ void XtCollapsibleSection::headerEvent(Widget widget, XtPointer clientData,
             // The window keeps the cursor after it is freed
             XDefineCursor(display, XtWindow(widget), hand);
             XFreeCursor(display, hand);
-            self->handCursorDefined = true;
+            self->handCursorDefined = TRUE;
         }
         return;
     }
@@ -156,4 +157,3 @@ void XtCollapsibleSection::headerEvent(Widget widget, XtPointer clientData,
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int XtCollapsibleSection::HEADER_HEIGHT;

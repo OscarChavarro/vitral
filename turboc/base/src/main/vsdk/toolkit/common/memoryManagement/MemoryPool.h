@@ -1,6 +1,7 @@
 #ifndef __MEMORY_POOL__
 #define __MEMORY_POOL__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 
 /**
@@ -23,7 +24,7 @@ class MemoryPool : public Object {
     Block *head;
     Block *tail;
     Block *current;
-    bool initialized;
+    BOOLEAN initialized;
 
     static Block *createBlock(long int capacityElements);
     static void destroyBlock(Block *block);
@@ -36,7 +37,7 @@ class MemoryPool : public Object {
     T *allocate(int numberOfElements);
     void free(int numberOfElements);
     void clear();
-    bool expand(int numberOfElements);
+    BOOLEAN expand(int numberOfElements);
 };
 
 

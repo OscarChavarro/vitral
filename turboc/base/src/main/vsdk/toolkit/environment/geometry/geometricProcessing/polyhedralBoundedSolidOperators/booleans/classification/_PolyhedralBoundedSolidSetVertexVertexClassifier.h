@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_VERTEX_CLASSIFIER__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_VERTEX_CLASSIFIER__
+#ifndef ___PBS_SET_VERTEX_VERTEX_CLASSIFIER__
+#define ___PBS_SET_VERTEX_VERTEX_CLASSIFIER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -64,13 +65,13 @@ private:
     */
     int coplanarSameOrientationForSectorPair(int secta, int sectb);
     static ArrayList<SectorOnVertex> nbrpreproc(_PolyhedralBoundedSolidVertex* v);
-    static bool sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb);
-    static bool sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
+    static BOOLEAN sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb);
+    static BOOLEAN sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
                             const Vector3Dd& ref2, const Vector3Dd& ref12);
     static int compareToZero(double value);
-    static int resolveCoplanarVertexVertexClass(int op, bool sameOrientation,
-                                                bool sideA);
-    bool vertexVertexSectorIntersectionTest(int i, int j);
+    static int resolveCoplanarVertexVertexClass(int op, BOOLEAN sameOrientation,
+                                                BOOLEAN sideA);
+    BOOLEAN vertexVertexSectorIntersectionTest(int i, int j);
     void vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
                                      _PolyhedralBoundedSolidVertex* vb);
     void vertexVertexReclassifyOnSectors(int op);

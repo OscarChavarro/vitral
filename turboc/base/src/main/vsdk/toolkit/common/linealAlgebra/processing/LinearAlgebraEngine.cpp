@@ -118,7 +118,8 @@ double LuCpuStrategy::determinant(const MatrixNxM& matrix) const
     for ( int k = 0; k < n; ++k ) {
         int p = k;
         double max = Cpp98Support::abs(lu[k][k]);
-        for ( int i = k + 1; i < n; ++i ) {
+        int i;
+        for ( i = k + 1; i < n; ++i ) {
             double v = Cpp98Support::abs(lu[i][k]);
             if ( v > max ) { max = v; p = i; }
         }
@@ -133,7 +134,7 @@ double LuCpuStrategy::determinant(const MatrixNxM& matrix) const
             pivSign = -pivSign;
         }
 
-        for ( int i = k + 1; i < n; ++i ) {
+        for ( i = k + 1; i < n; ++i ) {
             lu[i][k] /= lu[k][k];
             for ( int j = k + 1; j < n; ++j ) lu[i][j] -= lu[i][k] * lu[k][j];
         }
@@ -163,7 +164,8 @@ double GaussCpuStrategy::determinant(const MatrixNxM& matrix) const
     for ( int k = 0; k < n; ++k ) {
         int pivot = k;
         double max = Cpp98Support::abs(a[k][k]);
-        for ( int i = k + 1; i < n; ++i ) {
+        int i;
+        for ( i = k + 1; i < n; ++i ) {
             double candidate = Cpp98Support::abs(a[i][k]);
             if ( candidate > max ) { max = candidate; pivot = i; }
         }
@@ -179,7 +181,7 @@ double GaussCpuStrategy::determinant(const MatrixNxM& matrix) const
             sign = -sign;
         }
 
-        for ( int i = k + 1; i < n; ++i ) {
+        for ( i = k + 1; i < n; ++i ) {
             double factor = a[i][k] / a[k][k];
             for ( int j = k + 1; j < n; ++j ) a[i][j] -= factor * a[k][j];
             a[i][k] = 0.0;
@@ -198,12 +200,13 @@ MatrixNxM GaussCpuStrategy::inverse(const MatrixNxM& matrix) const
     int n = matrix.getNumRows();
     double** a = toArraySquare(matrix);
     double** inv = allocSquare(n);
-    for ( int i = 0; i < n; ++i ) inv[i][i] = 1.0;
+    int i;
+    for ( i = 0; i < n; ++i ) inv[i][i] = 1.0;
 
     for ( int col = 0; col < n; ++col ) {
         int pivot = col;
         double max = Cpp98Support::abs(a[col][col]);
-        for ( int i = col + 1; i < n; ++i ) {
+        for ( i = col + 1; i < n; ++i ) {
             double candidate = Cpp98Support::abs(a[i][col]);
             if ( candidate > max ) { max = candidate; pivot = i; }
         }
@@ -236,7 +239,7 @@ MatrixNxM GaussCpuStrategy::inverse(const MatrixNxM& matrix) const
     }
 
     MatrixNxM out(n, n);
-    for ( int i = 0; i < n; ++i ) {
+    for ( i = 0; i < n; ++i ) {
         for ( int j = 0; j < n; ++j ) {
             out = out.withVal(i, j, inv[i][j]);
         }

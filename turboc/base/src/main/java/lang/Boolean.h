@@ -1,6 +1,7 @@
 #ifndef __BOOLEAN__
 #define __BOOLEAN__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/lang/System.h"
 
@@ -14,7 +15,7 @@ class Boolean {
     @param name name of a system property (see `System::setProperty`)
     @return true if the property exists and is "true", ignoring case
     */
-    static bool getBoolean(const String& name) {
+    static BOOLEAN getBoolean(const String& name) {
         return System::getProperty(name).equalsIgnoreCase("true");
     }
 

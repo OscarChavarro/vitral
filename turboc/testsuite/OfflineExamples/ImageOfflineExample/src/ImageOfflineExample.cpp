@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -44,7 +45,7 @@ int main(int argc, char** argv)
     }
 
     performImageOperation1(img);
-    bool ok = ImagePersistence::exportPNG(File(outputFilename.c_str()), img);
+    BOOLEAN ok = ImagePersistence::exportPNG(File(outputFilename.c_str()), img);
     delete img;
 
     if (!ok) {

@@ -4,6 +4,7 @@
 
 #include <vga.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/io/FileReader.h"
 #include "java/lang/String.h"
@@ -142,10 +143,11 @@ PaletteSet::loadFile(const char *name, int *pal) {
         return 0;
     }
     int size = palette->size();
-    for (int i = 0; i < 256 * 3; i++) {
+    int i;
+    for (i = 0; i < 256 * 3; i++) {
         pal[i] = 0;
     }
-    for (int i = 0; i < 256 && i < size; i++) {
+    for (i = 0; i < 256 && i < size; i++) {
         const ColorRgb *c = palette->getColorAt(i);
         pal[i * 3] = (int)(c->r() * 63 + 0.5);
         pal[i * 3 + 1] = (int)(c->g() * 63 + 0.5);

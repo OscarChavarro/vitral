@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/regex/Matcher.h"
 #include "java/util/regex/Pattern.h"
 #include "java/lang/IllegalArgumentException.h"
@@ -12,21 +13,21 @@
 Appends the POSIX bracket expression contents for a Java class escape
 (`\\s`, `\\d`, `\\w`), or returns false if `escape` is not one of them.
 */
-static bool
+static BOOLEAN
 appendClassContents(char escape, StringBuilder &out)
 {
     switch ( escape ) {
       case 's':
         out.append("[:space:]");
-        return true;
+        return TRUE;
       case 'd':
         out.append("0-9");
-        return true;
+        return TRUE;
       case 'w':
         out.append("[:alnum:]_");
-        return true;
+        return TRUE;
       default:
-        return false;
+        return FALSE;
     }
 }
 
@@ -79,10 +80,10 @@ translate(const char *javaRegex, StringBuilder &out,
                 out.append('^');
                 i++;
             }
-            bool first = true;
+            BOOLEAN first = TRUE;
             for ( ; javaRegex[i] != '\0' && (first || javaRegex[i] != ']');
                   i++ ) {
-                first = false;
+                first = FALSE;
                 char member = javaRegex[i];
                 if ( member == '\\' && javaRegex[i + 1] != '\0' ) {
                     char next = javaRegex[++i];
@@ -199,7 +200,7 @@ Pattern::pattern() const
 Matcher::Matcher(const SharedPointer<CompiledExpression> &expression,
                  const String &input) :
     expression(expression), input(input), match(), searchFrom(0),
-    matched(false)
+    matched(FALSE)
 {
     regmatch_t empty;
     empty.rm_so = -1;
@@ -209,19 +210,19 @@ Matcher::Matcher(const SharedPointer<CompiledExpression> &expression,
     }
 }
 
-bool
+BOOLEAN
 Matcher::find()
 {
     if ( searchFrom > (size_t)input.size() ) {
-        matched = false;
-        return false;
+        matched = FALSE;
+        return FALSE;
     }
     int flags = searchFrom > 0 ? REG_NOTBOL : 0;
     matched = regexec(&expression->expression, input.c_str() + searchFrom,
                       (size_t)match.size(), match.data(), flags) == 0;
     if ( !matched ) {
         searchFrom = (size_t)input.size() + 1;
-        return false;
+        return FALSE;
     }
     // Offsets are relative to the start of the search
     for ( long i = 0; i < match.size(); i++ ) {
@@ -234,10 +235,10 @@ Matcher::find()
     size_t matchEnd = (size_t)match[0].rm_eo;
     // An empty match advances one character, as Java does
     searchFrom = matchEnd > matchStart ? matchEnd : matchEnd + 1;
-    return true;
+    return TRUE;
 }
 
-bool
+BOOLEAN
 Matcher::matches()
 {
     searchFrom = (size_t)input.size() + 1;

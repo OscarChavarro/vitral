@@ -1,6 +1,7 @@
 #ifndef __TREE_MAP_TXX__
 #define __TREE_MAP_TXX__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/TreeMap.h"
 
@@ -68,14 +69,14 @@ TreeMap<K, V>::size() const
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 TreeMap<K, V>::isEmpty() const
 {
     return entries.size() == 0;
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 TreeMap<K, V>::containsKey(const K &key) const
 {
     return indexOf(key) >= 0;
@@ -115,13 +116,13 @@ TreeMap<K, V>::getOrDefault(const K &key, const V &defaultValue) const
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 TreeMap<K, V>::put(const K &key, const V &value)
 {
     long index = lowerBound(key);
     if ( index < entries.size() && !(key < entries[index]->key) ) {
         entries[index]->value = value;
-        return false;
+        return FALSE;
     }
     TreeMapEntry<K, V> *entry = new TreeMapEntry<K, V>(key, value);
     if ( index == entries.size() ) {
@@ -130,7 +131,7 @@ TreeMap<K, V>::put(const K &key, const V &value)
     else {
         entries.add(index, entry);
     }
-    return true;
+    return TRUE;
 }
 
 template <class K, class V>
@@ -152,16 +153,16 @@ TreeMap<K, V>::putIfAbsent(const K &key, const V &value)
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 TreeMap<K, V>::remove(const K &key)
 {
     long index = indexOf(key);
     if ( index < 0 ) {
-        return false;
+        return FALSE;
     }
     delete entries[index];
     entries.remove(index);
-    return true;
+    return TRUE;
 }
 
 template <class K, class V>

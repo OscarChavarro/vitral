@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_SECTOR_CLASSIFICATION_ON_FACE__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_SECTOR_CLASSIFICATION_ON_FACE__
+#ifndef ___PBS_SET_OP_SECTOR_ON_FACE__
+#define ___PBS_SET_OP_SECTOR_ON_FACE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -27,28 +28,36 @@ numeric context.
 class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     : public _PolyhedralBoundedSolidOperator {
 public:
-    static const int ABOVE = 1;
-    static const int BELOW = -1;
-    static const int ON = 0;
+    enum {
+        ABOVE = 1,
+        BELOW = -1,
+        ON = 0
+    };
 
-    static const int AinB = 11;
-    static const int AoutB = 12;
-    static const int BinA = 13;
-    static const int BoutA = 14;
-    static const int AonBplus = 15;
-    static const int AonBminus = 16;
-    static const int BonAplus = 17;
-    static const int BonAminus = 18;
+    enum {
+        AinB = 11,
+        AoutB = 12,
+        BinA = 13,
+        BoutA = 14,
+        AonBplus = 15,
+        AonBminus = 16,
+        BonAplus = 17,
+        BonAminus = 18
+    };
 
-    static const int COPLANAR_FACE = 10;
-    static const int INPLANE_EDGE = 20;
-    static const int CROSSING_EDGE = 30;
-    static const int UNDEFINED = 40;
+    enum {
+        COPLANAR_FACE = 10,
+        INPLANE_EDGE = 20,
+        CROSSING_EDGE = 30,
+        UNDEFINED = 40
+    };
 
-    static const int COPLANAR_UNKNOWN = 0;
-    static const int COPLANAR_DISJOINT = 1;
-    static const int COPLANAR_TOUCHING = 2;
-    static const int COPLANAR_OVERLAP = 3;
+    enum {
+        COPLANAR_UNKNOWN = 0,
+        COPLANAR_DISJOINT = 1,
+        COPLANAR_TOUCHING = 2,
+        COPLANAR_OVERLAP = 3
+    };
 
     _PolyhedralBoundedSolidHalfEdge* sector;
     /** Referenced, not owned */
@@ -57,10 +66,10 @@ public:
 
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
-    bool isWide;
+    BOOLEAN isWide;
     Vector3Dd position;
     int situation;
-    bool reverse;
+    BOOLEAN reverse;
     int coplanarRelation;
 
     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();

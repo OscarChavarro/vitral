@@ -1,6 +1,7 @@
 #ifndef __MCP_JSON__
 #define __MCP_JSON__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class ColorRgb;
@@ -23,7 +24,7 @@ public:
     @param key name of the property
     @return true if the request has the property, whatever its value
     */
-    static bool hasProperty(const String& json, const String& key);
+    static BOOLEAN hasProperty(const String& json, const String& key);
 
     /**
     @param json request
@@ -57,8 +58,8 @@ public:
     @param outValue receives the value of the boolean property, if present
     @return false if the request has no such property (Java returns null)
     */
-    static bool booleanProperty(const String& json,
-                                const String& key, bool& outValue);
+    static BOOLEAN booleanProperty(const String& json,
+                                const String& key, BOOLEAN& outValue);
 
     //= Answers ===========================================================
 

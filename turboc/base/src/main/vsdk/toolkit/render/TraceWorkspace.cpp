@@ -1,17 +1,18 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 TraceWorkspace::TraceWorkspace()
-    : traversalCandidateHit(RayHit::DETAIL_NONE, false),
-      nearestHit(RayHit::DETAIL_NONE, false),
-      shadowCandidateHitObj(RayHit::DETAIL_NONE, false)
+    : traversalCandidateHit(RayHit::DETAIL_NONE, FALSE),
+      nearestHit(RayHit::DETAIL_NONE, FALSE),
+      shadowCandidateHitObj(RayHit::DETAIL_NONE, FALSE)
 {
     initialize(DEFAULT_MAX_RECURSION_LEVEL);
 }
 
 TraceWorkspace::TraceWorkspace(int maxRecursionLevel)
-    : traversalCandidateHit(RayHit::DETAIL_NONE, false),
-      nearestHit(RayHit::DETAIL_NONE, false),
-      shadowCandidateHitObj(RayHit::DETAIL_NONE, false)
+    : traversalCandidateHit(RayHit::DETAIL_NONE, FALSE),
+      nearestHit(RayHit::DETAIL_NONE, FALSE),
+      shadowCandidateHitObj(RayHit::DETAIL_NONE, FALSE)
 {
     initialize(maxRecursionLevel);
 }
@@ -23,7 +24,7 @@ void TraceWorkspace::initialize(int maxRecursionLevel)
     shadingHits.reserve((long int)levels);
     reflectionColors.reserve((long int)levels);
     for ( int i = 0; i < levels; i++ ) {
-        reflectionHits.add(RayHit(RayHit::DETAIL_NONE, false));
+        reflectionHits.add(RayHit(RayHit::DETAIL_NONE, FALSE));
         shadingHits.add(RayHit());
         reflectionColors.add(ColorRgb());
     }
@@ -36,4 +37,3 @@ RayHit* TraceWorkspace::shadowCandidateHit()
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int TraceWorkspace::DEFAULT_MAX_RECURSION_LEVEL;

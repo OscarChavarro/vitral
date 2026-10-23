@@ -1,6 +1,7 @@
 #ifndef __SIMPLE_MATERIAL__
 #define __SIMPLE_MATERIAL__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -14,7 +15,7 @@ class SimpleMaterial : public Entity, public Material {
     ColorRgb specular;
     ColorRgb emission;
     ColorRgb transmittance;
-    bool doubleSided;
+    BOOLEAN doubleSided;
     double reflectionCoefficient;
     double refractionCoefficient;
     double indexOfRefraction;
@@ -27,7 +28,7 @@ class SimpleMaterial : public Entity, public Material {
     virtual const Class *getClass() const;
 
     /// Resolves the `instanceOf` inherited from both `Entity` and `Material`
-    bool instanceOf(const Class &type) const
+    BOOLEAN instanceOf(const Class &type) const
     {
         return Entity::instanceOf(type);
     }
@@ -41,7 +42,7 @@ class SimpleMaterial : public Entity, public Material {
         const ColorRgb& specular,
         const ColorRgb& emission,
         const ColorRgb& transmittance,
-        bool doubleSided,
+        BOOLEAN doubleSided,
         double reflectionCoefficient,
         double refractionCoefficient,
         double indexOfRefraction,
@@ -53,7 +54,7 @@ class SimpleMaterial : public Entity, public Material {
         const ColorRgb& ambient,
         const ColorRgb& diffuse,
         const ColorRgb& specular,
-        bool doubleSided,
+        BOOLEAN doubleSided,
         double reflectionCoefficient,
         double refractionCoefficient,
         double opacity,
@@ -73,9 +74,9 @@ class SimpleMaterial : public Entity, public Material {
     SimpleMaterial withRefractionCoefficient(double kr) const;
     SimpleMaterial withIndexOfRefraction(double ior) const;
     SimpleMaterial withOpacity(double a) const;
-    SimpleMaterial withDoubleSided(bool b) const;
+    SimpleMaterial withDoubleSided(BOOLEAN b) const;
 
-    bool isDoubleSided() const;
+    BOOLEAN isDoubleSided() const;
 
     ColorRgb getAmbient() const;
     const ColorRgb& getAmbientReference() const;

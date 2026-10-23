@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
 #ifdef __APPLE__
@@ -53,7 +54,7 @@ struct App {
     int testIndex;
     Operation operation;
     PolygonSurfaceTessellationMode tessellationMode;
-    bool showRef, showClip, showSubj, showInner, showOuter, showIntersections, showFilled;
+    BOOLEAN showRef, showClip, showSubj, showInner, showOuter, showIntersections, showFilled;
     Polygon2D* clipPolygon;
     Polygon2D* subjectPolygon;
     Polygon2D* innerPolygon;
@@ -67,13 +68,13 @@ struct App {
 
     App() : testIndex(0), operation(INTERSECTION),
         tessellationMode(PolygonSurfaceTessellationMode::GLU),
-        showRef(true), showClip(true), showSubj(true), showInner(true), showOuter(true),
-        showIntersections(true), showFilled(true), clipPolygon(0), subjectPolygon(0), innerPolygon(0), outerPolygon(0),
+        showRef(TRUE), showClip(TRUE), showSubj(TRUE), showInner(TRUE), showOuter(TRUE),
+        showIntersections(TRUE), showFilled(TRUE), clipPolygon(0), subjectPolygon(0), innerPolygon(0), outerPolygon(0),
         clipper(0), cameraController(0), qualityController(0), hud(0)
     {
-        quality.setWires(true);
-        quality.setPoints(true);
-        quality.setSurfaces(true);
+        quality.setWires(TRUE);
+        quality.setPoints(TRUE);
+        quality.setSurfaces(TRUE);
         camera.setProjectionMode(Camera::PROJECTION_MODE_ORTHOGONAL);
         camera.setOrthogonalZoom(camera.getOrthogonalZoom() / 16.0);
         camera.updateViewportResize(1100, 900);
@@ -105,14 +106,14 @@ static Polygon2D* buildPolygonFromEncoded(const char* loopsEncoded)
     memcpy(tmp, loopsEncoded, len + 1);
 
     char* cursor = tmp;
-    bool firstLoop = true;
+    BOOLEAN firstLoop = TRUE;
     while (*cursor) {
         char* nextSep = strchr(cursor, ';');
         if (nextSep) *nextSep = '\0';
 
         if (firstLoop) {
             p->nextLoop();
-            firstLoop = false;
+            firstLoop = FALSE;
         }
         else {
             p->nextLoop();
@@ -184,14 +185,14 @@ static void rebuildScene(App* a)
     }
 }
 
-static void includePoly(Polygon2D* p, double& minX, double& minY, double& maxX, double& maxY, bool& init)
+static void includePoly(Polygon2D* p, double& minX, double& minY, double& maxX, double& maxY, BOOLEAN& init)
 {
     if (!p) return;
     for (long int i = 0; i < p->loops.size(); ++i) {
         _Polygon2DContour* c = p->loops[i];
         for (long int j = 0; j < c->vertices.size(); ++j) {
             Vertex2D v = c->vertices[j];
-            if (!init) { minX=maxX=v.x; minY=maxY=v.y; init=true; }
+            if (!init) { minX=maxX=v.x; minY=maxY=v.y; init=TRUE; }
             if (v.x < minX) minX = v.x; if (v.x > maxX) maxX = v.x;
             if (v.y < minY) minY = v.y; if (v.y > maxY) maxY = v.y;
         }
@@ -200,7 +201,7 @@ static void includePoly(Polygon2D* p, double& minX, double& minY, double& maxX, 
 
 static Bounds2D calculateBounds(App* a)
 {
-    double minX=0,minY=0,maxX=1,maxY=1; bool init=false;
+    double minX=0,minY=0,maxX=1,maxY=1; BOOLEAN init=FALSE;
     includePoly(a->clipPolygon, minX,minY,maxX,maxY,init);
     includePoly(a->subjectPolygon, minX,minY,maxX,maxY,init);
     includePoly(a->innerPolygon, minX,minY,maxX,maxY,init);
@@ -250,7 +251,7 @@ static void drawResultPolygon(App* a, const Matrix4x4d& mvp, Polygon2D* polygon,
     }
 }
 
-static String onOff(bool v)
+static String onOff(BOOLEAN v)
 {
     return v ? String("ON") : String("OFF");
 }
@@ -385,31 +386,31 @@ Shortcuts of the example; GLUT gives the characters, so `T` and `t` are
 told apart directly.
 @return true if the key was a letter shortcut (not given to the camera)
 */
-static bool processShortcut(App* a, unsigned char key, bool& rebuild)
+static BOOLEAN processShortcut(App* a, unsigned char key, BOOLEAN& rebuild)
 {
     switch (key) {
-      case 27: requestClose(); return true;
-      case '1': a->testIndex = (a->testIndex + PolygonClippingFixtures::COUNT - 1) % PolygonClippingFixtures::COUNT; rebuild = true; return false;
-      case '2': a->testIndex = (a->testIndex + 1) % PolygonClippingFixtures::COUNT; rebuild = true; return false;
-      case '3': a->operation = (Operation)(((int)a->operation + 1) % 4); rebuild = true; return false;
-      case ' ': a->showRef = !a->showRef; return false;
-      case 'c': case 'C': a->showClip = !a->showClip; return true;
-      case 's': case 'S': a->showSubj = !a->showSubj; return true;
-      case 'i': case 'I': a->showInner = !a->showInner; return true;
-      case 'o': case 'O': a->showOuter = !a->showOuter; return true;
-      case 'p': case 'P': a->showIntersections = !a->showIntersections; return true;
+      case 27: requestClose(); return TRUE;
+      case '1': a->testIndex = (a->testIndex + PolygonClippingFixtures::COUNT - 1) % PolygonClippingFixtures::COUNT; rebuild = TRUE; return FALSE;
+      case '2': a->testIndex = (a->testIndex + 1) % PolygonClippingFixtures::COUNT; rebuild = TRUE; return FALSE;
+      case '3': a->operation = (Operation)(((int)a->operation + 1) % 4); rebuild = TRUE; return FALSE;
+      case ' ': a->showRef = !a->showRef; return FALSE;
+      case 'c': case 'C': a->showClip = !a->showClip; return TRUE;
+      case 's': case 'S': a->showSubj = !a->showSubj; return TRUE;
+      case 'i': case 'I': a->showInner = !a->showInner; return TRUE;
+      case 'o': case 'O': a->showOuter = !a->showOuter; return TRUE;
+      case 'p': case 'P': a->showIntersections = !a->showIntersections; return TRUE;
       // Uppercase T: cycle surface tessellation mode (GLU vs monotone decomposition)
-      case 'T': a->tessellationMode = nextTessellationMode(a->tessellationMode); return true;
+      case 'T': a->tessellationMode = nextTessellationMode(a->tessellationMode); return TRUE;
       // Lowercase t: toggle whether polygon surfaces are filled
-      case 't': a->showFilled = !a->showFilled; return true;
-      case 'g': case 'G': a->showFilled = !a->showFilled; return true;
-      case 'f': case 'F': return true;
-      case 'h': case 'H': return true;
-      default: return false;
+      case 't': a->showFilled = !a->showFilled; return TRUE;
+      case 'g': case 'G': a->showFilled = !a->showFilled; return TRUE;
+      case 'f': case 'F': return TRUE;
+      case 'h': case 'H': return TRUE;
+      default: return FALSE;
     }
 }
 
-static void keyPressed(const KeyEvent& event, bool handledLetterShortcut)
+static void keyPressed(const KeyEvent& event, BOOLEAN handledLetterShortcut)
 {
     if (!handledLetterShortcut && app->cameraController) {
         app->cameraController->processKeyPressedEvent(event);
@@ -433,8 +434,8 @@ static void keyReleased(const KeyEvent& event)
 
 static void keyboardCb(unsigned char key, int, int)
 {
-    bool rebuild = false;
-    bool handledLetterShortcut = processShortcut(app, key, rebuild);
+    BOOLEAN rebuild = FALSE;
+    BOOLEAN handledLetterShortcut = processShortcut(app, key, rebuild);
     keyPressed(GlutSystem::glut2vsdkKeyEvent(key, glutGetModifiers()), handledLetterShortcut);
     if (rebuild) rebuildScene(app);
 }
@@ -446,7 +447,7 @@ static void keyboardUpCb(unsigned char key, int, int)
 
 static void specialCb(int key, int, int)
 {
-    keyPressed(GlutSystem::glut2vsdkSpecialKeyEvent(key, glutGetModifiers()), false);
+    keyPressed(GlutSystem::glut2vsdkSpecialKeyEvent(key, glutGetModifiers()), FALSE);
 }
 
 static void specialUpCb(int key, int, int)
@@ -470,7 +471,7 @@ static void applyOptions(App& app, const CommandLineOptions& options)
     if (options.hasTessellationMode) app.tessellationMode = options.tessellationMode;
 }
 
-static bool initGlut(int* argc, char** argv, int width, int height, bool shrinkToScreen)
+static BOOLEAN initGlut(int* argc, char** argv, int width, int height, BOOLEAN shrinkToScreen)
 {
     glutInit(argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
@@ -574,7 +575,7 @@ static void offlineDisplayCb()
 
     releaseGlResources(*app);
 
-    bool ok = ImagePersistence::exportPNG(File("output.png"), &image);
+    BOOLEAN ok = ImagePersistence::exportPNG(File("output.png"), &image);
     if (!ok) {
         fprintf(stderr, "[PolygonClippingExample] Failed to write output.png\n");
         exit(1);

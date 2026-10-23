@@ -2,6 +2,7 @@
 #define __FILE_H__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -9,13 +10,13 @@ class File {
   private:
 String path;
 
-static bool
+static BOOLEAN
 isValidPath(const char *rawPath);
 
-static bool
+static BOOLEAN
 canOpenWithMode(const char *rawPath, const char *mode, int *errorCode = NULL);
 
-static bool
+static BOOLEAN
 isDirectoryByReadProbe(const char *rawPath);
 
   public:
@@ -38,22 +39,22 @@ as in the JDK). */
 String
 getAbsolutePath() const;
 
-bool
+BOOLEAN
 exists() const;
 
-bool
+BOOLEAN
 isDirectory() const;
 
-bool
+BOOLEAN
 isFile() const;
 
-bool
+BOOLEAN
 canRead() const;
 
-bool
+BOOLEAN
 canWrite() const;
 
-bool
+BOOLEAN
 mkdirs() const;
 
 /**

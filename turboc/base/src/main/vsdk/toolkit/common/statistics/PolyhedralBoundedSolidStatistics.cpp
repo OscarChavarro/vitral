@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/concurrent/atomic/AtomicLong.h"
 #include <stdio.h>
 
@@ -28,9 +29,9 @@ static AtomicLong consistencyWarningCases(0);
 static AtomicLong operationFailureCases(0);
 
 
-bool PolyhedralBoundedSolidStatistics::isEnabled()
+BOOLEAN PolyhedralBoundedSolidStatistics::isEnabled()
 {
-    static const bool ENABLED = Boolean::getBoolean("vsdk.polyhedral.stats");
+    static const BOOLEAN ENABLED = Boolean::getBoolean("vsdk.polyhedral.stats");
     return ENABLED;
 }
 

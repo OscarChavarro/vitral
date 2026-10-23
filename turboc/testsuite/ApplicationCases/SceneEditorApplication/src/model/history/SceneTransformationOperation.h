@@ -1,6 +1,7 @@
 #ifndef __SCENE_TRANSFORMATION_OPERATION__
 #define __SCENE_TRANSFORMATION_OPERATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "model/history/UndoableOperation.h"
 
@@ -20,16 +21,16 @@ public:
     virtual const Class *getClass() const;
 
     /// Maximum time between two mergeable operations to be merged
-    static const long long MERGE_INTERVAL_MILLISECONDS = 1000;
+    static const long long MERGE_INTERVAL_MILLISECONDS;
 
 private:
     String name;
     ArrayList<EntityTransformState*> before;
     ArrayList<EntityTransformState*> after;
-    bool mergeable;
+    BOOLEAN mergeable;
     long long lastChangeTime;
 
-    bool sameElements(const SceneTransformationOperation* other) const;
+    BOOLEAN sameElements(const SceneTransformationOperation* other) const;
 
     SceneTransformationOperation(const SceneTransformationOperation& other);
     SceneTransformationOperation& operator=(
@@ -48,7 +49,7 @@ public:
         const String& name,
         const ArrayList<EntityTransformState*>& before,
         const ArrayList<EntityTransformState*>& after,
-        bool mergeable);
+        BOOLEAN mergeable);
     virtual ~SceneTransformationOperation();
 
     virtual void undo();
@@ -60,7 +61,7 @@ public:
     */
     int getEntityCount() const;
 
-    virtual bool absorb(UndoableOperation* next);
+    virtual BOOLEAN absorb(UndoableOperation* next);
 };
 
 #endif

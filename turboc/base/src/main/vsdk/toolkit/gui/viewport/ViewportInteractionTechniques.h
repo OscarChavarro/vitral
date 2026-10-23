@@ -1,6 +1,7 @@
 #ifndef __VIEWPORT_INTERACTION_TECHNIQUES__
 #define __VIEWPORT_INTERACTION_TECHNIQUES__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
 #include "vsdk/toolkit/gui/gizmo/TranslateGizmoInteractionTechnique.h"
@@ -53,15 +54,15 @@ public:
     void setCamera(Camera* camera);
     void setRendererConfiguration(RendererConfiguration* rendererConfiguration);
 
-    bool processCameraKeyPressedEvent(const KeyEvent& event);
-    bool processCameraKeyReleasedEvent(const KeyEvent& event);
-    bool processCameraMousePressedEvent(const MouseEvent& event);
-    bool processCameraMouseReleasedEvent(const MouseEvent& event);
-    bool processCameraMouseClickedEvent(const MouseEvent& event);
-    bool processCameraMouseMovedEvent(const MouseEvent& event);
-    bool processCameraMouseDraggedEvent(const MouseEvent& event);
-    bool processCameraMouseWheelEvent(const MouseEvent& event);
-    bool processQualityKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processCameraKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processCameraKeyReleasedEvent(const KeyEvent& event);
+    BOOLEAN processCameraMousePressedEvent(const MouseEvent& event);
+    BOOLEAN processCameraMouseReleasedEvent(const MouseEvent& event);
+    BOOLEAN processCameraMouseClickedEvent(const MouseEvent& event);
+    BOOLEAN processCameraMouseMovedEvent(const MouseEvent& event);
+    BOOLEAN processCameraMouseDraggedEvent(const MouseEvent& event);
+    BOOLEAN processCameraMouseWheelEvent(const MouseEvent& event);
+    BOOLEAN processQualityKeyPressedEvent(const KeyEvent& event);
 
     /**
     @return the input gizmo that shows and edits the coordinates of the
@@ -72,16 +73,16 @@ public:
     /**
     @return true if the input gizmo of the translation gizmo uses the key
     */
-    bool isTranslationInputGizmoKey(const KeyEvent& event);
-    bool processTranslationKeyPressedEvent(const KeyEvent& event);
-    bool processTranslationMousePressedEvent(const MouseEvent& event);
+    BOOLEAN isTranslationInputGizmoKey(const KeyEvent& event);
+    BOOLEAN processTranslationKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processTranslationMousePressedEvent(const MouseEvent& event);
 
     /**
     Processes the press of a mouse button over a viewport, starting a
     translation gesture confined to it (see `getTranslationDragViewport`).
     @return false (a press never changes the gizmo)
     */
-    bool processTranslationMousePressedEvent(const MouseEvent& event,
+    BOOLEAN processTranslationMousePressedEvent(const MouseEvent& event,
                                              Viewport* viewport);
 
     /**
@@ -94,69 +95,69 @@ public:
     @param enabled true if the caller is able to place the cursor when the
     translation technique requests it
     */
-    void setTranslationCursorWrapEnabled(bool enabled);
+    void setTranslationCursorWrapEnabled(BOOLEAN enabled);
 
     /**
     @param outWarp the pending request to place the cursor while dragging
     @return true if there was a pending request (the Java version returns
     null when there is none)
     */
-    bool consumeTranslationCursorWarp(
+    BOOLEAN consumeTranslationCursorWarp(
         TranslateGizmoInteractionTechnique::CursorWarp* outWarp);
-    bool processTranslationMouseReleasedEvent(const MouseEvent& event);
-    bool processTranslationMouseClickedEvent(const MouseEvent& event);
-    bool processTranslationMouseMovedEvent(const MouseEvent& event);
-    bool processTranslationMouseDraggedEvent(const MouseEvent& event);
+    BOOLEAN processTranslationMouseReleasedEvent(const MouseEvent& event);
+    BOOLEAN processTranslationMouseClickedEvent(const MouseEvent& event);
+    BOOLEAN processTranslationMouseMovedEvent(const MouseEvent& event);
+    BOOLEAN processTranslationMouseDraggedEvent(const MouseEvent& event);
 
     /**
     @return the input gizmo that shows and edits the angles of the rotation
     gizmo
     */
     InputGizmo* getRotationInputGizmo();
-    bool isRotationInputGizmoKey(const KeyEvent& event);
-    bool processRotateKeyPressedEvent(const KeyEvent& event);
-    bool processRotationMousePressedEvent(const MouseEvent& event);
+    BOOLEAN isRotationInputGizmoKey(const KeyEvent& event);
+    BOOLEAN processRotateKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processRotationMousePressedEvent(const MouseEvent& event);
 
     /**
     Processes the press of a mouse button over a viewport, starting a
     rotation gesture confined to it if the pointer is over a ring.
     @return false (a press never changes the gizmo)
     */
-    bool processRotationMousePressedEvent(const MouseEvent& event,
+    BOOLEAN processRotationMousePressedEvent(const MouseEvent& event,
                                           Viewport* viewport);
     Viewport* getRotationDragViewport() const;
-    bool processRotationMouseReleasedEvent(const MouseEvent& event);
-    bool processRotationMouseDraggedEvent(const MouseEvent& event);
-    bool processRotationMouseClickedEvent(const MouseEvent& event);
-    bool processRotationMouseMovedEvent(const MouseEvent& event);
-    bool processScaleKeyPressedEvent(const KeyEvent& event);
+    BOOLEAN processRotationMouseReleasedEvent(const MouseEvent& event);
+    BOOLEAN processRotationMouseDraggedEvent(const MouseEvent& event);
+    BOOLEAN processRotationMouseClickedEvent(const MouseEvent& event);
+    BOOLEAN processRotationMouseMovedEvent(const MouseEvent& event);
+    BOOLEAN processScaleKeyPressedEvent(const KeyEvent& event);
 
     /**
     @return the input gizmo that shows and edits the scale factors of the
     scale gizmo
     */
     InputGizmo* getScaleInputGizmo();
-    bool isScaleInputGizmoKey(const KeyEvent& event);
+    BOOLEAN isScaleInputGizmoKey(const KeyEvent& event);
 
     /**
     @return the interaction technique that hovers, selects and drags the
     handles of the scale gizmo
     */
     ScaleGizmoInteractionTechnique* getScaleTechnique() const;
-    bool processScaleMousePressedEvent(const MouseEvent& event);
+    BOOLEAN processScaleMousePressedEvent(const MouseEvent& event);
 
     /**
     Processes the press of a mouse button over a viewport, starting a scale
     gesture confined to it if the pointer is over a handle.
     @return false (a press never changes the gizmo)
     */
-    bool processScaleMousePressedEvent(const MouseEvent& event,
+    BOOLEAN processScaleMousePressedEvent(const MouseEvent& event,
                                        Viewport* viewport);
     Viewport* getScaleDragViewport() const;
-    bool processScaleMouseReleasedEvent(const MouseEvent& event);
-    bool processScaleMouseDraggedEvent(const MouseEvent& event);
-    bool processScaleMouseClickedEvent(const MouseEvent& event);
-    bool processScaleMouseMovedEvent(const MouseEvent& event);
+    BOOLEAN processScaleMouseReleasedEvent(const MouseEvent& event);
+    BOOLEAN processScaleMouseDraggedEvent(const MouseEvent& event);
+    BOOLEAN processScaleMouseClickedEvent(const MouseEvent& event);
+    BOOLEAN processScaleMouseMovedEvent(const MouseEvent& event);
 };
 
 #endif

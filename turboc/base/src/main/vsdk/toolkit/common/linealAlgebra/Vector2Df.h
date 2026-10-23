@@ -4,6 +4,7 @@
 
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
@@ -28,8 +29,8 @@ public:
     float x() const { return x_; }
     float y() const { return y_; }
 
-    bool epsilonEquals(const Vector2Df& other) const { return epsilonEquals(other, 1e-6f); }
-    bool epsilonEquals(const Vector2Df& other, float epsilon) const {
+    BOOLEAN epsilonEquals(const Vector2Df& other) const { return epsilonEquals(other, 1e-6f); }
+    BOOLEAN epsilonEquals(const Vector2Df& other, float epsilon) const {
         if ( epsilon < 0.0f ) {
             Logger::reportMessage("Vector2Df", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
             throw VSDKFatalException("epsilon must be >= 0");
@@ -37,7 +38,7 @@ public:
         return Cpp98Support::abs(x_ - other.x_) <= epsilon && Cpp98Support::abs(y_ - other.y_) <= epsilon;
     }
 
-    bool operator==(const Vector2Df& other) const { return x_ == other.x_ && y_ == other.y_; }
+    BOOLEAN operator==(const Vector2Df& other) const { return x_ == other.x_ && y_ == other.y_; }
 };
 
 

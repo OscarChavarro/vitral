@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 
 #include "java/util/ArrayList.txx"
@@ -11,7 +12,7 @@
 #include "vsdk/toolkit/render/opengl1/gizmo/OpenGL1InputGizmoRenderer.h"
 #include "java/lang/Math.h"
 
-static bool sameColor(const ColorRgb& a, const ColorRgb& b)
+static BOOLEAN sameColor(const ColorRgb& a, const ColorRgb& b)
 {
     return a.r() == b.r() && a.g() == b.g() && a.b() == b.b();
 }
@@ -255,11 +256,3 @@ void OpenGL1InputGizmoRenderer::drawRectangles(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int OpenGL1InputGizmoRenderer::BASE_FONT_SIZE;
-const int OpenGL1InputGizmoRenderer::BASE_MARGIN;
-const int OpenGL1InputGizmoRenderer::BASE_GAP;
-const int OpenGL1InputGizmoRenderer::BASE_PADDING_X;
-const int OpenGL1InputGizmoRenderer::BASE_PADDING_Y;
-const int OpenGL1InputGizmoRenderer::BASE_FRAME_THICKNESS;
-const int OpenGL1InputGizmoRenderer::BASE_UNDERLINE_DISTANCE;
-const int OpenGL1InputGizmoRenderer::BASE_UNDERLINE_THICKNESS;

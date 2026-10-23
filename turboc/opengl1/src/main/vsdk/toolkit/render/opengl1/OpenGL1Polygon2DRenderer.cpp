@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Polygon2DRenderer.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
@@ -41,7 +42,7 @@ void OpenGL1Polygon2DRenderer::tessEnd(void* userData)
     }
     else if (c->mode == GL_TRIANGLE_STRIP) {
         for (long int i = 0; i + 8 < c->pending.size(); i += 3) {
-            bool odd = ((i / 3) % 2) != 0;
+            BOOLEAN odd = ((i / 3) % 2) != 0;
             if (!odd) {
                 c->out->add(c->pending[i]); c->out->add(c->pending[i+1]); c->out->add(c->pending[i+2]);
                 c->out->add(c->pending[i+3]); c->out->add(c->pending[i+4]); c->out->add(c->pending[i+5]);
@@ -83,7 +84,8 @@ void OpenGL1Polygon2DRenderer::tessellatePolygonToTriangles(Polygon2D* polygon, 
     gluTessCallback(tess, GLU_TESS_COMBINE_DATA, (void (*)())tessCombine);
     gluTessCallback(tess, GLU_TESS_ERROR_DATA, (void (*)())tessError);
     gluTessBeginPolygon(tess, &c);
-    for (long int i = 0; i < polygon->loops.size(); ++i) {
+    long int i;
+    for (i = 0; i < polygon->loops.size(); ++i) {
         _Polygon2DContour* contour = polygon->loops[i];
         if (!contour || contour->vertices.size() < 3) continue;
         gluTessBeginContour(tess);
@@ -98,7 +100,7 @@ void OpenGL1Polygon2DRenderer::tessellatePolygonToTriangles(Polygon2D* polygon, 
     }
     gluTessEndPolygon(tess);
     gluDeleteTess(tess);
-    for (long int i = 0; i < c.allocs.size(); ++i) delete[] c.allocs[i];
+    for (i = 0; i < c.allocs.size(); ++i) delete[] c.allocs[i];
 }
 
 void OpenGL1Polygon2DRenderer::draw(const Matrix4x4d& mvp, Polygon2D* polygon, RendererConfiguration* quality,

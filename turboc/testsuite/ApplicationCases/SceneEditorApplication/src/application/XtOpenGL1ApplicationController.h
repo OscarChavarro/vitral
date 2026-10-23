@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_APPLICATION_CONTROLLER__
 #define __XT_OPENGL1_APPLICATION_CONTROLLER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "java/lang/IllegalArgumentException.h"
@@ -27,7 +28,7 @@ public:
     /**
     @return true if the canvas of the drawing area was already created
     */
-    virtual bool isDrawingAreaCreated() = 0;
+    virtual BOOLEAN isDrawingAreaCreated() = 0;
 
     /**
     Requests a new frame of the drawing area.
@@ -85,8 +86,8 @@ public:
     @throws IllegalArgumentException for an unknown key (Java throws
     IllegalArgumentException)
     */
-    virtual void injectKeyEvent(const String& key, bool shift,
-                                bool ctrl) = 0;
+    virtual void injectKeyEvent(const String& key, BOOLEAN shift,
+                                BOOLEAN ctrl) = 0;
 
     /**
     Projects a point of the scene to canvas pixel coordinates.
@@ -95,7 +96,7 @@ public:
     @param outCanvas {x, y} in canvas pixels
     @return false if the point is behind the camera (Java returns null)
     */
-    virtual bool projectToCanvas(Viewport* viewport, const Vector3Dd& point,
+    virtual BOOLEAN projectToCanvas(Viewport* viewport, const Vector3Dd& point,
                                  double outCanvas[2]) = 0;
 };
 

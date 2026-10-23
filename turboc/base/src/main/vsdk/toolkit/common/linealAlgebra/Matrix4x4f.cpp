@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4f.h"
 Matrix4x4f::Matrix4x4f(const float values[4][4])
@@ -50,7 +51,7 @@ float Matrix4x4f::obtainEulerYawAngle() const { return (float)d_.obtainEulerYawA
 float Matrix4x4f::obtainEulerPitchAngle() const { return (float)d_.obtainEulerPitchAngle(); }
 float Matrix4x4f::obtainEulerRollAngle() const { return (float)d_.obtainEulerRollAngle(); }
 
-bool Matrix4x4f::epsilonEquals(const Matrix4x4f& other, float eps) const { return d_.epsilonEquals(other.d_, eps); }
+BOOLEAN Matrix4x4f::epsilonEquals(const Matrix4x4f& other, float eps) const { return d_.epsilonEquals(other.d_, eps); }
 String* Matrix4x4f::toString() const { return d_.toString(); }
 double* Matrix4x4f::exportToDoubleArrayRowOrder() const { return d_.exportToDoubleArrayRowOrder(); }
 float* Matrix4x4f::exportToFloatArrayRowOrder() const { return d_.exportToFloatArrayRowOrder(); }

@@ -1,11 +1,12 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 RendererConfiguration::RendererConfiguration()
-    : shadingType(SHADING_TYPE_GOURAUD), surfaces(true), wires(false), boundingVolume(false), selectionCorners(false),
-      texture(true), bumpMap(false), points(false), normals(false), trianglesNormals(false), useVertexColors(false),
+    : shadingType(SHADING_TYPE_GOURAUD), surfaces(TRUE), wires(FALSE), boundingVolume(FALSE), selectionCorners(FALSE),
+      texture(TRUE), bumpMap(FALSE), points(FALSE), normals(FALSE), trianglesNormals(FALSE), useVertexColors(FALSE),
       vertexNormalSmoothingThresholdDegrees(15.0),
       wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0)
 {
@@ -77,15 +78,15 @@ void RendererConfiguration::setWireColor(const ColorRgb& c) { wireColor = ColorR
 void RendererConfiguration::setWireColor(double r, double g, double b) { wireColor = ColorRgb(r, g, b); }
 ColorRgb RendererConfiguration::getWireColor() const { return wireColor; }
 
-void RendererConfiguration::setSurfaces(bool b) { surfaces = b; }
-void RendererConfiguration::setWires(bool b) { wires = b; }
-void RendererConfiguration::setBoundingVolume(bool b) { boundingVolume = b; }
-void RendererConfiguration::setSelectionCorners(bool c) { selectionCorners = c; }
-void RendererConfiguration::setTexture(bool b) { texture = b; }
-void RendererConfiguration::setBumpMap(bool b) { bumpMap = b; }
-void RendererConfiguration::setPoints(bool b) { points = b; }
-void RendererConfiguration::setNormals(bool b) { normals = b; }
-void RendererConfiguration::setTrianglesNormals(bool b) { trianglesNormals = b; }
+void RendererConfiguration::setSurfaces(BOOLEAN b) { surfaces = b; }
+void RendererConfiguration::setWires(BOOLEAN b) { wires = b; }
+void RendererConfiguration::setBoundingVolume(BOOLEAN b) { boundingVolume = b; }
+void RendererConfiguration::setSelectionCorners(BOOLEAN c) { selectionCorners = c; }
+void RendererConfiguration::setTexture(BOOLEAN b) { texture = b; }
+void RendererConfiguration::setBumpMap(BOOLEAN b) { bumpMap = b; }
+void RendererConfiguration::setPoints(BOOLEAN b) { points = b; }
+void RendererConfiguration::setNormals(BOOLEAN b) { normals = b; }
+void RendererConfiguration::setTrianglesNormals(BOOLEAN b) { trianglesNormals = b; }
 void RendererConfiguration::setShadingType(int type) { shadingType = type; }
 void RendererConfiguration::setShadingType(ShadingType type) { shadingType = ((int)(type)); }
 
@@ -109,15 +110,15 @@ double RendererConfiguration::getVertexNormalSmoothingThresholdDegrees() const
     return vertexNormalSmoothingThresholdDegrees;
 }
 
-bool RendererConfiguration::isSurfacesSet() const { return surfaces; }
-bool RendererConfiguration::isWiresSet() const { return wires; }
-bool RendererConfiguration::isBoundingVolumeSet() const { return boundingVolume; }
-bool RendererConfiguration::isSelectionCornersSet() const { return selectionCorners; }
-bool RendererConfiguration::isTextureSet() const { return texture; }
-bool RendererConfiguration::isBumpMapSet() const { return bumpMap; }
-bool RendererConfiguration::isPointsSet() const { return points; }
-bool RendererConfiguration::isNormalsSet() const { return normals; }
-bool RendererConfiguration::isTrianglesNormalsSet() const { return trianglesNormals; }
+BOOLEAN RendererConfiguration::isSurfacesSet() const { return surfaces; }
+BOOLEAN RendererConfiguration::isWiresSet() const { return wires; }
+BOOLEAN RendererConfiguration::isBoundingVolumeSet() const { return boundingVolume; }
+BOOLEAN RendererConfiguration::isSelectionCornersSet() const { return selectionCorners; }
+BOOLEAN RendererConfiguration::isTextureSet() const { return texture; }
+BOOLEAN RendererConfiguration::isBumpMapSet() const { return bumpMap; }
+BOOLEAN RendererConfiguration::isPointsSet() const { return points; }
+BOOLEAN RendererConfiguration::isNormalsSet() const { return normals; }
+BOOLEAN RendererConfiguration::isTrianglesNormalsSet() const { return trianglesNormals; }
 
 int RendererConfiguration::getShadingType() const { return shadingType; }
 ShadingType RendererConfiguration::getShadingTypeEnum() const { return ShadingTypeUtil::fromCode(shadingType); }
@@ -133,8 +134,8 @@ void RendererConfiguration::changeNormals() { normals = !normals; }
 void RendererConfiguration::changeTrianglesNormals() { trianglesNormals = !trianglesNormals; }
 void RendererConfiguration::changeShadingType() { setShadingType(ShadingTypeUtil::next(getShadingTypeEnum())); }
 
-bool RendererConfiguration::getUseVertexColors() const { return useVertexColors; }
-void RendererConfiguration::setUseVertexColors(bool value) { useVertexColors = value; }
+BOOLEAN RendererConfiguration::getUseVertexColors() const { return useVertexColors; }
+void RendererConfiguration::setUseVertexColors(BOOLEAN value) { useVertexColors = value; }
 ColorRgb RendererConfiguration::getBoundingVolumeColor() const { return boundingVolumeColor; }
 void RendererConfiguration::setBoundingVolumeColor(const ColorRgb& c) { boundingVolumeColor = c; }
 
@@ -166,8 +167,3 @@ String RendererConfiguration::toString() const
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int RendererConfiguration::SHADING_TYPE_NOLIGHT;
-const int RendererConfiguration::SHADING_TYPE_FLAT;
-const int RendererConfiguration::SHADING_TYPE_GOURAUD;
-const int RendererConfiguration::SHADING_TYPE_PHONG;
-const int RendererConfiguration::SHADING_TYPE_COOK_TERRANCE;

@@ -1,6 +1,7 @@
 #ifndef __FILE_READER__
 #define __FILE_READER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/io/FileInputStream.h"
 #include "java/io/Reader.h"

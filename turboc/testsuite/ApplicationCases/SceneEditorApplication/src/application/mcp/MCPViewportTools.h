@@ -1,6 +1,7 @@
 #ifndef __MCP_VIEWPORT_TOOLS__
 #define __MCP_VIEWPORT_TOOLS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "java/lang/IllegalArgumentException.h"
@@ -21,7 +22,7 @@ Java ones.
 class MCPViewportTools {
 private:
     ApplicationModel* model;
-    bool supportsXlib;
+    BOOLEAN supportsXlib;
 
     ArrayList<Viewport*> selectedViewports(const String& request);
 
@@ -30,7 +31,7 @@ public:
     @param model application model the tools work over (referenced)
     */
     explicit MCPViewportTools(ApplicationModel* model,
-                              bool supportsXlib = false);
+                              BOOLEAN supportsXlib = FALSE);
 
     /**
     Sets the interaction mode of the drawing area (tool `gui.set_mode`).

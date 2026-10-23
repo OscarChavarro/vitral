@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "application/TangibleInterfaceConnection.h"
 #include "model/ApplicationModel.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
@@ -28,7 +29,7 @@ TangibleInterfaceConnection::TangibleInterfaceConnection(
     : serviceUrl(DEFAULT_TANGIBLE_SERVICE_URL),
       client(NULL),
       eventArrived(eventArrived),
-      hasPendingEvent(false)
+      hasPendingEvent(FALSE)
 {
     pthread_mutex_init(&pendingMutex, NULL);
 }
@@ -64,7 +65,7 @@ void TangibleInterfaceConnection::setServiceUrl(const String& serviceUrl)
 
 void TangibleInterfaceConnection::connect(
     const String& serviceUrl,
-    Consumer<bool>* connectionListener)
+    Consumer<BOOLEAN>* connectionListener)
 {
     setServiceUrl(serviceUrl);
     // Stops the previous client (and its thread) before the new one
@@ -81,29 +82,29 @@ void TangibleInterfaceConnection::tangibleInterfaceEventReceived(
         return;
     }
     pthread_mutex_lock(&pendingMutex);
-    bool notify = !hasPendingEvent;
+    BOOLEAN notify = !hasPendingEvent;
     pendingEvent = event;
-    hasPendingEvent = true;
+    hasPendingEvent = TRUE;
     pthread_mutex_unlock(&pendingMutex);
     if ( notify && eventArrived != NULL ) {
         eventArrived->run();
     }
 }
 
-bool TangibleInterfaceConnection::applyPendingEvent(ApplicationModel* model)
+BOOLEAN TangibleInterfaceConnection::applyPendingEvent(ApplicationModel* model)
 {
     pthread_mutex_lock(&pendingMutex);
-    bool pending = hasPendingEvent;
+    BOOLEAN pending = hasPendingEvent;
     TangibleInterfaceEvent event = pendingEvent;
-    hasPendingEvent = false;
+    hasPendingEvent = FALSE;
     pthread_mutex_unlock(&pendingMutex);
 
     if ( !pending || model == NULL || model->getRayGizmo() == NULL ) {
-        return false;
+        return FALSE;
     }
-    model->setWithVisualDebugRay(true);
-    model->getRayGizmo()->setRollIndicatorEnabled(true);
+    model->setWithVisualDebugRay(TRUE);
+    model->getRayGizmo()->setRollIndicatorEnabled(TRUE);
     TangibleInterfaceEvent2RayGizmoMapper(model->getActiveCamera())
         .map(event, model->getRayGizmo());
-    return true;
+    return TRUE;
 }

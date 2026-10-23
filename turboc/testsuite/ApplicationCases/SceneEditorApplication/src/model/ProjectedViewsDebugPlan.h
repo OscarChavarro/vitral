@@ -7,6 +7,7 @@
 #ifndef __PROJECTED_VIEWS_DEBUG_PLAN__
 #define __PROJECTED_VIEWS_DEBUG_PLAN__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
@@ -19,7 +20,7 @@ take those views. Views are numbered from 1 to `VIEW_COUNT`.
 */
 class ProjectedViewsDebugPlan {
 public:
-    static const int VIEW_COUNT = 13;
+    enum { VIEW_COUNT = 13 };
 
     /**
     Position, scale and orientation of the box presenting one projected view.
@@ -56,7 +57,7 @@ public:
     @return false if the number is out of range (the Java version returns
     null)
     */
-    static bool getPlacement(int view, ViewPlacement* outPlacement);
+    static BOOLEAN getPlacement(int view, ViewPlacement* outPlacement);
 
     /**
     Creates the camera that takes one projected view of a body normalized

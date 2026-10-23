@@ -1,6 +1,7 @@
 #ifndef __SCENE_EDITOR_SCENE__
 #define __SCENE_EDITOR_SCENE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeSet.h"
 
 #include "java/util/ArrayList.h"
@@ -36,16 +37,16 @@ class Scene {
 private:
     int acumObject;
     /// True when the contents were replaced by a MIT ray tracing scene.
-    bool importedMitScene;
+    BOOLEAN importedMitScene;
     /// An imported scene background takes precedence until the user cycles it.
-    bool importedSceneBackground;
+    BOOLEAN importedSceneBackground;
     /// Size factor of light gizmos, shared by rendering and picking
     double lightGizmoScale;
 
     /// Shared by all scenes: its threads (one per processor) are reused
     static ParallelRaytracer* getRaytracer();
     void raytrace(RGBImageUncompressed* outViewport, ZBuffer* outDepth,
-                  bool interactiveReport);
+                  BOOLEAN interactiveReport);
     /// Bodies hidden by the user (i.e. from the scene selector): they are
     /// neither drawn, picked nor raytraced
     TreeSet<SimpleBody*> hiddenBodies;
@@ -68,7 +69,7 @@ public:
 
     //- 4. Objects ---------------------------------------------------------
     /// Test corridor is drawn by the rendering technology, not stored here
-    bool showCorridor;
+    BOOLEAN showCorridor;
     ArrayList<SimpleBodyGroup*> debugThingGroups;
 
     SelectionSet* selectedThings;
@@ -91,8 +92,8 @@ public:
     */
     void setLightGizmoScale(double lightGizmoScale);
 
-    bool buildCubemap();
-    bool buildFixedmap();
+    BOOLEAN buildCubemap();
+    BOOLEAN buildFixedmap();
     static SimpleMaterial defaultMaterial();
 
     /**
@@ -104,13 +105,13 @@ public:
     /**
     @return true if the body was hidden by the user
     */
-    bool isHidden(SimpleBody* body) const;
+    BOOLEAN isHidden(SimpleBody* body) const;
 
     /**
     Hides a body (it is neither drawn, picked nor raytraced) or shows it.
     */
-    void setHidden(SimpleBody* body, bool hidden);
-    bool doIntersectionFirstHit(const Ray& r, RayHit* info);
+    void setHidden(SimpleBody* body, BOOLEAN hidden);
+    BOOLEAN doIntersectionFirstHit(const Ray& r, RayHit* info);
 
     /**
     Selects the next background, cycling over the three available ones.

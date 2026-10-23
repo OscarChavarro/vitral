@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
@@ -10,7 +11,7 @@ const ColorRgb InputGizmo::HIGHLIGHT_COLOR(1, 1, 0);
 
 static const int MAX_EDIT_LENGTH = 12;
 
-static bool isZeroText(const String& text)
+static BOOLEAN isZeroText(const String& text)
 {
     // Matches "0*\.?0*"
     int i = 0;
@@ -38,7 +39,7 @@ static String repeatZeros(int n)
 }
 
 InputGizmo::InputGizmo(int numberOfFields)
-    : decimals(DECIMALS), integerDigits(1), limitTypedDecimals(false),
+    : decimals(DECIMALS), integerDigits(1), limitTypedDecimals(FALSE),
       valueChangeRules(InputGizmoValueChangeRules::forTranslation())
 {
     init(numberOfFields);
@@ -47,7 +48,7 @@ InputGizmo::InputGizmo(int numberOfFields)
 InputGizmo::InputGizmo(int numberOfFields, int decimals, int integerDigits)
     : decimals(decimals > 0 ? decimals : 0),
       integerDigits(integerDigits > 1 ? integerDigits : 1),
-      limitTypedDecimals(true),
+      limitTypedDecimals(TRUE),
       valueChangeRules(InputGizmoValueChangeRules::forTranslation())
 {
     init(numberOfFields);
@@ -57,7 +58,7 @@ InputGizmo::InputGizmo(int numberOfFields, int decimals, int integerDigits,
                        const InputGizmoValueChangeRules& valueChangeRules)
     : decimals(decimals > 0 ? decimals : 0),
       integerDigits(integerDigits > 1 ? integerDigits : 1),
-      limitTypedDecimals(true), valueChangeRules(valueChangeRules)
+      limitTypedDecimals(TRUE), valueChangeRules(valueChangeRules)
 {
     init(numberOfFields);
 }
@@ -70,12 +71,12 @@ void InputGizmo::init(int numberOfFields)
     for ( i = 0; i < count; i++ ) {
         values.add(0.0);
         colors.add(ColorRgb(0, 0, 0));
-        highlighted.add(false);
+        highlighted.add(FALSE);
         editTexts.add(String(""));
-        editing.add(false);
+        editing.add(FALSE);
     }
     selectedField = 0;
-    commitPending = false;
+    commitPending = FALSE;
 }
 
 InputGizmoValueChangeRules& InputGizmo::getValueChangeRules()
@@ -147,12 +148,12 @@ void InputGizmo::setFieldColor(int field, const ColorRgb& color)
     colors[field] = color;
 }
 
-bool InputGizmo::isFieldHighlighted(int field) const
+BOOLEAN InputGizmo::isFieldHighlighted(int field) const
 {
     return highlighted[field];
 }
 
-void InputGizmo::setFieldHighlighted(int field, bool highlighted)
+void InputGizmo::setFieldHighlighted(int field, BOOLEAN highlighted)
 {
     this->highlighted[field] = highlighted;
 }
@@ -184,20 +185,20 @@ void InputGizmo::selectPreviousField()
     selectedField = (selectedField + values.size() - 1) % values.size();
 }
 
-bool InputGizmo::isEditing(int field) const
+BOOLEAN InputGizmo::isEditing(int field) const
 {
     return editing[field];
 }
 
-bool InputGizmo::isEditing() const
+BOOLEAN InputGizmo::isEditing() const
 {
     long i;
     for ( i = 0; i < editing.size(); i++ ) {
         if ( editing[i] ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 String InputGizmo::getEditText(int field) const
@@ -218,37 +219,37 @@ void InputGizmo::cancelEditing()
     long i;
     for ( i = 0; i < editTexts.size(); i++ ) {
         editTexts[i] = "";
-        editing[i] = false;
+        editing[i] = FALSE;
     }
-    commitPending = false;
+    commitPending = FALSE;
 }
 
-bool InputGizmo::consumesKey(const KeyEvent& event) const
+BOOLEAN InputGizmo::consumesKey(const KeyEvent& event) const
 {
     if ( (event.modifierMask & (KeyEvent::MASK_CTRL | KeyEvent::MASK_ALT)) != 0 ) {
-        return false;
+        return FALSE;
     }
     if ( digitOf(event) >= 0 || isDecimalPoint(event) || isMinus(event) ||
          stepOf(event) != 0.0 ) {
-        return true;
+        return TRUE;
     }
     switch ( event.keycode ) {
       case KeyEvent::KEY_TAB:
       case KeyEvent::KEY_BACKSPACE:
-        return true;
+        return TRUE;
       case KeyEvent::KEY_ENTER:
       case KeyEvent::KEY_NUMENTER:
       case KeyEvent::KEY_ESC:
         return isEditing();
       default:
-        return false;
+        return FALSE;
     }
 }
 
-bool InputGizmo::processKeyPressedEvent(const KeyEvent& event)
+BOOLEAN InputGizmo::processKeyPressedEvent(const KeyEvent& event)
 {
     if ( !consumesKey(event) ) {
-        return false;
+        return FALSE;
     }
 
     int digit = digitOf(event);
@@ -283,20 +284,20 @@ bool InputGizmo::processKeyPressedEvent(const KeyEvent& event)
             break;
           case KeyEvent::KEY_ENTER:
           case KeyEvent::KEY_NUMENTER:
-            commitPending = true;
+            commitPending = TRUE;
             break;
           default:
             break;
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool InputGizmo::consumeCommit()
+BOOLEAN InputGizmo::consumeCommit()
 {
-    bool commit = commitPending;
+    BOOLEAN commit = commitPending;
 
-    commitPending = false;
+    commitPending = FALSE;
     return commit;
 }
 
@@ -315,26 +316,26 @@ ArrayList<double> InputGizmo::getValuesWithEdits() const
     return result;
 }
 
-bool InputGizmo::parse(const String& text, double* outValue)
+BOOLEAN InputGizmo::parse(const String& text, double* outValue)
 {
     if ( text.isEmpty() ) {
-        return false;
+        return FALSE;
     }
     const char* start = text.c_str();
     char* end = NULL;
     double value = strtod(start, &end);
 
     if ( end == start ) {
-        return false;
+        return FALSE;
     }
     while ( *end == ' ' || *end == '\t' ) {
         end++;
     }
     if ( *end != '\0' || Cpp98Support::isNaN(value) || Cpp98Support::isInfinite(value) ) {
-        return false;
+        return FALSE;
     }
     *outValue = value;
-    return true;
+    return TRUE;
 }
 
 int InputGizmo::digitOf(const KeyEvent& event)
@@ -352,7 +353,7 @@ int InputGizmo::digitOf(const KeyEvent& event)
     return -1;
 }
 
-bool InputGizmo::isDecimalPoint(const KeyEvent& event)
+BOOLEAN InputGizmo::isDecimalPoint(const KeyEvent& event)
 {
     // The comma is accepted too, as it is the decimal separator of many
     // keyboard layouts.
@@ -362,7 +363,7 @@ bool InputGizmo::isDecimalPoint(const KeyEvent& event)
         event.keycode == KeyEvent::KEY_COMMA;
 }
 
-bool InputGizmo::isMinus(const KeyEvent& event)
+BOOLEAN InputGizmo::isMinus(const KeyEvent& event)
 {
     return event.unicodeId == '-' || event.keycode == KeyEvent::KEY_MINUS ||
         event.keycode == KeyEvent::KEY_NUMMINUS;
@@ -410,7 +411,7 @@ void InputGizmo::stepSelected(double step)
     }
 
     setSelectedEditText(stepped);
-    commitPending = true;
+    commitPending = TRUE;
 }
 
 String InputGizmo::selectedEditTextOrEmpty() const
@@ -424,7 +425,7 @@ String InputGizmo::selectedEditTextOrEmpty() const
 void InputGizmo::setSelectedEditText(const String& text)
 {
     editTexts[selectedField] = text;
-    editing[selectedField] = true;
+    editing[selectedField] = TRUE;
 }
 
 void InputGizmo::appendToSelected(char character)
@@ -485,10 +486,6 @@ void InputGizmo::deleteLastCharacterOfSelected()
     }
     setSelectedEditText(text);
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int InputGizmo::DECIMALS;
 
 const Class InputGizmo::CLASS = { "InputGizmo", &Gizmo::CLASS };
 

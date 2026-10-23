@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 static const Vector3Dd ZERO_VECTOR;
@@ -8,11 +9,11 @@ RayHit::RayHit()
       u(0), v(0),
       material(NULL), texture(NULL), normalMap(NULL),
       ray(),
-      hasRay(false),
+      hasRay(FALSE),
       requiredDetailMask(DETAIL_ALL),
-      storeRay(true),
+      storeRay(TRUE),
       hitDistance(0),
-      hitDistanceKnown(false)
+      hitDistanceKnown(FALSE)
 {
     clear();
     RaytraceStatistics::recordRayHitInstance();
@@ -23,26 +24,26 @@ RayHit::RayHit(int requiredDetailMask)
       u(0), v(0),
       material(NULL), texture(NULL), normalMap(NULL),
       ray(),
-      hasRay(false),
+      hasRay(FALSE),
       requiredDetailMask(requiredDetailMask),
-      storeRay(true),
+      storeRay(TRUE),
       hitDistance(0),
-      hitDistanceKnown(false)
+      hitDistanceKnown(FALSE)
 {
     clear();
     RaytraceStatistics::recordRayHitInstance();
 }
 
-RayHit::RayHit(int requiredDetailMask, bool storeRay)
+RayHit::RayHit(int requiredDetailMask, BOOLEAN storeRay)
     : point(ZERO_VECTOR), normal(ZERO_VECTOR), tangent(ZERO_VECTOR),
       u(0), v(0),
       material(NULL), texture(NULL), normalMap(NULL),
       ray(),
-      hasRay(false),
+      hasRay(FALSE),
       requiredDetailMask(requiredDetailMask),
       storeRay(storeRay),
       hitDistance(0),
-      hitDistanceKnown(false)
+      hitDistanceKnown(FALSE)
 {
     clear();
     RaytraceStatistics::recordRayHitInstance();
@@ -53,11 +54,11 @@ RayHit::RayHit(const RayHit& other)
       u(0), v(0),
       material(NULL), texture(NULL), normalMap(NULL),
       ray(),
-      hasRay(false),
+      hasRay(FALSE),
       requiredDetailMask(other.requiredDetailMask),
       storeRay(other.storeRay),
       hitDistance(0),
-      hitDistanceKnown(false)
+      hitDistanceKnown(FALSE)
 {
     clone(other);
 }
@@ -76,9 +77,9 @@ void RayHit::clear()
     material = NULL;
     texture = NULL;
     normalMap = NULL;
-    hasRay = false;
+    hasRay = FALSE;
     hitDistance = 0;
-    hitDistanceKnown = false;
+    hitDistanceKnown = FALSE;
 }
 
 void RayHit::reset(int newRequiredDetailMask)
@@ -90,9 +91,9 @@ void RayHit::reset(int newRequiredDetailMask)
 void RayHit::resetForDistanceOnly()
 {
     requiredDetailMask = DETAIL_NONE;
-    hasRay = false;
+    hasRay = FALSE;
     hitDistance = 0;
-    hitDistanceKnown = false;
+    hitDistanceKnown = FALSE;
 }
 
 void RayHit::clone(const RayHit& other)
@@ -127,37 +128,37 @@ void RayHit::setRequiredDetailMask(int value)
     requiredDetailMask = value;
 }
 
-bool RayHit::shouldStoreRay() const
+BOOLEAN RayHit::shouldStoreRay() const
 {
     return storeRay;
 }
 
-void RayHit::setStoreRay(bool value)
+void RayHit::setStoreRay(BOOLEAN value)
 {
     storeRay = value;
 }
 
-bool RayHit::needsPoint() const
+BOOLEAN RayHit::needsPoint() const
 {
     return (requiredDetailMask & DETAIL_POINT) != 0;
 }
 
-bool RayHit::needsNormal() const
+BOOLEAN RayHit::needsNormal() const
 {
     return (requiredDetailMask & DETAIL_NORMAL) != 0;
 }
 
-bool RayHit::needsTextureCoordinates() const
+BOOLEAN RayHit::needsTextureCoordinates() const
 {
     return (requiredDetailMask & DETAIL_UV) != 0;
 }
 
-bool RayHit::needsTangent() const
+BOOLEAN RayHit::needsTangent() const
 {
     return (requiredDetailMask & DETAIL_TANGENT) != 0;
 }
 
-bool RayHit::needsAnySurfaceData() const
+BOOLEAN RayHit::needsAnySurfaceData() const
 {
     return requiredDetailMask != DETAIL_NONE;
 }
@@ -170,12 +171,12 @@ const Ray* RayHit::getRay() const
 void RayHit::setRay(const Ray& value)
 {
     ray = value;
-    hasRay = true;
+    hasRay = TRUE;
     hitDistance = value.getT();
-    hitDistanceKnown = true;
+    hitDistanceKnown = TRUE;
 }
 
-bool RayHit::hasHitDistance() const
+BOOLEAN RayHit::hasHitDistance() const
 {
     return hitDistanceKnown;
 }
@@ -194,17 +195,8 @@ double RayHit::getHitDistance() const
 void RayHit::setHitDistance(double value)
 {
     hitDistance = value;
-    hitDistanceKnown = true;
+    hitDistanceKnown = TRUE;
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int RayHit::DETAIL_ALL;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int RayHit::DETAIL_NONE;
-const int RayHit::DETAIL_POINT;
-const int RayHit::DETAIL_NORMAL;
-const int RayHit::DETAIL_UV;
-const int RayHit::DETAIL_TANGENT;

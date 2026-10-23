@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/Cpp98Support.h"
 #include "vsdk/toolkit/processing/ComputationalGeometry.h"
 #include "vsdk/toolkit/processing/Containment.h"
 double ComputationalGeometry::lineToPointDistance(
@@ -11,7 +12,7 @@ double ComputationalGeometry::lineToPointDistance(
     Vector3Dd lineVector = p1.subtract(p0);
     double denominator = lineVector.length();
     if ( denominator < VSDK::EPSILON ) {
-        return NAN;
+        return Cpp98Support::nan();
     }
 
     Vector3Dd v = p1.subtract(p0);

@@ -2,6 +2,7 @@
 #define __CLASS__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 
 /**
 Emulation of `java.lang.Class`, the run time description of a class of the
@@ -54,14 +55,14 @@ class Class {
     /**
     @return true if `other` is this class or one of its subclasses
     */
-    bool isAssignableFrom(const Class *other) const
+    BOOLEAN isAssignableFrom(const Class *other) const
     {
         for ( const Class *c = other; c != NULL; c = c->superclass ) {
             if ( c == this ) {
-                return true;
+                return TRUE;
             }
         }
-        return false;
+        return FALSE;
     }
 };
 

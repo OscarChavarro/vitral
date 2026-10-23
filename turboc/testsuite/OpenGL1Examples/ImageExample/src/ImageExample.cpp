@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -62,7 +63,7 @@ public:
         cleanup();
     }
 
-    bool init(int* argc, char** argv) {
+    BOOLEAN init(int* argc, char** argv) {
         glutInit(argc, argv);
         glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
         // At most the screen, leaving room for the window manager
@@ -77,7 +78,7 @@ public:
         glutCreateWindow("VITRAL concept test - OpenGL1 Image use example");
 
         if (!OpenGL1Loader::load()) {
-            return false;
+            return FALSE;
         }
 
         glutDisplayFunc(displayCallback);
@@ -122,7 +123,7 @@ public:
             }
         }
 
-        return true;
+        return TRUE;
     }
 
     void onFramebufferSizeChanged(int width, int height) {
@@ -277,7 +278,7 @@ public:
         glDepthFunc(GL_LESS);
     }
 
-    void drawHudImage(Image* image, bool upperLeft) {
+    void drawHudImage(Image* image, BOOLEAN upperLeft) {
         if (image == NULL) {
             return;
         }
@@ -339,10 +340,10 @@ public:
     void drawHud() {
         glDisable(GL_DEPTH_TEST);
         if (renderImage != NULL) {
-            drawHudImage(renderImage, false);
+            drawHudImage(renderImage, FALSE);
         }
         if (earthImage != NULL) {
-            drawHudImage(earthImage, true);
+            drawHudImage(earthImage, TRUE);
         }
         glEnable(GL_DEPTH_TEST);
     }

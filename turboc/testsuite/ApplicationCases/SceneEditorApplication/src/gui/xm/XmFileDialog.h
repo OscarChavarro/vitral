@@ -1,6 +1,7 @@
 #ifndef __XM_FILE_DIALOG__
 #define __XM_FILE_DIALOG__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -36,7 +37,7 @@ public:
     @param outPath the chosen file, when approved
     @return true if the user approved a file (`APPROVE_OPTION`)
     */
-    static bool showDialog(XtApplicationHost* host, const String& title,
+    static BOOLEAN showDialog(XtApplicationHost* host, const String& title,
                            const String& folder,
                            const ArrayList<FileSuffixFilter>& filters,
                            String& outPath);
@@ -45,8 +46,8 @@ private:
     ArrayList<FileSuffixFilter> filters;
     Widget shell;
     Widget box;
-    bool done;
-    bool approved;
+    BOOLEAN done;
+    BOOLEAN approved;
     String path;
 
     explicit XmFileDialog(const ArrayList<FileSuffixFilter>& filters);

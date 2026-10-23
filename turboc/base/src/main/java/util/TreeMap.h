@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 #include "java/util/ArrayList.h"
 #include "java/util/TreeMapEntry.h"
@@ -52,9 +53,9 @@ class TreeMap : public Object {
 
     void clear();
     long size() const;
-    bool isEmpty() const;
+    BOOLEAN isEmpty() const;
 
-    bool containsKey(const K &key) const;
+    BOOLEAN containsKey(const K &key) const;
 
     /**
     @return the value of the key, or NULL when the key is not present
@@ -66,7 +67,7 @@ class TreeMap : public Object {
     /**
     @return true if the key was not present before
     */
-    bool put(const K &key, const V &value);
+    BOOLEAN put(const K &key, const V &value);
 
     /**
     Inserts the key with the given value only when it is not present.
@@ -77,7 +78,7 @@ class TreeMap : public Object {
     /**
     @return true if the key was present
     */
-    bool remove(const K &key);
+    BOOLEAN remove(const K &key);
 
     // Iteration in key order, 0 <= index < size()
     const K &getKey(long index) const;

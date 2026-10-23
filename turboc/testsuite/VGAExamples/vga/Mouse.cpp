@@ -5,13 +5,14 @@
 #include <vga.h>
 #include <vgamouse.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vga/Mouse.h"
 #include "programs/vga/Hud.h"
 #include "programs/vga/Picture.h"
 #include "programs/vga/VgaConstant.h"
 #include "programs/vga/VgaKeyboard.h"
 
-Mouse::Mouse() : connected(false), picture(NULL), hud(NULL) {}
+Mouse::Mouse() : connected(FALSE), picture(NULL), hud(NULL) {}
 
 // vga_init() opens the mouse configured for svgalib (Vga::start asks for mouse support); it has capabilities only
 // when that worked.
@@ -25,7 +26,7 @@ void
 Mouse::close() {
     if (connected) {
         mouse_close();
-        connected = false;
+        connected = FALSE;
     }
 }
 
@@ -89,14 +90,14 @@ Mouse::describe(char *position, char *state, size_t size) const {
 
 // The text picture: the HUD lines (inverse video) over the circle (bold dots).
 char
-Mouse::cellAt(int column, int row, bool &bold, bool &inverse) const {
+Mouse::cellAt(int column, int row, BOOLEAN &bold, BOOLEAN &inverse) const {
     char c;
     if (hud && hud->cellAt(column, row, c)) {
-        bold = false;
-        inverse = true;
+        bold = FALSE;
+        inverse = TRUE;
         return c;
     }
     bold = picture && picture->covers(column, row);
-    inverse = false;
+    inverse = FALSE;
     return bold ? '.' : ' ';
 }

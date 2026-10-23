@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
@@ -10,7 +11,7 @@ struct MicrofacetConfig {
     ColorRgb ambient;
     ColorRgb diffuse;
     ColorRgb specular;
-    bool doubleSided;
+    BOOLEAN doubleSided;
     double reflectionCoefficient;
     double refractionCoefficient;
     double opacity;
@@ -124,7 +125,7 @@ static MicrofacetConfig defaultConfig()
     c.ambient = ColorRgb(0.1, 0.1, 0.1);
     c.diffuse = ColorRgb(0.955008, 0.637427, 0.538163);
     c.specular = ColorRgb(0.955008, 0.637427, 0.538163);
-    c.doubleSided = true;
+    c.doubleSided = TRUE;
     c.reflectionCoefficient = 0.0;
     c.refractionCoefficient = 0.0;
     c.opacity = 1.0;
@@ -300,18 +301,6 @@ double MicroFacetedMaterial::getKs() const { return ks; }
 int MicroFacetedMaterial::getFresnelModel() const { return fresnelModel; }
 int MicroFacetedMaterial::getNdfModel() const { return ndfModel; }
 int MicroFacetedMaterial::getGeometryModel() const { return geometryModel; }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int MicroFacetedMaterial::FRESNEL_MODEL_CONDUCTOR;
-const int MicroFacetedMaterial::NDF_MODEL_GGX;
-const int MicroFacetedMaterial::GEOMETRY_MODEL_IMPLICIT;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int MicroFacetedMaterial::FRESNEL_MODEL_SCHLICK;
-const int MicroFacetedMaterial::NDF_MODEL_BECKMANN;
-const int MicroFacetedMaterial::GEOMETRY_MODEL_SMITH;
 
 const Class MicroFacetedMaterial::CLASS = { "MicroFacetedMaterial", &SimpleMaterial::CLASS };
 

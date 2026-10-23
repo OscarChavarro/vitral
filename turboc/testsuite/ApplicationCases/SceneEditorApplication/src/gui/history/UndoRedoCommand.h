@@ -1,6 +1,8 @@
 #ifndef __UNDO_REDO_COMMAND__
 #define __UNDO_REDO_COMMAND__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 Commands over the edition history: undo and redo over the global history of
 the scene, or over the history of the view of the selected viewport.
@@ -27,7 +29,7 @@ public:
     @return true if the command works over the history of a viewport, false
     if it works over the history of the scene
     */
-    static bool isViewportCommand(Value command)
+    static BOOLEAN isViewportCommand(Value command)
     {
         return command == UNDO_VIEWPORT || command == REDO_VIEWPORT;
     }
@@ -35,7 +37,7 @@ public:
     /**
     @return true for undo, false for redo
     */
-    static bool isUndoCommand(Value command)
+    static BOOLEAN isUndoCommand(Value command)
     {
         return command == UNDO_SCENE || command == UNDO_VIEWPORT;
     }

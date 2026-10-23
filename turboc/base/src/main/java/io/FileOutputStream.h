@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/io/OutputStream.h"
 

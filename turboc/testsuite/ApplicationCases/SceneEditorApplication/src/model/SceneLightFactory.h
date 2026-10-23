@@ -1,6 +1,7 @@
 #ifndef __SCENE_LIGHT_FACTORY__
 #define __SCENE_LIGHT_FACTORY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "java/util/Random.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -29,7 +30,7 @@ private:
     Random random;
 
     ColorRgb createRandomLightColor();
-    Viewport* chooseViewport(ViewportSet* viewportSet, bool first);
+    Viewport* chooseViewport(ViewportSet* viewportSet, BOOLEAN first);
     static double calculateFocalDistance(const Camera* camera);
     static double clampDepth(const Camera* camera, double depth);
     static Vector3Dd pointInFrustum(Camera* camera, double u, double v,

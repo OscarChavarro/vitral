@@ -1,6 +1,7 @@
 #ifndef __SCENE_MEMBERSHIP_OPERATION__
 #define __SCENE_MEMBERSHIP_OPERATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "model/history/SceneElementKind.h"
 #include "model/history/UndoableOperation.h"
@@ -33,23 +34,23 @@ public:
     private:
         int indexValue;
         Entity* elementValue;
-        bool selectedValue;
+        BOOLEAN selectedValue;
 
     public:
-        Entry() : indexValue(0), elementValue(NULL), selectedValue(false) {}
+        Entry() : indexValue(0), elementValue(NULL), selectedValue(FALSE) {}
 
         /**
         @param index position of the element in the list
         @param element the element
         @param selected true if the element was selected
         */
-        Entry(int index, Entity* element, bool selected)
+        Entry(int index, Entity* element, BOOLEAN selected)
             : indexValue(index), elementValue(element),
               selectedValue(selected) {}
 
         int index() const { return indexValue; }
         Entity* element() const { return elementValue; }
-        bool selected() const { return selectedValue; }
+        BOOLEAN selected() const { return selectedValue; }
     };
 
 private:

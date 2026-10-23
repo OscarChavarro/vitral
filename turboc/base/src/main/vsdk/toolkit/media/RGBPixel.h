@@ -1,6 +1,7 @@
 #ifndef __RGB_PIXEL__
 #define __RGB_PIXEL__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
 /**
@@ -47,7 +48,7 @@ public:
 
     void importFromColorRgb(const class ColorRgb& c);
 
-    bool isBlack() const {
+    BOOLEAN isBlack() const {
         return r == 0 && g == 0 && b == 0;
     }
 

@@ -1,6 +1,7 @@
 #ifndef __NORMAL_MAP__
 #define __NORMAL_MAP__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
 class Vector3Dd;
@@ -29,7 +30,7 @@ public:
     NormalMap(const NormalMap& other);
     virtual ~NormalMap();
 
-    bool init(int width, int height);
+    BOOLEAN init(int width, int height);
 
     int getXSize() const;
 

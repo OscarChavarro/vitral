@@ -1,6 +1,7 @@
 #ifndef __TRANSLATE_GIZMO_INTERACTION_TECHNIQUE__
 #define __TRANSLATE_GIZMO_INTERACTION_TECHNIQUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
@@ -56,29 +57,29 @@ private:
     TranslateGizmo* gizmo;
 
     Vector3Dd lastDeltaPosition;
-    bool active;
+    BOOLEAN active;
 
     // State of the gesture in course (drag confined to a viewport)
-    bool cursorWrapEnabled;
+    BOOLEAN cursorWrapEnabled;
     Viewport* dragViewport;
     int dragSelection;
-    bool wrappingSuspended;
+    BOOLEAN wrappingSuspended;
     int wrapOffsetX;
     int wrapOffsetY;
     int lastVirtualX;
     int lastVirtualY;
-    bool awaitingWarp;
+    BOOLEAN awaitingWarp;
     int warpTargetX;
     int warpTargetY;
     int staleEvents;
-    bool hasPendingWarp;
+    BOOLEAN hasPendingWarp;
     CursorWarp pendingWarp;
 
     void endGesture();
-    bool checkWarpArrival(int x, int y);
-    bool toVirtualEvent(const MouseEvent& e, MouseEvent* outVirtual);
+    BOOLEAN checkWarpArrival(int x, int y);
+    BOOLEAN toVirtualEvent(const MouseEvent& e, MouseEvent* outVirtual);
     int calculateSelection(int x, int y);
-    bool calculateInteractionPoint(const MouseEvent& e, Vector3Dd* outPoint);
+    BOOLEAN calculateInteractionPoint(const MouseEvent& e, Vector3Dd* outPoint);
 
 public:
     /**
@@ -94,13 +95,13 @@ public:
     TAB, BACKSPACE, and ENTER and ESC while editing), so the caller must
     not process it as any other command
     */
-    bool isInputGizmoKey(const KeyEvent& keyEvent);
+    BOOLEAN isInputGizmoKey(const KeyEvent& keyEvent);
 
     /**
     @return true if the last cursor position was over an axis or plane handle
     of the gizmo
     */
-    bool isActive() const;
+    BOOLEAN isActive() const;
 
     /**
     @return the viewport where the gesture in course started, or null if
@@ -114,8 +115,8 @@ public:
     warp is requested. It is disabled by default: the gesture is still
     confined to its viewport, but the cursor can leave it.
     */
-    void setCursorWrapEnabled(bool cursorWrapEnabled);
-    bool isCursorWrapEnabled() const;
+    void setCursorWrapEnabled(BOOLEAN cursorWrapEnabled);
+    BOOLEAN isCursorWrapEnabled() const;
 
     /**
     The caller should place the cursor as requested after processing each
@@ -125,11 +126,11 @@ public:
     @return true if there was a pending request; it is discarded after being
     returned (the Java version returns null when there is none)
     */
-    bool consumeCursorWarp(CursorWarp* outWarp);
+    BOOLEAN consumeCursorWarp(CursorWarp* outWarp);
 
-    bool processMouseEvent(const MouseEvent& mouseEvent);
-    bool processKeyPressedEvent(const KeyEvent& keyEvent);
-    bool processKeyReleasedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processMouseEvent(const MouseEvent& mouseEvent);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processKeyReleasedEvent(const KeyEvent& keyEvent);
 
     /**
     Processes the press of a mouse button, starting a gesture confined to the
@@ -137,19 +138,19 @@ public:
     is going to move the gizmo).
     @return false (a press never changes the gizmo)
     */
-    bool processMousePressedEvent(const MouseEvent& e, Viewport* viewport);
+    BOOLEAN processMousePressedEvent(const MouseEvent& e, Viewport* viewport);
 
     /**
     Processes the press of a mouse button, without confining the gesture to
     any viewport.
     @return false (a press never changes the gizmo)
     */
-    bool processMousePressedEvent(const MouseEvent& e);
-    bool processMouseReleasedEvent(const MouseEvent& e);
-    bool processMouseClickedEvent(const MouseEvent& e);
-    bool processMouseMovedEvent(const MouseEvent& e);
-    bool processMouseDraggedEvent(const MouseEvent& e);
-    bool processMouseWheelEvent(const MouseEvent& e);
+    BOOLEAN processMousePressedEvent(const MouseEvent& e);
+    BOOLEAN processMouseReleasedEvent(const MouseEvent& e);
+    BOOLEAN processMouseClickedEvent(const MouseEvent& e);
+    BOOLEAN processMouseMovedEvent(const MouseEvent& e);
+    BOOLEAN processMouseDraggedEvent(const MouseEvent& e);
+    BOOLEAN processMouseWheelEvent(const MouseEvent& e);
 };
 
 #endif

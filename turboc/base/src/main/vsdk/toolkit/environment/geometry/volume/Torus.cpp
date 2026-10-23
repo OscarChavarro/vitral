@@ -94,7 +94,8 @@ ArrayList<double> Torus::findRealRoots(
 
     ArrayList<double> derivative;
 
-    for ( int k = 1; k <= degree; k++ ) {
+    long k;
+    for ( k = 1; k <= degree; k++ ) {
         derivative.add(k * polynomial.get(k));
     }
     ArrayList<double> critical = findRealRoots(derivative);
@@ -102,7 +103,7 @@ ArrayList<double> Torus::findRealRoots(
     // Cauchy bound: every root is inside it
     double bound = 0;
 
-    for ( int k = 0; k < degree; k++ ) {
+    for ( k = 0; k < degree; k++ ) {
         bound = Math::max(bound, fabs(polynomial.get(k) / polynomial.get(degree)));
     }
     bound += 1;
@@ -110,12 +111,12 @@ ArrayList<double> Torus::findRealRoots(
     ArrayList<double> limits;
 
     limits.add(-bound);
-    for ( long k = 0; k < critical.size(); k++ ) {
+    for ( k = 0; k < critical.size(); k++ ) {
         limits.add(Math::max(-bound, Math::min(bound, critical.get(k))));
     }
     limits.add(bound);
 
-    for ( long k = 0; k < limits.size() - 1 && found.size() < degree; k++ ) {
+    for ( k = 0; k < limits.size() - 1 && found.size() < degree; k++ ) {
         double low = limits.get(k);
         double high = limits.get(k + 1);
         double valueAtLow = evaluate(polynomial, degree, low);
@@ -160,7 +161,7 @@ double Torus::evaluate(const ArrayList<double>& polynomial, int degree,
     return value;
 }
 
-bool Torus::isOnSurface(const Vector3Dd& origin, const Vector3Dd& direction,
+BOOLEAN Torus::isOnSurface(const Vector3Dd& origin, const Vector3Dd& direction,
                         double t) const
 {
     Vector3Dd hit = origin.add(direction.multiply(t));
@@ -170,9 +171,9 @@ bool Torus::isOnSurface(const Vector3Dd& origin, const Vector3Dd& direction,
     return fabs(distanceToCircle - minorRadius) <= tolerance;
 }
 
-bool Torus::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
+BOOLEAN Torus::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     Ray* hit = doIntersectionFirstHit(inRay);
-    if (hit == NULL) return false;
+    if (hit == NULL) return FALSE;
 
     if (outHit != NULL) {
         outHit->setRay(*hit);
@@ -180,7 +181,7 @@ bool Torus::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
         outHit->setRay(*hit);
     }
     delete hit;
-    return true;
+    return TRUE;
 }
 
 void Torus::doExtraInformation(const Ray& inRay, double inT, RayHit* outHit) {

@@ -1,9 +1,11 @@
 #ifndef __RAYTRACE_STATISTICS__
 #define __RAYTRACE_STATISTICS__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 class RaytraceStatistics {
 public:
-    static bool isEnabled();
+    static BOOLEAN isEnabled();
 
     static void recordPrimaryRay();
     static void recordShadowRay();

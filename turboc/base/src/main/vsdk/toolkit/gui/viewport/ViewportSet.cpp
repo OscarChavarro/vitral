@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportElementScaler.h"
@@ -66,7 +67,7 @@ static const int LAYOUTS_4_COUNT = 5;
 
 ViewportSet::ViewportSet()
     : name("Viewport set"), selectedViewportIndex(0), layoutStyle(0),
-      fullViewport(false), sizeXInPixels(0), sizeYInPixels(0),
+      fullViewport(FALSE), sizeXInPixels(0), sizeYInPixels(0),
       titleColor(1, 1, 1), selectedTitleColor(1, 1, 0),
       ownedElementScaler(new ViewportElementScaler()),
       elementScaler(NULL), i18nContext(NULL)
@@ -140,8 +141,8 @@ void ViewportSet::addViewport(Viewport* viewport)
 ArrayList<int> ViewportSet::getAvailableRenderModes() const { return availableRenderModes; }
 void ViewportSet::setAvailableRenderModes(const ArrayList<int>& modes)
 { if (modes.size() > 0) { availableRenderModes = modes; enforceAvailableRenderModes(); } }
-bool ViewportSet::isRenderModeAvailable(int mode) const
-{ for (long i=0;i<availableRenderModes.size();i++) if (availableRenderModes.get(i)==mode) return true; return false; }
+BOOLEAN ViewportSet::isRenderModeAvailable(int mode) const
+{ for (long i=0;i<availableRenderModes.size();i++) if (availableRenderModes.get(i)==mode) return TRUE; return FALSE; }
 void ViewportSet::coerceRenderMode(Viewport* v)
 { if (v != NULL && availableRenderModes.size()>0 && !isRenderModeAvailable(v->getRenderMode())) v->setRenderMode(availableRenderModes.get(0)); }
 void ViewportSet::enforceAvailableRenderModes()
@@ -179,21 +180,21 @@ Viewport* ViewportSet::getSelectedViewport()
     return viewports.get(selectedViewportIndex);
 }
 
-bool ViewportSet::isSelected(const Viewport* viewport)
+BOOLEAN ViewportSet::isSelected(const Viewport* viewport)
 {
     return viewport != NULL && viewport == getSelectedViewport();
 }
 
-bool ViewportSet::selectViewport(const Viewport* viewport)
+BOOLEAN ViewportSet::selectViewport(const Viewport* viewport)
 {
     int i;
     for ( i = 0; i < viewports.size(); i++ ) {
         if ( viewports.get(i) == viewport ) {
             selectedViewportIndex = i;
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 void ViewportSet::selectNextViewport()
@@ -238,12 +239,12 @@ void ViewportSet::selectNextLayoutStyle()
     updateLayout();
 }
 
-bool ViewportSet::isFullViewport() const
+BOOLEAN ViewportSet::isFullViewport() const
 {
     return fullViewport;
 }
 
-void ViewportSet::setFullViewport(bool fullViewport)
+void ViewportSet::setFullViewport(BOOLEAN fullViewport)
 {
     this->fullViewport = fullViewport;
 }
@@ -455,7 +456,7 @@ void ViewportSet::updateLayout()
 
     switch ( n ) {
       case 1:
-        viewports.get(0)->setActive(true);
+        viewports.get(0)->setActive(TRUE);
         viewports.get(0)->setPercentArea(0, 0, 1, 1);
         break;
       case 2:
@@ -512,7 +513,7 @@ void ViewportSet::applyAreas(const double areas[][4], int n)
 
     for ( i = 0; i < n; i++ ) {
         Viewport* viewport = viewports.get(i);
-        viewport->setActive(true);
+        viewport->setActive(TRUE);
         viewport->setPercentArea(areas[i][0], areas[i][1], areas[i][2],
                                  areas[i][3]);
     }

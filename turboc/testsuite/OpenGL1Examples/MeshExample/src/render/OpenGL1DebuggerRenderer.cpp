@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -52,10 +53,10 @@ ViewportSet* OpenGL1DebuggerRenderer::getViewportSet()
     return viewportSet;
 }
 
-bool OpenGL1DebuggerRenderer::init()
+BOOLEAN OpenGL1DebuggerRenderer::init()
 {
     // The fixed function pipeline needs no programs nor buffers
-    return true;
+    return TRUE;
 }
 
 void OpenGL1DebuggerRenderer::display()
@@ -74,11 +75,12 @@ void OpenGL1DebuggerRenderer::display()
     }
 
     ArrayList<SimpleBody*>& bodies = model->getScene()->getSimpleBodies();
-    for ( long i = 0; i < bodies.size(); i++ ) {
+    long i;
+    for ( i = 0; i < bodies.size(); i++ ) {
         drawSimpleBody(bodies.get(i), model->getCamera(), activeLights, model->getQualitySelection());
     }
 
-    for ( long i = 0; i < activeLights.size(); i++ ) {
+    for ( i = 0; i < activeLights.size(); i++ ) {
         if ( activeLights.get(i) != 0 ) {
             OpenGL1LightRenderer::draw(activeLights.get(i), model->getCamera(), LightGizmoStyle::OMNI_BILLBOARD);
         }
@@ -223,18 +225,18 @@ void OpenGL1DebuggerRenderer::drawSimpleBody(SimpleBody* body, Camera* camera, c
     }
 }
 
-bool OpenGL1DebuggerRenderer::buildFrame(TriangleMesh* mesh, ArrayList<float>& outPositions, ArrayList<float>& outNormals, ArrayList<float>& outUvs)
+BOOLEAN OpenGL1DebuggerRenderer::buildFrame(TriangleMesh* mesh, ArrayList<float>& outPositions, ArrayList<float>& outNormals, ArrayList<float>& outUvs)
 {
-    if ( mesh == 0 ) return false;
+    if ( mesh == 0 ) return FALSE;
 
     ArrayList<int>& indices = mesh->getTriangleIndexes();
     ArrayList<double>& vertices = mesh->getVertexPositions();
-    if ( indices.size() == 0 || vertices.size() == 0 ) return false;
+    if ( indices.size() == 0 || vertices.size() == 0 ) return FALSE;
 
     ArrayList<double>& normals = mesh->getVertexNormals();
     ArrayList<double>& uvs = mesh->getVertexUvs();
-    bool hasNormals = normals.size() >= vertices.size();
-    bool hasUvs = (uvs.size() / 2) >= (vertices.size() / 3);
+    BOOLEAN hasNormals = normals.size() >= vertices.size();
+    BOOLEAN hasUvs = (uvs.size() / 2) >= (vertices.size() / 3);
 
     outPositions.clear();
     outNormals.clear();
@@ -272,7 +274,7 @@ bool OpenGL1DebuggerRenderer::buildFrame(TriangleMesh* mesh, ArrayList<float>& o
         }
     }
 
-    return true;
+    return TRUE;
 }
 
 SimpleMaterial OpenGL1DebuggerRenderer::defaultMaterial()

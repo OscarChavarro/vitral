@@ -1,6 +1,7 @@
 #ifndef __EXECUTOR_SERVICE__
 #define __EXECUTOR_SERVICE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 
 /**
@@ -23,7 +24,7 @@ public:
     @return false if the executor rejected the task (then it is not
     deleted)
     */
-    virtual bool execute(Runnable* task) = 0;
+    virtual BOOLEAN execute(Runnable* task) = 0;
 };
 
 

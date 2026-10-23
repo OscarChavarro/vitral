@@ -1,6 +1,7 @@
 #ifndef __UNDOABLE_OPERATION__
 #define __UNDOABLE_OPERATION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Class.h"
 
 #include "java/lang/String.h"
@@ -27,7 +28,7 @@ public:
     @return true if this object is an instance of the class or of one of
     its subclasses (Java `instanceof`)
     */
-    bool instanceOf(const Class &type) const;
+    BOOLEAN instanceOf(const Class &type) const;
 
 
     /**
@@ -54,9 +55,9 @@ public:
     @return true if `next` was absorbed into this operation, so it must not
     be recorded
     */
-    virtual bool absorb(UndoableOperation* /*next*/)
+    virtual BOOLEAN absorb(UndoableOperation* /*next*/)
     {
-        return false;
+        return FALSE;
     }
 };
 

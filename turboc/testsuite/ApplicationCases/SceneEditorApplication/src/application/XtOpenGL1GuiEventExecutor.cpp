@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include <unistd.h>
 
@@ -34,30 +35,30 @@ XtOpenGL1GuiEventExecutor::XtOpenGL1GuiEventExecutor(XtApplicationHost* parent)
 {
 }
 
-bool XtOpenGL1GuiEventExecutor::executeCommand(const String& command)
+BOOLEAN XtOpenGL1GuiEventExecutor::executeCommand(const String& command)
 {
     String label(command.c_str());
     CommandResult result =
         parent->getSceneBridge()->executeCommand(label);
 
     if ( result == CommandResult::FAILED ) {
-        return false;
+        return FALSE;
     }
     if ( result == CommandResult::NOT_HANDLED &&
          !executeXtCommand(label) ) {
-        return false;
+        return FALSE;
     }
 
     //-----------------------------------------------------------------
     parent->repaintDrawingArea();
-    return true;
+    return TRUE;
 }
 
 /**
 Executes the commands that need Xt.
 @return false if the command failed
 */
-bool XtOpenGL1GuiEventExecutor::executeXtCommand(const String& label)
+BOOLEAN XtOpenGL1GuiEventExecutor::executeXtCommand(const String& label)
 {
     XtOpenGL1SceneBridge* bridge = parent->getSceneBridge();
     GuiEventExecutor* commands = bridge->getCommands();
@@ -82,7 +83,7 @@ bool XtOpenGL1GuiEventExecutor::executeXtCommand(const String& label)
                 Logger::reportMessage("XtOpenGL1GuiEventExecutor",
                     Logger::WARNING, "executeCommand",
                     String("Failed to read file...\n") + path.c_str());
-                return false;
+                return FALSE;
             }
             guiState->setReadFolder(parentFolderOf(path).c_str());
         }
@@ -102,7 +103,7 @@ bool XtOpenGL1GuiEventExecutor::executeXtCommand(const String& label)
                 Logger::reportMessage("XtOpenGL1GuiEventExecutor",
                     Logger::WARNING, "execute",
                     String("Failed to write file...\n") + path.c_str());
-                return false;
+                return FALSE;
             }
             guiState->setWriteFolder(parentFolderOf(path).c_str());
         }
@@ -118,7 +119,7 @@ bool XtOpenGL1GuiEventExecutor::executeXtCommand(const String& label)
             if ( !commands->loadPalette(File(path.c_str())) ) {
                 Logger::reportMessage("XtOpenGL1GuiEventExecutor",
                     Logger::WARNING, "execute", "Failed to read file");
-                return false;
+                return FALSE;
             }
         }
     }
@@ -145,7 +146,7 @@ bool XtOpenGL1GuiEventExecutor::executeXtCommand(const String& label)
     else if ( label == "IDC_CUSTOMIZE_LANGUAGE_SPANISH" ) {
         parent->setGuiLanguage("spanish");
     }
-    return true;
+    return TRUE;
 }
 
 const Class XtOpenGL1GuiEventExecutor::CLASS = { "XtOpenGL1GuiEventExecutor", &CommandListener::CLASS };

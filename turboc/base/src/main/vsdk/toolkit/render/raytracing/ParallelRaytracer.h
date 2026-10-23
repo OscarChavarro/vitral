@@ -1,6 +1,7 @@
 #ifndef __PARALLEL_RAYTRACER__
 #define __PARALLEL_RAYTRACER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 #include "vsdk/toolkit/render/raytracing/DepthBufferMode.h"
@@ -38,7 +39,7 @@ C++ counterpart of Java's `vsdk.toolkit.render.raytracing.ParallelRaytracer`.
 class ParallelRaytracer {
   private:
     /** Bands per thread: more bands balance the load better */
-    static const int BANDS_PER_THREAD = 8;
+    enum { BANDS_PER_THREAD = 8 };
 
     int numberOfThreads;
     ExecutorService* executorService;
@@ -55,7 +56,7 @@ class ParallelRaytracer {
         const DepthBufferEncoder* depthEncoder,
         const RendererConfiguration* rendererConfiguration,
         SimpleSceneSnapshot* sceneSnapshot,
-        bool reportProgress);
+        BOOLEAN reportProgress);
 
     ExecutorService* getExecutorService();
     static int availableProcessors();
@@ -134,7 +135,7 @@ class ParallelRaytracer {
         RGBImageUncompressed* resultingImage,
         const RendererConfiguration* rendererConfiguration,
         SimpleSceneSnapshot* sceneSnapshot,
-        bool reportProgress);
+        BOOLEAN reportProgress);
 
     /**
     Raytraces the scene into the whole image and into a depth buffer given by
@@ -154,7 +155,7 @@ class ParallelRaytracer {
         DepthBufferMode depthMode,
         const RendererConfiguration* rendererConfiguration,
         SimpleSceneSnapshot* sceneSnapshot,
-        bool reportProgress);
+        BOOLEAN reportProgress);
 
     /**
     Stops the threads. The next `execute` creates them again.

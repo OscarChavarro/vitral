@@ -1,6 +1,8 @@
 #ifndef __PROCESS_BUILDER__
 #define __PROCESS_BUILDER__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 
 class ProcessBuilder {
   private:

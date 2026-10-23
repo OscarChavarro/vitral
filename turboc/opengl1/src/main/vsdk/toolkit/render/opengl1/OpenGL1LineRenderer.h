@@ -1,6 +1,7 @@
 #ifndef __OPEN_GL_1_LINE_RENDERER__
 #define __OPEN_GL_1_LINE_RENDERER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -25,7 +26,7 @@ public:
 private:
     static double evaluateClipPlane(const double plane[4], const Vector4Dd& point);
     static Vector4Dd interpolate(const Vector4Dd& start, const Vector4Dd& end, double t);
-    static bool clipLineToClipVolume(
+    static BOOLEAN clipLineToClipVolume(
         const Vector4Dd& start,
         const Vector4Dd& end,
         Vector4Dd& outStart,

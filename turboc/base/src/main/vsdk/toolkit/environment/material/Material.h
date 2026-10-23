@@ -1,6 +1,7 @@
 #ifndef __MATERIAL__
 #define __MATERIAL__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Class.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
@@ -23,7 +24,7 @@ class Material {
     @return true if this material is an instance of the class or of one of
     its subclasses (Java `instanceof`)
     */
-    bool instanceOf(const Class &type) const
+    BOOLEAN instanceOf(const Class &type) const
     {
         return type.isAssignableFrom(getClass());
     }

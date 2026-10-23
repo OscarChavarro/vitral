@@ -9,6 +9,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/util/TreeSet.h"
 #include "java/lang/String.h"
@@ -69,12 +70,12 @@ public:
     HalfEdgePair(_PolyhedralBoundedSolidHalfEdge* from,
                  _PolyhedralBoundedSolidHalfEdge* to) : from(from), to(to) {}
 
-    bool operator<(const HalfEdgePair& other) const
+    BOOLEAN operator<(const HalfEdgePair& other) const
     {
         return from < other.from || (from == other.from && to < other.to);
     }
 
-    bool operator==(const HalfEdgePair& other) const
+    BOOLEAN operator==(const HalfEdgePair& other) const
     {
         return from == other.from && to == other.to;
     }
@@ -90,7 +91,7 @@ static void tracePipelineSummary(const String& message)
     _SetOperationTrace::tracePipelineSummary(message.c_str());
 }
 
-static bool isPipelineSummaryTraceEnabled()
+static BOOLEAN isPipelineSummaryTraceEnabled()
 {
     return _SetOperationTrace::isPipelineSummaryTraceEnabled();
 }
@@ -250,7 +251,7 @@ Vector3Dd SetOperator::inside(_PolyhedralBoundedSolidHalfEdge* he)
 /**
 Checks if two coplanar sectors overlaps, following section [MANT1988].15.6.2.
 */
-bool SetOperator::sectoroverlap(
+BOOLEAN SetOperator::sectoroverlap(
     const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex& na,
     const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex& nb)
 {
@@ -258,7 +259,7 @@ bool SetOperator::sectoroverlap(
         ::sectoroverlap(na, nb, (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0);
 }
 
-bool SetOperator::colinearVectorsWithDirection(const Vector3Dd& a,
+BOOLEAN SetOperator::colinearVectorsWithDirection(const Vector3Dd& a,
     const Vector3Dd& b)
 {
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
@@ -270,7 +271,7 @@ Normalizes one endpoint for `separateEdgeSequence` when a previous null
 strut edge was already inserted on the same vertex neighborhood.
 */
 _PolyhedralBoundedSolidHalfEdge* SetOperator::recoverEdgeSequenceEndpointFromStrut(
-    _PolyhedralBoundedSolidHalfEdge* endpoint, bool isFromEndpoint)
+    _PolyhedralBoundedSolidHalfEdge* endpoint, BOOLEAN isFromEndpoint)
 {
     _PolyhedralBoundedSolidHalfEdge* prev;
 
@@ -307,7 +308,7 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB)
 {
-    bool trace = (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00;
+    BOOLEAN trace = (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00;
 
     //-----------------------------------------------------------------
     if ( trace ) {
@@ -346,7 +347,7 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
     // until the two starts coincide. Each iteration must produce an unseen
     // (from, to) pair - repeating a pair proves divergence.
     TreeSet<HalfEdgePair> visitedConfigurations;
-    bool changed;
+    BOOLEAN changed;
     do {
         if ( !visitedConfigurations.add(HalfEdgePair(from, to)) ) {
             Logger::reportMessage(String(), Logger::WARNING,
@@ -356,23 +357,23 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
             return FAILED_CYCLE_DETECTED;
         }
 
-        changed = false;
+        changed = FALSE;
 
         _PolyhedralBoundedSolidHalfEdge* recoveredFrom =
-            recoverEdgeSequenceEndpointFromStrut(from, true);
+            recoverEdgeSequenceEndpointFromStrut(from, TRUE);
         if ( recoveredFrom != from ) {
             from = recoveredFrom;
-            changed = true;
+            changed = TRUE;
             if ( trace ) {
                 printf("        Recovered edge sequence case A\n");
             }
         }
 
         _PolyhedralBoundedSolidHalfEdge* recoveredTo =
-            recoverEdgeSequenceEndpointFromStrut(to, false);
+            recoverEdgeSequenceEndpointFromStrut(to, FALSE);
         if ( recoveredTo != to ) {
             to = recoveredTo;
-            changed = true;
+            changed = TRUE;
             if ( trace ) {
                 printf("        Recovered edge sequence case B\n");
             }
@@ -386,7 +387,7 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
                  fromPrev->parentEdge != 0 && toPrev->parentEdge != 0 &&
                  fromPrev == toPrev->mirrorHalfEdge() ) {
                 from = fromPrev;
-                changed = true;
+                changed = TRUE;
                 if ( trace ) {
                     printf("        Recovered edge sequence case C\n");
                 }
@@ -394,7 +395,7 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
             else if ( fromPrev != 0 &&
                       fromPrev->startingVertex == to->startingVertex ) {
                 from = fromPrev;
-                changed = true;
+                changed = TRUE;
                 if ( trace ) {
                     printf("        Recovered edge sequence case D\n");
                 }
@@ -402,7 +403,7 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
             else if ( toPrev != 0 &&
                       toPrev->startingVertex == from->startingVertex ) {
                 to = toPrev;
-                changed = true;
+                changed = TRUE;
                 if ( trace ) {
                     printf("        Recovered edge sequence case E\n");
                 }
@@ -440,7 +441,7 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
     return OK;
 }
 
-bool SetOperator::nulledge(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN SetOperator::nulledge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
         he->startingVertex->position, he->next()->startingVertex->position,
@@ -450,7 +451,7 @@ bool SetOperator::nulledge(_PolyhedralBoundedSolidHalfEdge* he)
 /**
 Borrowed from [.wMANT2008].
 */
-bool SetOperator::strutnulledge(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN SetOperator::strutnulledge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return he == he->mirrorHalfEdge()->next() ||
            he == he->mirrorHalfEdge()->previous();
@@ -498,7 +499,7 @@ void SetOperator::traceSelfTouchingLoops(PolyhedralBoundedSolid* solid,
                              ha->startingVertex->position,
                              hb->startingVertex->position, tol) ) {
                         long int gap = b - a;
-                        bool adjacent = (gap == 1) || (gap == sz - 1);
+                        BOOLEAN adjacent = (gap == 1) || (gap == sz - 1);
                         printf("[SelfTouch] %s face=%d loop=%d size=%d "
                             "idx[%d]v%d==idx[%d]v%d%s at (%.4f,%.4f,%.4f)\n",
                             label, face->id, (int)li, (int)sz,
@@ -526,12 +527,12 @@ void SetOperator::splitSelfTouchingLoops(PolyhedralBoundedSolid* solid)
     if ( solid == 0 ) {
         return;
     }
-    bool tracing = isPipelineSummaryTraceEnabled();
+    BOOLEAN tracing = isPipelineSummaryTraceEnabled();
     int splitsFired = 0;
     long int fi = 0;
     while ( fi < solid->getPolygonsList().size() ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(fi);
-        bool splitDone = false;
+        BOOLEAN splitDone = FALSE;
         long int li = 0;
         while ( li < face->boundariesList.size() && !splitDone ) {
             _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(li);
@@ -571,7 +572,7 @@ void SetOperator::splitSelfTouchingLoops(PolyhedralBoundedSolid* solid)
                                     "==idx[" + str(b) + "]v" + str(hb->startingVertex->id) +
                                     " -> newFace=" + str(newFace->id));
                             }
-                            splitDone = true;
+                            splitDone = TRUE;
                         }
                         break;
                     }
@@ -633,7 +634,7 @@ void SetOperator::debugSolid(PolyhedralBoundedSolid* solid, const char* pattern)
 Following program [MANT1988].15.1.
 */
 void SetOperator::postProcessResult(PolyhedralBoundedSolid* res,
-    bool maximizeResultFaces)
+    BOOLEAN maximizeResultFaces)
 {
     PolyhedralBoundedSolidValidationEngine::validateIntermediate(res);
     PolyhedralBoundedSolidTopologyEditing::compactIds(res);
@@ -651,8 +652,8 @@ PolyhedralBoundedSolid* SetOperator::completeSetOpResult(
     const String& operandBDiagnostics,
     int op,
     const char* resultPath,
-    bool maximizeResultFaces,
-    bool doStrictValidation)
+    BOOLEAN maximizeResultFaces,
+    BOOLEAN doStrictValidation)
 {
     if ( result == 0 ) {
         throw IllegalStateException(String("Boolean operation returned null: op=") +
@@ -807,60 +808,60 @@ PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* soli
     return copy;
 }
 
-bool SetOperator::hasDegenerateFace(PolyhedralBoundedSolid* solid)
+BOOLEAN SetOperator::hasDegenerateFace(PolyhedralBoundedSolid* solid)
 {
     long int i;
 
     if ( solid == 0 ) {
-        return true;
+        return TRUE;
     }
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
         if ( face->boundariesList.size() < 1 ||
              face->boundariesList.get(0)->halfEdgesList.size() < 3 ) {
-            return true;
+            return TRUE;
         }
         InfinitePlane* plane = face->getContainingPlane();
         if ( plane == 0 ) {
-            return true;
+            return TRUE;
         }
         delete plane;
     }
-    return false;
+    return FALSE;
 }
 
-bool SetOperator::shouldUseAxisAlignedCellBooleanFallback(
+BOOLEAN SetOperator::shouldUseAxisAlignedCellBooleanFallback(
     PolyhedralBoundedSolid* fallback, PolyhedralBoundedSolid* result)
 {
     if ( fallback == 0 || fallback->getPolygonsList().size() <= 0 ) {
-        return false;
+        return FALSE;
     }
     if ( result == 0 || result->getPolygonsList().size() <= 0 ) {
-        return true;
+        return TRUE;
     }
     if ( hasDegenerateFace(result) ) {
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
-bool SetOperator::hasIncompleteConnectState()
+BOOLEAN SetOperator::hasIncompleteConnectState()
 {
     return _PolyhedralBoundedSolidSetNullEdgesConnector::getLastLooseACount() > 0 ||
         _PolyhedralBoundedSolidSetNullEdgesConnector::getLastLooseBCount() > 0;
 }
 
-bool SetOperator::isStructurallyUsableSetOpResult(PolyhedralBoundedSolid* result)
+BOOLEAN SetOperator::isStructurallyUsableSetOpResult(PolyhedralBoundedSolid* result)
 {
     if ( result == 0 ||
          result->getPolygonsList().size() <= 0 ||
          hasDegenerateFace(result) ) {
-        return false;
+        return FALSE;
     }
     return PolyhedralBoundedSolidValidationEngine::validateIntermediate(result);
 }
 
-bool SetOperator::hasBasicSetOpShapeData(PolyhedralBoundedSolid* result)
+BOOLEAN SetOperator::hasBasicSetOpShapeData(PolyhedralBoundedSolid* result)
 {
     return result != 0 &&
         result->getPolygonsList().size() > 0 &&
@@ -868,18 +869,18 @@ bool SetOperator::hasBasicSetOpShapeData(PolyhedralBoundedSolid* result)
         result->getVerticesList().size() > 0;
 }
 
-bool SetOperator::hasSameShapeData(PolyhedralBoundedSolid* first,
+BOOLEAN SetOperator::hasSameShapeData(PolyhedralBoundedSolid* first,
     PolyhedralBoundedSolid* second)
 {
     if ( !hasBasicSetOpShapeData(first) || !hasBasicSetOpShapeData(second) ||
          first->getPolygonsList().size() != second->getPolygonsList().size() ||
          first->getEdgesList().size() != second->getEdgesList().size() ||
          first->getVerticesList().size() != second->getVerticesList().size() ) {
-        return false;
+        return FALSE;
     }
     double* a = first->getMinMax();
     double* b = second->getMinMax();
-    bool same = _PolyhedralBoundedSolidFallbackGeometry::boundsMatch(a, b);
+    BOOLEAN same = _PolyhedralBoundedSolidFallbackGeometry::boundsMatch(a, b);
     delete[] a;
     delete[] b;
     return same;
@@ -917,9 +918,9 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
     int op,
-    bool withDebug,
-    bool maximizeResultFaces,
-    bool doStrictValidation)
+    BOOLEAN withDebug,
+    BOOLEAN maximizeResultFaces,
+    BOOLEAN doStrictValidation)
 {
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
         PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
@@ -960,14 +961,14 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     PolyhedralBoundedSolid* offsetCylinderDifferenceFallback;
     PolyhedralBoundedSolid* axisAlignedCellBooleanFallback;
     PolyhedralBoundedSolid* orthogonalProfileBooleanFallback;
-    bool fallbackProvidedResult;
+    BOOLEAN fallbackProvidedResult;
     String resultPath;
     String operandADiagnostics;
     String operandBDiagnostics;
 
     _SetOperationContext ctx;
     offsetCylinderDifferenceFallback = 0;
-    fallbackProvidedResult = false;
+    fallbackProvidedResult = FALSE;
     resultPath = "normal-pipeline";
     operandADiagnostics = cardinalitiesAndBounds(inSolidA);
     operandBDiagnostics = cardinalitiesAndBounds(inSolidB);
@@ -1030,7 +1031,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     PreflightCache preflightCache =
         _PolyhedralBoundedSolidSetNonIntersectingClassifier
             ::newPreflightCache(inSolidA, inSolidB);
-    bool preflightResolved = false;
+    BOOLEAN preflightResolved = FALSE;
 
     PolyhedralBoundedSolid* coplanarAreaContactResult =
         _PolyhedralBoundedSolidSetNonIntersectingClassifier
@@ -1039,7 +1040,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     if ( coplanarAreaContactResult != 0 ) {
         res = coplanarAreaContactResult;
         resultPath = "partial-coplanar-area-preflight";
-        preflightResolved = true;
+        preflightResolved = TRUE;
     }
 
     if ( !preflightResolved &&
@@ -1049,7 +1050,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             ::runSetOpNoIntersectionCase(inSolidA, inSolidB, res, op,
                 preflightCache);
         resultPath = "touching-only-preflight";
-        preflightResolved = true;
+        preflightResolved = TRUE;
     }
 
     // Section 7.3.1.A - Degenerate identity preflight: when A and B are
@@ -1072,7 +1073,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
         // SUBTRACT case: A - A = empty; res remains the empty solid
         // already initialised at function entry.
         resultPath = "geometric-identity-preflight";
-        preflightResolved = true;
+        preflightResolved = TRUE;
     }
 
     // Section 7.3.1.D - Containment-only preflight: when one solid is
@@ -1087,7 +1088,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             ::runSetOpNoIntersectionCase(inSolidA, inSolidB, res, op,
                 preflightCache);
         resultPath = "containment-only-preflight";
-        preflightResolved = true;
+        preflightResolved = TRUE;
     }
 
     if ( !preflightResolved ) {
@@ -1117,7 +1118,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             res = _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 ::runSetOpNoIntersectionCase(inSolidA, inSolidB, res, op);
             resultPath = "no-intersection-after-classify";
-            preflightResolved = true;
+            preflightResolved = TRUE;
         }
     }
 
@@ -1146,7 +1147,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
                 delete res;
                 res = offsetCylinderDifferenceFallback;
                 offsetCylinderDifferenceFallback = 0;
-                fallbackProvidedResult = true;
+                fallbackProvidedResult = TRUE;
                 resultPath = "offset-cylinder-fallback-incomplete-connect";
             }
         }
@@ -1159,7 +1160,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             delete res;
             res = axisAlignedCellBooleanFallback;
             axisAlignedCellBooleanFallback = 0;
-            fallbackProvidedResult = true;
+            fallbackProvidedResult = TRUE;
             resultPath = "axis-aligned-cell-fallback-incomplete-connect";
         }
         else if ( !fallbackProvidedResult &&
@@ -1170,7 +1171,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             delete res;
             res = orthogonalProfileBooleanFallback;
             orthogonalProfileBooleanFallback = 0;
-            fallbackProvidedResult = true;
+            fallbackProvidedResult = TRUE;
             resultPath = "orthogonal-profile-fallback-incomplete-connect";
         }
         if ( !fallbackProvidedResult ) {
@@ -1286,10 +1287,3 @@ PolyhedralBoundedSolid* SetOperator::setOp(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidSetOperator::DEBUG_01_STRUCTURE;
-const int _PolyhedralBoundedSolidSetOperator::DEBUG_02_GENERATOR;
-const int _PolyhedralBoundedSolidSetOperator::DEBUG_03_VERTEXFACECLASIFFIER;
-const int _PolyhedralBoundedSolidSetOperator::DEBUG_04_VERTEXVERTEXCLASIFFIER;
-const int _PolyhedralBoundedSolidSetOperator::DEBUG_05_CONNECT;
-const int _PolyhedralBoundedSolidSetOperator::DEBUG_06_FINISH;
-const int _PolyhedralBoundedSolidSetOperator::DEBUG_99_SHOWOPERATIONS;

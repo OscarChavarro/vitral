@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
@@ -257,15 +258,15 @@ int GlutSystem::getMouseButtonsDownMask()
     return mouseButtonsDownMask;
 }
 
-bool GlutSystem::isWheelButton(int button, int* outDirection)
+BOOLEAN GlutSystem::isWheelButton(int button, int* outDirection)
 {
     if ( button != 3 && button != 4 ) {
-        return false;
+        return FALSE;
     }
     if ( outDirection != NULL ) {
         *outDirection = button == 3 ? 1 : -1;
     }
-    return true;
+    return TRUE;
 }
 
 //= Labels ================================================================

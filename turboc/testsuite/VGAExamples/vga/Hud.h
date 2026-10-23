@@ -1,6 +1,7 @@
 #ifndef __HUD__
 #define __HUD__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vga/VgaConstant.h"
 
 class Mouse;
@@ -16,7 +17,7 @@ class Hud {
     void clear();
     void draw(const Picture &picture, const PaletteSet &palettes, Mouse &mouse);
     int pixel(const char *text, int x, int y) const;
-    bool cellAt(int column, int row, char &c) const;
+    BOOLEAN cellAt(int column, int row, char &c) const;
 
   private:
     unsigned char font[FONT_GLYPHS * FONT_SLOT];

@@ -1,6 +1,7 @@
 #ifndef __INPUT_STREAM_READER__
 #define __INPUT_STREAM_READER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/InputStream.h"
 #include "java/io/Reader.h"
 

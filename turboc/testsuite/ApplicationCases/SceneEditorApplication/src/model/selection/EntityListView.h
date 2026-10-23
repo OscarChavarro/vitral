@@ -1,6 +1,7 @@
 #ifndef __ENTITY_LIST_VIEW__
 #define __ENTITY_LIST_VIEW__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 class Entity;
@@ -20,7 +21,7 @@ public:
     virtual const void* getList() const = 0;
     virtual long size() const = 0;
     virtual Entity* get(long index) const = 0;
-    virtual bool insert(long index, Entity* element) = 0;
+    virtual BOOLEAN insert(long index, Entity* element) = 0;
     virtual Entity* remove(long index) = 0;
 };
 
@@ -52,7 +53,7 @@ public:
     explicit EntityListView(ArrayList<Camera*>* externalList);
     explicit EntityListView(ArrayList<SimpleBodyGroup*>* externalList);
 
-    bool isValid() const
+    BOOLEAN isValid() const
     {
         return access != NULL;
     }
@@ -60,7 +61,7 @@ public:
     /**
     @return true if both views show the same list
     */
-    bool isSameList(const EntityListView& other) const
+    BOOLEAN isSameList(const EntityListView& other) const
     {
         return (access == NULL ? NULL : access->getList()) ==
             (other.access == NULL ? NULL : other.access->getList());
@@ -79,7 +80,7 @@ public:
     /**
     @return false if the element is not of the type of the list
     */
-    bool insert(long index, Entity* element)
+    BOOLEAN insert(long index, Entity* element)
     {
         return access->insert(index, element);
     }

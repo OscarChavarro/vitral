@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayDeque.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/concurrent/Executors.h"
@@ -12,7 +13,7 @@ private:
     ArrayDeque<Runnable*> queue_;
     pthread_mutex_t mutex_;
     pthread_cond_t hasWorkCond_;
-    bool shutdown_;
+    BOOLEAN shutdown_;
 
 #ifdef VITRAL_WITH_POSIX_THREADS
     ArrayList<pthread_t> workers_;
@@ -24,7 +25,7 @@ private:
         FixedThreadPoolExecutor* self = ctx->owner;
         delete ctx;
 
-        while ( true ) {
+        while ( TRUE ) {
             Runnable* task = 0;
             pthread_mutex_lock(&self->mutex_);
             while ( self->queue_.isEmpty() && !self->shutdown_ ) {
@@ -50,7 +51,7 @@ private:
 
 public:
     explicit FixedThreadPoolExecutor(int numberOfThreads)
-        : queue_(), shutdown_(false)
+        : queue_(), shutdown_(FALSE)
     {
         pthread_mutex_init(&mutex_, 0);
         pthread_cond_init(&hasWorkCond_, 0);
@@ -59,10 +60,11 @@ public:
         if ( numberOfThreads < 1 ) {
             numberOfThreads = 1;
         }
-        for (int i = 0; i < numberOfThreads; ++i) {
+        int i;
+        for (i = 0; i < numberOfThreads; ++i) {
             workers_.add((pthread_t)0);
         }
-        for (int i = 0; i < numberOfThreads; ++i) {
+        for (i = 0; i < numberOfThreads; ++i) {
             WorkerContext* ctx = new WorkerContext();
             ctx->owner = this;
             pthread_create(&workers_[i], 0, &FixedThreadPoolExecutor::workerMain, ctx);
@@ -84,7 +86,7 @@ public:
             pthread_mutex_unlock(&mutex_);
             return;
         }
-        shutdown_ = true;
+        shutdown_ = TRUE;
         pthread_cond_broadcast(&hasWorkCond_);
         pthread_mutex_unlock(&mutex_);
 
@@ -104,12 +106,12 @@ public:
         pthread_mutex_unlock(&mutex_);
     }
 
-    virtual bool execute(Runnable* task)
+    virtual BOOLEAN execute(Runnable* task)
     {
         pthread_mutex_lock(&mutex_);
         if ( shutdown_ ) {
             pthread_mutex_unlock(&mutex_);
-            return false;
+            return FALSE;
         }
 #ifdef VITRAL_WITH_POSIX_THREADS
         queue_.addLast(task);
@@ -120,7 +122,7 @@ public:
         task->run();
         delete task;
 #endif
-        return true;
+        return TRUE;
     }
 };
 

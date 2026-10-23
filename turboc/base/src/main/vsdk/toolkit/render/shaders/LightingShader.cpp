@@ -61,7 +61,7 @@ static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd
     return surfaceNormal.add(normalPerturbation).normalized();
 }
 
-LightingShader::LightingShader(bool specularEnabledIn, bool textureEnabledIn, bool bumpMapEnabledIn)
+LightingShader::LightingShader(BOOLEAN specularEnabledIn, BOOLEAN textureEnabledIn, BOOLEAN bumpMapEnabledIn)
     : specularEnabled(specularEnabledIn), textureEnabled(textureEnabledIn), bumpMapEnabled(bumpMapEnabledIn)
 {
 }
@@ -113,9 +113,9 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
 
         if ( workspace != 0 ) {
             RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
-            shadowCandidateHit->setStoreRay(false);
+            shadowCandidateHit->setStoreRay(FALSE);
 
-            bool shadowed = false;
+            BOOLEAN shadowed = FALSE;
             for ( long int oi = 0; oi < objects.size(); oi++ ) {
                 SimpleBody* candidateObject = objects.get(oi);
                 shadowCandidateHit->resetForDistanceOnly();
@@ -123,7 +123,7 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
                 if ( candidateObject != 0 && candidateObject->doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
                     double hitDistance = shadowCandidateHit->getHitDistance();
                     if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
-                        shadowed = true;
+                        shadowed = TRUE;
                         break;
                     }
                 }

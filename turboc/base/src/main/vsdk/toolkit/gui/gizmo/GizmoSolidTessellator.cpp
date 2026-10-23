@@ -110,5 +110,3 @@ ArrayList<Vector3Dd> GizmoSolidTessellator::buildPlaneQuad(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int GizmoSolidTessellator::SLICES;
-const int GizmoSolidTessellator::BOX_NUMBER_OF_FACES;

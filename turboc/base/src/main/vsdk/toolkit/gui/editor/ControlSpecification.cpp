@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/lang/NumberFormatException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -64,8 +65,8 @@ static double parseLimit(const String &limit)
 
 ControlSpecification::ControlSpecification(const String &type,
     const String &name, const String &intervalText,
-    double lowerBound, double upperBound, bool lowerInclusive,
-    bool upperInclusive) :
+    double lowerBound, double upperBound, BOOLEAN lowerInclusive,
+    BOOLEAN upperInclusive) :
     type(type), name(name), intervalText(intervalText),
     lowerBound(lowerBound), upperBound(upperBound),
     lowerInclusive(lowerInclusive), upperInclusive(upperInclusive)
@@ -92,7 +93,7 @@ ControlSpecification::parse(const String &specification)
     if ( parts.size() == 2 || trim(parts[2]).isEmpty() ) {
         return new ControlSpecification(type, name, "",
             -HUGE_VAL,
-            HUGE_VAL, false, false);
+            HUGE_VAL, FALSE, FALSE);
     }
 
     String interval = trim(parts[2]);
@@ -154,15 +155,15 @@ ControlSpecification::getLabel() const
     return label;
 }
 
-bool
+BOOLEAN
 ControlSpecification::contains(double value) const
 {
     if ( Cpp98Support::isNaN(value) ) {
-        return false;
+        return FALSE;
     }
-    bool aboveLower = lowerInclusive ? value >= lowerBound :
+    BOOLEAN aboveLower = lowerInclusive ? value >= lowerBound :
         value > lowerBound;
-    bool belowUpper = upperInclusive ? value <= upperBound :
+    BOOLEAN belowUpper = upperInclusive ? value <= upperBound :
         value < upperBound;
     return aboveLower && belowUpper;
 }

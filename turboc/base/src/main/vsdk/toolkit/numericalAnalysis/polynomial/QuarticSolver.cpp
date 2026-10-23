@@ -13,7 +13,8 @@ int
 QuarticSolver::hasDifficultCoefficients(int n, const double *coefficients)
 {
     double largestCoefficient = 0.0;
-    for (int coefficientIndex = 0; coefficientIndex <= n; coefficientIndex++) {
+    int coefficientIndex;
+    for (coefficientIndex = 0; coefficientIndex <= n; coefficientIndex++) {
         if (Math::abs(coefficients[coefficientIndex]) > largestCoefficient) {
             largestCoefficient = coefficients[coefficientIndex];
         }
@@ -23,7 +24,7 @@ QuarticSolver::hasDifficultCoefficients(int n, const double *coefficients)
         return 0;
     }
 
-    for (int coefficientIndex = 0; coefficientIndex <= n; coefficientIndex++) {
+    for (coefficientIndex = 0; coefficientIndex <= n; coefficientIndex++) {
         if (coefficients[coefficientIndex] != 0.0) {
             if (Math::abs(largestCoefficient / coefficients[coefficientIndex]) >
                 FUDGE_FACTOR1) {

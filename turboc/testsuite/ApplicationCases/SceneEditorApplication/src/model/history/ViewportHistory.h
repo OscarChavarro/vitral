@@ -1,6 +1,7 @@
 #ifndef __VIEWPORT_HISTORY__
 #define __VIEWPORT_HISTORY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 class UndoQueue;
@@ -48,7 +49,7 @@ public:
     /**
     @return true if a user action is being recorded
     */
-    bool isRecording() const;
+    BOOLEAN isRecording() const;
 
     /**
     Starts recording a user action over the viewports of a set.
@@ -64,7 +65,7 @@ public:
     next action over the same viewport
     @return number of viewports whose change was recorded
     */
-    int end(bool mergeable);
+    int end(BOOLEAN mergeable);
 
     /**
     @return the undone operation, or null if there was nothing to undo or an

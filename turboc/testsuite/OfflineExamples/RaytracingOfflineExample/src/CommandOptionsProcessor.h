@@ -1,6 +1,7 @@
 #ifndef __COMMAND_OPTIONS_PROCESSOR__
 #define __COMMAND_OPTIONS_PROCESSOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -13,13 +14,13 @@ private:
 
     String sceneFile;
     String outputFile;
-    bool save;
-    bool parallel;
-    bool showHelp;
+    BOOLEAN save;
+    BOOLEAN parallel;
+    BOOLEAN showHelp;
     int xResolution;
     int yResolution;
 
-    static bool parseResolution(const String& value, int* x, int* y);
+    static BOOLEAN parseResolution(const String& value, int* x, int* y);
 
 public:
     CommandOptionsProcessor();
@@ -29,10 +30,10 @@ public:
 
     const String& getSceneFile() const;
     const String& getOutputFile() const;
-    bool shouldSave() const;
-    bool shouldUseParallelExecutor() const;
-    bool shouldShowHelp() const;
-    bool shouldUseSceneResolution() const;
+    BOOLEAN shouldSave() const;
+    BOOLEAN shouldUseParallelExecutor() const;
+    BOOLEAN shouldShowHelp() const;
+    BOOLEAN shouldUseSceneResolution() const;
     int getXResolution() const;
     int getYResolution() const;
 };

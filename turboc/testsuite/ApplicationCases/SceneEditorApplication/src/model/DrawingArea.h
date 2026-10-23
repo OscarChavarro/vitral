@@ -1,6 +1,7 @@
 #ifndef __DRAWING_AREA__
 #define __DRAWING_AREA__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
@@ -27,15 +28,15 @@ private:
     InteractionMode interactionMode;
     InteractionMode lastInteractionMode;
 
-    bool colorCaptureRequested;
-    bool depthCaptureRequested;
-    bool contoursRequested;
-    bool projectedViewsDebugRequested;
+    BOOLEAN colorCaptureRequested;
+    BOOLEAN depthCaptureRequested;
+    BOOLEAN contoursRequested;
+    BOOLEAN projectedViewsDebugRequested;
 
-    bool hasPendingViewportExport;
+    BOOLEAN hasPendingViewportExport;
     File pendingViewportExportFile;
-    bool pendingViewportExportJpg;
-    bool hasPendingWorkspaceExport;
+    BOOLEAN pendingViewportExportJpg;
+    BOOLEAN hasPendingWorkspaceExport;
     File pendingWorkspaceExportFile;
 
     int canvasWidth;
@@ -65,22 +66,22 @@ public:
     (as in 3ds Max) only marks the selected objects with the selection
     corners: it shows no gizmo
     */
-    bool shouldDrawTranslationGizmo() const;
+    BOOLEAN shouldDrawTranslationGizmo() const;
 
     //= Pending requests to the renderer ==================================
-    bool isColorCaptureRequested() const;
-    void setColorCaptureRequested(bool colorCaptureRequested);
-    bool isDepthCaptureRequested() const;
-    void setDepthCaptureRequested(bool depthCaptureRequested);
+    BOOLEAN isColorCaptureRequested() const;
+    void setColorCaptureRequested(BOOLEAN colorCaptureRequested);
+    BOOLEAN isDepthCaptureRequested() const;
+    void setDepthCaptureRequested(BOOLEAN depthCaptureRequested);
 
     /**
     @return true if the requested depth capture must be presented as a
     contours (normal map) image
     */
-    bool isContoursRequested() const;
-    void setContoursRequested(bool contoursRequested);
-    bool isProjectedViewsDebugRequested() const;
-    void setProjectedViewsDebugRequested(bool projectedViewsDebugRequested);
+    BOOLEAN isContoursRequested() const;
+    void setContoursRequested(BOOLEAN contoursRequested);
+    BOOLEAN isProjectedViewsDebugRequested() const;
+    void setProjectedViewsDebugRequested(BOOLEAN projectedViewsDebugRequested);
 
     /**
     Requests the export of the selected viewport, to be done in the next
@@ -88,7 +89,7 @@ public:
     @param file destination file
     @param jpg true for a JPG file, false for a PNG one
     */
-    void requestViewportExport(const File& file, bool jpg);
+    void requestViewportExport(const File& file, BOOLEAN jpg);
 
     /**
     Requests the export of the whole viewport set area as a JPG, to be done
@@ -101,7 +102,7 @@ public:
     is none
     */
     const File* getPendingViewportExportFile() const;
-    bool isPendingViewportExportJpg() const;
+    BOOLEAN isPendingViewportExportJpg() const;
 
     /**
     @return the destination of the pending workspace export, or null if
@@ -162,7 +163,7 @@ public:
     @return false if the point is behind the camera (the Java version
     returns null)
     */
-    bool projectToCanvas(Viewport* viewport, const Vector3Dd& point,
+    BOOLEAN projectToCanvas(Viewport* viewport, const Vector3Dd& point,
                          double outCanvas[2]) const;
 };
 

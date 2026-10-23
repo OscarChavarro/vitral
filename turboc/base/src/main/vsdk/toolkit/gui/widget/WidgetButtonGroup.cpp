@@ -1,26 +1,27 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/widget/Widget.h"
 #include "vsdk/toolkit/gui/widget/WidgetButtonGroup.h"
 
 WidgetButtonGroup::WidgetButtonGroup(Widget* parent)
-    : name(""), showText(false), showIcons(false), showTitle(false),
+    : name(""), showText(FALSE), showIcons(FALSE), showTitle(FALSE),
       direction(0)
 {
     context = parent;
 }
 
-void WidgetButtonGroup::setShowText(bool f)
+void WidgetButtonGroup::setShowText(BOOLEAN f)
 {
     showText = f;
 }
 
-void WidgetButtonGroup::setShowIcons(bool f)
+void WidgetButtonGroup::setShowIcons(BOOLEAN f)
 {
     showIcons = f;
 }
 
-void WidgetButtonGroup::setTitle(bool f)
+void WidgetButtonGroup::setTitle(BOOLEAN f)
 {
     showTitle = f;
 }
@@ -35,17 +36,17 @@ int WidgetButtonGroup::getDirection() const
     return direction;
 }
 
-bool WidgetButtonGroup::isShowTextSet() const
+BOOLEAN WidgetButtonGroup::isShowTextSet() const
 {
     return showText;
 }
 
-bool WidgetButtonGroup::isShowIconsSet() const
+BOOLEAN WidgetButtonGroup::isShowIconsSet() const
 {
     return showIcons;
 }
 
-bool WidgetButtonGroup::isShowTitleSet() const
+BOOLEAN WidgetButtonGroup::isShowTitleSet() const
 {
     return showTitle;
 }
@@ -82,14 +83,6 @@ String WidgetButtonGroup::toString() const
     return String("ButtonGroup \"") + name + "\" with " +
         String::valueOf((long)commands.size()) + " commands\n";
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int WidgetButtonGroup::VERTICAL;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int WidgetButtonGroup::HORIZONTAL;
 
 const Class WidgetButtonGroup::CLASS = { "WidgetButtonGroup", &WidgetElement::CLASS };
 

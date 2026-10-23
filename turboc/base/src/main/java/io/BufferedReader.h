@@ -1,6 +1,7 @@
 #ifndef __BUFFERED_READER__
 #define __BUFFERED_READER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/InputStream.h"
 #include "java/lang/String.h"
 
@@ -18,7 +19,7 @@ class BufferedReader {
     int position;
     int count;
     /// A line ended by "\r": a "\n" following it is not a new line
-    bool skipLF;
+    BOOLEAN skipLF;
 
     int
     readByte();
@@ -31,7 +32,7 @@ class BufferedReader {
     @param outLine the line read
     @return false at the end of the stream, when Java returns null
     */
-    bool
+    BOOLEAN
     readLine(String &outLine);
 };
 

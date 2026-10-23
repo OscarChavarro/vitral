@@ -11,8 +11,10 @@ class FourierShapeDescriptor : public ShapeDescriptor {
 
 private:
     double* featureVector;
-    static const int numberOfElements = 32;
-    static const int numberOfHarmonics = 16;
+    enum {
+        numberOfElements = 32,
+        numberOfHarmonics = 16
+    };
 
 public:
     static const Class CLASS;

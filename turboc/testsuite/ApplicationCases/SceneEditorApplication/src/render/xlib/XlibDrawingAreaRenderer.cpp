@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "render/xlib/XlibDrawingAreaRenderer.h"
 
 // First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
@@ -86,7 +87,7 @@ public:
 static void drawLines(Display* display, Drawable frame, GC gc,
                const Calligraphic2DBuffer& lines, int x, int y,
                int width, int height, unsigned long color,
-               int lineWidth = 1, bool dashed = false)
+               int lineWidth = 1, BOOLEAN dashed = FALSE)
 {
     XSetForeground(display, gc, color);
     XSetLineAttributes(display, gc, lineWidth,
@@ -105,7 +106,7 @@ static void drawLines(Display* display, Drawable frame, GC gc,
     XSetLineAttributes(display, gc, 1, LineSolid, CapButt, JoinMiter);
 }
 
-static bool projectLine(const Matrix4x4d& projection, const Vector3Dd& a,
+static BOOLEAN projectLine(const Matrix4x4d& projection, const Vector3Dd& a,
                  const Vector3Dd& b, Calligraphic2DBuffer& lines)
 {
     Vector4Dd p = projection.multiply(Vector4Dd(a));
@@ -118,7 +119,7 @@ static bool projectLine(const Matrix4x4d& projection, const Vector3Dd& a,
         const double* n = planes[i];
         double dp = n[0]*p.x()+n[1]*p.y()+n[2]*p.z()+n[3]*p.w();
         double dq = n[0]*q.x()+n[1]*q.y()+n[2]*q.z()+n[3]*q.w();
-        if (dp < 0 && dq < 0) return false;
+        if (dp < 0 && dq < 0) return FALSE;
         if (dp < 0 || dq < 0) {
             double t = dp / (dp - dq);
             Vector4Dd cut = p.multiply(1-t).add(q.multiply(t));
@@ -128,7 +129,7 @@ static bool projectLine(const Matrix4x4d& projection, const Vector3Dd& a,
     p = p.dividedByW();
     q = q.dividedByW();
     lines.add2DLine(p.x(), p.y(), q.x(), q.y());
-    return true;
+    return TRUE;
 }
 
 static void drawGrid(Display* display, Drawable frame, GC gc, Visual* visual,
@@ -235,7 +236,7 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
     RendererConfiguration* quality = viewport->getRendererConfiguration();
     scene->activeCamera = camera;
     scene->qualityTemplate->cloneFrom(*quality);
-    bool raytraced = viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING;
+    BOOLEAN raytraced = viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING;
 
     if (raytraced) {
         scene->activateSelectedBackground();
@@ -306,12 +307,12 @@ void XlibDrawingAreaRenderer::display(Display* display, Window window,
     ViewportSet* set = area->getViewportSet();
     set->enforceAvailableRenderModes();
     if (area->isDepthCaptureRequested()) {
-        area->setDepthCaptureRequested(false);
-        area->setContoursRequested(false);
+        area->setDepthCaptureRequested(FALSE);
+        area->setContoursRequested(FALSE);
         host->showStatusMessage("Depth capture is unavailable in Xlib mode");
     }
     if (area->isProjectedViewsDebugRequested()) {
-        area->setProjectedViewsDebugRequested(false);
+        area->setProjectedViewsDebugRequested(FALSE);
         host->showStatusMessage("Projected views debugging is unavailable in Xlib mode");
     }
 
@@ -321,7 +322,7 @@ void XlibDrawingAreaRenderer::display(Display* display, Window window,
     XFillRectangle(display, frame, gc, 0, 0, width, height);
 
     const ArrayList<Viewport*>& viewports = set->getViewports();
-    bool full = host->isFullScreenGuiMode() && set->countActiveViewports() == 1;
+    BOOLEAN full = host->isFullScreenGuiMode() && set->countActiveViewports() == 1;
     if (!full) {
         for (long i = 0; i < viewports.size(); ++i) {
             Viewport* v = viewports[i];

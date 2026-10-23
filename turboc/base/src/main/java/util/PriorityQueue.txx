@@ -2,6 +2,7 @@
 #define __PRIORITY_QUEUE_TXX__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/PriorityQueue.h"
 
 template <class T>
@@ -63,7 +64,7 @@ PriorityQueue<T>::releaseStorage()
 }
 
 template <class T>
-bool
+BOOLEAN
 PriorityQueue<T>::lessThan(const T& a, const T& b) const
 {
     return a < b;
@@ -131,29 +132,29 @@ PriorityQueue<T>::siftDown(int index)
 }
 
 template <class T>
-bool
+BOOLEAN
 PriorityQueue<T>::add(const T& elem)
 {
     if (activeLimit >= 0) {
         currentSize++;
         if (currentSize >= activeLimit) {
             currentSize--;
-            return false;
+            return FALSE;
         }
         data[currentSize] = elem;
         siftUp(currentSize);
-        return true;
+        return TRUE;
     }
 
     currentSize++;
     ensureCapacity(currentSize);
     data[currentSize] = elem;
     siftUp(currentSize);
-    return true;
+    return TRUE;
 }
 
 template <class T>
-bool
+BOOLEAN
 PriorityQueue<T>::offer(const T& elem)
 {
     return add(elem);
@@ -229,14 +230,14 @@ PriorityQueue<T>::end()
 }
 
 template <class T>
-bool
+BOOLEAN
 PriorityQueue<T>::removeIf(Predicate<T>& p)
 {
-    bool removed = false;
+    BOOLEAN removed = FALSE;
     int w = 1;
     for (int r = 1; r <= currentSize; r++) {
         if (p.test(data[r])) {
-            removed = true;
+            removed = TRUE;
         } else {
             data[w++] = data[r];
         }
@@ -260,19 +261,19 @@ PriorityQueue<T>::forEach(Consumer<T>& action) const
 }
 
 template <class T>
-bool
+BOOLEAN
 PriorityQueue<T>::contains(const T& elem) const
 {
     for (int i = 1; i <= currentSize; i++) {
         if (!lessThan(data[i], elem) && !lessThan(elem, data[i])) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 template <class T>
-bool
+BOOLEAN
 PriorityQueue<T>::remove(const T& elem)
 {
     for (int i = 1; i <= currentSize; i++) {
@@ -281,10 +282,10 @@ PriorityQueue<T>::remove(const T& elem)
             if (currentSize >= 1 && i <= currentSize) {
                 siftDown(i);
             }
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 template <class T>

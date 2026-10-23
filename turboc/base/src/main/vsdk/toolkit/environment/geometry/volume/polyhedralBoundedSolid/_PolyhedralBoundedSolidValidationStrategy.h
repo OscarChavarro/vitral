@@ -1,6 +1,7 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_VALIDATION_STRATEGY__
-#define __POLYHEDRAL_BOUNDED_SOLID_VALIDATION_STRATEGY__
+#ifndef __PBS_VALIDATION_STRATEGY__
+#define __PBS_VALIDATION_STRATEGY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 class PolyhedralBoundedSolid;
@@ -23,7 +24,7 @@ public:
     @param msg receives failure details
     @return true when the criterion holds
     */
-    virtual bool validate(PolyhedralBoundedSolid* solid,
+    virtual BOOLEAN validate(PolyhedralBoundedSolid* solid,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
         String* msg) = 0;
 };

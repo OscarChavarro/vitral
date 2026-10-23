@@ -1,6 +1,7 @@
 #ifndef __EDIT_HISTORY__
 #define __EDIT_HISTORY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
@@ -51,7 +52,7 @@ public:
     /**
     @return true if a user action is being recorded in any history
     */
-    bool isRecording() const
+    BOOLEAN isRecording() const
     {
         return sceneHistory.isRecording() || viewportHistory.isRecording();
     }

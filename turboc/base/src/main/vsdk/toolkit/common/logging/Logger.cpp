@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-bool Logger::withSystemExit = true;
-bool Logger::withFatalExceptions = true;
+BOOLEAN Logger::withSystemExit = TRUE;
+BOOLEAN Logger::withFatalExceptions = TRUE;
 
-void Logger::setWithSystemExit(bool flag) { withSystemExit = flag; }
-void Logger::setWithFatalExceptions(bool flag) { withFatalExceptions = flag; }
+void Logger::setWithSystemExit(BOOLEAN flag) { withSystemExit = flag; }
+void Logger::setWithFatalExceptions(BOOLEAN flag) { withFatalExceptions = flag; }
 
 void Logger::processFatalError(const String& method, const String& message, const Throwable* cause)
 {
@@ -51,8 +52,3 @@ void Logger::reportMessageWithException(const String& className, int level, cons
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int Logger::WARNING;
-const int Logger::ERROR;
-const int Logger::FATAL_ERROR;
-const int Logger::DEBUG;
-const int Logger::VERBOSE;

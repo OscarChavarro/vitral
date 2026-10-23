@@ -1,6 +1,7 @@
 #ifndef __GEOMETRIC_FACE_ORIENTATION_STRATEGY__
 #define __GEOMETRIC_FACE_ORIENTATION_STRATEGY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"
 
 /**
@@ -11,7 +12,7 @@ half-space test of [MANT1988].13.1 used downstream by the boolean pipeline.
 */
 class _GeometricFaceOrientationStrategy : public _PolyhedralBoundedSolidValidationStrategy {
 public:
-    virtual bool validate(PolyhedralBoundedSolid* solid,
+    virtual BOOLEAN validate(PolyhedralBoundedSolid* solid,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
         String* msg);
 };

@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 
 #include "java/lang/Math.h"
@@ -16,7 +17,7 @@
 const int OpenGL1ArrowRenderer::SLICES = 16;
 unsigned int OpenGL1ArrowRenderer::displayListId = 0;
 int OpenGL1ArrowRenderer::vertexCount = 0;
-bool OpenGL1ArrowRenderer::initialized = false;
+BOOLEAN OpenGL1ArrowRenderer::initialized = FALSE;
 
 void OpenGL1ArrowRenderer::draw(
     const Arrow* arrow,
@@ -38,8 +39,8 @@ void OpenGL1ArrowRenderer::draw(
     // the OpenGL 4 port
     RendererConfiguration gouraud;
     gouraud.setShadingType(RendererConfiguration::SHADING_TYPE_GOURAUD);
-    gouraud.setTexture(false);
-    gouraud.setBumpMap(false);
+    gouraud.setTexture(FALSE);
+    gouraud.setBumpMap(FALSE);
     OpenGL1RendererConfigurationStateSelector::activateState(
         camera, projection, modelMatrix, lights, *material, &gouraud, 0);
 
@@ -64,13 +65,13 @@ void OpenGL1ArrowRenderer::dispose()
 {
     if ( displayListId != 0 ) { glDeleteLists(displayListId, 1); displayListId = 0; }
     vertexCount = 0;
-    initialized = false;
+    initialized = FALSE;
 }
 
-bool OpenGL1ArrowRenderer::ensureMesh(const Arrow* arrow)
+BOOLEAN OpenGL1ArrowRenderer::ensureMesh(const Arrow* arrow)
 {
     if ( initialized ) {
-        return true;
+        return TRUE;
     }
     ArrowMesh mesh = buildArrowMesh(
         arrow->getBaseRadius(),
@@ -79,8 +80,8 @@ bool OpenGL1ArrowRenderer::ensureMesh(const Arrow* arrow)
         arrow->getHeadLength(),
         SLICES);
     uploadMesh(mesh);
-    initialized = true;
-    return true;
+    initialized = TRUE;
+    return TRUE;
 }
 
 OpenGL1ArrowRenderer::ArrowMesh OpenGL1ArrowRenderer::buildArrowMesh(
@@ -92,7 +93,8 @@ OpenGL1ArrowRenderer::ArrowMesh OpenGL1ArrowRenderer::buildArrowMesh(
 {
     ArrowMesh mesh;
 
-    for ( int i = 0; i < slices; i++ ) {
+    int i;
+    for ( i = 0; i < slices; i++ ) {
         double a0 = 2.0 * Math::PI * i / slices;
         double a1 = 2.0 * Math::PI * (i + 1) / slices;
         float x0 = (float)(cos(a0) * baseRadius);
@@ -113,7 +115,7 @@ OpenGL1ArrowRenderer::ArrowMesh OpenGL1ArrowRenderer::buildArrowMesh(
         addPos(mesh.positions, x0, y0, (float)baseLength); addNorm(mesh.normals, nx0, ny0, 0); addUv(mesh.uvs, 0, 1);
     }
 
-    for ( int i = 0; i < slices; i++ ) {
+    for ( i = 0; i < slices; i++ ) {
         double a0 = 2.0 * Math::PI * i / slices;
         double a1 = 2.0 * Math::PI * (i + 1) / slices;
         float x0 = (float)(cos(a0) * baseRadius);
@@ -127,7 +129,7 @@ OpenGL1ArrowRenderer::ArrowMesh OpenGL1ArrowRenderer::buildArrowMesh(
     }
 
     float coneBase = (float)baseLength;
-    for ( int i = 0; i < slices; i++ ) {
+    for ( i = 0; i < slices; i++ ) {
         double a0 = 2.0 * Math::PI * i / slices;
         double a1 = 2.0 * Math::PI * (i + 1) / slices;
         float ox0 = (float)(cos(a0) * baseRadius);
@@ -153,7 +155,7 @@ OpenGL1ArrowRenderer::ArrowMesh OpenGL1ArrowRenderer::buildArrowMesh(
     float cosAlpha = slantLength > 1e-12f ? (float)(headLength / slantLength) : 1.0f;
     float sinAlpha = slantLength > 1e-12f ? (float)(headRadius / slantLength) : 0.0f;
 
-    for ( int i = 0; i < slices; i++ ) {
+    for ( i = 0; i < slices; i++ ) {
         double a0 = 2.0 * Math::PI * i / slices;
         double a1 = 2.0 * Math::PI * (i + 1) / slices;
         double aMid = (a0 + a1) * 0.5;

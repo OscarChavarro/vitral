@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayDeque.h"
 #include <fcntl.h>
 #include "java/lang/PosixThreads.h"
@@ -19,10 +20,10 @@
 
 struct XtEventQueueTask {
     Runnable* runnable;
-    bool owned;
+    BOOLEAN owned;
     unsigned long delayMillis;
     /// Set when an `invokeAndWait` task ended, or null
-    bool* done;
+    BOOLEAN* done;
 };
 
 /**
@@ -33,12 +34,12 @@ struct XtEventQueueState {
     XtAppContext appContext;
     int pipeFds[2];
     pthread_t dispatchThread;
-    bool installed;
+    BOOLEAN installed;
     pthread_mutex_t mutex;
     pthread_cond_t finished;
     ArrayDeque<XtEventQueueTask> tasks;
 
-    XtEventQueueState() : appContext(NULL), installed(false)
+    XtEventQueueState() : appContext(NULL), installed(FALSE)
     {
         pipeFds[0] = -1;
         pipeFds[1] = -1;
@@ -88,7 +89,7 @@ static void finishTask(const XtEventQueueTask& task)
     if ( task.done != NULL ) {
         XtEventQueueState* queue = state();
         XtEventQueueLock lock(&queue->mutex);
-        *task.done = true;
+        *task.done = TRUE;
         pthread_cond_broadcast(&queue->finished);
     }
 }
@@ -110,7 +111,7 @@ static void dispatchTasks(XtPointer, int* fd, XtInputId*)
     if ( read(*fd, wakeUps, sizeof(wakeUps)) <= 0 ) {
         return;
     }
-    while ( true ) {
+    while ( TRUE ) {
         XtEventQueueTask task;
         {
             XtEventQueueLock lock(&queue->mutex);
@@ -143,25 +144,25 @@ static void post(const XtEventQueueTask& task)
 }
 
 
-bool XtEventQueue::install(XtAppContext appContext)
+BOOLEAN XtEventQueue::install(XtAppContext appContext)
 {
     XtEventQueueState* queue = state();
     if ( pipe(queue->pipeFds) != 0 ) {
         perror("XtEventQueue: pipe");
-        return false;
+        return FALSE;
     }
     // The loop reads the pipe only when it has data: never blocks on it
     fcntl(queue->pipeFds[0], F_SETFL, O_NONBLOCK);
     queue->appContext = appContext;
     queue->dispatchThread = pthread_self();
-    queue->installed = true;
+    queue->installed = TRUE;
     XtAppAddInput(appContext, queue->pipeFds[0],
                   ((XtPointer)(XtInputReadMask)),
                   &dispatchTasks, NULL);
-    return true;
+    return TRUE;
 }
 
-bool XtEventQueue::isDispatchThread()
+BOOLEAN XtEventQueue::isDispatchThread()
 {
     XtEventQueueState* queue = state();
     return queue->installed &&
@@ -175,8 +176,8 @@ void XtEventQueue::invokeAndWait(Runnable* task)
         return;
     }
     XtEventQueueState* queue = state();
-    bool done = false;
-    XtEventQueueTask entry = { task, false, 0, &done };
+    BOOLEAN done = FALSE;
+    XtEventQueueTask entry = { task, FALSE, 0, &done };
     post(entry);
     XtEventQueueLock lock(&queue->mutex);
     while ( !done ) {
@@ -186,12 +187,12 @@ void XtEventQueue::invokeAndWait(Runnable* task)
 
 void XtEventQueue::invokeLater(Runnable* task)
 {
-    XtEventQueueTask entry = { task, true, 0, NULL };
+    XtEventQueueTask entry = { task, TRUE, 0, NULL };
     post(entry);
 }
 
 void XtEventQueue::invokeLater(Runnable* task, unsigned long delayMillis)
 {
-    XtEventQueueTask entry = { task, true, delayMillis, NULL };
+    XtEventQueueTask entry = { task, TRUE, delayMillis, NULL };
     post(entry);
 }

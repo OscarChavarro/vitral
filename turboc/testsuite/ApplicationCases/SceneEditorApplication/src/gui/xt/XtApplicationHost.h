@@ -1,6 +1,7 @@
 #ifndef __XT_APPLICATION_HOST__
 #define __XT_APPLICATION_HOST__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
@@ -99,7 +100,7 @@ public:
     whether the connection succeeded (not owned: it must live until then)
     */
     virtual void connectTangibleInterface(const String& serviceUrl,
-        Consumer<bool>* connectionListener) = 0;
+        Consumer<BOOLEAN>* connectionListener) = 0;
 
     /**
     @param id identifier of a dialog of `etc/gui/dialogs.json`

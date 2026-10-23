@@ -1,16 +1,17 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "gui/PopupDismissClickFilter.h"
 
 /** The press that closes the popup is delivered to the canvas right after */
 static const long long OUTSIDE_PRESS_WINDOW_MILLIS = 300;
 
 PopupDismissClickFilter::PopupDismissClickFilter()
-    : closedAtMillis(0), swallowingClick(false)
+    : closedAtMillis(0), swallowingClick(FALSE)
 {
 }
 
 void PopupDismissClickFilter::popupShown()
 {
-    swallowingClick = false;
+    swallowingClick = FALSE;
 }
 
 void PopupDismissClickFilter::popupClosed(long long nowMillis)
@@ -18,7 +19,7 @@ void PopupDismissClickFilter::popupClosed(long long nowMillis)
     closedAtMillis = nowMillis;
 }
 
-bool PopupDismissClickFilter::consumes(MouseEventKind kind,
+BOOLEAN PopupDismissClickFilter::consumes(MouseEventKind kind,
                                        long long nowMillis)
 {
     switch ( kind ) {
@@ -33,16 +34,16 @@ bool PopupDismissClickFilter::consumes(MouseEventKind kind,
         // only the rest of that click reaches the drawing area
         if ( !swallowingClick && closedAtMillis != 0 &&
              nowMillis - closedAtMillis <= OUTSIDE_PRESS_WINDOW_MILLIS ) {
-            swallowingClick = true;
+            swallowingClick = TRUE;
             closedAtMillis = 0;
         }
         return swallowingClick;
       case MouseEventKind::CLICK: {
-        bool swallowed = swallowingClick;
-        swallowingClick = false;
+        BOOLEAN swallowed = swallowingClick;
+        swallowingClick = FALSE;
         return swallowed;
       }
       default:
-        return false;
+        return FALSE;
     }
 }

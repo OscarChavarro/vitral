@@ -1,6 +1,7 @@
 #ifndef __INFINITE_PLANE__
 #define __INFINITE_PLANE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/HalfSpace.h"
 class Ray;
@@ -26,7 +27,7 @@ public:
     void clone(const InfinitePlane& other);
 
     Ray* doIntersectionFirstHit(const Ray& inout_rayo);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
 
     Ray* doIntersectionWithNegative(const Ray& inout_rayo);
 
@@ -47,7 +48,7 @@ public:
     Vector3Dd projectPoint(const Vector3Dd& p) const;
     Vector3Dd mirrorPoint(const Vector3Dd& p) const;
 
-    bool overlapsWith(const InfinitePlane& other, double tolerance) const;
+    BOOLEAN overlapsWith(const InfinitePlane& other, double tolerance) const;
     String toString() const;
 
     double getA() const;

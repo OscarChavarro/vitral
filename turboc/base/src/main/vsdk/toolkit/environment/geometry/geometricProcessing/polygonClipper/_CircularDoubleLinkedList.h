@@ -26,7 +26,7 @@ public:
         if (head == 0) {
             newNode->previous = newNode;
             newNode->next = newNode;
-            newNode->isHead = true;
+            newNode->isHead = TRUE;
             head = newNode;
             currentSize = 1;
         }
@@ -47,8 +47,8 @@ public:
             head->previous->next = newNode;
             newNode->previous = head->previous;
             newNode->next = head;
-            newNode->isHead = true;
-            head->isHead = false;
+            newNode->isHead = TRUE;
+            head->isHead = FALSE;
             head->previous = newNode;
             head = newNode;
             ++currentSize;
@@ -81,7 +81,7 @@ public:
             head->previous->next = head->next;
             head->next->previous = head->previous;
             head = head->next;
-            head->isHead = true;
+            head->isHead = TRUE;
         }
         else {
             target = head;
@@ -103,10 +103,10 @@ public:
         newNode->data = data;
         if (node == head) {
             head->previous->next = newNode;
-            newNode->isHead = true;
+            newNode->isHead = TRUE;
             newNode->previous = head->previous;
             newNode->next = head;
-            head->isHead = false;
+            head->isHead = FALSE;
             head->previous = newNode;
             head = newNode;
         }

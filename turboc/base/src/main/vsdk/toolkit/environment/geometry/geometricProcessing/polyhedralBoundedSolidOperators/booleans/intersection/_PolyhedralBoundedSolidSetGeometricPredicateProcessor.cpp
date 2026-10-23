@@ -61,32 +61,32 @@ static const int COPLANAR_VERTEX_VERTEX_CLASS_TABLE[3][2][2] = {
 A `Vector3Dd` that may be missing (Java null).
 */
 struct MaybeVector {
-    bool valid;
+    BOOLEAN valid;
     Vector3Dd v;
 
-    MaybeVector() : valid(false) {}
-    explicit MaybeVector(const Vector3Dd& v) : valid(true), v(v) {}
+    MaybeVector() : valid(FALSE) {}
+    explicit MaybeVector(const Vector3Dd& v) : valid(TRUE), v(v) {}
 };
 
 struct CoplanarAngleBasis {
-    bool valid;
+    BOOLEAN valid;
     Vector3Dd normal;
     Vector3Dd u;
     Vector3Dd v;
 
-    CoplanarAngleBasis() : valid(false) {}
+    CoplanarAngleBasis() : valid(FALSE) {}
 };
 
 struct CoplanarAngularInterval {
-    bool valid;
+    BOOLEAN valid;
     double start;
     double end;
     double interior;
 
-    CoplanarAngularInterval() : valid(false), start(0), end(0), interior(0) {}
+    CoplanarAngularInterval() : valid(FALSE), start(0), end(0), interior(0) {}
 };
 
-static bool isCoplanarTangentialTraceEnabled()
+static BOOLEAN isCoplanarTangentialTraceEnabled()
 {
     return Boolean::getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
 }
@@ -99,7 +99,7 @@ static void traceCoplanarTangential(const String& message)
     printf("[SetOpCoplanarTrace] %s\n", message.c_str());
 }
 
-static const char* booleanName(bool value)
+static const char* booleanName(BOOLEAN value)
 {
     return value ? "true" : "false";
 }
@@ -164,7 +164,7 @@ static CoplanarAngleBasis buildCoplanarAngleBasis(
         return basis;
     }
 
-    basis.valid = true;
+    basis.valid = TRUE;
     basis.normal = normal.v;
     basis.u = u.v;
     basis.v = v.v;
@@ -192,14 +192,14 @@ static double unwrapAngleNear(double angle, double reference)
     return angle;
 }
 
-static bool sectorContainsDirectionInclusive(const Vector3Dd& dir,
+static BOOLEAN sectorContainsDirectionInclusive(const Vector3Dd& dir,
                                       const Vector3Dd& ref1,
                                       const Vector3Dd& ref2,
                                       const Vector3Dd& ref12)
 {
     if ( Processor::colinearVectorsWithDirection(dir, ref1) ||
          Processor::colinearVectorsWithDirection(dir, ref2) ) {
-        return true;
+        return TRUE;
     }
     return Processor::sctrwitthin(dir, ref1, ref2, ref12);
 }
@@ -283,7 +283,7 @@ static CoplanarAngularInterval buildCoplanarAngularInterval(
         return interval;
     }
 
-    interval.valid = true;
+    interval.valid = TRUE;
     interval.interior = angleOnBasis(basis, probe.v, context);
     interval.start = unwrapAngleNear(angleOnBasis(basis, boundary1, context),
         interval.interior);
@@ -312,7 +312,7 @@ static CoplanarAngularInterval alignCoplanarInterval(
 
     newInterior = unwrapAngleNear(source.interior, referenceInterior);
     delta = newInterior - source.interior;
-    aligned.valid = true;
+    aligned.valid = TRUE;
     aligned.start = source.start + delta;
     aligned.end = source.end + delta;
     aligned.interior = newInterior;
@@ -490,7 +490,7 @@ static int coplanarSideIndex(int BvsA)
     return (BvsA == 0) ? COPLANAR_SIDE_A_VS_B : COPLANAR_SIDE_B_VS_A;
 }
 
-static int coplanarOrientationIndex(bool sameOrientation)
+static int coplanarOrientationIndex(BOOLEAN sameOrientation)
 {
     return sameOrientation ? COPLANAR_ORIENTATION_SAME :
         COPLANAR_ORIENTATION_OPPOSITE;
@@ -524,7 +524,7 @@ Processor::getSectoroverlapTrace()
 void Processor::recordSectoroverlapCall(const SectorOnVertex& na,
                                         const SectorOnVertex& nb,
                                         double a1, double a2, double b1,
-                                        double b2, bool decision)
+                                        double b2, BOOLEAN decision)
 {
     if ( sectoroverlapTrace == NULL ) {
         return;
@@ -579,23 +579,23 @@ _PolyhedralBoundedSolidFace::PointInsideResult Processor::pointInFaceDetailed(
     return face->testPointInsideDetailed(point, numericContext.bigEpsilon());
 }
 
-bool Processor::colinearVectors(const Vector3Dd& a, const Vector3Dd& b)
+BOOLEAN Processor::colinearVectors(const Vector3Dd& a, const Vector3Dd& b)
 {
     return PolyhedralBoundedSolidNumericPolicy::vectorsColinear(a, b,
         numericContext);
 }
 
-bool Processor::colinearVectorsWithDirection(const Vector3Dd& a,
+BOOLEAN Processor::colinearVectorsWithDirection(const Vector3Dd& a,
                                              const Vector3Dd& b)
 {
     if ( PolyhedralBoundedSolidNumericPolicy::vectorsColinear(a, b,
              numericContext) ) {
-        if ( a.dotProduct(b) >= 0 ) return true;
+        if ( a.dotProduct(b) >= 0 ) return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
-bool Processor::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
+BOOLEAN Processor::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
                             const Vector3Dd& ref2, const Vector3Dd& ref12)
 {
     Vector3Dd c1;
@@ -618,18 +618,18 @@ bool Processor::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
     return ( t1 < 0.0 && t2 < 0.0 );
 }
 
-bool Processor::sctrwitthinProper(const Vector3Dd& dir, const Vector3Dd& ref1,
+BOOLEAN Processor::sctrwitthinProper(const Vector3Dd& dir, const Vector3Dd& ref1,
                                   const Vector3Dd& ref2, const Vector3Dd& ref12)
 {
     if ( colinearVectors(dir, ref1) || colinearVectors(dir, ref2) ) {
-        return false;
+        return FALSE;
     }
 
     return sctrwitthin(dir, ref1, ref2, ref12);
 }
 
-bool Processor::sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb,
-                              bool withDebug)
+BOOLEAN Processor::sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb,
+                              BOOLEAN withDebug)
 {
     double a1;
     double a2;
@@ -672,7 +672,7 @@ bool Processor::sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb
     // contact — a strict open-set check breaks MANT1988 §15.1 reference geometry.
     // The symmetric disjoint case (B entirely left of A) is not yet fixed here;
     // that requires a deeper restructuring of the coplanar V/V path.
-    bool decision = (a2 + VSDK::EPSILON > b1 - VSDK::EPSILON);
+    BOOLEAN decision = (a2 + VSDK::EPSILON > b1 - VSDK::EPSILON);
     recordSectoroverlapCall(na, nb, a1, a2, b1, b2, decision);
     if ( withDebug ) {
         printf(decision ? " <TRUE>" : " <FALSE>");
@@ -703,8 +703,8 @@ double Processor::angleFromVectors(const Vector3Dd& u, const Vector3Dd& v,
     return angle;
 }
 
-int Processor::resolveCoplanarVertexVertexClass(int op, bool sameOrientation,
-                                                bool sideA)
+int Processor::resolveCoplanarVertexVertexClass(int op, BOOLEAN sameOrientation,
+                                                BOOLEAN sideA)
 {
     int sideIndex = sideA ? 0 : 1;
     return COPLANAR_VERTEX_VERTEX_CLASS_TABLE[coplanarOpIndex(op)]
@@ -717,7 +717,7 @@ void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
     _PolyhedralBoundedSolidFace* referenceFace,
     InfinitePlane* referencePlane,
     int BvsA, int op,
-    bool useMirrorFace)
+    BOOLEAN useMirrorFace)
 {
     _PolyhedralBoundedSolidHalfEdge* he;
     _PolyhedralBoundedSolidFace* localFace;
@@ -727,7 +727,7 @@ void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
     long nnbr = nbr.size();
     int relation;
     int resolvedClass;
-    bool sameOrientation;
+    BOOLEAN sameOrientation;
 
     for ( i = 0; i < nnbr; i++ ) {
         SectorOnFace& current = nbr[i];
@@ -851,7 +851,7 @@ int Processor::classifyCoplanarSectorRelation(
 }
 
 int Processor::resolveCoplanarSectorClass(int op, int BvsA,
-                                          bool sameOrientation)
+                                          BOOLEAN sameOrientation)
 {
     return COPLANAR_VERTEX_FACE_CLASS_TABLE[coplanarOpIndex(op)]
         [coplanarSideIndex(BvsA)]

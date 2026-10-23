@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/PresentationElement.h"
 
 const Class PresentationElement::CLASS = { "PresentationElement", NULL };
@@ -8,7 +9,7 @@ PresentationElement::getClass() const
     return &CLASS;
 }
 
-bool
+BOOLEAN
 PresentationElement::instanceOf(const Class &type) const
 {
     return type.isAssignableFrom(getClass());

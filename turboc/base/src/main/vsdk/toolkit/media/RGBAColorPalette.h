@@ -1,6 +1,7 @@
 #ifndef __RGBA_COLOR_PALETTE__
 #define __RGBA_COLOR_PALETTE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
 class ColorRgba;
@@ -26,7 +27,7 @@ class RGBAColorPalette : public MediaEntity {
     void init(int size);
 
     int size() const;
-    bool hasPositions() const;
+    BOOLEAN hasPositions() const;
 
     ColorRgba* getColorAt(int i) const;
     double     getPositionAt(int i) const;

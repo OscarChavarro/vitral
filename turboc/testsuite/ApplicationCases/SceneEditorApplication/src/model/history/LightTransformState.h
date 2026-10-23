@@ -1,6 +1,7 @@
 #ifndef __LIGHT_TRANSFORM_STATE__
 #define __LIGHT_TRANSFORM_STATE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "model/history/EntityTransformState.h"
 
@@ -28,7 +29,7 @@ public:
 
     virtual Entity* getEntity() const;
     virtual void restore() const;
-    virtual bool isSameState(const EntityTransformState* other) const;
+    virtual BOOLEAN isSameState(const EntityTransformState* other) const;
     virtual EntityTransformState* clone() const;
 };
 

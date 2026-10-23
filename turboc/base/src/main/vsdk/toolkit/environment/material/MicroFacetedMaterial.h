@@ -8,12 +8,14 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int FRESNEL_MODEL_SCHLICK = 0;
-    static const int FRESNEL_MODEL_CONDUCTOR = 1;
-    static const int NDF_MODEL_BECKMANN = 0;
-    static const int NDF_MODEL_GGX = 1;
-    static const int GEOMETRY_MODEL_SMITH = 0;
-    static const int GEOMETRY_MODEL_IMPLICIT = 1;
+    enum {
+        FRESNEL_MODEL_SCHLICK = 0,
+        FRESNEL_MODEL_CONDUCTOR = 1,
+        NDF_MODEL_BECKMANN = 0,
+        NDF_MODEL_GGX = 1,
+        GEOMETRY_MODEL_SMITH = 0,
+        GEOMETRY_MODEL_IMPLICIT = 1
+    };
 
 private:
     double roughness;

@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_MODELER__
 #define __POLYHEDRAL_BOUNDED_SOLID_MODELER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/processing/ProcessingElement.h"
 
@@ -25,9 +26,11 @@ operands are consumed (modified) but stay owned by the caller, see
 */
 class PolyhedralBoundedSolidModeler : public ProcessingElement {
 public:
-    static const int UNION = 1;
-    static const int INTERSECTION = 2;
-    static const int SUBTRACT = 3;
+    enum {
+        UNION = 1,
+        INTERSECTION = 2,
+        SUBTRACT = 3
+    };
 
     /**
     Applies a transformation matrix to all vertices in the solid.
@@ -141,9 +144,9 @@ public:
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
         int op,
-        bool withDebug = false,
-        bool maximizeResultFaces = true,
-        bool doStrictValidation = true);
+        BOOLEAN withDebug = FALSE,
+        BOOLEAN maximizeResultFaces = TRUE,
+        BOOLEAN doStrictValidation = TRUE);
 };
 
 #endif

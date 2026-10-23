@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "javax/xml/parsers/DocumentBuilder.h"
 #include "org/w3c/dom/Document.h"
@@ -13,9 +14,9 @@ private:
 const String& text;
 int position;
 int length;
-bool failed;
+BOOLEAN failed;
 
-bool atEnd() const
+BOOLEAN atEnd() const
 {
     return position >= length;
 }
@@ -25,23 +26,23 @@ char current() const
     return atEnd() ? '\0' : text.charAt(position);
 }
 
-bool startsWithAt(const char* token) const
+BOOLEAN startsWithAt(const char* token) const
 {
     int i;
     for ( i = 0; token[i] != '\0'; i++ ) {
         if ( position + i >= length || text.charAt(position + i) != token[i] ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
-static bool isSpace(char c)
+static BOOLEAN isSpace(char c)
 {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-static bool isNameChar(char c)
+static BOOLEAN isNameChar(char c)
 {
     return !isSpace(c) && c != '\0' && c != '=' && c != '>' &&
         c != '/' && c != '<' && c != '"' && c != '\'';
@@ -54,7 +55,7 @@ void skipSpaces()
     }
 }
 
-bool skipPast(const char* token)
+BOOLEAN skipPast(const char* token)
 {
     while ( !atEnd() ) {
         if ( startsWithAt(token) ) {
@@ -62,12 +63,12 @@ bool skipPast(const char* token)
             for ( i = 0; token[i] != '\0'; i++ ) {
                 position++;
             }
-            return true;
+            return TRUE;
         }
         position++;
     }
-    failed = true;
-    return false;
+    failed = TRUE;
+    return FALSE;
 }
 
 void skipDoctype()
@@ -87,7 +88,7 @@ void skipDoctype()
             return;
         }
     }
-    failed = true;
+    failed = TRUE;
 }
 
 String readName()
@@ -181,19 +182,19 @@ static String decodeEntities(const String& raw)
     return out;
 }
 
-static bool isWhitespaceOnly(const String& s)
+static BOOLEAN isWhitespaceOnly(const String& s)
 {
     int i;
     for ( i = 0; i < s.length(); i++ ) {
         if ( !isSpace(s.charAt(i)) ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 void addText(Node* parent, const String& raw,
-             bool decode)
+             BOOLEAN decode)
 {
     if ( parent == NULL || isWhitespaceOnly(raw) ) {
         return;
@@ -204,40 +205,40 @@ void addText(Node* parent, const String& raw,
     parent->appendChild(textNode);
 }
 
-bool parseAttributes(Element* element, bool* selfClosing)
+BOOLEAN parseAttributes(Element* element, BOOLEAN* selfClosing)
 {
-    while ( true ) {
+    while ( TRUE ) {
         skipSpaces();
         if ( atEnd() ) {
-            failed = true;
-            return false;
+            failed = TRUE;
+            return FALSE;
         }
         if ( startsWithAt("/>") ) {
             position += 2;
-            *selfClosing = true;
-            return true;
+            *selfClosing = TRUE;
+            return TRUE;
         }
         if ( current() == '>' ) {
             position++;
-            *selfClosing = false;
-            return true;
+            *selfClosing = FALSE;
+            return TRUE;
         }
         String name = readName();
         if ( name.isEmpty() ) {
-            failed = true;
-            return false;
+            failed = TRUE;
+            return FALSE;
         }
         skipSpaces();
         if ( current() != '=' ) {
-            failed = true;
-            return false;
+            failed = TRUE;
+            return FALSE;
         }
         position++;
         skipSpaces();
         char quote = current();
         if ( quote != '"' && quote != '\'' ) {
-            failed = true;
-            return false;
+            failed = TRUE;
+            return FALSE;
         }
         position++;
         int start = position;
@@ -245,8 +246,8 @@ bool parseAttributes(Element* element, bool* selfClosing)
             position++;
         }
         if ( atEnd() ) {
-            failed = true;
-            return false;
+            failed = TRUE;
+            return FALSE;
         }
         element->setAttribute(name,
             decodeEntities(text.substring(start, position)));
@@ -256,7 +257,7 @@ bool parseAttributes(Element* element, bool* selfClosing)
 
 public:
 explicit XmlTextParser(const String& text)
-    : text(text), position(0), length(text.length()), failed(false)
+    : text(text), position(0), length(text.length()), failed(FALSE)
 {
 }
 
@@ -278,7 +279,7 @@ Document* parse()
             int start = position;
             if ( skipPast("]]>") ) {
                 addText(parent, text.substring(start, position - 3),
-                        false);
+                        FALSE);
             }
         }
         else if ( startsWithAt("<!") ) {
@@ -290,7 +291,7 @@ Document* parse()
             skipSpaces();
             if ( current() != '>' || stack.size() == 0 ||
                  !stack.get(stack.size() - 1)->getNodeName().equals(name) ) {
-                failed = true;
+                failed = TRUE;
                 break;
             }
             position++;
@@ -303,13 +304,13 @@ Document* parse()
             position++;
             String name = readName();
             if ( name.isEmpty() ) {
-                failed = true;
+                failed = TRUE;
                 break;
             }
             Element* element =
                 new Element(name);
             parent->appendChild(element);
-            bool selfClosing = false;
+            BOOLEAN selfClosing = FALSE;
             if ( !parseAttributes(element, &selfClosing) ) {
                 break;
             }
@@ -324,7 +325,7 @@ Document* parse()
                 position++;
             }
             if ( parent != document ) {
-                addText(parent, text.substring(start, position), true);
+                addText(parent, text.substring(start, position), TRUE);
             }
         }
     }

@@ -1,10 +1,11 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Thread.h"
 #include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
 ParallelProgressMonitorConsumer::ParallelProgressMonitorConsumer(
     ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
     : concreteProgressMonitor(),
       sharedEventQueue(queue),
-      stillProcessingEvents(true),
+      stillProcessingEvents(TRUE),
       totalElementsToProcess(0),
       currentProcessedElements(0)
 {
@@ -15,7 +16,7 @@ void ParallelProgressMonitorConsumer::run()
     concreteProgressMonitor.begin();
     while ( stillProcessingEvents || !sharedEventQueue->isEmpty() ) {
         ParallelProgressMonitorEvent nextEvent(FINISH, 0);
-        bool hasEvent = sharedEventQueue->poll(&nextEvent);
+        BOOLEAN hasEvent = sharedEventQueue->poll(&nextEvent);
 
         if ( !hasEvent ) {
             Thread::sleep(50);
@@ -31,7 +32,7 @@ void ParallelProgressMonitorConsumer::run()
                 concreteProgressMonitor.update(0, totalElementsToProcess, currentProcessedElements);
                 break;
             case FINISH:
-                stillProcessingEvents = false;
+                stillProcessingEvents = FALSE;
                 break;
             default:
                 break;

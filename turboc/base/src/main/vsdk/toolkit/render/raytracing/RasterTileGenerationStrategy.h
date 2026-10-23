@@ -1,6 +1,8 @@
 #ifndef __RASTER_TILE_GENERATION_STRATEGY__
 #define __RASTER_TILE_GENERATION_STRATEGY__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 C++98 replacement for a scoped enumeration: values are accessed as
 `RasterTileGenerationStrategy::VALUE` and objects convert implicitly to the plain `Value` enum,

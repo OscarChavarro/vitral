@@ -1,6 +1,7 @@
 #ifndef __CAMERA_CONTROLLER_GOOGLE_EARTH__
 #define __CAMERA_CONTROLLER_GOOGLE_EARTH__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/CameraController.h"
 class Camera;
 
@@ -12,14 +13,14 @@ public:
     explicit CameraControllerGoogleEarth(Camera* camera);
     virtual ~CameraControllerGoogleEarth() {}
 
-    bool processKeyPressedEvent(const KeyEvent& keyEvent);
-    bool processKeyReleasedEvent(const KeyEvent& keyEvent);
-    bool processMousePressedEvent(const MouseEvent& e);
-    bool processMouseReleasedEvent(const MouseEvent& e);
-    bool processMouseClickedEvent(const MouseEvent& e);
-    bool processMouseMovedEvent(const MouseEvent& e);
-    bool processMouseDraggedEvent(const MouseEvent& e);
-    bool processMouseWheelEvent(const MouseEvent& e);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processKeyReleasedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processMousePressedEvent(const MouseEvent& e);
+    BOOLEAN processMouseReleasedEvent(const MouseEvent& e);
+    BOOLEAN processMouseClickedEvent(const MouseEvent& e);
+    BOOLEAN processMouseMovedEvent(const MouseEvent& e);
+    BOOLEAN processMouseDraggedEvent(const MouseEvent& e);
+    BOOLEAN processMouseWheelEvent(const MouseEvent& e);
 
     Camera* getCamera();
     void setCamera(Camera* camera);

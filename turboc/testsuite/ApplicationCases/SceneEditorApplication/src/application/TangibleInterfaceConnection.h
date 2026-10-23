@@ -1,6 +1,7 @@
 #ifndef __TANGIBLE_INTERFACE_CONNECTION__
 #define __TANGIBLE_INTERFACE_CONNECTION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
@@ -32,7 +33,7 @@ private:
     TangibleInterfaceNetworkClient* client;
     Runnable* eventArrived;
     pthread_mutex_t pendingMutex;
-    bool hasPendingEvent;
+    BOOLEAN hasPendingEvent;
     TangibleInterfaceEvent pendingEvent;
 
     void setServiceUrl(const String& serviceUrl);
@@ -70,14 +71,14 @@ public:
     until the next `connect`, or the destruction of this object)
     */
     void connect(const String& serviceUrl,
-                 Consumer<bool>* connectionListener);
+                 Consumer<BOOLEAN>* connectionListener);
 
     /**
     Moves the ray gizmo of the model to the pose of the last event received.
     Must be called from the thread of the GUI.
     @return true if there was an event to apply (the view must be repainted)
     */
-    bool applyPendingEvent(ApplicationModel* model);
+    BOOLEAN applyPendingEvent(ApplicationModel* model);
 };
 
 #endif

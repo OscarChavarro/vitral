@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 #include "java/util/ArrayList.h"
 
@@ -27,23 +28,23 @@ class TreeSet : public Object {
 
     void clear();
     long size() const;
-    bool isEmpty() const;
-    bool contains(const T &element) const;
+    BOOLEAN isEmpty() const;
+    BOOLEAN contains(const T &element) const;
 
     /**
     @return true if the element was not present before
     */
-    bool add(const T &element);
+    BOOLEAN add(const T &element);
 
     /**
     @return true if the element was present
     */
-    bool remove(const T &element);
+    BOOLEAN remove(const T &element);
 
     /**
     @return true if both sets have the same elements (Java `Set.equals`)
     */
-    bool equals(const TreeSet &other) const;
+    BOOLEAN equals(const TreeSet &other) const;
 
     // Iteration in order, 0 <= index < size()
     const T &get(long index) const;

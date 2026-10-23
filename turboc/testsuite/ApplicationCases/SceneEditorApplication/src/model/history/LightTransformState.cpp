@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "model/history/LightTransformState.h"
 
@@ -21,12 +22,12 @@ void LightTransformState::restore() const
     light->setPosition(position);
 }
 
-bool LightTransformState::isSameState(const EntityTransformState* other) const
+BOOLEAN LightTransformState::isSameState(const EntityTransformState* other) const
 {
     const LightTransformState* state =
         (other != NULL && other->instanceOf(LightTransformState::CLASS) ? (const LightTransformState*)other : NULL);
     if ( state == NULL ) {
-        return false;
+        return FALSE;
     }
     return state->light == light && position.equals(state->position);
 }

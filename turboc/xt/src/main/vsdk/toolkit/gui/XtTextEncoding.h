@@ -1,6 +1,7 @@
 #ifndef __XT_TEXT_ENCODING__
 #define __XT_TEXT_ENCODING__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 /**
@@ -24,13 +25,13 @@ public:
     Xlib, else ISO 8859-1.
     @return true if the GUI locale is a UTF-8 one
     */
-    static bool selectLocale(const char* overrideLocale);
+    static BOOLEAN selectLocale(const char* overrideLocale);
 
     /**
     @return true if the texts are given to X in UTF-8 (the GUI locale is a
     UTF-8 one, or `selectLocale` was not called)
     */
-    static bool isUtf8();
+    static BOOLEAN isUtf8();
 
     /**
     @param text UTF-8 text

@@ -1,6 +1,7 @@
 #ifndef __FUNCTIONAL_EXPLICIT_SURFACE_EDITOR__
 #define __FUNCTIONAL_EXPLICIT_SURFACE_EDITOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -39,7 +40,7 @@ public:
         NX,
         NY
     };
-    static const int PARAMETER_COUNT = 9;
+    enum { PARAMETER_COUNT = 9 };
 
     /**
     @return text presented next to the value of the parameter
@@ -89,7 +90,7 @@ public:
     @throws java::NumberFormatException if the configuration has a bad
     number
     */
-    bool applyPreset(const String& preset);
+    BOOLEAN applyPreset(const String& preset);
 };
 
 #endif

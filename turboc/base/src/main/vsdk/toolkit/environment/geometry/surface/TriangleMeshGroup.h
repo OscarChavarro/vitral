@@ -1,6 +1,7 @@
 #ifndef __TRIANGLE_MESH_GROUP__
 #define __TRIANGLE_MESH_GROUP__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
@@ -33,7 +34,7 @@ public:
     void calculateMinMaxPositions();
 
     Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 
     int* doIntersectionInformation();

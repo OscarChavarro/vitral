@@ -1,6 +1,7 @@
 #ifndef __OPEN_GL_1_RENDERER_CONFIGURATION_STATE_SELECTOR__
 #define __OPEN_GL_1_RENDERER_CONFIGURATION_STATE_SELECTOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 
@@ -38,7 +39,7 @@ Usage:
 class OpenGL1RendererConfigurationStateSelector {
 public:
     /// Number of lights of the fixed function pipeline (GL_LIGHT0..7)
-    static const int MAX_LIGHTS = 8;
+    enum { MAX_LIGHTS = 8 };
 
     /**
     Saves the OpenGL state, and sets the matrices, lights, material and
@@ -81,15 +82,15 @@ public:
     by OpenGL 1.2 (Phong or Cook-Torrance shading, or bump mapping); they are
     reported once on the standard error.
     */
-    static bool reportUnsupportedFeatures(const RendererConfiguration* quality);
+    static BOOLEAN reportUnsupportedFeatures(const RendererConfiguration* quality);
 
     static void dispose();
 
 private:
-    static bool tooManyLightsReported;
-    static bool phongReported;
-    static bool cookTorranceReported;
-    static bool bumpMapReported;
+    static BOOLEAN tooManyLightsReported;
+    static BOOLEAN phongReported;
+    static BOOLEAN cookTorranceReported;
+    static BOOLEAN bumpMapReported;
 
     static void pushState();
     static void activateLights(const ArrayList<Light*>& lights);

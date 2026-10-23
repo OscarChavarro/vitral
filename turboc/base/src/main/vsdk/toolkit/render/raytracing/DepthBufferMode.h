@@ -1,6 +1,8 @@
 #ifndef __DEPTH_BUFFER_MODE__
 #define __DEPTH_BUFFER_MODE__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 Kinds of depth buffer a raytracer can export together with its color image
 (see `ParallelRaytracer::setDepthBufferMode` and `DepthBufferEncoder`).

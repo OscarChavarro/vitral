@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_NULL_EDGES_CONNECTOR__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_NULL_EDGES_CONNECTOR__
+#ifndef ___PBS_SET_NULL_EDGES_CONNECTOR__
+#define ___PBS_SET_NULL_EDGES_CONNECTOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/util/ArrayList.h"
 
@@ -56,7 +57,7 @@ public:
     instead of the production ordering. Always unset in production.
     */
     static ArrayList<int> testOnlyForcedConnectOrder;
-    static bool hasTestOnlyForcedConnectOrder;
+    static BOOLEAN hasTestOnlyForcedConnectOrder;
 
     _PolyhedralBoundedSolidSetNullEdgesConnector();
 
@@ -92,11 +93,13 @@ private:
         int pairIndex;
     };
 
-    static const int DEBUG_01_STRUCTURE = 0x01;
-    static const int DEBUG_05_CONNECT = 0x10;
-    static const int DEBUG_99_SHOWOPERATIONS = 0x40;
-    static const int ENDPOINT_SOLID_A = 0;
-    static const int ENDPOINT_SOLID_B = 1;
+    enum {
+        DEBUG_01_STRUCTURE = 0x01,
+        DEBUG_05_CONNECT = 0x10,
+        DEBUG_99_SHOWOPERATIONS = 0x40,
+        ENDPOINT_SOLID_A = 0,
+        ENDPOINT_SOLID_B = 1
+    };
 
     static int debugFlags;
     static int operation;
@@ -109,7 +112,7 @@ private:
     FaceList sonfb;
     static TreeMap<int, int> sonfaPairIndexByFaceId;
     static TreeMap<int, int> sonfbPairIndexByFaceId;
-    static bool hasPairIndexMaps;
+    static BOOLEAN hasPairIndexMaps;
     static int lastLooseACount;
     static int lastLooseBCount;
     static int lastSonfaCount;
@@ -123,7 +126,7 @@ private:
     intersection curves, so the connect loop must respect that orientation
     instead of re-normalizing edge halves by vertex-id comparison.
     */
-    static bool curveOrientationApplied;
+    static BOOLEAN curveOrientationApplied;
 
     /**
     Junction adjacency in processing-position space when the curve order is
@@ -137,8 +140,8 @@ private:
     */
     static ArrayList<int> endsPairIndex;
 
-    static bool isPipelineSummaryTraceEnabled();
-    static bool isKeepInsertionOrderEnabled();
+    static BOOLEAN isPipelineSummaryTraceEnabled();
+    static BOOLEAN isKeepInsertionOrderEnabled();
     static void tracePipelineSummary(const String& message);
     static String summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
     static String summarizeNullEdge(
@@ -147,18 +150,18 @@ private:
     static int allocateSyntheticPairIndex();
     static String summarizeLooseEnds(const HalfEdgeList& endsA,
         const HalfEdgeList& endsB);
-    static bool isSamePoint(_PolyhedralBoundedSolidHalfEdge* first,
+    static BOOLEAN isSamePoint(_PolyhedralBoundedSolidHalfEdge* first,
         _PolyhedralBoundedSolidHalfEdge* second);
-    static bool canCutCoincidentHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool hasReusableCoincidentCutFace(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool canCutCoincidentFinishFace(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN canCutCoincidentHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN hasReusableCoincidentCutFace(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN canCutCoincidentFinishFace(_PolyhedralBoundedSolidHalfEdge* he);
     static _PolyhedralBoundedSolidFace* registerCoincidentCutFace(
         _PolyhedralBoundedSolidHalfEdge* he, FaceList& target,
         const char* label);
-    static bool canFinalizeCoincidentLooseA(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool canFinalizeCoincidentLooseB(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool isPointLikeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool isDegenerateCoincidentLooseClosure(
+    static BOOLEAN canFinalizeCoincidentLooseA(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN canFinalizeCoincidentLooseB(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN isPointLikeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN isDegenerateCoincidentLooseClosure(
         _PolyhedralBoundedSolidHalfEdge* firstA,
         _PolyhedralBoundedSolidHalfEdge* secondA,
         _PolyhedralBoundedSolidHalfEdge* firstB,
@@ -167,10 +170,10 @@ private:
     void finalizeCoincidentLooseB(_PolyhedralBoundedSolidHalfEdge* he);
     static void removeLoosePair(int index);
     void updateLastSnapshot();
-    static bool isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool sharesParentFace(_PolyhedralBoundedSolidHalfEdge* first,
+    static BOOLEAN isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN sharesParentFace(_PolyhedralBoundedSolidHalfEdge* first,
         _PolyhedralBoundedSolidHalfEdge* second);
-    static bool isOppositeHalfEdgeSide(_PolyhedralBoundedSolidHalfEdge* first,
+    static BOOLEAN isOppositeHalfEdgeSide(_PolyhedralBoundedSolidHalfEdge* first,
         _PolyhedralBoundedSolidHalfEdge* second);
     static _PolyhedralBoundedSolidFace* findUniqueClassicRebindTargetFace(
         _PolyhedralBoundedSolidHalfEdge* currentTargetFirst,
@@ -179,7 +182,7 @@ private:
         _PolyhedralBoundedSolidHalfEdge* currentReferenceSecond,
         const HalfEdgeList& targetEnds,
         const HalfEdgeList& referenceEnds);
-    static bool isStrictRebindTargetFace(_PolyhedralBoundedSolidFace* targetFace,
+    static BOOLEAN isStrictRebindTargetFace(_PolyhedralBoundedSolidFace* targetFace,
         _PolyhedralBoundedSolidHalfEdge* currentTarget);
     static void rebindClassicCurrentNullEdgeIfNeeded(
         _PolyhedralBoundedSolidHalfEdge* currentTargetFirst,
@@ -199,20 +202,20 @@ private:
     void applyOrderPermutation(const ArrayList<int>& order);
     static int curveComponentFind(ArrayList<int>& parent, int x);
     void groupNullEdgesByRing();
-    bool sgetnextnulledge(NullEdgePair& out);
-    bool scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
+    BOOLEAN sgetnextnulledge(NullEdgePair& out);
+    BOOLEAN scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
         _PolyhedralBoundedSolidHalfEdge* heb,
         _PolyhedralBoundedSolidHalfEdge** outA,
         _PolyhedralBoundedSolidHalfEdge** outB);
-    static bool rolesOpposite(_PolyhedralBoundedSolidHalfEdge* h1,
+    static BOOLEAN rolesOpposite(_PolyhedralBoundedSolidHalfEdge* h1,
         _PolyhedralBoundedSolidHalfEdge* h2);
-    static bool isPendingStrutRing(_PolyhedralBoundedSolidHalfEdge* he);
-    bool rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
+    static BOOLEAN isPendingStrutRing(_PolyhedralBoundedSolidHalfEdge* he);
+    BOOLEAN rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
         _PolyhedralBoundedSolidHalfEdge* heb,
         _PolyhedralBoundedSolidHalfEdge** outA,
         _PolyhedralBoundedSolidHalfEdge** outB);
-    static bool isLooseA(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool isLooseB(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN isLooseA(_PolyhedralBoundedSolidHalfEdge* he);
+    static BOOLEAN isLooseB(_PolyhedralBoundedSolidHalfEdge* he);
     _PolyhedralBoundedSolidFace* cutA(_PolyhedralBoundedSolidHalfEdge* he);
     _PolyhedralBoundedSolidFace* cutB(_PolyhedralBoundedSolidHalfEdge* he);
     static void removeLastCutFaceIfSame(FaceList& faces,

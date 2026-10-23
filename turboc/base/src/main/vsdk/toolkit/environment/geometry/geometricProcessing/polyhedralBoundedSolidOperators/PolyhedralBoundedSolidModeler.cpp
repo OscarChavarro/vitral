@@ -30,21 +30,21 @@ static const double GLYPH_WELD_RELATIVE_FACTOR = 1.0e-2;
 class BoundaryRepresentationFromCurveBuildState {
 public:
     PolyhedralBoundedSolid* solid;
-    bool firstLoop;
-    bool beginningOfLoop;
+    BOOLEAN firstLoop;
+    BOOLEAN beginningOfLoop;
     int nextVertexId;
     int lastLoopStartVertexId;
     int nextFaceId;
     Vector3Dd firstPointInLoop;
     Vector3Dd lastAcceptedPoint;
-    bool hasLastAcceptedPoint;
+    BOOLEAN hasLastAcceptedPoint;
     double weldEpsilon;
     int verticesInCurrentLoop;
 
     BoundaryRepresentationFromCurveBuildState()
-        : solid(new PolyhedralBoundedSolid()), firstLoop(true),
-          beginningOfLoop(true), nextVertexId(1), lastLoopStartVertexId(1),
-          nextFaceId(1), hasLastAcceptedPoint(false),
+        : solid(new PolyhedralBoundedSolid()), firstLoop(TRUE),
+          beginningOfLoop(TRUE), nextVertexId(1), lastLoopStartVertexId(1),
+          nextFaceId(1), hasLastAcceptedPoint(FALSE),
           weldEpsilon(PolyhedralBoundedSolidNumericPolicy::BREP_BIG_EPSILON),
           verticesInCurrentLoop(0)
     {
@@ -76,7 +76,7 @@ static void findWireSweepEnds(PolyhedralBoundedSolid* solid,
     *outLast = last;
 }
 
-static bool isOnXAxis(const Vector3Dd& p, double tolerance)
+static BOOLEAN isOnXAxis(const Vector3Dd& p, double tolerance)
 {
     return fabs(p.y()) <= tolerance && fabs(p.z()) <= tolerance;
 }
@@ -102,7 +102,7 @@ static void collapseFaceToAxisVertex(_PolyhedralBoundedSolidFace* face, double x
     }
 }
 
-static bool isBreakMarker(ParametricCurve* curve, int segmentIndex)
+static BOOLEAN isBreakMarker(ParametricCurve* curve, int segmentIndex)
 {
     return curve->getPointType(segmentIndex) == ParametricCurve::BREAK;
 }
@@ -111,13 +111,13 @@ static ArrayList<Vector3Dd> sampleCurveSegment(ParametricCurve* curve,
                                               int segmentIndex)
 {
     // Approximate one parametric segment as a polyLine.
-    return curve->calculatePoints(segmentIndex, false);
+    return curve->calculatePoints(segmentIndex, FALSE);
 }
 
 static void startLoopWithSeedPoint(BoundaryRepresentationFromCurveBuildState& state,
                             const Vector3Dd& point)
 {
-    state.beginningOfLoop = false;
+    state.beginningOfLoop = FALSE;
     if ( state.firstLoop ) {
         // [MANT1988] 12.2: first contour starts with MVFS.
         PolyhedralBoundedSolidEulerOperators::mvfs(state.solid, point,
@@ -138,11 +138,11 @@ static void startLoopWithSeedPoint(BoundaryRepresentationFromCurveBuildState& st
 
     state.firstPointInLoop = point;
     state.lastAcceptedPoint = point;
-    state.hasLastAcceptedPoint = true;
+    state.hasLastAcceptedPoint = TRUE;
     state.verticesInCurrentLoop = 1;
 }
 
-static bool shouldAcceptPolyLinePoint(
+static BOOLEAN shouldAcceptPolyLinePoint(
     const BoundaryRepresentationFromCurveBuildState& state,
     const Vector3Dd& point)
 {
@@ -157,7 +157,7 @@ static void appendPointToCurrentLoop(BoundaryRepresentationFromCurveBuildState& 
         state.nextVertexId-1, state.nextVertexId, point);
     state.nextVertexId++;
     state.lastAcceptedPoint = point;
-    state.hasLastAcceptedPoint = true;
+    state.hasLastAcceptedPoint = TRUE;
     state.verticesInCurrentLoop++;
 }
 
@@ -197,9 +197,9 @@ static void closeLoopWithMef(BoundaryRepresentationFromCurveBuildState& state)
         PolyhedralBoundedSolidEulerOperators::kfmrh(state.solid, 2,
             state.nextFaceId-1);
     }
-    state.firstLoop = false;
-    state.beginningOfLoop = true;
-    state.hasLastAcceptedPoint = false;
+    state.firstLoop = FALSE;
+    state.beginningOfLoop = TRUE;
+    state.hasLastAcceptedPoint = FALSE;
     state.verticesInCurrentLoop = 0;
 }
 
@@ -380,9 +380,9 @@ void PolyhedralBoundedSolidModeler::rotationalSweepExtrudeWireAroundXAxis(
     double axisTolerance = VSDK::EPSILON * 100.0;
     Vector3Dd firstEndpointPosition(first->next()->startingVertex->position);
     Vector3Dd lastEndpointPosition(last->startingVertex->position);
-    bool firstEndpointOnAxis = isOnXAxis(firstEndpointPosition,
+    BOOLEAN firstEndpointOnAxis = isOnXAxis(firstEndpointPosition,
         axisTolerance);
-    bool lastEndpointOnAxis = isOnXAxis(lastEndpointPosition,
+    BOOLEAN lastEndpointOnAxis = isOnXAxis(lastEndpointPosition,
         axisTolerance);
 
     _PolyhedralBoundedSolidHalfEdge* cfirst;
@@ -503,9 +503,9 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidModeler::setOp(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
     int op,
-    bool withDebug,
-    bool maximizeResultFaces,
-    bool doStrictValidation)
+    BOOLEAN withDebug,
+    BOOLEAN maximizeResultFaces,
+    BOOLEAN doStrictValidation)
 {
     PolyhedralBoundedSolidStatistics::recordSetOpCall(op);
     return _PolyhedralBoundedSolidSetOperator::setOp(inSolidA, inSolidB, op,
@@ -514,6 +514,3 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidModeler::setOp(
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int PolyhedralBoundedSolidModeler::UNION;
-const int PolyhedralBoundedSolidModeler::INTERSECTION;
-const int PolyhedralBoundedSolidModeler::SUBTRACT;

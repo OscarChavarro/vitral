@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "programs/vitralRaytracer/Frame.h"
 #include "programs/vitralRaytracer/RaytracerRenderer.h"
 #include "programs/vitralRaytracer/ScreenProgress.h"

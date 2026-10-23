@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
@@ -78,7 +79,7 @@ void WriterVtk::exportEnvironment(OutputStream& outputStream,
 
     //-----------------------------------------------------------------
     ArrayList<SimpleBody*>& objs = scene->getSimpleBodies();
-    bool exported = false;
+    BOOLEAN exported = FALSE;
     int i;
 
     for ( i = 0; i < objs.size(); i++ ) {
@@ -93,7 +94,7 @@ void WriterVtk::exportEnvironment(OutputStream& outputStream,
         if ( mesh != NULL ) {
             if ( !exported ) {
                 exportMesh(bos, mesh);
-                exported = true;
+                exported = TRUE;
             }
             else {
                 Logger::reportMessage("WriterVtk", Logger::WARNING,

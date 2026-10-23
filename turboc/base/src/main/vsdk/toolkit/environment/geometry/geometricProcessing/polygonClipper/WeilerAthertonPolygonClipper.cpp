@@ -1,11 +1,12 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.h"
 WeilerAthertonPolygonClipper::WeilerAthertonPolygonClipper()
-    : clipPolyWA(0), subjectPolyWA(0), firstIntersection(false), previousOut(false)
+    : clipPolyWA(0), subjectPolyWA(0), firstIntersection(FALSE), previousOut(FALSE)
 {
-    coincidentPoints[0] = coincidentPoints[1] = coincidentPoints[2] = coincidentPoints[3] = false;
+    coincidentPoints[0] = coincidentPoints[1] = coincidentPoints[2] = coincidentPoints[3] = FALSE;
 }
 
 WeilerAthertonPolygonClipper::~WeilerAthertonPolygonClipper()
@@ -38,8 +39,8 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
 
     if (clipPolyWA) { delete clipPolyWA; clipPolyWA = 0; }
     if (subjectPolyWA) { delete subjectPolyWA; subjectPolyWA = 0; }
-    clipPolyWA = new _Polygon2DWA(*clipPoly, true);
-    subjectPolyWA = new _Polygon2DWA(*subjectPoly, true);
+    clipPolyWA = new _Polygon2DWA(*clipPoly, TRUE);
+    subjectPolyWA = new _Polygon2DWA(*subjectPoly, TRUE);
 
     resetOutputPolygon(innerPolyOut);
     resetOutputPolygon(outerPolyOut);
@@ -47,12 +48,13 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
     ArrayList<_DoubleLinkedListNode<_VertexNode2D>*> intersecVertListOut;
     ArrayList<_DoubleLinkedListNode<_VertexNode2D>*> intersecVertListIn;
 
-    bool emptyInnerPolyOut = true;
-    bool emptyOuterPolyOut = true;
+    BOOLEAN emptyInnerPolyOut = TRUE;
+    BOOLEAN emptyOuterPolyOut = TRUE;
 
-    for (long int i = 0; i < clipPolyWA->loops.size(); ++i) {
+    long int i;
+    for (i = 0; i < clipPolyWA->loops.size(); ++i) {
         _Polygon2DContourWA* p2DContClip = clipPolyWA->loops.get(i);
-        p2DContClip->isClipped = false;
+        p2DContClip->isClipped = FALSE;
         _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeC = p2DContClip->vertices.getHead();
         if (p2DContClip->vertices.size() > 1) {
             long int guardC = 0;
@@ -63,13 +65,13 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
                 _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodePrevC = dllnVertNodeC->previous;
                 _VertexNode2D nodeC = dllnVertNodeC->data;
                 _VertexNode2D nodePrevC = dllnVertNodePrevC->data;
-                previousOut = false;
+                previousOut = FALSE;
 
                 for (long int j = 0; j < subjectPolyWA->loops.size(); ++j) {
                     _Polygon2DContourWA* p2DContSubj = subjectPolyWA->loops.get(j);
                     _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeS = p2DContSubj->vertices.getHead();
                     if (p2DContSubj->vertices.size() > 1) {
-                        firstIntersection = true;
+                        firstIntersection = TRUE;
                         long int guardS = 0;
                         do {
                             if (++guardS > 5000) {
@@ -94,10 +96,10 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
         }
     }
 
-    for (long int i = 0; i < intersecVertListOut.size(); ++i) {
+    for (i = 0; i < intersecVertListOut.size(); ++i) {
         _DoubleLinkedListNode<_VertexNode2D>* dllnNodeS = intersecVertListOut.get(i);
         if ((dllnNodeS->data.flags & 0x01) == 0) {
-            if (emptyInnerPolyOut) emptyInnerPolyOut = false;
+            if (emptyInnerPolyOut) emptyInnerPolyOut = FALSE;
             else innerPolyOut->nextLoop();
 
             _DoubleLinkedListNode<_VertexNode2D>* iterator = dllnNodeS;
@@ -116,11 +118,11 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
         }
     }
 
-    for (long int i = 0; i < intersecVertListIn.size(); ++i) {
+    for (i = 0; i < intersecVertListIn.size(); ++i) {
         _DoubleLinkedListNode<_VertexNode2D>* dllnNodeS = intersecVertListIn.get(i);
         if ((dllnNodeS->data.flags & 0x02) == 0) {
-            bool isSubject = true;
-            if (emptyOuterPolyOut) emptyOuterPolyOut = false;
+            BOOLEAN isSubject = TRUE;
+            if (emptyOuterPolyOut) emptyOuterPolyOut = FALSE;
             else outerPolyOut->nextLoop();
 
             _DoubleLinkedListNode<_VertexNode2D>* iterator = dllnNodeS;
@@ -145,27 +147,27 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
     classifyHolesAndContours(getClipPolyWA());
     classifyHolesAndContours(getSubjectPolyWA());
 
-    for (long int i = 0; i < clipPolyWA->loops.size(); ++i) {
+    for (i = 0; i < clipPolyWA->loops.size(); ++i) {
         _Polygon2DContourWA* p2DContClip = clipPolyWA->loops.get(i);
         if (!p2DContClip->isClipped) {
             _DoubleLinkedListNode<_VertexNode2D>* head = p2DContClip->vertices.getHead();
             if (!head) continue;
-            bool insideAContourNotAHole = false;
+            BOOLEAN insideAContourNotAHole = FALSE;
 
             for (long int j = 0; j < subjectPolyWA->loops.size(); ++j) {
                 _Polygon2DContourWA* p2DContSubj = subjectPolyWA->loops.get(j);
-                bool pointInPolygon = false;
+                BOOLEAN pointInPolygon = FALSE;
                 _DoubleLinkedListNode<_VertexNode2D>* dllnNode = head;
                 do {
-                    if (isPointInPolygon2D(dllnNode->data, p2DContSubj->vertices) == 1) { pointInPolygon = true; break; }
+                    if (isPointInPolygon2D(dllnNode->data, p2DContSubj->vertices) == 1) { pointInPolygon = TRUE; break; }
                     dllnNode = dllnNode->next;
                 } while (dllnNode != head);
                 if (pointInPolygon) insideAContourNotAHole = !insideAContourNotAHole;
             }
 
             if (insideAContourNotAHole) {
-                if (emptyInnerPolyOut) emptyInnerPolyOut = false; else innerPolyOut->nextLoop();
-                if (emptyOuterPolyOut) emptyOuterPolyOut = false; else outerPolyOut->nextLoop();
+                if (emptyInnerPolyOut) emptyInnerPolyOut = FALSE; else innerPolyOut->nextLoop();
+                if (emptyOuterPolyOut) emptyOuterPolyOut = FALSE; else outerPolyOut->nextLoop();
 
                 _DoubleLinkedListNode<_VertexNode2D>* dllnNode = head;
                 do {
@@ -184,26 +186,26 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
         }
     }
 
-    for (long int i = 0; i < subjectPolyWA->loops.size(); ++i) {
+    for (i = 0; i < subjectPolyWA->loops.size(); ++i) {
         _Polygon2DContourWA* p2DContSubj = subjectPolyWA->loops.get(i);
         if (!p2DContSubj->isClipped) {
             _DoubleLinkedListNode<_VertexNode2D>* head = p2DContSubj->vertices.getHead();
             if (!head) continue;
-            bool insideAContourNotAHole = false;
+            BOOLEAN insideAContourNotAHole = FALSE;
 
             for (long int j = 0; j < clipPolyWA->loops.size(); ++j) {
                 _Polygon2DContourWA* p2DContClip = clipPolyWA->loops.get(j);
-                bool pointInPolygon = false;
+                BOOLEAN pointInPolygon = FALSE;
                 _DoubleLinkedListNode<_VertexNode2D>* dllnNode = head;
                 do {
-                    if (isPointInPolygon2D(dllnNode->data, p2DContClip->vertices) == 1) { pointInPolygon = true; break; }
+                    if (isPointInPolygon2D(dllnNode->data, p2DContClip->vertices) == 1) { pointInPolygon = TRUE; break; }
                     dllnNode = dllnNode->next;
                 } while (dllnNode != head);
                 if (pointInPolygon) insideAContourNotAHole = !insideAContourNotAHole;
             }
 
-            if (insideAContourNotAHole) { if (emptyInnerPolyOut) emptyInnerPolyOut = false; else innerPolyOut->nextLoop(); }
-            else { if (emptyOuterPolyOut) emptyOuterPolyOut = false; else outerPolyOut->nextLoop(); }
+            if (insideAContourNotAHole) { if (emptyInnerPolyOut) emptyInnerPolyOut = FALSE; else innerPolyOut->nextLoop(); }
+            else { if (emptyOuterPolyOut) emptyOuterPolyOut = FALSE; else outerPolyOut->nextLoop(); }
 
             _DoubleLinkedListNode<_VertexNode2D>* dllnNode = head;
             do {
@@ -234,17 +236,17 @@ void WeilerAthertonPolygonClipper::makeCut(
     _VertexNode2D nodeS;
     _VertexNode2D nodePrevS;
     double dotProd;
-    bool firstCutOutOfSubject;
+    BOOLEAN firstCutOutOfSubject;
 
     if (!coincidentPoints[0] && !coincidentPoints[2]) {
-        firstCutOutOfSubject = false;
+        firstCutOutOfSubject = FALSE;
         if (firstIntersection) {
             firstCutOutOfSubject = (crossProduct2D(
                 dllnVertNodePrevS->data, dllnVertNodeS->data, dllnVertNodePrevC->data, dllnVertNodeC->data) < 0);
         }
         updatePolygonsAndListsWithCuts(
             p2DContClip, p2DContSubj, dllnVertNodePrevC, dllnVertNodeC, dllnVertNodePrevS, dllnVertNodeS, nodeIntersecS,
-            firstCutOutOfSubject, intersecVertListOut, intersecVertListIn, true);
+            firstCutOutOfSubject, intersecVertListOut, intersecVertListIn, TRUE);
         return;
     }
     nodePrevC = dllnVertNodePrevC->data;
@@ -287,17 +289,17 @@ void WeilerAthertonPolygonClipper::makeCut(
 
         if (are3VectorsOrderedCounterclockwise2D(
             vecParallel, vecAwayParallelLines1C, vecAwayParallelLines1S) == 1) {
-            firstCutOutOfSubject = true;
+            firstCutOutOfSubject = TRUE;
             updatePolygonsAndListsWithCuts(p2DContClip, p2DContSubj,
                 dllnVertNodePrevC, dllnVertNodeC, dllnVertNodePrevS, dllnVertNodeS,
-                nodeIntersecS, true, intersecVertListOut, intersecVertListIn, true);
+                nodeIntersecS, TRUE, intersecVertListOut, intersecVertListIn, TRUE);
         }
         if (are3VectorsOrderedCounterclockwise2D(
             negVecParallel, vecAwayParallelLines2S, vecAwayParallelLines2C) == 1) {
-            firstCutOutOfSubject = false;
+            firstCutOutOfSubject = FALSE;
             updatePolygonsAndListsWithCuts(p2DContClip, p2DContSubj,
                 dllnVertNodePrevC, dllnVertNodeC, dllnVertNodePrevS, dllnVertNodeS,
-                nodeIntersecS, false, intersecVertListOut, intersecVertListIn, false);
+                nodeIntersecS, FALSE, intersecVertListOut, intersecVertListIn, FALSE);
         }
     }
     else if (fabs(dotProd) < 0.9999) {
@@ -305,7 +307,7 @@ void WeilerAthertonPolygonClipper::makeCut(
         _VertexNode2D vecBC;
         _VertexNode2D vecAS;
         _VertexNode2D vecBS;
-        bool thereAreCut;
+        BOOLEAN thereAreCut;
         signed char orderVecAC, orderVecBC;
 
         vecAC.x = dllnVertNodeC->data.x - dllnVertNodePrevC->data.x;
@@ -330,18 +332,18 @@ void WeilerAthertonPolygonClipper::makeCut(
         }
         orderVecAC = are3VectorsOrderedCounterclockwise2D(vecAS, vecAC, vecBS);
         orderVecBC = are3VectorsOrderedCounterclockwise2D(vecAS, vecBC, vecBS);
-        thereAreCut = false;
-        firstCutOutOfSubject = false;
+        thereAreCut = FALSE;
+        firstCutOutOfSubject = FALSE;
         if (orderVecAC != 0 && orderVecBC != 0) {
             if ((orderVecAC == 1) != (orderVecBC == 1)) {
-                thereAreCut = true;
+                thereAreCut = TRUE;
                 firstCutOutOfSubject = (orderVecAC == -1);
             }
         }
         if (thereAreCut) {
             updatePolygonsAndListsWithCuts(
                 p2DContClip, p2DContSubj, dllnVertNodePrevC, dllnVertNodeC, dllnVertNodePrevS, dllnVertNodeS, nodeIntersecS,
-                firstCutOutOfSubject, intersecVertListOut, intersecVertListIn, true);
+                firstCutOutOfSubject, intersecVertListOut, intersecVertListIn, TRUE);
         }
     }
 }
@@ -350,10 +352,10 @@ void WeilerAthertonPolygonClipper::updatePolygonsAndListsWithCuts(
     _Polygon2DContourWA* p2DContClip, _Polygon2DContourWA* p2DContSubj,
     _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodePrevC, _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeC,
     _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodePrevS, _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeS,
-    _VertexNode2D& nodeIntersecS, bool firstCutOutOfSubject,
+    _VertexNode2D& nodeIntersecS, BOOLEAN firstCutOutOfSubject,
     ArrayList<_DoubleLinkedListNode<_VertexNode2D>*>& intersecVertListOut,
     ArrayList<_DoubleLinkedListNode<_VertexNode2D>*>& intersecVertListIn,
-    bool operateOnFirstPointsOfLines)
+    BOOLEAN operateOnFirstPointsOfLines)
 {
     _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodeCutS = 0;
 
@@ -425,11 +427,11 @@ void WeilerAthertonPolygonClipper::updatePolygonsAndListsWithCuts(
     }
 
     if (firstIntersection) {
-        p2DContSubj->isClipped = true;
-        p2DContClip->isClipped = true;
-        if (firstCutOutOfSubject) { intersecVertListOut.add(dllnVertNodeCutS); previousOut = true; }
-        else { intersecVertListIn.add(dllnVertNodeCutS); previousOut = false; }
-        firstIntersection = false;
+        p2DContSubj->isClipped = TRUE;
+        p2DContClip->isClipped = TRUE;
+        if (firstCutOutOfSubject) { intersecVertListOut.add(dllnVertNodeCutS); previousOut = TRUE; }
+        else { intersecVertListIn.add(dllnVertNodeCutS); previousOut = FALSE; }
+        firstIntersection = FALSE;
     }
     else {
         if (previousOut) intersecVertListIn.add(dllnVertNodeCutS);
@@ -442,17 +444,17 @@ void WeilerAthertonPolygonClipper::classifyHolesAndContours(_Polygon2DWA* polygo
 {
     for (long int i = 0; i < polygon->loops.size(); ++i) {
         _Polygon2DContourWA* p2DContTest = polygon->loops.get(i);
-        p2DContTest->isHole = false;
+        p2DContTest->isHole = FALSE;
         for (long int j = 0; j < polygon->loops.size(); ++j) {
             _Polygon2DContourWA* p2DCont = polygon->loops.get(j);
             if (p2DCont != p2DContTest) {
                 _DoubleLinkedListNode<_VertexNode2D>* head = p2DContTest->vertices.getHead();
                 if (!head) continue;
-                bool pointInPolygon = false;
+                BOOLEAN pointInPolygon = FALSE;
                 _DoubleLinkedListNode<_VertexNode2D>* dllnNode = head;
                 do {
                     if (isPointInPolygon2D(dllnNode->data, p2DCont->vertices) == 1) {
-                        pointInPolygon = true;
+                        pointInPolygon = TRUE;
                         break;
                     }
                     dllnNode = dllnNode->next;
@@ -489,7 +491,7 @@ signed char WeilerAthertonPolygonClipper::isPointInPolygon2D(const _VertexNode2D
 {
     _DoubleLinkedListNode<_VertexNode2D>* dllnNode = polygon.getHead();
     if (!dllnNode) return -1;
-    bool isInside = false;
+    BOOLEAN isInside = FALSE;
     do {
         double temp = dllnNode->data.y - dllnNode->next->data.y;
         if (fabs(temp) < 0.0001) {
@@ -542,64 +544,64 @@ _DoubleLinkedListNode<_VertexNode2D>* WeilerAthertonPolygonClipper::insertOrdere
     return linkedList.insertBefore(nodeIntersec, dllnNode);
 }
 
-bool WeilerAthertonPolygonClipper::intersecLineLine2D(
+BOOLEAN WeilerAthertonPolygonClipper::intersecLineLine2D(
     const _VertexNode2D& inP0, const _VertexNode2D& inP1, const _VertexNode2D& inP2, const _VertexNode2D& inP3,
-    _VertexNode2D& outPIntersec, bool outCoincidentPoints[4])
+    _VertexNode2D& outPIntersec, BOOLEAN outCoincidentPoints[4])
 {
     double temp1, temp2;
-    bool vertical1, vertical2;
+    BOOLEAN vertical1, vertical2;
     double m1, b1, m2, b2;
-    bool intersec1, intersec2;
-    bool pointToPointCoincidence;
-    bool point0ToPoint2Coincidence;
-    bool point0ToPoint3Coincidence;
-    bool point2ToPoint1Coincidence;
+    BOOLEAN intersec1, intersec2;
+    BOOLEAN pointToPointCoincidence;
+    BOOLEAN point0ToPoint2Coincidence;
+    BOOLEAN point0ToPoint3Coincidence;
+    BOOLEAN point2ToPoint1Coincidence;
 
-    outCoincidentPoints[0] = false;
-    outCoincidentPoints[1] = false;
-    outCoincidentPoints[2] = false;
-    outCoincidentPoints[3] = false;
-    pointToPointCoincidence = false;
-    point0ToPoint2Coincidence = false;
-    point0ToPoint3Coincidence = false;
-    point2ToPoint1Coincidence = false;
+    outCoincidentPoints[0] = FALSE;
+    outCoincidentPoints[1] = FALSE;
+    outCoincidentPoints[2] = FALSE;
+    outCoincidentPoints[3] = FALSE;
+    pointToPointCoincidence = FALSE;
+    point0ToPoint2Coincidence = FALSE;
+    point0ToPoint3Coincidence = FALSE;
+    point2ToPoint1Coincidence = FALSE;
     if (fabs(inP0.x - inP2.x) < 0.0001 && fabs(inP0.y - inP2.y) < 0.0001) {
-        outCoincidentPoints[0] = true;
-        outCoincidentPoints[2] = true;
-        point0ToPoint2Coincidence = true;
-        pointToPointCoincidence = true;
+        outCoincidentPoints[0] = TRUE;
+        outCoincidentPoints[2] = TRUE;
+        point0ToPoint2Coincidence = TRUE;
+        pointToPointCoincidence = TRUE;
     }
     if (fabs(inP0.x - inP3.x) < 0.0001 && fabs(inP0.y - inP3.y) < 0.0001) {
-        outCoincidentPoints[0] = true;
-        outCoincidentPoints[3] = true;
-        point0ToPoint3Coincidence = true;
-        pointToPointCoincidence = true;
+        outCoincidentPoints[0] = TRUE;
+        outCoincidentPoints[3] = TRUE;
+        point0ToPoint3Coincidence = TRUE;
+        pointToPointCoincidence = TRUE;
     }
     if (fabs(inP1.x - inP2.x) < 0.0001 && fabs(inP1.y - inP2.y) < 0.0001) {
-        outCoincidentPoints[1] = true;
-        outCoincidentPoints[2] = true;
-        point2ToPoint1Coincidence = true;
-        pointToPointCoincidence = true;
+        outCoincidentPoints[1] = TRUE;
+        outCoincidentPoints[2] = TRUE;
+        point2ToPoint1Coincidence = TRUE;
+        pointToPointCoincidence = TRUE;
     }
     if (fabs(inP1.x - inP3.x) < 0.0001 && fabs(inP1.y - inP3.y) < 0.0001) {
-        outCoincidentPoints[1] = true;
-        outCoincidentPoints[3] = true;
-        pointToPointCoincidence = true;
+        outCoincidentPoints[1] = TRUE;
+        outCoincidentPoints[3] = TRUE;
+        pointToPointCoincidence = TRUE;
     }
-    vertical1 = false;
-    vertical2 = false;
+    vertical1 = FALSE;
+    vertical2 = FALSE;
     temp1 = inP1.x - inP0.x;
     temp2 = inP3.x - inP2.x;
-    if (temp1 > -0.00001 && temp1 < 0.00001) vertical1 = true;
-    if (temp2 > -0.00001 && temp2 < 0.00001) vertical2 = true;
+    if (temp1 > -0.00001 && temp1 < 0.00001) vertical1 = TRUE;
+    if (temp2 > -0.00001 && temp2 < 0.00001) vertical2 = TRUE;
     if (vertical1 && vertical2) {
         if (fabs(inP0.x - inP2.x) < 0.0001) {
-            if ((inP3.y - inP0.y) * (inP0.y - inP2.y) > 0) outCoincidentPoints[0] = true;
-            if ((inP1.y - inP2.y) * (inP2.y - inP0.y) > 0) outCoincidentPoints[2] = true;
-            if ((inP3.y - inP1.y) * (inP1.y - inP2.y) > 0) outCoincidentPoints[1] = true;
-            if ((inP1.y - inP3.y) * (inP3.y - inP0.y) > 0) outCoincidentPoints[3] = true;
+            if ((inP3.y - inP0.y) * (inP0.y - inP2.y) > 0) outCoincidentPoints[0] = TRUE;
+            if ((inP1.y - inP2.y) * (inP2.y - inP0.y) > 0) outCoincidentPoints[2] = TRUE;
+            if ((inP3.y - inP1.y) * (inP1.y - inP2.y) > 0) outCoincidentPoints[1] = TRUE;
+            if ((inP1.y - inP3.y) * (inP3.y - inP0.y) > 0) outCoincidentPoints[3] = TRUE;
             if (pointToPointCoincidence) {
-                if (point0ToPoint2Coincidence) return true;
+                if (point0ToPoint2Coincidence) return TRUE;
                 return (outCoincidentPoints[0] && !point0ToPoint3Coincidence) || (outCoincidentPoints[2] && !point2ToPoint1Coincidence);
             }
             return outCoincidentPoints[0] || outCoincidentPoints[2];
@@ -610,59 +612,59 @@ bool WeilerAthertonPolygonClipper::intersecLineLine2D(
     if (!vertical1) { m1 = (inP1.y - inP0.y) / (inP1.x - inP0.x); b1 = inP0.y - m1 * inP0.x; }
     if (!vertical2) { m2 = (inP3.y - inP2.y) / (inP3.x - inP2.x); b2 = inP2.y - m2 * inP2.x; }
     if (vertical1) {
-        if ((inP1.y - inP3.y) * (inP3.y - inP0.y) > 0 && fabs(inP0.x - inP3.x) < 0.0001) outCoincidentPoints[3] = true;
+        if ((inP1.y - inP3.y) * (inP3.y - inP0.y) > 0 && fabs(inP0.x - inP3.x) < 0.0001) outCoincidentPoints[3] = TRUE;
         if ((inP1.y - inP2.y) * (inP2.y - inP0.y) > 0 && fabs(inP0.x - inP2.x) < 0.0001) {
-            outCoincidentPoints[2] = true;
+            outCoincidentPoints[2] = TRUE;
             if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-            return true;
+            return TRUE;
         }
         outPIntersec.x = inP0.x;
         outPIntersec.y = m2 * outPIntersec.x + b2;
         if ((inP3.x - outPIntersec.x) * (outPIntersec.x - inP2.x) > 0) {
-            if (fabs(inP1.y - outPIntersec.y) < 0.0001) outCoincidentPoints[1] = true;
+            if (fabs(inP1.y - outPIntersec.y) < 0.0001) outCoincidentPoints[1] = TRUE;
             if (fabs(inP0.y - outPIntersec.y) < 0.0001) {
-                outCoincidentPoints[0] = true;
+                outCoincidentPoints[0] = TRUE;
                 if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-                return true;
+                return TRUE;
             }
             if ((inP1.y - outPIntersec.y) * (outPIntersec.y - inP0.y) > 0) {
                 if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-                return true;
+                return TRUE;
             }
         }
         return point0ToPoint2Coincidence;
     }
     if (vertical2) {
-        if ((inP3.y - inP1.y) * (inP1.y - inP2.y) > 0 && fabs(inP2.x - inP1.x) < 0.0001) outCoincidentPoints[1] = true;
+        if ((inP3.y - inP1.y) * (inP1.y - inP2.y) > 0 && fabs(inP2.x - inP1.x) < 0.0001) outCoincidentPoints[1] = TRUE;
         if ((inP3.y - inP0.y) * (inP0.y - inP2.y) > 0 && fabs(inP2.x - inP0.x) < 0.0001) {
-            outCoincidentPoints[0] = true;
+            outCoincidentPoints[0] = TRUE;
             if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-            return true;
+            return TRUE;
         }
         outPIntersec.x = inP2.x;
         outPIntersec.y = m1 * outPIntersec.x + b1;
         if ((inP1.x - outPIntersec.x) * (outPIntersec.x - inP0.x) > 0) {
-            if (fabs(inP3.y - outPIntersec.y) < 0.0001) outCoincidentPoints[3] = true;
+            if (fabs(inP3.y - outPIntersec.y) < 0.0001) outCoincidentPoints[3] = TRUE;
             if (fabs(inP2.y - outPIntersec.y) < 0.0001) {
-                outCoincidentPoints[2] = true;
+                outCoincidentPoints[2] = TRUE;
                 if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-                return true;
+                return TRUE;
             }
             if ((inP3.y - outPIntersec.y) * (outPIntersec.y - inP2.y) > 0) {
                 if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-                return true;
+                return TRUE;
             }
         }
         return point0ToPoint2Coincidence;
     }
     if (fabs(m2 - m1) < 0.00001) {
         if (fabs(b1 - b2) < 0.0001) {
-            if ((inP3.x - inP0.x) * (inP0.x - inP2.x) >= 0) outCoincidentPoints[0] = true;
-            if ((inP3.x - inP1.x) * (inP1.x - inP2.x) >= 0) outCoincidentPoints[1] = true;
-            if ((inP1.x - inP2.x) * (inP2.x - inP0.x) >= 0) outCoincidentPoints[2] = true;
-            if ((inP1.x - inP3.x) * (inP3.x - inP0.x) >= 0) outCoincidentPoints[3] = true;
+            if ((inP3.x - inP0.x) * (inP0.x - inP2.x) >= 0) outCoincidentPoints[0] = TRUE;
+            if ((inP3.x - inP1.x) * (inP1.x - inP2.x) >= 0) outCoincidentPoints[1] = TRUE;
+            if ((inP1.x - inP2.x) * (inP2.x - inP0.x) >= 0) outCoincidentPoints[2] = TRUE;
+            if ((inP1.x - inP3.x) * (inP3.x - inP0.x) >= 0) outCoincidentPoints[3] = TRUE;
             if (pointToPointCoincidence) {
-                if (point0ToPoint2Coincidence) return true;
+                if (point0ToPoint2Coincidence) return TRUE;
                 return (outCoincidentPoints[0] && !point0ToPoint3Coincidence) || (outCoincidentPoints[2] && !point2ToPoint1Coincidence);
             }
             return outCoincidentPoints[0] || outCoincidentPoints[2];
@@ -670,45 +672,45 @@ bool WeilerAthertonPolygonClipper::intersecLineLine2D(
         return point0ToPoint2Coincidence;
     }
 
-    intersec1 = false;
-    intersec2 = false;
+    intersec1 = FALSE;
+    intersec2 = FALSE;
     if (m1 < 1) {
         outPIntersec.x = (b1 - b2) / (m2 - m1);
         outPIntersec.y = m1 * outPIntersec.x + b1;
-        if ((inP1.x - outPIntersec.x) * (outPIntersec.x - inP0.x) >= 0) intersec1 = true;
+        if ((inP1.x - outPIntersec.x) * (outPIntersec.x - inP0.x) >= 0) intersec1 = TRUE;
     }
     else {
         outPIntersec.y = (b1 * m2 - b2 * m1) / (m2 - m1);
         outPIntersec.x = (outPIntersec.y - b1) / m1;
-        if ((inP1.y - outPIntersec.y) * (outPIntersec.y - inP0.y) >= 0) intersec1 = true;
+        if ((inP1.y - outPIntersec.y) * (outPIntersec.y - inP0.y) >= 0) intersec1 = TRUE;
     }
     if (m2 < 1) {
-        if ((inP3.x - outPIntersec.x) * (outPIntersec.x - inP2.x) >= 0) intersec2 = true;
+        if ((inP3.x - outPIntersec.x) * (outPIntersec.x - inP2.x) >= 0) intersec2 = TRUE;
     }
     else {
-        if ((inP3.y - outPIntersec.y) * (outPIntersec.y - inP2.y) >= 0) intersec2 = true;
+        if ((inP3.y - outPIntersec.y) * (outPIntersec.y - inP2.y) >= 0) intersec2 = TRUE;
     }
     if (intersec1 && intersec2) {
         if (fabs(inP0.x - outPIntersec.x) < 0.0001 && fabs(inP0.y - outPIntersec.y) < 0.0001) {
-            outCoincidentPoints[0] = true;
+            outCoincidentPoints[0] = TRUE;
             if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-            return true;
+            return TRUE;
         }
         if (fabs(inP1.x - outPIntersec.x) < 0.0001 && fabs(inP1.y - outPIntersec.y) < 0.0001) {
-            outCoincidentPoints[1] = true;
+            outCoincidentPoints[1] = TRUE;
             return point0ToPoint2Coincidence;
         }
         if (fabs(inP2.x - outPIntersec.x) < 0.0001 && fabs(inP2.y - outPIntersec.y) < 0.0001) {
-            outCoincidentPoints[2] = true;
+            outCoincidentPoints[2] = TRUE;
             if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-            return true;
+            return TRUE;
         }
         if (fabs(inP3.x - outPIntersec.x) < 0.0001 && fabs(inP3.y - outPIntersec.y) < 0.0001) {
-            outCoincidentPoints[3] = true;
+            outCoincidentPoints[3] = TRUE;
             return point0ToPoint2Coincidence;
         }
         if (pointToPointCoincidence) return point0ToPoint2Coincidence;
-        return true;
+        return TRUE;
     }
     return point0ToPoint2Coincidence;
 }
@@ -725,7 +727,7 @@ void WeilerAthertonPolygonClipper::resetOutputPolygon(Polygon2D* polygon)
 
 void WeilerAthertonPolygonClipper::appendNonEmptyContours(const Polygon2D* source, Polygon2D* target)
 {
-    bool hasOutputVertices = hasAnyVertex(target);
+    BOOLEAN hasOutputVertices = hasAnyVertex(target);
     for (long int i = 0; i < source->loops.size(); ++i) {
         _Polygon2DContour* contour = source->loops.get(i);
         if (contour->vertices.size() == 0) continue;
@@ -734,12 +736,12 @@ void WeilerAthertonPolygonClipper::appendNonEmptyContours(const Polygon2D* sourc
             Vertex2D v = contour->vertices.get(j);
             target->addVertex(v.x, v.y, v.color.r(), v.color.g(), v.color.b());
         }
-        hasOutputVertices = true;
+        hasOutputVertices = TRUE;
     }
 }
 
-bool WeilerAthertonPolygonClipper::hasAnyVertex(const Polygon2D* polygon)
+BOOLEAN WeilerAthertonPolygonClipper::hasAnyVertex(const Polygon2D* polygon)
 {
-    for (long int i = 0; i < polygon->loops.size(); ++i) if (polygon->loops.get(i)->vertices.size() > 0) return true;
-    return false;
+    for (long int i = 0; i < polygon->loops.size(); ++i) if (polygon->loops.get(i)->vertices.size() > 0) return TRUE;
+    return FALSE;
 }

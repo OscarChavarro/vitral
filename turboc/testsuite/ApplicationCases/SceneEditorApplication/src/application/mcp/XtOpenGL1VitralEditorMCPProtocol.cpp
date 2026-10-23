@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 
 #include "java/io/BufferedReader.h"
@@ -23,12 +24,12 @@ private:
 
 public:
     String result;
-    bool failed;
+    BOOLEAN failed;
     String failure;
 
     ToolCall(XtOpenGL1VitralEditorMCPProtocol* protocol, const String& tool,
              const String& request)
-        : protocol(protocol), tool(tool), request(request), failed(false) {}
+        : protocol(protocol), tool(tool), request(request), failed(FALSE) {}
 
     virtual void run()
     {
@@ -36,7 +37,7 @@ public:
             result = protocol->executeTool(tool, request);
         }
         catch ( const Exception& e ) {
-            failed = true;
+            failed = TRUE;
             failure = e.getMessage().c_str();
         }
     }
@@ -47,7 +48,7 @@ XtOpenGL1VitralEditorMCPProtocol::XtOpenGL1VitralEditorMCPProtocol(
     XtOpenGL1SceneEditorApplication* parent, Socket* socket)
     : socket(socket),
       sceneTools(parent->getApplicationModel()),
-      viewportTools(parent->getApplicationModel(), true),
+      viewportTools(parent->getApplicationModel(), TRUE),
       applicationTools(parent)
 {
 }
@@ -56,7 +57,7 @@ void XtOpenGL1VitralEditorMCPProtocol::run()
 {
     try {
         BufferedReader in(socket->getInputStream());
-        PrintWriter out(socket->getOutputStream(), true);
+        PrintWriter out(socket->getOutputStream(), TRUE);
         String line;
 
         while ( in.readLine(line) ) {

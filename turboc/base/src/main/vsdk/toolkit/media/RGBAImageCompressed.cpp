@@ -30,7 +30,7 @@ int RGBAImageCompressed::getSizeInBytes() const {
     return dataSize + 4 * INT_SIZE_IN_BYTES + POINTER_SIZE_IN_BYTES;
 }
 
-bool RGBAImageCompressed::init(int width, int height) {
+BOOLEAN RGBAImageCompressed::init(int width, int height) {
     xSize = width;
     ySize = height;
     compressionFormat = COMPRESSION_UNKNOWN;
@@ -39,10 +39,10 @@ bool RGBAImageCompressed::init(int width, int height) {
         delete[] data;
     }
     data = new char[0];
-    return true;
+    return TRUE;
 }
 
-bool RGBAImageCompressed::initNoFill(int width, int height) {
+BOOLEAN RGBAImageCompressed::initNoFill(int width, int height) {
     return init(width, height);
 }
 
@@ -66,7 +66,7 @@ int RGBAImageCompressed::calculateTopLevelDataSize(
     return blockWidth * blockHeight * blockSize;
 }
 
-bool RGBAImageCompressed::initCompressed(
+BOOLEAN RGBAImageCompressed::initCompressed(
     int width,
     int height,
     int compressionFormat_,
@@ -78,7 +78,7 @@ bool RGBAImageCompressed::initCompressed(
         ySize = 0;
         compressionFormat = COMPRESSION_UNKNOWN;
         compressedDataSize = 0;
-        return false;
+        return FALSE;
     }
 
     xSize = width;
@@ -91,7 +91,7 @@ bool RGBAImageCompressed::initCompressed(
         ySize = 0;
         compressionFormat = COMPRESSION_UNKNOWN;
         compressedDataSize = 0;
-        return false;
+        return FALSE;
     }
 
     if (data != NULL) {
@@ -99,7 +99,7 @@ bool RGBAImageCompressed::initCompressed(
     }
     data = new char[dataSize];
     memcpy(data, compressedData, dataSize);
-    return true;
+    return TRUE;
 }
 
 void RGBAImageCompressed::setRawImage(
@@ -156,13 +156,6 @@ int RGBAImageCompressed::getXSize() const {
 int RGBAImageCompressed::getYSize() const {
     return ySize;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int RGBAImageCompressed::COMPRESSION_UNKNOWN;
-const int RGBAImageCompressed::COMPRESSION_DXT1;
-const int RGBAImageCompressed::COMPRESSION_DXT3;
-const int RGBAImageCompressed::COMPRESSION_DXT5;
 
 const Class RGBAImageCompressed::CLASS = { "RGBAImageCompressed", &Image::CLASS };
 

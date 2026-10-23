@@ -1,6 +1,8 @@
 #ifndef __FRAME_CAPTURE_SERVICE__
 #define __FRAME_CAPTURE_SERVICE__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 class ApplicationModel;
 class DrawingArea;
 class DrawingAreaHost;
@@ -37,7 +39,7 @@ public:
     @param selectedView true if the view being drawn is the selected one
     */
     void copyColorBufferIfNeeded(FrameBufferSource* source,
-                                 bool selectedView);
+                                 BOOLEAN selectedView);
 
     /**
     Captures the depth buffer, if it was requested.
@@ -48,7 +50,7 @@ public:
     /**
     @return true if the user requested to export the next frame to files
     */
-    bool isFrameExportPending() const;
+    BOOLEAN isFrameExportPending() const;
 
     /**
     Exports to files the frame just drawn, if it was requested.

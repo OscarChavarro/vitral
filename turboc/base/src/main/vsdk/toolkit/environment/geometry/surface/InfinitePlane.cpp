@@ -42,16 +42,16 @@ Ray* InfinitePlane::doIntersectionFirstHit(const Ray& inout_rayo)
     return new Ray(inout_rayo.withT(t));
 }
 
-bool InfinitePlane::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+BOOLEAN InfinitePlane::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     Ray* hit = doIntersectionFirstHit(inRay);
-    if (hit == NULL) return false;
+    if (hit == NULL) return FALSE;
     if (outHit != NULL) {
         outHit->setRay(*hit);
         doExtraInformation(*hit, hit->getT(), outHit);
     }
     delete hit;
-    return true;
+    return TRUE;
 }
 
 Ray* InfinitePlane::doIntersectionWithNegative(const Ray& inout_rayo)
@@ -102,8 +102,9 @@ void InfinitePlane::doExtraInformation(const Ray& inRay, double inT, RayHit* out
 double* InfinitePlane::getMinMax()
 {
     double* minmax = new double[6];
-    for (int i = 0; i < 3; i++) minmax[i] = -1e308;
-    for (int i = 3; i < 6; i++) minmax[i] = 1e308;
+    int i;
+    for (i = 0; i < 3; i++) minmax[i] = -1e308;
+    for (i = 3; i < 6; i++) minmax[i] = 1e308;
     return minmax;
 }
 
@@ -142,7 +143,7 @@ Vector3Dd InfinitePlane::mirrorPoint(const Vector3Dd& p) const
     return p.subtract(n);
 }
 
-bool InfinitePlane::overlapsWith(const InfinitePlane& other, double tolerance) const
+BOOLEAN InfinitePlane::overlapsWith(const InfinitePlane& other, double tolerance) const
 {
     double a1=a,b1=b,c1=c,d1=d;
     double a2=other.a,b2=other.b,c2=other.c,d2=other.d;

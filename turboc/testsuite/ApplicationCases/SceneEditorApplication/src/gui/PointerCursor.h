@@ -33,7 +33,7 @@ public:
         /** Selected things can be scaled (scale mode with a selection) */
         SCALE
     };
-    static const int COUNT = 8;
+    enum { COUNT = 8 };
 
     /** Folder with the images of the pointers */
     static const char* const IMAGE_FOLDER;

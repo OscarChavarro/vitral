@@ -1,6 +1,7 @@
 #ifndef __XT_DIALOG_HOST__
 #define __XT_DIALOG_HOST__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -84,7 +85,7 @@ public:
         @return true if the definition has an element (a button or an
         `action` element) with the action
         */
-        bool hasAction(const String& action) const;
+        BOOLEAN hasAction(const String& action) const;
         DialogSession* session();
 
         String getText(const String& binding) const;
@@ -113,7 +114,7 @@ public:
         close requests do (the `dispose` of Swing).
         */
         void close();
-        bool isVisible() const;
+        BOOLEAN isVisible() const;
 
     private:
         friend class XtDialogHost;
@@ -124,8 +125,8 @@ public:
         XFontSet fontSet;
         XtWidget shell;
         XtWidget firstField;
-        bool modal;
-        bool visible;
+        BOOLEAN modal;
+        BOOLEAN visible;
         int width;
         int buttonsY;
         DialogSession dialogSession;

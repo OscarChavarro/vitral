@@ -3,7 +3,7 @@
 
 class PolynomialSolver {
   public:
-    static const int MAX_ORDER = 7;
+    enum { MAX_ORDER = 7 };
 
     PolynomialSolver();
     PolynomialSolver(int order, const double *coefficients);
@@ -15,7 +15,7 @@ class PolynomialSolver {
     double coefficients[MAX_ORDER + 1];
 
     static const double COEFFICIENT_LIMIT;
-    static const int MAX_ITERATIONS = 50;
+    enum { MAX_ITERATIONS = 50 };
     static const double POLYNOMIAL_MAX_DISTANCE;
 
     int polynomialRemainder(

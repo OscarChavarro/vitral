@@ -1,10 +1,11 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Math.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/media/solidTexture/from2d/ImageToSolidTextureProjectionMethods.h"
 #include "vsdk/toolkit/media/solidTexture/from2d/SolidTextureCoordinateMapper.h"
-bool
+BOOLEAN
 SolidTextureCoordinateMapper::cylindricalImageMap(
     double x, double y, double z, const ControlledRGBAImageHDRUncompressed *image, double *u, double *v) const
 {
@@ -12,20 +13,20 @@ SolidTextureCoordinateMapper::cylindricalImageMap(
     double theta;
 
     if ((image->getOnceFlag()) && ((y < 0.0) || (y > 1.0))) {
-        return false;
+        return FALSE;
     }
     *v = fmod(y * image->getYSize(), image->getYSize());
 
     len = Math::sqrt(x * x + y * y + z * z);
     if (len == 0.0) {
-        return false;
+        return FALSE;
     }
     x /= len;
     z /= len;
 
     len = Math::sqrt(x * x + z * z);
     if (len == 0.0) {
-        return false;
+        return FALSE;
     }
     if (z == 0.0) {
         if (x > 0) {
@@ -42,10 +43,10 @@ SolidTextureCoordinateMapper::cylindricalImageMap(
     theta /= 2.0 * Math::PI;
 
     *u = (theta * image->getXSize());
-    return true;
+    return TRUE;
 }
 
-bool
+BOOLEAN
 SolidTextureCoordinateMapper::torusImageMap(
     double x, double y, double z, const ControlledRGBAImageHDRUncompressed *image, double *u, double *v) const
 {
@@ -56,7 +57,7 @@ SolidTextureCoordinateMapper::torusImageMap(
 
     len = Math::sqrt(x * x + z * z);
     if (len == 0.0) {
-        return false;
+        return FALSE;
     }
     if (z == 0.0) {
         if (x > 0) {
@@ -84,10 +85,10 @@ SolidTextureCoordinateMapper::torusImageMap(
     phi /= 2.0 * Math::PI;
     *u = (-theta * image->getXSize());
     *v = (phi * image->getYSize());
-    return true;
+    return TRUE;
 }
 
-bool
+BOOLEAN
 SolidTextureCoordinateMapper::sphericalImageMap(
     double x, double y, double z, const RGBAImageHDRUncompressed *image, double *u, double *v) const
 {
@@ -97,7 +98,7 @@ SolidTextureCoordinateMapper::sphericalImageMap(
 
     len = Math::sqrt(x * x + y * y + z * z);
     if (len == 0.0) {
-        return false;
+        return FALSE;
     }
     x /= len;
     y /= len;
@@ -125,16 +126,16 @@ SolidTextureCoordinateMapper::sphericalImageMap(
     }
     *u = (theta * image->getXSize());
     *v = (phi * image->getYSize());
-    return true;
+    return TRUE;
 }
 
-bool
+BOOLEAN
 SolidTextureCoordinateMapper::planarImageMap(
     double x, double y, double z, const ControlledRGBAImageHDRUncompressed *image, double *u, double *v) const
 {
     if (image->getImageGradient().x() != 0.0) {
         if ((image->getOnceFlag()) && ((x < 0.0) || (x > 1.0))) {
-            return false;
+            return FALSE;
         }
         if (image->getImageGradient().x() > 0) {
             *u = fmod(x * image->getXSize(), image->getXSize());
@@ -144,7 +145,7 @@ SolidTextureCoordinateMapper::planarImageMap(
     }
     if (image->getImageGradient().y() != 0.0) {
         if ((image->getOnceFlag()) && ((y < 0.0) || (y > 1.0))) {
-            return false;
+            return FALSE;
         }
         if (image->getImageGradient().y() > 0) {
             *u = fmod(y * image->getXSize(), image->getXSize());
@@ -154,7 +155,7 @@ SolidTextureCoordinateMapper::planarImageMap(
     }
     if (image->getImageGradient().z() != 0.0) {
         if ((image->getOnceFlag()) && ((z < 0.0) || (z > 1.0))) {
-            return false;
+            return FALSE;
         }
         if (image->getImageGradient().z() > 0) {
             *u = fmod(z * image->getXSize(), image->getXSize());
@@ -162,37 +163,37 @@ SolidTextureCoordinateMapper::planarImageMap(
             *v = fmod(z * image->getYSize(), image->getYSize());
         }
     }
-    return true;
+    return TRUE;
 }
 
-bool
+BOOLEAN
 SolidTextureCoordinateMapper::map(double x, double y, double z, const ControlledRGBAImageHDRUncompressed *image,
     double *xCoordinate, double *yCoordinate, double smallTolerance) const
 {
     switch (image->getMapType()) {
     case PLANAR_MAP:
         if (!planarImageMap(x, y, z, image, xCoordinate, yCoordinate)) {
-            return true;
+            return TRUE;
         }
         break;
     case SPHERICAL_MAP:
         if (!sphericalImageMap(x, y, z, image, xCoordinate, yCoordinate)) {
-            return true;
+            return TRUE;
         }
         break;
     case CYLINDRICAL_MAP:
         if (!cylindricalImageMap(x, y, z, image, xCoordinate, yCoordinate)) {
-            return true;
+            return TRUE;
         }
         break;
     case TORUS_MAP:
         if (!torusImageMap(x, y, z, image, xCoordinate, yCoordinate)) {
-            return true;
+            return TRUE;
         }
         break;
     default:
         if (!planarImageMap(x, y, z, image, xCoordinate, yCoordinate)) {
-            return true;
+            return TRUE;
         }
         break;
     }
@@ -219,5 +220,5 @@ SolidTextureCoordinateMapper::map(double x, double y, double z, const Controlled
         Logger::reportMessage("MapTextureFixture", Logger::FATAL_ERROR, "", "\nPicture index out of range\n");
     }
 
-    return false;
+    return FALSE;
 }

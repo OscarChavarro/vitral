@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_FINISHER__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_FINISHER__
+#ifndef ___PBS_SET_FINISHER__
+#define ___PBS_SET_FINISHER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
@@ -66,25 +67,27 @@ public:
         FaceList& sonfb);
 
 private:
-    static const int DEBUG_01_STRUCTURE = 0x01;
-    static const int DEBUG_06_FINISH = 0x20;
+    enum {
+        DEBUG_01_STRUCTURE = 0x01,
+        DEBUG_06_FINISH = 0x20
+    };
 
     static int lastLegacyFallbackCount;
     static int lastTriangulatedFaceCount;
 
     _PolyhedralBoundedSolidSetFinisher();
 
-    static bool isPipelineSummaryTraceEnabled();
+    static BOOLEAN isPipelineSummaryTraceEnabled();
     static void tracePipelineSummary(const String& message);
-    static bool hasUsableIntegrationRing(_PolyhedralBoundedSolidFace* face);
-    static bool hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face);
+    static BOOLEAN hasUsableIntegrationRing(_PolyhedralBoundedSolidFace* face);
+    static BOOLEAN hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face);
     static String integrationRingSummary(_PolyhedralBoundedSolidFace* face);
     static int sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb);
     static _PolyhedralBoundedSolidHalfEdge* findNonDegenerateEar(
         _PolyhedralBoundedSolidHalfEdge* start,
         int loopSize,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context);
-    static bool hasSelfTouchingVertex(_PolyhedralBoundedSolidLoop* loop,
+    static BOOLEAN hasSelfTouchingVertex(_PolyhedralBoundedSolidLoop* loop,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& tol);
     static void extractInnerLoopsOfNonPlanarFace(PolyhedralBoundedSolid* solid,
         _PolyhedralBoundedSolidFace* face);

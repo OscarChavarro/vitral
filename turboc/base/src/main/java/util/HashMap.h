@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 #include "java/lang/String.h"
 #include "java/util/HashMapEntry.h"
@@ -13,8 +14,8 @@ FNV-1a hash of a sequence of bytes, used by `HashMap` to place its keys.
 */
 inline size_t
 hashMapFnv1a(const unsigned char *bytes, size_t length) {
-    const size_t offset = ((size_t)(1469598103934665603ULL));
-    const size_t prime = ((size_t)(1099511628211ULL));
+    const size_t offset = ((size_t)(VSDK_ULL(1469598103934665603)));
+    const size_t prime = ((size_t)(VSDK_ULL(1099511628211)));
     size_t hash = offset;
     for ( size_t i = 0; i < length; i++ ) {
         hash ^= ((size_t)(bytes[i]));
@@ -109,15 +110,15 @@ class HashMap: public Object {
 
     void clear();
     long size() const;
-    bool isEmpty() const;
+    BOOLEAN isEmpty() const;
 
-    bool containsKey(const K &key) const;
+    BOOLEAN containsKey(const K &key) const;
     V *get(const K &key);
     const V *get(const K &key) const;
-    bool tryGet(const K &key, V *valueOut) const;
+    BOOLEAN tryGet(const K &key, V *valueOut) const;
     V getOrDefault(const K &key, const V &defaultValue) const;
-    bool put(const K &key, const V &value);
-    bool remove(const K &key);
+    BOOLEAN put(const K &key, const V &value);
+    BOOLEAN remove(const K &key);
 };
 
 #include "java/util/HashMap.txx"

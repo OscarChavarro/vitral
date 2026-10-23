@@ -1,6 +1,7 @@
 #ifndef __XT_EVENT_QUEUE__
 #define __XT_EVENT_QUEUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"
 
 // As declared by <X11/Intrinsic.h>, so this header can be used without Xt
@@ -24,12 +25,12 @@ public:
     methods.
     @return false if the pipe could not be created
     */
-    static bool install(XtAppContext appContext);
+    static BOOLEAN install(XtAppContext appContext);
 
     /**
     @return true if called from the thread of the event loop
     */
-    static bool isDispatchThread();
+    static BOOLEAN isDispatchThread();
 
     /**
     Runs the task in the thread of the event loop and waits for its end (as

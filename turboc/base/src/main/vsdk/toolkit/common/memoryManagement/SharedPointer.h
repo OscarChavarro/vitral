@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/concurrent/locks/ReentrantLock.h"
 
 /**
@@ -37,7 +38,7 @@ class SharedPointer {
         if ( control == NULL ) {
             return;
         }
-        bool last;
+        BOOLEAN last;
         {
             ReentrantLockGuard guard(control->lock);
             control->references--;
@@ -103,7 +104,7 @@ class SharedPointer {
         return *pointer;
     }
 
-    bool operator!() const
+    BOOLEAN operator!() const
     {
         return pointer == NULL;
     }

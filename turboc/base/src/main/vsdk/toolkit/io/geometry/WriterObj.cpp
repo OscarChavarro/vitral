@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -29,8 +30,8 @@ static long long exportMesh(OutputStream& os, TriangleMesh* mesh,
     ArrayList<double>& vp = mesh->getVertexPositions();
     ArrayList<double>& vn = mesh->getVertexNormals();
     ArrayList<double>& vuv = mesh->getVertexUvs();
-    bool withNormals = vn.size() > 0;
-    bool withUvs = vuv.size() > 0;
+    BOOLEAN withNormals = vn.size() > 0;
+    BOOLEAN withUvs = vuv.size() > 0;
     int i;
     Vector3Dd p;
     Vector3Dd n;

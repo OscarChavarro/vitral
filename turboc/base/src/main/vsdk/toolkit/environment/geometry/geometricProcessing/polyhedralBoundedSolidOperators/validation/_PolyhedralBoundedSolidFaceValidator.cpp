@@ -23,7 +23,7 @@ struct FaceSegment {
     FaceSegment(const Vector3Dd& start, const Vector3Dd& end)
         : start(start), end(end) {}
 
-    bool sharesEndpointWith(const FaceSegment& other, double tolerance) const
+    BOOLEAN sharesEndpointWith(const FaceSegment& other, double tolerance) const
     {
         return start.subtract(other.start).length() <= tolerance ||
             start.subtract(other.end).length() <= tolerance ||
@@ -116,7 +116,7 @@ static double segmentDistance(const Vector3Dd& p1, const Vector3Dd& q1,
 }
 
 
-bool _PolyhedralBoundedSolidFaceValidator::isSurfaceDegenerate(
+BOOLEAN _PolyhedralBoundedSolidFaceValidator::isSurfaceDegenerate(
     _PolyhedralBoundedSolidFace* face)
 {
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext =
@@ -126,11 +126,11 @@ bool _PolyhedralBoundedSolidFaceValidator::isSurfaceDegenerate(
              face, points) ||
          !PolyhedralBoundedSolidGeometricValidator
              ::validateFacePointsAreCoplanar(points, numericContext) ) {
-        return true;
+        return TRUE;
     }
     if ( faceArea(face) <= numericContext.bigEpsilon() *
          numericContext.bigEpsilon() ) {
-        return true;
+        return TRUE;
     }
     return hasCloseNonAdjacentEdges(face, numericContext);
 }
@@ -162,7 +162,7 @@ double _PolyhedralBoundedSolidFaceValidator::faceArea(
     return area;
 }
 
-bool _PolyhedralBoundedSolidFaceValidator::hasCloseNonAdjacentEdges(
+BOOLEAN _PolyhedralBoundedSolidFaceValidator::hasCloseNonAdjacentEdges(
     _PolyhedralBoundedSolidFace* face,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext)
 {
@@ -178,9 +178,9 @@ bool _PolyhedralBoundedSolidFaceValidator::hasCloseNonAdjacentEdges(
             }
             if ( segmentDistance(a.start, a.end, b.start, b.end) <=
                  tolerance ) {
-                return true;
+                return TRUE;
             }
         }
     }
-    return false;
+    return FALSE;
 }

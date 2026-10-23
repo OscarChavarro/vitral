@@ -1,20 +1,21 @@
 #ifndef __SOLID_TEXTURE_COORDINATE_MAPPER__
 #define __SOLID_TEXTURE_COORDINATE_MAPPER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/solidTexture/from2d/ControlledRGBAImageHDRUncompressed.h"
 class SolidTextureCoordinateMapper {
   private:
-    bool cylindricalImageMap(
+    BOOLEAN cylindricalImageMap(
         double x, double y, double z, const ControlledRGBAImageHDRUncompressed *image, double *u, double *v) const;
-    bool torusImageMap(
+    BOOLEAN torusImageMap(
         double x, double y, double z, const ControlledRGBAImageHDRUncompressed *image, double *u, double *v) const;
-    bool sphericalImageMap(
+    BOOLEAN sphericalImageMap(
         double x, double y, double z, const RGBAImageHDRUncompressed *image, double *u, double *v) const;
-    bool planarImageMap(
+    BOOLEAN planarImageMap(
         double x, double y, double z, const ControlledRGBAImageHDRUncompressed *image, double *u, double *v) const;
 
   public:
-    bool map(
+    BOOLEAN map(
         double x, double y, double z,
         const ControlledRGBAImageHDRUncompressed *image,
         double *xCoordinate, double *yCoordinate, double smallTolerance) const;

@@ -1,6 +1,7 @@
 #ifndef __XT_COLLAPSIBLE_SECTION__
 #define __XT_COLLAPSIBLE_SECTION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 // Xt names its strings and objects as the vitral String and Object
@@ -38,7 +39,7 @@ public:
     /**
     Height of the header of the sections.
     */
-    static const int HEADER_HEIGHT = 24;
+    enum { HEADER_HEIGHT = 24 };
 
     /**
     @param widgets builder of the widgets of the widget set in use
@@ -51,7 +52,7 @@ public:
     */
     XtCollapsibleSection(XtPanelWidgets* widgets, Widget parent,
                          const String& title, XFontSet fontSet,
-                         int y, int width, bool expanded);
+                         int y, int width, BOOLEAN expanded);
 
     /**
     The widgets of the section are destroyed with their parent.
@@ -73,13 +74,13 @@ public:
     /**
     @return true if the section shows its content
     */
-    bool isExpanded() const;
+    BOOLEAN isExpanded() const;
 
     /**
     @param expanded true to show the content of the section, false to hide
     it
     */
-    void setExpanded(bool expanded);
+    void setExpanded(BOOLEAN expanded);
 
     /**
     @return height of the section: its header, and its content when it is
@@ -117,8 +118,8 @@ private:
     String title;
     int width;
     int contentHeight;
-    bool expanded;
-    bool handCursorDefined;
+    BOOLEAN expanded;
+    BOOLEAN handCursorDefined;
     LayoutProc layoutListener;
     void* layoutClientData;
 

@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/render/shaders/ConstantShader.h"
 #include "vsdk/toolkit/render/shaders/ConstantTextureShader.h"
@@ -13,8 +14,8 @@
 Shader* ShaderSelector::select(const RendererConfiguration* qualitySelection)
 {
     int shadingType = qualitySelection->getShadingType();
-    bool textureEnabled = qualitySelection->isTextureSet();
-    bool bumpMapEnabled = qualitySelection->isBumpMapSet();
+    BOOLEAN textureEnabled = qualitySelection->isTextureSet();
+    BOOLEAN bumpMapEnabled = qualitySelection->isBumpMapSet();
 
     if ( shadingType == RendererConfiguration::SHADING_TYPE_NOLIGHT ) {
         if ( textureEnabled ) return new ConstantTextureShader();

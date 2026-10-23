@@ -101,8 +101,8 @@ RayGizmo::RayGizmo(Function<const Ray&, Intersection*>* intersectionCallback, in
       currentSnapshot(0),
       lastDataTime(time(0)),
       previousDataTime(time(0)),
-      visible(true),
-      rollIndicatorEnabled(false),
+      visible(TRUE),
+      rollIndicatorEnabled(FALSE),
       disableAfterElapsedSeconds(DEFAULT_DISABLE_TIME),
       sourceRayColor(DEFAULT_RAY_COLOR)
 {
@@ -194,7 +194,7 @@ void RayGizmo::setRay(const Ray& ray, double rotationAngleInRadians)
     pthread_mutex_unlock(&pendingMutex);
 
     syncInputGizmo(ray.getOrigin(), ray.getDirection());
-    visible = true;
+    visible = TRUE;
     recordDataArrival();
 }
 
@@ -217,27 +217,27 @@ InputGizmo* RayGizmo::getInputGizmo()
 void RayGizmo::update()
 {
     if ( inactivityThresholdExceeded() ) {
-        visible = false;
+        visible = FALSE;
     }
     previousDataTime = lastDataTime;
 }
 
-bool RayGizmo::isVisible() const
+BOOLEAN RayGizmo::isVisible() const
 {
     return visible;
 }
 
-void RayGizmo::setVisible(bool visible)
+void RayGizmo::setVisible(BOOLEAN visible)
 {
     this->visible = visible;
 }
 
-bool RayGizmo::isRollIndicatorEnabled() const
+BOOLEAN RayGizmo::isRollIndicatorEnabled() const
 {
     return rollIndicatorEnabled;
 }
 
-void RayGizmo::setRollIndicatorEnabled(bool enabled)
+void RayGizmo::setRollIndicatorEnabled(BOOLEAN enabled)
 {
     rollIndicatorEnabled = enabled;
 }
@@ -469,7 +469,7 @@ void RayGizmo::recordDataArrival()
     lastDataTime = time(0);
 }
 
-bool RayGizmo::inactivityThresholdExceeded() const
+BOOLEAN RayGizmo::inactivityThresholdExceeded() const
 {
     double elapsed = difftime(time(0), lastDataTime);
     return disableAfterElapsedSeconds > 0.0 && elapsed > disableAfterElapsedSeconds;
@@ -549,4 +549,3 @@ Matrix4x4d RayGizmo::rotationFromZToDirection(const Vector3Dd& direction)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int RayGizmo::NUMBER_OF_INPUT_FIELDS;

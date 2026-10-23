@@ -1,13 +1,14 @@
 #ifndef __IMAGE_EXPORTER__
 #define __IMAGE_EXPORTER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class RGBImageUncompressed;
 
 class ImageExporter {
 public:
-    bool exportImage(const String& outputFileName, RGBImageUncompressed* image);
+    BOOLEAN exportImage(const String& outputFileName, RGBImageUncompressed* image);
 };
 
 #endif

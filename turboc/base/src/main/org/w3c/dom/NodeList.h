@@ -2,6 +2,7 @@
 #define __ORG_W3C_DOM_NODE_LIST__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 // Inline methods below instantiate the list
 #include "java/util/ArrayList.txx"

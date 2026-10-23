@@ -1,6 +1,7 @@
 #ifndef __OPENGL1_LOADER__
 #define __OPENGL1_LOADER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 
 /**
@@ -21,19 +22,19 @@ public:
     @return false if the context does not offer OpenGL 1.1 (reported on the
     standard error)
     */
-    static bool load();
+    static BOOLEAN load();
 
     /**
     @return true if the current context offers OpenGL 1.2 or later
     */
-    static bool offersOpenGL12();
+    static BOOLEAN offersOpenGL12();
 
     /**
     @param name name of an extension (i.e.
     "GL_EXT_texture_compression_s3tc")
     @return true if the current context offers it
     */
-    static bool isExtensionSupported(const char* name);
+    static BOOLEAN isExtensionSupported(const char* name);
 
 private:
     OpenGL1Loader();

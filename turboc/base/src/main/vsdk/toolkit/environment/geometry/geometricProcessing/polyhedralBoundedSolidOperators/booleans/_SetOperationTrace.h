@@ -1,6 +1,7 @@
 #ifndef ___SET_OPERATION_TRACE__
 #define ___SET_OPERATION_TRACE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 /**
@@ -17,8 +18,8 @@ C++ counterpart of Java's `_SetOperationTrace`.
 */
 class _SetOperationTrace {
 public:
-    static bool isCoplanarTangentialTraceEnabled();
-    static bool isPipelineSummaryTraceEnabled();
+    static BOOLEAN isCoplanarTangentialTraceEnabled();
+    static BOOLEAN isPipelineSummaryTraceEnabled();
     static void traceCoplanarTangential(const String& message);
     static void tracePipelineSummary(const String& message);
 

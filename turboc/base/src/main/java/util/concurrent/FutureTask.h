@@ -1,6 +1,7 @@
 #ifndef __FUTURE_TASK__
 #define __FUTURE_TASK__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 
 #include "java/lang/Exception.h"
@@ -27,10 +28,10 @@ private:
             state_->value = *value;
         }
         else {
-            state_->failed = true;
+            state_->failed = TRUE;
             state_->errorMessage = errorMessage;
         }
-        state_->done = true;
+        state_->done = TRUE;
         pthread_cond_broadcast(&state_->cond);
         pthread_mutex_unlock(&state_->mutex);
     }

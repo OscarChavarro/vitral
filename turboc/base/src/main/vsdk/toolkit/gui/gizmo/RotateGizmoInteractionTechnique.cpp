@@ -19,7 +19,7 @@ static const double MIN_RAY_TO_AXIS_COSINE = 0.05;
 
 RotateGizmoInteractionTechnique::RotateGizmoInteractionTechnique(
     RotateGizmo* gizmo)
-    : gizmo(gizmo), active(false)
+    : gizmo(gizmo), active(FALSE)
 {
     endGesture();
 }
@@ -29,7 +29,7 @@ RotateGizmo* RotateGizmoInteractionTechnique::getGizmo() const
     return gizmo;
 }
 
-bool RotateGizmoInteractionTechnique::isActive() const
+BOOLEAN RotateGizmoInteractionTechnique::isActive() const
 {
     return active;
 }
@@ -39,18 +39,18 @@ Viewport* RotateGizmoInteractionTechnique::getDragViewport() const
     return dragViewport;
 }
 
-bool RotateGizmoInteractionTechnique::isDragging() const
+BOOLEAN RotateGizmoInteractionTechnique::isDragging() const
 {
     return dragRing >= 0;
 }
 
-bool RotateGizmoInteractionTechnique::isInputGizmoKey(
+BOOLEAN RotateGizmoInteractionTechnique::isInputGizmoKey(
     const KeyEvent& keyEvent)
 {
     return gizmo->getInputGizmo()->consumesKey(keyEvent);
 }
 
-bool RotateGizmoInteractionTechnique::processKeyPressedEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processKeyPressedEvent(
     const KeyEvent& keyEvent)
 {
     InputGizmo* inputGizmo = gizmo->getInputGizmo();
@@ -79,9 +79,9 @@ bool RotateGizmoInteractionTechnique::processKeyPressedEvent(
             }
             gizmo->setTransformationMatrix(
                 rotation.withTranslation(gizmo->getPosition()));
-            return true;
+            return TRUE;
         }
-        return false;
+        return FALSE;
     }
 
     Vector3Dd axis;
@@ -97,7 +97,7 @@ bool RotateGizmoInteractionTechnique::processKeyPressedEvent(
         axis = Vector3Dd(0, 0, 1);
         break;
       default:
-        return false;
+        return FALSE;
     }
 
     double angle = isupper((unsigned char)keyEvent.unicodeId) ?
@@ -107,24 +107,24 @@ bool RotateGizmoInteractionTechnique::processKeyPressedEvent(
     inputGizmo->cancelEditing();
     gizmo->setTransformationMatrix(
         gizmo->getTransformationMatrix().multiply(delta));
-    return true;
+    return TRUE;
 }
 
-bool RotateGizmoInteractionTechnique::processKeyReleasedEvent(const KeyEvent&)
+BOOLEAN RotateGizmoInteractionTechnique::processKeyReleasedEvent(const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool RotateGizmoInteractionTechnique::processMousePressedEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processMousePressedEvent(
     const MouseEvent& e, Viewport* viewport)
 {
-    bool changed = processMousePressedEvent(e);
+    BOOLEAN changed = processMousePressedEvent(e);
 
     dragViewport = isDragging() ? viewport : NULL;
     return changed;
 }
 
-bool RotateGizmoInteractionTechnique::processMousePressedEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processMousePressedEvent(
     const MouseEvent& e)
 {
     endGesture();
@@ -136,19 +136,19 @@ bool RotateGizmoInteractionTechnique::processMousePressedEvent(
         // camera ring), so they line up as `selection - 1`
         beginGesture(selection - 1, e.getX(), e.getY());
     }
-    return false;
+    return FALSE;
 }
 
-bool RotateGizmoInteractionTechnique::processMouseReleasedEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processMouseReleasedEvent(
     const MouseEvent&)
 {
-    bool wasDragging = isDragging();
+    BOOLEAN wasDragging = isDragging();
 
     endGesture();
     return wasDragging;
 }
 
-bool RotateGizmoInteractionTechnique::processMouseClickedEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processMouseClickedEvent(
     const MouseEvent& e)
 {
     int previousSelection = gizmo->getCurrentSelection();
@@ -161,12 +161,12 @@ bool RotateGizmoInteractionTechnique::processMouseClickedEvent(
     return selection != previousSelection;
 }
 
-bool RotateGizmoInteractionTechnique::processMouseMovedEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processMouseMovedEvent(
     const MouseEvent& e)
 {
     if ( isDragging() ) {
         // The ring is fixed while dragging
-        return false;
+        return FALSE;
     }
     int previousSelection = gizmo->getCurrentSelection();
     int selection = calculateSelection(e.getX(), e.getY());
@@ -175,17 +175,17 @@ bool RotateGizmoInteractionTechnique::processMouseMovedEvent(
     return gizmo->getCurrentSelection() != previousSelection;
 }
 
-bool RotateGizmoInteractionTechnique::processMouseDraggedEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processMouseDraggedEvent(
     const MouseEvent& e)
 {
     if ( !isDragging() ) {
-        return false;
+        return FALSE;
     }
 
     double angle = calculateAngle(e.getX(), e.getY());
 
     if ( Cpp98Support::isNaN(angle) ) {
-        return false;
+        return FALSE;
     }
     if ( Cpp98Support::isNaN(dragLastAngle) ) {
         // First point of the plane the cursor defines: the arc starts here
@@ -214,13 +214,13 @@ bool RotateGizmoInteractionTechnique::processMouseDraggedEvent(
         rotationOnly.withTranslation(
             dragStartTransformation.extractTranslation()));
     gizmo->setArc(dragRing, dragU, dragV, dragStartAngle, dragSweep);
-    return true;
+    return TRUE;
 }
 
-bool RotateGizmoInteractionTechnique::processMouseWheelEvent(
+BOOLEAN RotateGizmoInteractionTechnique::processMouseWheelEvent(
     const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
 void RotateGizmoInteractionTechnique::beginGesture(int ring, int x, int y)
@@ -240,7 +240,7 @@ void RotateGizmoInteractionTechnique::beginGesture(int ring, int x, int y)
         gizmo->setPersistentSelection(RotateGizmo::groupOfRing(ring));
     }
     dragStartAngle = 0;
-    dragLastAngle = NAN;
+    dragLastAngle = Cpp98Support::nan();
     dragSweep = 0;
     gizmo->clearArc();
 
@@ -262,7 +262,7 @@ void RotateGizmoInteractionTechnique::endGesture()
     dragV = Vector3Dd();
     dragAxis = Vector3Dd();
     dragStartAngle = 0;
-    dragLastAngle = NAN;
+    dragLastAngle = Cpp98Support::nan();
     dragSweep = 0;
     gizmo->clearArc();
 }
@@ -277,7 +277,7 @@ double RotateGizmoInteractionTechnique::calculateAngle(int x, int y)
     double cosine = direction.dotProduct(dragAxis);
 
     if ( fabs(cosine) < MIN_RAY_TO_AXIS_COSINE ) {
-        return NAN;
+        return Cpp98Support::nan();
     }
 
     Vector3Dd center = dragStartTransformation.extractTranslation();
@@ -288,7 +288,7 @@ double RotateGizmoInteractionTechnique::calculateAngle(int x, int y)
     // be behind it
     if ( distance <= 0 &&
          camera->getProjectionMode() != Camera::PROJECTION_MODE_ORTHOGONAL ) {
-        return NAN;
+        return Cpp98Support::nan();
     }
 
     Vector3Dd fromCenter = ray.getOrigin().add(

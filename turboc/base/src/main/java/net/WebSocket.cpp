@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/InputStream.h"
 #include "java/io/OutputStream.h"
 #include "java/net/Socket.h"
@@ -41,12 +42,12 @@ WebSocket* WebSocket::connect(const String& serviceUrl)
         return 0;
     }
 
-    bool handshakeOk = false;
+    BOOLEAN handshakeOk = FALSE;
     try {
         handshakeOk = sendHandshake(socket, url);
     }
     catch ( ... ) {
-        handshakeOk = false;
+        handshakeOk = FALSE;
     }
     if ( !handshakeOk ) {
         delete socket;
@@ -56,35 +57,35 @@ WebSocket* WebSocket::connect(const String& serviceUrl)
     return new WebSocket(socket);
 }
 
-bool WebSocket::readText(String* outPayload)
+BOOLEAN WebSocket::readText(String* outPayload)
 {
     if ( socket_ == 0 || !open_ || outPayload == 0 ) {
-        return false;
+        return FALSE;
     }
 
     unsigned char header[2];
     if ( !readExact(socket_, header, 2) ) {
-        open_ = false;
-        return false;
+        open_ = FALSE;
+        return FALSE;
     }
 
     int opcode = header[0] & 0x0F;
-    bool masked = (header[1] & 0x80) != 0;
+    BOOLEAN masked = (header[1] & 0x80) != 0;
     unsigned long long payloadLen = header[1] & 0x7F;
 
     if ( payloadLen == 126 ) {
         unsigned char ext[2];
         if ( !readExact(socket_, ext, 2) ) {
-            open_ = false;
-            return false;
+            open_ = FALSE;
+            return FALSE;
         }
         payloadLen = (((unsigned long long)(ext[0])) << 8) | ext[1];
     }
     else if ( payloadLen == 127 ) {
         unsigned char ext[8];
         if ( !readExact(socket_, ext, 8) ) {
-            open_ = false;
-            return false;
+            open_ = FALSE;
+            return FALSE;
         }
         payloadLen = 0;
         for ( int i = 0; i < 8; i++ ) {
@@ -94,13 +95,13 @@ bool WebSocket::readText(String* outPayload)
 
     unsigned char mask[4] = {0, 0, 0, 0};
     if ( masked && !readExact(socket_, mask, 4) ) {
-        open_ = false;
-        return false;
+        open_ = FALSE;
+        return FALSE;
     }
 
     if ( opcode == 8 ) {
-        open_ = false;
-        return false;
+        open_ = FALSE;
+        return FALSE;
     }
     if ( opcode != 1 || payloadLen > 1024 * 1024 ) {
         return discard(socket_, payloadLen);
@@ -109,8 +110,8 @@ bool WebSocket::readText(String* outPayload)
     char* payload = new char[((size_t)(payloadLen)) + 1];
     if ( !readExact(socket_, ((unsigned char*)(payload)), ((int)(payloadLen))) ) {
         delete[] payload;
-        open_ = false;
-        return false;
+        open_ = FALSE;
+        return FALSE;
     }
     for ( unsigned long long i = 0; i < payloadLen; i++ ) {
         if ( masked ) {
@@ -120,27 +121,27 @@ bool WebSocket::readText(String* outPayload)
     payload[payloadLen] = '\0';
     *outPayload = String(payload);
     delete[] payload;
-    return true;
+    return TRUE;
 }
 
 void WebSocket::close()
 {
-    open_ = false;
+    open_ = FALSE;
     if ( socket_ != 0 ) {
         socket_->close();
     }
 }
 
-bool WebSocket::isOpen() const
+BOOLEAN WebSocket::isOpen() const
 {
     return open_;
 }
 
-bool WebSocket::parseUrl(const String& url, ParsedUrl* outUrl)
+BOOLEAN WebSocket::parseUrl(const String& url, ParsedUrl* outUrl)
 {
     const char* prefix = "ws://";
     if ( !extractStringPrefix(url, prefix) ) {
-        return false;
+        return FALSE;
     }
 
     int hostStart = 5;
@@ -161,12 +162,12 @@ bool WebSocket::parseUrl(const String& url, ParsedUrl* outUrl)
     return !outUrl->host.empty() && outUrl->port > 0;
 }
 
-bool WebSocket::extractStringPrefix(const String& text, const char* prefix)
+BOOLEAN WebSocket::extractStringPrefix(const String& text, const char* prefix)
 {
     return findText(text, prefix) == 0;
 }
 
-bool WebSocket::readHttpHeader(Socket* socket, String* outHeader)
+BOOLEAN WebSocket::readHttpHeader(Socket* socket, String* outHeader)
 {
     char buffer[8192];
     int n = 0;
@@ -174,7 +175,7 @@ bool WebSocket::readHttpHeader(Socket* socket, String* outHeader)
     while ( n < 8191 ) {
         int c = input->read();
         if ( c < 0 ) {
-            return false;
+            return FALSE;
         }
         buffer[n++] = ((char)(c));
         if ( n >= 4 && buffer[n - 4] == '\r' && buffer[n - 3] == '\n' &&
@@ -184,10 +185,10 @@ bool WebSocket::readHttpHeader(Socket* socket, String* outHeader)
     }
     buffer[n] = '\0';
     *outHeader = String(buffer);
-    return true;
+    return TRUE;
 }
 
-bool WebSocket::sendHandshake(Socket* socket, const ParsedUrl& url)
+BOOLEAN WebSocket::sendHandshake(Socket* socket, const ParsedUrl& url)
 {
     String request = String("GET ") + url.path + " HTTP/1.1\r\n"
         + "Host: " + url.host + "\r\n"
@@ -204,30 +205,30 @@ bool WebSocket::sendHandshake(Socket* socket, const ParsedUrl& url)
     return readHttpHeader(socket, &response) && findText(response, "101") != String::npos;
 }
 
-bool WebSocket::readExact(Socket* socket, unsigned char* buffer, int length)
+BOOLEAN WebSocket::readExact(Socket* socket, unsigned char* buffer, int length)
 {
     int done = 0;
     InputStream* input = socket->getInputStream();
     while ( done < length ) {
         int n = input->read(buffer, done, length - done);
         if ( n <= 0 ) {
-            return false;
+            return FALSE;
         }
         done += n;
     }
-    return true;
+    return TRUE;
 }
 
-bool WebSocket::discard(Socket* socket, unsigned long long length)
+BOOLEAN WebSocket::discard(Socket* socket, unsigned long long length)
 {
     unsigned char buffer[512];
     while ( length > 0 ) {
         int chunk = length > sizeof(buffer) ? ((int)(sizeof(buffer))) : ((int)(length));
         if ( !readExact(socket, buffer, chunk) ) {
-            return false;
+            return FALSE;
         }
         length -= ((unsigned long long)(chunk));
     }
-    return true;
+    return TRUE;
 }
 

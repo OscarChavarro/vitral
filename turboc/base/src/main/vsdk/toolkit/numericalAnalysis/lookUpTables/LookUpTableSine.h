@@ -8,7 +8,7 @@ with a single array lookup.
 */
 class LookUpTableSine {
   private:
-    static const int SIZE = 1000;
+    enum { SIZE = 1000 };
     double table[SIZE];
 
   public:

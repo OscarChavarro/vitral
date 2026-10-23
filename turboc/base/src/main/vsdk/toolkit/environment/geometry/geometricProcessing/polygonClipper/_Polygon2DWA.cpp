@@ -1,15 +1,16 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_Polygon2DWA.h"
 _Polygon2DWA::_Polygon2DWA() : currentLoop(0) { nextLoop(); }
 
-_Polygon2DWA::_Polygon2DWA(const Polygon2D& polyToCopy, bool copyClean) : currentLoop(0)
+_Polygon2DWA::_Polygon2DWA(const Polygon2D& polyToCopy, BOOLEAN copyClean) : currentLoop(0)
 {
-    bool oneOrMoreLoops = false;
+    BOOLEAN oneOrMoreLoops = FALSE;
     for (long int i = 0; i < polyToCopy.loops.size(); ++i) {
         _Polygon2DContour* contourToCopy = polyToCopy.loops.get(i);
-        oneOrMoreLoops = true;
+        oneOrMoreLoops = TRUE;
         nextLoop();
         if (contourToCopy->vertices.size() == 0) continue;
         if (contourToCopy->vertices.size() == 1) {
@@ -19,21 +20,21 @@ _Polygon2DWA::_Polygon2DWA(const Polygon2D& polyToCopy, bool copyClean) : curren
         else {
             Vertex2D prevV = contourToCopy->vertices.get(contourToCopy->vertices.size()-1);
             Vertex2D prevPV = contourToCopy->vertices.get(contourToCopy->vertices.size()-2);
-            bool removeLast = false;
-            bool isFirst = true;
+            BOOLEAN removeLast = FALSE;
+            BOOLEAN isFirst = TRUE;
             for (long int j = 0; j < contourToCopy->vertices.size(); ++j) {
                 Vertex2D v = contourToCopy->vertices.get(j);
                 if (copyClean) {
                     if (fabs(prevV.x-v.x) > 0.0001 || fabs(prevV.y-v.y) > 0.0001) {
                         addVertex(v.x, v.y, v.color.r(), v.color.g(), v.color.b());
                         if (areCollinearAndOposite2DVectors(prevPV, prevV, v)) {
-                            if (isFirst) removeLast = true;
+                            if (isFirst) removeLast = TRUE;
                             else currentLoop->removeVertex(currentLoop->vertices.size()-2);
                         }
                         else prevPV = prevV;
                         prevV = v;
                     }
-                    isFirst = false;
+                    isFirst = FALSE;
                 }
                 else addVertex(v.x, v.y, v.color.r(), v.color.g(), v.color.b());
             }
@@ -52,15 +53,15 @@ _Polygon2DWA::~_Polygon2DWA()
     for (long int i = 0; i < loops.size(); ++i) delete loops[i];
 }
 
-bool _Polygon2DWA::areCollinearAndOposite2DVectors(const Vertex2D& vEndA, const Vertex2D& vStartAB, const Vertex2D& vEndB)
+BOOLEAN _Polygon2DWA::areCollinearAndOposite2DVectors(const Vertex2D& vEndA, const Vertex2D& vStartAB, const Vertex2D& vEndB)
 {
     Vertex2D a(vEndA.x - vStartAB.x, vEndA.y - vStartAB.y);
     Vertex2D b(vEndB.x - vStartAB.x, vEndB.y - vStartAB.y);
     double t = sqrt(a.x*a.x + a.y*a.y);
-    if (t < 1e-12) return false;
+    if (t < 1e-12) return FALSE;
     a.x /= t; a.y /= t;
     t = sqrt(b.x*b.x + b.y*b.y);
-    if (t < 1e-12) return false;
+    if (t < 1e-12) return FALSE;
     b.x /= t; b.y /= t;
     t = a.x*b.x + a.y*b.y;
     return (t > -1.0001 && t < -0.9999);

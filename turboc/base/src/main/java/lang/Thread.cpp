@@ -1,6 +1,10 @@
 #include <stddef.h>
 #include <time.h>
+#ifdef __TURBOC__
+#include <dos.h>
+#endif
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Thread.h"
 
 
@@ -33,7 +37,7 @@ runThreadStartup(void *data)
 // `thread` is only read once `joinable` is set (gcc 2.7.2 rejects the
 // `thread()` initializer of a scalar pthread_t)
 Thread::Thread(Runnable *target) :
-    target(target), name("Thread"), joinable(false)
+    target(target), name("Thread"), joinable(FALSE)
 {
 }
 
@@ -41,7 +45,7 @@ Thread::~Thread()
 {
     if ( joinable ) {
         pthread_detach(thread);
-        joinable = false;
+        joinable = FALSE;
     }
 }
 
@@ -74,7 +78,7 @@ Thread::start()
         return;
     }
     thread = newThread;
-    joinable = true;
+    joinable = TRUE;
     pthread_mutex_unlock(&startup->started);
 }
 
@@ -83,17 +87,26 @@ Thread::join()
 {
     if ( joinable && !pthread_equal(thread, pthread_self()) ) {
         pthread_join(thread, NULL);
-        joinable = false;
+        joinable = FALSE;
     }
 }
 
 void
 Thread::sleep(long long millis)
 {
+#ifdef __TURBOC__
+    // DOS has no nanosleep: delay waits at most 65535 milliseconds
+    while ( millis > 0 ) {
+        unsigned step = millis > 60000 ? 60000 : (unsigned)millis;
+        delay(step);
+        millis -= step;
+    }
+#else
     struct timespec duration;
     duration.tv_sec = (time_t)(millis / 1000);
     duration.tv_nsec = (long)((millis % 1000) * 1000000);
     while ( nanosleep(&duration, &duration) != 0 ) {
     }
+#endif
 }
 

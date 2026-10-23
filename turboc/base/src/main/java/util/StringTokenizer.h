@@ -1,6 +1,7 @@
 #ifndef __STRING_TOKENIZER__
 #define __STRING_TOKENIZER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 class StringTokenizer {
@@ -9,7 +10,7 @@ class StringTokenizer {
     char *delimiters;
     int cursor;
 
-    bool
+    BOOLEAN
     isDelimiter(char ch) const;
 
     int
@@ -25,7 +26,7 @@ class StringTokenizer {
     void
     dispose();
 
-    bool
+    BOOLEAN
     hasMoreTokens() const;
 
     String

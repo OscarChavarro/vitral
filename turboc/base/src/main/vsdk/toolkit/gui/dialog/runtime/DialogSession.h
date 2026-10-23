@@ -1,6 +1,7 @@
 #ifndef __DIALOG_SESSION__
 #define __DIALOG_SESSION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 
 #include "java/lang/String.h"
@@ -17,8 +18,8 @@ class DialogSession {
 private:
     const WidgetDialog* definition;
     TreeMap<String, String> drafts;
-    bool open;
-    bool busy;
+    BOOLEAN open;
+    BOOLEAN busy;
     long generation;
 
 public:
@@ -34,8 +35,8 @@ public:
     @return the draft of the binding, or an empty string
     */
     String getDraft(const String& binding) const;
-    bool isOpen() const;
-    bool isBusy() const;
+    BOOLEAN isOpen() const;
+    BOOLEAN isBusy() const;
 
     /**
     @return identifier of the action started, or -1 if the session is
@@ -47,7 +48,7 @@ public:
     @return true if the request is the running action of the open session
     (then the session is not busy anymore)
     */
-    bool completeAction(long request);
+    BOOLEAN completeAction(long request);
     void close();
 };
 

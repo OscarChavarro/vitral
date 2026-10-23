@@ -5,6 +5,7 @@ class Camera;
 class InfinitePlaneGizmo;
 class TangibleInterfaceEvent;
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 class TangibleInterfaceEvent2InfinitePlaneGizmoMapper {

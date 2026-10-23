@@ -1,6 +1,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_ORTHOGONAL_PROFILE_FALLBACK__
 #define ___POLYHEDRAL_BOUNDED_SOLID_ORTHOGONAL_PROFILE_FALLBACK__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -33,8 +34,10 @@ public:
         int op);
 
 private:
-    static const int PROFILE_X_EXTRUDED_YZ = 0;
-    static const int PROFILE_Y_EXTRUDED_XZ = 1;
+    enum {
+        PROFILE_X_EXTRUDED_YZ = 0,
+        PROFILE_Y_EXTRUDED_XZ = 1
+    };
 
     class OrthogonalProfileOperandSpec {
     public:
@@ -44,7 +47,7 @@ private:
         ArrayList<double> rightBoundaryZ;
         ArrayList<double> rightBoundaryX;
 
-        bool contains(double x, double y, double z) const;
+        BOOLEAN contains(double x, double y, double z) const;
         double rightXAtZ(double z) const;
     };
 
@@ -82,29 +85,29 @@ private:
         void attachEdge(_PolyhedralBoundedSolidHalfEdge* he,
             _PolyhedralBoundedSolidVertex* a,
             _PolyhedralBoundedSolidVertex* b);
-        static bool degenerateQuad(const Vector3Dd corners[4]);
+        static BOOLEAN degenerateQuad(const Vector3Dd corners[4]);
     };
 
     _PolyhedralBoundedSolidOrthogonalProfileFallback();
-    static bool pointInsideYZProfile(const ArrayList<Vector3Dd>& profile,
+    static BOOLEAN pointInsideYZProfile(const ArrayList<Vector3Dd>& profile,
         double y, double z);
-    static bool createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
+    static BOOLEAN createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
         const ArrayList<double>& xCoordinates,
         const ArrayList<double>& yCoordinates,
         const ArrayList<double>& zCoordinates,
         OrthogonalProfileOperandSpec& outSpec);
-    static bool createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
+    static BOOLEAN createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
         const ArrayList<double>& xCoordinates,
         const ArrayList<double>& yCoordinates,
         const ArrayList<double>& zCoordinates,
         OrthogonalProfileOperandSpec& outSpec);
-    static bool createOrthogonalProfileSpec(PolyhedralBoundedSolid* solid,
+    static BOOLEAN createOrthogonalProfileSpec(PolyhedralBoundedSolid* solid,
         OrthogonalProfileOperandSpec& outSpec);
-    static bool prepareOrthogonalProfileBooleanFallbackSpec(
+    static BOOLEAN prepareOrthogonalProfileBooleanFallbackSpec(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
         OrthogonalProfileBooleanFallbackSpec& outSpec);
-    static bool profileCellSelected(const OrthogonalProfileBooleanFallbackSpec& spec,
+    static BOOLEAN profileCellSelected(const OrthogonalProfileBooleanFallbackSpec& spec,
         int op, int zone, int iy, int iz);
     static void addProfileBoundaryQuad(ProfileCellBooleanBuilder& builder,
         const OrthogonalProfileBooleanFallbackSpec& spec,

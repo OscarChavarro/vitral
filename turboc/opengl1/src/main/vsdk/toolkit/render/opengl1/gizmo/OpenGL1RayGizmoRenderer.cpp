@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 
 #include "java/util/ArrayList.txx"
@@ -132,11 +133,11 @@ void OpenGL1RayGizmoRenderer::drawIndicator(
 RendererConfiguration OpenGL1RayGizmoRenderer::buildSurfaceQuality()
 {
     RendererConfiguration quality;
-    quality.setSurfaces(true);
-    quality.setWires(false);
-    quality.setPoints(false);
-    quality.setTexture(false);
-    quality.setBumpMap(false);
+    quality.setSurfaces(TRUE);
+    quality.setWires(FALSE);
+    quality.setPoints(FALSE);
+    quality.setTexture(FALSE);
+    quality.setBumpMap(FALSE);
     return quality;
 }
 

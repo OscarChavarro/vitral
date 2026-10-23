@@ -19,7 +19,8 @@ RGBColorPalette::~RGBColorPalette() {
 }
 
 void RGBColorPalette::init(int size) {
-    for (long int i = 0; i < colors.size(); i++) {
+    long i;
+    for (i = 0; i < colors.size(); i++) {
         if (colors[i] != NULL) {
             delete colors[i];
             colors[i] = NULL;
@@ -27,7 +28,7 @@ void RGBColorPalette::init(int size) {
     }
     colors.clear();
 
-    for (int i = 0; i < size; i++) {
+    for (i = 0; i < size; i++) {
         colors.add(new ColorRgb(0, 0, 0));
     }
     buildGrayLevelsTable();

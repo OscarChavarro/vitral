@@ -1,6 +1,7 @@
 #ifndef __GUI_STATE__
 #define __GUI_STATE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -22,8 +23,8 @@ public:
 
 private:
     String languageGuiFile;
-    bool modifyPanelSelected;
-    bool fullScreenGuiMode;
+    BOOLEAN modifyPanelSelected;
+    BOOLEAN fullScreenGuiMode;
     String readFolder;
     String writeFolder;
 
@@ -52,15 +53,15 @@ public:
     /**
     @return true if the panel that edits the selected body is shown
     */
-    bool isModifyPanelSelected() const;
-    void setModifyPanelSelected(bool modifyPanelSelected);
+    BOOLEAN isModifyPanelSelected() const;
+    void setModifyPanelSelected(BOOLEAN modifyPanelSelected);
 
     /**
     @return true if only the drawing area is shown, without the rest of the
     GUI
     */
-    bool isFullScreenGuiMode() const;
-    void setFullScreenGuiMode(bool fullScreenGuiMode);
+    BOOLEAN isFullScreenGuiMode() const;
+    void setFullScreenGuiMode(BOOLEAN fullScreenGuiMode);
 
     /**
     Switches between showing only the drawing area and showing all the GUI.

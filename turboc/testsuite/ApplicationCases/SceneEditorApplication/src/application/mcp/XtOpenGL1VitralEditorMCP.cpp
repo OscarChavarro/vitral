@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/net/ServerSocket.h"
 #include "java/net/Socket.h"
 #include "application/mcp/XtOpenGL1VitralEditorMCP.h"
@@ -62,7 +63,7 @@ void XtOpenGL1VitralEditorMCP::run()
         fprintf(stderr, "Can not listen on TCP port %d\n", tcpPort);
         return;
     }
-    while ( true ) {
+    while ( TRUE ) {
         Socket* clientSocket = serverSocket.accept();
         if ( clientSocket == NULL ) {
             if ( errno == EINTR || errno == ECONNABORTED ) {

@@ -4,6 +4,7 @@
 //=     Engine for 3D Models", ACM Transactions on Graphics, Vol 22. No1.   =
 //=     January 2003. Pp. 83-105                                            =
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -35,7 +36,7 @@
 #include "render/ProjectedViewRenderer.h"
 #include "render/ProjectedViewsDebugger.h"
 
-static const bool DO_DISTANCE_FIELD = false;
+static const BOOLEAN DO_DISTANCE_FIELD = FALSE;
 static const int DISTANCE_FIELD_SIDE = 320;
 
 ProjectedViewsDebugger::ProjectedViewsDebugger(ApplicationModel* model,
@@ -44,9 +45,9 @@ ProjectedViewsDebugger::ProjectedViewsDebugger(ApplicationModel* model,
       host(host)
 {
     quality = new RendererConfiguration();
-    quality->setWires(false);
-    quality->setSurfaces(true);
-    isTransparent = true;
+    quality->setWires(FALSE);
+    quality->setSurfaces(TRUE);
+    isTransparent = TRUE;
 
     if ( DO_DISTANCE_FIELD ) {
         viewSize = DISTANCE_FIELD_SIDE;
@@ -67,7 +68,7 @@ void ProjectedViewsDebugger::debugIfNeeded(ProjectedViewRenderer* renderer)
     if ( !drawingArea->isProjectedViewsDebugRequested() ) {
         return;
     }
-    drawingArea->setProjectedViewsDebugRequested(false);
+    drawingArea->setProjectedViewsDebugRequested(FALSE);
 
     //-----------------------------------------------------------------
     int selectedThing = scene->selectedThings->firstSelected();
@@ -319,7 +320,7 @@ SimpleBodyGroup* ProjectedViewsDebugger::addDebugProjectedView(
         textureRange.add(1);
         textureRanges.add(textureRange);
         SimpleMaterial material = Scene::defaultMaterial();
-        material = material.withDoubleSided(true);
+        material = material.withDoubleSided(TRUE);
         material = material.withAmbient(ColorRgb(1, 1, 1));
         material = material.withDiffuse(ColorRgb(1, 1, 1));
         material = material.withSpecular(ColorRgb(1, 1, 1));
@@ -332,13 +333,13 @@ SimpleBodyGroup* ProjectedViewsDebugger::addDebugProjectedView(
         materialRanges.add(materialRange);
 
         mesh = new TriangleMesh();
-        mesh->setVertexes(vertexArray, true, false, false, true);
+        mesh->setVertexes(vertexArray, TRUE, FALSE, FALSE, TRUE);
         mesh->setTriangles(triangleArray);
         // The texture is owned by the body, the materials by the mesh
         mesh->setTextures(textureArray);
         mesh->setTextureRanges(textureRanges);
         mesh->setMaterials(materialArray);
-        mesh->setOwnsMaterials(true);
+        mesh->setOwnsMaterials(TRUE);
         mesh->setMaterialRanges(materialRanges);
 
         //-----------------------------------------------------------------

@@ -2,6 +2,7 @@
 #define __INDEXED_COLOR_IMAGE_UNCOMPRESSED__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/Image.h"
 class RGBColorPalette;
 class RGBAImageUncompressed;
@@ -19,7 +20,7 @@ private:
     int xSize;
     int ySize;
     RGBColorPalette* colorTable;
-    mutable ColorRgb* staticColor;
+    ColorRgb* staticColor;
 
     int pixelBaseIndex(int x, int y) const;
 
@@ -32,9 +33,9 @@ public:
 
     virtual int getSizeInBytes() const;
 
-    virtual bool init(int width, int height);
+    virtual BOOLEAN init(int width, int height);
 
-    virtual bool initNoFill(int width, int height);
+    virtual BOOLEAN initNoFill(int width, int height);
 
     void putPixel(int x, int y, char colorIndex);
 

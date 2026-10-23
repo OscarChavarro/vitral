@@ -1,6 +1,7 @@
 #ifndef __APPLICATION_MODEL__
 #define __APPLICATION_MODEL__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "java/util/function/Function.h"
 #include "java/util/function/Supplier.h"
@@ -64,7 +65,7 @@ private:
     int raytracedImageHeight;
     RGBColorPalette* palette;
     RayGizmo* rayGizmo;
-    mutable Ray visualDebugRay;
+    Ray visualDebugRay;
     ArrayList<ViewportSet*> viewportSets;
     int activeViewportSetIndex;
     Widget* i18nContext;
@@ -175,8 +176,8 @@ public:
     void setRaytracedImageHeight(int raytracedImageHeight);
     RGBColorPalette* getPalette() const;
     void setPalette(RGBColorPalette* palette);
-    bool isWithVisualDebugRay() const;
-    void setWithVisualDebugRay(bool withVisualDebugRay);
+    BOOLEAN isWithVisualDebugRay() const;
+    void setWithVisualDebugRay(BOOLEAN withVisualDebugRay);
 
     /**
     @return the ray to debug visually, or null if there is none

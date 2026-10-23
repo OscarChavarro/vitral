@@ -1,6 +1,7 @@
 #ifndef __SCENE_SELECTION_EDITOR__
 #define __SCENE_SELECTION_EDITOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -26,7 +27,7 @@ public:
     @param outCentroid the centroid, when something is selected
     @return false if no thing is selected (the Java version returns null)
     */
-    bool computeSelectionCentroid(Vector3Dd* outCentroid);
+    BOOLEAN computeSelectionCentroid(Vector3Dd* outCentroid);
 
     /**
     @param position where the translation gizmo is to be placed

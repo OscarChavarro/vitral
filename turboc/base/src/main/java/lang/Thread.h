@@ -1,6 +1,7 @@
 #ifndef __THREAD__
 #define __THREAD__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"
 
 #include "java/lang/Runnable.h"
@@ -20,7 +21,7 @@ class Thread {
     Runnable *target;
     String name;
     pthread_t thread;
-    bool joinable;
+    BOOLEAN joinable;
 
     Thread(const Thread &other);
     Thread &operator=(const Thread &other);

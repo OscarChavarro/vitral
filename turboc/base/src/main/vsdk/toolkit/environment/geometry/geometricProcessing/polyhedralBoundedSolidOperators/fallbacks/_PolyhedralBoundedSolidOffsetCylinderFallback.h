@@ -1,6 +1,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_OFFSET_CYLINDER_FALLBACK__
 #define ___POLYHEDRAL_BOUNDED_SOLID_OFFSET_CYLINDER_FALLBACK__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
 
 class PolyhedralBoundedSolid;
@@ -51,7 +52,7 @@ public:
 
 private:
     _PolyhedralBoundedSolidOffsetCylinderFallback();
-    static bool describeVerticalCylinder(PolyhedralBoundedSolid* solid,
+    static BOOLEAN describeVerticalCylinder(PolyhedralBoundedSolid* solid,
         VerticalCylinderOperandSpec& outSpec);
     static PolyhedralBoundedSolid* createFallbackCylinder(
         const VerticalCylinderOperandSpec& spec,

@@ -362,12 +362,12 @@ Vector3Dd RotateGizmo::getCameraPlaneUpDirection() const
         getCameraPlaneRightDirection()).normalized();
 }
 
-bool RotateGizmo::isPointOnVisibleHemisphere(const Vector3Dd& point) const
+BOOLEAN RotateGizmo::isPointOnVisibleHemisphere(const Vector3Dd& point) const
 {
     return visibilityMetric(point, getPosition()) < VSDK::EPSILON;
 }
 
-bool RotateGizmo::needsHemisphereClipping(const Vector3Dd& axis,
+BOOLEAN RotateGizmo::needsHemisphereClipping(const Vector3Dd& axis,
                                           const Vector3Dd& center) const
 {
     Vector3Dd viewDirection =
@@ -461,7 +461,8 @@ ArrayList<ArrayList<Vector3Dd> > RotateGizmo::buildVisibleRingArcs(
     ArrayList<Vector3Dd> points;
     ArrayList<double> metrics;
 
-    for ( int i = 0; i <= n; i++ ) {
+    int i;
+    for ( i = 0; i <= n; i++ ) {
         double angle = 2 * M_PI * (i % n) / n;
         Vector3Dd point = center.add(u.multiply(radius * cos(angle)))
             .add(v.multiply(radius * sin(angle)));
@@ -473,9 +474,9 @@ ArrayList<ArrayList<Vector3Dd> > RotateGizmo::buildVisibleRingArcs(
     ArrayList<ArrayList<Vector3Dd> > arcs;
     ArrayList<Vector3Dd> current;
 
-    for ( int i = 0; i < n; i++ ) {
-        bool visibleA = metrics[i] < 0;
-        bool visibleB = metrics[i + 1] < 0;
+    for ( i = 0; i < n; i++ ) {
+        BOOLEAN visibleA = metrics[i] < 0;
+        BOOLEAN visibleB = metrics[i + 1] < 0;
 
         if ( visibleA && current.size() == 0 ) {
             current.add(points[i]);
@@ -659,13 +660,13 @@ int RotateGizmo::getCurrentSelection() const
     return volatileSelection;
 }
 
-bool RotateGizmo::isRingHighlighted(int ring) const
+BOOLEAN RotateGizmo::isRingHighlighted(int ring) const
 {
     checkRing(ring);
     return getCurrentSelection() == groupOfRing(ring);
 }
 
-bool RotateGizmo::isCameraRingHighlighted() const
+BOOLEAN RotateGizmo::isCameraRingHighlighted() const
 {
     return getCurrentSelection() == CAMERA_RING_GROUP;
 }
@@ -701,7 +702,7 @@ void RotateGizmo::clearArc()
     arcRing = -1;
 }
 
-bool RotateGizmo::isArcVisible() const
+BOOLEAN RotateGizmo::isArcVisible() const
 {
     return arcRing >= 0;
 }
@@ -751,14 +752,14 @@ ArrayList<Vector3Dd> RotateGizmo::buildArcFan() const
     return fan;
 }
 
-bool RotateGizmo::getArcLabelPosition(Vector3Dd* outPosition) const
+BOOLEAN RotateGizmo::getArcLabelPosition(Vector3Dd* outPosition) const
 {
     if ( !isArcVisible() ) {
-        return false;
+        return FALSE;
     }
     *outPosition = pointOfArc(arcStartAngle + arcSweep / 2,
                               ARC_LABEL_DISTANCE);
-    return true;
+    return TRUE;
 }
 
 double RotateGizmo::arcRingRadius() const
@@ -843,25 +844,6 @@ void RotateGizmo::checkRingOrCamera(int ring)
             " for the camera ring.");
     }
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int RotateGizmo::X_RING_GROUP;
-const int RotateGizmo::Y_RING_GROUP;
-const int RotateGizmo::Z_RING_GROUP;
-const int RotateGizmo::CAMERA_RING_GROUP;
-const int RotateGizmo::CAMERA_RING_INDEX;
-const int RotateGizmo::INPUT_FIELD_COUNT;
-const int RotateGizmo::CAMERA_INPUT_FIELD_INDEX;
-const int RotateGizmo::DEFAULT_APPARENT_SIZE_IN_PIXELS;
-const int RotateGizmo::ANGLE_DECIMALS;
-const int RotateGizmo::ANGLE_INTEGER_DIGITS;
-const int RotateGizmo::RING_SEGMENTS;
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int RotateGizmo::NULL_GROUP;
-const int RotateGizmo::RING_COUNT;
 
 const Class RotateGizmo::CLASS = { "RotateGizmo", &Gizmo::CLASS };
 

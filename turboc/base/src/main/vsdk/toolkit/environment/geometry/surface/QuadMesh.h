@@ -1,6 +1,7 @@
 #ifndef __QUAD_MESH__
 #define __QUAD_MESH__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
@@ -64,7 +65,7 @@ public:
     TriangleMeshGroup* exportToTriangleMeshGroup();
 
     Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 
     String toString() const;

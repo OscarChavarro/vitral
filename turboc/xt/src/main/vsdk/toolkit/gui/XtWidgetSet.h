@@ -1,6 +1,7 @@
 #ifndef __XT_WIDGET_SET__
 #define __XT_WIDGET_SET__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -32,8 +33,8 @@ public:
     */
     struct MenuChoice {
         String label;
-        bool checked;
-        bool separator;
+        BOOLEAN checked;
+        BOOLEAN separator;
     };
 
     /**

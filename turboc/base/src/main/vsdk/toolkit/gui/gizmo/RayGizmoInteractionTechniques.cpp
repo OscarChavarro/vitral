@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
@@ -10,7 +11,7 @@ const double RayGizmoInteractionTechniques::ORIGIN_STEP = 0.1;
 const double RayGizmoInteractionTechniques::ANGLE_STEP_DEGREES = 5.0;
 
 RayGizmoInteractionTechniques::RayGizmoInteractionTechniques(RayGizmo* gizmo)
-    : gizmo(gizmo), active(false), origin(0, 0, 0),
+    : gizmo(gizmo), active(FALSE), origin(0, 0, 0),
       yawInDegrees(0.0), pitchInDegrees(0.0)
 {
     initialize();
@@ -27,7 +28,7 @@ void RayGizmoInteractionTechniques::initialize()
 
 RayGizmoInteractionTechniques::RayGizmoInteractionTechniques(
     RayGizmo* gizmo, int activationKey1)
-    : gizmo(gizmo), active(false), origin(0, 0, 0),
+    : gizmo(gizmo), active(FALSE), origin(0, 0, 0),
       yawInDegrees(0.0), pitchInDegrees(0.0)
 {
     initialize();
@@ -36,7 +37,7 @@ RayGizmoInteractionTechniques::RayGizmoInteractionTechniques(
 
 RayGizmoInteractionTechniques::RayGizmoInteractionTechniques(
     RayGizmo* gizmo, int activationKey1, int activationKey2)
-    : gizmo(gizmo), active(false), origin(0, 0, 0),
+    : gizmo(gizmo), active(FALSE), origin(0, 0, 0),
       yawInDegrees(0.0), pitchInDegrees(0.0)
 {
     initialize();
@@ -48,12 +49,12 @@ RayGizmoInteractionTechniques::~RayGizmoInteractionTechniques()
 {
 }
 
-bool RayGizmoInteractionTechniques::isActive() const
+BOOLEAN RayGizmoInteractionTechniques::isActive() const
 {
     return active;
 }
 
-void RayGizmoInteractionTechniques::setActive(bool active)
+void RayGizmoInteractionTechniques::setActive(BOOLEAN active)
 {
     this->active = active;
     if ( gizmo == 0 ) {
@@ -72,23 +73,23 @@ InputGizmo* RayGizmoInteractionTechniques::getInputGizmo()
     return gizmo != 0 ? gizmo->getInputGizmo() : 0;
 }
 
-bool RayGizmoInteractionTechniques::processKeyPressedEvent(const KeyEvent& event)
+BOOLEAN RayGizmoInteractionTechniques::processKeyPressedEvent(const KeyEvent& event)
 {
     if ( gizmo == 0 ) {
-        return false;
+        return FALSE;
     }
     active = gizmo->isVisible();
     if ( isActivationKey(event) || event.keycode == KeyEvent::KEY_NUM5 ) {
         setActive(!active);
-        return true;
+        return TRUE;
     }
     if ( !active ) {
-        return false;
+        return FALSE;
     }
     if ( processNumericPadCommand(event) ) {
         getInputGizmo()->cancelEditing();
         applyRay();
-        return true;
+        return TRUE;
     }
     if ( getInputGizmo()->consumesKey(event) ) {
         getInputGizmo()->processKeyPressedEvent(event);
@@ -97,9 +98,9 @@ bool RayGizmoInteractionTechniques::processKeyPressedEvent(const KeyEvent& event
             getInputGizmo()->cancelEditing();
             applyRay();
         }
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 void RayGizmoInteractionTechniques::setRay(const Ray* ray)
@@ -113,60 +114,60 @@ void RayGizmoInteractionTechniques::setRay(const Ray* ray)
     gizmo->setRay(*ray, 0.0);
 }
 
-bool RayGizmoInteractionTechniques::processNumericPadCommand(const KeyEvent& event)
+BOOLEAN RayGizmoInteractionTechniques::processNumericPadCommand(const KeyEvent& event)
 {
     switch ( event.keycode ) {
       case KeyEvent::KEY_NUM4:
         origin = origin.add(Vector3Dd(-ORIGIN_STEP, 0, 0));
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUM6:
         origin = origin.add(Vector3Dd(ORIGIN_STEP, 0, 0));
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUM2:
         origin = origin.add(Vector3Dd(0, -ORIGIN_STEP, 0));
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUM8:
         origin = origin.add(Vector3Dd(0, ORIGIN_STEP, 0));
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUM1:
         origin = origin.add(Vector3Dd(0, 0, -ORIGIN_STEP));
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUM7:
         origin = origin.add(Vector3Dd(0, 0, ORIGIN_STEP));
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUMASTERISK:
         yawInDegrees -= ANGLE_STEP_DEGREES;
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUMSLASH:
         yawInDegrees += ANGLE_STEP_DEGREES;
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUMPLUS:
         pitchInDegrees += ANGLE_STEP_DEGREES;
         clampPitch();
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUMMINUS:
         pitchInDegrees -= ANGLE_STEP_DEGREES;
         clampPitch();
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUM9:
         gizmo->setMaxNumOfReflections(gizmo->getMaxNumOfReflections() + 1);
-        return true;
+        return TRUE;
       case KeyEvent::KEY_NUM3:
         gizmo->setMaxNumOfReflections(gizmo->getMaxNumOfReflections() - 1);
-        return true;
+        return TRUE;
       default:
-        return false;
+        return FALSE;
     }
 }
 
-bool RayGizmoInteractionTechniques::isActivationKey(const KeyEvent& event) const
+BOOLEAN RayGizmoInteractionTechniques::isActivationKey(const KeyEvent& event) const
 {
     for ( long i = 0; i < activationKeys.size(); i++ ) {
         if ( event.keycode == activationKeys.get(i) ) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 Ray RayGizmoInteractionTechniques::currentRay() const

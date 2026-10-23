@@ -14,6 +14,7 @@
 #undef Object
 #undef String
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/XmPanelWidgets.h"
 #include "vsdk/toolkit/gui/XmWidgetSupport.h"
 #include "vsdk/toolkit/gui/XtTextEncoding.h"
@@ -74,7 +75,7 @@ static void postOptions(Widget button, XtPointer clientData, XtPointer)
 
 
 Widget XmPanelWidgets::createPanel(Widget parent, const char* name, int x,
-                                   int y, int width, int height, bool managed)
+                                   int y, int width, int height, BOOLEAN managed)
 {
     // Panels are the first Motif widgets of the windows
     if (XtIsShell(parent)) XmWidgetSupport::requireMotifShell(parent);
@@ -149,7 +150,7 @@ Widget XmPanelWidgets::createTextField(Widget parent, const String& text,
     Widget field = XtCreateManagedWidget("panelTextField",
         xmTextFieldWidgetClass, parent, args, n);
     if (fonts != NULL) XmRenderTableFree(fonts);
-    setInvalid(field, false);
+    setInvalid(field, FALSE);
     XtWidgetSupport::bindProc(field, XmNactivateCallback, activate,
                               clientData);
     return field;
@@ -168,10 +169,10 @@ void XmPanelWidgets::setText(Widget field, const String& text)
 {
     const String localeText = XtTextEncoding::toLocale(text);
     XmTextFieldSetString(field, ((char*)(localeText.c_str())));
-    setInvalid(field, false);
+    setInvalid(field, FALSE);
 }
 
-void XmPanelWidgets::setInvalid(Widget field, bool invalid)
+void XmPanelWidgets::setInvalid(Widget field, BOOLEAN invalid)
 {
     XtWidgetSupport::setColor(field, XmNbackground,
                               invalid ? INVALID_BACKGROUND : NORMAL_BACKGROUND);

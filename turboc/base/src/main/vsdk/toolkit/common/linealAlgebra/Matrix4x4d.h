@@ -4,6 +4,7 @@
 
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -66,11 +67,11 @@ public:
     double obtainEulerPitchAngle() const;
     double obtainEulerRollAngle() const;
 
-    bool epsilonEquals(const Matrix4x4d& other) const { return epsilonEquals(other, 1e-6); }
-    bool epsilonEquals(const Matrix4x4d& other, double epsilon) const;
+    BOOLEAN epsilonEquals(const Matrix4x4d& other) const { return epsilonEquals(other, 1e-6); }
+    BOOLEAN epsilonEquals(const Matrix4x4d& other, double epsilon) const;
 
-    bool operator==(const Matrix4x4d& other) const;
-    bool equals(const Matrix4x4d& other) const { return (*this) == other; }
+    BOOLEAN operator==(const Matrix4x4d& other) const;
+    BOOLEAN equals(const Matrix4x4d& other) const { return (*this) == other; }
     int hashCode() const;
 
     inline Vector3Dd transformPoint(const Vector3Dd& v) const {

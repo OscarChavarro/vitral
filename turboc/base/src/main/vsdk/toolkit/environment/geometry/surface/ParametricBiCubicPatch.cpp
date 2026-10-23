@@ -27,8 +27,8 @@ static ReentrantLock& rayIntersectorAccess()
 }
 
 ParametricBiCubicPatch::ParametricBiCubicPatch()
-    : contourCurve(NULL), hasControlMeshPoints(false),
-      hasCoefficientMatrices(false), approximationSteps(INITIAL_APPROXIMATION_STEPS), type(ParametricCurve::HERMITE)
+    : contourCurve(NULL), hasControlMeshPoints(FALSE),
+      hasCoefficientMatrices(FALSE), approximationSteps(INITIAL_APPROXIMATION_STEPS), type(ParametricCurve::HERMITE)
 {
 }
 
@@ -47,7 +47,7 @@ void ParametricBiCubicPatch::buildBezierPatch(const Vector3Dd inControlMeshPoint
             controlMeshPoints[i][j] = inControlMeshPoints[i][j];
         }
     }
-    hasControlMeshPoints = true;
+    hasControlMeshPoints = TRUE;
     approximationSteps = INITIAL_APPROXIMATION_STEPS;
     type = ParametricCurve::BEZIER;
     calculateMatrices();
@@ -76,7 +76,7 @@ void ParametricBiCubicPatch::calculateMatrices()
     tParameterMatrix = Matrix4x4d();
     sDerivativeParameterMatrix = Matrix4x4d();
     tDerivativeParameterMatrix = Matrix4x4d();
-    hasCoefficientMatrices = true;
+    hasCoefficientMatrices = TRUE;
     ReentrantLockGuard guard(rayIntersectorAccess());
     rayIntersector.reset();
 }
@@ -100,21 +100,22 @@ ParametricBiCubicPatch::getRayIntersector() const
         intersector = SharedPointer<const _ParametricBiCubicPatchIntersector>(
             new _ParametricBiCubicPatchIntersector(
                 coefficientMatrixX, coefficientMatrixY, coefficientMatrixZ));
-        rayIntersector = intersector;
+        // A cache, changed by this const method (no `mutable` in Turbo C++)
+        ((ParametricBiCubicPatch *)this)->rayIntersector = intersector;
     }
     return intersector;
 }
 
-bool ParametricBiCubicPatch::getBezierControlPoint(int i, int j,
+BOOLEAN ParametricBiCubicPatch::getBezierControlPoint(int i, int j,
                                                    Vector3Dd& outPoint) const
 {
     SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
         getRayIntersector();
     if ( !intersector ) {
-        return false;
+        return FALSE;
     }
     outPoint = intersector->getBezierControlPoint(i, j);
-    return true;
+    return TRUE;
 }
 
 int ParametricBiCubicPatch::getApproximationSteps() const { return approximationSteps; }
@@ -146,7 +147,8 @@ void ParametricBiCubicPatch::buildGeometryMatricesXYZ_Hermite()
 
     int p = 0;
     int i = 0;
-    for (int j = 0; j < 2; j++) {
+    int j;
+    for (j = 0; j < 2; j++) {
         const Vector3Dd* vp = contourCurve->getPoint(p);
         mx[i][j] = vp[0].x(); my[i][j] = vp[0].y(); mz[i][j] = vp[0].z();
         mx[i][j + 2] = vp[2 - j].x(); my[i][j + 2] = vp[2 - j].y(); mz[i][j + 2] = vp[2 - j].z();
@@ -157,7 +159,7 @@ void ParametricBiCubicPatch::buildGeometryMatricesXYZ_Hermite()
 
     p = 2;
     i = 1;
-    for (int j = 0; j < 2; j++) {
+    for (j = 0; j < 2; j++) {
         const Vector3Dd* vp = contourCurve->getPoint(p);
         mx[i][j] = vp[0].x(); my[i][j] = vp[0].y(); mz[i][j] = vp[0].z();
         mx[i][j + 2] = vp[j + 1].x(); my[i][j + 2] = vp[j + 1].y(); mz[i][j + 2] = vp[j + 1].z();
@@ -296,14 +298,14 @@ Ray* ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& r)
     return new Ray(r.withT(hit.t));
 }
 
-bool ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& inRay,
+BOOLEAN ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& inRay,
                                                     RayHit* outHit)
 {
     SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
         getRayIntersector();
     _ParametricBiCubicPatchIntersector::PatchHit hit;
     if ( !intersector || !intersector->intersect(inRay, hit) ) {
-        return false;
+        return FALSE;
     }
 
     if ( outHit != NULL ) {
@@ -318,7 +320,7 @@ bool ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& inRay,
             outHit->setHitDistance(hit.t);
         }
     }
-    return true;
+    return TRUE;
 }
 
 /**
@@ -443,11 +445,6 @@ double* ParametricBiCubicPatch::getMinMax()
     minMax[3] = maxX; minMax[4] = maxY; minMax[5] = maxZ;
     return minMax;
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98
-const int ParametricBiCubicPatch::FERGUSON;
-const int ParametricBiCubicPatch::INITIAL_APPROXIMATION_STEPS;
 
 const Class ParametricBiCubicPatch::CLASS = { "ParametricBiCubicPatch", &Surface::CLASS };
 

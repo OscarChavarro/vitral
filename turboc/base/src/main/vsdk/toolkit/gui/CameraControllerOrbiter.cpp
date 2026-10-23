@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Math.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -73,14 +74,14 @@ double CameraControllerOrbiter::diminishLogarithmic(double val, double epsilon)
     return val;
 }
 
-bool CameraControllerOrbiter::orbitAroundPointOfInterest(double yawDelta,
+BOOLEAN CameraControllerOrbiter::orbitAroundPointOfInterest(double yawDelta,
                                                          double pitchDelta)
 {
     Vector3Dd eyePosition = camera->getPosition();
     Vector3Dd offset = eyePosition.subtract(pointOfInterest);
 
     if ( offset.length() < 1e-9 ) {
-        return false;
+        return FALSE;
     }
 
     Matrix4x4d R = camera->getRotation();
@@ -108,15 +109,15 @@ bool CameraControllerOrbiter::orbitAroundPointOfInterest(double yawDelta,
     newFrontDirection = newFrontDirection.normalized();
     Vector3Dd upHint = camera->getUp();
     if ( Cpp98Support::abs(newFrontDirection.dotProduct(upHint)) > 0.99999 ) {
-        return false;
+        return FALSE;
     }
 
     camera->setPosition(newEyePosition);
     camera->setFocusedPositionMaintainingOrthogonality(pointOfInterest);
-    return true;
+    return TRUE;
 }
 
-bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
+BOOLEAN CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
 {
     Vector3Dd eyePosition = camera->getPosition();
     Vector3Dd focusedPosition = camera->getFocusedPosition();
@@ -128,7 +129,7 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
     double farPlaneDistance = camera->getFarPlaneDistance();
 
     double angleInc;
-    bool updated = false;
+    BOOLEAN updated = FALSE;
     const double epsilon = 0.0001;
     double roll = R.obtainEulerRollAngle();
 
@@ -155,32 +156,32 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
       case KeyEvent::KEY_x:
         eyePosition = eyePosition.withX(eyePosition.x() - deltaMovement);
         focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMovement);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_X:
         eyePosition = eyePosition.withX(eyePosition.x() + deltaMovement);
         focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMovement);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_y:
         eyePosition = eyePosition.withY(eyePosition.y() - deltaMovement);
         focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMovement);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_Y:
         eyePosition = eyePosition.withY(eyePosition.y() + deltaMovement);
         focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMovement);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_z:
         eyePosition = eyePosition.withZ(eyePosition.z() - deltaMovement);
         focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMovement);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_Z:
         eyePosition = eyePosition.withZ(eyePosition.z() + deltaMovement);
         focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMovement);
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_S:
@@ -190,7 +191,7 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
             R.obtainEulerYawAngle(),
             R.obtainEulerPitchAngle(),
             roll);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_s:
         roll += PI * 5.0 / 180.0;
@@ -199,7 +200,7 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
             R.obtainEulerYawAngle(),
             R.obtainEulerPitchAngle(),
             roll);
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_A:
@@ -211,7 +212,7 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
             else if ( fov < 1 - epsilon ) fov++;
             else if ( fov < 175 - epsilon ) fov += 5;
         }
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_a:
         if ( camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL ) {
@@ -222,25 +223,25 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
             else if ( fov > 1 + epsilon ) fov--;
             else if ( fov > 0.1 + epsilon ) fov -= 0.1;
         }
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_N:
         nearPlaneDistance = augmentLogarithmic(nearPlaneDistance, epsilon);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_n:
         nearPlaneDistance = diminishLogarithmic(nearPlaneDistance, epsilon);
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_F:
         farPlaneDistance = augmentLogarithmic(farPlaneDistance, epsilon);
-        updated = true;
+        updated = TRUE;
         break;
       case KeyEvent::KEY_f:
         farPlaneDistance = diminishLogarithmic(farPlaneDistance, epsilon);
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_p:
@@ -252,7 +253,7 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
             projectionMode = Camera::PROJECTION_MODE_PERSPECTIVE;
             break;
         }
-        updated = true;
+        updated = TRUE;
         break;
 
       case KeyEvent::KEY_i:
@@ -277,38 +278,38 @@ bool CameraControllerOrbiter::processKeyPressedEvent(const KeyEvent& keyEvent)
     return updated;
 }
 
-bool CameraControllerOrbiter::processKeyReleasedEvent(const KeyEvent&)
+BOOLEAN CameraControllerOrbiter::processKeyReleasedEvent(const KeyEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerOrbiter::processMousePressedEvent(const MouseEvent& e)
+BOOLEAN CameraControllerOrbiter::processMousePressedEvent(const MouseEvent& e)
 {
     oldMouseX = e.getX();
     oldMouseY = e.getY();
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerOrbiter::processMouseReleasedEvent(const MouseEvent&)
+BOOLEAN CameraControllerOrbiter::processMouseReleasedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerOrbiter::processMouseClickedEvent(const MouseEvent&)
+BOOLEAN CameraControllerOrbiter::processMouseClickedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerOrbiter::processMouseMovedEvent(const MouseEvent&)
+BOOLEAN CameraControllerOrbiter::processMouseMovedEvent(const MouseEvent&)
 {
-    return false;
+    return FALSE;
 }
 
-bool CameraControllerOrbiter::processMouseDraggedEvent(const MouseEvent& e)
+BOOLEAN CameraControllerOrbiter::processMouseDraggedEvent(const MouseEvent& e)
 {
     int deltaX = e.getX() - oldMouseX;
     int deltaY = e.getY() - oldMouseY;
-    bool updated = false;
+    BOOLEAN updated = FALSE;
     double senseFactor = deltaMovement / 5.0;
 
     deltaX = Math::max(-5, Math::min(5, deltaX));
@@ -336,14 +337,14 @@ bool CameraControllerOrbiter::processMouseDraggedEvent(const MouseEvent& e)
         eyePosition = eyePosition.subtract(w.multiply(senseFactor * ((double)deltaY)));
         focusedPosition = focusedPosition.subtract(v.multiply(senseFactor * ((double)deltaX)));
         focusedPosition = focusedPosition.subtract(w.multiply(senseFactor * ((double)deltaY)));
-        updated = true;
+        updated = TRUE;
     }
     else if ( (modifiers & MouseEvent::BUTTON3_DOWN_MASK) != 0 ) {
         eyePosition = eyePosition.subtract(u.multiply(senseFactor * ((double)deltaY)));
         double ax = Math::min(2.0, 0.01 * deltaX);
         DR = Matrix4x4d().axisRotation(ax, u.x(), u.y(), u.z());
         R = DR.multiply(R);
-        updated = true;
+        updated = TRUE;
     }
 
     if ( (modifiers & MouseEvent::BUTTON1_DOWN_MASK) == 0 ) {
@@ -357,7 +358,7 @@ bool CameraControllerOrbiter::processMouseDraggedEvent(const MouseEvent& e)
     return updated;
 }
 
-bool CameraControllerOrbiter::processMouseWheelEvent(const MouseEvent& e)
+BOOLEAN CameraControllerOrbiter::processMouseWheelEvent(const MouseEvent& e)
 {
     double fov = camera->getFov();
     double orthogonalZoom = camera->getOrthogonalZoom();
@@ -389,7 +390,7 @@ bool CameraControllerOrbiter::processMouseWheelEvent(const MouseEvent& e)
     camera->setFov(fov);
     camera->setOrthogonalZoom(orthogonalZoom);
 
-    return true;
+    return TRUE;
 }
 
 Camera* CameraControllerOrbiter::getCamera()

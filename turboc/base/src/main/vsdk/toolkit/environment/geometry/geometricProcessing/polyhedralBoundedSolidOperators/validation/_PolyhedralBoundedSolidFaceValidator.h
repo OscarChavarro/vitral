@@ -1,6 +1,7 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_FACE_VALIDATOR__
-#define __POLYHEDRAL_BOUNDED_SOLID_FACE_VALIDATOR__
+#ifndef __PBS_FACE_VALIDATOR__
+#define __PBS_FACE_VALIDATOR__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
 class _PolyhedralBoundedSolidFace;
@@ -18,7 +19,7 @@ public:
     @return true if the face is not planar, has no area, or has two
     non-adjacent edges closer than the tolerance of the face
     */
-    static bool isSurfaceDegenerate(_PolyhedralBoundedSolidFace* face);
+    static BOOLEAN isSurfaceDegenerate(_PolyhedralBoundedSolidFace* face);
 
     /**
     @param face face to measure
@@ -32,7 +33,7 @@ public:
     @return true if two edges of the face that do not share an end point are
     closer than the tolerance
     */
-    static bool hasCloseNonAdjacentEdges(
+    static BOOLEAN hasCloseNonAdjacentEdges(
         _PolyhedralBoundedSolidFace* face,
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
 

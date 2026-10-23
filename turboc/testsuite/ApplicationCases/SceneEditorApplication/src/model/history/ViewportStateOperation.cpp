@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/System.h"
 #include "model/history/ViewportState.h"
 #include "model/history/ViewportStateOperation.h"
@@ -5,7 +6,7 @@
 ViewportStateOperation::ViewportStateOperation(const String& name,
                                                ViewportState* before,
                                                ViewportState* after,
-                                               bool mergeable)
+                                               BOOLEAN mergeable)
     : name(name), before(before), after(after), mergeable(mergeable),
       lastChangeTime(System::currentTimeMillis())
 {
@@ -37,7 +38,7 @@ String ViewportStateOperation::getName() const
     return name;
 }
 
-bool ViewportStateOperation::absorb(UndoableOperation* next)
+BOOLEAN ViewportStateOperation::absorb(UndoableOperation* next)
 {
     ViewportStateOperation* other =
         (next != NULL && next->instanceOf(ViewportStateOperation::CLASS) ? (ViewportStateOperation*)next : NULL);
@@ -46,7 +47,7 @@ bool ViewportStateOperation::absorb(UndoableOperation* next)
          !mergeable || !other->mergeable || !name.equals(other->name) ||
          other->getViewport() != getViewport() ||
          other->lastChangeTime - lastChangeTime > MERGE_INTERVAL_MILLISECONDS ) {
-        return false;
+        return FALSE;
     }
     // Takes the state after the other operation; the old one goes to the
     // other operation, deleted by the caller
@@ -54,12 +55,12 @@ bool ViewportStateOperation::absorb(UndoableOperation* next)
     after = other->after;
     other->after = oldAfter;
     lastChangeTime = other->lastChangeTime;
-    return true;
+    return TRUE;
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const long long ViewportStateOperation::MERGE_INTERVAL_MILLISECONDS;
+const long long ViewportStateOperation::MERGE_INTERVAL_MILLISECONDS = 1000;
 
 const Class ViewportStateOperation::CLASS = { "ViewportStateOperation", &UndoableOperation::CLASS };
 

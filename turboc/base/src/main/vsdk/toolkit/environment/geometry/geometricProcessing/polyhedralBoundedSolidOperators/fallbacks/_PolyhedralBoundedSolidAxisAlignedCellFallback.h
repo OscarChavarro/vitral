@@ -1,6 +1,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_AXIS_ALIGNED_CELL_FALLBACK__
 #define ___POLYHEDRAL_BOUNDED_SOLID_AXIS_ALIGNED_CELL_FALLBACK__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -23,7 +24,7 @@ C++ counterpart of Java's `_PolyhedralBoundedSolidAxisAlignedCellFallback`.
 class _PolyhedralBoundedSolidAxisAlignedCellFallback
     : public _PolyhedralBoundedSolidOperator {
 public:
-    static bool axisAlignedCellSelected(bool insideA, bool insideB, int op);
+    static BOOLEAN axisAlignedCellSelected(BOOLEAN insideA, BOOLEAN insideB, int op);
 
     /**
     @return a new solid owned by the caller, or null when the operands are
@@ -62,12 +63,12 @@ private:
     };
 
     _PolyhedralBoundedSolidAxisAlignedCellFallback();
-    static bool isAxisAlignedEdge(_PolyhedralBoundedSolidEdge* edge);
-    static bool isAxisAlignedSolid(PolyhedralBoundedSolid* solid);
+    static BOOLEAN isAxisAlignedEdge(_PolyhedralBoundedSolidEdge* edge);
+    static BOOLEAN isAxisAlignedSolid(PolyhedralBoundedSolid* solid);
     static int classifyPointForAxisAlignedFallback(PolyhedralBoundedSolid* solid,
         const Vector3Dd& point);
     static void addAxisAlignedBoundaryQuad(AxisAlignedCellBooleanBuilder& builder,
-        int axis, bool positiveSide, int ix, int iy, int iz);
+        int axis, BOOLEAN positiveSide, int ix, int iy, int iz);
     static ArrayList<double> uniformCoordinates(double min, double max,
         int divisions);
     static PolyhedralBoundedSolid* buildUniformSampledCellBooleanFallback(
@@ -75,7 +76,7 @@ private:
         PolyhedralBoundedSolid* inSolidB,
         int op);
     static void addOccupiedCellQuads(AxisAlignedCellBooleanBuilder& builder,
-        const ArrayList<bool>& occupied, int nx, int ny, int nz);
+        const ArrayList<BOOLEAN>& occupied, int nx, int ny, int nz);
 };
 
 #endif

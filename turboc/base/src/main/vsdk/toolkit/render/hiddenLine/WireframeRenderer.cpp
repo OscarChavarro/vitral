@@ -30,7 +30,7 @@ static int calculateCanonicalOutcode(const Vector3Dd& p, double fpd)
     return bits;
 }
 
-static bool clipLineCanonicVolume(const Vector3Dd& worldP0,
+static BOOLEAN clipLineCanonicVolume(const Vector3Dd& worldP0,
                                   const Vector3Dd& worldP1,
                                   const Camera* camera,
                                   Vector3Dd& outP0,
@@ -46,20 +46,20 @@ static bool clipLineCanonicVolume(const Vector3Dd& worldP0,
     int outcode0 = calculateCanonicalOutcode(p0, fpd);
     int outcode1 = calculateCanonicalOutcode(p1, fpd);
 
-    while ( true ) {
+    while ( TRUE ) {
         if ( outcode0 == 0x0 && outcode1 == 0x0 ) {
             outP0 = p0;
             outP1 = p1;
-            return true;
+            return TRUE;
         }
         if ( (outcode0 & outcode1) != 0x0 ) {
-            return false;
+            return FALSE;
         }
 
         int outcodeout = (outcode0 != 0) ? outcode0 : outcode1;
         Vector3Dd dir = p1.subtract(p0);
         const double l = dir.length();
-        if ( l < VSDK::EPSILON ) return false;
+        if ( l < VSDK::EPSILON ) return FALSE;
         dir = dir.multiply(1.0 / l);
         const double de = (outcodeout == outcode1) ? -VSDK::EPSILON : VSDK::EPSILON;
 

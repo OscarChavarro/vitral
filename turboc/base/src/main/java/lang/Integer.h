@@ -6,8 +6,8 @@
 
 class Integer {
   public:
-    static const int MIN_VALUE = (-2147483647 - 1);
-    static const int MAX_VALUE = 2147483647;
+    static const int MIN_VALUE;
+    static const int MAX_VALUE;
 
     /**
     Emulation of `Integer.parseInt` (base 10).

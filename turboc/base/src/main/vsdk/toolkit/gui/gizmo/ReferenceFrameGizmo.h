@@ -1,6 +1,7 @@
 #ifndef __REFERENCE_FRAME_GIZMO__
 #define __REFERENCE_FRAME_GIZMO__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -29,12 +30,14 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
-    static const int AXIS_X = 0;
-    static const int AXIS_Y = 1;
-    static const int AXIS_Z = 2;
-    static const int NUMBER_OF_AXES = 3;
+    enum {
+        AXIS_X = 0,
+        AXIS_Y = 1,
+        AXIS_Z = 2,
+        NUMBER_OF_AXES = 3
+    };
 
-    static const int DEFAULT_SIZE_IN_PIXELS = 64;
+    enum { DEFAULT_SIZE_IN_PIXELS = 64 };
     static const double DEFAULT_AXIS_LENGTH;
     static const double DEFAULT_LINE_WIDTH;
 
@@ -42,7 +45,7 @@ private:
     int sizeInPixels;
     double axisLength;
     double lineWidth;
-    bool visible;
+    BOOLEAN visible;
     ColorRgb axisColors[NUMBER_OF_AXES];
     String axisLabels[NUMBER_OF_AXES];
 
@@ -87,8 +90,8 @@ public:
     @param scaler scaler informed of the resolution of the screen
     */
     void applyScale(const ViewportElementScaler* scaler);
-    bool isVisible() const;
-    void setVisible(bool visible);
+    BOOLEAN isVisible() const;
+    void setVisible(BOOLEAN visible);
 
     /**
     @param axis one of `AXIS_X`, `AXIS_Y` or `AXIS_Z`

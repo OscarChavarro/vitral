@@ -1,6 +1,8 @@
 #ifndef __POPUP_DISMISS_CLICK_FILTER__
 #define __POPUP_DISMISS_CLICK_FILTER__
 
+#include "vsdk/toolkit/common/VSDK.h"
+
 /**
 A click outside a popup menu closes it, and that click must not act over the
 drawing area (i.e. selecting another viewport): the user only wanted to leave
@@ -36,7 +38,7 @@ public:
 
 private:
     long long closedAtMillis;
-    bool swallowingClick;
+    BOOLEAN swallowingClick;
 
 public:
     PopupDismissClickFilter();
@@ -57,7 +59,7 @@ public:
     @param nowMillis current time, in milliseconds
     @return true if the event must be ignored by the drawing area
     */
-    bool consumes(MouseEventKind kind, long long nowMillis);
+    BOOLEAN consumes(MouseEventKind kind, long long nowMillis);
 };
 
 #endif

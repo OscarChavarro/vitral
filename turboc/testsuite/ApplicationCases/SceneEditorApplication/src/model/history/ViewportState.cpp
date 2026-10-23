@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
@@ -80,7 +81,7 @@ String ViewportState::describeChangeTo(const ViewportState* later) const
     return "Display change";
 }
 
-bool ViewportState::isSameState(const ViewportState* other) const
+BOOLEAN ViewportState::isSameState(const ViewportState* other) const
 {
     int i;
 
@@ -91,16 +92,15 @@ bool ViewportState::isSameState(const ViewportState* other) const
          other->requestedSizeXInPixels != requestedSizeXInPixels ||
          other->requestedSizeYInPixels != requestedSizeYInPixels ||
          other->rendererConfiguration->compareTo(*rendererConfiguration) != 0 ) {
-        return false;
+        return FALSE;
     }
     for ( i = 0; i < CAMERA_COUNT; i++ ) {
         if ( !cameraStates[i]->isSameState(other->cameraStates[i]) ) {
-            return false;
+            return FALSE;
         }
     }
-    return true;
+    return TRUE;
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int ViewportState::CAMERA_COUNT;

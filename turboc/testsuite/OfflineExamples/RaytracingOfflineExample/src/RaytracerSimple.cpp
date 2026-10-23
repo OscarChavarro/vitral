@@ -28,14 +28,14 @@ static const int EXIT_CODE_ARGUMENT_ERROR = 2;
 
 static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererConfiguration* rendererConfiguration)
 {
-    bool hasTextures = false;
-    bool hasNormalMaps = false;
+    BOOLEAN hasTextures = FALSE;
+    BOOLEAN hasNormalMaps = FALSE;
     ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
 
     for (long int i = 0; i < bodies.size(); i++) {
         SimpleBody* body = bodies[i];
-        if ( body->getTexture() != 0 ) hasTextures = true;
-        if ( body->getNormalMap() != 0 ) hasNormalMaps = true;
+        if ( body->getTexture() != 0 ) hasTextures = TRUE;
+        if ( body->getNormalMap() != 0 ) hasNormalMaps = TRUE;
         if ( hasTextures && hasNormalMaps ) break;
     }
 
@@ -57,9 +57,9 @@ static void resizeCameraViewport(Camera* camera, int xSize, int ySize)
 }
 
 static void offlineExecution(const String& fileName,
-                             bool save,
+                             BOOLEAN save,
                              const String& outputFileName,
-                             bool parallel,
+                             BOOLEAN parallel,
                              int xResolution,
                              int yResolution)
 {
@@ -108,7 +108,7 @@ static void offlineExecution(const String& fileName,
         parallelRaytracer.execute(&resultingImage,
                                   &rendererConfiguration,
                                   sceneSnapshot,
-                                  true);
+                                  TRUE);
         parallelRaytracer.dispose();
     }
     else {

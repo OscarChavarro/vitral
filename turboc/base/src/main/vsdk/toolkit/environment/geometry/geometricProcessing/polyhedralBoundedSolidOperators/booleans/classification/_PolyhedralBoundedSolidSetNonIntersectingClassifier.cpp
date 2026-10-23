@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Double.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/Collections.h"
@@ -53,7 +54,7 @@ int Classifier::_PreflightCache::bInA()
     return bInAValue;
 }
 
-bool Classifier::_PreflightCache::hasInteriorOverlap()
+BOOLEAN Classifier::_PreflightCache::hasInteriorOverlap()
 {
     if ( interiorOverlap < 0 ) {
         interiorOverlap = (signed char)(hasConfirmedInteriorOverlap(a, b) ? 1 : 0);
@@ -61,7 +62,7 @@ bool Classifier::_PreflightCache::hasInteriorOverlap()
     return interiorOverlap == 1;
 }
 
-bool Classifier::_PreflightCache::hasEdgeFaceIntersectionAB()
+BOOLEAN Classifier::_PreflightCache::hasEdgeFaceIntersectionAB()
 {
     if ( edgeFaceAB < 0 ) {
         edgeFaceAB = (signed char)(hasProperEdgeFaceIntersection(a, b) ? 1 : 0);
@@ -69,7 +70,7 @@ bool Classifier::_PreflightCache::hasEdgeFaceIntersectionAB()
     return edgeFaceAB == 1;
 }
 
-bool Classifier::_PreflightCache::hasEdgeFaceIntersectionBA()
+BOOLEAN Classifier::_PreflightCache::hasEdgeFaceIntersectionBA()
 {
     if ( edgeFaceBA < 0 ) {
         edgeFaceBA = (signed char)(hasProperEdgeFaceIntersection(b, a) ? 1 : 0);
@@ -123,7 +124,7 @@ Classifier::_PreflightCache Classifier::newPreflightCache(
     return _PreflightCache(inSolidA, inSolidB);
 }
 
-bool Classifier::runContainmentOnlyPreflightCase(
+BOOLEAN Classifier::runContainmentOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB)
 {
@@ -131,7 +132,7 @@ bool Classifier::runContainmentOnlyPreflightCase(
     return runContainmentOnlyPreflightCase(inSolidA, inSolidB, cache);
 }
 
-bool Classifier::runContainmentOnlyPreflightCase(
+BOOLEAN Classifier::runContainmentOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
     _PreflightCache& cache)
@@ -153,20 +154,20 @@ bool Classifier::runContainmentOnlyPreflightCase(
     // plan section 7.3.1.D-cont as remaining drift.
     if ( relation != NO_INT_RELATION_A_IN_B &&
          relation != NO_INT_RELATION_B_IN_A ) {
-        return false;
+        return FALSE;
     }
 
     if ( cache.hasEdgeFaceIntersectionAB() ) {
-        return false;
+        return FALSE;
     }
     if ( cache.hasEdgeFaceIntersectionBA() ) {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
-bool Classifier::runTouchingOnlyPreflightCase(
+BOOLEAN Classifier::runTouchingOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB)
 {
@@ -174,7 +175,7 @@ bool Classifier::runTouchingOnlyPreflightCase(
     return runTouchingOnlyPreflightCase(inSolidA, inSolidB, cache);
 }
 
-bool Classifier::runTouchingOnlyPreflightCase(
+BOOLEAN Classifier::runTouchingOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
     _PreflightCache& cache)
@@ -186,25 +187,25 @@ bool Classifier::runTouchingOnlyPreflightCase(
     int relation = classifyNoIntersectionRelation(cache.aInB(), cache.bInA());
 
     if ( relation != NO_INT_RELATION_TOUCHING ) {
-        return false;
+        return FALSE;
     }
 
     if ( cache.hasInteriorOverlap() ) {
-        return false;
+        return FALSE;
     }
 
     if ( cache.hasEdgeFaceIntersectionAB() ) {
-        return false;
+        return FALSE;
     }
     if ( cache.hasEdgeFaceIntersectionBA() ) {
-        return false;
+        return FALSE;
     }
 
     if ( hasPartialCoplanarFaceAreaOverlap(inSolidA, inSolidB) ) {
-        return false;
+        return FALSE;
     }
 
-    return true;
+    return TRUE;
 }
 
 PolyhedralBoundedSolid* Classifier::runSetOpNoIntersectionCase(
@@ -377,7 +378,7 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
 
     for ( j = 0; j < 3; j++ ) {
         int hits = 0;
-        bool ambiguous = false;
+        BOOLEAN ambiguous = FALSE;
         ArrayList<double> distances;
         Ray ray(point, dirs[j]);
 
@@ -385,7 +386,7 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
             face = solid->getPolygonsList().get(i);
             InfinitePlane* facePlane = facePlanes.get(i);
             if ( facePlane == 0 ) {
-                ambiguous = true;
+                ambiguous = TRUE;
                 break;
             }
             Ray rayHit(ray);
@@ -402,15 +403,15 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
 
             int status = face->testPointInside(pi, eps, facePlane);
             if ( status == Geometry::LIMIT ) {
-                ambiguous = true;
+                ambiguous = TRUE;
                 break;
             }
             if ( status == Geometry::INSIDE ) {
-                bool duplicated = false;
+                BOOLEAN duplicated = FALSE;
                 long k;
                 for ( k = 0; k < distances.size(); k++ ) {
                     if ( fabs(distances[k] - t) <= eps ) {
-                        duplicated = true;
+                        duplicated = TRUE;
                         break;
                     }
                 }
@@ -459,7 +460,7 @@ ArrayList<double> Classifier::overlappingBounds(
     return bounds;
 }
 
-bool Classifier::hasPositiveOverlapVolume(const ArrayList<double>& bounds)
+BOOLEAN Classifier::hasPositiveOverlapVolume(const ArrayList<double>& bounds)
 {
     double eps = numericContext.bigEpsilon();
 
@@ -475,7 +476,7 @@ Tests the 27 quarter/center/three-quarter combinations of the overlap AABB
 result is always exact; a negative result is inconclusive and the caller
 must still run the exhaustive grid.
 */
-bool Classifier::hasInteriorOverlapWitnessInAabb(
+BOOLEAN Classifier::hasInteriorOverlapWitnessInAabb(
     const ArrayList<double>& bounds,
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB,
@@ -497,12 +498,12 @@ bool Classifier::hasInteriorOverlapWitnessInAabb(
                      Geometry::INSIDE &&
                      classifyPointAgainstSolid(solidB, planesB, sample) ==
                      Geometry::INSIDE ) {
-                    return true;
+                    return TRUE;
                 }
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
 ArrayList<double> Classifier::axisProbeCoordinates(double min, double max)
@@ -661,7 +662,7 @@ ArrayList<double> Classifier::sampleCoordinates(double min, double max,
     return samples;
 }
 
-bool Classifier::hasConfirmedInteriorOverlap(
+BOOLEAN Classifier::hasConfirmedInteriorOverlap(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
@@ -670,12 +671,12 @@ bool Classifier::hasConfirmedInteriorOverlap(
     long k;
 
     if ( solidA == 0 || solidB == 0 ) {
-        return false;
+        return FALSE;
     }
 
     ArrayList<double> bounds = overlappingBounds(solidA, solidB);
     if ( !hasPositiveOverlapVolume(bounds) ) {
-        return false;
+        return FALSE;
     }
 
     // Precompute each solid's face planes once; every probe/grid point is
@@ -689,7 +690,7 @@ bool Classifier::hasConfirmedInteriorOverlap(
     // the exact fallback for the negative case.
     if ( hasInteriorOverlapWitnessInAabb(bounds, solidA, solidB,
              planesA, planesB) ) {
-        return true;
+        return TRUE;
     }
 
     ArrayList<double> xs = sampleCoordinates(bounds[0], bounds[3], solidA, solidB, 0);
@@ -704,13 +705,13 @@ bool Classifier::hasConfirmedInteriorOverlap(
                      Geometry::INSIDE &&
                      classifyPointAgainstSolid(solidB, planesB, sample) ==
                      Geometry::INSIDE ) {
-                    return true;
+                    return TRUE;
                 }
             }
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 int Classifier::classifySolidAgainstSolid(
@@ -718,8 +719,8 @@ int Classifier::classifySolidAgainstSolid(
     PolyhedralBoundedSolid* solidB)
 {
     long int i;
-    bool sawLimit = false;
-    bool sawOutside = false;
+    BOOLEAN sawLimit = FALSE;
+    BOOLEAN sawOutside = FALSE;
 
     if ( solidA == 0 || solidA->getVerticesList().size() < 1 ) {
         return Geometry::OUTSIDE;
@@ -733,10 +734,10 @@ int Classifier::classifySolidAgainstSolid(
             return Geometry::INSIDE;
         }
         if ( status == Geometry::LIMIT ) {
-            sawLimit = true;
+            sawLimit = TRUE;
         }
         else {
-            sawOutside = true;
+            sawOutside = TRUE;
         }
     }
 
@@ -763,7 +764,7 @@ int Classifier::classifyNoIntersectionRelation(int aInB, int bInA)
     return NO_INT_RELATION_DISJOINT;
 }
 
-bool Classifier::hasProperEdgeFaceIntersection(
+BOOLEAN Classifier::hasProperEdgeFaceIntersection(
     PolyhedralBoundedSolid* current,
     PolyhedralBoundedSolid* other)
 {
@@ -782,7 +783,7 @@ bool Classifier::hasProperEdgeFaceIntersection(
     Vector3Dd p;
 
     if ( current == 0 || other == 0 ) {
-        return false;
+        return FALSE;
     }
 
     for ( i = 0; i < current->getEdgesList().size(); i++ ) {
@@ -826,16 +827,16 @@ bool Classifier::hasProperEdgeFaceIntersection(
             }
 
             if ( pointInFace(face, p) == Geometry::INSIDE ) {
-                return true;
+                return TRUE;
             }
         }
     }
-    return false;
+    return FALSE;
 }
 
 //= Coplanar faces overlap ==========================================
 
-bool Classifier::hasPartialCoplanarFaceAreaOverlap(
+BOOLEAN Classifier::hasPartialCoplanarFaceAreaOverlap(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
@@ -843,7 +844,7 @@ bool Classifier::hasPartialCoplanarFaceAreaOverlap(
     long int j;
 
     if ( solidA == 0 || solidB == 0 ) {
-        return false;
+        return FALSE;
     }
 
     for ( i = 0; i < solidA->getPolygonsList().size(); i++ ) {
@@ -852,12 +853,12 @@ bool Classifier::hasPartialCoplanarFaceAreaOverlap(
             _PolyhedralBoundedSolidFace* faceB = solidB->getPolygonsList().get(j);
             if ( coplanarFaces(faceA, faceB) &&
                  partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
-                return true;
+                return TRUE;
             }
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 ArrayList<Classifier::Polygon> Classifier::partialCoplanarFaceAreaOverlapPolygons(
@@ -889,15 +890,15 @@ ArrayList<Classifier::Polygon> Classifier::partialCoplanarFaceAreaOverlapPolygon
     return polygons;
 }
 
-bool Classifier::coplanarFaces(_PolyhedralBoundedSolidFace* faceA,
+BOOLEAN Classifier::coplanarFaces(_PolyhedralBoundedSolidFace* faceA,
     _PolyhedralBoundedSolidFace* faceB)
 {
     if ( faceA == 0 || faceB == 0 ) {
-        return false;
+        return FALSE;
     }
     InfinitePlane* planeA = faceA->getContainingPlane();
     InfinitePlane* planeB = faceB->getContainingPlane();
-    bool coplanar = false;
+    BOOLEAN coplanar = FALSE;
 
     if ( planeA != 0 && planeB != 0 &&
          PolyhedralBoundedSolidNumericPolicy::unitVectorsParallel(
@@ -913,13 +914,13 @@ bool Classifier::coplanarFaces(_PolyhedralBoundedSolidFace* faceA,
     return coplanar;
 }
 
-bool Classifier::partialCoplanarFaceAreaOverlap(
+BOOLEAN Classifier::partialCoplanarFaceAreaOverlap(
     _PolyhedralBoundedSolidFace* faceA,
     _PolyhedralBoundedSolidFace* faceB)
 {
     if ( faceHasInteriorVertexOrEdgeMidpoint(faceA, faceB) ||
          faceHasInteriorVertexOrEdgeMidpoint(faceB, faceA) ) {
-        return true;
+        return TRUE;
     }
 
     return faceBoundariesCrossProperly(faceA, faceB);
@@ -1144,7 +1145,7 @@ PolyhedralBoundedSolid* Classifier::createLaminaFromPolygon(
     return solid;
 }
 
-bool Classifier::faceHasInteriorVertexOrEdgeMidpoint(
+BOOLEAN Classifier::faceHasInteriorVertexOrEdgeMidpoint(
     _PolyhedralBoundedSolidFace* source,
     _PolyhedralBoundedSolidFace* target)
 {
@@ -1163,7 +1164,7 @@ bool Classifier::faceHasInteriorVertexOrEdgeMidpoint(
         do {
             if ( target->testPointInside(he->startingVertex->position,
                      numericContext.bigEpsilon()) == Geometry::INSIDE ) {
-                return true;
+                return TRUE;
             }
             if ( he->next() != 0 ) {
                 Vector3Dd midpoint = he->startingVertex->position.add(
@@ -1172,17 +1173,17 @@ bool Classifier::faceHasInteriorVertexOrEdgeMidpoint(
                         .multiply(0.5));
                 if ( target->testPointInside(midpoint,
                          numericContext.bigEpsilon()) == Geometry::INSIDE ) {
-                    return true;
+                    return TRUE;
                 }
             }
             he = he->next();
         } while ( he != 0 && he != start );
     }
 
-    return false;
+    return FALSE;
 }
 
-bool Classifier::faceBoundariesCrossProperly(
+BOOLEAN Classifier::faceBoundariesCrossProperly(
     _PolyhedralBoundedSolidFace* faceA,
     _PolyhedralBoundedSolidFace* faceB)
 {
@@ -1199,15 +1200,15 @@ bool Classifier::faceBoundariesCrossProperly(
             _PolyhedralBoundedSolidLoop* loopB = faceB->boundariesList.get(j);
             if ( loopB != 0 &&
                  loopsCrossProperly(loopA, loopB, dominantCoordinate) ) {
-                return true;
+                return TRUE;
             }
         }
     }
 
-    return false;
+    return FALSE;
 }
 
-bool Classifier::loopsCrossProperly(_PolyhedralBoundedSolidLoop* loopA,
+BOOLEAN Classifier::loopsCrossProperly(_PolyhedralBoundedSolidLoop* loopA,
     _PolyhedralBoundedSolidLoop* loopB,
     int dominantCoordinate)
 {
@@ -1234,12 +1235,12 @@ bool Classifier::loopsCrossProperly(_PolyhedralBoundedSolidLoop* loopA,
             Vector2Dd b2 = projectPointTo2D(
                 heB->next()->startingVertex->position, dominantCoordinate);
             if ( segmentsCrossProperly2D(a1, a2, b1, b2) ) {
-                return true;
+                return TRUE;
             }
         }
     }
 
-    return false;
+    return FALSE;
 }
 
 int Classifier::dominantCoordinateForFace(_PolyhedralBoundedSolidFace* face)
@@ -1277,7 +1278,7 @@ double Classifier::orientation2D(const Vector2Dd& a, const Vector2Dd& b,
     return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
 }
 
-bool Classifier::segmentsCrossProperly2D(const Vector2Dd& a1,
+BOOLEAN Classifier::segmentsCrossProperly2D(const Vector2Dd& a1,
     const Vector2Dd& a2, const Vector2Dd& b1, const Vector2Dd& b2)
 {
     double o1 = orientation2D(a1, a2, b1);
@@ -1302,7 +1303,3 @@ bool Classifier::segmentsCrossProperly2D(const Vector2Dd& a1,
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int _PolyhedralBoundedSolidSetNonIntersectingClassifier::NO_INT_RELATION_DISJOINT;
-const int _PolyhedralBoundedSolidSetNonIntersectingClassifier::NO_INT_RELATION_TOUCHING;
-const int _PolyhedralBoundedSolidSetNonIntersectingClassifier::NO_INT_RELATION_A_IN_B;
-const int _PolyhedralBoundedSolidSetNonIntersectingClassifier::NO_INT_RELATION_B_IN_A;

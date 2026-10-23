@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/concurrent/Callable.h"
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"
@@ -9,7 +10,9 @@
 #include "java/util/concurrent/Future.h"
 #include "java/util/concurrent/Void.h"
 #include "java/lang/PosixThreads.h"
+#ifdef VITRAL_WITH_POSIX_THREADS
 #include <unistd.h>
+#endif
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
@@ -195,7 +198,7 @@ void ParallelRaytracer::execute(
     RGBImageUncompressed* resultingImage,
     const RendererConfiguration* rendererConfiguration,
     SimpleSceneSnapshot* sceneSnapshot,
-    bool reportProgress)
+    BOOLEAN reportProgress)
 {
     if ( resultingImage->getXSize() <= 0 || resultingImage->getYSize() <= 0 ) {
         return;
@@ -224,7 +227,7 @@ void ParallelRaytracer::execute(
     DepthBufferMode depthMode,
     const RendererConfiguration* rendererConfiguration,
     SimpleSceneSnapshot* sceneSnapshot,
-    bool reportProgress)
+    BOOLEAN reportProgress)
 {
     if ( outDepth == 0 || depthMode == DepthBufferMode::NONE ) {
         executeWithEncoder(resultingImage, 0, 0, rendererConfiguration,
@@ -249,7 +252,7 @@ void ParallelRaytracer::executeWithEncoder(
     const DepthBufferEncoder* depthEncoder,
     const RendererConfiguration* rendererConfiguration,
     SimpleSceneSnapshot* sceneSnapshot,
-    bool reportProgress)
+    BOOLEAN reportProgress)
 {
     if ( resultingImage->getXSize() <= 0 || resultingImage->getYSize() <= 0 ) {
         return;
@@ -284,7 +287,8 @@ void ParallelRaytracer::executeWithEncoder(
     }
 
     ArrayList<Future<Void> > futures;
-    for ( int i = 0; i < numberOfThreads; i++ ) {
+    long i;
+    for ( i = 0; i < numberOfThreads; i++ ) {
         futures.add(FutureTask<Void>::submit(getExecutorService(),
             new ParallelRaytracerTileWorker(
             &pendingTiles,
@@ -296,15 +300,15 @@ void ParallelRaytracer::executeWithEncoder(
             progressReporter)));
     }
 
-    bool failed = false;
+    BOOLEAN failed = FALSE;
     String failure;
-    for ( long int i = 0; i < futures.size(); i++ ) {
+    for ( i = 0; i < futures.size(); i++ ) {
         try {
             futures[i].get();
         }
         catch ( const Exception& e ) {
             if ( !failed ) {
-                failed = true;
+                failed = TRUE;
                 failure = String("Parallel raytracing failed: ").concat(e.getMessage().c_str());
             }
         }
@@ -341,4 +345,3 @@ void ParallelRaytracer::dispose()
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int ParallelRaytracer::BANDS_PER_THREAD;

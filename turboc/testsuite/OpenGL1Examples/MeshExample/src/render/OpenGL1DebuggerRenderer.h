@@ -13,6 +13,7 @@ class SimpleBody;
 class SimpleMaterial;
 class TriangleMesh;
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -41,7 +42,7 @@ private:
     OpenGL1ViewportWindow* viewportWindow;
 
     void drawSimpleBody(SimpleBody* body, Camera* camera, const ArrayList<Light*>& lights, RendererConfiguration* quality);
-    bool buildFrame(TriangleMesh* mesh, ArrayList<float>& outPositions, ArrayList<float>& outNormals, ArrayList<float>& outUvs);
+    BOOLEAN buildFrame(TriangleMesh* mesh, ArrayList<float>& outPositions, ArrayList<float>& outNormals, ArrayList<float>& outUvs);
     static void drawArrays(int mode, ArrayList<float>& positions, ArrayList<float>* normals, ArrayList<float>* uvs);
     static SimpleMaterial defaultMaterial();
 
@@ -55,7 +56,7 @@ public:
     scaler can be configured with the resolution of the screen
     */
     ViewportSet* getViewportSet();
-    bool init();
+    BOOLEAN init();
     void display();
     void reshape(int width, int height);
     void dispose();

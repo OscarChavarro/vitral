@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/StreamTokenizer.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"
@@ -12,9 +13,9 @@ RGBColorPalettePersistence::importGimpPalette(Reader& source)
     StreamTokenizer parser(source);
 
     parser.resetSyntax();
-    parser.eolIsSignificant(true);
-    parser.slashSlashComments(false);
-    parser.slashStarComments(false);
+    parser.eolIsSignificant(TRUE);
+    parser.slashSlashComments(FALSE);
+    parser.slashStarComments(FALSE);
     parser.commentChar('#');
     parser.whitespaceChars(' ', ' ');
     parser.whitespaceChars(',', ',');

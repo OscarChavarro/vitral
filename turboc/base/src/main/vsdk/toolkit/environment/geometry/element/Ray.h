@@ -1,6 +1,7 @@
 #ifndef __RAY__
 #define __RAY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 /**
@@ -37,7 +38,7 @@ public:
     void setOriginAndDirection(
         const Vector3Dd& newOrigin, const Vector3Dd& newDirection);
 
-    bool equals(const Ray& other) const;
+    BOOLEAN equals(const Ray& other) const;
     int hashCode() const;
     String toString() const;
 };

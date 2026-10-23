@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -27,7 +28,7 @@ static int runLineTest(const String& outputFileName)
     }
 
     File out(outputFileName.c_str());
-    bool ok = ImagePersistence::exportPNG(out, &img);
+    BOOLEAN ok = ImagePersistence::exportPNG(out, &img);
     printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }
@@ -53,7 +54,7 @@ static int runPolygonTest(const String& outputFileName)
     Rasterizer2D::drawPolygon(&img, pol, bordercolor);
 
     File out(outputFileName.c_str());
-    bool ok = ImagePersistence::exportPNG(out, &img);
+    BOOLEAN ok = ImagePersistence::exportPNG(out, &img);
     printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }
@@ -78,7 +79,7 @@ static int runSmoothPolygonTest(const String& outputFileName)
     Rasterizer2D::drawPolygon(&img, pol, bordercolor);
 
     File out(outputFileName.c_str());
-    bool ok = ImagePersistence::exportPNG(out, &img);
+    BOOLEAN ok = ImagePersistence::exportPNG(out, &img);
     printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }

@@ -33,16 +33,16 @@ SimpleRaytracer::SimpleRaytracer() : workspace(MAX_RECURSION_LEVEL)
 {
 }
 
-bool SimpleRaytracer::hasNonAmbientLights(ArrayList<Light*>& lights)
-{ for (long int i=0;i<lights.size();i++) if (lights.get(i) && !lights.get(i)->isAmbient()) return true; return false; }
+BOOLEAN SimpleRaytracer::hasNonAmbientLights(ArrayList<Light*>& lights)
+{ for (long int i=0;i<lights.size();i++) if (lights.get(i) && !lights.get(i)->isAmbient()) return TRUE; return FALSE; }
 
-bool SimpleRaytracer::isReflective(SimpleMaterial* material)
+BOOLEAN SimpleRaytracer::isReflective(SimpleMaterial* material)
 { return material != 0 && material->getReflectionCoefficient() > 0; }
 
 RenderContext SimpleRaytracer::buildRenderContext(const RendererConfiguration* qualitySelection,ArrayList<Light*>& lights)
 {
     Shader* localShader = ShaderSelector::select(qualitySelection);
-    bool localLightingEnabled =
+    BOOLEAN localLightingEnabled =
         qualitySelection->getShadingType() != RendererConfiguration::SHADING_TYPE_NOLIGHT &&
         hasNonAmbientLights(lights);
     return RenderContext(localLightingEnabled, qualitySelection->isTextureSet(), qualitySelection->isBumpMapSet(), localShader);
@@ -50,11 +50,11 @@ RenderContext SimpleRaytracer::buildRenderContext(const RendererConfiguration* q
 
 int SimpleRaytracer::buildSurfaceDetailMask(SimpleMaterial* material, Image* texture, NormalMap* normalMap, const RenderContext& renderContext)
 {
-    bool objectReflective = isReflective(material);
-    bool needsPoint = renderContext.localLightingEnabled || objectReflective;
-    bool needsNormal = needsPoint;
-    bool needsUv = (renderContext.textureEnabled && texture != 0) || ((renderContext.localLightingEnabled || objectReflective) && normalMap != 0);
-    bool needsTangent = (renderContext.localLightingEnabled || objectReflective) && normalMap != 0;
+    BOOLEAN objectReflective = isReflective(material);
+    BOOLEAN needsPoint = renderContext.localLightingEnabled || objectReflective;
+    BOOLEAN needsNormal = needsPoint;
+    BOOLEAN needsUv = (renderContext.textureEnabled && texture != 0) || ((renderContext.localLightingEnabled || objectReflective) && normalMap != 0);
+    BOOLEAN needsTangent = (renderContext.localLightingEnabled || objectReflective) && normalMap != 0;
     int detailMask = RayHit::DETAIL_NONE;
     if (needsPoint) detailMask |= RayHit::DETAIL_POINT;
     if (needsNormal) detailMask |= RayHit::DETAIL_NORMAL;
@@ -163,7 +163,7 @@ ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,do
 int SimpleRaytracer::selectNearestThingInRayDirection(const Ray& inRay,ArrayList<SimpleBody*>& bodies,RayHit* outHit,RayHit* candidateHit)
 {
     double nearestDistance = 1e308; int nearestIndex = -1;
-    candidateHit->setStoreRay(false);
+    candidateHit->setStoreRay(FALSE);
     RaytraceStatistics::recordSceneTraversal();
     for ( long int i=0; i<bodies.size(); i++ ) {
         candidateHit->resetForDistanceOnly();
@@ -258,5 +258,3 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
-const int SimpleRaytracer::MAX_RECURSION_LEVEL;
-const int SimpleRaytracer::TILE_WORKERS_HINT;

@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <ctype.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/dialog/components/DialogFileFilter.h"
 
 static String lowerCase(const char* text)
@@ -19,10 +20,10 @@ DialogFileFilter::DialogFileFilter(const String& suffix,
 {
 }
 
-bool DialogFileFilter::accepts(const String& path, bool directory) const
+BOOLEAN DialogFileFilter::accepts(const String& path, BOOLEAN directory) const
 {
     if ( directory ) {
-        return true;
+        return TRUE;
     }
     int dot = path.rfind('.');
     return dot > 0 && dot < path.size() - 1 &&

@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_EULER_OPERATORS__
 #define __POLYHEDRAL_BOUNDED_SOLID_EULER_OPERATORS__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
@@ -24,14 +25,14 @@ public:
     static _PolyhedralBoundedSolidFace* lmikrh(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidLoop* l, int newFaceId);
     static void lmekr(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he1, _PolyhedralBoundedSolidHalfEdge* he2);
 
-    static bool lringmv(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidLoop* l, _PolyhedralBoundedSolidFace* toFace, bool setAsOuterLoop);
+    static BOOLEAN lringmv(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidLoop* l, _PolyhedralBoundedSolidFace* toFace, BOOLEAN setAsOuterLoop);
 
-    static bool smev(PolyhedralBoundedSolid* solid, int f1, int v1, int v4, const Vector3Dd& p);
-    static bool mev(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4, const Vector3Dd& p);
-    static bool smef(PolyhedralBoundedSolid* solid, int f1, int v1, int v3, int newFaceId);
-    static bool mef(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4, int newFaceId);
-    static bool kemr(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4);
-    static bool kfmrh(PolyhedralBoundedSolid* solid, int f1, int f2);
+    static BOOLEAN smev(PolyhedralBoundedSolid* solid, int f1, int v1, int v4, const Vector3Dd& p);
+    static BOOLEAN mev(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4, const Vector3Dd& p);
+    static BOOLEAN smef(PolyhedralBoundedSolid* solid, int f1, int v1, int v3, int newFaceId);
+    static BOOLEAN mef(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4, int newFaceId);
+    static BOOLEAN kemr(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4);
+    static BOOLEAN kfmrh(PolyhedralBoundedSolid* solid, int f1, int f2);
 };
 
 #endif

@@ -1,5 +1,6 @@
 #ifndef __RAYTRACER_HUD__
 #define __RAYTRACER_HUD__
+#include "vsdk/toolkit/common/VSDK.h"
 #include "lib/dithering/Dithering.h"
 #include "programs/vitralRaytracer/RaytracerColorMode.h"
 #include "programs/vitralRaytracer/RaytracerConstant.h"
@@ -9,7 +10,7 @@ class RaytracerHud {
 public:
     RaytracerHud();
     void loadFont();
-    bool hasFont() const;
+    BOOLEAN hasFont() const;
     void toggle();
     void draw(const Shown *shown, RaytracerColorMode colorMode, int width, int height, int text, double seconds) const;
 

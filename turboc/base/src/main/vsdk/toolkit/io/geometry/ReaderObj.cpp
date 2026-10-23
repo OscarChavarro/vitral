@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/HashMap.h"
@@ -27,14 +28,14 @@ struct ReaderObjVertex {
 
     ReaderObjVertex() : vertexPositionIndex(-1), vertexNormalIndex(-1), vertexTextureCoordinateIndex(-1) {}
 
-    bool operator<(const ReaderObjVertex& o) const
+    BOOLEAN operator<(const ReaderObjVertex& o) const
     {
         if (vertexPositionIndex != o.vertexPositionIndex) return vertexPositionIndex < o.vertexPositionIndex;
         if (vertexNormalIndex != o.vertexNormalIndex) return vertexNormalIndex < o.vertexNormalIndex;
         return vertexTextureCoordinateIndex < o.vertexTextureCoordinateIndex;
     }
 
-    bool operator==(const ReaderObjVertex& o) const
+    BOOLEAN operator==(const ReaderObjVertex& o) const
     {
         return vertexPositionIndex == o.vertexPositionIndex &&
                vertexNormalIndex == o.vertexNormalIndex &&
@@ -156,7 +157,7 @@ static SimpleMaterial defaultMaterial()
     m = m.withAmbient(ColorRgb(0.2, 0.2, 0.2));
     m = m.withDiffuse(ColorRgb(0.5, 0.9, 0.5));
     m = m.withSpecular(ColorRgb(1, 1, 1));
-    m = m.withDoubleSided(false);
+    m = m.withDoubleSided(FALSE);
     return m;
 }
 
@@ -178,8 +179,8 @@ static void readMaterials(
     if (!in) return;
 
     SimpleMaterial active;
-    active = active.withDoubleSided(false).withName("default");
-    bool hasRealMaterial = false;
+    active = active.withDoubleSided(FALSE).withName("default");
+    BOOLEAN hasRealMaterial = FALSE;
 
     char line[1024];
     while (fgets(line, sizeof(line), in)) {
@@ -233,8 +234,8 @@ static void readMaterials(
                 materialNames.add(active.getName());
                 materialValues.add(active);
             }
-            active = SimpleMaterial().withDoubleSided(false).withName(name);
-            hasRealMaterial = true;
+            active = SimpleMaterial().withDoubleSided(FALSE).withName(name);
+            hasRealMaterial = TRUE;
         }
     }
     fclose(in);
@@ -260,13 +261,14 @@ static void addMeshToGroup(
 
     if (nextMaterialsArray.size() == 0) {
         SimpleMaterial defaultMat;
-        defaultMat = defaultMat.withName("default obj material").withDoubleSided(false);
+        defaultMat = defaultMat.withName("default obj material").withDoubleSided(FALSE);
         nextMaterialsArray.add(new SimpleMaterial(defaultMat));
     }
 
     ArrayList<ReaderObjVertex> finalVertexes;
 
-    for (size_t i = 0; i < (size_t)triangleDatasetsArray.size(); i++) {
+    long i;
+    for (i = 0; i < triangleDatasetsArray.size(); i++) {
         for (int k = 0; k < 3; k++) {
             ReaderObjVertex p = triangleDatasetsArray[i][k];
             int vertexIdx = -1;
@@ -290,7 +292,7 @@ static void addMeshToGroup(
     Matrix4x4d R;
     R = R.axisRotation(90.0 * pi / 180.0, Vector3Dd(1, 0, 0));
 
-    for (size_t i = 0; i < (size_t)finalVertexes.size(); i++) {
+    for (i = 0; i < finalVertexes.size(); i++) {
         int srcPos = resolveObjIndex(
             finalVertexes[i].vertexPositionIndex, (int)vertexPositionsArray.size());
         if (srcPos < 0 || srcPos >= (int)vertexPositionsArray.size()) srcPos = 0;
@@ -316,14 +318,14 @@ static void addMeshToGroup(
 
     ArrayList<Triangle> newTriangleArray;
     newTriangleArray.reserve((long int)triangleDatasetsArray.size());
-    for (size_t i = 0; i < (size_t)triangleDatasetsArray.size(); i++) newTriangleArray.add(Triangle());
-    for (size_t i = 0; i < (size_t)triangleDatasetsArray.size(); i++) {
+    for (i = 0; i < triangleDatasetsArray.size(); i++) newTriangleArray.add(Triangle());
+    for (i = 0; i < triangleDatasetsArray.size(); i++) {
         newTriangleArray[(long int)i].setPoint0(triangleDatasetsArray[i][0].vertexPositionIndex);
         newTriangleArray[(long int)i].setPoint1(triangleDatasetsArray[i][1].vertexPositionIndex);
         newTriangleArray[(long int)i].setPoint2(triangleDatasetsArray[i][2].vertexPositionIndex);
     }
 
-    mesh.setVertexes(newVertexArray, true, false, false, true);
+    mesh.setVertexes(newVertexArray, TRUE, FALSE, FALSE, TRUE);
     mesh.setTriangles(newTriangleArray);
 
     mesh.setMaterials(nextMaterialsArray);
@@ -334,12 +336,12 @@ static void addMeshToGroup(
     materialTriangleRangeTable.add(auxMaterialRange);
 
     ArrayList< ArrayList<int> > materialRanges;
-    for (size_t i = 0; i < (size_t)materialTriangleRangeTable.size(); i++) {
+    for (i = 0; i < materialTriangleRangeTable.size(); i++) {
         ArrayList<int> row;
         row.add(0); row.add(0);
         materialRanges.add(row);
     }
-    for (size_t i = 1; i < (size_t)materialTriangleRangeTable.size(); i++) {
+    for (i = 1; i < materialTriangleRangeTable.size(); i++) {
         materialRanges[(long int)i][0] = materialTriangleRangeTable[i][0];
         materialRanges[(long int)i][1] = materialTriangleRangeTable[i - 1][1];
     }
@@ -348,12 +350,13 @@ static void addMeshToGroup(
     mesh.setTextures(nextTexturesArray);
 
     int numTextureSpans = 0;
-    for (size_t textureIndex = 0; textureIndex < (size_t)textureSpanTriangleRangeTable.size(); textureIndex++) {
+    size_t textureIndex;
+    for (textureIndex = 0; textureIndex < (size_t)textureSpanTriangleRangeTable.size(); textureIndex++) {
         numTextureSpans += (int)textureSpanTriangleRangeTable[textureIndex].size();
     }
 
     ArrayList< ArrayList<int> > textureRangesTmp;
-    for (size_t textureIndex = 0; textureIndex < (size_t)textureSpanTriangleRangeTable.size(); textureIndex++) {
+    for (textureIndex = 0; textureIndex < (size_t)textureSpanTriangleRangeTable.size(); textureIndex++) {
         for (size_t j = 0; j < (size_t)textureSpanTriangleRangeTable[textureIndex].size(); j++) {
             ArrayList<int> row;
             row.add(textureSpanTriangleRangeTable[textureIndex][j][1]);
@@ -361,7 +364,7 @@ static void addMeshToGroup(
             textureRangesTmp.add(row);
         }
     }
-    for (long int i = 1; i < textureRangesTmp.size(); i++) {
+    for (i = 1; i < textureRangesTmp.size(); i++) {
         ArrayList<int> key = textureRangesTmp[i];
         long int j = i - 1;
         while (j >= 0 && textureRangesTmp[j][0] > key[0]) {
@@ -371,7 +374,7 @@ static void addMeshToGroup(
         textureRangesTmp[j + 1] = key;
     }
     ArrayList< ArrayList<int> > textureRanges;
-    for (size_t i = 0; i < (size_t)textureRangesTmp.size(); i++) {
+    for (i = 0; i < textureRangesTmp.size(); i++) {
         ArrayList<int> row;
         row.add(textureRangesTmp[i][0]);
         row.add(textureRangesTmp[i][1]);
@@ -442,11 +445,11 @@ static TriangleMeshGroup* readObj(const File& sceneFile)
             char tStr[256] = {0}, matNameStr[256] = {0};
             sscanf(lineBuf, "%255s %255s", tStr, matNameStr);
             String matName(matNameStr);
-            bool found = false;
+            BOOLEAN found = FALSE;
             for (long int mi = 0; mi < materialNames.size(); mi++) {
                 if (materialNames[mi] == matName) {
                     nextMaterialsArray.add(new SimpleMaterial(materialValues[mi]));
-                    found = true;
+                    found = TRUE;
                     break;
                 }
             }

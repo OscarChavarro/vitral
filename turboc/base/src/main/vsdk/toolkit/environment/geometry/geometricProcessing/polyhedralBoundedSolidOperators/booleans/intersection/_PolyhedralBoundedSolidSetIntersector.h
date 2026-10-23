@@ -2,10 +2,11 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTOR__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTOR__
+#ifndef ___PBS_SET_INTERSECTOR__
+#define ___PBS_SET_INTERSECTOR__
 
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
@@ -70,21 +71,21 @@ private:
     set) or at a vertex (`vertex` set). Java returns null for no hit.
     */
     struct BoundaryHit {
-        bool found;
+        BOOLEAN found;
         _PolyhedralBoundedSolidHalfEdge* halfEdge;
         _PolyhedralBoundedSolidVertex* vertex;
         Vector3Dd point;
 
-        BoundaryHit() : found(false), halfEdge(NULL), vertex(NULL) {}
+        BoundaryHit() : found(FALSE), halfEdge(NULL), vertex(NULL) {}
         BoundaryHit(_PolyhedralBoundedSolidHalfEdge* halfEdge,
                     _PolyhedralBoundedSolidVertex* vertex,
                     const Vector3Dd& point)
-            : found(true), halfEdge(halfEdge), vertex(vertex), point(point) {}
+            : found(TRUE), halfEdge(halfEdge), vertex(vertex), point(point) {}
     };
 
     static int compareToZero(double value);
-    static bool isZero(double value);
-    static bool isZeroBig(double value);
+    static BOOLEAN isZero(double value);
+    static BOOLEAN isZeroBig(double value);
     static BoundaryHit findNearbyBoundaryHit(_PolyhedralBoundedSolidFace* face,
                                              const Vector3Dd& point);
     static BoundaryHit findNearbyBoundaryHit(_PolyhedralBoundedSolidHalfEdge* halfEdge,

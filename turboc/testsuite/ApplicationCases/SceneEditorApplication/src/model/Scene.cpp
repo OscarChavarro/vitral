@@ -1,6 +1,7 @@
 #include <float.h>
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
@@ -62,8 +63,8 @@ ParallelRaytracer* Scene::getRaytracer()
     return &raytracer;
 }
 
-Scene::Scene() : acumObject(1), importedMitScene(false),
-    importedSceneBackground(false), lightGizmoScale(1.0)
+Scene::Scene() : acumObject(1), importedMitScene(FALSE),
+    importedSceneBackground(FALSE), lightGizmoScale(1.0)
 {
     scene = new SimpleScene();
 
@@ -92,11 +93,11 @@ Scene::Scene() : acumObject(1), importedMitScene(false),
     selectedBackground = 0;
 
     //-----------------------------------------------------------------
-    showCorridor = false;
+    showCorridor = FALSE;
 
     qualityTemplate = new RendererConfiguration();
-    qualityTemplate->setSurfaces(true);
-    qualityTemplate->setWires(false);
+    qualityTemplate->setSurfaces(TRUE);
+    qualityTemplate->setWires(FALSE);
 }
 
 Scene::~Scene()
@@ -137,7 +138,7 @@ void Scene::setLightGizmoScale(double lightGizmoScale)
     this->lightGizmoScale = lightGizmoScale;
 }
 
-bool Scene::buildCubemap()
+BOOLEAN Scene::buildCubemap()
 {
     RGBAImageUncompressed* front;
     RGBAImageUncompressed* right;
@@ -168,7 +169,7 @@ bool Scene::buildCubemap()
         delete left;
         delete down;
         delete up;
-        return false;
+        return FALSE;
     }
     System::out.println(" OK!");
 
@@ -176,10 +177,10 @@ bool Scene::buildCubemap()
     // for the rest of the program (as done by the Java garbage collector)
     cubemapBackground =
         new CubemapBackground(camera, front, right, back, left, down, up);
-    return true;
+    return TRUE;
 }
 
-bool Scene::buildFixedmap()
+BOOLEAN Scene::buildFixedmap()
 {
     RGBAImageUncompressed* img;
 
@@ -187,12 +188,12 @@ bool Scene::buildFixedmap()
     img = importCubemapFace("../../../../etc/cubemaps/dorise1/entorno0.jpg");
     if ( img == NULL ) {
         System::err.println("Error loading background image");
-        return false;
+        return FALSE;
     }
     System::out.println("OK!");
 
     fixedBackground = new FixedBackground(camera, img);
-    return true;
+    return TRUE;
 }
 
 SimpleMaterial Scene::defaultMaterial()
@@ -210,7 +211,7 @@ SimpleMaterial Scene::defaultMaterial()
     m = m.withAmbient(ColorRgb(0, 0, 0));
     m = m.withDiffuse(ColorRgb(1, 1, 1));
     m = m.withSpecular(ColorRgb(1, 1, 1));
-    m = m.withDoubleSided(false);
+    m = m.withDoubleSided(FALSE);
     m = m.withPhongExponent(40.0);
 
     return m;
@@ -235,12 +236,12 @@ SimpleBody* Scene::addThing(Geometry* g)
     return thing;
 }
 
-bool Scene::isHidden(SimpleBody* body) const
+BOOLEAN Scene::isHidden(SimpleBody* body) const
 {
     return hiddenBodies.contains(body);
 }
 
-void Scene::setHidden(SimpleBody* body, bool hidden)
+void Scene::setHidden(SimpleBody* body, BOOLEAN hidden)
 {
     if ( hidden ) {
         hiddenBodies.add(body);
@@ -250,12 +251,12 @@ void Scene::setHidden(SimpleBody* body, bool hidden)
     }
 }
 
-bool Scene::doIntersectionFirstHit(const Ray& inRay, RayHit* info)
+BOOLEAN Scene::doIntersectionFirstHit(const Ray& inRay, RayHit* info)
 {
     int i;
     double nearestDistance = FLT_MAX;
     ArrayList<SimpleBody*>& things = scene->getSimpleBodies();
-    bool intersected = false;
+    BOOLEAN intersected = FALSE;
     SimpleBody* gi;
     RayHit ii;
     Ray r(inRay);
@@ -264,28 +265,28 @@ bool Scene::doIntersectionFirstHit(const Ray& inRay, RayHit* info)
         gi = things.get(i);
         if ( isHidden(gi) ) continue;
         RayHit hit;
-        hit.setStoreRay(true);
+        hit.setStoreRay(TRUE);
         if ( gi->doIntersectionFirstHit(r, &hit) ) {
             double t = hitDistance(hit);
             if ( t < nearestDistance ) {
                 ii.clone(hit);
                 nearestDistance = t;
                 r = r.withT(t);
-                intersected = true;
+                intersected = TRUE;
             }
         }
     }
     if ( intersected ) {
         info->clone(ii);
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 void Scene::rotateBackground()
 {
     // An explicit editor background choice takes precedence over `.ray`.
-    importedSceneBackground = false;
+    importedSceneBackground = FALSE;
     selectedBackground++;
     if ( selectedBackground > 2 ) {
         selectedBackground = 0;
@@ -346,10 +347,11 @@ void Scene::importMitScene(const File& file)
     ArrayList<Light*>& lights = imported.getLights();
     ArrayList<Background*>& backgrounds = imported.getBackgrounds();
     ArrayList<Camera*>& cameras = imported.getCameras();
-    for ( long i = 0; i < bodies.size(); i++ ) scene->getSimpleBodies().add(bodies.get(i));
-    for ( long i = 0; i < lights.size(); i++ ) scene->getLights().add(lights.get(i));
-    for ( long i = 0; i < backgrounds.size(); i++ ) scene->getBackgrounds().add(backgrounds.get(i));
-    for ( long i = 0; i < cameras.size(); i++ ) scene->getCameras().add(cameras.get(i));
+    long i;
+    for ( i = 0; i < bodies.size(); i++ ) scene->getSimpleBodies().add(bodies.get(i));
+    for ( i = 0; i < lights.size(); i++ ) scene->getLights().add(lights.get(i));
+    for ( i = 0; i < backgrounds.size(); i++ ) scene->getBackgrounds().add(backgrounds.get(i));
+    for ( i = 0; i < cameras.size(); i++ ) scene->getCameras().add(cameras.get(i));
     scene->setActiveCameraIndex(imported.getActiveCameraIndex());
     scene->setActiveBackgroundIndex(imported.getActiveBackgroundIndex());
     bodies.clear(); lights.clear(); backgrounds.clear(); cameras.clear();
@@ -358,12 +360,12 @@ void Scene::importMitScene(const File& file)
     activeCamera = scene->getActiveCamera();
     cubemapBackground = NULL;
     fixedBackground = NULL;
-    importedMitScene = true;
+    importedMitScene = TRUE;
     importedSceneBackground = scene->getBackgrounds().size() > 0;
     selectedBackground = 0;
     // Debug groups are editor-owned, unlike bodies owned by SimpleScene.
     // Release them before replacing their selection domain.
-    for ( long i = 0; i < debugThingGroups.size(); i++ ) {
+    for ( i = 0; i < debugThingGroups.size(); i++ ) {
         ArrayList<SimpleBody*>& debugBodies =
             debugThingGroups.get(i)->getBodies();
         for ( long j = 0; j < debugBodies.size(); j++ ) delete debugBodies.get(j);
@@ -379,8 +381,8 @@ void Scene::importMitScene(const File& file)
 
 void Scene::optimizeRendererConfigurationForImportedScene()
 {
-    bool hasTextures = false;
-    bool hasNormalMaps = false;
+    BOOLEAN hasTextures = FALSE;
+    BOOLEAN hasNormalMaps = FALSE;
     ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
     for ( long i = 0; i < bodies.size(); i++ ) {
         hasTextures = hasTextures || bodies.get(i)->getTexture() != NULL;
@@ -413,22 +415,22 @@ void Scene::print()
 
 void Scene::raytrace(RGBImageUncompressed* outViewport)
 {
-    raytrace(outViewport, NULL, true);
+    raytrace(outViewport, NULL, TRUE);
 }
 
 void Scene::raytraceViewport(RGBImageUncompressed* outViewport)
 {
-    raytrace(outViewport, NULL, false);
+    raytrace(outViewport, NULL, FALSE);
 }
 
 void Scene::raytraceViewport(RGBImageUncompressed* outViewport,
                              ZBuffer* outDepth)
 {
-    raytrace(outViewport, outDepth, false);
+    raytrace(outViewport, outDepth, FALSE);
 }
 
 void Scene::raytrace(RGBImageUncompressed* outViewport, ZBuffer* outDepth,
-                     bool interactiveReport)
+                     BOOLEAN interactiveReport)
 {
     int originalWidth;
     int originalHeight;

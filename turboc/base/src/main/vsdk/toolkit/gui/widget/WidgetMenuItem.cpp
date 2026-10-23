@@ -1,13 +1,14 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
 
 WidgetMenuItem::WidgetMenuItem(Widget* c)
-    : name(""), hasName(false), commandName(""), hasCommandName(false),
-      isSeparatorFlag(false), mnemonic(0), accelerator("")
+    : name(""), hasName(FALSE), commandName(""), hasCommandName(FALSE),
+      isSeparatorFlag(FALSE), mnemonic(0), accelerator("")
 {
     context = c;
 }
 
-bool WidgetMenuItem::isSeparator() const
+BOOLEAN WidgetMenuItem::isSeparator() const
 {
     return isSeparatorFlag;
 }
@@ -15,7 +16,7 @@ bool WidgetMenuItem::isSeparator() const
 void WidgetMenuItem::setName(const String& n)
 {
     name = processSimplifiedName(n);
-    hasName = true;
+    hasName = TRUE;
     mnemonic = processMnemonic(n);
     accelerator = processAccelerator(n);
 }
@@ -35,7 +36,7 @@ String WidgetMenuItem::getCommandName() const
 void WidgetMenuItem::setCommandName(const String& a)
 {
     commandName = a;
-    hasCommandName = true;
+    hasCommandName = TRUE;
 }
 
 void WidgetMenuItem::addModifier(const String& m)
@@ -47,7 +48,7 @@ void WidgetMenuItem::addModifier(const String& m)
     else if ( m.equals("UNCHEKED") ) {
     }
     else if ( m.equals("SEPARATOR") ) {
-        isSeparatorFlag = true;
+        isSeparatorFlag = TRUE;
     }
     else {
         setCommandName(m);

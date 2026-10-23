@@ -1,6 +1,7 @@
 #ifndef __VSDK_EXCEPTION__
 #define __VSDK_EXCEPTION__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Exception.h"
 #include "java/lang/String.h"
 

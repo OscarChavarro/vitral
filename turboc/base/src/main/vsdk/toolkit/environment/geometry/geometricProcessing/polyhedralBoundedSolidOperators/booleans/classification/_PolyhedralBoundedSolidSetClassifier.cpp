@@ -39,7 +39,7 @@ static void traceCoplanarTangential(const String& message)
     _SetOperationTrace::traceCoplanarTangential(String(message.c_str()));
 }
 
-static const char* booleanName(bool value)
+static const char* booleanName(BOOLEAN value)
 {
     return value ? "true" : "false";
 }
@@ -202,7 +202,7 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::selectAlternativeBHalfEdge(
 
 _PolyhedralBoundedSolidHalfEdge* Classifier::resolveBEndpointCandidate(
     const VertexVertexClassificationData& data, int sectorIndex,
-    bool selectHb1, _PolyhedralBoundedSolidHalfEdge* hb1,
+    BOOLEAN selectHb1, _PolyhedralBoundedSolidHalfEdge* hb1,
     _PolyhedralBoundedSolidHalfEdge* hb2)
 {
     _PolyhedralBoundedSolidHalfEdge* candidate;
@@ -263,8 +263,8 @@ int Classifier::pointInFace(_PolyhedralBoundedSolidFace* face,
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor::pointInFace(face, point);
 }
 
-int Classifier::resolveCoplanarVertexVertexClass(int op, bool sameOrientation,
-                                                 bool sideA)
+int Classifier::resolveCoplanarVertexVertexClass(int op, BOOLEAN sameOrientation,
+                                                 BOOLEAN sideA)
 {
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         ::resolveCoplanarVertexVertexClass(op, sameOrientation, sideA);
@@ -309,7 +309,7 @@ Vector3Dd Classifier::inside(_PolyhedralBoundedSolidHalfEdge* he)
     return middle;
 }
 
-bool Classifier::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
+BOOLEAN Classifier::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
                              const Vector3Dd& ref2, const Vector3Dd& ref12)
 {
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor::sctrwitthin(
@@ -321,7 +321,7 @@ Normalizes one endpoint for `separateEdgeSequence` when a previous null
 strut edge was already inserted on the same vertex neighborhood.
 */
 _PolyhedralBoundedSolidHalfEdge* Classifier::recoverEdgeSequenceEndpointFromStrut(
-    _PolyhedralBoundedSolidHalfEdge* endpoint, bool isFromEndpoint)
+    _PolyhedralBoundedSolidHalfEdge* endpoint, BOOLEAN isFromEndpoint)
 {
     _PolyhedralBoundedSolidHalfEdge* prev;
 
@@ -387,26 +387,26 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
     // This block fully resolves the old A-E unsupported branches by
     // canonicalizing endpoint selection until both halfedges share origin.
     int recoveryGuard = 0;
-    bool changed;
+    BOOLEAN changed;
     do {
-        changed = false;
+        changed = FALSE;
 
         _PolyhedralBoundedSolidHalfEdge* recoveredFrom;
         _PolyhedralBoundedSolidHalfEdge* recoveredTo;
 
-        recoveredFrom = recoverEdgeSequenceEndpointFromStrut(from, true);
+        recoveredFrom = recoverEdgeSequenceEndpointFromStrut(from, TRUE);
         if ( recoveredFrom != from ) {
             from = recoveredFrom;
-            changed = true;
+            changed = TRUE;
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                 printf("        Recovered edge sequence case A\n");
             }
         }
 
-        recoveredTo = recoverEdgeSequenceEndpointFromStrut(to, false);
+        recoveredTo = recoverEdgeSequenceEndpointFromStrut(to, FALSE);
         if ( recoveredTo != to ) {
             to = recoveredTo;
-            changed = true;
+            changed = TRUE;
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                 printf("        Recovered edge sequence case B\n");
             }
@@ -420,7 +420,7 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
                  fromPrev->parentEdge != NULL && toPrev->parentEdge != NULL &&
                  fromPrev == toPrev->mirrorHalfEdge() ) {
                 from = fromPrev;
-                changed = true;
+                changed = TRUE;
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     printf("        Recovered edge sequence case C\n");
                 }
@@ -428,7 +428,7 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
             else if ( fromPrev != NULL &&
                       fromPrev->startingVertex == to->startingVertex ) {
                 from = fromPrev;
-                changed = true;
+                changed = TRUE;
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     printf("        Recovered edge sequence case D\n");
                 }
@@ -436,7 +436,7 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
             else if ( toPrev != NULL &&
                       toPrev->startingVertex == from->startingVertex ) {
                 to = toPrev;
-                changed = true;
+                changed = TRUE;
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     printf("        Recovered edge sequence case E\n");
                 }
@@ -500,7 +500,7 @@ edge from the side that would otherwise produce an inward-facing null-edge.
 @param traceContext caller label for pipeline-summary diagnostics
 */
 void Classifier::flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
-    _PolyhedralBoundedSolidHalfEdge* he, int type, bool orient,
+    _PolyhedralBoundedSolidHalfEdge* he, int type, BOOLEAN orient,
     const String& traceContext,
     PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB)
 {
@@ -546,7 +546,7 @@ void Classifier::flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
 /**
 Borrowed from [.wMANT2008].
 */
-bool Classifier::nulledge(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Classifier::nulledge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     return PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
         he->startingVertex->position, he->next()->startingVertex->position,
@@ -556,19 +556,19 @@ bool Classifier::nulledge(_PolyhedralBoundedSolidHalfEdge* he)
 /**
 Borrowed from [.wMANT2008].
 */
-bool Classifier::strutnulledge(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Classifier::strutnulledge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     if( he == he->mirrorHalfEdge()->next() ||
         he == he->mirrorHalfEdge()->previous() ) {
-        return true;
+        return TRUE;
     }
-    return false;
+    return FALSE;
 }
 
 /**
 Borrowed from [.wMANT2008].
 */
-bool Classifier::convexedg(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Classifier::convexedg(_PolyhedralBoundedSolidHalfEdge* he)
 {
     _PolyhedralBoundedSolidHalfEdge* h2;
     Vector3Dd dir;
@@ -582,7 +582,7 @@ bool Classifier::convexedg(_PolyhedralBoundedSolidHalfEdge* he)
     cr = he->parentLoop->parentFace->getContainingPlane()->getNormal().crossProduct(
         he->mirrorHalfEdge()->parentLoop->parentFace->getContainingPlane()->getNormal());
     if ( cr.length() < numericContext.unitVectorTolerance() ) {
-        return true;
+        return TRUE;
     }
     return (dir.dotProduct(cr) < 0.0);
 }
@@ -590,7 +590,7 @@ bool Classifier::convexedg(_PolyhedralBoundedSolidHalfEdge* he)
 /**
 Borrowed from [.wMANT2008].
 */
-bool Classifier::sectorwide(_PolyhedralBoundedSolidHalfEdge* he, int /*ind*/)
+BOOLEAN Classifier::sectorwide(_PolyhedralBoundedSolidHalfEdge* he, int /*ind*/)
 {
     return checkWideness(he);
 }
@@ -598,13 +598,13 @@ bool Classifier::sectorwide(_PolyhedralBoundedSolidHalfEdge* he, int /*ind*/)
 /**
 Borrowed from [.wMANT2008].
 */
-bool Classifier::getOrientation(_PolyhedralBoundedSolidHalfEdge* ref,
+BOOLEAN Classifier::getOrientation(_PolyhedralBoundedSolidHalfEdge* ref,
                                 _PolyhedralBoundedSolidHalfEdge* he1,
                                 _PolyhedralBoundedSolidHalfEdge* he2)
 {
     _PolyhedralBoundedSolidHalfEdge* mhe1;
     _PolyhedralBoundedSolidHalfEdge* mhe2;
-    bool retcode = false;
+    BOOLEAN retcode = FALSE;
 
     mhe1 = he1->mirrorHalfEdge()->next();
     mhe2 = he2->mirrorHalfEdge()->next();
@@ -621,18 +621,18 @@ bool Classifier::getOrientation(_PolyhedralBoundedSolidHalfEdge* ref,
     return !retcode;
 }
 
-bool Classifier::sectorContainsAState(const OnSector& sector, int wantedState)
+BOOLEAN Classifier::sectorContainsAState(const OnSector& sector, int wantedState)
 {
     return sector.s1a == wantedState || sector.s2a == wantedState;
 }
 
-bool Classifier::sectorContainsBState(const OnSector& sector, int wantedState)
+BOOLEAN Classifier::sectorContainsBState(const OnSector& sector, int wantedState)
 {
     return sector.s1b == wantedState || sector.s2b == wantedState;
 }
 
 _PolyhedralBoundedSolidHalfEdge* Classifier::selectMissingEndpoint(
-    const VertexVertexClassificationData& data, bool fromSolidA,
+    const VertexVertexClassificationData& data, BOOLEAN fromSolidA,
     int wantedState, _PolyhedralBoundedSolidHalfEdge* avoid)
 {
     _PolyhedralBoundedSolidHalfEdge* fallback;
@@ -641,7 +641,7 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::selectMissingEndpoint(
     fallback = NULL;
     for ( i = 0; i < data.sectors.size(); i++ ) {
         _PolyhedralBoundedSolidHalfEdge* candidate;
-        bool containsState;
+        BOOLEAN containsState;
 
         const OnSector& sector = data.sectors[i];
         if ( !sector.intersect ) {
@@ -688,16 +688,16 @@ void Classifier::recoverMissingCoplanarEndpoints(
         " hb1=" + summarizeHalfEdge(hb1) +
         " hb2=" + summarizeHalfEdge(hb2));
     if ( ha1 == NULL ) {
-        ha1 = selectMissingEndpoint(data, true, OnSector::OUT, ha2);
+        ha1 = selectMissingEndpoint(data, TRUE, OnSector::OUT, ha2);
     }
     if ( ha2 == NULL ) {
-        ha2 = selectMissingEndpoint(data, true, OnSector::IN, ha1);
+        ha2 = selectMissingEndpoint(data, TRUE, OnSector::IN, ha1);
     }
     if ( hb1 == NULL ) {
-        hb1 = selectMissingEndpoint(data, false, OnSector::IN, hb2);
+        hb1 = selectMissingEndpoint(data, FALSE, OnSector::IN, hb2);
     }
     if ( hb2 == NULL ) {
-        hb2 = selectMissingEndpoint(data, false, OnSector::OUT, hb1);
+        hb2 = selectMissingEndpoint(data, FALSE, OnSector::OUT, hb1);
     }
 
     traceCoplanarTangential(
@@ -741,7 +741,7 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
         " totalSectors=" + Cpp98Support::toString(n));
 
     i = 0;
-    while ( true ) {
+    while ( TRUE ) {
         String traceContext;
         //-------------------------------------------------------------
         if ( i >= n ) {
@@ -807,7 +807,7 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
             long j;
 
             for ( j = 0; j < n; j++ ) {
-                data.sectors[j].intersect = false;
+                data.sectors[j].intersect = FALSE;
             }
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                 printf("    . Incomplete coplanar pairing, skipping split\n");

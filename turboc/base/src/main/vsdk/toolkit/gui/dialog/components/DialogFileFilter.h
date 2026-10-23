@@ -1,6 +1,7 @@
 #ifndef __DIALOG_FILE_FILTER__
 #define __DIALOG_FILE_FILTER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 /**
@@ -23,7 +24,7 @@ public:
     /**
     @return true for folders and for the files with the suffix
     */
-    bool accepts(const String& path, bool directory) const;
+    BOOLEAN accepts(const String& path, BOOLEAN directory) const;
     const String& getSuffix() const;
 
     /**

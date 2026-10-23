@@ -266,12 +266,12 @@ void ApplicationModel::setPalette(RGBColorPalette* palette)
     this->palette = palette;
 }
 
-bool ApplicationModel::isWithVisualDebugRay() const
+BOOLEAN ApplicationModel::isWithVisualDebugRay() const
 {
     return rayGizmo != NULL && rayGizmo->isVisible();
 }
 
-void ApplicationModel::setWithVisualDebugRay(bool withVisualDebugRay)
+void ApplicationModel::setWithVisualDebugRay(BOOLEAN withVisualDebugRay)
 {
     if ( rayGizmo != NULL ) {
         rayGizmo->setVisible(withVisualDebugRay);
@@ -283,7 +283,9 @@ const Ray* ApplicationModel::getVisualDebugRay() const
     if ( rayGizmo == NULL ) {
         return NULL;
     }
-    visualDebugRay = Ray(rayGizmo->getPosition(), rayGizmo->getDirection());
+    // Changed by this const method (no `mutable` in Turbo C++ 3.0)
+    ((ApplicationModel *)this)->visualDebugRay =
+        Ray(rayGizmo->getPosition(), rayGizmo->getDirection());
     return &visualDebugRay;
 }
 

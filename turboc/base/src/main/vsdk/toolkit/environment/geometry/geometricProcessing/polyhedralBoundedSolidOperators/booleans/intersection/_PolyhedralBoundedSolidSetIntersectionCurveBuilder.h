@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTION_CURVE_BUILDER__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTION_CURVE_BUILDER__
+#ifndef ___PBS_SET_INTERSECTION_CURVE_BUILDER__
+#define ___PBS_SET_INTERSECTION_CURVE_BUILDER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
@@ -66,7 +67,7 @@ public:
         @return true when every node lies on a closed cycle and no structural
         anomaly was detected
         */
-        bool isCleanlyClosed() const;
+        BOOLEAN isCleanlyClosed() const;
 
         /**
         @return one-line structural summary for pipeline traces
@@ -102,7 +103,7 @@ public:
     @return false (Java null) when the cycles do not cover the index range
     exactly
     */
-    static bool computeTraversalOrder(const ArrayList<IndexList>& cycles,
+    static BOOLEAN computeTraversalOrder(const ArrayList<IndexList>& cycles,
         int nodeCount, IndexList& outPermutation);
 
     /**
@@ -118,7 +119,7 @@ public:
     @return false (Java null) when the cycles do not cover the index range
     exactly, in which case nothing is mutated
     */
-    static bool orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
+    static BOOLEAN orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
         int nodeCount, NullEdgeList& sonea, NullEdgeList& soneb,
         IndexList& outPermutation);
 
@@ -129,9 +130,9 @@ private:
         _PolyhedralBoundedSolidHalfEdge* he);
     static void collectFaces(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
         ArrayList<_PolyhedralBoundedSolidFace*>& outFaces);
-    static bool nodePosition(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
+    static BOOLEAN nodePosition(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
         Vector3Dd& outPosition);
-    static bool faceNormal(_PolyhedralBoundedSolidFace* face,
+    static BOOLEAN faceNormal(_PolyhedralBoundedSolidFace* face,
         Vector3Dd& outNormal);
     static void link(ArrayList<IndexList>& neighbors, int i, int j);
 
@@ -145,7 +146,7 @@ private:
     static void orientTowardSuccessor(
         _PolyhedralBoundedSolidSetOperatorNullEdge& current,
         const _PolyhedralBoundedSolidSetOperatorNullEdge& successor,
-        bool successorSideIsRight);
+        BOOLEAN successorSideIsRight);
     static int minOf(const IndexList& values);
 
     // Sorting criteria (C++98 has no lambdas)

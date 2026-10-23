@@ -1,5 +1,6 @@
 #include <math.h>
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
@@ -64,7 +65,7 @@ double signedArea(const ArrayList<IndexedVertex> &vertices)
     return area * 0.5;
 }
 
-bool samePoint(const IndexedVertex &a, const IndexedVertex &b)
+BOOLEAN samePoint(const IndexedVertex &a, const IndexedVertex &b)
 {
     return Cpp98Support::abs(a.x - b.x) <= EPSILON && Cpp98Support::abs(a.y - b.y) <= EPSILON;
 }
@@ -91,7 +92,7 @@ ArrayList<IndexedVertex> removeConsecutiveDuplicates(
 }
 
 void normalizeOrientation(ArrayList<IndexedVertex> &vertices,
-    bool wantCounterClockwise)
+    BOOLEAN wantCounterClockwise)
 {
     const double area = signedArea(vertices);
     if ((wantCounterClockwise && area < 0.0) ||
@@ -100,13 +101,13 @@ void normalizeOrientation(ArrayList<IndexedVertex> &vertices,
     }
 }
 
-bool pointOnSegment(double x, double y, const IndexedVertex &a,
+BOOLEAN pointOnSegment(double x, double y, const IndexedVertex &a,
     const IndexedVertex &b)
 {
     const double areaTwice = (b.x - a.x) * (y - a.y) -
         (b.y - a.y) * (x - a.x);
     if (Cpp98Support::abs(areaTwice) > EPSILON) {
-        return false;
+        return FALSE;
     }
 
     return x >= minValue(a.x, b.x) - EPSILON &&
@@ -115,18 +116,18 @@ bool pointOnSegment(double x, double y, const IndexedVertex &a,
         y <= maxValue(a.y, b.y) + EPSILON;
 }
 
-bool containsPoint(const ArrayList<IndexedVertex> &contour, double x, double y)
+BOOLEAN containsPoint(const ArrayList<IndexedVertex> &contour, double x, double y)
 {
-    bool inside = false;
+    BOOLEAN inside = FALSE;
     for (size_t i = 0, j = (size_t)contour.size() - 1; i < (size_t)contour.size(); j = i++) {
         const IndexedVertex &a = contour[i];
         const IndexedVertex &b = contour[j];
 
         if (pointOnSegment(x, y, a, b)) {
-            return true;
+            return TRUE;
         }
 
-        const bool intersects = ((a.y > y) != (b.y > y)) &&
+        const BOOLEAN intersects = ((a.y > y) != (b.y > y)) &&
             (x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x);
         if (intersects) {
             inside = !inside;
@@ -142,7 +143,7 @@ double squaredDistance(const IndexedVertex &a, const IndexedVertex &b)
     return dx * dx + dy * dy;
 }
 
-bool rangesOverlap(double a0, double a1, double b0, double b1)
+BOOLEAN rangesOverlap(double a0, double a1, double b0, double b1)
 {
     const double minA = minValue(a0, a1);
     const double maxA = maxValue(a0, a1);
@@ -151,12 +152,12 @@ bool rangesOverlap(double a0, double a1, double b0, double b1)
     return maxValue(minA, minB) <= minValue(maxA, maxB) + EPSILON;
 }
 
-bool segmentsIntersectProperly(const IndexedVertex &a, const IndexedVertex &b,
+BOOLEAN segmentsIntersectProperly(const IndexedVertex &a, const IndexedVertex &b,
     const IndexedVertex &c, const IndexedVertex &d)
 {
     if (samePoint(a, c) || samePoint(a, d) || samePoint(b, c) ||
         samePoint(b, d)) {
-        return false;
+        return FALSE;
     }
 
     const double abC = cross(a, b, c);
@@ -176,7 +177,7 @@ bool segmentsIntersectProperly(const IndexedVertex &a, const IndexedVertex &b,
             (cdA < -EPSILON && cdB > EPSILON));
 }
 
-bool segmentCrossesAnyEdge(const IndexedVertex &a, const IndexedVertex &b,
+BOOLEAN segmentCrossesAnyEdge(const IndexedVertex &a, const IndexedVertex &b,
     const ArrayList<IndexedVertex> &boundary, int allowedVertexIndex)
 {
     for (size_t i = 0; i < (size_t)boundary.size(); i++) {
@@ -192,18 +193,18 @@ bool segmentCrossesAnyEdge(const IndexedVertex &a, const IndexedVertex &b,
         }
 
         if (segmentsIntersectProperly(a, b, edgeStart, edgeEnd)) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
-bool segmentCrossesBoundary(const IndexedVertex &a, const IndexedVertex &b,
+BOOLEAN segmentCrossesBoundary(const IndexedVertex &a, const IndexedVertex &b,
     const ArrayList<IndexedVertex> &polygon, int polygonVertexIndex,
     const ArrayList<IndexedVertex> &hole, int holeVertexIndex)
 {
     if (segmentCrossesAnyEdge(a, b, polygon, polygonVertexIndex)) {
-        return true;
+        return TRUE;
     }
     return segmentCrossesAnyEdge(a, b, hole, holeVertexIndex);
 }
@@ -273,7 +274,8 @@ ArrayList<ContourData> flattenContours(const Polygon2D &input)
 
 void classifyContourHierarchy(ArrayList<ContourData> &contours)
 {
-    for (size_t i = 0; i < (size_t)contours.size(); i++) {
+    size_t i;
+    for (i = 0; i < (size_t)contours.size(); i++) {
         ContourData &contour = contours[i];
         const IndexedVertex &probe = contour.vertices[0];
         double bestContainerArea = HUGE_VAL;
@@ -297,11 +299,11 @@ void classifyContourHierarchy(ArrayList<ContourData> &contours)
         }
     }
 
-    for (size_t i = 0; i < (size_t)contours.size(); i++) {
+    for (i = 0; i < (size_t)contours.size(); i++) {
         computeDepth(contours, ((int)(i)));
     }
 
-    for (size_t i = 0; i < (size_t)contours.size(); i++) {
+    for (i = 0; i < (size_t)contours.size(); i++) {
         const int parentIndex = contours[i].parentContour;
         if (parentIndex >= 0) {
             contours[parentIndex].childContours.add(((int)(i)));
@@ -309,7 +311,7 @@ void classifyContourHierarchy(ArrayList<ContourData> &contours)
     }
 }
 
-bool hasRepeatedVertex(const IndexedVertex &a, const IndexedVertex &b,
+BOOLEAN hasRepeatedVertex(const IndexedVertex &a, const IndexedVertex &b,
     const IndexedVertex &c)
 {
     return a.originalIndex == b.originalIndex ||
@@ -317,26 +319,26 @@ bool hasRepeatedVertex(const IndexedVertex &a, const IndexedVertex &b,
         a.originalIndex == c.originalIndex;
 }
 
-bool pointInTriangle(const IndexedVertex &a, const IndexedVertex &b,
+BOOLEAN pointInTriangle(const IndexedVertex &a, const IndexedVertex &b,
     const IndexedVertex &c, const IndexedVertex &p)
 {
     if (samePoint(a, p) || samePoint(b, p) || samePoint(c, p)) {
-        return false;
+        return FALSE;
     }
 
     const double ab = cross(a, b, p);
     const double bc = cross(b, c, p);
     const double ca = cross(c, a, p);
-    const bool hasNegative = ab < -EPSILON || bc < -EPSILON || ca < -EPSILON;
-    const bool hasPositive = ab > EPSILON || bc > EPSILON || ca > EPSILON;
+    const BOOLEAN hasNegative = ab < -EPSILON || bc < -EPSILON || ca < -EPSILON;
+    const BOOLEAN hasPositive = ab > EPSILON || bc > EPSILON || ca > EPSILON;
     return !(hasNegative && hasPositive);
 }
 
 void simplifyCollinearVertices(ArrayList<IndexedVertex> &polygon)
 {
-    bool removed;
+    BOOLEAN removed;
     do {
-        removed = false;
+        removed = FALSE;
         if (polygon.size() <= 3) {
             return;
         }
@@ -348,7 +350,7 @@ void simplifyCollinearVertices(ArrayList<IndexedVertex> &polygon)
             if (samePoint(previous, current) || samePoint(current, next) ||
                 Cpp98Support::abs(cross(previous, current, next)) <= EPSILON) {
                 polygon.remove(((long)(i)));
-                removed = true;
+                removed = TRUE;
                 break;
             }
         }
@@ -356,13 +358,13 @@ void simplifyCollinearVertices(ArrayList<IndexedVertex> &polygon)
     while (removed);
 }
 
-bool earClipSimplePolygon(const ArrayList<IndexedVertex> &polygon,
+BOOLEAN earClipSimplePolygon(const ArrayList<IndexedVertex> &polygon,
     ArrayList<MonotoneDecompositionTriangulator::Triangle> &output)
 {
     ArrayList<IndexedVertex> work = removeConsecutiveDuplicates(polygon);
     simplifyCollinearVertices(work);
     if (work.size() < 3) {
-        return true;
+        return TRUE;
     }
 
     if (signedArea(work) < 0.0) {
@@ -371,7 +373,7 @@ bool earClipSimplePolygon(const ArrayList<IndexedVertex> &polygon,
 
     int guard = ((int)(work.size() * work.size()));
     while (work.size() > 3 && guard-- > 0) {
-        bool clippedEar = false;
+        BOOLEAN clippedEar = FALSE;
 
         for (size_t i = 0; i < (size_t)work.size(); i++) {
             const IndexedVertex &previous =
@@ -386,14 +388,14 @@ bool earClipSimplePolygon(const ArrayList<IndexedVertex> &polygon,
                 continue;
             }
 
-            bool containsOtherVertex = false;
+            BOOLEAN containsOtherVertex = FALSE;
             for (size_t j = 0; j < (size_t)work.size(); j++) {
                 if (j == i || j == (i + 1) % work.size() ||
                     j == (i + work.size() - 1) % work.size()) {
                     continue;
                 }
                 if (pointInTriangle(previous, current, next, work[j])) {
-                    containsOtherVertex = true;
+                    containsOtherVertex = TRUE;
                     break;
                 }
             }
@@ -409,12 +411,12 @@ bool earClipSimplePolygon(const ArrayList<IndexedVertex> &polygon,
 
             work.remove(((long)(i)));
             simplifyCollinearVertices(work);
-            clippedEar = true;
+            clippedEar = TRUE;
             break;
         }
 
         if (!clippedEar) {
-            return false;
+            return FALSE;
         }
     }
 
@@ -426,7 +428,7 @@ bool earClipSimplePolygon(const ArrayList<IndexedVertex> &polygon,
         triangle.add(work[1].originalIndex);
         triangle.add(work[2].originalIndex);
         output.add(triangle);
-        return true;
+        return TRUE;
     }
 
     return work.size() == 0 || work.size() < 3;
@@ -467,12 +469,12 @@ int findVisibleBridgeVertex(const ArrayList<IndexedVertex> &polygon,
             continue;
         }
 
-        bool crossesRemainingHole = false;
+        BOOLEAN crossesRemainingHole = FALSE;
         for (size_t holeIndex = 0; holeIndex < (size_t)remainingHoles.size();
              holeIndex++) {
             if (segmentCrossesAnyEdge(holeVertex, polygonVertex,
                     remainingHoles[holeIndex], -1)) {
-                crossesRemainingHole = true;
+                crossesRemainingHole = TRUE;
                 break;
             }
         }
@@ -504,14 +506,14 @@ ArrayList<IndexedVertex> bridgeHoleIntoPolygon(
     const ArrayList<IndexedVertex> &polygonInput,
     const ArrayList<IndexedVertex> &holeInput,
     const ArrayList< ArrayList<IndexedVertex> > &remainingHoles,
-    bool &ok)
+    BOOLEAN &ok)
 {
     const ArrayList<IndexedVertex> polygon =
         removeConsecutiveDuplicates(polygonInput);
     const ArrayList<IndexedVertex> hole =
         removeConsecutiveDuplicates(holeInput);
     if (hole.size() < 3) {
-        ok = true;
+        ok = TRUE;
         return polygon;
     }
 
@@ -520,12 +522,13 @@ ArrayList<IndexedVertex> bridgeHoleIntoPolygon(
     const int bridgePolygonVertexIndex = findVisibleBridgeVertex(
         polygon, hole, holeVertexIndex, remainingHoles);
     if (bridgePolygonVertexIndex < 0) {
-        ok = false;
+        ok = FALSE;
         return ArrayList<IndexedVertex>();
     }
 
     ArrayList<IndexedVertex> merged;
-    for (int i = 0; i <= bridgePolygonVertexIndex; i++) {
+    long i;
+    for (i = 0; i <= bridgePolygonVertexIndex; i++) {
         merged.add(polygon[i]);
     }
 
@@ -537,30 +540,30 @@ ArrayList<IndexedVertex> bridgeHoleIntoPolygon(
     }
     merged.add(holeVertex);
 
-    for (size_t i = ((size_t)(bridgePolygonVertexIndex));
-         i < (size_t)polygon.size(); i++) {
+    for (i = ((bridgePolygonVertexIndex));
+         i < polygon.size(); i++) {
         merged.add(polygon[i]);
     }
 
-    ok = true;
+    ok = TRUE;
     return removeConsecutiveDuplicates(merged);
 }
 
-bool triangulateFilledRegion(const ArrayList<IndexedVertex> &outerInput,
+BOOLEAN triangulateFilledRegion(const ArrayList<IndexedVertex> &outerInput,
     const ArrayList< ArrayList<IndexedVertex> > &holesInput,
     ArrayList<MonotoneDecompositionTriangulator::Triangle> &output)
 {
     ArrayList<IndexedVertex> outer = outerInput;
-    normalizeOrientation(outer, true);
+    normalizeOrientation(outer, TRUE);
 
     ArrayList< ArrayList<IndexedVertex> > holes = holesInput;
     for (size_t i = 0; i < (size_t)holes.size(); i++) {
-        normalizeOrientation(holes[i], false);
+        normalizeOrientation(holes[i], FALSE);
     }
 
     ArrayList<IndexedVertex> polygon = removeConsecutiveDuplicates(outer);
     if (polygon.size() < 3) {
-        return true;
+        return TRUE;
     }
 
     ArrayList< ArrayList<IndexedVertex> > remainingHoles = holes;
@@ -569,10 +572,10 @@ bool triangulateFilledRegion(const ArrayList<IndexedVertex> &outerInput,
         const ArrayList<IndexedVertex> hole = remainingHoles[nextHoleIndex];
         remainingHoles.remove(nextHoleIndex);
 
-        bool ok = false;
+        BOOLEAN ok = FALSE;
         polygon = bridgeHoleIntoPolygon(polygon, hole, remainingHoles, ok);
         if (!ok) {
-            return false;
+            return FALSE;
         }
     }
 

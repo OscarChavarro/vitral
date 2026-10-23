@@ -1,6 +1,7 @@
 #ifndef __ROTATE_GIZMO_INTERACTION_TECHNIQUE__
 #define __ROTATE_GIZMO_INTERACTION_TECHNIQUE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
@@ -41,7 +42,7 @@ seen in, with origin at its upper left corner.
 class RotateGizmoInteractionTechnique {
 private:
     RotateGizmo* gizmo;
-    bool active;
+    BOOLEAN active;
 
     // State of the gesture in course (drag of a ring)
     int dragRing;
@@ -71,7 +72,7 @@ public:
     /**
     @return true if the last cursor position was over a ring of the gizmo
     */
-    bool isActive() const;
+    BOOLEAN isActive() const;
 
     /**
     @return the viewport where the gesture in course started, or null if
@@ -82,21 +83,21 @@ public:
     /**
     @return true if a ring is being dragged
     */
-    bool isDragging() const;
+    BOOLEAN isDragging() const;
 
     /**
     @return true if the input gizmo uses the key (digits, `-`, decimal point,
     TAB, BACKSPACE, arrows, and ENTER and ESC while editing), so the caller
     must not process it as any other command
     */
-    bool isInputGizmoKey(const KeyEvent& keyEvent);
+    BOOLEAN isInputGizmoKey(const KeyEvent& keyEvent);
 
     /**
     Processes a key press.
     @return true if the orientation of the gizmo changed
     */
-    bool processKeyPressedEvent(const KeyEvent& keyEvent);
-    bool processKeyReleasedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processKeyPressedEvent(const KeyEvent& keyEvent);
+    BOOLEAN processKeyReleasedEvent(const KeyEvent& keyEvent);
 
     /**
     Processes the press of a mouse button over the viewport where the gizmo
@@ -104,41 +105,41 @@ public:
     and a gesture to rotate around it starts, confined to the given viewport.
     @return false (a press never changes the gizmo)
     */
-    bool processMousePressedEvent(const MouseEvent& e, Viewport* viewport);
+    BOOLEAN processMousePressedEvent(const MouseEvent& e, Viewport* viewport);
 
     /**
     Processes the press of a mouse button. If the cursor is over a ring, the
     ring becomes the chosen one and a gesture to rotate around it starts.
     @return false (a press never changes the gizmo)
     */
-    bool processMousePressedEvent(const MouseEvent& e);
+    BOOLEAN processMousePressedEvent(const MouseEvent& e);
 
     /**
     Ends the gesture in course, if there is one, so the arc disappears.
     @return true if there was a gesture, so the gizmo must be drawn again
     */
-    bool processMouseReleasedEvent(const MouseEvent& e);
+    BOOLEAN processMouseReleasedEvent(const MouseEvent& e);
 
     /**
     Makes the ring under the cursor the persistent selection, if there is
     one.
     @return true if the current selection changed
     */
-    bool processMouseClickedEvent(const MouseEvent& e);
+    BOOLEAN processMouseClickedEvent(const MouseEvent& e);
 
     /**
     Makes the ring under the cursor the volatile selection.
     @return true if the current selection changed
     */
-    bool processMouseMovedEvent(const MouseEvent& e);
+    BOOLEAN processMouseMovedEvent(const MouseEvent& e);
 
     /**
     Rotates the gizmo around the axis of the ring being dragged, so the point
     of the ring under the cursor when the gesture started follows it.
     @return true if the gizmo changed
     */
-    bool processMouseDraggedEvent(const MouseEvent& e);
-    bool processMouseWheelEvent(const MouseEvent& e);
+    BOOLEAN processMouseDraggedEvent(const MouseEvent& e);
+    BOOLEAN processMouseWheelEvent(const MouseEvent& e);
 };
 
 #endif

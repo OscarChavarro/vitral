@@ -18,7 +18,7 @@ void Rasterizer2D::sortFillEdges(ArrayList<FillEdge>& edges)
         size_t j = i;
         while (j > 0) {
             const FillEdge& prev = edges[j - 1];
-            bool shouldMove =
+            BOOLEAN shouldMove =
                 prev.xAtCurrentY > key.xAtCurrentY ||
                 (prev.xAtCurrentY == key.xAtCurrentY &&
                     (prev.inverseSlope > key.inverseSlope ||
@@ -182,13 +182,14 @@ void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
     }
 
     ArrayList< ArrayList<FillEdge> > buckets(imageHeight);
-    for (int i = 0; i < imageHeight; i++) {
+    long i;
+    for (i = 0; i < imageHeight; i++) {
         buckets.add(ArrayList<FillEdge>());
     }
     int yRange[2] = {imageHeight, 0};
     int sortOrder = 0;
 
-    for (long int i = 0; i < polygon.loops.size(); i++) {
+    for (i = 0; i < polygon.loops.size(); i++) {
         _Polygon2DContour* contour = polygon.loops[i];
         long int vertexCount = contour->vertices.size();
         if (vertexCount < 2) {
@@ -211,18 +212,18 @@ void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
 
     for (int y = yRange[0]; y < yRange[1]; y++) {
         ArrayList<FillEdge>& bucket = buckets[y];
-        for (long int i = 0; i < bucket.size(); i++) {
+        for (i = 0; i < bucket.size(); i++) {
             activeEdges.add(bucket[i]);
         }
 
-        for (int i = (int)activeEdges.size() - 1; i >= 0; i--) {
+        for (i = (int)activeEdges.size() - 1; i >= 0; i--) {
             if (y >= activeEdges[(size_t)i].yMaxExclusive) {
                 activeEdges.remove(i);
             }
         }
 
         if (activeEdges.size() < 2) {
-            for (size_t i = 0; i < (size_t)activeEdges.size(); i++) {
+            for (i = 0; i < activeEdges.size(); i++) {
                 activeEdges[i].xAtCurrentY += activeEdges[i].inverseSlope;
             }
             continue;
@@ -230,7 +231,7 @@ void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
 
         sortFillEdges(activeEdges);
 
-        for (size_t i = 0; i + 1 < (size_t)activeEdges.size(); i += 2) {
+        for (i = 0; i + 1 < activeEdges.size(); i += 2) {
             double xLeft = activeEdges[i].xAtCurrentY;
             double xRight = activeEdges[i + 1].xAtCurrentY;
 
@@ -255,7 +256,7 @@ void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
             }
         }
 
-        for (size_t i = 0; i < (size_t)activeEdges.size(); i++) {
+        for (i = 0; i < activeEdges.size(); i++) {
             activeEdges[i].xAtCurrentY += activeEdges[i].inverseSlope;
         }
     }

@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/HashMap.h"
 
 /**
@@ -65,7 +66,7 @@ HashMap<K, V>::size() const {
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 HashMap<K, V>::isEmpty() const {
     return elementCount == 0;
 }
@@ -81,7 +82,7 @@ HashMap<K, V>::bucketIndexFor(const K &key) const {
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 HashMap<K, V>::containsKey(const K &key) const {
     return tryGet(key, NULL);
 }
@@ -125,10 +126,10 @@ HashMap<K, V>::get(const K &key) const {
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 HashMap<K, V>::tryGet(const K &key, V *valueOut) const {
     if ( buckets == NULL || bucketCount <= 0 ) {
-        return false;
+        return FALSE;
     }
 
     const long index = bucketIndexFor(key);
@@ -138,12 +139,12 @@ HashMap<K, V>::tryGet(const K &key, V *valueOut) const {
             if ( valueOut != NULL ) {
                 *valueOut = current->value;
             }
-            return true;
+            return TRUE;
         }
         current = current->next;
     }
 
-    return false;
+    return FALSE;
 }
 
 template <class K, class V>
@@ -167,11 +168,12 @@ HashMap<K, V>::rehash(long newBucketCount) {
     if ( newBuckets == NULL ) {
         return;
     }
-    for ( long i = 0; i < newBucketCount; i++ ) {
+    long i;
+    for ( i = 0; i < newBucketCount; i++ ) {
         newBuckets[i] = NULL;
     }
 
-    for ( long i = 0; i < bucketCount; i++ ) {
+    for ( i = 0; i < bucketCount; i++ ) {
         Entry *current = buckets[i];
         while ( current != NULL ) {
             Entry *next = current->next;
@@ -189,12 +191,12 @@ HashMap<K, V>::rehash(long newBucketCount) {
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 HashMap<K, V>::put(const K &key, const V &value) {
     if ( buckets == NULL || bucketCount <= 0 ) {
         initialize(16);
         if ( buckets == NULL ) {
-            return false;
+            return FALSE;
         }
     }
 
@@ -203,14 +205,14 @@ HashMap<K, V>::put(const K &key, const V &value) {
     while ( current != NULL ) {
         if ( current->key == key ) {
             current->value = value;
-            return true;
+            return TRUE;
         }
         current = current->next;
     }
 
     Entry *entry = new Entry(key, value, buckets[index]);
     if ( entry == NULL ) {
-        return false;
+        return FALSE;
     }
     buckets[index] = entry;
     elementCount++;
@@ -219,14 +221,14 @@ HashMap<K, V>::put(const K &key, const V &value) {
     if ( ((float)(elementCount)) > maxElements ) {
         rehash(bucketCount * 2);
     }
-    return true;
+    return TRUE;
 }
 
 template <class K, class V>
-bool
+BOOLEAN
 HashMap<K, V>::remove(const K &key) {
     if ( buckets == NULL || bucketCount <= 0 ) {
-        return false;
+        return FALSE;
     }
 
     const long index = bucketIndexFor(key);
@@ -241,12 +243,12 @@ HashMap<K, V>::remove(const K &key) {
             }
             delete current;
             elementCount--;
-            return true;
+            return TRUE;
         }
         previous = current;
         current = current->next;
     }
 
-    return false;
+    return FALSE;
 }
 

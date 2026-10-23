@@ -1,6 +1,7 @@
 #ifndef __OPEN_GL_1_MESH_BUILDER__
 #define __OPEN_GL_1_MESH_BUILDER__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -45,14 +46,14 @@ public:
     to the Z axis.
     */
     void addDisk(double z, double innerRadius, double outerRadius,
-                 bool facingUp, int slices);
+                 BOOLEAN facingUp, int slices);
 
     /**
     Makes the built mesh visible from both sides, as needed by open surfaces
     (i.e. a patch or a height field): each triangle gets a back side copy
     with the opposite winding and normals.
     */
-    void setDoubleSided(bool doubleSided);
+    void setDoubleSided(BOOLEAN doubleSided);
 
     /**
     @return a new mesh with the triangles added, owned by the caller
@@ -61,10 +62,10 @@ public:
 
 private:
     /// x y z, nx ny nz, u v of each vertex
-    static const int VERTEX_SIZE = 8;
+    enum { VERTEX_SIZE = 8 };
     ArrayList<float> vertices;
     double characteristicSize;
-    bool doubleSided;
+    BOOLEAN doubleSided;
 
     void addVertex(const Vector3Dd& p, const Vector3Dd& n, double u, double v);
     void addBackSides(int frontCount);

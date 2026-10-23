@@ -1,6 +1,7 @@
 #ifndef __XT_TREE_VIEW__
 #define __XT_TREE_VIEW__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeSet.h"
 #include "java/util/ArrayList.h"
 
@@ -92,7 +93,7 @@ private:
     XFontSet fontSet;
     GC gc;
     unsigned long colors[5];
-    bool colorsAllocated;
+    BOOLEAN colorsAllocated;
     int rowHeight;
     int ascent;
     int scrollTop;

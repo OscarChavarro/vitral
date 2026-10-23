@@ -1,6 +1,7 @@
 #ifndef __ENTITY__
 #define __ENTITY__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Class.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -43,14 +44,16 @@ private:
 
 public:
     /// Constants used for operations of type getSizeInBytes
-    static const int BYTE_SIZE_IN_BYTES = 1;
-    static const int INT_SIZE_IN_BYTES = 4;
-    static const int LONG_SIZE_IN_BYTES = 8;
-    static const int FLOAT_SIZE_IN_BYTES = 4;
-    static const int DOUBLE_SIZE_IN_BYTES = 8;
-    static const int VECTOR3D_SIZE_IN_BYTES = 24;
-    static const int COLORRGB_SIZE_IN_BYTES = 24;
-    static const int POINTER_SIZE_IN_BYTES = 8;
+    enum {
+        BYTE_SIZE_IN_BYTES = 1,
+        INT_SIZE_IN_BYTES = 4,
+        LONG_SIZE_IN_BYTES = 8,
+        FLOAT_SIZE_IN_BYTES = 4,
+        DOUBLE_SIZE_IN_BYTES = 8,
+        VECTOR3D_SIZE_IN_BYTES = 24,
+        COLORRGB_SIZE_IN_BYTES = 24,
+        POINTER_SIZE_IN_BYTES = 8
+    };
 
     Entity();
 
@@ -128,7 +131,7 @@ public:
     @return true if this object is an instance of the class or of one of
     its subclasses (Java `instanceof`)
     */
-    bool instanceOf(const Class &type) const;
+    BOOLEAN instanceOf(const Class &type) const;
 
     /**
     @return the name of the class of this entity, without namespaces (as

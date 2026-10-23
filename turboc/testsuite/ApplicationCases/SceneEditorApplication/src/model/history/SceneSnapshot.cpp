@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/light/Light.h"
@@ -82,7 +83,7 @@ Scene* SceneSnapshot::getScene() const
 
 UndoableOperation* SceneSnapshot::operationTo(const SceneSnapshot* later,
                                               const String& name,
-                                              bool mergeable) const
+                                              BOOLEAN mergeable) const
 {
     ArrayList<UndoableOperation*> operations;
     UndoableOperation* transformation;
@@ -114,7 +115,7 @@ UndoableOperation* SceneSnapshot::operationTo(const SceneSnapshot* later,
 
 UndoableOperation* SceneSnapshot::transformationTo(const SceneSnapshot* later,
                                                    const String& name,
-                                                   bool mergeable) const
+                                                   BOOLEAN mergeable) const
 {
     ArrayList<EntityTransformState*> before;
     ArrayList<EntityTransformState*> after;
@@ -161,13 +162,13 @@ SceneSnapshot::entriesMissingIn(const SceneSnapshot* other,
                                 SceneElementKind::Value kind) const
 {
     const ArrayList<Entity*>& list = elements[kind];
-    const ArrayList<bool>& selected = selections[kind];
-    HashMap<Entity*, bool> otherElements;
+    const ArrayList<BOOLEAN>& selected = selections[kind];
+    HashMap<Entity*, BOOLEAN> otherElements;
     ArrayList<SceneMembershipOperation::Entry> missing;
     long i;
 
     for ( i = 0; i < other->elements[kind].size(); i++ ) {
-        otherElements.put(other->elements[kind].get(i), true);
+        otherElements.put(other->elements[kind].get(i), TRUE);
     }
     for ( i = 0; i < list.size(); i++ ) {
         if ( !otherElements.containsKey(list.get(i)) ) {
