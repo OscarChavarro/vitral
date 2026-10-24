@@ -8,26 +8,27 @@
 #include "vsdk/toolkit/common/Cpp98Support.h"
 const double EPSILON = 1.0e-9;
 
+// By value: Turbo C++ 3.0 does not deduce `const T &` from a value
 template <class T>
-static const T& minValue(const T& a, const T& b)
+T minValue(T a, T b)
 {
     return (b < a) ? b : a;
 }
 
 template <class T>
-static const T& maxValue(const T& a, const T& b)
+T maxValue(T a, T b)
 {
     return (a < b) ? b : a;
 }
 
 template <class T>
-static void reverseArray(T* values, size_t count)
+void reverseArray(T* values, long count)
 {
     if (count < 2) {
         return;
     }
-    size_t left = 0;
-    size_t right = count - 1;
+    long left = 0;
+    long right = count - 1;
     while (left < right) {
         T temp = values[left];
         values[left] = values[right];

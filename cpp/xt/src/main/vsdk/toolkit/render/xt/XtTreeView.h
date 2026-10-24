@@ -84,7 +84,7 @@ private:
 
     XtWidget widget;
     XFontSet fontSet;
-    GC gc;
+    GC graphicsContext;
     unsigned long colors[5];
     bool colorsAllocated;
     int rowHeight;

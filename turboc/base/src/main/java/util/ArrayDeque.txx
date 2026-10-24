@@ -17,7 +17,7 @@ ArrayDeque<E>::ArrayDeque(long numElements) {
 }
 
 template <class E>
-ArrayDeque<E>::ArrayDeque(const ArrayDeque& other) {
+ArrayDeque<E>::ArrayDeque(const ArrayDeque<E>& other) {
     allocate(other.capacity);
     head = other.head;
     tail = other.tail;
@@ -33,7 +33,7 @@ ArrayDeque<E>::ArrayDeque(const ArrayDeque& other) {
 }
 
 template <class E>
-ArrayDeque<E>& ArrayDeque<E>::operator=(const ArrayDeque& other) {
+ArrayDeque<E>& ArrayDeque<E>::operator=(const ArrayDeque<E>& other) {
     if (this != &other) {
         dispose();
         allocate(other.capacity);
@@ -189,7 +189,7 @@ E ArrayDeque<E>::peekLast() const {
 template <class E>
 E ArrayDeque<E>::pollFirst() {
     if (isEmpty()) {
-        return E();
+        return vsdkDefaultValue((E *)NULL);
     }
     return removeFirst();
 }
@@ -197,7 +197,7 @@ E ArrayDeque<E>::pollFirst() {
 template <class E>
 E ArrayDeque<E>::pollLast() {
     if (isEmpty()) {
-        return E();
+        return vsdkDefaultValue((E *)NULL);
     }
     return removeLast();
 }
@@ -205,7 +205,7 @@ E ArrayDeque<E>::pollLast() {
 template <class E>
 E ArrayDeque<E>::get(long index) const {
     if (index < 0 || index >= size()) {
-        return E();
+        return vsdkDefaultValue((E *)NULL);
     }
     long m = mask();
     return elements[(head + index) & m];

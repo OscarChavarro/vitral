@@ -33,7 +33,11 @@ public:
         DIFFERENCE = SUBTRACT
     };
 
+#ifdef __TURBOC__
+public:
+#else
 protected:
+#endif
     static PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext;
 
     /**

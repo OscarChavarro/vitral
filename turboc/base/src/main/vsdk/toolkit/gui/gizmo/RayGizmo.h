@@ -21,6 +21,9 @@ class SimpleMaterial;
 
 class RayGizmo {
 public:
+    // Boxes of the input gizmo: x, y, z, yaw and pitch
+    enum { NUMBER_OF_INPUT_FIELDS = 5 };
+
     static const double DEFAULT_DISABLE_TIME;
     static const ColorRgb DEFAULT_RAY_COLOR;
     static const ColorRgb DEFAULT_NORMAL_COLOR;
@@ -87,9 +90,6 @@ private:
     static const double ARROW_HEAD_LENGTH;
     static const double ARROW_BASE_RADIUS;
     static const double ARROW_HEAD_RADIUS;
-    // Colors of the boxes of the input gizmo: x, y, z, yaw and pitch
-    enum { NUMBER_OF_INPUT_FIELDS = 5 };
-    static const ColorRgb INPUT_FIELD_COLORS[NUMBER_OF_INPUT_FIELDS];
 
     Arrow* arrow;
     Sphere* dotSphere;

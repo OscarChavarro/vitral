@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "java/io/File.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -148,7 +149,8 @@ static MicrofacetConfig loadFromCsv(const String& csvFileName, const String& mat
     MicrofacetConfig d = defaultConfig();
     if ( csvFileName.empty() || materialName.empty() ) return d;
 
-    FILE* in = fopen(csvFileName.c_str(), "r");
+    const String platformName = File::toPlatformName(csvFileName);
+    FILE* in = fopen(platformName.toCString(), "r");
     if ( !in ) return d;
 
     char headerLineStr[4096];

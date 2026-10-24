@@ -137,7 +137,7 @@ public:
         BOOLEAN doStrictValidation = TRUE);
 
 private:
-    typedef _PolyhedralBoundedSolidSetNonIntersectingClassifier::_PreflightCache PreflightCache;
+    typedef _PolyhedralBoundedSolidSetNonIntersectingClassifier::Pfc PreflightCache;
 
     enum {
         DEBUG_01_STRUCTURE = 0x01,

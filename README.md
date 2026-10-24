@@ -45,6 +45,57 @@ A key property of the project is the "pure" base layer (`java/base`): it minimiz
 
 The Java code in this repository is a **port** of the toolkit architecture. The same high-level design used in `java/base` is intended to be replicated across other ports (such as C++, TypeScript, and others): a clean core model plus backend-specific rendering adapters.
 
+## Turbo C++ 3.0 / DOS maintenance notes
+
+The `turboc/` port is built on MS-DOS with Borland Turbo C++ 3.0. It is a
+working legacy target. Keep these rules in mind when changing sources that
+reach it:
+
+- Transform every changed source and header with `turboc/scripts/map_to_83.py`
+  before copying it to DOS. The guest uses mapped 8.3 paths, rewritten includes,
+  and shortened class identifiers.
+- Transferred sources and batch files must use **CRLF**. Verify the generated
+  text and the mounted floppy image before executing a batch file.
+- Do not use class temporaries in conditional (`?:`) expressions. TCC cannot
+  reliably destroy them; use default construction followed by `if` assignment.
+  This affects `String`, `ColorRgb`, `Vector3Dd`, and similar value types.
+- Avoid `new T[count]()` and `for (int i = ...)`. Allocate normally, initialize
+  elements explicitly, and declare loop indices before the loop.
+- TCC rejects `delete` on const-qualified pointers. Keep a non-const local
+  pointer when an owned `const T*` must be released.
+- Its nested-class access rules are stricter. Under `__TURBOC__`, expose only
+  required helper declarations and qualify calls to outer static members.
+- With `VITRAL_WITHOUT_PTHREADS`, provide a synchronous path for code that
+  otherwise creates `Future`, `FutureTask`, or `ExecutorService` objects.
+- TCC response files need one option per line. Batch builds should print a
+  compact `Compiling <source>` line, redirect successful output to a log, and
+  print the log only after an error.
+- DOS release batches use `-O1 -d -v-`: optimize for size, merge duplicate
+  strings, and explicitly omit debug records. Debug the corresponding source
+  on a modern platform instead.
+- The generated `BASE.BAT` compiles the objects and `BASELINK.BAT` archives
+  them into `BUILD\\BASE.LIB`. Run the latter separately when investigating a
+  Turbo Librarian failure; it does not need to recompile the base library.
+
+When a DOS error repeats, inspect the actual guest copy of the source before
+changing the host version again.
+
+### DOS runtime memory direction
+
+For future DOS applications, prefer **XMS** as the backing store for code
+overlays and large, pageable assets.  Keep a deliberately small conventional
+memory core: application state needed at all times, the event loop, and the
+active overlay buffer.  Turbo C++'s overlay manager can swap inactive code
+segments through XMS; it does not make XMS directly executable.  Load file
+I/O or rendering functionality only for the operation that needs it, and page
+large images, meshes, and other assets rather than retaining them in the
+conventional-memory model.
+
+Splitting the base into thematic static libraries is still useful for build
+and linker memory pressure, but static libraries are selected at link time.
+It does not by itself make a DOS executable dynamically unloadable; that
+requires overlay-aware module boundaries or an explicit runtime loader.
+
 ## Bibliographic traceability
 
 The project maintains traceability to classic computer graphics literature used to guide algorithms and implementation decisions. The `doc/` folder includes architectural notes and a curated set of important references (including foundational papers) that support the toolkit's technical direction.

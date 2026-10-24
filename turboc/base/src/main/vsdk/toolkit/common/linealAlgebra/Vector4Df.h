@@ -39,5 +39,12 @@ public:
     BOOLEAN operator==(const Vector4Df& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_ && w_ == other.w_; }
 };
 
+/** Equality of the elements of ArrayList (see vsdkEquals in ArrayList.h) */
+inline BOOLEAN
+vsdkEquals(const Vector4Df &a, const Vector4Df &b)
+{
+    return a == b;
+}
+
 
 #endif

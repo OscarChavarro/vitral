@@ -165,7 +165,7 @@ T
 PriorityQueue<T>::peek()
 {
     if (currentSize < 1) {
-        return T();
+        return vsdkDefaultValue((T *)NULL);
     }
     return data[1];
 }
@@ -175,7 +175,7 @@ T
 PriorityQueue<T>::poll()
 {
     if (currentSize < 1) {
-        return T();
+        return vsdkDefaultValue((T *)NULL);
     }
 
     T top = data[1];

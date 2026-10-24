@@ -536,6 +536,15 @@ static TriangleMesh* buildTriangleMesh(
         return 0;
     }
 
+    // DOS/Turbo C++ has no pthread implementation.  These two independent
+    // tasks are an optimization only, so run them synchronously there and do
+    // not instantiate Future (whose exception path needs thread support).
+#ifdef VITRAL_WITHOUT_PTHREADS
+    ReaderPlyVertexBuildTask vertexTask(&vertices);
+    ReaderPlyTriangleBuildTask triangleTask(&triangles, (int)vertices.size());
+    ArrayList<Vertex>* meshVertices = vertexTask.call();
+    ArrayList<Triangle>* meshTriangles = triangleTask.call();
+#else
     ExecutorService* executorService = Executors::newFixedThreadPool(2);
     Future< ArrayList<Vertex>* > vertexFuture =
         FutureTask< ArrayList<Vertex>* >::submit(executorService,
@@ -548,6 +557,7 @@ static TriangleMesh* buildTriangleMesh(
     ArrayList<Triangle>* meshTriangles = triangleFuture.get();
     executorService->shutdownNow();
     delete executorService;
+#endif
 
     TriangleMesh* mesh = new TriangleMesh();
     mesh->setName("PLY mesh");

@@ -2,9 +2,49 @@
 #define __ARRAY_LIST__
 
 #include <stddef.h>
+#include <string.h>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Object.h"
 #include "java/util/Comparator.h"
+
+/**
+Equality of the elements of ArrayList (indexOf, contains, remove(T) and
+equals). Turbo C++ 3.0 compiles every member of the class templates it uses,
+also for element types without operator==, so there the generic version
+compares the bytes (as == does for numbers and pointers; its arguments go
+by value, as it does not deduce `const T &` from pointers), and the classes
+with operator== declare an exact overload (taken before the template) that
+calls it. VSDK_CHECK_ELEMENT_EQUALITY leaves the generic version undefined,
+so linking with a modern compiler names the element types compared with it.
+*/
+#if defined(__TURBOC__)
+template <class T> BOOLEAN
+vsdkEquals(T a, T b)
+{
+    return memcmp(&a, &b, sizeof(T)) == 0;
+}
+#elif defined(VSDK_CHECK_ELEMENT_EQUALITY)
+template <class T> BOOLEAN
+vsdkEquals(const T &a, const T &b);
+#else
+template <class T> BOOLEAN
+vsdkEquals(const T &a, const T &b)
+{
+    return a == b;
+}
+#endif
+
+inline BOOLEAN
+vsdkEquals(const double &a, const double &b)
+{
+    return a == b;
+}
+
+inline BOOLEAN
+vsdkEquals(const float &a, const float &b)
+{
+    return a == b;
+}
 
 template<class T>
 class ArrayList : public Object {
@@ -72,12 +112,18 @@ public:
     void reserve(long int n);
     void add(long int pos, T elem);
     void remove(long int pos);
+#ifdef __TURBOC__
+    // Turbo C++ 3.0 represents long long as long.  A remove(T) overload
+    // would then collide with remove(long) when T is long long.
+    void remove2(T data);
+#else
     void remove(T data);
+#endif
     void set(long int pos, T elem);
     void clear();
 
     /**
-    @return the index of the first element equal (`operator==`) to `elem`,
+    @return the index of the first element equal (vsdkEquals) to `elem`,
     or -1
     */
     long int indexOf(const T &elem) const;
@@ -85,7 +131,7 @@ public:
     void addAll(const ArrayList &other);
 
     /**
-    @return true if both lists have equal (`operator==`) elements in the
+    @return true if both lists have equal (vsdkEquals) elements in the
     same order (Java `List.equals`)
     */
     BOOLEAN equals(const ArrayList &other) const;

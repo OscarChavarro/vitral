@@ -12,10 +12,12 @@
 
 #include "java/lang/System.h"
 
-FileOutputStream System::standardOutput("/dev/stdout");
-FileOutputStream System::standardError("/dev/stderr");
-PrintStream System::out(&System::standardOutput);
-PrintStream System::err(&System::standardError);
+// Not private static members, as Turbo C++ 3.0 does not let the
+// initializers of out and err use them
+static FileOutputStream standardOutput("/dev/stdout");
+static FileOutputStream standardError("/dev/stderr");
+PrintStream System::out(&standardOutput);
+PrintStream System::err(&standardError);
 
 void
 System::exit(int status) {

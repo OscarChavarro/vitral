@@ -96,10 +96,12 @@ public:
     registers its accessors, so generic editors can read and write it. Call
     it from the constructor of the entity class, i.e.
     <pre>
-    addControlSpecification("double;radius;(0, INFINITE)",
+    MemberEntityControlAccessor<Sphere, double> *radiusAccessor =
         new MemberEntityControlAccessor<Sphere, double>(
-            &Sphere::getRadius, &Sphere::setRadius));
+            &Sphere::getRadius, &Sphere::setRadius);
+    addControlSpecification("double;radius;(0, INFINITE)", radiusAccessor);
     </pre>
+    (Turbo C++ 3.0 crashes with the new of a template class as an argument)
     C++ port note: the accessors are created by the caller, as legacy
     compilers (gcc 2.7, Turbo C++ 3.0) have no member templates.
     @param specification control specification in "type;name;interval"

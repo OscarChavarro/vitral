@@ -33,13 +33,13 @@ std::vector<FileSuffixFilter> FileSuffixFilter::fromDialog(
         return filters;
     }
     const std::vector<WidgetDialogElement>& elements = definition->getElements();
-    for ( size_t i = 0; i < elements.size(); i++ ) {
+    for ( int i = 0; i < (int)elements.size(); i++ ) {
         if ( !elements[i].getKind().equals("fileChooser") ) {
             continue;
         }
         const std::vector<WidgetDialogElement>& children =
             elements[i].getChildren();
-        for ( size_t j = 0; j < children.size(); j++ ) {
+        for ( int j = 0; j < (int)children.size(); j++ ) {
             if ( !children[j].getKind().equals("fileFilter") ) {
                 continue;
             }

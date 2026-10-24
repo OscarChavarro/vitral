@@ -28,6 +28,7 @@ void FunctionalExplicitSurface::init(const String& fxy)
     try {
         xyFunction->setExpression(fxy);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch (const AlgebraicExpressionException& e) {
         Logger::reportMessage("FunctionalExplicitSurface", Logger::WARNING,
             "constructor",
@@ -43,6 +44,7 @@ void FunctionalExplicitSurface::init(const String& fxy)
                 e2.getMessage());
         }
     }
+#endif
     minXBound = minYBound = minZBound = -1.0;
     maxXBound = maxYBound = maxZBound = 1.0;
     tesselationHintX = 10;
@@ -107,11 +109,13 @@ void FunctionalExplicitSurface::updateInternalGeometry()
             }
         }
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch (const AlgebraicExpressionException& e) {
         Logger::reportMessage("FunctionalExplicitSurface", Logger::WARNING, "constructor",
             String("Cannot evaluate algebraic expression!") + e.getMessage());
         return;
     }
+#endif
 
     internalTriangleMesh->initTriangleArrays(tesselationHintX*tesselationHintY*2);
     ArrayList<int>& t = internalTriangleMesh->getTriangleIndexes();

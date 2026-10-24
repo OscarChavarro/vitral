@@ -30,7 +30,6 @@ class DepthBufferEncoder;
 class SimpleRaytracer : public RenderingElement {
 private:
     enum { MAX_RECURSION_LEVEL = TraceWorkspace::DEFAULT_MAX_RECURSION_LEVEL };
-    static const RasterTileGenerationStrategy::Value TILE_STRATEGY = RasterTileGenerationStrategy::SERIAL;
     enum { TILE_WORKERS_HINT = 1 };
 
     struct SceneObjectRenderData {

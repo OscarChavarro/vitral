@@ -30,41 +30,42 @@ static const double BARYCENTRIC_TOLERANCE = 1.0e-9;
 /**
 Node in the bounding sphere hierarchy. Interior nodes have `children`,
 leaves have the four corner points of the sub-patch and its parametric
-range.
+range. C++ port note: not a nested struct, as Turbo C++ 3.0 does not define
+nested classes out of their class.
 */
-struct _ParametricBiCubicPatchIntersector::PatchNode {
+struct _ParametricBiCubicPatchNode {
     double centerX;
     double centerY;
     double centerZ;
     double radiusSquared;
     /// Empty for leaves (owned by this node)
-    ArrayList<PatchNode*> children;
+    ArrayList<_ParametricBiCubicPatchNode*> children;
     double corners[12];
     double uMin;
     double uMax;
     double vMin;
     double vMax;
 
-    PatchNode(const double net[48], BOOLEAN leaf,
+    _ParametricBiCubicPatchNode(const double net[48], BOOLEAN leaf,
               double u0, double u1, double v0, double v1)
         : uMin(u0), uMax(u1), vMin(v0), vMax(v1)
     {
         double sphere[4];
-        boundingSphere(net, sphere);
+        _ParametricBiCubicPatchIntersector::boundingSphere(net, sphere);
         centerX = sphere[0];
         centerY = sphere[1];
         centerZ = sphere[2];
         radiusSquared = sphere[3];
         if ( leaf ) {
             // Corners (u0, v0), (u0, v1), (u1, v1) and (u1, v0)
-            copyPoint(net, 0, 0, corners, 0);
-            copyPoint(net, 0, 3, corners, 1);
-            copyPoint(net, 3, 3, corners, 2);
-            copyPoint(net, 3, 0, corners, 3);
+            _ParametricBiCubicPatchIntersector::copyPoint(net, 0, 0, corners, 0);
+            _ParametricBiCubicPatchIntersector::copyPoint(net, 0, 3, corners, 1);
+            _ParametricBiCubicPatchIntersector::copyPoint(net, 3, 3, corners, 2);
+            _ParametricBiCubicPatchIntersector::copyPoint(net, 3, 0, corners, 3);
         }
     }
 
-    ~PatchNode()
+    ~_ParametricBiCubicPatchNode()
     {
         for ( long i = 0; i < children.size(); i++ ) {
             delete children[i];
@@ -77,8 +78,8 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
     }
 
   private:
-    PatchNode(const PatchNode&);
-    PatchNode& operator=(const PatchNode&);
+    _ParametricBiCubicPatchNode(const _ParametricBiCubicPatchNode&);
+    _ParametricBiCubicPatchNode& operator=(const _ParametricBiCubicPatchNode&);
 };
 
 _ParametricBiCubicPatchIntersector::PatchHit::PatchHit()

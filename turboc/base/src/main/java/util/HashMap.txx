@@ -8,7 +8,7 @@ its entries.
 */
 template <class K, class V>
 void
-HashMap<K, V>::copyFrom(const HashMap &other) {
+HashMap<K, V>::copyFrom(const HashMap<K, V> &other) {
     initialize(other.bucketCount <= 0 ? 16 : other.bucketCount);
     for ( long i = 0; i < other.bucketCount; i++ ) {
         Entry *current = other.buckets[i];

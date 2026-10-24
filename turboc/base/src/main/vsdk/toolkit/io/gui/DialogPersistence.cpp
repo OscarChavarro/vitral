@@ -271,7 +271,10 @@ private:
                 fail("unexpected character");
             }
             value.type = JsonValue::NUMBER;
-            position += ((long)(end - start));
+            // TCC 3.0 does not apply the qualification conversion needed for
+            // pointer subtraction between strtod's char* and our const text.
+            const char* parsedEnd = end;
+            position += ((long)(parsedEnd - start));
         }
     }
 

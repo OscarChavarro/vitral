@@ -19,7 +19,7 @@
 set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-MODULES="base opengl1 glut xt xaw xm"
+MODULES="base dos opengl1 glut xt xaw xm"
 TESTSUITE_GROUPS="testsuite/OpenGL1Examples testsuite/_APITests testsuite/OfflineExamples"
 SCENE_EDITOR_DIR="testsuite/ApplicationCases/SceneEditorApplication"
 SCENE_EDITOR_VARIANTS="xm_opengl1 xaw_opengl1"

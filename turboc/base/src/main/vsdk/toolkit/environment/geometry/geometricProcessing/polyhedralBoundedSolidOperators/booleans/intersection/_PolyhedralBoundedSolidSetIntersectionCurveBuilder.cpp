@@ -29,6 +29,7 @@ ArrayList<Builder::IndexList> Builder::lastTraversalNeighborPositions;
 Orders node indexes by the position of their null edges along a direction
 (ties and nodes without position keep the index order).
 */
+#ifndef __TURBOC__
 class Builder::NodeDirectionOrder : public Comparator<int> {
 public:
     const NullEdgeList& sonea;
@@ -57,17 +58,36 @@ public:
 /**
 Orders cycles by their minimum node index.
 */
-class Builder::CycleMinimumOrder : public Comparator<ArrayList<int> > {
+class Builder::CycleMinimumOrder : public Comparator<
+#ifdef __TURBOC__
+    IndexList
+#else
+    ArrayList<int>
+#endif
+    > {
 public:
     // C++ port note: ArrayList<int> instead of the IndexList typedef, which
     // gcc 2.7.2 takes as another Comparator instantiation
-    int compare(const ArrayList<int>& a, const ArrayList<int>& b) const
+    int compare(const
+#ifdef __TURBOC__
+        IndexList
+#else
+        ArrayList<int>
+#endif
+        & a, const
+#ifdef __TURBOC__
+        IndexList
+#else
+        ArrayList<int>
+#endif
+        & b) const
     {
         int minA = minOf(a);
         int minB = minOf(b);
         return minA < minB ? -1 : (minB < minA ? 1 : 0);
     }
 };
+#endif
 
 
 /** Internal carrier for one face-pair point group. */
@@ -137,7 +157,7 @@ String Builder::Report::summarize() const
 
 //= Helpers =========================================================
 
-Builder::_PolyhedralBoundedSolidSetIntersectionCurveBuilder()
+_PolyhedralBoundedSolidSetIntersectionCurveBuilder::_PolyhedralBoundedSolidSetIntersectionCurveBuilder()
 {
 }
 
@@ -311,7 +331,38 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
         }
 
         IndexList sorted = group.nodes;
+#ifdef __TURBOC__
+        long sortI;
+        long sortJ;
+        long sortMin;
+        for ( sortI = 0; sortI + 1 < sorted.size(); sortI++ ) {
+            sortMin = sortI;
+            for ( sortJ = sortI + 1; sortJ < sorted.size(); sortJ++ ) {
+                Vector3Dd aPosition;
+                Vector3Dd bPosition;
+                int a = sorted[sortJ];
+                int b = sorted[sortMin];
+                int cmp;
+                if ( !nodePosition(sonea[a], aPosition) ||
+                     !nodePosition(sonea[b], bPosition) ) {
+                    cmp = a < b ? -1 : (b < a ? 1 : 0);
+                }
+                else {
+                    cmp = Double::compare(direction.dotProduct(aPosition),
+                        direction.dotProduct(bPosition));
+                    if ( cmp == 0 ) cmp = a < b ? -1 : (b < a ? 1 : 0);
+                }
+                if ( cmp < 0 ) sortMin = sortJ;
+            }
+            if ( sortMin != sortI ) {
+                int tmp = sorted[sortI];
+                sorted[sortI] = sorted[sortMin];
+                sorted[sortMin] = tmp;
+            }
+        }
+#else
         sorted.sort(NodeDirectionOrder(sonea, direction));
+#endif
 
         if ( (m % 2) != 0 ) {
             report.oddFacePairGroupCount++;
@@ -470,7 +521,20 @@ BOOLEAN Builder::computeTraversalOrder(const ArrayList<IndexList>& cycles,
     }
 
     ArrayList<IndexList> ordered = cycles;
-    ordered.sort(CycleMinimumOrder());
+    long sortI;
+    long sortJ;
+    long sortMin;
+    for ( sortI = 0; sortI + 1 < ordered.size(); sortI++ ) {
+        sortMin = sortI;
+        for ( sortJ = sortI + 1; sortJ < ordered.size(); sortJ++ ) {
+            if ( minOf(ordered[sortJ]) < minOf(ordered[sortMin]) ) sortMin = sortJ;
+        }
+        if ( sortMin != sortI ) {
+            IndexList tmp = ordered[sortI];
+            ordered[sortI] = ordered[sortMin];
+            ordered[sortMin] = tmp;
+        }
+    }
 
     outPermutation = Collections<int>::nCopies(nodeCount, 0);
     int position = 0;
@@ -507,7 +571,20 @@ BOOLEAN Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
     }
 
     ArrayList<IndexList> ordered = cycles;
-    ordered.sort(CycleMinimumOrder());
+    long sortI;
+    long sortJ;
+    long sortMin;
+    for ( sortI = 0; sortI + 1 < ordered.size(); sortI++ ) {
+        sortMin = sortI;
+        for ( sortJ = sortI + 1; sortJ < ordered.size(); sortJ++ ) {
+            if ( minOf(ordered[sortJ]) < minOf(ordered[sortMin]) ) sortMin = sortJ;
+        }
+        if ( sortMin != sortI ) {
+            IndexList tmp = ordered[sortI];
+            ordered[sortI] = ordered[sortMin];
+            ordered[sortMin] = tmp;
+        }
+    }
 
     ArrayList<IndexList> directedCycles;
     for ( c = 0; c < ordered.size(); c++ ) {

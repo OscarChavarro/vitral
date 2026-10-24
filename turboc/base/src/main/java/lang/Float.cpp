@@ -29,7 +29,12 @@ Float::toString(float value) {
     for ( int precision = 1; precision <= 9; precision++ ) {
         snprintf(buffer, sizeof(buffer), "%.*g", precision,
                       ((double)(value)));
+#ifdef __TURBOC__
+        // Turbo C++ 3.0 has no strtof
+        if ( ((float)(strtod(buffer, NULL))) == value ) {
+#else
         if ( strtof(buffer, NULL) == value ) {
+#endif
             break;
         }
     }

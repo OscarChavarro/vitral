@@ -93,6 +93,13 @@ public:
     }
 };
 
+/** Equality of the elements of ArrayList (see vsdkEquals in ArrayList.h) */
+inline BOOLEAN
+vsdkEquals(const Matrix4x4d &a, const Matrix4x4d &b)
+{
+    return a == b;
+}
+
 
 /* Composes a rotation as a sequence of three per-axis rotations (X, then Y,
    then Z), tracking the inverse alongside via transposition (rotation

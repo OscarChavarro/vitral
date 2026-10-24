@@ -29,6 +29,10 @@
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 #include "vsdk/toolkit/render/shaders/Shader.h"
 #include "vsdk/toolkit/render/shaders/ShaderSelector.h"
+
+// Not a static member with its initializer in the class, that Turbo C++ 3.0
+// does not take
+static const RasterTileGenerationStrategy::Value TILE_STRATEGY = RasterTileGenerationStrategy::SERIAL;
 SimpleRaytracer::SimpleRaytracer() : workspace(MAX_RECURSION_LEVEL)
 {
 }

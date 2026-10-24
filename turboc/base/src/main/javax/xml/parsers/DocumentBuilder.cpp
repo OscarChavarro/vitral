@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "java/io/File.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "javax/xml/parsers/DocumentBuilder.h"
@@ -199,9 +200,9 @@ void addText(Node* parent, const String& raw,
     if ( parent == NULL || isWhitespaceOnly(raw) ) {
         return;
     }
-    Node* textNode = new Node(
-        Node::TEXT_NODE, "#text",
-        decode ? decodeEntities(raw) : raw);
+    String decoded = raw;
+    if ( decode ) decoded = decodeEntities(raw);
+    Node* textNode = new Node(Node::TEXT_NODE, "#text", decoded);
     parent->appendChild(textNode);
 }
 
@@ -353,7 +354,8 @@ return parser.parse();
 
 Document* DocumentBuilder::parse(const File& file)
 {
-FILE* fd = fopen(file.getPath().c_str(), "rb");
+const String platformName = File::toPlatformName(file.getPath());
+FILE* fd = fopen(platformName.toCString(), "rb");
 if ( fd == NULL ) {
     return NULL;
 }

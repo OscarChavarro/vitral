@@ -53,5 +53,7 @@ IndexedColorImageHDRUncompressed::allocate(int w, int h) {
     xSize = w;
     ySize = h;
     delete[] data;
-    data = new unsigned char[w * h]();
+    data = new unsigned char[w * h];
+    int i;
+    for ( i = 0; i < w * h; i++ ) data[i] = 0;
 }

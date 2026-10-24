@@ -71,5 +71,12 @@ public:
     int hashCode() const;
 };
 
+/** Equality of the elements of ArrayList (see vsdkEquals in ArrayList.h) */
+inline BOOLEAN
+vsdkEquals(const Matrix4x4f &a, const Matrix4x4f &b)
+{
+    return a == b;
+}
+
 
 #endif

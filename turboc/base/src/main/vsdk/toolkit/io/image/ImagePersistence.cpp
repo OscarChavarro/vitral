@@ -54,7 +54,8 @@ unsigned int readU32BE(const unsigned char* p) {
 IndexedColorImageUncompressed* importSgiIndexed(const File& inImageFd)
 {
     String filePath = inImageFd.getPath();
-    FILE* f = fopen(filePath.toCString(), "rb");
+    const String platformName = File::toPlatformName(filePath);
+    FILE* f = fopen(platformName.toCString(), "rb");
     if (f == NULL) return NULL;
 
     unsigned char header[512];
@@ -149,7 +150,8 @@ IndexedColorImageUncompressed* importSgiIndexed(const File& inImageFd)
 
 RGBAImageCompressed* importDDSCompressed(const File& inImageFd) {
     String filePath = inImageFd.getPath();
-    FILE* f = fopen(filePath.toCString(), "rb");
+    const String platformName = File::toPlatformName(filePath);
+    FILE* f = fopen(platformName.toCString(), "rb");
     if (f == NULL) {
         fprintf(stderr, "Error: could not open DDS file \"%s\"\\n", filePath.toCString());
         return NULL;
@@ -271,7 +273,8 @@ RGBImageUncompressed* ImagePersistence::importRGB(const File& inImageFd) {
     if (type->equals("jpg") || type->equals("jpeg")) {
         String nameStr = inImageFd.getPath();
         const char* filename = nameStr.toCString();
-        FILE* infile = fopen(filename, "rb");
+        const String platformName = File::toPlatformName(filename);
+        FILE* infile = fopen(platformName.toCString(), "rb");
         if (infile == NULL) {
             fprintf(stderr, "Cannot open JPEG file: %s\n", filename);
             delete type;
@@ -328,7 +331,8 @@ RGBImageUncompressed* ImagePersistence::importRGB(const File& inImageFd) {
     if (type->equals("png")) {
         String pngNameStr = inImageFd.getPath();
         const char* filename = pngNameStr.toCString();
-        FILE* fp = fopen(filename, "rb");
+        const String platformName = File::toPlatformName(filename);
+        FILE* fp = fopen(platformName.toCString(), "rb");
         if (fp == NULL) {
             delete type;
             return new RGBImageUncompressed();
@@ -568,7 +572,8 @@ RGBAImageUncompressed* ImagePersistence::importRGBA(const File& inImageFd) {
     delete type;
     if (isPng) {
         String pngNameStr = inImageFd.getPath();
-        FILE* fp = fopen(pngNameStr.toCString(), "rb");
+        const String platformName = File::toPlatformName(pngNameStr);
+        FILE* fp = fopen(platformName.toCString(), "rb");
         if (!fp) {
             fprintf(stderr, "Cannot open PNG file: %s\n", pngNameStr.toCString());
             return NULL;
@@ -740,7 +745,8 @@ BOOLEAN ImagePersistence::exportJPEG(const File& fd, Image* img, int quality) {
 
     String jpegExportName = fd.getPath();
     const char* filename = jpegExportName.toCString();
-    if ((outfile = fopen(filename, "wb")) == NULL) {
+    const String platformName = File::toPlatformName(filename);
+    if ((outfile = fopen(platformName.toCString(), "wb")) == NULL) {
         fprintf(stderr, "Cannot open file %s for writing\n", filename);
         return FALSE;
     }
@@ -813,7 +819,8 @@ BOOLEAN ImagePersistence::exportPNG(const File& fd, Image* img) {
 
     String pngExportName = fd.getPath();
     const char* filename = pngExportName.toCString();
-    fp = fopen(filename, "wb");
+    const String platformName = File::toPlatformName(filename);
+    fp = fopen(platformName.toCString(), "wb");
     if (!fp) {
         fprintf(stderr, "Cannot open file %s for writing\n", filename);
         return FALSE;

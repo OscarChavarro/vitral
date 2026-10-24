@@ -33,7 +33,11 @@ public:
         PolyhedralBoundedSolid* inSolidB,
         int op);
 
+#ifdef __TURBOC__
+public:
+#else
 private:
+#endif
     enum {
         PROFILE_X_EXTRUDED_YZ = 0,
         PROFILE_Y_EXTRUDED_XZ = 1

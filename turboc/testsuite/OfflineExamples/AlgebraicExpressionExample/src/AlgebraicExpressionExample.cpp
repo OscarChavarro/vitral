@@ -32,11 +32,13 @@ int main(int argc, char** argv)
         printf("REGEXP VALUE:\n%s\n",
                     Double::toString(regexp.eval()).c_str());
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( const AlgebraicExpressionException& e ) {
         // Same text as the Java version prints for the exception
         printf("Error processing regular expression."
                     "vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException: %s\n",
                     e.getMessage().c_str());
     }
+#endif
     return 0;
 }

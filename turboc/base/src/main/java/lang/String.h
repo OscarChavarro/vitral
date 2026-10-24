@@ -224,6 +224,13 @@ static String
 formatCStringToJavaString(const char *format, va_list arguments);
 };
 
+/** Equality of the elements of ArrayList (see vsdkEquals in ArrayList.h) */
+inline BOOLEAN
+vsdkEquals(const String &a, const String &b)
+{
+    return a == b;
+}
+
 String operator+(const char *left, const String &right);
 
 

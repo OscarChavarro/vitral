@@ -46,9 +46,11 @@ WebSocket* WebSocket::connect(const String& serviceUrl)
     try {
         handshakeOk = sendHandshake(socket, url);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( ... ) {
         handshakeOk = FALSE;
     }
+#endif
     if ( !handshakeOk ) {
         delete socket;
         return 0;

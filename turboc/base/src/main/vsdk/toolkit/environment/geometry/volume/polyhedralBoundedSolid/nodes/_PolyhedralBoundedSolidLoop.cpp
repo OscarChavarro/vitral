@@ -26,7 +26,11 @@ _PolyhedralBoundedSolidLoop::~_PolyhedralBoundedSolidLoop()
 
 void _PolyhedralBoundedSolidLoop::unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
+#ifdef __TURBOC__
+    halfEdgesList.remove2(he);
+#else
     halfEdgesList.remove(he);
+#endif
     boundaryStartHalfEdge = halfEdgesList.size() == 0 ? 0 : halfEdgesList[0];
 }
 

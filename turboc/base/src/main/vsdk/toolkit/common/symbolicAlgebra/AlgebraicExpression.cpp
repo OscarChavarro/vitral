@@ -53,9 +53,11 @@ static double parseConstant(const String& token)
     try {
         return Double::parseDouble(token);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( const NumberFormatException& e ) {
         throw AlgebraicExpressionException(e.getMessage());
     }
+#endif
     return 0.0;
 }
 

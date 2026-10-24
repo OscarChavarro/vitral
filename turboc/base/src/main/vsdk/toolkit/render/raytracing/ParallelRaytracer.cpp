@@ -306,12 +306,14 @@ void ParallelRaytracer::executeWithEncoder(
         try {
             futures[i].get();
         }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
         catch ( const Exception& e ) {
             if ( !failed ) {
                 failed = TRUE;
                 failure = String("Parallel raytracing failed: ").concat(e.getMessage().c_str());
             }
         }
+#endif
     }
 
     if ( reportProgress ) {

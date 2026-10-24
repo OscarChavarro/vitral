@@ -6,6 +6,7 @@
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
+#include <X11/Xaw/XawInit.h>
 #include <X11/Xaw/List.h>
 #include <X11/Xaw/Viewport.h>
 #undef Object
@@ -140,13 +141,15 @@ void XawFileDialog::showFolder(const String& newFolder)
     for ( i = 0; i < entries.size(); i++ ) {
         entryTexts.add(entries[i].c_str());
     }
-    // Older Xaw (i.e. 1.0.3, XawVersion 6700002, of Ubuntu 7.04 and
+    // XawInit.h defines the version. Older Xaw (i.e. 1.0.3, XawVersion 6700002, of Ubuntu 7.04 and
     // XQuartz) declares String* (XtString* here), whereas current Xaw uses
     // const char**. XawListChange only reads the entries in either API.
 #if !defined(XawVersion) || XawVersion <= 6700002L
     XtString* xawEntries = (XtString*)(&entryTexts[0]);
 #else
-    const char** xawEntries = entryTexts.data();
+    // ArrayList's legacy data() declaration exposes this as char** even
+    // though its elements are const char*.  Xaw only reads the list.
+    const char** xawEntries = (const char**)(entryTexts.data());
 #endif
     XawListChange(list, xawEntries,
                   ((int)(entryTexts.size())), 0, True);

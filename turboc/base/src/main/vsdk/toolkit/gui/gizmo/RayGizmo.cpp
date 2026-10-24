@@ -19,12 +19,15 @@ const double RayGizmo::ARROW_BASE_RADIUS = 0.15;
 const double RayGizmo::ARROW_HEAD_RADIUS = 0.40;
 const ColorRgb RayGizmo::DEFAULT_RAY_COLOR = ColorRgb(1, 0.8, 0.8);
 const ColorRgb RayGizmo::DEFAULT_NORMAL_COLOR = ColorRgb(1, 1, 0.8);
-const ColorRgb RayGizmo::INPUT_FIELD_COLORS[RayGizmo::NUMBER_OF_INPUT_FIELDS] = {
-    ColorRgb(1, 0, 0),
-    ColorRgb(0, 1, 0),
-    ColorRgb(0, 0, 1),
-    ColorRgb(1, 1, 0),
-    ColorRgb(0, 1, 1)
+// Colors of the boxes of the input gizmo: x, y, z, yaw and pitch. C++ port
+// note: red, green and blue, as Turbo C++ 3.0 mistakes an array of ColorRgb
+// for the element type of the ArrayList<ColorRgb> of this file
+static const double INPUT_FIELD_COLORS[RayGizmo::NUMBER_OF_INPUT_FIELDS][3] = {
+    { 1, 0, 0 },
+    { 0, 1, 0 },
+    { 0, 0, 1 },
+    { 1, 1, 0 },
+    { 0, 1, 1 }
 };
 
 RayGizmo::RaySnapshot::RaySnapshot()
@@ -118,7 +121,8 @@ RayGizmo::RayGizmo(Function<const Ray&, Intersection*>* intersectionCallback, in
     body->setMaterial(mat);
 
     for ( int i = 0; i < NUMBER_OF_INPUT_FIELDS; i++ ) {
-        inputGizmo.setFieldColor(i, INPUT_FIELD_COLORS[i]);
+        inputGizmo.setFieldColor(i, ColorRgb(INPUT_FIELD_COLORS[i][0],
+            INPUT_FIELD_COLORS[i][1], INPUT_FIELD_COLORS[i][2]));
     }
 
     currentPosition = Vector3Dd(0, 0, 0);

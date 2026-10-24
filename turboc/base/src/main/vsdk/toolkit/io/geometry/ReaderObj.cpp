@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "java/io/File.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -175,7 +176,8 @@ static void readMaterials(
     if (mtlFile.empty()) return;
 
     String mtlPath = joinPath(dirnameOf(objFile), mtlFile);
-    FILE* in = fopen(mtlPath.c_str(), "r");
+    const String platformName = File::toPlatformName(mtlPath);
+    FILE* in = fopen(platformName.toCString(), "r");
     if (!in) return;
 
     SimpleMaterial active;
@@ -408,7 +410,8 @@ static void ensureMaterialSelection(
 static TriangleMeshGroup* readObj(const File& sceneFile)
 {
     const String fileName = sceneFile.getPath().toCString();
-    FILE* in = fopen(fileName.c_str(), "r");
+    const String platformName = File::toPlatformName(fileName);
+    FILE* in = fopen(platformName.toCString(), "r");
     if (!in) return new TriangleMeshGroup();
 
     ArrayList<Vector3Dd> vertexPositionsArray;

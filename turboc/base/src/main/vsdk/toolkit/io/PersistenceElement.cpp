@@ -102,8 +102,8 @@ of short type.
 void
 PersistenceElement::signedShort2byteArrayDirect(
     unsigned char *outArrayToBeExported,
-    const int inStartIndexInsideArray,
-    const int inNumberToConvert)
+    int inStartIndexInsideArray,
+    int inNumberToConvert)
 {
     int i;
     const int length = 2;

@@ -74,7 +74,7 @@ public:
     void setContextMenuListener(const ContextMenuListener& listener);
 
 private:
-    GtkWidget* scrolled;
+    GtkWidget* widget;
     GtkWidget* list;
     const DialogTreeNode* root;
     std::set<const DialogTreeNode*> expanded;

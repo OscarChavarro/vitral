@@ -17,15 +17,17 @@
 #include "vsdk/toolkit/common/Cpp98Support.h"
 Cone::Cone(double bottomRadius, double topRadius, double height) :
     bottomRadius(bottomRadius), topRadius(topRadius), height(height) {
-    addControlSpecification("double;bottomRadius;(0, INFINITE)",
-        new MemberEntityControlAccessor<Cone, double>(
-            &Cone::getBottomRadius, &Cone::setBottomRadius));
-    addControlSpecification("double;topRadius;[0, INFINITE)",
-        new MemberEntityControlAccessor<Cone, double>(
-            &Cone::getTopRadius, &Cone::setTopRadius));
-    addControlSpecification("double;height;(0, INFINITE)",
-        new MemberEntityControlAccessor<Cone, double>(
-            &Cone::getHeight, &Cone::setHeight));
+    // Turbo C++ 3.0 crashes with the new of a template class as an argument
+    MemberEntityControlAccessor<Cone, double> *accessor;
+    accessor = new MemberEntityControlAccessor<Cone, double>(
+        &Cone::getBottomRadius, &Cone::setBottomRadius);
+    addControlSpecification("double;bottomRadius;(0, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<Cone, double>(
+        &Cone::getTopRadius, &Cone::setTopRadius);
+    addControlSpecification("double;topRadius;[0, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<Cone, double>(
+        &Cone::getHeight, &Cone::setHeight);
+    addControlSpecification("double;height;(0, INFINITE)", accessor);
 }
 
 double Cone::sq(double v){ return v*v; }

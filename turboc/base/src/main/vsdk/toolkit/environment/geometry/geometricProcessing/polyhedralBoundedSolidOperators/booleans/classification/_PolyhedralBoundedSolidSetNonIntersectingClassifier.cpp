@@ -29,51 +29,51 @@ typedef _PolyhedralBoundedSolidSetNonIntersectingClassifier Classifier;
 
 //= Preflight cache =================================================
 
-const int Classifier::_PreflightCache::UNSET = INT_MIN;
+const int Classifier::Pfc::UNSET = INT_MIN;
 
-Classifier::_PreflightCache::_PreflightCache(
+Classifier::Pfc::Pfc(
     PolyhedralBoundedSolid* inA, PolyhedralBoundedSolid* inB)
     : a(inA), b(inB), aInBValue(UNSET), bInAValue(UNSET),
       interiorOverlap(-1), edgeFaceAB(-1), edgeFaceBA(-1)
 {
 }
 
-int Classifier::_PreflightCache::aInB()
+int Classifier::Pfc::aInB()
 {
     if ( aInBValue == UNSET ) {
-        aInBValue = classifySolidAgainstSolid(a, b);
+        aInBValue = Classifier::classifySolidAgainstSolid(a, b);
     }
     return aInBValue;
 }
 
-int Classifier::_PreflightCache::bInA()
+int Classifier::Pfc::bInA()
 {
     if ( bInAValue == UNSET ) {
-        bInAValue = classifySolidAgainstSolid(b, a);
+        bInAValue = Classifier::classifySolidAgainstSolid(b, a);
     }
     return bInAValue;
 }
 
-BOOLEAN Classifier::_PreflightCache::hasInteriorOverlap()
+BOOLEAN Classifier::Pfc::hasInteriorOverlap()
 {
     if ( interiorOverlap < 0 ) {
-        interiorOverlap = (signed char)(hasConfirmedInteriorOverlap(a, b) ? 1 : 0);
+        interiorOverlap = (signed char)(Classifier::hasConfirmedInteriorOverlap(a, b) ? 1 : 0);
     }
     return interiorOverlap == 1;
 }
 
-BOOLEAN Classifier::_PreflightCache::hasEdgeFaceIntersectionAB()
+BOOLEAN Classifier::Pfc::hasEfa()
 {
     if ( edgeFaceAB < 0 ) {
-        edgeFaceAB = (signed char)(hasProperEdgeFaceIntersection(a, b) ? 1 : 0);
+        edgeFaceAB = (signed char)(Classifier::hasProperEdgeFaceIntersection(a, b) ? 1 : 0);
     }
     return edgeFaceAB == 1;
 }
 
-BOOLEAN Classifier::_PreflightCache::hasEdgeFaceIntersectionBA()
+BOOLEAN Classifier::Pfc::hasEfb()
 {
     if ( edgeFaceBA < 0 ) {
-        edgeFaceBA = (signed char)(hasProperEdgeFaceIntersection(b, a) ? 1 : 0);
+        edgeFaceBA = (signed char)(Classifier::hasProperEdgeFaceIntersection(b, a) ? 1 : 0);
     }
     return edgeFaceBA == 1;
 }
@@ -113,29 +113,29 @@ InfinitePlane* Classifier::FacePlanes::get(long int i) const
 
 //= Public preflight API ============================================
 
-Classifier::_PolyhedralBoundedSolidSetNonIntersectingClassifier()
+_PolyhedralBoundedSolidSetNonIntersectingClassifier::_PolyhedralBoundedSolidSetNonIntersectingClassifier()
 {
 }
 
-Classifier::_PreflightCache Classifier::newPreflightCache(
+Classifier::Pfc Classifier::newPreflightCache(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB)
 {
-    return _PreflightCache(inSolidA, inSolidB);
+    return Pfc(inSolidA, inSolidB);
 }
 
 BOOLEAN Classifier::runContainmentOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB)
 {
-    _PreflightCache cache = newPreflightCache(inSolidA, inSolidB);
+    Pfc cache = newPreflightCache(inSolidA, inSolidB);
     return runContainmentOnlyPreflightCase(inSolidA, inSolidB, cache);
 }
 
 BOOLEAN Classifier::runContainmentOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
-    _PreflightCache& cache)
+    Pfc& cache)
 {
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
         PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
@@ -157,10 +157,10 @@ BOOLEAN Classifier::runContainmentOnlyPreflightCase(
         return FALSE;
     }
 
-    if ( cache.hasEdgeFaceIntersectionAB() ) {
+    if ( cache.hasEfa() ) {
         return FALSE;
     }
-    if ( cache.hasEdgeFaceIntersectionBA() ) {
+    if ( cache.hasEfb() ) {
         return FALSE;
     }
 
@@ -171,14 +171,14 @@ BOOLEAN Classifier::runTouchingOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB)
 {
-    _PreflightCache cache = newPreflightCache(inSolidA, inSolidB);
+    Pfc cache = newPreflightCache(inSolidA, inSolidB);
     return runTouchingOnlyPreflightCase(inSolidA, inSolidB, cache);
 }
 
 BOOLEAN Classifier::runTouchingOnlyPreflightCase(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
-    _PreflightCache& cache)
+    Pfc& cache)
 {
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
         PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
@@ -194,10 +194,10 @@ BOOLEAN Classifier::runTouchingOnlyPreflightCase(
         return FALSE;
     }
 
-    if ( cache.hasEdgeFaceIntersectionAB() ) {
+    if ( cache.hasEfa() ) {
         return FALSE;
     }
-    if ( cache.hasEdgeFaceIntersectionBA() ) {
+    if ( cache.hasEfb() ) {
         return FALSE;
     }
 
@@ -214,7 +214,7 @@ PolyhedralBoundedSolid* Classifier::runSetOpNoIntersectionCase(
     PolyhedralBoundedSolid* outRes,
     int op)
 {
-    _PreflightCache cache = newPreflightCache(inSolidA, inSolidB);
+    Pfc cache = newPreflightCache(inSolidA, inSolidB);
     return runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op, cache);
 }
 
@@ -223,7 +223,7 @@ PolyhedralBoundedSolid* Classifier::runSetOpNoIntersectionCase(
     PolyhedralBoundedSolid* inSolidB,
     PolyhedralBoundedSolid* outRes,
     int op,
-    _PreflightCache& cache)
+    Pfc& cache)
 {
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
         PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
@@ -275,7 +275,7 @@ PolyhedralBoundedSolid* Classifier::runPartialCoplanarFaceAreaCase(
     PolyhedralBoundedSolid* outRes,
     int op)
 {
-    _PreflightCache cache = newPreflightCache(inSolidA, inSolidB);
+    Pfc cache = newPreflightCache(inSolidA, inSolidB);
     return runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, outRes, op, cache);
 }
 
@@ -284,7 +284,7 @@ PolyhedralBoundedSolid* Classifier::runPartialCoplanarFaceAreaCase(
     PolyhedralBoundedSolid* inSolidB,
     PolyhedralBoundedSolid* outRes,
     int op,
-    _PreflightCache& cache)
+    Pfc& cache)
 {
     long i;
 
@@ -297,8 +297,8 @@ PolyhedralBoundedSolid* Classifier::runPartialCoplanarFaceAreaCase(
     setNumericContext(&context);
 
     if ( cache.hasInteriorOverlap() ||
-         cache.hasEdgeFaceIntersectionAB() ||
-         cache.hasEdgeFaceIntersectionBA() ) {
+         cache.hasEfa() ||
+         cache.hasEfb() ) {
         return 0;
     }
 

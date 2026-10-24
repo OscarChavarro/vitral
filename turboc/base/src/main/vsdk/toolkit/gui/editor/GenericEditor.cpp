@@ -215,11 +215,13 @@ GenericEditor::updateValue(const ControlSpecification *specification,
     try {
         numeric = parseValue(specification->getType(), trimmed);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( const NumberFormatException & ) {
         showValidationMessage((specification->getLabel() + ": \"" + text +
             "\" is not a valid " + specification->getType() + ".").c_str());
         return FALSE;
     }
+#endif
 
     if ( !specification->contains(numeric) ) {
         showValidationMessage((specification->getLabel() + " must be in " +

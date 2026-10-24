@@ -11,9 +11,11 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 
 Sphere::Sphere(double r) : radius(r), radiusSquared(r * r) {
-    addControlSpecification("double;radius;(0, INFINITE)",
+    // Turbo C++ 3.0 crashes with the new of a template class as an argument
+    MemberEntityControlAccessor<Sphere, double> *radiusAccessor =
         new MemberEntityControlAccessor<Sphere, double>(
-            &Sphere::getRadius, &Sphere::setRadius));
+            &Sphere::getRadius, &Sphere::setRadius);
+    addControlSpecification("double;radius;(0, INFINITE)", radiusAccessor);
 }
 
 Ray*

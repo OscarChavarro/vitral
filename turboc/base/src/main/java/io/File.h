@@ -28,6 +28,16 @@ explicit File(const String &path);
 void
 dispose();
 
+/**
+Name for the C library of a path with the standard (long) names of the tree.
+With Turbo C++ (DOS) the folders and files of etc/ take their 8.3 names (see
+turboc/scripts/mappings_83.csv; map_to_83.py generates their table,
+java/io/NAMES83.H) and the other names are cut to 8.3, as DOS does; with the
+other compilers it is the path itself.
+*/
+static String
+toPlatformName(const String &standardName);
+
 String
 getPath() const;
 

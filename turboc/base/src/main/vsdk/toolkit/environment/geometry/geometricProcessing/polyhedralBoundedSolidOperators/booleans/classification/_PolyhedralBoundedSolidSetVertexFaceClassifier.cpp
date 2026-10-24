@@ -52,7 +52,7 @@ static int classFor(int op, BOOLEAN inForUnion)
 }
 
 
-Classifier::_PolyhedralBoundedSolidSetVertexFaceClassifier()
+_PolyhedralBoundedSolidSetVertexFaceClassifier::_PolyhedralBoundedSolidSetVertexFaceClassifier()
     : sonea(NULL), soneb(NULL)
 {
 }

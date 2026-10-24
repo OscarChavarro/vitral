@@ -66,9 +66,12 @@ BOOLEAN NormalMap::init(int width, int height) {
         for (i = 0; i < width * height; i++) {
             data.add(new Vector3Dd());
         }
-    } catch (...) {
+    }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
+    catch (...) {
         return FALSE;
     }
+#endif
     xSize = width;
     ySize = height;
     return TRUE;

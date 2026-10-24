@@ -1,5 +1,6 @@
 #include <cmath>
 #include <common/matd.h>
+#include <cstdlib>
 #include <cstdio>
 
 #include "java/util/ArrayList.txx"
@@ -173,9 +174,11 @@ void MarkerTracker::loop() {
             apriltag_pose_t pose;
             estimate_tag_pose(&info, &pose);
 
-            double tx = matd_get(pose.t, 0, 0);
-            double ty = matd_get(pose.t, 1, 0);
-            double tz = matd_get(pose.t, 2, 0);
+            // Debian's AprilTag shared library keeps matd_* helpers private.
+            // pose.t is a 3x1 matd_t, so its row-major payload is directly usable.
+            double tx = pose.t->data[0];
+            double ty = pose.t->data[1];
+            double tz = pose.t->data[2];
 
             double* r = pose.R->data;
             double tr = r[0] + r[4] + r[8];
@@ -215,8 +218,8 @@ void MarkerTracker::loop() {
                 static_cast<float>(qModel.magnitude())).normalized();
             mp.viewDot   = std::fabs(static_cast<float>(r[8]));
 
-            matd_destroy(pose.R);
-            matd_destroy(pose.t);
+            std::free(pose.R);
+            std::free(pose.t);
             markers.add(mp);
         }
 
@@ -277,9 +280,10 @@ void MarkerTracker::runPreviewLoop() {
             apriltag_pose_t pose;
             estimate_tag_pose(&info, &pose);
 
-            double tx = matd_get(pose.t, 0, 0);
-            double ty = matd_get(pose.t, 1, 0);
-            double tz = matd_get(pose.t, 2, 0);
+            // See the equivalent conversion in the camera loop above.
+            double tx = pose.t->data[0];
+            double ty = pose.t->data[1];
+            double tz = pose.t->data[2];
 
             double* r = pose.R->data;
             double tr = r[0] + r[4] + r[8];
@@ -319,8 +323,8 @@ void MarkerTracker::runPreviewLoop() {
                 static_cast<float>(qModel.magnitude())).normalized();
             mp.viewDot   = std::fabs(static_cast<float>(r[8]));
 
-            matd_destroy(pose.R);
-            matd_destroy(pose.t);
+            std::free(pose.R);
+            std::free(pose.t);
             markers.add(mp);
         }
 

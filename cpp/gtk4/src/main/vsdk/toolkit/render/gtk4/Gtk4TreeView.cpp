@@ -10,14 +10,14 @@ const char* NODE_KEY = "vitral-tree-node";
 }
 
 Gtk4TreeView::Gtk4TreeView()
-    : scrolled(gtk_scrolled_window_new()), list(gtk_list_box_new()),
+    : widget(gtk_scrolled_window_new()), list(gtk_list_box_new()),
       root(nullptr), anchor(-1), updating(false)
 {
     gtk_list_box_set_selection_mode(GTK_LIST_BOX(list), GTK_SELECTION_MULTIPLE);
     gtk_widget_set_focusable(list, TRUE);
-    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), list);
-    gtk_widget_set_vexpand(scrolled, TRUE);
-    gtk_widget_set_hexpand(scrolled, TRUE);
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(widget), list);
+    gtk_widget_set_vexpand(widget, TRUE);
+    gtk_widget_set_hexpand(widget, TRUE);
     g_signal_connect(list, "selected-rows-changed",
                      G_CALLBACK(&Gtk4TreeView::selectionChanged), this);
 
@@ -49,7 +49,7 @@ Gtk4TreeView::Gtk4TreeView()
 
 GtkWidget* Gtk4TreeView::getWidget() const
 {
-    return scrolled;
+    return widget;
 }
 
 GtkWidget* Gtk4TreeView::getList() const

@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <string.h>
 
+#include "java/io/File.h"
 #include "java/io/FileOutputStream.h"
 
 FILE *
@@ -10,8 +12,20 @@ FileOutputStream::toFileHandle(void *handle) {
 FileOutputStream::FileOutputStream(const char *fileName):
     stream(NULL)
 {
+#ifdef __TURBOC__
+    // DOS has no /dev/stdout nor /dev/stderr
+    if ( fileName != NULL && strcmp(fileName, "/dev/stdout") == 0 ) {
+        stream = stdout;
+        return;
+    }
+    if ( fileName != NULL && strcmp(fileName, "/dev/stderr") == 0 ) {
+        stream = stderr;
+        return;
+    }
+#endif
     if ( fileName != NULL && fileName[0] != '\0' ) {
-        stream = ((void *)(fopen(fileName, "wb")));
+        const String platformName = File::toPlatformName(fileName);
+        stream = ((void *)(fopen(platformName.toCString(), "wb")));
     }
 }
 

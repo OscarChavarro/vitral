@@ -14,7 +14,8 @@ void
 EnvironmentPersistence::importEnvironment(const File& sceneFile, SimpleScene* scene)
 {
     char* extC = extractExtensionFromFile(sceneFile);
-    String ext = (extC != 0) ? String(extC) : String();
+    String ext;
+    if ( extC != 0 ) ext = String(extC);
     if ( extC != 0 ) free(extC);
     for (size_t i = 0; i < (size_t)ext.size(); i++) ext[i] = (char)tolower((unsigned char)ext[i]);
 

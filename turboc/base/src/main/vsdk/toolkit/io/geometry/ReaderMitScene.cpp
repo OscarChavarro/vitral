@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "java/io/File.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
@@ -38,7 +39,8 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
         throw VSDKFatalException("ReaderMitScene::importEnvironment: outScene is null");
     }
 
-    FILE* file = fopen(fileName, "r");
+    const String platformName = File::toPlatformName(fileName);
+    FILE* file = fopen(platformName.toCString(), "r");
     if ( !file ) {
         Logger::reportMessage("ReaderMitScene", Logger::ERROR, "importEnvironment", "could not open file");
         throw VSDKFatalException("ReaderMitScene::importEnvironment: could not open file");

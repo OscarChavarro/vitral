@@ -84,6 +84,37 @@ int vsnprintf(char *buffer, size_t size, const char *format,
 #define __attribute__(attributes)
 #endif
 
+// Turbo C++ 3.0 has no exceptions (VSDK_WITHOUT_EXCEPTIONS, that may also be
+// given to a modern compiler to check this configuration): a throw reports
+// the exception and ends the program, as an uncaught exception does, a try
+// block just runs, and the catch clauses are left out with
+// `#ifndef VSDK_WITHOUT_EXCEPTIONS`
+#ifdef __TURBOC__
+#define VSDK_WITHOUT_EXCEPTIONS
+#endif
+#ifdef VSDK_WITHOUT_EXCEPTIONS
+class Throwable;
+class VsdkUncaughtThrow {
+  public:
+    void operator<<(const Throwable &exception) const;
+};
+extern VsdkUncaughtThrow vsdkUncaughtThrow;
+#define try
+#define throw vsdkUncaughtThrow <<
+#endif
+
+/**
+@return the value of `T()` (zero for numbers and pointers), that Turbo C++
+3.0 does not take for pointer types. The argument only selects `T` (legacy
+compilers lack explicit template arguments for functions).
+*/
+template <class T> T
+vsdkDefaultValue(T *)
+{
+    static T value;
+    return value;
+}
+
 class String;
 
 class VSDK {

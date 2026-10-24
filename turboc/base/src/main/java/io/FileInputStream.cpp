@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "java/io/File.h"
 #include "java/io/FileInputStream.h"
 
 FILE *
@@ -11,7 +12,8 @@ FileInputStream::FileInputStream(const char *fileName):
     stream(NULL)
 {
     if ( fileName != NULL && fileName[0] != '\0' ) {
-        stream = ((void *)(fopen(fileName, "rb")));
+        const String platformName = File::toPlatformName(fileName);
+        stream = ((void *)(fopen(platformName.toCString(), "rb")));
     }
 }
 

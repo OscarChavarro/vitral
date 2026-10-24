@@ -46,7 +46,7 @@ const WidgetDialogElement* WidgetDialogElement::findAction(
     if ( !action.isEmpty() && this->action.equals(action) ) {
         return this;
     }
-    for ( size_t i = 0; i < children.size(); i++ ) {
+    for ( int i = 0; i < (int)children.size(); i++ ) {
         const WidgetDialogElement* found = children[i].findAction(action);
         if ( found != nullptr ) {
             return found;

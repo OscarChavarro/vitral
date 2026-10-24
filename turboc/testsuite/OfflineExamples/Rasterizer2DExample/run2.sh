@@ -2,4 +2,4 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-exec sh "$SCRIPT_DIR/run.sh" polygon output2.png
+exec sh "$SCRIPT_DIR/run.sh" polygon output2.ppm

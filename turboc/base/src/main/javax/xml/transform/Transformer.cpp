@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "java/io/File.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "javax/xml/transform/Transformer.h"
@@ -170,7 +171,8 @@ BOOLEAN Transformer::transform(const Document* document,
                             const File& file) const
 {
     String xmlText = toXmlText(document);
-    FILE* fd = fopen(file.getPath().c_str(), "wb");
+    const String platformName = File::toPlatformName(file.getPath());
+    FILE* fd = fopen(platformName.toCString(), "wb");
     if ( fd == NULL ) {
         return FALSE;
     }

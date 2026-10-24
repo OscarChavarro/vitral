@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "java/lang/String.h"
+#include "java/lang/Throwable.h"
 #include "vsdk/toolkit/common/VSDK.h"
 const double VSDK::EPSILON = 1e-6;
 
@@ -18,6 +20,16 @@ int vsnprintf(char *buffer, size_t /*size*/, const char *format,
     va_list arguments)
 {
     return vsprintf(buffer, format, arguments);
+}
+#endif
+
+#ifdef VSDK_WITHOUT_EXCEPTIONS
+VsdkUncaughtThrow vsdkUncaughtThrow;
+
+void VsdkUncaughtThrow::operator<<(const Throwable &exception) const
+{
+    fprintf(stderr, "Uncaught exception: %s\n", exception.getMessage().c_str());
+    abort();
 }
 #endif
 

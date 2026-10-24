@@ -42,10 +42,6 @@ class System {
     @param argv arguments
     */
     static void setPropertiesFromArguments(int argc, char* argv[]);
-
-  private:
-    static FileOutputStream standardOutput;
-    static FileOutputStream standardError;
 };
 
 

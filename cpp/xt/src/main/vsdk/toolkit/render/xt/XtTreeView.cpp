@@ -54,9 +54,9 @@ struct XtTreeViewCallbacks {
     static void destroyed(XtWidget, XtPointer clientData, XtPointer)
     {
         XtTreeView* self = static_cast<XtTreeView*>(clientData);
-        if ( self->gc != nullptr ) {
-            XFreeGC(XtDisplay(self->widget), self->gc);
-            self->gc = nullptr;
+        if ( self->graphicsContext != nullptr ) {
+            XFreeGC(XtDisplay(self->widget), self->graphicsContext);
+            self->graphicsContext = nullptr;
         }
         self->widget = nullptr;
     }
@@ -64,7 +64,7 @@ struct XtTreeViewCallbacks {
 
 XtTreeView::XtTreeView(XtWidget parent, XFontSet fontSet, int x, int y,
                        int width, int height)
-    : widget(nullptr), fontSet(fontSet), gc(nullptr), colorsAllocated(false),
+    : widget(nullptr), fontSet(fontSet), graphicsContext(nullptr), colorsAllocated(false),
       rowHeight(20), ascent(14), scrollTop(0), anchor(-1), root(nullptr)
 {
     if ( fontSet != nullptr ) {
@@ -98,8 +98,8 @@ XtTreeView::~XtTreeView()
                          &XtTreeViewCallbacks::keyPressed, this);
     XtRemoveCallback(widget, XtNdestroyCallback,
                      &XtTreeViewCallbacks::destroyed, this);
-    if ( gc != nullptr ) {
-        XFreeGC(XtDisplay(widget), gc);
+    if ( graphicsContext != nullptr ) {
+        XFreeGC(XtDisplay(widget), graphicsContext);
     }
 }
 
@@ -253,13 +253,13 @@ void XtTreeView::redraw()
     if ( widget == nullptr || !XtIsRealized(widget) ) return;
     Display* display = XtDisplay(widget);
     Window window = XtWindow(widget);
-    if ( gc == nullptr ) gc = XCreateGC(display, window, 0, nullptr);
+    if ( graphicsContext == nullptr ) graphicsContext = XCreateGC(display, window, 0, nullptr);
     if ( !colorsAllocated ) allocateColors();
 
     Dimension width = 0, height = 0;
     XtVaGetValues(widget, XtNwidth, &width, XtNheight, &height, nullptr);
-    XSetForeground(display, gc, colors[BACKGROUND]);
-    XFillRectangle(display, window, gc, 0, 0, width, height);
+    XSetForeground(display, graphicsContext, colors[BACKGROUND]);
+    XFillRectangle(display, window, graphicsContext, 0, 0, width, height);
 
     int count = visibleRows();
     for ( int i = 0; i < count && scrollTop + i < static_cast<int>(rows.size()); i++ ) {
@@ -274,8 +274,8 @@ void XtTreeView::redraw()
                 XmbTextEscapement(fontSet, label.c_str(),
                                   static_cast<int>(label.size())) :
                 static_cast<int>(label.size()) * 8;
-            XSetForeground(display, gc, colors[SELECTION]);
-            XFillRectangle(display, window, gc, labelX - 2, y,
+            XSetForeground(display, graphicsContext, colors[SELECTION]);
+            XFillRectangle(display, window, graphicsContext, labelX - 2, y,
                            labelWidth + 4, rowHeight);
         }
         if ( !row.node->getChildren().empty() ) {
@@ -292,12 +292,12 @@ void XtTreeView::redraw()
                 points[1].x = cx + 2; points[1].y = cy + TOGGLE_SIZE / 2;
                 points[2].x = cx + 7; points[2].y = cy;
             }
-            XSetForeground(display, gc, colors[LINE]);
-            XFillPolygon(display, window, gc, points, 3, Convex, CoordModeOrigin);
+            XSetForeground(display, graphicsContext, colors[LINE]);
+            XFillPolygon(display, window, graphicsContext, points, 3, Convex, CoordModeOrigin);
         }
-        XSetForeground(display, gc, colors[isSelected ? SELECTED_TEXT : TEXT]);
+        XSetForeground(display, graphicsContext, colors[isSelected ? SELECTED_TEXT : TEXT]);
         if ( fontSet != nullptr ) {
-            XmbDrawString(display, window, fontSet, gc, labelX, y + ascent,
+            XmbDrawString(display, window, fontSet, graphicsContext, labelX, y + ascent,
                           label.c_str(), static_cast<int>(label.size()));
         }
     }
@@ -308,8 +308,8 @@ void XtTreeView::redraw()
                                      static_cast<int>(rows.size()));
         int barY = (static_cast<int>(height) - barHeight) * scrollTop /
             std::max(1, static_cast<int>(rows.size()) - count);
-        XSetForeground(display, gc, colors[LINE]);
-        XFillRectangle(display, window, gc, width - SCROLLBAR_WIDTH - 2, barY,
+        XSetForeground(display, graphicsContext, colors[LINE]);
+        XFillRectangle(display, window, graphicsContext, width - SCROLLBAR_WIDTH - 2, barY,
                        SCROLLBAR_WIDTH, barHeight);
     }
 }

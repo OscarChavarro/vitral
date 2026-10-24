@@ -327,7 +327,7 @@ static void removeEdgeRecord(
 }
 
 template <class T>
-static void removeFirst(ArrayList<T>& list, T elem)
+void removeFirst(ArrayList<T>& list, T elem)
 {
     for ( long int i = 0; i < list.size(); i++ ) {
         if ( list.get(i) == elem ) {

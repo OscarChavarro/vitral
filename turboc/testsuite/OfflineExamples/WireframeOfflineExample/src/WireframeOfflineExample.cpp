@@ -65,14 +65,14 @@ rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const String& output
         delete e1;
     }
 
-    ImagePersistence::exportPNG(File(outputFile.c_str()), &outputImage);
+    ImagePersistence::exportPPM(File(outputFile.c_str()), &outputImage);
 }
 
 int
 main(int argc, char** argv)
 {
     String sceneFile = "../../../../etc/geometry/cow.obj";
-    String outputFile = "output.png";
+    String outputFile = "output.ppm";
     if (argc > 1 && argv[1] != 0 && String(argv[1]).size() > 0) {
         outputFile = argv[1];
     }
@@ -85,7 +85,7 @@ main(int argc, char** argv)
     camera.setNearPlaneDistance(0.001);
     camera.setFarPlaneDistance(100);
     camera.setRotation(R);
-    camera.updateViewportResize(1024, 768);
+    camera.updateViewportResize(320, 240);
     SimpleScene scene;
     EnvironmentPersistence::importEnvironment(File(sceneFile.c_str()), &scene);
     if (scene.getSimpleBodies().size() == 0) {

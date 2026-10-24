@@ -19,7 +19,12 @@ void Logger::processFatalError(const String& method, const String& message, cons
     if ( !withFatalExceptions ) {
         return;
     }
-    String m = method.empty() ? String("VSDK fatal error") : ("VSDK fatal error at " + method);
+    // Turbo C++ 3.0 does not take String temporaries in conditional
+    // expressions
+    String m("VSDK fatal error");
+    if ( !method.empty() ) {
+        m += " at " + method;
+    }
     if ( !message.empty() ) {
         m += ": " + message;
     }

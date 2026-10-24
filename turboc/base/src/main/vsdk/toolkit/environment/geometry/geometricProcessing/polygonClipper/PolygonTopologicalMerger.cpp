@@ -166,8 +166,10 @@ struct EdgeKey {
 struct EdgeKeyHasher {
     size_t operator()(const EdgeKey& k) const
     {
-        size_t h1 = PointKeyHasher()(k.startKey);
-        size_t h2 = PointKeyHasher()(k.endKey);
+        // Not a temporary PointKeyHasher, that Turbo C++ 3.0 does not take
+        PointKeyHasher pointKeyHasher;
+        size_t h1 = pointKeyHasher(k.startKey);
+        size_t h2 = pointKeyHasher(k.endKey);
         return h1 ^ (h2 << 1);
     }
 };

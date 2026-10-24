@@ -71,11 +71,13 @@ static void offlineExecution(const String& fileName,
         ReaderMitScene readerMitScene;
         readerMitScene.importEnvironment(fileName.c_str(), &scene);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch (const Exception& e) {
         fprintf(stderr, "Error reading %s: %s\n", fileName.c_str(), e.getMessage().c_str());
         fprintf(stderr, "There are scene samples on %s\n", SCENE_SAMPLES_PATH);
         exit(EXIT_CODE_READ_ERROR);
     }
+#endif
 
     printf("Scene loaded OK!\n");
 

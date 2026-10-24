@@ -9,6 +9,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 #include <stdio.h>
+#include "java/io/File.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/util/TreeSet.h"
@@ -112,7 +113,7 @@ static String boundsText(const double* bounds)
 }
 
 template <class T>
-static void unlistShared(ArrayList<T*>& from, const ArrayList<T*>& reference)
+void unlistShared(ArrayList<T*>& from, const ArrayList<T*>& reference)
 {
     TreeSet<T*> referenced;
     long int i;
@@ -619,7 +620,8 @@ void SetOperator::debugSolid(PolyhedralBoundedSolid* solid, const char* pattern)
 {
     printf("**** DEBUGGING SOLID INFORMATION WRITEN TO FILES %s ****\n", pattern);
     String fileName = String(pattern) + ".txt";
-    FILE* fd = fopen(fileName.c_str(), "w");
+    const String platformName = File::toPlatformName(fileName);
+    FILE* fd = fopen(platformName.toCString(), "w");
     if ( fd == 0 ) {
         return;
     }
@@ -958,7 +960,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     _PolyhedralBoundedSolidProfileDifferenceFallbackSpec* profileDifferenceFallback;
     _PolyhedralBoundedSolidOffsetCylinderFallback::OffsetCylinderDifferenceFallbackSpec*
         offsetCylinderDifferenceFallbackSpec;
-    PolyhedralBoundedSolid* offsetCylinderDifferenceFallback;
+    PolyhedralBoundedSolid* offsetCylinderFallbackResult;
     PolyhedralBoundedSolid* axisAlignedCellBooleanFallback;
     PolyhedralBoundedSolid* orthogonalProfileBooleanFallback;
     BOOLEAN fallbackProvidedResult;
@@ -967,7 +969,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     String operandBDiagnostics;
 
     _SetOperationContext ctx;
-    offsetCylinderDifferenceFallback = 0;
+    offsetCylinderFallbackResult = 0;
     fallbackProvidedResult = FALSE;
     resultPath = "normal-pipeline";
     operandADiagnostics = cardinalitiesAndBounds(inSolidA);
@@ -1137,16 +1139,16 @@ PolyhedralBoundedSolid* SetOperator::setOp(
 
         if ( hasIncompleteConnectState() &&
              offsetCylinderDifferenceFallbackSpec != 0 ) {
-            offsetCylinderDifferenceFallback =
+            offsetCylinderFallbackResult =
                 _PolyhedralBoundedSolidOffsetCylinderFallback
                     ::buildOffsetCylinderDifferenceFallback(
                         offsetCylinderDifferenceFallbackSpec);
-            if ( offsetCylinderDifferenceFallback != 0 ) {
+            if ( offsetCylinderFallbackResult != 0 ) {
                 tracePipelineSummary(
                     "offset cylinder fallback replacing incomplete connect");
                 delete res;
-                res = offsetCylinderDifferenceFallback;
-                offsetCylinderDifferenceFallback = 0;
+                res = offsetCylinderFallbackResult;
+                offsetCylinderFallbackResult = 0;
                 fallbackProvidedResult = TRUE;
                 resultPath = "offset-cylinder-fallback-incomplete-connect";
             }
@@ -1178,6 +1180,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             try {
                 setOpFinish(ctx, inSolidA, inSolidB, res, op);
             }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
             catch ( const Exception& e ) {
                 PolyhedralBoundedSolid* offsetCylinderExceptionFallback =
                     _PolyhedralBoundedSolidOffsetCylinderFallback
@@ -1224,6 +1227,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
                     }
                 }
             }
+#endif
         }
 
         if ( withDebug ) {
@@ -1265,7 +1269,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     // result as the only owner of its nodes
     delete axisAlignedCellBooleanFallback;
     delete orthogonalProfileBooleanFallback;
-    delete offsetCylinderDifferenceFallback;
+    delete offsetCylinderFallbackResult;
     delete profileDifferenceFallback;
     delete offsetCylinderDifferenceFallbackSpec;
     unlistSharedNodes(inSolidA, res);

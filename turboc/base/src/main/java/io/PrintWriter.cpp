@@ -15,9 +15,11 @@ PrintWriter::print(const String &text)
         out->write(((const unsigned char *)(text.c_str())), 0,
                    text.length());
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( const Exception & ) {
         error = TRUE;
     }
+#endif
 }
 
 void
@@ -36,9 +38,11 @@ PrintWriter::flush()
     try {
         out->flush();
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( const Exception & ) {
         error = TRUE;
     }
+#endif
 }
 
 BOOLEAN

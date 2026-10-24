@@ -153,7 +153,7 @@ String Double::toString(double value)
     one[0] = digits[0];
     out += one;
     out += ".";
-    out += digitCount > 1 ? String(digits + 1) : String("0");
+    out += digitCount > 1 ? ((const char *)(digits + 1)) : "0";
     out += "E";
     out += String::valueOf(exponent);
     return out;

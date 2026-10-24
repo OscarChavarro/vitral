@@ -21,8 +21,9 @@
 #include "java/lang/Exception.h"
 const char* const DEFAULT_INPUT_FILE =
     "../../../../etc/polygons/example01.polygon";
-const int DEFAULT_ZONE_WIDTH = 512;
-const int DEFAULT_ZONE_HEIGHT = 512;
+// Two 160 pixel zones are rendered side by side, producing a 320x240 image.
+const int DEFAULT_ZONE_WIDTH = 160;
+const int DEFAULT_ZONE_HEIGHT = 240;
 const double EPSILON = 1e-9;
 const int DEFAULT_IMAGE_MARGIN = 10;
 
@@ -117,20 +118,21 @@ String deriveOutputFileName(const String& inputFileName)
             }
         }
         if (allDigits) {
-            return String("output").concat(number).concat(".png");
+            return String("output").concat(number).concat(".ppm");
         }
     }
-    return String("output.png");
+    return String("output.ppm");
 }
 
+// By value: Turbo C++ 3.0 does not deduce `const T &` from a value
 template <class T>
-static const T& minValue(const T& a, const T& b)
+T minValue(T a, T b)
 {
     return (b < a) ? b : a;
 }
 
 template <class T>
-static const T& maxValue(const T& a, const T& b)
+T maxValue(T a, T b)
 {
     return (a < b) ? b : a;
 }
@@ -161,9 +163,9 @@ void printUsage()
     printf("Usage: PolygonTriangulation [options] [input_file] [output_file]\n");
     printf("Options:\n");
     printf("  --input, -i <file>       Polygon input file (.polygon)\n");
-    printf("  --output, -o <file>      PNG output file\n");
-    printf("  --zone-width <pixels>    Width of each image zone (default 512)\n");
-    printf("  --zone-height <pixels>   Height of each image zone (default 512)\n");
+    printf("  --output, -o <file>      PPM output file\n");
+    printf("  --zone-width <pixels>    Width of each image zone (default 160)\n");
+    printf("  --zone-height <pixels>   Height of each image zone (default 240)\n");
     printf("  --help, -h               Show this help\n");
 }
 
@@ -244,7 +246,8 @@ static void failReadPolygon(FILE* input, const String& fileName, const char* rea
 
 void readPolygon(const String& fileName, Polygon2D& polygon)
 {
-    FILE* input = fopen(fileName.c_str(), "r");
+    const String platformName = File::toPlatformName(fileName);
+    FILE* input = fopen(platformName.toCString(), "r");
     if (!input) {
         fail("readPolygon", String("failed reading polygon file: ").concat(fileName));
     }
@@ -371,8 +374,10 @@ void renderSmoothFilledPolygon(RGBImageUncompressed& image,
     try {
         Rasterizer2D::fillSmoothPolygon(&image, projectedPolygon);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch (...) {
     }
+#endif
 
     Rasterizer2D::drawPolygon(&image, projectedPolygon, borderColor);
 }
@@ -538,8 +543,8 @@ RGBPixel createBorderColor()
 
 void exportImage(RGBImageUncompressed& image, const String& outputFileName)
 {
-    if (!ImagePersistence::exportPNG(File(outputFileName.c_str()), &image)) {
-        fail("exportImage", String("failed writing PNG file: ").concat(outputFileName));
+    if (!ImagePersistence::exportPPM(File(outputFileName.c_str()), &image)) {
+        fail("exportImage", String("failed writing PPM file: ").concat(outputFileName));
     }
     printf("Image written to: %s\n", outputFileName.toCString());
 }
@@ -550,11 +555,13 @@ int run(int argc, char* argv[])
     try {
         commandLineOptions = parseCommandLineOptions(argc, argv);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch (const Exception& exception) {
         Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "run", "invalid command line argument", &exception);
         printUsage();
         return 0;
     }
+#endif
 
     if (commandLineOptions.showHelp) {
         printUsage();
@@ -593,8 +600,10 @@ int main(int argc, char* argv[])
     try {
         return run(argc, argv);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch (const Exception& exception) {
         Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "main", "PolygonTriangulation failed", &exception);
         return 1;
     }
+#endif
 }

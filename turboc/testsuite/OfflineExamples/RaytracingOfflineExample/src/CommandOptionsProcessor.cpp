@@ -19,7 +19,7 @@ CommandOptionsProcessor::CommandOptionsProcessor()
 {
 }
 
-// Parses "<width>x<height>" (e.g. 640x480), or "scene" for the viewport
+// Parses "<width>x<height>" (e.g. 320x240), or "scene" for the viewport
 // defined on the scene file (reported as 0x0)
 BOOLEAN CommandOptionsProcessor::parseResolution(const String& value, int* x, int* y)
 {
@@ -116,7 +116,7 @@ void CommandOptionsProcessor::printUsage()
     printf("Usage: RaytracerSimple [options] [scene_file]\n");
     printf("Options:\n");
     printf("  --scene, -s <file>     MIT scene file (.ray)\n");
-    printf("  --output, -o <file>    Output image file (.ppm/.png/.jpg)\n");
+    printf("  --output, -o <file>    Output image file (.ppm)\n");
     printf("  --resolution, -r <WxH> Image size (default %dx%d), or `scene`\n",
            DEFAULT_X_RESOLUTION, DEFAULT_Y_RESOLUTION);
     printf("                         to use the viewport of the scene file\n");

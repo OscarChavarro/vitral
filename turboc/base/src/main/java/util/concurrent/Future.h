@@ -57,7 +57,8 @@ public:
         pthread_mutex_unlock(&state_->mutex);
 
         if ( failed ) {
-            throw ExecutionException(message.isEmpty() ? String("Task execution failed") : message);
+            if ( message.isEmpty() ) message = String("Task execution failed");
+            throw ExecutionException(message);
         }
         return value;
     }

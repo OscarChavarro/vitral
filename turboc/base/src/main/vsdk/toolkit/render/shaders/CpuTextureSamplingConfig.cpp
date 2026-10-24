@@ -20,7 +20,8 @@ ColorRgb CpuTextureSamplingConfig::sample(Image* texture, double u, double v)
     double du = texture->getXSize() > 0 ? textureOffsetUTexels / ((double)texture->getXSize()) : 0.0;
     double dv = texture->getYSize() > 0 ? textureOffsetVTexels / ((double)texture->getYSize()) : 0.0;
     ColorRgb* c = texture->getColorRgbBiLinear(u + du, v + dv);
-    ColorRgb out = c != 0 ? *c : ColorRgb();
+    ColorRgb out;
+    if ( c != 0 ) out = *c;
     delete c;
     return out;
 }
@@ -31,7 +32,8 @@ Vector3Dd CpuTextureSamplingConfig::sampleNormal(NormalMap* normalMap, double u,
     double du = normalMap->getXSize() > 0 ? NORMAL_OFFSET_U_TEXELS / ((double)normalMap->getXSize()) : 0.0;
     double dv = normalMap->getYSize() > 0 ? NORMAL_OFFSET_V_TEXELS / ((double)normalMap->getYSize()) : 0.0;
     Vector3Dd* n = normalMap->getNormalBiLinear(u + du, v + dv);
-    Vector3Dd out = n != 0 ? *n : Vector3Dd();
+    Vector3Dd out;
+    if ( n != 0 ) out = *n;
     delete n;
     return out;
 }

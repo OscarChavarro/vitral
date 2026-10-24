@@ -48,7 +48,7 @@ Emulates `CircularDoubleLinkedList.locateWindowAtElem`.
 @return element index, or -1 when it is not in the list
 */
 template <class T>
-static long indexOf(const ArrayList<T>& list, T elem)
+long indexOf(const ArrayList<T>& list, T elem)
 {
     for ( long i = 0; i < list.size(); ++i ) {
         if ( list.get(i) == elem ) {
@@ -66,7 +66,7 @@ the list or is its head, `elem` becomes the new head.
 @param pivot element before which `elem` is inserted
 */
 template <class T>
-static void insertBefore(ArrayList<T>& list, T elem, T pivot)
+void insertBefore(ArrayList<T>& list, T elem, T pivot)
 {
     long pos = indexOf(list, pivot);
     if ( pos < 0 ) {
@@ -82,7 +82,7 @@ Emulates `locateWindowAtElem` followed by `removeElemAtWindow`.
 @return true if the element was found and removed
 */
 template <class T>
-static BOOLEAN removeElem(ArrayList<T>& list, T elem)
+BOOLEAN removeElem(ArrayList<T>& list, T elem)
 {
     long pos = indexOf(list, elem);
     if ( pos < 0 ) {
@@ -99,7 +99,7 @@ Emulates `CircularDoubleLinkedList.swapElements`.
 @param b second element
 */
 template <class T>
-static void swapElems(ArrayList<T>& list, T a, T b)
+void swapElems(ArrayList<T>& list, T a, T b)
 {
     long ia = indexOf(list, a);
     long ib = indexOf(list, b);

@@ -29,7 +29,7 @@ BOOLEAN ProfileFallback::OrthogonalProfileOperandSpec::contains(
     if ( type == PROFILE_X_EXTRUDED_YZ ) {
         return x >= bounds[0] - eps &&
                x <= bounds[3] + eps &&
-               pointInsideYZProfile(yzProfile, y, z);
+               ProfileFallback::pointInsideYZProfile(yzProfile, y, z);
     }
 
     return y >= bounds[1] - eps &&

@@ -38,6 +38,12 @@ private:
         int sortOrder);
     static void rasterizePolygonSpans(Image* img, Polygon2D& polygon,
         SpanShader& shader);
+#ifdef __TURBOC__
+    // TCC 3.0 does not grant a local shader class the enclosing member
+    // function's access rights.  The shader in fillSmoothPolygon needs this
+    // helper, so expose it only for that compiler.
+public:
+#endif
     static void fillSmoothPolygonCalculateColor(
         Polygon2D& p,
         double x,

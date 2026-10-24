@@ -40,15 +40,18 @@ public:
     runContainmentOnlyPreflightCase and runSetOpNoIntersectionCase. The cache
     does not change any decision.
     */
-    class _PreflightCache {
+    // Keep this nested name short: Turbo C++ 3.0 truncates long C++ public
+    // names while mangling them, which otherwise makes the AB and BA methods
+    // collide in the object module.
+    class Pfc {
     public:
-        _PreflightCache(PolyhedralBoundedSolid* a, PolyhedralBoundedSolid* b);
+        Pfc(PolyhedralBoundedSolid* a, PolyhedralBoundedSolid* b);
 
         int aInB();
         int bInA();
         BOOLEAN hasInteriorOverlap();
-        BOOLEAN hasEdgeFaceIntersectionAB();
-        BOOLEAN hasEdgeFaceIntersectionBA();
+        BOOLEAN hasEfa();
+        BOOLEAN hasEfb();
 
     private:
         static const int UNSET;
@@ -70,7 +73,7 @@ public:
     @param inSolidB second operand
     @return new memo
     */
-    static _PreflightCache newPreflightCache(
+    static Pfc newPreflightCache(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB);
 
@@ -89,7 +92,7 @@ public:
     static BOOLEAN runContainmentOnlyPreflightCase(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
-        _PreflightCache& cache);
+        Pfc& cache);
 
     /**
     Detects solids that only touch each other (no interior overlap, no proper
@@ -104,7 +107,7 @@ public:
     static BOOLEAN runTouchingOnlyPreflightCase(
         PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
-        _PreflightCache& cache);
+        Pfc& cache);
 
     /**
     Table 15.1 dispatch of [MANT1988] for operands without intersections
@@ -126,7 +129,7 @@ public:
         PolyhedralBoundedSolid* inSolidB,
         PolyhedralBoundedSolid* outRes,
         int op,
-        _PreflightCache& cache);
+        Pfc& cache);
 
     /**
     Resolves operands that only share partial coplanar face areas: the
@@ -148,9 +151,13 @@ public:
         PolyhedralBoundedSolid* inSolidB,
         PolyhedralBoundedSolid* outRes,
         int op,
-        _PreflightCache& cache);
+        Pfc& cache);
 
+#ifdef __TURBOC__
+public:
+#else
 private:
+#endif
     typedef ArrayList<Vector3Dd> Polygon;
 
     /**

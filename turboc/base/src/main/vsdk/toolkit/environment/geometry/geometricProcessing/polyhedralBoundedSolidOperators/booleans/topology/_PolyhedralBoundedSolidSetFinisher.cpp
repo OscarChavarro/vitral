@@ -41,7 +41,7 @@ static String str(int value)
 int Finisher::lastLegacyFallbackCount = 0;
 int Finisher::lastTriangulatedFaceCount = 0;
 
-Finisher::_PolyhedralBoundedSolidSetFinisher()
+_PolyhedralBoundedSolidSetFinisher::_PolyhedralBoundedSolidSetFinisher()
 {
 }
 

@@ -12,6 +12,7 @@
 
 all:
 	cd base && $(MAKE)
+	cd dos && $(MAKE)
 	cd testsuite/OfflineExamples && $(MAKE)
 
 # Needs X11 (Xt, Xaw, Xmu) and OpenGL 1.1 or later
@@ -36,6 +37,7 @@ glut-examples: all
 
 clean:
 	cd base && $(MAKE) clean
+	cd dos && $(MAKE) clean
 	cd testsuite/OfflineExamples && $(MAKE) clean
 	cd opengl1 && $(MAKE) clean
 	cd xt && $(MAKE) clean

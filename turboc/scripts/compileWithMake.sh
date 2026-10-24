@@ -58,7 +58,7 @@ make $TARGETS "$@"
 
 if [ -f base/build/libvitral_base.a ]; then
     echo "=== Libraries:"
-    for library in base/build/libvitral_base.a opengl1/build/libvitral_opengl1.a \
+    for library in base/build/libvitral_base.a dos/build/libvitral_dos.a opengl1/build/libvitral_opengl1.a \
                    xt/build/libvitral_xt.a xaw/build/libvitral_xaw.a \
                    xm/build/libvitral_xm.a glut/build/libvitral_glut.a; do
         if [ -f "$library" ]; then

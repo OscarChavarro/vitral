@@ -127,7 +127,11 @@ void _PolyhedralBoundedSolidOperator::movefac(_PolyhedralBoundedSolidFace* f,
         return;
     }
 
+#ifdef __TURBOC__
+    f->parentSolid->getPolygonsList().remove2(f);
+#else
     f->parentSolid->getPolygonsList().remove(f);
+#endif
     s->getPolygonsList().add(f);
     f->parentSolid = s;
 
@@ -394,10 +398,21 @@ void _PolyhedralBoundedSolidOperator::traceRingMoveShadowDecision(
          l->boundaryStartHalfEdge == NULL ||
          l->boundaryStartHalfEdge->startingVertex == NULL ||
          f1->getContainingPlane() == NULL ) {
+#ifdef __TURBOC__
+        // TCC 3.0 cannot destroy a String temporary selected by ?: inside a
+        // varargs call.  Materialize both alternatives before printf.
+        String f1Text = "?";
+        String f2Text = "?";
+        if ( f1 != NULL ) f1Text = Cpp98Support::toString(f1->id);
+        if ( f2 != NULL ) f2Text = Cpp98Support::toString(f2->id);
+        printf("[LARINGMV] f1=%s f2=%s ring=untestable site=%s\n",
+            f1Text.c_str(), f2Text.c_str(), site.c_str());
+#else
         printf("[LARINGMV] f1=%s f2=%s ring=untestable site=%s\n",
             f1 == NULL ? "?" : Cpp98Support::toString(f1->id).c_str(),
             f2 == NULL ? "?" : Cpp98Support::toString(f2->id).c_str(),
             site.c_str());
+#endif
         return;
     }
     _PolyhedralBoundedSolidLoop* outerLoop = f1->boundariesList.get(0);

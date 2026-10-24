@@ -183,12 +183,16 @@ ArrayList<T>::remove(long int pos)
 }
 
 template <class T> void
+#ifdef __TURBOC__
+ArrayList<T>::remove2(T data)
+#else
 ArrayList<T>::remove(T data)
+#endif
 {
     BOOLEAN shouldRemove = FALSE;
     long int i;
     for ( i = 0; i < size(); i++ ) {
-        if ( Data[i] == data ) {
+        if ( vsdkEquals(Data[i], data) ) {
             shouldRemove = TRUE;
             break;
         }
@@ -212,7 +216,7 @@ ArrayList<T>::clear() {
 template <class T> long int
 ArrayList<T>::indexOf(const T &elem) const {
     for ( long int i = 0; i < currentSize; i++ ) {
-        if ( Data[i] == elem ) {
+        if ( vsdkEquals(Data[i], elem) ) {
             return i;
         }
     }
@@ -277,7 +281,7 @@ ArrayList<T>::equals(const ArrayList<T> &other) const {
         return FALSE;
     }
     for ( long int i = 0; i < currentSize; i++ ) {
-        if ( !(Data[i] == other.Data[i]) ) {
+        if ( !vsdkEquals(Data[i], other.Data[i]) ) {
             return FALSE;
         }
     }

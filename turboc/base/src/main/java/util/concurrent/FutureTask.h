@@ -54,12 +54,14 @@ public:
             T value = callable_->call();
             finish(&value, 0);
         }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
         catch (const Exception& e) {
             finish(0, e.getMessage().c_str());
         }
         catch (...) {
             finish(0, "unknown exception");
         }
+#endif
         delete callable_;
     }
 

@@ -119,10 +119,12 @@ ControlSpecification::parse(const String &specification)
         lower = parseLimit(trim(limits[0]));
         upper = parseLimit(trim(limits[1]));
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( const NumberFormatException & ) {
         reportMalformed(specification, "invalid interval limit");
         return NULL;
     }
+#endif
     if ( lower > upper ) {
         reportMalformed(specification,
             "lower limit is greater than upper limit");

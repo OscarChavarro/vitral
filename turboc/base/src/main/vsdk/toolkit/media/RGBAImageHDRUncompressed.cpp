@@ -11,5 +11,13 @@ void RGBAImageHDRUncompressed::allocate(int w, int h) {
     xSize = w;
     ySize = h;
     delete[] data;
-    data = new RGBAPixelHDR[w * h]();
+    data = new RGBAPixelHDR[w * h];
+    // TCC 3.0 does not support value-initialization after new[].
+    int i;
+    for ( i = 0; i < w * h; i++ ) {
+        data[i].r = 0;
+        data[i].g = 0;
+        data[i].b = 0;
+        data[i].a = 0;
+    }
 }

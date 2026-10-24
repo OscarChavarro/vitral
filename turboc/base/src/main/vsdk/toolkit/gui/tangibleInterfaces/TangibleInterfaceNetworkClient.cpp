@@ -48,7 +48,11 @@ void TangibleInterfaceNetworkClient::addListener(TangibleInterfaceListener* list
 void TangibleInterfaceNetworkClient::removeListener(TangibleInterfaceListener* listener)
 {
     pthread_mutex_lock(&listenersMutex);
+#ifdef __TURBOC__
+    listeners.remove2(listener);
+#else
     listeners.remove(listener);
+#endif
     pthread_mutex_unlock(&listenersMutex);
 }
 
@@ -220,8 +224,13 @@ BOOLEAN TangibleInterfaceNetworkClient::extractNumbers(const String& text, const
     int start = 0;
     for ( int i = 0; i < count; i++ ) {
         int comma = payload.find(',', start);
-        String token = (i == count - 1) ?
-            payload.substr(start) : payload.substr(start, comma - start);
+        String token;
+        if ( i == count - 1 ) {
+            token = payload.substr(start);
+        }
+        else {
+            token = payload.substr(start, comma - start);
+        }
         if ( i != count - 1 && comma == String::npos ) {
             return FALSE;
         }

@@ -16,6 +16,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class Matrix4x4d;
 class Ray;
+struct _ParametricBiCubicPatchNode;
 
 /**
 Ray / bicubic patch intersection support for `ParametricBiCubicPatch`.
@@ -114,7 +115,8 @@ public:
     void evaluate(double u, double v, double out[9]) const;
 
 private:
-    struct PatchNode;
+    friend struct _ParametricBiCubicPatchNode;
+    typedef _ParametricBiCubicPatchNode PatchNode;
 
     /// Bezier control net, stored as 16 points of 3 coordinates, with point
     /// (i, j) at index 3*(4*i + j). Index i follows the s (u) parameter and

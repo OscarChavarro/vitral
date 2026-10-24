@@ -55,7 +55,9 @@ void
 TextureUtils::computeColor(
     ColorRgba *color, const RGBAColorPalette *colorMap, double value)
 {
-    const ColorRgba *c = colorMap->evalLinear(value);
+    // evalLinear returns an owned heap copy.  TCC 3.0 cannot delete a
+    // const-qualified pointer, unlike modern compilers.
+    ColorRgba *c = (ColorRgba *)colorMap->evalLinear(value);
     *color = *c;
     delete c;
 }

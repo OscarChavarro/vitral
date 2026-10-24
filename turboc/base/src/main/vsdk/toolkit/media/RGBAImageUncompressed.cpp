@@ -31,13 +31,20 @@ BOOLEAN RGBAImageUncompressed::init(int width, int height) {
             delete[] data;
         }
         data = new char[width * height * BYTES_PER_PIXEL];
+        if (data == NULL) {
+            // new without exceptions (Turbo C++)
+            return FALSE;
+        }
         for (int i = 0; i < width * height * BYTES_PER_PIXEL; i++) {
             data[i] = 0;
         }
-    } catch (...) {
+    }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
+    catch (...) {
         data = NULL;
         return FALSE;
     }
+#endif
     xSize = width;
     ySize = height;
     return TRUE;
@@ -53,10 +60,17 @@ BOOLEAN RGBAImageUncompressed::initNoFill(int width, int height) {
             delete[] data;
         }
         data = new char[width * height * BYTES_PER_PIXEL];
-    } catch (...) {
+        if (data == NULL) {
+            // new without exceptions (Turbo C++)
+            return FALSE;
+        }
+    }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
+    catch (...) {
         data = NULL;
         return FALSE;
     }
+#endif
     xSize = width;
     ySize = height;
     return TRUE;

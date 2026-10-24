@@ -187,11 +187,13 @@ PolyhedralBoundedSolid* CylinderFallback::buildOffsetCylinderDifferenceFallback(
         result = _PolyhedralBoundedSolidSetOperator::setOp(fallbackA, fallbackB,
             SUBTRACT, FALSE, TRUE);
     }
+#ifndef VSDK_WITHOUT_EXCEPTIONS
     catch ( const Exception& e ) {
         _SetOperationTrace::tracePipelineSummary(
             (String("offset cylinder fallback failed: ") + e.getMessage().c_str()).c_str());
         result = 0;
     }
+#endif
     delete fallbackA;
     delete fallbackB;
     if ( result == 0 ) {

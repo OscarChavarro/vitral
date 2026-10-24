@@ -46,7 +46,8 @@ static const char* booleanName(BOOLEAN value)
 
 static String halfEdgeText(_PolyhedralBoundedSolidHalfEdge* he)
 {
-    return he == NULL ? String("null") : String(he->toString().c_str());
+    if ( he == NULL ) return String("null");
+    return String(he->toString().c_str());
 }
 
 

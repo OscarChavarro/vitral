@@ -1,1 +1,0 @@
-/usr/bin/c++  -std=c++98 -Wall -rdynamic CMakeFiles/Rasterizer2DExample.dir/src/Rasterizer2DExample.o -o ../../Rasterizer2DExample/build/Rasterizer2DExample   -L/home/jedilink/VITRAL/vitral/turboc/testsuite/OfflineExamples/../../base/build  -Wl,-rpath,/home/jedilink/VITRAL/vitral/turboc/testsuite/OfflineExamples/../../base/build -lvitral_base -lpthread 

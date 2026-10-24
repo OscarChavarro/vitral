@@ -203,7 +203,8 @@ BOOLEAN InputGizmo::isEditing() const
 
 String InputGizmo::getEditText(int field) const
 {
-    return editing[field] ? editTexts[field] : String("");
+    if ( editing[field] ) return editTexts[field];
+    return String("");
 }
 
 String InputGizmo::getDisplayText(int field) const

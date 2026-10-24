@@ -41,7 +41,7 @@ void WidgetDialog::addElement(const WidgetDialogElement& element)
 const WidgetDialogElement* WidgetDialog::getElementByAction(
     const java::String& action) const
 {
-    for ( size_t i = 0; i < elements.size(); i++ ) {
+    for ( int i = 0; i < (int)elements.size(); i++ ) {
         const WidgetDialogElement* found = elements[i].findAction(action);
         if ( found != nullptr ) {
             return found;

@@ -58,5 +58,12 @@ public:
     String* toString() const;
 };
 
+/** Equality of the elements of ArrayList (see vsdkEquals in ArrayList.h) */
+inline BOOLEAN
+vsdkEquals(const Vector4Dd &a, const Vector4Dd &b)
+{
+    return a == b;
+}
+
 
 #endif

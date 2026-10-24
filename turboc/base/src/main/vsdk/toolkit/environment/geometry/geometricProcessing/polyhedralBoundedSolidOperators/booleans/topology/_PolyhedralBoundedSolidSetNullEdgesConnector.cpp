@@ -91,7 +91,7 @@ const Connector::FaceList& Connector::ConnectResult::sonfb() const
     return sonfbValue;
 }
 
-Connector::_PolyhedralBoundedSolidSetNullEdgesConnector()
+_PolyhedralBoundedSolidSetNullEdgesConnector::_PolyhedralBoundedSolidSetNullEdgesConnector()
     : nextNullEdgeIndex(0), sonea(0), soneb(0)
 {
 }
@@ -1062,10 +1062,12 @@ BOOLEAN Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
             "connect ring-rescue re-parent did not complete the match");
         return FALSE;
     }
+    String ringVertex = "?";
+    if ( ringSide->startingVertex != 0 ) {
+        ringVertex = str(ringSide->startingVertex->id);
+    }
     tracePipelineSummary(("connect ring-rescue applied: ring v=" +
-        (ringSide->startingVertex == 0 ? String("?") :
-         str(ringSide->startingVertex->id)) +
-        " -> face " + str(targetFace->id)).c_str());
+        ringVertex + " -> face " + str(targetFace->id)).c_str());
     *outA = endsa[candidate];
     *outB = endsb[candidate];
     endsa.remove((long)candidate);

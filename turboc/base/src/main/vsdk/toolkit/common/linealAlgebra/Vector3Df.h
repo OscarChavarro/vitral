@@ -38,5 +38,12 @@ public:
     BOOLEAN operator==(const Vector3Df& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_; }
 };
 
+/** Equality of the elements of ArrayList (see vsdkEquals in ArrayList.h) */
+inline BOOLEAN
+vsdkEquals(const Vector3Df &a, const Vector3Df &b)
+{
+    return a == b;
+}
+
 
 #endif
