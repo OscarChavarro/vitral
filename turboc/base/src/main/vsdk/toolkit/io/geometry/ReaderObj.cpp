@@ -479,7 +479,9 @@ static TriangleMeshGroup* readObj(const File& sceneFile)
                 Image* tex = 0;
                 if (texName != "(null)") {
                     String texPath = joinPath(dirnameOf(fileName), texName);
-                    tex = ImagePersistence::importRGBA(File(texPath.c_str()));
+                    // Turbo C++ 3.0 does not apply the derived-to-base
+                    // conversion through this static factory result.
+                    tex = (Image*)ImagePersistence::importRGBA(File(texPath.c_str()));
                 }
                 texturesHashMap.put(texName, tex);
                 if (tex != 0) {

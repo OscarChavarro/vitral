@@ -17,6 +17,7 @@ echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\..\..\BASE\SRC;..\..\..\BASE\SRC\MAIN;SRC >> TC.RSP
+echo -I..\..\..\DOS\SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RAS2DEXA.OBJ >> TC.RSP
 echo SRC\RAS2DEXA.CPP >> TC.RSP
 tcc @TC.RSP > TC.LOG
@@ -29,6 +30,7 @@ if not exist ..\..\..\BASE\BUILD\BASEMEDI.LIB goto missing_libraries
 if not exist ..\..\..\BASE\BUILD\BASEREND.LIB goto missing_libraries
 if not exist ..\..\..\BASE\BUILD\BASEENG1.LIB goto missing_libraries
 if not exist ..\..\..\BASE\BUILD\BASEENG2.LIB goto missing_libraries
+if not exist ..\..\..\DOS\BUILD\DOS.LIB goto missing_libraries
 
 rem TLINK does not read TURBOC.CFG, so every Borland runtime component has
 rem an explicit path. Keep object and library lists in separate response
@@ -42,6 +44,7 @@ echo ..\..\..\BASE\BUILD\BASEIO.LIB+ >> LIB.RSP
 echo ..\..\..\BASE\BUILD\BASEMEDI.LIB+ >> LIB.RSP
 echo ..\..\..\BASE\BUILD\BASECOMM.LIB+ >> LIB.RSP
 echo ..\..\..\BASE\BUILD\BASELANG.LIB+ >> LIB.RSP
+echo ..\..\..\DOS\BUILD\DOS.LIB+ >> LIB.RSP
 echo C:\TURBOC\LIB\EMU.LIB+C:\TURBOC\LIB\MATHL.LIB+C:\TURBOC\LIB\CL.LIB >> LIB.RSP
 
 echo Linking RASTERIZ.EXE

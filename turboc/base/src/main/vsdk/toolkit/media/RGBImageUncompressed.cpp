@@ -3,22 +3,37 @@
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#ifdef __TURBOC__
+#include "vsdk/toolkit/media/XmsRgbImage.h"
+#endif
 RGBImageUncompressed::RGBImageUncompressed() :
-    data(NULL), xSize(0), ySize(0), rowStride(0) {
+    data(NULL), xSize(0), ySize(0), rowStride(0)
+#ifdef __TURBOC__
+    , xmsImage(NULL)
+#endif
+{
 }
 
 RGBImageUncompressed::~RGBImageUncompressed() {
+#ifdef __TURBOC__
+    detach();
+#else
     if (data != NULL) {
         delete[] data;
         data = NULL;
     }
+#endif
 }
 
 void RGBImageUncompressed::detach() {
+#ifdef __TURBOC__
+    if (xmsImage != NULL) { delete xmsImage; xmsImage = NULL; }
+#else
     if (data != NULL) {
         delete[] data;
         data = NULL;
     }
+#endif
 }
 
 int RGBImageUncompressed::getSizeInBytes() const {
@@ -26,6 +41,11 @@ int RGBImageUncompressed::getSizeInBytes() const {
 }
 
 BOOLEAN RGBImageUncompressed::init(int width, int height) {
+#ifdef __TURBOC__
+    detach(); xmsImage = new XmsRgbImage();
+    if (xmsImage == NULL || !xmsImage->init(width, height)) { detach(); return FALSE; }
+    xSize = width; ySize = height; rowStride = width * BYTES_PER_PIXEL; return TRUE;
+#else
     try {
         if (data != NULL) {
             delete[] data;
@@ -49,9 +69,15 @@ BOOLEAN RGBImageUncompressed::init(int width, int height) {
     ySize = height;
     rowStride = width * BYTES_PER_PIXEL;
     return TRUE;
+#endif
 }
 
 BOOLEAN RGBImageUncompressed::initNoFill(int width, int height) {
+#ifdef __TURBOC__
+    detach(); xmsImage = new XmsRgbImage();
+    if (xmsImage == NULL || !xmsImage->initNoFill(width, height)) { detach(); return FALSE; }
+    xSize = width; ySize = height; rowStride = width * BYTES_PER_PIXEL; return TRUE;
+#else
     if (data != NULL && width == xSize && height == ySize) {
         return TRUE;
     }
@@ -76,6 +102,7 @@ BOOLEAN RGBImageUncompressed::initNoFill(int width, int height) {
     ySize = height;
     rowStride = width * BYTES_PER_PIXEL;
     return TRUE;
+#endif
 }
 
 int RGBImageUncompressed::pixelBaseIndex(int x, int y) const {
@@ -83,49 +110,73 @@ int RGBImageUncompressed::pixelBaseIndex(int x, int y) const {
 }
 
 void RGBImageUncompressed::putPixel(int x, int y, char r, char g, char b) {
+#ifdef __TURBOC__
+    if (xmsImage != NULL) xmsImage->putPixel(x, y, r, g, b);
+#else
     int index = pixelBaseIndex(x, y);
     data[index] = r;
     data[index + 1] = g;
     data[index + 2] = b;
+#endif
 }
 
 void RGBImageUncompressed::putPixel(int x, int y, const RGBPixel* p) {
+#ifdef __TURBOC__
+    if (xmsImage != NULL) xmsImage->putPixelRgb(x, y, (RGBPixel*)p);
+#else
     int index = pixelBaseIndex(x, y);
     data[index] = p->r;
     data[index + 1] = p->g;
     data[index + 2] = p->b;
+#endif
 }
 
 void RGBImageUncompressed::putPixelRgb(int x, int y, RGBPixel* p) {
+#ifdef __TURBOC__
+    if (xmsImage != NULL) xmsImage->putPixelRgb(x, y, p);
+#else
     int index = pixelBaseIndex(x, y);
     data[index] = p->r;
     data[index + 1] = p->g;
     data[index + 2] = p->b;
+#endif
 }
 
 RGBPixel* RGBImageUncompressed::getPixel(int x, int y) const {
+#ifdef __TURBOC__
+    return xmsImage == NULL ? new RGBPixel() : xmsImage->getPixelRgb(x, y);
+#else
     RGBPixel* p = new RGBPixel();
     int index = pixelBaseIndex(x, y);
     p->r = data[index];
     p->g = data[index + 1];
     p->b = data[index + 2];
     return p;
+#endif
 }
 
 RGBPixel* RGBImageUncompressed::getPixelRgb(int x, int y) const {
+#ifdef __TURBOC__
+    return xmsImage == NULL ? new RGBPixel() : xmsImage->getPixelRgb(x, y);
+#else
     RGBPixel* p = new RGBPixel();
     int index = pixelBaseIndex(x, y);
     p->r = data[index];
     p->g = data[index + 1];
     p->b = data[index + 2];
     return p;
+#endif
 }
 
 void RGBImageUncompressed::getPixelRgb(int x, int y, RGBPixel* p) const {
+#ifdef __TURBOC__
+    if (xmsImage != NULL) xmsImage->getPixelRgb(x, y, p);
+#else
     int index = pixelBaseIndex(x, y);
     p->r = data[index];
     p->g = data[index + 1];
     p->b = data[index + 2];
+#endif
 }
 
 int RGBImageUncompressed::getXSize() const {

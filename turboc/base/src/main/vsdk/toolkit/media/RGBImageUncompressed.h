@@ -5,6 +5,9 @@
 #include "vsdk/toolkit/media/Image.h"
 class RGBPixel;
 class RGBAImageUncompressed;
+#ifdef __TURBOC__
+class XmsRgbImage;
+#endif
 
 /**
 Current class is a specific low level implementation of an uncompressed
@@ -21,6 +24,9 @@ private:
     int xSize;
     int ySize;
     int rowStride;
+#ifdef __TURBOC__
+    XmsRgbImage* xmsImage;
+#endif
 
     int pixelBaseIndex(int x, int y) const;
 

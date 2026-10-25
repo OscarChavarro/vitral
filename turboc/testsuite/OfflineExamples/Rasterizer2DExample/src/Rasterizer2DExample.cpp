@@ -10,8 +10,8 @@
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 
-const int OUTPUT_WIDTH = 320;
-const int OUTPUT_HEIGHT = 240;
+const int OUTPUT_WIDTH = 640;
+const int OUTPUT_HEIGHT = 480;
 
 static String argOrDefault(int argc, char** argv, int idx, const String& fallback)
 {

@@ -881,6 +881,10 @@ testsuite/OfflineExamples/PolygonTriangulation/runAll.sh,TESTSUIT/OFFLEXAM/POLYT
 testsuite/OfflineExamples/PolygonTriangulation/src/triangulatePolygon2D.cpp,TESTSUIT/OFFLEXAM/POLYTRIA/SRC/TRIPOL2D.CPP,triangulatePolygon2D.cpp,TRIPOL2D.CPP
 testsuite/OfflineExamples/Rasterizer2DExample/CMakeLists.txt,TESTSUIT/OFFLEXAM/RAS2DEXA/CMAKELIS.TXT,CMakeLists.txt,CMAKELIS.TXT
 testsuite/OfflineExamples/Rasterizer2DExample/compile.bat,TESTSUIT/OFFLEXAM/RAS2DEXA/COMPILE.BAT,compile.bat,COMPILE.BAT
+testsuite/OfflineExamples/Rasterizer2DExample/run.bat,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN.BAT,run.bat,RUN.BAT
+testsuite/OfflineExamples/Rasterizer2DExample/run1.bat,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN1.BAT,run1.bat,RUN1.BAT
+testsuite/OfflineExamples/Rasterizer2DExample/run2.bat,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN2.BAT,run2.bat,RUN2.BAT
+testsuite/OfflineExamples/Rasterizer2DExample/run3.bat,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN3.BAT,run3.bat,RUN3.BAT
 testsuite/OfflineExamples/Rasterizer2DExample/run.sh,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN.SH,run.sh,RUN.SH
 testsuite/OfflineExamples/Rasterizer2DExample/run1.sh,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN1.SH,run1.sh,RUN1.SH
 testsuite/OfflineExamples/Rasterizer2DExample/run2.sh,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN2.SH,run2.sh,RUN2.SH
