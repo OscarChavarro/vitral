@@ -113,11 +113,23 @@ and use a mounted ISO image as the normal transfer medium.
    `TURBOC/BASE/SRC/MAIN/JAVA/IO/NAMES83.H`: it is generated rather than
    listed as a source file, and `File.cpp` cannot compile for Turbo C++
    without its tables.
+
+   **Never copy a source file directly from the normal checkout into this
+   staging tree.**  Mapping changes not only file and directory names, but
+   also `#include` spellings (for example, `vsdk/toolkit/...` becomes its
+   8.3 `VSDK/...` counterpart).  A long-name source file placed in an
+   otherwise 8.3 archive can therefore look valid by pathname yet fail to
+   compile in DOS with missing-header errors.  Re-run the mapping process on
+   changed sources, or apply the change to their already-normalized staging
+   counterpart, before making the archive.
 2. Validate the staging tree before packaging: every path component must be
    an 8.3 DOS name, and the build batches (`BASE.BAT`, `BASELINK.BAT`,
    `DOS.BAT`, `DOSLINK.BAT`, and the Rasterizer `COMPILE.BAT` / `RUN*.BAT`)
-   must be present.  Do not copy the unmapped X11, OpenGL, or host build
-   subtrees merely because they exist in the working checkout.
+   must be present.  Validate normalized include directives as well as path
+   components.  Do not copy the unmapped X11, OpenGL, or host build subtrees
+   merely because they exist in the working checkout.  In particular, the
+   `VITRAL.TGZ` put on the ISO must be built from this staging tree only,
+   never from the ordinary repository checkout.
 3. On the host, archive the two directories and create an ISO containing
    only that archive.  A gzip-compressed TAR is appropriate because `djtar`
    reads it directly:
@@ -192,6 +204,13 @@ builds `RASTERIZ.EXE`, the non-GUI Rasterizer2D offline example.  `RUN.BAT`
 runs the default line test; `RUN1.BAT`, `RUN2.BAT`, and `RUN3.BAT` run the
 line, polygon, and smooth-polygon cases and write `OUTPUT1.PPM`,
 `OUTPUT2.PPM`, and `OUTPUT3.PPM`.
+
+`RASTERIZ.EXE` accepts optional dimensions after the mode and output name:
+`RASTERIZ line OUTPUT1.PPM 640 480`.  Its scene is authored in a logical
+320×240 coordinate system and is scaled independently in each axis to the
+requested output image, so a different resolution fills the new canvas rather
+than leaving the scene in its upper-left quadrant.  The default remains
+640×480.
 
 ### Legacy toolchains (GNU make only)
 

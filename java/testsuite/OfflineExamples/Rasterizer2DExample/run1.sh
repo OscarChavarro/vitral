@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
-gradle -q run -PrunMainClass=LineTest --args="output1.png"
+set -eu
+if [ "$#" -eq 0 ]; then set -- output1.png; fi
+gradle -q run -PrunMainClass=LineTest --args="$*"

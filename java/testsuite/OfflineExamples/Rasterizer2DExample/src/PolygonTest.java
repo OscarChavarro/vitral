@@ -29,7 +29,11 @@ public class PolygonTest
         bordercolor.b = 0;
 
         img = new RGBImageUncompressed();
-        img.init(640, 480);
+        int outputWidth = Rasterizer2DExampleSettings.positiveArgument(args, 1,
+            Rasterizer2DExampleSettings.DEFAULT_WIDTH);
+        int outputHeight = Rasterizer2DExampleSettings.positiveArgument(args, 2,
+            Rasterizer2DExampleSettings.DEFAULT_HEIGHT);
+        img.init(outputWidth, outputHeight);
         //img.createTestPattern();
 
         //-----------------------------------------------------------------

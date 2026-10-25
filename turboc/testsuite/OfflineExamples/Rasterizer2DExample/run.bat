@@ -1,9 +1,9 @@
 @echo off
-rem Run Rasterizer2DExample in DOS. Optional arguments are mode and output.
+rem Run Rasterizer2DExample in DOS. Optional arguments are mode, output, width, and height.
 if not exist RASTERIZ.EXE goto missing_program
 
 if "%1"=="" goto default
-RASTERIZ.EXE %1 %2
+RASTERIZ.EXE %1 %2 %3 %4
 goto end
 
 :default

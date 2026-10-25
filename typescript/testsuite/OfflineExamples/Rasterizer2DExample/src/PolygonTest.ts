@@ -6,6 +6,7 @@ import { RGBImageUncompressed, RGBPixel } from "@vitral/base";
 import { Polygon2D } from "@vitral/base";
 import { Rasterizer2D } from "@vitral/base";
 import { ImagePersistence } from "@vitral/fs";
+import { DEFAULT_OUTPUT_HEIGHT, DEFAULT_OUTPUT_WIDTH, positiveArgument } from "./Rasterizer2DExampleSettings.js";
 
 export class PolygonTest {
     public static main(args: string[]): void {
@@ -27,7 +28,9 @@ export class PolygonTest {
         bordercolor.b = 0;
 
         img = new RGBImageUncompressed();
-        img.init(640, 480);
+        const outputWidth = positiveArgument(args, 1, DEFAULT_OUTPUT_WIDTH);
+        const outputHeight = positiveArgument(args, 2, DEFAULT_OUTPUT_HEIGHT);
+        img.init(outputWidth, outputHeight);
         //img.createTestPattern();
 
         //-----------------------------------------------------------------

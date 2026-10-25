@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
-gradle -q run -PrunMainClass=PolygonTest --args="output2.png"
+set -eu
+if [ "$#" -eq 0 ]; then set -- output2.png; fi
+gradle -q run -PrunMainClass=PolygonTest --args="$*"

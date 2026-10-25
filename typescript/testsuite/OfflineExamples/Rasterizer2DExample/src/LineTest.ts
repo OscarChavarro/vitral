@@ -5,6 +5,7 @@ import { File } from "@vitral/fs";
 import { RGBImageUncompressed, RGBPixel, JavaMath } from "@vitral/base";
 import { ImagePersistence } from "@vitral/fs";
 import { Rasterizer2D } from "@vitral/base";
+import { DEFAULT_OUTPUT_HEIGHT, DEFAULT_OUTPUT_WIDTH, positiveArgument } from "./Rasterizer2DExampleSettings.js";
 
 export class LineTest {
     public static main(args: string[]): void {
@@ -21,7 +22,9 @@ export class LineTest {
         color.b = 0;
 
         img = new RGBImageUncompressed();
-        img.init(640, 480);
+        const outputWidth = positiveArgument(args, 1, DEFAULT_OUTPUT_WIDTH);
+        const outputHeight = positiveArgument(args, 2, DEFAULT_OUTPUT_HEIGHT);
+        img.init(outputWidth, outputHeight);
         //img.createTestPattern();
 
         //-----------------------------------------------------------------

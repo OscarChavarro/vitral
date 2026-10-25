@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
@@ -14,10 +15,20 @@ static java::String argOrDefault(int argc, char** argv, int idx, const java::Str
     return fallback;
 }
 
-static int runLineTest(const java::String& outputFileName)
+const int DEFAULT_OUTPUT_WIDTH = 640;
+const int DEFAULT_OUTPUT_HEIGHT = 480;
+
+static int positiveIntOrDefault(int argc, char** argv, int idx, int fallback)
+{
+    if (argc <= idx || argv[idx] == 0) return fallback;
+    int value = std::atoi(argv[idx]);
+    return value > 0 ? value : fallback;
+}
+
+static int runLineTest(const java::String& outputFileName, int outputWidth, int outputHeight)
 {
     RGBImageUncompressed img;
-    img.init(640, 480);
+    img.init(outputWidth, outputHeight);
     RGBPixel color((char)0xFF, 0, 0);
 
     for (double a = 0; a < 360.0; a += 15.0) {
@@ -32,10 +43,10 @@ static int runLineTest(const java::String& outputFileName)
     return ok ? 0 : 1;
 }
 
-static int runPolygonTest(const java::String& outputFileName)
+static int runPolygonTest(const java::String& outputFileName, int outputWidth, int outputHeight)
 {
     RGBImageUncompressed img;
-    img.init(640, 480);
+    img.init(outputWidth, outputHeight);
 
     RGBPixel fillcolor((char)0xFF, 0, 0);
     RGBPixel bordercolor((char)0xFF, (char)0xFF, 0);
@@ -58,10 +69,10 @@ static int runPolygonTest(const java::String& outputFileName)
     return ok ? 0 : 1;
 }
 
-static int runSmoothPolygonTest(const java::String& outputFileName)
+static int runSmoothPolygonTest(const java::String& outputFileName, int outputWidth, int outputHeight)
 {
     RGBImageUncompressed img;
-    img.init(640, 480);
+    img.init(outputWidth, outputHeight);
     img.createTestPattern();
 
     RGBPixel bordercolor((char)0xFF, (char)0xFF, 0);
@@ -87,12 +98,14 @@ int main(int argc, char** argv)
 {
     java::String mode = argOrDefault(argc, argv, 1, "line");
     java::String outputFileName = argOrDefault(argc, argv, 2, "output1.png");
+    int outputWidth = positiveIntOrDefault(argc, argv, 3, DEFAULT_OUTPUT_WIDTH);
+    int outputHeight = positiveIntOrDefault(argc, argv, 4, DEFAULT_OUTPUT_HEIGHT);
 
-    if (mode == "line") return runLineTest(outputFileName);
-    if (mode == "polygon") return runPolygonTest(outputFileName);
-    if (mode == "smooth") return runSmoothPolygonTest(outputFileName);
+    if (mode == "line") return runLineTest(outputFileName, outputWidth, outputHeight);
+    if (mode == "polygon") return runPolygonTest(outputFileName, outputWidth, outputHeight);
+    if (mode == "smooth") return runSmoothPolygonTest(outputFileName, outputWidth, outputHeight);
 
     std::fprintf(stderr, "Unknown mode: %s\n", mode.c_str());
-    std::fprintf(stderr, "Usage: Rasterizer2DExample [line|polygon|smooth] [output.png]\n");
+    std::fprintf(stderr, "Usage: Rasterizer2DExample [line|polygon|smooth] [output.png] [width] [height]\n");
     return 1;
 }
