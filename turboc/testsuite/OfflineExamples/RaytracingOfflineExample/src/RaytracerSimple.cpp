@@ -7,7 +7,9 @@
 #include "ImageExporter.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
+#ifndef __TURBOC__
 #include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
+#endif
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/processing/StopWatch.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
@@ -17,7 +19,9 @@
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
+#ifndef __TURBOC__
 #include "vsdk/toolkit/render/raytracing/ParallelRaytracer.h"
+#endif
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 #include "java/lang/Exception.h"
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
@@ -25,6 +29,13 @@ static const int ELAPSED_TIME_DECIMALS = 3;
 static const int EXIT_CODE_READ_ERROR = -1;
 static const int EXIT_CODE_IMAGE_ERROR = 1;
 static const int EXIT_CODE_ARGUMENT_ERROR = 2;
+
+#ifdef __TURBOC__
+// C0L's implicit stack in the manually linked DOS executable is only 272
+// bytes. ReaderMitScene alone needs more than 1.5 KiB in automatic buffers;
+// make the runtime reserve enough conventional memory for this program.
+unsigned _stklen = 32768U;
+#endif
 
 static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererConfiguration* rendererConfiguration)
 {
@@ -92,7 +103,6 @@ static void offlineExecution(const String& fileName,
         exit(EXIT_CODE_IMAGE_ERROR);
     }
 
-    ProgressMonitorConsole reporter;
     RendererConfiguration rendererConfiguration;
     optimizeRendererConfigurationForScene(&scene, &rendererConfiguration);
 
@@ -105,6 +115,17 @@ static void offlineExecution(const String& fileName,
     StopWatch clock;
 
     clock.start();
+#ifdef __TURBOC__
+    // DOS has one processor and this avoids linking the executor and console
+    // feedback implementations.  A null monitor is supported by SimpleRaytracer.
+    parallel = FALSE;
+    visualizationEngine.execute(&resultingImage,
+                                &rendererConfiguration,
+                                sceneSnapshot,
+                                (ProgressMonitor*)0,
+                                (ZBuffer*)0);
+#else
+    ProgressMonitorConsole reporter;
     if ( parallel ) {
         ParallelRaytracer parallelRaytracer;
         parallelRaytracer.execute(&resultingImage,
@@ -120,6 +141,7 @@ static void offlineExecution(const String& fileName,
                                     &reporter,
                                     (ZBuffer*)0);
     }
+#endif
     clock.stop();
 
     printf("Image generated in %s seconds.\n",

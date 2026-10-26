@@ -1,6 +1,8 @@
 #ifndef __SPHERE_POLYHEDRAL_CACHE__
 #define __SPHERE_POLYHEDRAL_CACHE__
 
+#ifndef __TURBOC__
+
 #include "java/util/ArrayList.h"
 
 class Sphere;
@@ -100,5 +102,7 @@ private:
 
     static Entry* build(const Sphere* sphere, int meridians, int parallels);
 };
+
+#endif
 
 #endif

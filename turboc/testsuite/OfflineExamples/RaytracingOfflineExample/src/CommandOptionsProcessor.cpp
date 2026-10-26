@@ -4,7 +4,12 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "CommandOptionsProcessor.h"
+#ifdef __TURBOC__
+// The DOS package is the 8.3-normalized tree under C:\\VITRAL.
+const char* CommandOptionsProcessor::DEFAULT_SCENE_FILE = "../../../../ETC/GEOMETRY/MITSCENE/BALLS.RAY";
+#else
 const char* CommandOptionsProcessor::DEFAULT_SCENE_FILE = "../../../../etc/geometry/mitscenes/balls.ray";
+#endif
 const char* CommandOptionsProcessor::DEFAULT_OUTPUT_FILE_NAME = "./output.ppm";
 
 // turboc runs on less powerful machines, usually with a single thread, so

@@ -7,8 +7,10 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#ifndef __TURBOC__
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
+#endif
 
 Sphere::Sphere(double r) : radius(r), radiusSquared(r * r) {
     // Turbo C++ 3.0 crashes with the new of a template class as an argument
@@ -165,6 +167,7 @@ double Sphere::getRadius() const { return radius; }
 double Sphere::getRadiusSquared() const { return radiusSquared; }
 void Sphere::setRadius(double value) { radius = value; radiusSquared = value * value; }
 
+#ifndef __TURBOC__
 Vector3Dd Sphere::spherePosition(double theta, double t, double r) {
     double phi = (t - 0.5) * M_PI;
     return Vector3Dd(
@@ -282,6 +285,7 @@ PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int 
 
     return solid;
 }
+#endif
 
 Vector3Dd Sphere::spherePosition(double theta, double phi) {
     return Vector3Dd(

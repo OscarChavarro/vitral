@@ -179,6 +179,14 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
                 }
             }
         }
+#ifdef __TURBOC__
+        // BREP/model commands are deliberately ignored in the DOS reader.
+        // The raytracer supports analytic spheres only, and not constructing
+        // a PolyhedralBoundedSolid keeps the executable within DOS limits.
+        else if ( cmd == "brep" || cmd == "model" || cmd == "object" ) {
+            continue;
+        }
+#endif
     }
 
     fclose(file);

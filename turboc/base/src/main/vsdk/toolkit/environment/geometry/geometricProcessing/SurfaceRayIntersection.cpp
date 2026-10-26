@@ -3,11 +3,15 @@
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#ifndef __TURBOC__
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#endif
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
+
+#ifndef __TURBOC__
 static BOOLEAN rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
 {
     double* mm = geometry->getMinMax();
@@ -27,6 +31,7 @@ static BOOLEAN rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
     );
     return boundingVolume.doIntersectionFirstHit(localRay, 0);
 }
+#endif
 
 BOOLEAN SurfaceRayIntersection::doIntersectionFirstHit(Geometry* geometry, const Ray& inRay, RayHit* outHit)
 {
@@ -34,6 +39,7 @@ BOOLEAN SurfaceRayIntersection::doIntersectionFirstHit(Geometry* geometry, const
         return FALSE;
     }
 
+#ifndef __TURBOC__
     if ( (geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS)) ||
          (geometry != NULL && geometry->instanceOf(TriangleMeshGroup::CLASS)) ||
          (geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS)) ) {
@@ -41,6 +47,7 @@ BOOLEAN SurfaceRayIntersection::doIntersectionFirstHit(Geometry* geometry, const
             return FALSE;
         }
     }
+#endif
 
     return geometry->doIntersectionFirstHit(inRay, outHit);
 }

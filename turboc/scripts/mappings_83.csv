@@ -891,6 +891,8 @@ testsuite/OfflineExamples/Rasterizer2DExample/run2.sh,TESTSUIT/OFFLEXAM/RAS2DEXA
 testsuite/OfflineExamples/Rasterizer2DExample/run3.sh,TESTSUIT/OFFLEXAM/RAS2DEXA/RUN3.SH,run3.sh,RUN3.SH
 testsuite/OfflineExamples/Rasterizer2DExample/src/Rasterizer2DExample.cpp,TESTSUIT/OFFLEXAM/RAS2DEXA/SRC/RAS2DEXA.CPP,Rasterizer2DExample.cpp,RAS2DEXA.CPP
 testsuite/OfflineExamples/RaytracingOfflineExample/CMakeLists.txt,TESTSUIT/OFFLEXAM/RAYOFFEX/CMAKELIS.TXT,CMakeLists.txt,CMAKELIS.TXT
+testsuite/OfflineExamples/RaytracingOfflineExample/compile.bat,TESTSUIT/OFFLEXAM/RAYOFFEX/COMPILE.BAT,compile.bat,COMPILE.BAT
+testsuite/OfflineExamples/RaytracingOfflineExample/run.bat,TESTSUIT/OFFLEXAM/RAYOFFEX/RUN.BAT,run.bat,RUN.BAT
 testsuite/OfflineExamples/RaytracingOfflineExample/run.sh,TESTSUIT/OFFLEXAM/RAYOFFEX/RUN.SH,run.sh,RUN.SH
 testsuite/OfflineExamples/RaytracingOfflineExample/runAll.sh,TESTSUIT/OFFLEXAM/RAYOFFEX/RUNALL.SH,runAll.sh,RUNALL.SH
 testsuite/OfflineExamples/RaytracingOfflineExample/src/CommandOptionsProcessor.cpp,TESTSUIT/OFFLEXAM/RAYOFFEX/SRC/COMOPTPR.CPP,CommandOptionsProcessor.cpp,COMOPTPR.CPP

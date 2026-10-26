@@ -2402,22 +2402,6 @@ echo SRC\MAIN\VSDK\TOOL\RENDER\TRACWORK.CPP >> TC.RSP
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 
-echo [151/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\SPHPOLCA.CPP
-echo -c > TC.RSP
-echo -ml >> TC.RSP
-echo -O1 >> TC.RSP
-echo -d >> TC.RSP
-echo -v- >> TC.RSP
-echo -w-inl >> TC.RSP
-echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
-echo -IC:\TURBOC\INCLUDE >> TC.RSP
-echo -I..\DOS\SRC\MAIN >> TC.RSP
-echo -ISRC;SRC\MAIN >> TC.RSP
-echo -oBUILDTC\SPHPOLCA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\SPHPOLCA.CPP >> TC.RSP
-tcc @TC.RSP > TC.LOG
-if errorlevel 1 goto error
-
 echo [152/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\DEPBUFEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP

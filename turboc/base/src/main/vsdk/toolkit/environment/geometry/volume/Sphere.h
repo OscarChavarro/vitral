@@ -5,13 +5,16 @@
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Ray;
 class RayHit;
+#ifndef __TURBOC__
 class PolyhedralBoundedSolid;
+#endif
 
 class Sphere : public Solid {
 private:
     double radius;
     double radiusSquared;
 
+#ifndef __TURBOC__
     enum {
         DEFAULT_PARALLELS = 8,
         DEFAULT_MERIDIANS = 16,
@@ -21,6 +24,7 @@ private:
 
     static Vector3Dd spherePosition(double theta, double t, double r);
     PolyhedralBoundedSolid* buildPolyhedralBoundedSolid(int nmeridians, int nparalels);
+#endif
 
 public:
     static const Class CLASS;
@@ -39,8 +43,10 @@ public:
     double getRadiusSquared() const;
     void setRadius(double value);
 
+#ifndef __TURBOC__
     virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
     PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int meridians, int parallels);
+#endif
 
     Vector3Dd spherePosition(double theta, double phi);
     Vector3Dd sphereNormal(double theta, double phi);

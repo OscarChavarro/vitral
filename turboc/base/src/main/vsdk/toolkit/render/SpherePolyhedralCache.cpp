@@ -1,3 +1,5 @@
+#ifndef __TURBOC__
+
 #include <stddef.h>
 #include <math.h>
 #include "vsdk/toolkit/common/VSDK.h"
@@ -251,3 +253,5 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
     }
     return entry;
 }
+
+#endif
