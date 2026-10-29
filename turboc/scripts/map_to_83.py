@@ -526,12 +526,16 @@ def base_batchfile(sources, nodes) -> bytes:
         lines += [f"echo [{number}/{total}] Compiling " + dos_source,
                   "echo -c > TC.RSP",
                   "echo -ml >> TC.RSP",
+                  "echo -f87 >> TC.RSP",
                   "echo -O1 >> TC.RSP",
                   "echo -d >> TC.RSP",
                   "echo -v- >> TC.RSP",
                   "echo -w-inl >> TC.RSP",
                   "echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP",
+                  "echo -DTURBO_C_286_ENABLED >> TC.RSP",
                   "echo -IC:\\TURBOC\\INCLUDE >> TC.RSP",
+                  "echo -I..\\DOS\\SRC\\MAIN >> TC.RSP",
+                  "echo -I..\\DOS\\286 >> TC.RSP",
                   "echo -ISRC;SRC\\MAIN >> TC.RSP",
                   "echo -o" + obj + " >> TC.RSP",
                   "echo " + dos_source + " >> TC.RSP",
@@ -709,7 +713,7 @@ def main():
     if present is None:
         print("The tree already has the 8.3 names, nothing to do.")
         return 0
-    sources = [src for src, _dst in present if Path(src).suffix in SOURCE_EXTS]
+    sources = [src for src, _dst in present if Path(src).suffix.lower() in SOURCE_EXTS]
     with_cr = [rel for rel in sources if b"\r" in (project_root / rel).read_bytes()]
     if with_cr:
         print("Sources with CR characters (the DOS text conversion would not be reversible):\n  "

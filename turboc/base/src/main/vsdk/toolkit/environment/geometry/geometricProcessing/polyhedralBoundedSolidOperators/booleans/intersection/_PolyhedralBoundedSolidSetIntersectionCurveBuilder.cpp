@@ -669,7 +669,10 @@ BOOLEAN Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
                 }
             }
         }
-        IndexList rotated(len);
+        // ArrayList(len) reserves capacity but leaves size() at zero.
+        // Populate the list before indexed assignment, otherwise the
+        // round-robin traversal below never advances position.
+        IndexList rotated(Collections<int>::nCopies(len, 0));
         for ( j = 0; j < len; j++ ) {
             rotated[j] = directedCycle[(startPos + j) % len];
         }

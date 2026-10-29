@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/TreeSet.h"
+#include "java/util/Comparator.h"
 
 template <class T>
 TreeSet<T>::TreeSet()
@@ -39,7 +40,7 @@ TreeSet<T>::lowerBound(const T &element) const
     long high = elements.size();
     while ( low < high ) {
         long middle = low + (high - low) / 2;
-        if ( elements[middle] < element ) {
+        if ( naturalOrderLess(elements[middle], element) ) {
             low = middle + 1;
         }
         else {
@@ -75,7 +76,7 @@ BOOLEAN
 TreeSet<T>::contains(const T &element) const
 {
     long index = lowerBound(element);
-    return index < elements.size() && !(element < elements[index]);
+    return index < elements.size() && !naturalOrderLess(element, elements[index]);
 }
 
 template <class T>
@@ -83,7 +84,7 @@ BOOLEAN
 TreeSet<T>::add(const T &element)
 {
     long index = lowerBound(element);
-    if ( index < elements.size() && !(element < elements[index]) ) {
+    if ( index < elements.size() && !naturalOrderLess(element, elements[index]) ) {
         return FALSE;
     }
     if ( index == elements.size() ) {
@@ -100,7 +101,7 @@ BOOLEAN
 TreeSet<T>::remove(const T &element)
 {
     long index = lowerBound(element);
-    if ( index < elements.size() && !(element < elements[index]) ) {
+    if ( index < elements.size() && !naturalOrderLess(element, elements[index]) ) {
         elements.remove(index);
         return TRUE;
     }
@@ -115,8 +116,8 @@ TreeSet<T>::equals(const TreeSet<T> &other) const
         return FALSE;
     }
     for ( long i = 0; i < elements.size(); i++ ) {
-        if ( elements[i] < other.elements[i] ||
-             other.elements[i] < elements[i] ) {
+        if ( naturalOrderLess(elements[i], other.elements[i]) ||
+             naturalOrderLess(other.elements[i], elements[i]) ) {
             return FALSE;
         }
     }

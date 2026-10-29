@@ -24,6 +24,9 @@
 #endif
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 #include "java/lang/Exception.h"
+#ifdef TURBO_C_286_ENABLED
+#include "Protected286ProgressMonitor.h"
+#endif
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
 static const int ELAPSED_TIME_DECIMALS = 3;
 static const int EXIT_CODE_READ_ERROR = -1;
@@ -116,14 +119,23 @@ static void offlineExecution(const String& fileName,
 
     clock.start();
 #ifdef __TURBOC__
-    // DOS has one processor and this avoids linking the executor and console
-    // feedback implementations.  A null monitor is supported by SimpleRaytracer.
+    // DOS has one processor.  The protected monitor writes directly to VGA
+    // text memory, so it remains observable after DOS services are unavailable.
     parallel = FALSE;
+#ifdef TURBO_C_286_ENABLED
+    Protected286ProgressMonitor reporter;
+    visualizationEngine.execute(&resultingImage,
+                                &rendererConfiguration,
+                                sceneSnapshot,
+                                &reporter,
+                                (ZBuffer*)0);
+#else
     visualizationEngine.execute(&resultingImage,
                                 &rendererConfiguration,
                                 sceneSnapshot,
                                 (ProgressMonitor*)0,
                                 (ZBuffer*)0);
+#endif
 #else
     ProgressMonitorConsole reporter;
     if ( parallel ) {
@@ -159,7 +171,11 @@ static void offlineExecution(const String& fileName,
     delete sceneSnapshot;
 }
 
+#ifdef TURBO_C_286_ENABLED
+extern "C" int raytracerMain(int argc, char** argv)
+#else
 int main(int argc, char** argv)
+#endif
 {
     ArrayList<String> args;
     for (int i = 1; i < argc; i++) {

@@ -1,11 +1,20 @@
 #ifndef __RGB_IMAGE_UNCOMPRESSED__
 #define __RGB_IMAGE_UNCOMPRESSED__
 
+#if defined(__TURBOC__) && !defined(TURBO_C_286_ENABLED) && !defined(TURBO_C_8086_REAL_MODE_ENABLED)
+#error Select TURBO_C_286_ENABLED or TURBO_C_8086_REAL_MODE_ENABLED
+#endif
+#if defined(TURBO_C_286_ENABLED) && defined(TURBO_C_8086_REAL_MODE_ENABLED)
+#error The protected 286 and real-mode 8086 backends are mutually exclusive
+#endif
+
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/Image.h"
 class RGBPixel;
 class RGBAImageUncompressed;
-#ifdef __TURBOC__
+#if defined(TURBO_C_286_ENABLED)
+class Protected286ModeRgbImage;
+#elif defined(TURBO_C_8086_REAL_MODE_ENABLED)
 class XmsRgbImage;
 #endif
 
@@ -24,8 +33,10 @@ private:
     int xSize;
     int ySize;
     int rowStride;
-#ifdef __TURBOC__
-    XmsRgbImage* xmsImage;
+#if defined(TURBO_C_286_ENABLED)
+    Protected286ModeRgbImage* dosImage;
+#elif defined(TURBO_C_8086_REAL_MODE_ENABLED)
+    XmsRgbImage* dosImage;
 #endif
 
     int pixelBaseIndex(int x, int y) const;

@@ -1,6 +1,13 @@
 #ifndef __XMS_MEMORY__
 #define __XMS_MEMORY__
 
+#if defined(TURBO_C_286_ENABLED)
+#error XMS storage is forbidden in protected 286 mode
+#endif
+#if defined(__TURBOC__) && !defined(TURBO_C_8086_REAL_MODE_ENABLED)
+#error XMS storage requires TURBO_C_8086_REAL_MODE_ENABLED
+#endif
+
 #include "vsdk/toolkit/common/VSDK.h"
 
 /**

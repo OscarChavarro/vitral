@@ -1,6 +1,10 @@
 #ifndef __XMS_RGB_IMAGE__
 #define __XMS_RGB_IMAGE__
 
+#if defined(TURBO_C_286_ENABLED)
+#error Use Protected286ModeRgbImage in protected 286 mode
+#endif
+
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/XmsMemory.h"
 

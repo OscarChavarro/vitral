@@ -73,7 +73,8 @@ public:
 
     BOOLEAN operator<(const HalfEdgePair& other) const
     {
-        return from < other.from || (from == other.from && to < other.to);
+        return naturalOrderLess(from, other.from) ||
+            (from == other.from && naturalOrderLess(to, other.to));
     }
 
     BOOLEAN operator==(const HalfEdgePair& other) const

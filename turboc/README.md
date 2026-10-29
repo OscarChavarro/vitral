@@ -64,6 +64,18 @@ DOS specific fork, and the same sources build and run unchanged on the
 three toolchains, with the platform differences confined to a few
 `#ifdef`s in `base`.
 
+Container replacements must preserve the semantics of the corresponding
+`cpp/` containers, including pointer identity. Turbo C++ compares only the
+offsets of far pointers with its built-in `<`; pointers in different
+segments can therefore compare equivalent despite being unequal.
+`naturalOrderLess` includes the selector when ordering Turbo pointers, and
+TreeSet, TreeMap and compound half-edge keys use it. Without this total
+order, BREP maps can merge unrelated nodes and topology summaries can lose
+vertices depending on heap placement. `dos/286/crt/ORDTEST.CPP` checks keys
+with identical offsets in different segments, as well as ordinary value
+keys. Keep boolean operations and their validation aligned with `cpp/`;
+do not weaken topology checks to accommodate a container-port defect.
+
 ### 32 bit CPUs
 
 The turboc port is meant to run on 32 bit CPUs (i386 and later), unlike the
@@ -92,6 +104,26 @@ cmake --build .
 ```
 
 ### DOS build and transfer (Turbo C++ 3.0)
+
+The DOS backends are separate: `TURBO_C_8086_REAL_MODE_ENABLED` selects
+real-mode/XMS storage; `TURBO_C_286_ENABLED` selects the ring-0 runtime and
+`Protected286ModeRgbImage`, with direct selector-based RGB storage. Do not
+define both. The default `DOS.BAT`/`DOSLINK.BAT` build the 286 backend without
+XMS objects; passing `8086` builds the real-mode XMS library instead (all
+BASE/application objects must use the matching mode macro).
+
+The 286 image reserves a physical RAM window using the BIOS-reported end,
+capped at 16 MiB, excluding the HMA and its loaded executable. It requires
+a bare boot without HIMEM, EMM386, DPMI, SMARTDRV or other extended-memory
+clients. Use DOS's F5 startup bypass when testing the executable already
+copied to C:. Build and transfer first, since bypassing CONFIG.SYS also
+disables the CD-ROM driver. See [dos/286/README.md](dos/286/README.md).
+
+The protected build currently requires a hardware 287-compatible FPU.
+Its CRT initializes C++ globals and calls the portable raytracer entry;
+native 287 math replaces Borland's real-mode interrupt shortcuts. Copy
+the staged `BALLS.RAY` to `C:\` before the bare boot. `RUN.BAT` renders
+320x240 to `C:\RAYTRACE.PPM`, waits for a key and resets the CPU.
 
 The DOS build uses an 8.3 copy of `etc/` and `turboc/` under
 `C:\VITRAL`.  DOS cannot consume the source tree directly: its directory

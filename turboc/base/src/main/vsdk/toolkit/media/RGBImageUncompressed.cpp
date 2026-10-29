@@ -3,13 +3,17 @@
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
-#ifdef __TURBOC__
+#if defined(TURBO_C_286_ENABLED)
+#include "Protected286ModeRgbImage.h"
+#define VITRAL_DOS_RGB_STORAGE Protected286ModeRgbImage
+#elif defined(TURBO_C_8086_REAL_MODE_ENABLED)
 #include "vsdk/toolkit/media/XmsRgbImage.h"
+#define VITRAL_DOS_RGB_STORAGE XmsRgbImage
 #endif
 RGBImageUncompressed::RGBImageUncompressed() :
     data(NULL), xSize(0), ySize(0), rowStride(0)
 #ifdef __TURBOC__
-    , xmsImage(NULL)
+    , dosImage(NULL)
 #endif
 {
 }
@@ -27,7 +31,7 @@ RGBImageUncompressed::~RGBImageUncompressed() {
 
 void RGBImageUncompressed::detach() {
 #ifdef __TURBOC__
-    if (xmsImage != NULL) { delete xmsImage; xmsImage = NULL; }
+    if (dosImage != NULL) { delete dosImage; dosImage = NULL; }
 #else
     if (data != NULL) {
         delete[] data;
@@ -42,8 +46,8 @@ int RGBImageUncompressed::getSizeInBytes() const {
 
 BOOLEAN RGBImageUncompressed::init(int width, int height) {
 #ifdef __TURBOC__
-    detach(); xmsImage = new XmsRgbImage();
-    if (xmsImage == NULL || !xmsImage->init(width, height)) { detach(); return FALSE; }
+    detach(); dosImage = new VITRAL_DOS_RGB_STORAGE();
+    if (dosImage == NULL || !dosImage->init(width, height)) { detach(); return FALSE; }
     xSize = width; ySize = height; rowStride = width * BYTES_PER_PIXEL; return TRUE;
 #else
     try {
@@ -74,8 +78,8 @@ BOOLEAN RGBImageUncompressed::init(int width, int height) {
 
 BOOLEAN RGBImageUncompressed::initNoFill(int width, int height) {
 #ifdef __TURBOC__
-    detach(); xmsImage = new XmsRgbImage();
-    if (xmsImage == NULL || !xmsImage->initNoFill(width, height)) { detach(); return FALSE; }
+    detach(); dosImage = new VITRAL_DOS_RGB_STORAGE();
+    if (dosImage == NULL || !dosImage->initNoFill(width, height)) { detach(); return FALSE; }
     xSize = width; ySize = height; rowStride = width * BYTES_PER_PIXEL; return TRUE;
 #else
     if (data != NULL && width == xSize && height == ySize) {
@@ -111,7 +115,7 @@ int RGBImageUncompressed::pixelBaseIndex(int x, int y) const {
 
 void RGBImageUncompressed::putPixel(int x, int y, char r, char g, char b) {
 #ifdef __TURBOC__
-    if (xmsImage != NULL) xmsImage->putPixel(x, y, r, g, b);
+    if (dosImage != NULL) dosImage->putPixel(x, y, r, g, b);
 #else
     int index = pixelBaseIndex(x, y);
     data[index] = r;
@@ -122,7 +126,7 @@ void RGBImageUncompressed::putPixel(int x, int y, char r, char g, char b) {
 
 void RGBImageUncompressed::putPixel(int x, int y, const RGBPixel* p) {
 #ifdef __TURBOC__
-    if (xmsImage != NULL) xmsImage->putPixelRgb(x, y, (RGBPixel*)p);
+    if (dosImage != NULL) dosImage->putPixelRgb(x, y, (RGBPixel*)p);
 #else
     int index = pixelBaseIndex(x, y);
     data[index] = p->r;
@@ -133,7 +137,7 @@ void RGBImageUncompressed::putPixel(int x, int y, const RGBPixel* p) {
 
 void RGBImageUncompressed::putPixelRgb(int x, int y, RGBPixel* p) {
 #ifdef __TURBOC__
-    if (xmsImage != NULL) xmsImage->putPixelRgb(x, y, p);
+    if (dosImage != NULL) dosImage->putPixelRgb(x, y, p);
 #else
     int index = pixelBaseIndex(x, y);
     data[index] = p->r;
@@ -144,7 +148,7 @@ void RGBImageUncompressed::putPixelRgb(int x, int y, RGBPixel* p) {
 
 RGBPixel* RGBImageUncompressed::getPixel(int x, int y) const {
 #ifdef __TURBOC__
-    return xmsImage == NULL ? new RGBPixel() : xmsImage->getPixelRgb(x, y);
+    return dosImage == NULL ? new RGBPixel() : dosImage->getPixelRgb(x, y);
 #else
     RGBPixel* p = new RGBPixel();
     int index = pixelBaseIndex(x, y);
@@ -157,7 +161,7 @@ RGBPixel* RGBImageUncompressed::getPixel(int x, int y) const {
 
 RGBPixel* RGBImageUncompressed::getPixelRgb(int x, int y) const {
 #ifdef __TURBOC__
-    return xmsImage == NULL ? new RGBPixel() : xmsImage->getPixelRgb(x, y);
+    return dosImage == NULL ? new RGBPixel() : dosImage->getPixelRgb(x, y);
 #else
     RGBPixel* p = new RGBPixel();
     int index = pixelBaseIndex(x, y);
@@ -170,7 +174,7 @@ RGBPixel* RGBImageUncompressed::getPixelRgb(int x, int y) const {
 
 void RGBImageUncompressed::getPixelRgb(int x, int y, RGBPixel* p) const {
 #ifdef __TURBOC__
-    if (xmsImage != NULL) xmsImage->getPixelRgb(x, y, p);
+    if (dosImage != NULL) dosImage->getPixelRgb(x, y, p);
 #else
     int index = pixelBaseIndex(x, y);
     p->r = data[index];

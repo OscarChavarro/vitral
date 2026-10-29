@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/TreeMap.h"
+#include "java/util/Comparator.h"
 
 template <class K, class V>
 void
@@ -27,7 +28,7 @@ TreeMap<K, V>::lowerBound(const K &key) const
     long high = entries.size();
     while ( low < high ) {
         long middle = low + (high - low) / 2;
-        if ( entries[middle]->key < key ) {
+        if ( naturalOrderLess(entries[middle]->key, key) ) {
             low = middle + 1;
         }
         else {
@@ -45,7 +46,7 @@ long
 TreeMap<K, V>::indexOf(const K &key) const
 {
     long index = lowerBound(key);
-    if ( index < entries.size() && !(key < entries[index]->key) ) {
+    if ( index < entries.size() && !naturalOrderLess(key, entries[index]->key) ) {
         return index;
     }
     return -1;
@@ -120,7 +121,7 @@ BOOLEAN
 TreeMap<K, V>::put(const K &key, const V &value)
 {
     long index = lowerBound(key);
-    if ( index < entries.size() && !(key < entries[index]->key) ) {
+    if ( index < entries.size() && !naturalOrderLess(key, entries[index]->key) ) {
         entries[index]->value = value;
         return FALSE;
     }
@@ -139,7 +140,7 @@ V &
 TreeMap<K, V>::putIfAbsent(const K &key, const V &value)
 {
     long index = lowerBound(key);
-    if ( index < entries.size() && !(key < entries[index]->key) ) {
+    if ( index < entries.size() && !naturalOrderLess(key, entries[index]->key) ) {
         return entries[index]->value;
     }
     TreeMapEntry<K, V> *entry = new TreeMapEntry<K, V>(key, value);

@@ -4,6 +4,9 @@
 #include "java/lang/String.h"
 #include "java/lang/Throwable.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#ifdef TURBO_C_286_ENABLED
+#include "crt/FORMAT.H"
+#endif
 const double VSDK::EPSILON = 1e-6;
 
 #ifdef __TURBOC__
@@ -16,10 +19,14 @@ int snprintf(char *buffer, size_t size, const char *format, ...)
     return written;
 }
 
-int vsnprintf(char *buffer, size_t /*size*/, const char *format,
+int vsnprintf(char *buffer, size_t size, const char *format,
     va_list arguments)
 {
+#ifdef TURBO_C_286_ENABLED
+    return crt286VBuffer(buffer, size, format, arguments);
+#else
     return vsprintf(buffer, format, arguments);
+#endif
 }
 #endif
 

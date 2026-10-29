@@ -11,6 +11,10 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#ifndef TURBO_C_8086_REAL_MODE_ENABLED
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.h"
+#endif
 #include "vsdk/toolkit/environment/background/SimpleBackground.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/light/AmbientLight.h"
@@ -68,6 +72,7 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
     double importedHorizontalFov = 30.0;
 
     SimpleMaterial* currentMaterial = new SimpleMaterial();
+    Matrix4x4d currentRotation;
 
     char lineBuf[1024];
     while ( fgets(lineBuf, sizeof(lineBuf), file) ) {
@@ -147,6 +152,41 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
                     ns);
             }
         }
+        else if ( cmd == "rotation" ) {
+            double yaw, pitch, roll;
+            if (sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &yaw, &pitch, &roll) == 3)
+                currentRotation = Matrix4x4d().eulerAnglesRotation(yaw, pitch, roll);
+        }
+#ifndef TURBO_C_8086_REAL_MODE_ENABLED
+        else if ( cmd == "appel" ) {
+            int model;
+            double x, y, z, scale;
+            if (sscanf(javaLine.toCString(), "%*s %d %lf %lf %lf %lf",
+                       &model, &x, &y, &z, &scale) != 5 || model < 1 || model > 3) {
+                fclose(file);
+                throw VSDKFatalException("ReaderMitScene: invalid Appel model");
+            }
+            printf("Building PolyhedralBoundedSolid: Appel %d...\n", model);
+            PolyhedralBoundedSolid* solid = model == 1 ?
+                SimpleTestGeometryLibrary::createTestObjectAPPE1967_1() : model == 2 ?
+                SimpleTestGeometryLibrary::createTestObjectAPPE1967_2() :
+                SimpleTestGeometryLibrary::createTestObjectAPPE1967_3();
+            if (!solid) {
+                fclose(file);
+                throw VSDKFatalException("ReaderMitScene: Appel construction failed");
+            }
+            SimpleBody* body = new SimpleBody();
+            body->setGeometry(solid);
+            body->setPosition(Vector3Dd(x, y, z));
+            body->setScale(Vector3Dd(scale, scale, scale));
+            body->setRotation(currentRotation);
+            body->setMaterial(new SimpleMaterial(*currentMaterial));
+            outScene->addBody(body);
+            printf("BREP loaded: %ld vertices, %ld edges, %ld faces.\n",
+                solid->getVerticesList().size(), solid->getEdgesList().size(),
+                solid->getPolygonsList().size());
+        }
+#endif
         else if ( cmd == "sphere" ) {
             double x, y, z, r;
             if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf %lf", &x, &y, &z, &r) == 4 ) {
@@ -179,7 +219,7 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
                 }
             }
         }
-#ifdef __TURBOC__
+#ifdef TURBO_C_8086_REAL_MODE_ENABLED
         // BREP/model commands are deliberately ignored in the DOS reader.
         // The raytracer supports analytic spheres only, and not constructing
         // a PolyhedralBoundedSolid keeps the executable within DOS limits.
