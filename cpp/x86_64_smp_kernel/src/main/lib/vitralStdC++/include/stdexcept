@@ -1,0 +1,45 @@
+#ifndef __STDEXCEPT__
+#define __STDEXCEPT__
+#include <exception>
+#include <string>
+namespace std {
+class logic_error : public exception {
+public:
+    explicit logic_error(const char *message);
+    explicit logic_error(const string &message);
+    logic_error(const logic_error &other) noexcept;
+    logic_error &operator=(const logic_error &other) noexcept;
+    ~logic_error() noexcept override;
+    const char *what() const noexcept override;
+private:
+    char *text;
+};
+class runtime_error : public exception {
+public:
+    explicit runtime_error(const char *message);
+    explicit runtime_error(const string &message);
+    runtime_error(const runtime_error &other) noexcept;
+    runtime_error &operator=(const runtime_error &other) noexcept;
+    ~runtime_error() noexcept override;
+    const char *what() const noexcept override;
+private:
+    char *text;
+};
+#define VITRAL_DERIVED_ERROR(name, base) \
+    class name : public base { \
+    public: \
+        explicit name(const char *message) : base(message) {} \
+        explicit name(const string &message) : base(message) {} \
+        ~name() noexcept override; \
+    };
+VITRAL_DERIVED_ERROR(domain_error, logic_error)
+VITRAL_DERIVED_ERROR(invalid_argument, logic_error)
+VITRAL_DERIVED_ERROR(length_error, logic_error)
+VITRAL_DERIVED_ERROR(out_of_range, logic_error)
+VITRAL_DERIVED_ERROR(range_error, runtime_error)
+VITRAL_DERIVED_ERROR(overflow_error, runtime_error)
+VITRAL_DERIVED_ERROR(underflow_error, runtime_error)
+#undef VITRAL_DERIVED_ERROR
+}
+
+#endif

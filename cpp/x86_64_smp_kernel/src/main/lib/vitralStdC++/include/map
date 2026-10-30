@@ -1,0 +1,119 @@
+#ifndef __MAP__
+#define __MAP__
+#include <bits/tree.h>
+#include <stdexcept>
+namespace std {
+template <typename K, typename V> struct __map_key {
+    const K &operator()(const pair<const K, V> &value) const { return value.first; }
+};
+template <typename K, typename V, typename C = less<K> > class map {
+    typedef __tree<pair<const K, V>, K, __map_key<K, V>, C> Tree;
+public:
+    typedef K key_type;
+    typedef V mapped_type;
+    typedef pair<const K, V> value_type;
+    typedef C key_compare;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    typedef value_type &reference;
+    typedef const value_type &const_reference;
+    typedef typename Tree::iterator iterator;
+    typedef typename Tree::const_iterator const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+    map() {}
+    explicit map(const C &c) : tree(c) {}
+    map(initializer_list<value_type> list) { insert(list.begin(), list.end()); }
+    template <typename It> map(It from, It to) { insert(from, to); }
+
+    iterator begin() noexcept { return tree.begin(); }
+    iterator end() noexcept { return tree.end(); }
+    const_iterator begin() const noexcept { return tree.begin(); }
+    const_iterator end() const noexcept { return tree.end(); }
+    const_iterator cbegin() const noexcept { return tree.begin(); }
+    const_iterator cend() const noexcept { return tree.end(); }
+    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+
+    bool empty() const noexcept { return tree.empty(); }
+    size_type size() const noexcept { return tree.size(); }
+    key_compare key_comp() const { return tree.key_comp(); }
+
+    V &operator[](const K &key) {
+        iterator i = tree.find(key);
+        if (i == end()) {
+            i = tree.insert(value_type(key, V())).first;
+        }
+        return i->second;
+    }
+    V &at(const K &key) {
+        iterator i = find(key);
+        if (i == end()) {
+            throw out_of_range("map::at");
+        }
+        return i->second;
+    }
+    const V &at(const K &key) const {
+        const_iterator i = find(key);
+        if (i == end()) {
+            throw out_of_range("map::at");
+        }
+        return i->second;
+    }
+
+    pair<iterator, bool> insert(const value_type &value) { return tree.insert(value); }
+    template <typename P> pair<iterator, bool> insert(P &&value) { return tree.insert(value_type(std::forward<P>(value))); }
+    iterator insert(const_iterator, const value_type &value) { return tree.insert(value).first; }
+    template <typename It>
+    void insert(It from, It to) {
+        for (; from != to; ++from) {
+            tree.insert(*from);
+        }
+    }
+    template <typename... A> pair<iterator, bool> emplace(A &&... arguments) {
+        return tree.insert(value_type(std::forward<A>(arguments)...));
+    }
+
+    iterator find(const K &key) { return tree.find(key); }
+    const_iterator find(const K &key) const { return tree.find(key); }
+    size_type count(const K &key) const { return tree.count(key); }
+    iterator lower_bound(const K &key) { return tree.lower_bound(key); }
+    const_iterator lower_bound(const K &key) const { return tree.lower_bound(key); }
+    iterator upper_bound(const K &key) { return tree.upper_bound(key); }
+    const_iterator upper_bound(const K &key) const { return tree.upper_bound(key); }
+
+    iterator erase(const_iterator position) { return tree.erase(position); }
+    iterator erase(iterator position) { return tree.erase(const_iterator(position)); }
+    iterator erase(const_iterator from, const_iterator to) { return tree.erase(from, to); }
+    size_type erase(const K &key) { return tree.erase(key); }
+    void clear() noexcept { tree.clear(); }
+    void swap(map &other) noexcept { tree.swap(other.tree); }
+
+private:
+    Tree tree;
+};
+template <typename K, typename V, typename C>
+bool
+operator==(const map<K, V, C> &a, const map<K, V, C> &b) {
+    if (a.size() != b.size()) {
+        return false;
+    }
+    typename map<K, V, C>::const_iterator i = a.begin(), j = b.begin();
+    for (; i != a.end(); ++i, ++j) {
+        if (!(i->first == j->first) || !(i->second == j->second)) {
+            return false;
+        }
+    }
+    return true;
+}
+template <typename K, typename V, typename C>
+bool
+operator!=(const map<K, V, C> &a, const map<K, V, C> &b) {
+    return !(a == b);
+}
+}
+
+#endif

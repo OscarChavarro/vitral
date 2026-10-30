@@ -1,0 +1,10 @@
+#ifndef __CTIME__
+#define __CTIME__
+#include <time.h>
+namespace std {
+using ::clock_t; using ::time_t; using ::tm; using ::timespec;
+using ::clock; using ::difftime; using ::mktime; using ::time; using ::asctime; using ::ctime;
+using ::gmtime; using ::localtime; using ::strftime;
+}
+
+#endif

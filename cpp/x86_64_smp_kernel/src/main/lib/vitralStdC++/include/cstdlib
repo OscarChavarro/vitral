@@ -1,0 +1,17 @@
+#ifndef __CSTDLIB__
+#define __CSTDLIB__
+#include <stdlib.h>
+#include <bits/std_abs.h>
+namespace std {
+using ::size_t;
+using ::malloc; using ::calloc; using ::realloc; using ::free;
+using ::div; using ::ldiv;
+using ::atoi; using ::atol; using ::atoll; using ::atof;
+using ::strtod; using ::strtof; using ::strtold; using ::strtol; using ::strtoll;
+using ::strtoul; using ::strtoull;
+using ::rand; using ::srand; using ::qsort; using ::bsearch;
+using ::exit; using ::abort; using ::atexit; using ::getenv; using ::system;
+using ::div_t; using ::ldiv_t;
+}
+
+#endif

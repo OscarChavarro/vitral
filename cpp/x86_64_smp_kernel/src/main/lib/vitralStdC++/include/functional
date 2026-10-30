@@ -1,0 +1,68 @@
+#ifndef __FUNCTIONAL__
+#define __FUNCTIONAL__
+#include <new>
+#include <utility>
+#include <exception>
+namespace std {
+class bad_function_call : public exception {
+public:
+    bad_function_call() noexcept;
+    ~bad_function_call() noexcept override;
+    const char *what() const noexcept override;
+};
+template <typename T> struct less {
+    bool operator()(const T &a, const T &b) const { return a < b; }
+};
+template <typename T> struct greater {
+    bool operator()(const T &a, const T &b) const { return b < a; }
+};
+template <typename T> struct equal_to {
+    bool operator()(const T &a, const T &b) const { return a == b; }
+};
+template <typename Signature> class function;
+template <typename R, typename... A> class function<R(A...)> {
+public:
+    function() noexcept : holder(nullptr) {}
+    function(nullptr_t) noexcept : holder(nullptr) {}
+    function(const function &other) : holder(other.holder ? other.holder->clone() : nullptr) {}
+    function(function &&other) noexcept : holder(other.holder) { other.holder = nullptr; }
+    template <typename F> function(F f) : holder(new Model<F>(f)) {}
+    ~function() { delete holder; }
+    function &operator=(const function &other) {
+        function(other).swap(*this);
+        return *this;
+    }
+    function &operator=(function &&other) noexcept {
+        function(std::move(other)).swap(*this);
+        return *this;
+    }
+    function &operator=(nullptr_t) {
+        delete holder;
+        holder = nullptr;
+        return *this;
+    }
+    void swap(function &other) noexcept { std::swap(holder, other.holder); }
+    explicit operator bool() const noexcept { return holder != nullptr; }
+    R operator()(A... arguments) const {
+        if (!holder) {
+            throw bad_function_call();
+        }
+        return holder->call(forward<A>(arguments)...);
+    }
+private:
+    struct Base {
+        virtual ~Base() {}
+        virtual R call(A... arguments) = 0;
+        virtual Base *clone() const = 0;
+    };
+    template <typename F> struct Model : Base {
+        F function;
+        explicit Model(const F &f) : function(f) {}
+        R call(A... arguments) override { return function(forward<A>(arguments)...); }
+        Base *clone() const override { return new Model(function); }
+    };
+    Base *holder;
+};
+}
+
+#endif

@@ -1,0 +1,68 @@
+#ifndef __NEW__
+#define __NEW__
+#include <cstddef>
+#include <exception>
+namespace std {
+struct nothrow_t {};
+enum class align_val_t : size_t {};
+extern const nothrow_t nothrow;
+class bad_alloc : public exception {
+public:
+    bad_alloc() noexcept;
+    ~bad_alloc() noexcept override;
+    const char *what() const noexcept override;
+};
+class bad_array_new_length : public bad_alloc {
+public:
+    bad_array_new_length() noexcept;
+    ~bad_array_new_length() noexcept override;
+    const char *what() const noexcept override;
+};
+typedef void (*new_handler)();
+new_handler
+set_new_handler(new_handler handler) noexcept;
+new_handler
+get_new_handler() noexcept;
+}
+void *
+operator new(size_t size);
+void *
+operator new[](size_t size);
+void *
+operator new(size_t size, const std::nothrow_t &) noexcept;
+void *
+operator new[](size_t size, const std::nothrow_t &) noexcept;
+void *
+operator new(size_t size, std::align_val_t alignment);
+void *
+operator new[](size_t size, std::align_val_t alignment);
+void
+operator delete(void *pointer) noexcept;
+void
+operator delete[](void *pointer) noexcept;
+void
+operator delete(void *pointer, size_t size) noexcept;
+void
+operator delete[](void *pointer, size_t size) noexcept;
+void
+operator delete(void *pointer, std::align_val_t alignment) noexcept;
+void
+operator delete[](void *pointer, std::align_val_t alignment) noexcept;
+void
+operator delete(void *pointer, size_t size, std::align_val_t alignment) noexcept;
+void
+operator delete[](void *pointer, size_t size, std::align_val_t alignment) noexcept;
+void
+operator delete(void *pointer, const std::nothrow_t &) noexcept;
+void
+operator delete[](void *pointer, const std::nothrow_t &) noexcept;
+inline void *
+operator new(size_t, void *where) noexcept { return where; }
+inline void *
+operator new[](size_t, void *where) noexcept { return where; }
+inline void
+operator delete(void *, void *) noexcept {}
+inline void
+operator delete[](void *, void *) noexcept {}
+
+#endif

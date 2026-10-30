@@ -27,7 +27,8 @@ import re
 import sys
 
 SKIP_DIRS = {"build", "dist", "node_modules", "build-cmake", ".gradle",
-             "target", "_deps", "artifacts", ".angular", "cmake-build-debug"}
+             "target", "_deps", "artifacts", ".angular", "cmake-build-debug",
+             "x86_64_smp_kernel"}  # Separate kernel with its own conventions
 
 #- Exemptions (phase 0 decisions) ------------------------------------------
 

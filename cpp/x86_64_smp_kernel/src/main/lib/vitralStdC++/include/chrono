@@ -1,0 +1,152 @@
+#ifndef __CHRONO__
+#define __CHRONO__
+#include <cstdint>
+#include <limits>
+#include <type_traits>
+#include <ctime>
+namespace std {
+template <intmax_t N, intmax_t D = 1> struct ratio {
+    static constexpr intmax_t num = N;
+    static constexpr intmax_t den = D;
+};
+typedef ratio<1, 1000000000> nano;
+typedef ratio<1, 1000000> micro;
+typedef ratio<1, 1000> milli;
+namespace chrono {
+template <typename Rep, typename Period = ratio<1> > class duration;
+template <typename To, typename Rep, typename Period>
+constexpr To
+duration_cast(const duration<Rep, Period> &d);
+template <typename Rep, typename Period>
+class duration {
+public:
+    typedef Rep rep;
+    typedef Period period;
+    constexpr duration() : amount() {}
+    template <typename R2> constexpr explicit duration(const R2 &count) : amount(count) {}
+    template <typename R2, typename P2> constexpr duration(const duration<R2, P2> &other)
+        : amount(duration_cast<duration>(other).count()) {}
+    constexpr Rep count() const { return amount; }
+    duration operator+() const { return *this; }
+    duration operator-() const { return duration(-amount); }
+    duration &operator+=(const duration &d) { amount += d.amount; return *this; }
+    duration &operator-=(const duration &d) { amount -= d.amount; return *this; }
+    static constexpr duration zero() { return duration(Rep()); }
+private:
+    Rep amount;
+};
+template <typename To, typename Rep, typename Period>
+constexpr To
+duration_cast(const duration<Rep, Period> &d) {
+    typedef typename To::rep ToRep;
+    typedef typename To::period ToPeriod;
+    return To(static_cast<ToRep>(static_cast<long double>(d.count()) *
+                                 ((long double)Period::num * ToPeriod::den) /
+                                 ((long double)Period::den * ToPeriod::num)));
+}
+template <typename R1, typename P1, typename R2, typename P2>
+constexpr bool
+operator<(const duration<R1, P1> &a, const duration<R2, P2> &b) {
+    return duration_cast<duration<long double, nano>>(a).count() <
+           duration_cast<duration<long double, nano>>(b).count();
+}
+template <typename R1, typename P1, typename R2, typename P2>
+constexpr bool
+operator>(const duration<R1, P1> &a, const duration<R2, P2> &b) { return b < a; }
+template <typename R1, typename P1, typename R2, typename P2>
+constexpr bool
+operator<=(const duration<R1, P1> &a, const duration<R2, P2> &b) { return !(b < a); }
+template <typename R1, typename P1, typename R2, typename P2>
+constexpr bool
+operator>=(const duration<R1, P1> &a, const duration<R2, P2> &b) { return !(a < b); }
+template <typename R1, typename P1, typename R2, typename P2>
+constexpr bool
+operator==(const duration<R1, P1> &a, const duration<R2, P2> &b) { return !(a < b) && !(b < a); }
+template <typename R1, typename P1, typename R2, typename P2>
+constexpr bool
+operator!=(const duration<R1, P1> &a, const duration<R2, P2> &b) { return !(a == b); }
+template <typename Rep, typename Period>
+constexpr duration<Rep, Period>
+operator+(const duration<Rep, Period> &a, const duration<Rep, Period> &b) {
+    return duration<Rep, Period>(a.count() + b.count());
+}
+template <typename Rep, typename Period>
+constexpr duration<Rep, Period>
+operator-(const duration<Rep, Period> &a, const duration<Rep, Period> &b) {
+    return duration<Rep, Period>(a.count() - b.count());
+}
+template <typename Rep, typename Period, typename S>
+constexpr duration<Rep, Period>
+operator*(const duration<Rep, Period> &a, const S &s) {
+    return duration<Rep, Period>(a.count() * s);
+}
+typedef duration<long long, nano> nanoseconds;
+typedef duration<long long, micro> microseconds;
+typedef duration<long long, milli> milliseconds;
+typedef duration<long long> seconds;
+typedef duration<long long, ratio<60> > minutes;
+typedef duration<long long, ratio<3600> > hours;
+template <typename Clock, typename Duration = typename Clock::duration> class time_point {
+public:
+    typedef Clock clock;
+    typedef Duration duration;
+    typedef typename Duration::rep rep;
+    typedef typename Duration::period period;
+    constexpr time_point() : offset() {}
+    constexpr explicit time_point(const Duration &d) : offset(d) {}
+    constexpr Duration time_since_epoch() const { return offset; }
+    time_point &operator+=(const Duration &d) { offset += d; return *this; }
+    time_point &operator-=(const Duration &d) { offset -= d; return *this; }
+private:
+    Duration offset;
+};
+template <typename C, typename D>
+constexpr D
+operator-(const time_point<C, D> &a, const time_point<C, D> &b) {
+    return a.time_since_epoch() - b.time_since_epoch();
+}
+template <typename C, typename D>
+constexpr time_point<C, D>
+operator+(const time_point<C, D> &a, const D &d) {
+    return time_point<C, D>(a.time_since_epoch() + d);
+}
+template <typename C, typename D>
+constexpr bool
+operator<(const time_point<C, D> &a, const time_point<C, D> &b) {
+    return a.time_since_epoch() < b.time_since_epoch();
+}
+template <typename C, typename D>
+constexpr bool
+operator>(const time_point<C, D> &a, const time_point<C, D> &b) { return b < a; }
+template <typename C, typename D>
+constexpr bool
+operator<=(const time_point<C, D> &a, const time_point<C, D> &b) { return !(b < a); }
+template <typename C, typename D>
+constexpr bool
+operator>=(const time_point<C, D> &a, const time_point<C, D> &b) { return !(a < b); }
+long long
+__nanoseconds(int clock);
+struct steady_clock {
+    typedef nanoseconds duration;
+    typedef duration::rep rep;
+    typedef duration::period period;
+    typedef chrono::time_point<steady_clock, duration> time_point;
+    static constexpr bool is_steady = true;
+    static time_point now() noexcept { return time_point(duration(__nanoseconds(1))); }
+};
+struct system_clock {
+    typedef nanoseconds duration;
+    typedef duration::rep rep;
+    typedef duration::period period;
+    typedef chrono::time_point<system_clock, duration> time_point;
+    static constexpr bool is_steady = false;
+    static time_point now() noexcept { return time_point(duration(__nanoseconds(0))); }
+    static time_t to_time_t(const time_point &t) noexcept {
+        return (time_t)(t.time_since_epoch().count() / 1000000000);
+    }
+};
+typedef steady_clock high_resolution_clock;
+}
+}
+
+#endif

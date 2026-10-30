@@ -1,0 +1,16 @@
+#ifndef __CSTDIO__
+#define __CSTDIO__
+#include <stdio.h>
+namespace std {
+using ::FILE; using ::fpos_t; using ::size_t;
+using ::fopen; using ::freopen; using ::fclose; using ::fflush; using ::setvbuf; using ::setbuf;
+using ::fprintf; using ::fscanf; using ::printf; using ::scanf; using ::snprintf;
+using ::sprintf; using ::sscanf; using ::vfprintf; using ::vprintf; using ::vsnprintf;
+using ::vsprintf; using ::vsscanf; using ::fgetc; using ::fgets; using ::fputc; using ::fputs;
+using ::getc; using ::getchar; using ::putc; using ::putchar; using ::puts; using ::ungetc;
+using ::fread; using ::fwrite; using ::fgetpos; using ::fseek; using ::fsetpos; using ::ftell;
+using ::rewind; using ::clearerr; using ::feof; using ::ferror; using ::perror;
+using ::remove; using ::rename; using ::tmpfile;
+}
+
+#endif

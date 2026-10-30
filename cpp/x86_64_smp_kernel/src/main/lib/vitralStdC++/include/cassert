@@ -1,0 +1,5 @@
+#ifndef __CASSERT__
+#define __CASSERT__
+#include <assert.h>
+
+#endif

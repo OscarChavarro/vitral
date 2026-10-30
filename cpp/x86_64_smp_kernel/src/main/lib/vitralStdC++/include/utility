@@ -1,0 +1,69 @@
+#ifndef __UTILITY__
+#define __UTILITY__
+#include <type_traits>
+namespace std {
+template <typename T>
+constexpr typename remove_reference<T>::type &&
+move(T &&value) noexcept {
+    return static_cast<typename remove_reference<T>::type &&>(value);
+}
+template <typename T>
+constexpr T &&
+forward(typename remove_reference<T>::type &value) noexcept {
+    return static_cast<T &&>(value);
+}
+template <typename T>
+constexpr T &&
+forward(typename remove_reference<T>::type &&value) noexcept {
+    return static_cast<T &&>(value);
+}
+template <typename T>
+void
+swap(T &a, T &b) {
+    T temp(move(a));
+    a = move(b);
+    b = move(temp);
+}
+template <typename T, size_t N>
+void
+swap(T (&a)[N], T (&b)[N]) {
+    for (size_t i = 0; i < N; i++) {
+        swap(a[i], b[i]);
+    }
+}
+template <typename T>
+T
+exchange(T &object, T value) {
+    T old(move(object));
+    object = move(value);
+    return old;
+}
+template <typename A, typename B> struct pair {
+    typedef A first_type;
+    typedef B second_type;
+    A first;
+    B second;
+    constexpr pair() : first(), second() {}
+    constexpr pair(const A &a, const B &b) : first(a), second(b) {}
+    template <typename U, typename V> constexpr pair(U &&a, V &&b)
+        : first(forward<U>(a)), second(forward<V>(b)) {}
+    template <typename U, typename V> pair(const pair<U, V> &other)
+        : first(other.first), second(other.second) {}
+};
+template <typename A, typename B> constexpr pair<typename decay<A>::type, typename decay<B>::type>
+make_pair(A &&a, B &&b) {
+    return pair<typename decay<A>::type, typename decay<B>::type>(forward<A>(a), forward<B>(b));
+}
+template <typename A, typename B>
+constexpr bool
+operator==(const pair<A, B> &x, const pair<A, B> &y) {
+    return x.first == y.first && x.second == y.second;
+}
+template <typename A, typename B>
+constexpr bool
+operator<(const pair<A, B> &x, const pair<A, B> &y) {
+    return x.first < y.first || (!(y.first < x.first) && x.second < y.second);
+}
+}
+
+#endif

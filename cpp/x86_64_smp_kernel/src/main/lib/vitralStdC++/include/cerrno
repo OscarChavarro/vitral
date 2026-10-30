@@ -1,0 +1,5 @@
+#ifndef __CERRNO__
+#define __CERRNO__
+#include <errno.h>
+
+#endif

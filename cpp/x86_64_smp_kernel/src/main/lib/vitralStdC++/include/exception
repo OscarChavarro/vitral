@@ -1,0 +1,30 @@
+#ifndef __EXCEPTION__
+#define __EXCEPTION__
+namespace std {
+class exception {
+public:
+    exception() noexcept;
+    exception(const exception &) noexcept;
+    exception &operator=(const exception &) noexcept;
+    virtual ~exception() noexcept;
+    virtual const char *what() const noexcept;
+};
+class bad_exception : public exception {
+public:
+    bad_exception() noexcept;
+    ~bad_exception() noexcept override;
+    const char *what() const noexcept override;
+};
+typedef void (*terminate_handler)();
+typedef void (*unexpected_handler)();
+terminate_handler
+set_terminate(terminate_handler handler) noexcept;
+terminate_handler
+get_terminate() noexcept;
+[[noreturn]] void
+terminate() noexcept;
+bool
+uncaught_exception() noexcept;
+}
+
+#endif

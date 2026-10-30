@@ -1,0 +1,37 @@
+#ifndef __TYPEINFO__
+#define __TYPEINFO__
+#include <exception>
+namespace __cxxabiv1 {
+class __class_type_info;
+}
+namespace std {
+class type_info {
+public:
+    virtual ~type_info();
+    const char *name() const noexcept { return typeName[0] == '*' ? typeName + 1 : typeName; }
+    bool before(const type_info &other) const noexcept;
+    bool operator==(const type_info &other) const noexcept;
+    bool operator!=(const type_info &other) const noexcept { return !(*this == other); }
+    unsigned long hash_code() const noexcept { return (unsigned long)typeName; }
+protected:
+    const char *typeName;
+    explicit type_info(const char *name) : typeName(name) {}
+private:
+    type_info(const type_info &);
+    type_info &operator=(const type_info &);
+};
+class bad_cast : public exception {
+public:
+    bad_cast() noexcept;
+    ~bad_cast() noexcept override;
+    const char *what() const noexcept override;
+};
+class bad_typeid : public exception {
+public:
+    bad_typeid() noexcept;
+    ~bad_typeid() noexcept override;
+    const char *what() const noexcept override;
+};
+}
+
+#endif

@@ -55,13 +55,16 @@ The rules that came out of each step are listed below, in
 |---|---|---|---|
 | Ubuntu 7.04 (i686) | g++ 4.1.2 | CMake 2.4.6 or Makefiles | X11, Xt, Motif 2.2.3, Athena, Mesa 6.5.2, freeglut 2.4.0, SVGALIB |
 | Debian 1.1 (i386) | gcc 2.7.2.1 | Makefiles | X11R6.1, Xt, LessTif 0.76, Athena, Mesa 2.2 / 3.0 |
-| DOS | Borland Turbo C++ 3.0 | Turbo C++ | none: `base` and the offline examples only |
+| DOS (8086/8088) | Borland Turbo C++ 3.0 | Turbo C++ | none: `base` and the offline examples only |
+| DOS (80286) | Borland Turbo C++ 3.0 | Turbo C++ | none: `base` and the offline examples only |
+| OSF/1 (MIPS) | — | — | — |
+| IRIX (MIPS) | — | — | — |
 
 DOS has none of SVGALIB, X11, Xt, Xaw, Motif nor OpenGL, so only the core
 library and the programs that need no window system are built there.
 Despite that, the code base is the same for every platform: there is no
 DOS specific fork, and the same sources build and run unchanged on the
-three toolchains, with the platform differences confined to a few
+supported toolchains, with the platform differences confined to a few
 `#ifdef`s in `base`.
 
 Container replacements must preserve the semantics of the corresponding
@@ -76,12 +79,18 @@ with identical offsets in different segments, as well as ordinary value
 keys. Keep boolean operations and their validation aligned with `cpp/`;
 do not weaken topology checks to accommodate a container-port defect.
 
-### 32 bit CPUs
+### CPU and memory targets
 
-The turboc port is meant to run on 32 bit CPUs (i386 and later), unlike the
-cpp port, which mainly targets 64 bit CPUs. The code does not assume 64 bit
-pointers nor a 64 bit `long`, and on Turbo C++ `long long` is a 32 bit
-`long` (see `VSDK_LL` / `VSDK_HAS_LONG_LONG` below).
+The turboc port runs on 32-bit systems and on single-core 16-bit CPUs such
+as the Intel 8086, 8088 and 80286. On DOS, it supports real mode for small
+programs that fit within the 640 KB conventional RAM limit, and 80286
+protected mode for medium-sized programs that fit within its 16 MB address
+space. The cpp port also runs in 32-bit mode, on 386 and later machines,
+including SMP systems.
+
+The code does not assume 64-bit pointers or a 64-bit `long`, and on Turbo
+C++ `long long` is a 32-bit `long` (see `VSDK_LL` / `VSDK_HAS_LONG_LONG`
+below).
 
 ### No threads nor `Future` on DOS
 

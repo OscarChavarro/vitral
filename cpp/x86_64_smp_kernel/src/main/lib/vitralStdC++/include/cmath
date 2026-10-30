@@ -1,0 +1,151 @@
+#ifndef __CMATH__
+#define __CMATH__
+#include <math.h>
+#include <bits/std_abs.h>
+#include <type_traits>
+namespace std {
+using ::double_t; using ::float_t;
+#define VITRAL_USING_MATH(name) using ::name; using ::name##f; using ::name##l;
+VITRAL_USING_MATH(sin) VITRAL_USING_MATH(cos) VITRAL_USING_MATH(tan) VITRAL_USING_MATH(asin)
+VITRAL_USING_MATH(acos) VITRAL_USING_MATH(atan) VITRAL_USING_MATH(atan2) VITRAL_USING_MATH(sinh)
+VITRAL_USING_MATH(cosh) VITRAL_USING_MATH(tanh) VITRAL_USING_MATH(exp) VITRAL_USING_MATH(exp2)
+VITRAL_USING_MATH(expm1) VITRAL_USING_MATH(log) VITRAL_USING_MATH(log2) VITRAL_USING_MATH(log10)
+VITRAL_USING_MATH(log1p) VITRAL_USING_MATH(pow) VITRAL_USING_MATH(sqrt) VITRAL_USING_MATH(cbrt)
+VITRAL_USING_MATH(hypot) VITRAL_USING_MATH(fabs) VITRAL_USING_MATH(floor) VITRAL_USING_MATH(ceil)
+VITRAL_USING_MATH(round) VITRAL_USING_MATH(trunc) VITRAL_USING_MATH(rint) VITRAL_USING_MATH(nearbyint)
+VITRAL_USING_MATH(fmod) VITRAL_USING_MATH(remainder) VITRAL_USING_MATH(copysign)
+VITRAL_USING_MATH(fmin) VITRAL_USING_MATH(fmax) VITRAL_USING_MATH(fdim) VITRAL_USING_MATH(ldexp)
+VITRAL_USING_MATH(scalbn) VITRAL_USING_MATH(frexp) VITRAL_USING_MATH(modf) VITRAL_USING_MATH(fma)
+VITRAL_USING_MATH(lround) VITRAL_USING_MATH(llround) VITRAL_USING_MATH(lrint)
+VITRAL_USING_MATH(llrint) VITRAL_USING_MATH(asinh) VITRAL_USING_MATH(acosh)
+VITRAL_USING_MATH(atanh) VITRAL_USING_MATH(erf) VITRAL_USING_MATH(tgamma) VITRAL_USING_MATH(lgamma)
+VITRAL_USING_MATH(ilogb) VITRAL_USING_MATH(logb)
+#undef VITRAL_USING_MATH
+                                                        using ::isnan;
+using ::isfinite;
+using ::isinf;
+using ::signbit;
+inline float
+sin(float x) { return sinf(x); }
+inline long double
+sin(long double x) { return sinl(x); }
+inline float
+cos(float x) { return cosf(x); }
+inline long double
+cos(long double x) { return cosl(x); }
+inline float
+tan(float x) { return tanf(x); }
+inline long double
+tan(long double x) { return tanl(x); }
+inline float
+asin(float x) { return asinf(x); }
+inline long double
+asin(long double x) { return asinl(x); }
+inline float
+acos(float x) { return acosf(x); }
+inline long double
+acos(long double x) { return acosl(x); }
+inline float
+atan(float x) { return atanf(x); }
+inline long double
+atan(long double x) { return atanl(x); }
+inline float
+atan2(float y, float x) { return atan2f(y, x); }
+inline long double
+atan2(long double y, long double x) { return atan2l(y, x); }
+inline float
+sinh(float x) { return sinhf(x); }
+inline long double
+sinh(long double x) { return sinhl(x); }
+inline float
+cosh(float x) { return coshf(x); }
+inline long double
+cosh(long double x) { return coshl(x); }
+inline float
+tanh(float x) { return tanhf(x); }
+inline long double
+tanh(long double x) { return tanhl(x); }
+inline float
+exp(float x) { return expf(x); }
+inline long double
+exp(long double x) { return expl(x); }
+inline float
+log(float x) { return logf(x); }
+inline long double
+log(long double x) { return logl(x); }
+inline float
+log10(float x) { return log10f(x); }
+inline long double
+log10(long double x) { return log10l(x); }
+inline float
+pow(float x, float y) { return powf(x, y); }
+inline long double
+pow(long double x, long double y) { return powl(x, y); }
+inline float
+sqrt(float x) { return sqrtf(x); }
+inline long double
+sqrt(long double x) { return sqrtl(x); }
+inline float
+fabs(float x) { return fabsf(x); }
+inline long double
+fabs(long double x) { return fabsl(x); }
+inline float
+floor(float x) { return floorf(x); }
+inline long double
+floor(long double x) { return floorl(x); }
+inline float
+ceil(float x) { return ceilf(x); }
+inline long double
+ceil(long double x) { return ceill(x); }
+inline float
+round(float x) { return roundf(x); }
+inline long double
+round(long double x) { return roundl(x); }
+inline float
+fmod(float x, float y) { return fmodf(x, y); }
+inline long double
+fmod(long double x, long double y) { return fmodl(x, y); }
+inline float
+hypot(float x, float y) { return hypotf(x, y); }
+inline long double
+hypot(long double x, long double y) { return hypotl(x, y); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+sin(T x) { return ::sin((double)x); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+cos(T x) { return ::cos((double)x); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+tan(T x) { return ::tan((double)x); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+sqrt(T x) { return ::sqrt((double)x); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+fabs(T x) { return ::fabs((double)x); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+floor(T x) { return (double)x; }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+ceil(T x) { return (double)x; }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+log(T x) { return ::log((double)x); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+exp(T x) { return ::exp((double)x); }
+template <typename T>
+inline typename enable_if<is_integral<T>::value, double>::type
+log10(T x) { return ::log10((double)x); }
+template <typename T, typename U>
+inline typename enable_if<is_arithmetic<T>::value && is_arithmetic<U>::value &&
+                          (is_integral<T>::value || is_integral<U>::value) &&
+                          !is_same<T, long double>::value && !is_same<U, long double>::value &&
+                          !is_same<T, float>::value && !is_same<U, float>::value,
+                          double>::type
+pow(T x, U y) { return ::pow((double)x, (double)y); }
+}
+
+#endif

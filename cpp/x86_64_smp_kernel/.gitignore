@@ -1,0 +1,61 @@
+# Build output
+/loopKernelRootFileSystem/
+build/
+cmake-build-*/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Testing/
+_deps/
+compile_commands.json
+CMakeUserPresets.json
+Makefile
+
+# Compiled objects and binaries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.elf
+*.bin
+*.iso
+*.zip
+*.img
+*.map
+*.lst
+*.d
+*.gch
+*.pch
+
+# Backups and temporaries
+*~
+*.bak
+*.orig
+*.rej
+*.swp
+*.swo
+*.tmp
+.#*
+\#*#
+
+# Editors / OS
+.vscode/
+.idea/
+.cache/
+.DS_Store
+*.code-workspace
+
+# FreeDOS (only used by scripts/runFreeDos.sh) is downloaded by hand into bin/ and never committed
+bin/*
+!bin/readme.txt
+.aider*

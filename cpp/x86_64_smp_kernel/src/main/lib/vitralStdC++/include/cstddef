@@ -1,0 +1,11 @@
+#ifndef __CSTDDEF__
+#define __CSTDDEF__
+#include <stddef.h>
+namespace std {
+typedef decltype(nullptr) nullptr_t;
+using ::size_t;
+using ::ptrdiff_t;
+typedef long double max_align_t;
+}
+
+#endif
