@@ -71,7 +71,7 @@ segments can therefore compare equivalent despite being unequal.
 `naturalOrderLess` includes the selector when ordering Turbo pointers, and
 TreeSet, TreeMap and compound half-edge keys use it. Without this total
 order, BREP maps can merge unrelated nodes and topology summaries can lose
-vertices depending on heap placement. `dos/src/main/vsdk/kernel/286/vitralLibC/ORDTEST.CPP` checks keys
+vertices depending on heap placement. `dos/src/test/vsdk/kernel/286/vitralLibC/ordtest.cpp` checks keys
 with identical offsets in different segments, as well as ordinary value
 keys. Keep boolean operations and their validation aligned with `cpp/`;
 do not weaken topology checks to accommodate a container-port defect.
@@ -121,9 +121,9 @@ disables the CD-ROM driver. See [dos/src/main/vsdk/kernel/286/README.md](dos/src
 
 The protected build currently requires a hardware 287-compatible FPU.
 Its CRT initializes C++ globals and calls the portable raytracer entry;
-native 287 math replaces Borland's real-mode interrupt shortcuts. Copy
-the staged `BALLS.RAY` to `C:\` before the bare boot. `RUN.BAT` renders
-320x240 to `C:\RAYTRACE.PPM`, waits for a key and resets the CPU.
+native 287 math replaces Borland's real-mode interrupt shortcuts. `RUN1.BAT`
+loads the staged Appel 3 scene via a relative path and renders 320x240 to
+`APPEL3.PPM` in the current directory, then waits for a key and resets.
 
 The DOS build uses an 8.3 copy of `etc/` and `turboc/` under
 `C:\VITRAL`.  DOS cannot consume the source tree directly: its directory

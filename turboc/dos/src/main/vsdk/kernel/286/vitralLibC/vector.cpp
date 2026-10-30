@@ -1,6 +1,6 @@
 /* Turbo C++ large-model vector ABI (far objects, far cdecl callbacks).
  * The four-byte count cookie precedes the returned element pointer. */
-#include "vitralLibC/CRT.H"
+#include "vitralLibC/crt.h"
 #include <stdarg.h>
 #include <stdlib.h>
 

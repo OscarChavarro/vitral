@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vitralLibC/Protected286Crt.h"
+#include "boot/Protected286Loader.h"
 
 struct Directory { DIR publicDir; Protected286Word cursor; int used; };
 static Directory directories[4];
@@ -56,10 +57,11 @@ extern "C" int closedir(DIR* p)
 }
 extern "C" char* getcwd(char* buffer, int size)
 {
-    if (!buffer && !size) size = 4;
-    if (size < 4) { errno = ERANGE; return 0; }
+    unsigned needed = (unsigned)strlen(protected286CurrentDirectory) + 1;
+    if (!buffer && !size) size = (int)needed;
+    if (size < 0 || (unsigned)size < needed) { errno = ERANGE; return 0; }
     if (!buffer) { buffer = (char*)malloc((unsigned)size); if (!buffer) { errno = ENOMEM; return 0; } }
-    buffer[0] = 'C'; buffer[1] = ':'; buffer[2] = '\\'; buffer[3] = 0;
+    memcpy(buffer, protected286CurrentDirectory, needed);
     return buffer;
 }
 extern "C" int mkdir(const char*)

@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
-#include "vitralLibC/FORMAT.H"
+#include "vitralLibC/format.h"
 #include "vitralLibC/Protected286Crt.h"
 #include "svgalib/Protected286VgaText.h"
 
@@ -54,20 +54,15 @@ extern "C" FILE* fopen(const char* path, const char* mode)
 {
     unsigned i;
     int handle;
-    const char* basename;
     if (!path || !mode) { errno = EINVAL; return 0; }
     if (!strcmp(path, "/dev/stdout")) return stdout;
     if (!strcmp(path, "/dev/stderr")) return stderr;
     if (!strcmp(path, "/dev/stdin")) return stdin;
-    /* Root-only FAT contract: resolve the portable scene path to its 8.3
-     * filename. No directories are mounted in this runtime yet. */
-    basename = path;
-    while (*path) { if (*path == '/' || *path == '\\') basename = path + 1; ++path; }
     if (mode[0] != 'r' && mode[0] != 'w') { errno = EINVAL; return 0; }
     for (i = 5; i < 9 && _streams[i].flags; ++i) {}
     if (i == 9) { errno = EMFILE; return 0; }
-    handle = mode[0] == 'r' ? Protected286Crt::openRead(basename) :
-                            Protected286Crt::openWrite(basename);
+    handle = mode[0] == 'r' ? Protected286Crt::openRead(path) :
+                            Protected286Crt::openWrite(path);
     if (handle < 0) { errno = ENOENT; return 0; }
     _streams[i].fd = (char)handle;
     _streams[i].flags = mode[0] == 'r' ? _F_READ : _F_WRIT;

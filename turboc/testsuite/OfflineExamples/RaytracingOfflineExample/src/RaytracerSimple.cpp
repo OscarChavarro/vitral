@@ -171,11 +171,7 @@ static void offlineExecution(const String& fileName,
     delete sceneSnapshot;
 }
 
-#ifdef TURBO_C_286_ENABLED
-extern "C" int raytracerMain(int argc, char** argv)
-#else
 int main(int argc, char** argv)
-#endif
 {
     ArrayList<String> args;
     for (int i = 1; i < argc; i++) {

@@ -252,6 +252,8 @@ call BUILD.BAT
 cd ..\..\..\..\..\..
 if not exist SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\CRT286.LIB goto error
 if not exist SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\CRT.OK goto error
+call SRC\MAIN\V\KERNEL\286\LOADER\BUILD.BAT
+if not exist SRC\MAIN\V\KERNEL\286\LOADER\LOADER.EXE goto error
 echo DOS objects compiled successfully.
 goto end
 :error

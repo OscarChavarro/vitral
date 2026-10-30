@@ -28,12 +28,12 @@ extrn C protected286DescriptorCount:word
 extrn C protected286DescriptorBases:dword
 extrn C protected286DescriptorAccess:byte
 .code
-public C main
+public C init
 public C enterProtected286
 
-; This is the real-mode executable entry. It never returns: the 286 cannot
-; leave protected mode, so the protected return path resets the processor.
-main proc far
+; The real-mode entry returns to DOS on setup failure. Once protected mode
+; is entered, the protected return path resets the processor.
+init proc far
     mov ax, @data
     mov ds, ax
     cld
@@ -43,7 +43,7 @@ main proc far
     mov ax, cs
     mov protected286GatewaySegment, ax
     call enterProtected286
-main endp
+init endp
 
 enterProtected286 proc far
     mov si, offset traceLoader
@@ -113,23 +113,12 @@ halted:
     hlt
     jmp halted
 loaderFailure:
-    ; No protected jump is safe if ownership, RAM detection, copying or
-    ; MZ relocation rewriting failed.  Show a minimal real-mode diagnostic.
-    mov ax, 0B800h
-    mov es, ax
-    xor di, di
-    mov si, offset loaderFailureMessage
-loaderFailurePrint:
-    mov al, cs:[si]
-    inc si
-    or al, al
-    jz loaderFailureWait
-    mov ah, 4Fh
-    stosw
-    jmp loaderFailurePrint
-loaderFailureWait:
-    hlt
-    jmp loaderFailureWait
+    ; Still in real mode: release the DOS process and return an error code.
+    ; Any memory-manager diagnostic was printed before reaching this point.
+    mov ax, 4C01h
+    int 21h
+    hlt                         ; DOS termination must not return.
+    jmp loaderFailure
 enterProtected286 endp
 
 ; Bootstrap diagnostics never call DOS, BIOS or any C runtime routine.
@@ -322,14 +311,13 @@ idtPointer:
     dw 0
     dd 0
 
-loaderFailureMessage db 'Protected image loader failed. System halted.', 0
-traceStart db '286 [00] Real-mode entry reached.',0
-traceLoader db '286 [01] Preparing physical image (BIOS/DOS used only here).',0
-traceLoaded db '286 [10] Protected image prepared; constructing GDT.',0
-traceSwitch db '286 [11] GDT/IDT loaded; setting PE and taking far jump.',0
-traceProtected db '286 [12] Protected mode active; selectors loaded; entering C++.',0
+traceStart db '286 loader: [00] Real-mode entry reached.',0
+traceLoader db '286 loader: [01] Preparing physical image (BIOS/DOS used only here).',0
+traceLoaded db '286 loader: [10] Protected image prepared; constructing GDT.',0
+traceSwitch db '286 loader: [11] GDT/IDT loaded; setting PE and taking far jump.',0
+traceProtected db '286 loader: [12] Protected mode active; selectors loaded; entering C++.',0
 
 ; With no Borland C0L startup object linked, this END operand is the DOS EXE
 ; entry address.  It must remain a real-mode address because the loader has
 ; not copied the image or set PE yet.
-end main
+end init

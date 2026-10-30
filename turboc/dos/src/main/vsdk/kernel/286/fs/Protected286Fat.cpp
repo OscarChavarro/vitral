@@ -1,5 +1,6 @@
 #include "drivers/Protected286Ata.h"
 #include "fs/Protected286Fat.h"
+#include "boot/Protected286Loader.h"
 
 long Protected286Fat::seek(int handle, long offset, int origin)
 {
@@ -146,22 +147,20 @@ Protected286Fat::mount()
 int
 Protected286Fat::format83(const char* path, Protected286Byte far* name)
 {
-    Protected286Byte i = 0;
-    Protected286Byte extension = 0;
-    if (path == 0 || name == 0) return 0;
-    while (*path == ' ' || *path == '\\' || *path == '/') path++;
-    if ((path[0] >= 'A' && path[0] <= 'Z') && path[1] == ':') path += 2;
-    while (*path == '\\' || *path == '/') path++;
-    for (i = 0; i < 11; i++) name[i] = ' ';
-    i = 0;
-    while (*path && *path != '\\' && *path != '/') {
+    unsigned i, base = 0, ext = 0;
+    int dot = 0;
+    if (!path || !*path || !name) return 0;
+    for (i = 0; i < 11; ++i) name[i] = ' ';
+    while (*path) {
         char c = *path++;
-        if (c == '.') { extension = 1; i = 8; continue; }
-        if (i >= (extension ? 11 : 8)) return 0;
+        if (c == '.') { if (dot || !base) return 0; dot = 1; continue; }
+        if (c <= ' ' || c == '/' || c == '\\' || c == ':' ||
+            c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|') return 0;
         if (c >= 'a' && c <= 'z') c = (char)(c - 'a' + 'A');
-        name[i++] = (Protected286Byte)c;
+        if (dot) { if (ext == 3) return 0; name[8 + ext++] = (Protected286Byte)c; }
+        else { if (base == 8) return 0; name[base++] = (Protected286Byte)c; }
     }
-    return i != 0 && *path == 0;
+    return base != 0 && (!dot || ext != 0);
 }
 
 int
@@ -177,29 +176,124 @@ Protected286Fat::readDirectory(Protected286Word index, Protected286Byte far* byt
     return 1;
 }
 
+/* Return 1 for an entry, 0 at the end and -1 on I/O or corrupt chains. */
 int
-Protected286Fat::find(const char* path, Protected286Byte far* entry,
-                      Protected286Dword* lba, Protected286Word* offset)
+Protected286Fat::directoryEntry(Protected286Word directory, Protected286Dword index,
+                                Protected286Dword* lba, Protected286Word* offset,
+                                int grow)
 {
-    Protected286Byte wanted[11];
-    Protected286Word index;
-    Protected286Byte same;
-    Protected286Byte i;
-    Protected286Word at;
-    if (!format83(path, wanted)) return 0;
-    for (index = 0; index < rootEntries; index++) {
-        if (!readDirectory(index, fatScratch, lba, &at)) return 0;
-        if (fatScratch[at] == 0) return 0;
-        if (fatScratch[at] == 0xE5 || (fatScratch[at + 11] & 0x18)) continue;
-        same = 1;
-        for (i = 0; i < 11; i++) if (fatScratch[at + i] != wanted[i]) same = 0;
-        if (same) {
-            for (i = 0; i < 32; i++) entry[i] = fatScratch[at + i];
-            if (offset) *offset = at;
+    Protected286Word cluster = directory;
+    Protected286Dword hops, entriesPerCluster;
+    if (!directory) {
+        if (index >= rootEntries) return 0;
+        return readDirectory((Protected286Word)index, fatScratch, lba, offset) ? 1 : -1;
+    }
+    entriesPerCluster = (Protected286Dword)sectorsPerCluster * 16UL;
+    hops = index / entriesPerCluster;
+    if (hops >= clusterCount) return -1;
+    while (hops--) {
+        long value;
+        if (cluster < 2 || (Protected286Dword)cluster >= (Protected286Dword)clusterCount + 2UL) return -1;
+        value = fatValue(cluster);
+        if (value < 0) return -1;
+        if (value >= (fat12 ? 0x0FF8L : 0xFFF8L)) {
+            Protected286Word next;
+            if (!grow) return 0;
+            next = allocateCluster();
+            if (!next || !setCluster(cluster, next)) return -1;
+            cluster = next;
+        } else {
+            if (value < 2 || value >= (long)clusterCount + 2L) return -1;
+            cluster = (Protected286Word)value;
+        }
+    }
+    if (cluster < 2 || (Protected286Dword)cluster >= (Protected286Dword)clusterCount + 2UL) return -1;
+    index %= entriesPerCluster;
+    *lba = clusterLba(cluster) + index / 16UL;
+    *offset = (Protected286Word)((index % 16UL) * 32UL);
+    return readSector(*lba, fatScratch) ? 1 : -1;
+}
+
+int
+Protected286Fat::findEntry(Protected286Word directory, const Protected286Byte* name,
+                           Protected286Byte* entry, Protected286Dword* lba,
+                           Protected286Word* offset)
+{
+    Protected286Dword index;
+    for (index = 0; index < (Protected286Dword)clusterCount * sectorsPerCluster * 16UL + rootEntries; ++index) {
+        unsigned i;
+        int result = directoryEntry(directory, index, lba, offset, 0);
+        if (result <= 0) return result;
+        if (!fatScratch[*offset]) return 0;
+        if (fatScratch[*offset] == 0xE5 || (fatScratch[*offset + 11] & 0x08)) continue;
+        for (i = 0; i < 11 && fatScratch[*offset + i] == name[i]; ++i) {}
+        if (i == 11) {
+            for (i = 0; i < 32; ++i) entry[i] = fatScratch[*offset + i];
             return 1;
         }
     }
-    return 0;
+    return -1;
+}
+
+int
+Protected286Fat::walkDirectories(Protected286Word* directory, const char* path)
+{
+    char component[13];
+    Protected286Byte name[11], entry[32];
+    Protected286Dword lba;
+    Protected286Word offset;
+    while (*path) {
+        unsigned n = 0;
+        while (*path == '/' || *path == '\\') ++path;
+        if (!*path) break;
+        while (*path && *path != '/' && *path != '\\') {
+            if (n == 12) return 0;
+            component[n++] = *path++;
+        }
+        component[n] = 0;
+        if (n == 1 && component[0] == '.') continue;
+        if (n == 2 && component[0] == '.' && component[1] == '.') {
+            if (!*directory) continue;
+            for (n = 0; n < 11; ++n) name[n] = ' ';
+            name[0] = name[1] = '.';
+        } else if (!format83(component, name)) return 0;
+        if (findEntry(*directory, name, entry, &lba, &offset) != 1 || !(entry[11] & 0x10)) return 0;
+        *directory = fatLe16(entry + 26);
+        if (*directory && (*directory < 2 || (Protected286Dword)*directory >= (Protected286Dword)clusterCount + 2UL)) return 0;
+    }
+    return 1;
+}
+
+int
+Protected286Fat::resolveParent(const char* path, Protected286Word* directory,
+                               Protected286Byte* name)
+{
+    char parent[68], file[13];
+    unsigned n = 0, f = 0;
+    const char* p = path;
+    int absolute = 0;
+    if (!p || !*p) return 0;
+    if (p[1] == ':') {
+        if (p[0] != 'C' && p[0] != 'c') return 0;
+        p += 2;
+    }
+    if (*p == '/' || *p == '\\') absolute = 1;
+    *directory = 0;
+    if (!absolute && !walkDirectories(directory, protected286CurrentDirectory + 3)) return 0;
+    while (*p) {
+        char c = *p++;
+        if (c == '/' || c == '\\') {
+            if (n + f + 1 >= sizeof(parent)) return 0;
+            while (f) { unsigned j; for (j = 0; j < f; ++j) parent[n++] = file[j]; f = 0; }
+            parent[n++] = '/';
+        } else {
+            if (f == 12) return 0;
+            file[f++] = c;
+        }
+    }
+    if (!f) return 0;
+    file[f] = 0; parent[n] = 0;
+    return format83(file, name) && walkDirectories(directory, parent);
 }
 
 int
@@ -335,29 +429,39 @@ Protected286Fat::open(const char* path, Protected286Byte writable)
     Protected286Byte entry[32];
     Protected286Dword lba;
     Protected286Word offset;
-    Protected286Word index;
+    Protected286Dword index;
+    Protected286Word directory;
+    Protected286Byte wanted[11];
+    int found;
     int slot = allocateHandle();
     if (slot < 0) return -1;
-    if (!find(path, entry, &lba, &offset)) {
-        if (!writable || !format83(path, entry)) { handles[slot].used = 0; return -1; }
-        for (index = 0; index < rootEntries; index++) {
-            if (!readDirectory(index, fatScratch, &lba, &offset)) break;
+    if (!resolveParent(path, &directory, wanted)) { handles[slot].used = 0; return -1; }
+    found = findEntry(directory, wanted, entry, &lba, &offset);
+    if (found < 0) { handles[slot].used = 0; return -1; }
+    if (!found) {
+        int placed = 0;
+        if (!writable) { handles[slot].used = 0; return -1; }
+        for (index = 0; index < (Protected286Dword)clusterCount * sectorsPerCluster * 16UL + rootEntries; ++index) {
+            int result = directoryEntry(directory, index, &lba, &offset, 1);
+            if (result <= 0) break;
             if (fatScratch[offset] == 0 || fatScratch[offset] == 0xE5) {
                 Protected286Byte i;
                 for (i = 0; i < 32; i++) fatScratch[offset + i] = 0;
-                for (i = 0; i < 11; i++) fatScratch[offset + i] = entry[i];
+                for (i = 0; i < 11; i++) fatScratch[offset + i] = wanted[i];
                 fatScratch[offset + 11] = 0x20;
-                if (!writeSector(lba, fatScratch)) { handles[slot].used = 0; return -1; }
+                if (!writeSector(lba, fatScratch)) break;
+                placed = 1;
                 break;
             }
         }
-        if (index == rootEntries) { handles[slot].used = 0; return -1; }
+        if (!placed) { handles[slot].used = 0; return -1; }
         handles[slot].firstCluster = 0;
         handles[slot].size = 0;
     } else {
+        if (entry[11] & 0x10) { handles[slot].used = 0; return -1; }
         handles[slot].firstCluster = fatLe16(entry + 26);
         handles[slot].size = writable ? 0 : fatLe32(entry + 28);
-        if (writable) handles[slot].firstCluster = 0; /* old chain is left intact safely. */
+        if (writable) handles[slot].firstCluster = 0;
     }
     handles[slot].position = 0;
     handles[slot].directoryLba = lba;

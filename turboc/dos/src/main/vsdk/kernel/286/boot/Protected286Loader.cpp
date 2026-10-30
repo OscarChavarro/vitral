@@ -12,10 +12,21 @@ static void loaderTrace(unsigned row, const char far* text)
     while (*text && column < 80) video[column++] = 0x0F00U | (unsigned char)*text++;
     while (column < 80) video[column++] = 0x0720U;
 }
+/* Print through DOS while still in real mode so the message survives exit. */
+static void loaderNotice(const char far* message)
+{
+    asm push ds;
+    _DX = FP_OFF(message);
+    _AX = FP_SEG(message);
+    asm mov ds, ax;
+    _AX = 0x0900;
+    asm int 21h;
+    asm pop ds;
+}
 static void loaderRangeTrace(Protected286Dword base, Protected286Dword bytes)
 {
     char text[80];
-    const char* prefix = "286 RAM base=0x";
+    const char* prefix = "286 loader: RAM base=0x";
     unsigned n = 0, i;
     while (*prefix) text[n++] = *prefix++;
     for (i = 0; i < 8; ++i) text[n++] = "0123456789ABCDEF"[(unsigned)(base >> ((7 - i) * 4)) & 15];
@@ -39,6 +50,7 @@ Protected286Word protected286InitBytes = 0;
 Protected286Dword protected286ExitOffset = 0;
 Protected286Word protected286ExitBytes = 0;
 char protected286CommandLine[128] = {0};
+char protected286CurrentDirectory[68] = {0};
 Protected286Word protected286DescriptorCount = 0;
 Protected286Dword protected286DescriptorBases[PROTECTED_286_LOADER_MAX_DESCRIPTORS];
 Protected286Byte protected286DescriptorAccess[PROTECTED_286_LOADER_MAX_DESCRIPTORS];
@@ -230,28 +242,30 @@ static int copyImage(Protected286Word programSegment)
 
 static const char far* protected286ExecutablePath(Protected286Word psp)
 {
+#ifdef TURBO_C_286_EXTERNAL_PAYLOAD
+    static char path[13];
+    unsigned i = 0;
+    const char* command = protected286CommandLine;
+    (void)psp;
+    while (*command == ' ' || *command == '\t') ++command;
+    while (*command && *command != ' ' && *command != '\t') {
+        char c = *command++;
+        if (i == 8 || !((c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ||
+            c == '_' || c == '-')) return 0;
+        path[i++] = c;
+    }
+    if (!i) return 0;
+    path[i++] = '.'; path[i++] = 'B'; path[i++] = 'I'; path[i++] = 'N';
+    path[i] = 0;
+    return path;
+#else
     Protected286Word environment = *(Protected286Word far*)MK_FP(psp, 0x2C);
     const char far* p;
     if (environment == 0) return 0;
     p = (const char far*)MK_FP(environment, 0);
     while (*p != 0 || *(p + 1) != 0) p++;
-#ifdef TURBO_C_286_EXTERNAL_PAYLOAD
-    static char path[128];
-    unsigned length = 0, directory = 0;
-    p += 4;
-    while (*p && length < sizeof(path) - 1) {
-        path[length] = *p++;
-        if (path[length] == '\\' || path[length] == '/') directory = length + 1;
-        ++length;
-    }
-    if (*p || directory + 11U > sizeof(path)) return 0;
-    const char* name = "RAY286.BIN";
-    length = directory;
-    while (*name) path[length++] = *name++;
-    path[length] = 0;
-    return path;
-#else
-    return p + 4; /* two NULs, then the environment word, then ASCIIZ path */
+    return p + 4;
 #endif
 }
 
@@ -298,6 +312,7 @@ static PayloadSymbol payloadSymbols[] = {
     {"_protected286ExitOffset", &protected286ExitOffset, 4, 0},
     {"_protected286ExitBytes", &protected286ExitBytes, 2, 0},
     {"_protected286CommandLine", protected286CommandLine, 128, 0},
+    {"_protected286CurrentDirectory", protected286CurrentDirectory, 68, 0},
     {"__psp", &_psp, 2, 0},
     {"__version", &_version, 2, 0}
 };
@@ -515,18 +530,34 @@ protected286PrepareImage()
     Protected286Dword limit;
     unsigned machineStatus, commandBytes, commandIndex;
     protected286DiscardImage();
-    loaderTrace(2, "286 [02] Checking exclusive bare-machine memory ownership.");
+    loaderTrace(2, "286 loader: [02] Checking exclusive bare-machine memory ownership.");
+    /* DPMI installation check is a read-only real-mode multiplex call. */
+    asm push es;
+    asm push di;
+    asm push si;
+    _AX = 0x1687;
+    asm int 2Fh;
+    machineStatus = _AX;
+    asm pop si;
+    asm pop di;
+    asm pop es;
+    if (machineStatus == 0) {
+        loaderNotice("\r\n286 loader: DPMI host detected. Restart DOS without the DPMI host.\r\n$");
+        return 0;
+    }
     asm db 0Fh, 01h, 0E0h; /* SMSW AX, available on an 80286. */
     machineStatus = _AX;
     if (machineStatus & 1) {
-        loaderTrace(9, "286 ERROR: PE/V86 already active. Boot without EMM386/DPMI.");
+        loaderNotice("\r\n286 loader: Protected or virtual-8086 mode detected.\r\n"
+                     "286 loader: Restart DOS without EMM386, QEMM or the active manager.\r\n$");
         return 0;
     }
-    /* Read-only installation check, not an XMS allocation or move call. */
+    /* XMS identifies HIMEM and compatible managers without allocating memory. */
     _AX = 0x4300;
     asm int 2Fh;
     if ((_AX & 255) == 0x80) {
-        loaderTrace(9, "286 ERROR: Boot without HIMEM/XMS (F5: skip CONFIG/AUTOEXEC).");
+        loaderNotice("\r\n286 loader: HIMEM.SYS or another XMS manager detected.\r\n"
+                     "286 loader: Restart DOS without HIMEM.SYS or the active XMS manager.\r\n$");
         return 0;
     }
     _AX = 0x8800;
@@ -534,7 +565,7 @@ protected286PrepareImage()
     asm jc noExtendedMemory;
     memoryKB = _AX;
     if (memoryKB <= 64) goto noExtendedMemory;
-    loaderTrace(3, "286 [03] BIOS RAM detected; reading PSP and segment map.");
+    loaderTrace(3, "286 loader: [03] BIOS RAM detected; reading PSP and segment map.");
     _AX = 0x6200;
     asm int 21h;
     psp = _BX;
@@ -544,15 +575,46 @@ protected286PrepareImage()
     for (commandIndex = 0; commandIndex < commandBytes; ++commandIndex)
         protected286CommandLine[commandIndex] = *(char far*)MK_FP(psp, 0x81 + commandIndex);
     protected286CommandLine[commandBytes] = 0;
+    /* Capture the caller's current drive and directory while DOS is available.
+     * The protected ATA backend currently mounts the C: volume only. */
+    _AX = 0x1900;
+    asm int 21h;
+    if ((_AX & 255) != 2) {
+        loaderTrace(9, "286 loader: ERROR: Current drive must be C:.");
+        return 0;
+    }
+    protected286CurrentDirectory[0] = 'C';
+    protected286CurrentDirectory[1] = ':';
+    protected286CurrentDirectory[2] = '\\';
+    asm push ds;
+    _SI = FP_OFF(protected286CurrentDirectory + 3);
+    _AX = FP_SEG(protected286CurrentDirectory + 3);
+    asm mov ds, ax;
+    _DX = 0;
+    _AX = 0x4700;
+    asm int 21h;
+    asm jnc cwdReady;
+    asm pop ds;
+    loaderTrace(9, "286 loader: ERROR: Cannot read current directory.");
+    return 0;
+cwdReady:
+    asm pop ds;
     _AX = 0x3000;
     asm int 21h;
     _version = _AX;
     endSegment = *(Protected286Word far*)MK_FP(psp, 2);
     programSegment = (Protected286Word)(psp + 0x10);
-    if (endSegment <= programSegment || !loaderCodeMap(psp)) return 0;
+    if (endSegment <= programSegment || !protected286ExecutablePath(psp)) {
+        loaderTrace(9, "286 loader: ERROR: Expected program basename (1-8 characters).");
+        return 0;
+    }
+    if (!loaderCodeMap(psp)) {
+        loaderTrace(9, "286 loader: ERROR: Missing or invalid payload MAP.");
+        return 0;
+    }
 #ifdef TURBO_C_286_EXTERNAL_PAYLOAD
     if (!payloadHeader(psp)) {
-        loaderTrace(9, "286 ERROR: Invalid/missing RAY286.BIN payload or stack ABI.");
+        loaderTrace(9, "286 loader: ERROR: Invalid/missing payload or stack ABI.");
         return 0;
     }
 #else
@@ -571,25 +633,25 @@ protected286PrepareImage()
     protected286DataBase = protected286ImageBase + ((Protected286Dword)(_DS - programSegment) << 4);
     protected286StackBase = protected286ImageBase + ((Protected286Dword)(_SS - programSegment) << 4);
 #endif
-    loaderTrace(4, "286 [04] Physical range bounded by detected RAM and 16 MiB.");
-    loaderTrace(5, "286 [05] Copying image with AT BIOS physical block transfer.");
+    loaderTrace(4, "286 loader: [04] Physical range bounded by detected RAM and 16 MiB.");
+    loaderTrace(5, "286 loader: [05] Copying image with AT BIOS physical block transfer.");
 #ifdef TURBO_C_286_EXTERNAL_PAYLOAD
     if (!copyPayload(psp)) {
 #else
     if (!copyImage(programSegment)) {
 #endif
-        loaderTrace(9, "286 ERROR: BIOS physical image copy failed.");
+        loaderTrace(9, "286 loader: ERROR: BIOS physical image copy failed.");
         return 0;
     }
-    loaderTrace(7, "286 [07] Patching MZ relocations (no XMS calls).");
+    loaderTrace(7, "286 loader: [07] Patching MZ relocations (no XMS calls).");
 #ifdef TURBO_C_286_EXTERNAL_PAYLOAD
     if (!protected286PatchRelocations(psp, 0) || !publishPayloadState()) return 0;
 #else
     if (!protected286PatchRelocations(psp, programSegment)) return 0;
 #endif
-    loaderTrace(8, "286 [08] Physical image ready; returning to ASM gateway.");
+    loaderTrace(8, "286 loader: [08] Physical image ready; returning to ASM gateway.");
     return 1;
 noExtendedMemory:
-    loaderTrace(9, "286 ERROR: BIOS reported no usable extended memory.");
+    loaderTrace(9, "286 loader: ERROR: BIOS reported no usable extended memory.");
     return 0;
 }

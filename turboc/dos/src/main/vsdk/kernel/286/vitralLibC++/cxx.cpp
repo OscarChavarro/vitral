@@ -1,5 +1,5 @@
 /* Compile only for the freestanding Turbo C++ large-model target. */
-#include "vitralLibC/CRT.H"
+#include "vitralLibC/crt.h"
 #include <new.h>
 #include "vitralLibC/Protected286Crt.h"
 #include "kernel/Protected286Runtime.h"

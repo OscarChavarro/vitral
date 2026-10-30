@@ -3,9 +3,7 @@
 
 #include "vitralLibC/Protected286Crt.h"
 
-/* Minimal FAT12/FAT16 root-directory backend.  It is intentionally limited
- * to 8.3 names in C:'s root because that is the contract used by RUN.BAT and
- * avoids dragging a DOS-compatible stdio layer into protected mode. */
+/* FAT12/FAT16 backend with 8.3 paths on the mounted C: volume. */
 class Protected286Fat : public Protected286FileSystem {
 private:
     struct Handle {
@@ -37,8 +35,15 @@ private:
     int writeSector(Protected286Dword lba, const Protected286Byte far* bytes);
     int readDirectory(Protected286Word index, Protected286Byte far* bytes,
                       Protected286Dword* lba, Protected286Word* offset);
-    int find(const char* path, Protected286Byte far* entry,
-             Protected286Dword* lba, Protected286Word* offset);
+    int directoryEntry(Protected286Word directory, Protected286Dword index,
+                       Protected286Dword* lba, Protected286Word* offset,
+                       int grow);
+    int findEntry(Protected286Word directory, const Protected286Byte* name,
+                  Protected286Byte* entry, Protected286Dword* lba,
+                  Protected286Word* offset);
+    int walkDirectories(Protected286Word* directory, const char* path);
+    int resolveParent(const char* path, Protected286Word* directory,
+                      Protected286Byte* name);
     int format83(const char* path, Protected286Byte far* name);
     int allocateHandle();
     long fatValue(Protected286Word cluster);

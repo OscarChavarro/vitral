@@ -1,6 +1,6 @@
 @echo off
 rem Build the protected 286 example with spheres and the Appel BREP fixture.
-rem RAYTRACE.EXE is intentionally limited to the non-GUI renderer and PPM output.
+rem The payload is intentionally limited to the non-GUI renderer and PPM output.
 
 if not exist BUILD md BUILD
 if not exist BUILDTC md BUILDTC
@@ -148,23 +148,7 @@ echo C:\TURBOC\LIB\MATHL.LIB >> LIB.RSP
 echo Linking protected RAY286.BIN payload
 tlink /n /c /s /yx @OBJ.RSP,RAY286.BIN,RAY286.MAP,@LIB.RSP > TLINK.LOG
 if errorlevel 1 goto linker_error
-rem DOS loads only this small launcher. The identical PMSW286 first object
-rem fixes the protected-entry offset in both links; BREP stays above 1 MiB.
-echo -c -ml -2 -f87 -O1 > BOOT.RSP
-echo -IC:\TURBOC\INCLUDE >> BOOT.RSP
-echo -I..\..\..\DOS\SRC\MAIN\V\KERNEL\286 >> BOOT.RSP
-echo -oBUILDTC\PBOOT286.OBJ >> BOOT.RSP
-echo ..\..\..\DOS\SRC\MAIN\V\KERNEL\286\BOOT\PBOOT286.CPP >> BOOT.RSP
-tcc @BOOT.RSP >> TC.LOG
-if errorlevel 1 goto compiler_error
-echo ..\..\..\DOS\BUILDTC\PMSW286.OBJ+BUILDTC\PBOOT286.OBJ+ > BOOTOBJ.RSP
-rem Keep compiler helpers as objects, without C0L or CL.
-echo ..\..\..\DOS\SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\HELPERS.OBJ+ >> BOOTOBJ.RSP
-echo ..\..\..\DOS\SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\FPU.OBJ >> BOOTOBJ.RSP
-echo Linking small RAYTRACE.EXE DOS launcher
-tlink /n /c /s @BOOTOBJ.RSP,RAYTRACE.EXE,RAYTRACE.MAP >> TLINK.LOG
-if errorlevel 1 goto linker_error
-echo RAYTRACE.EXE created successfully.
+echo RAY286.BIN and RAY286.MAP created successfully.
 goto end
 
 :compiler_error

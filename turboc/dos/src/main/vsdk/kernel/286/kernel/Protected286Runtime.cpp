@@ -5,7 +5,7 @@
 #include "drivers/Protected286Ports.h"
 #include "kernel/Protected286Runtime.h"
 #include "svgalib/Protected286VgaText.h"
-#include "vitralLibC/CRT.H"
+#include "vitralLibC/crt.h"
 #include <dos.h>
 
 static Protected286Fat* protected286Fat;

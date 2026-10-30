@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <errno.h>
 #include "vitralLibC/Protected286Crt.h"
+char protected286CurrentDirectory[68] = "C:\\";
 extern "C" void crt286InitializeDirectories();
 int Protected286Crt::nextRootEntry(Protected286Word* cursor, char far* name)
 {
@@ -15,12 +16,15 @@ int Protected286Crt::nextRootEntry(Protected286Word* cursor, char far* name)
 }
 int main()
 {
-    char root[] = "C:\\", sub[] = "C:\\SUB", buffer[4];
+    char root[] = "C:\\", sub[] = "C:\\SUB", buffer[68];
     DIR* d;
     struct dirent* entry;
     crt286InitializeDirectories();
     assert(getcwd(buffer, 4) == buffer && !strcmp(buffer, root));
     assert(getcwd(buffer, 3) == 0 && errno == ERANGE);
+    strcpy(protected286CurrentDirectory, "C:\\SUB");
+    assert(getcwd(buffer, sizeof(buffer)) == buffer && !strcmp(buffer, "C:\\SUB"));
+    strcpy(protected286CurrentDirectory, "C:\\");
     d = opendir(root);
     assert(d);
     entry = readdir(d);

@@ -1,0 +1,22 @@
+@echo off
+rem Run from the DOS directory after building DOS.LIB and LOADER.EXE.
+echo -c -ml -2 -f87 -O1 > ARG.RSP
+echo -IC:\TURBOC\INCLUDE >> ARG.RSP
+echo -oBUILDTC\ARGTEST.OBJ >> ARG.RSP
+echo SRC\TEST\V\KERNEL\286\LOADER\ARGTEST.CPP >> ARG.RSP
+tcc @ARG.RSP > ARG.LOG
+if errorlevel 1 goto error
+echo BUILDTC\PMSW286.OBJ+BUILDTC\ARGTEST.OBJ > ARGOBJ.RSP
+echo BUILD\DOS.LIB+ > ARGLIB.RSP
+echo SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\CRT286.LIB+ >> ARGLIB.RSP
+echo C:\TURBOC\LIB\MATHL.LIB >> ARGLIB.RSP
+tlink /n /c /s /yx @ARGOBJ.RSP,ARGTEST.BIN,ARGTEST.MAP,@ARGLIB.RSP > ARGTLINK.LOG
+if errorlevel 1 goto error
+copy /y ARGTEST.BIN SRC\TEST\V\KERNEL\286\LOADER > NUL
+copy /y ARGTEST.MAP SRC\TEST\V\KERNEL\286\LOADER > NUL
+echo ARGTEST payload built.
+goto end
+:error
+type ARG.LOG
+echo ARGTEST build failed.
+:end

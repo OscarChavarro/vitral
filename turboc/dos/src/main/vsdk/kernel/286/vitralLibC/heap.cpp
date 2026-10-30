@@ -1,4 +1,4 @@
-#include "vitralLibC/CRT.H"
+#include "vitralLibC/crt.h"
 #ifdef __TURBOC__
 #include <dos.h>
 #endif

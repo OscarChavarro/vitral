@@ -5,7 +5,7 @@
 #include "java/lang/Throwable.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #ifdef TURBO_C_286_ENABLED
-#include "vitralLibC/FORMAT.H"
+#include "vitralLibC/format.h"
 #endif
 const double VSDK::EPSILON = 1e-6;
 

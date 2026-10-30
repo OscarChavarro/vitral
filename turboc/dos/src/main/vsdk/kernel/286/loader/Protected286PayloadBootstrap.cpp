@@ -1,4 +1,4 @@
-// Separate real-mode executable: stream RAY286.BIN into extended memory.
+// Separate real-mode executable: stream the selected payload into extended memory.
 // Both links MUST put the identical ModeSwitch286 object first. Its high
 // protectedEntry offset is therefore identical in the launcher and payload.
 #define TURBO_C_286_EXTERNAL_PAYLOAD

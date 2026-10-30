@@ -1,4 +1,4 @@
-#include "vitralLibC/CRT.H"
+#include "vitralLibC/crt.h"
 #include <assert.h>
 
 union Arena { long double alignment; void* pointer; unsigned char bytes[4096]; };

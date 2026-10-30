@@ -1,5 +1,5 @@
 /* Hosted probe: allocation is supplied by DOS, vector mechanics by VECTOR. */
-#include "vitralLibC/CRT.H"
+#include "vitralLibC/crt.h"
 #include <stdlib.h>
 #include <assert.h>
 static int constructed, destroyed, released;

@@ -1,4 +1,4 @@
-#include "vitralLibC/FORMAT.H"
+#include "vitralLibC/format.h"
 #include <assert.h>
 #include <string.h>
 #include <limits.h>

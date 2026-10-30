@@ -1,9 +1,11 @@
 /* Host-only test: ATA sectors live in RAM, no guest disk is touched.
- * g++ -x c++ -std=c++98 -Dfar= FATTEST.CPP ../fs/Protected286Fat.cpp */
+ * Compile with the main 286 directory on the include path and link Protected286Fat.cpp. */
 #include "drivers/Protected286Ata.h"
 #include "fs/Protected286Fat.h"
 #include <assert.h>
 #include <string.h>
+
+char protected286CurrentDirectory[68] = "C:\\";
 
 static unsigned char disk[8192][512];
 static unsigned sectorReads;
@@ -82,6 +84,39 @@ int main()
         assert(fat.nextRootEntry(&cursor, found) == 0);
         assert(fat.nextRootEntry(&cursor, found) == 0);
     }
+    /* Traverse existing nested 8.3 directories and write relative to cwd. */
+    memset(disk[25], 0, 512); /* root begins at sector 25 */
+    memcpy(disk[25], "SUB        ", 11); disk[25][11] = 0x10;
+    disk[25][26] = 2;
+    disk[1][3] = disk[1][4] = disk[1][5] = 0xFF;
+    disk[13][3] = disk[13][4] = disk[13][5] = 0xFF;
+    memset(disk[27], 0, 512); memset(disk[28], 0, 512);
+    memcpy(disk[27], ".          ", 11); disk[27][11] = 0x10; disk[27][26] = 2;
+    memcpy(disk[27] + 32, "..         ", 11); disk[27][43] = 0x10;
+    memcpy(disk[27] + 64, "DEEP       ", 11); disk[27][75] = 0x10; disk[27][90] = 3;
+    memcpy(disk[28], ".          ", 11); disk[28][11] = 0x10; disk[28][26] = 3;
+    memcpy(disk[28] + 32, "..         ", 11); disk[28][43] = 0x10; disk[28][58] = 2;
+    strcpy(protected286CurrentDirectory, "C:\\SUB\\DEEP");
+    assert(fat.mount());
+    h = fat.open("RESULT.DAT", 1); assert(h >= 0);
+    assert(fat.write(h, source, sizeof(source)) == sizeof(source)); fat.close(h);
+    h = fat.open("C:\\SUB\\DEEP\\RESULT.DAT", 0); assert(h >= 0);
+    assert(fat.read(h, result, sizeof(result)) == sizeof(result));
+    assert(!memcmp(source, result, sizeof(source))); fat.close(h);
+    h = fat.open("..\\PARENT.DAT", 1); assert(h >= 0); fat.close(h);
+    assert(fat.open("C:\\PARENT.DAT", 0) < 0);
+    h = fat.open("C:\\SUB\\PARENT.DAT", 0); assert(h >= 0); fat.close(h);
+    assert(fat.open("D:\\RESULT.DAT", 1) < 0);
+    assert(fat.open("MISSING\\BAD.DAT", 1) < 0);
+    /* Force the nested directory to grow into a second FAT cluster. */
+    for (i = 0; i < 20; ++i) {
+        char child[] = "CHILD00.DAT";
+        child[5] = (char)('0' + i / 10); child[6] = (char)('0' + i % 10);
+        h = fat.open(child, 1); assert(h >= 0); fat.close(h);
+    }
+    assert(fat.mount());
+    h = fat.open("CHILD19.DAT", 0); assert(h >= 0); fat.close(h);
+    strcpy(protected286CurrentDirectory, "C:\\");
     /* FAT16 with a long occupied prefix: allocation must read each FAT
      * sector once, not issue thousands of reads for individual entries. */
     memset(disk, 0, sizeof(disk));

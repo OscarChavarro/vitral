@@ -3,16 +3,14 @@
 #include "svgalib/Protected286VgaText.h"
 #include "boot/Protected286Loader.h"
 #include "vitralLibC/Protected286Crt.h"
-#include "vitralLibC/CRT.H"
+#include "vitralLibC/crt.h"
 
-extern "C" int raytracerMain(int, char**);
-static char applicationName[] = "RAYTRACE.EXE";
+extern "C" int main(int, char**);
 static char* arguments[32];
 static int prepareArguments()
 {
     char* p = protected286CommandLine;
-    int count = 1;
-    arguments[0] = applicationName;
+    int count = 0;
     while (*p) {
         while (*p == ' ' || *p == '\t') ++p;
         if (!*p) break;
@@ -42,9 +40,9 @@ extern "C" void protected286KernelMain()
                                   protected286InitBytes, 0);
     int count = prepareArguments();
     if (valid && count) {
-        Protected286Crt::writeLine("286 [20] Calling portable raytracer entry.");
-        int status = raytracerMain(count, arguments);
-        Protected286Crt::write("286 [21] Raytracer returned: ");
+        Protected286Crt::writeLine("286 [20] Calling program main.");
+        int status = main(count, arguments);
+        Protected286Crt::write("286 [21] Program returned: ");
         Protected286Crt::writeUnsigned((unsigned long)status);
         Protected286Crt::writeLine("");
         crt286Finalize();
