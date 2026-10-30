@@ -71,7 +71,7 @@ segments can therefore compare equivalent despite being unequal.
 `naturalOrderLess` includes the selector when ordering Turbo pointers, and
 TreeSet, TreeMap and compound half-edge keys use it. Without this total
 order, BREP maps can merge unrelated nodes and topology summaries can lose
-vertices depending on heap placement. `dos/286/crt/ORDTEST.CPP` checks keys
+vertices depending on heap placement. `dos/src/main/vsdk/kernel/286/vitralLibC/ORDTEST.CPP` checks keys
 with identical offsets in different segments, as well as ordinary value
 keys. Keep boolean operations and their validation aligned with `cpp/`;
 do not weaken topology checks to accommodate a container-port defect.
@@ -117,7 +117,7 @@ capped at 16 MiB, excluding the HMA and its loaded executable. It requires
 a bare boot without HIMEM, EMM386, DPMI, SMARTDRV or other extended-memory
 clients. Use DOS's F5 startup bypass when testing the executable already
 copied to C:. Build and transfer first, since bypassing CONFIG.SYS also
-disables the CD-ROM driver. See [dos/286/README.md](dos/286/README.md).
+disables the CD-ROM driver. See [dos/src/main/vsdk/kernel/286/README.md](dos/src/main/vsdk/kernel/286/README.md).
 
 The protected build currently requires a hardware 287-compatible FPU.
 Its CRT initializes C++ globals and calls the portable raytracer entry;

@@ -535,7 +535,7 @@ def base_batchfile(sources, nodes) -> bytes:
                   "echo -DTURBO_C_286_ENABLED >> TC.RSP",
                   "echo -IC:\\TURBOC\\INCLUDE >> TC.RSP",
                   "echo -I..\\DOS\\SRC\\MAIN >> TC.RSP",
-                  "echo -I..\\DOS\\286 >> TC.RSP",
+                  "echo -I..\\DOS\\SRC\\MAIN\\V\\KERNEL\\286 >> TC.RSP",
                   "echo -ISRC;SRC\\MAIN >> TC.RSP",
                   "echo -o" + obj + " >> TC.RSP",
                   "echo " + dos_source + " >> TC.RSP",

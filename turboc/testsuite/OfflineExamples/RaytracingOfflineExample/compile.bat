@@ -19,7 +19,7 @@ echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\..\..\BASE\SRC;..\..\..\BASE\SRC\MAIN;SRC >> TC.RSP
 echo -I..\..\..\DOS\SRC\MAIN >> TC.RSP
-echo -I..\..\..\DOS\286 >> TC.RSP
+echo -I..\..\..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -oBUILDTC\RAYTSIMP.OBJ >> TC.RSP
 echo SRC\RAYTSIMP.CPP >> TC.RSP
 tcc @TC.RSP > TC.LOG
@@ -38,7 +38,7 @@ echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\..\..\BASE\SRC;..\..\..\BASE\SRC\MAIN;SRC >> TC.RSP
 echo -I..\..\..\DOS\SRC\MAIN >> TC.RSP
-echo -I..\..\..\DOS\286 >> TC.RSP
+echo -I..\..\..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -oBUILDTC\COMOPTPR.OBJ >> TC.RSP
 echo SRC\COMOPTPR.CPP >> TC.RSP
 tcc @TC.RSP >> TC.LOG
@@ -57,7 +57,7 @@ echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\..\..\BASE\SRC;..\..\..\BASE\SRC\MAIN;SRC >> TC.RSP
 echo -I..\..\..\DOS\SRC\MAIN >> TC.RSP
-echo -I..\..\..\DOS\286 >> TC.RSP
+echo -I..\..\..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -oBUILDTC\IMAGEXPO.OBJ >> TC.RSP
 echo SRC\IMAGEXPO.CPP >> TC.RSP
 tcc @TC.RSP >> TC.LOG
@@ -142,7 +142,7 @@ echo ..\..\..\BASE\BUILD\BASEGUI.LIB+ >> LIB.RSP
 rem /n below disables default libraries.  In particular, never add CL.LIB:
 rem it is the DOS real-mode CRT.  Every runtime service used in protected
 rem mode must be supplied by DOS.LIB (Protected286Crt and its drivers).
-echo ..\..\..\DOS\286\CRT\BUILD\CRT286.LIB+ >> LIB.RSP
+echo ..\..\..\DOS\SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\CRT286.LIB+ >> LIB.RSP
 echo C:\TURBOC\LIB\MATHL.LIB >> LIB.RSP
 
 echo Linking protected RAY286.BIN payload
@@ -152,15 +152,15 @@ rem DOS loads only this small launcher. The identical PMSW286 first object
 rem fixes the protected-entry offset in both links; BREP stays above 1 MiB.
 echo -c -ml -2 -f87 -O1 > BOOT.RSP
 echo -IC:\TURBOC\INCLUDE >> BOOT.RSP
-echo -I..\..\..\DOS\286 >> BOOT.RSP
+echo -I..\..\..\DOS\SRC\MAIN\V\KERNEL\286 >> BOOT.RSP
 echo -oBUILDTC\PBOOT286.OBJ >> BOOT.RSP
-echo ..\..\..\DOS\286\PBOOT286.CPP >> BOOT.RSP
+echo ..\..\..\DOS\SRC\MAIN\V\KERNEL\286\BOOT\PBOOT286.CPP >> BOOT.RSP
 tcc @BOOT.RSP >> TC.LOG
 if errorlevel 1 goto compiler_error
 echo ..\..\..\DOS\BUILDTC\PMSW286.OBJ+BUILDTC\PBOOT286.OBJ+ > BOOTOBJ.RSP
 rem Keep compiler helpers as objects, without C0L or CL.
-echo ..\..\..\DOS\286\CRT\BUILD\HELPERS.OBJ+ >> BOOTOBJ.RSP
-echo ..\..\..\DOS\286\CRT\BUILD\FPU.OBJ >> BOOTOBJ.RSP
+echo ..\..\..\DOS\SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\HELPERS.OBJ+ >> BOOTOBJ.RSP
+echo ..\..\..\DOS\SRC\MAIN\V\KERNEL\286\VLIBC\BUILD\FPU.OBJ >> BOOTOBJ.RSP
 echo Linking small RAYTRACE.EXE DOS launcher
 tlink /n /c /s @BOOTOBJ.RSP,RAYTRACE.EXE,RAYTRACE.MAP >> TLINK.LOG
 if errorlevel 1 goto linker_error

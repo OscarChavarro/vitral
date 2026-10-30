@@ -1,12 +1,8 @@
 #!/bin/sh
 # Stage long-name host sources, map only the copy, and package DOS components.
 set -eu
-payload_name=${1:-TURBOC}
-case "$payload_name" in
-    ''|*[!A-Z0-9_]* ) echo 'Payload name must be uppercase DOS 8.3' >&2; exit 2 ;;
-esac
-if [ "${#payload_name}" -gt 8 ]; then
-    echo 'Payload name must be at most eight characters' >&2
+if [ "$#" -ne 0 ]; then
+    echo 'Usage: sh scripts/stageDos286.sh' >&2
     exit 2
 fi
 port_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
@@ -19,14 +15,24 @@ mv "$stage_root/TURBOC/base/baselink.bat" "$stage_root/baselink.bat"
     cd "$stage_root/TURBOC"
     python3 scripts/map_to_83.py --clang clang > "$stage_root/MAPPING.LOG" 2>&1
 )
+# COMMAND.COM requires CRLF for batch files; keep host sources in Unix format.
+python3 - "$stage_root/TURBOC" <<'PYDOS'
+from pathlib import Path
+import sys
+for path in Path(sys.argv[1]).rglob('*'):
+    if path.is_file() and path.suffix.lower() == '.bat':
+        data = path.read_bytes().replace(b'\r\n', b'\n').replace(b'\r', b'\n')
+        path.write_bytes(data.replace(b'\n', b'\r\n'))
+PYDOS
 python3 "$port_root/scripts/validateDos83.py" "$stage_root/TURBOC"
 # Exclude unmapped Unix GUI ports: their names can collide when DJTAR truncates
 # them. Only mapped files needed for this build belong in the DOS archive.
-cp "$port_root/../etc/geometry/mitscenes/balls.ray" "$stage_root/TURBOC/BALLS.RAY"
-cp "$port_root/../etc/geometry/mitscenes/balls_featured_object.ray" "$stage_root/TURBOC/APPEL3.RAY"
+mkdir -p "$stage_root/ETC"
+cp "$port_root/../etc/geometry/mitscenes/balls.ray" "$stage_root/ETC/BALLS.RAY"
+cp "$port_root/../etc/geometry/mitscenes/balls_featured_object.ray" "$stage_root/ETC/APPEL3.RAY"
 tar -czf "$stage_root/VITRAL.TGZ" --exclude='*/BUILD' --exclude='*/BUILDTC' \
-    --exclude='*/output.ppm' --transform "s,^TURBOC,$payload_name," -C "$stage_root" \
-    TURBOC/BASE TURBOC/DOS TURBOC/TESTSUIT/OFFLEXAM/RAYOFFEX TURBOC/BALLS.RAY TURBOC/APPEL3.RAY
+    --exclude='*/output.ppm' -C "$stage_root" \
+    TURBOC/BASE TURBOC/DOS TURBOC/TESTSUIT/OFFLEXAM/RAYOFFEX ETC
 mkisofs -quiet -iso-level 1 -o "$stage_root/VITRAL.ISO" \
     -graft-points "VITRAL.TGZ=$stage_root/VITRAL.TGZ"
 printf '%s\n' "$stage_root"

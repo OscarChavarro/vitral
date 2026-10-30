@@ -25,7 +25,7 @@
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 #include "java/lang/Exception.h"
 #ifdef TURBO_C_286_ENABLED
-#include "Protected286ProgressMonitor.h"
+#include "svgalib/Protected286ProgressMonitor.h"
 #endif
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
 static const int ELAPSED_TIME_DECIMALS = 3;

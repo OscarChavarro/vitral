@@ -4,7 +4,7 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #if defined(TURBO_C_286_ENABLED)
-#include "Protected286ModeRgbImage.h"
+#include "svgalib/Protected286ModeRgbImage.h"
 #define VITRAL_DOS_RGB_STORAGE Protected286ModeRgbImage
 #elif defined(TURBO_C_8086_REAL_MODE_ENABLED)
 #include "vsdk/toolkit/media/XmsRgbImage.h"
