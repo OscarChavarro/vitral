@@ -24,6 +24,7 @@ public:
     void addChild(WidgetMenuElement* i);
     virtual java::String toString(int level) const override;
     virtual java::String toString() const override;
+    virtual bool isMenu() const override { return true; }
     const java::String& getName() const;
     char getMnemonic() const;
     const java::String& getAccelerator() const;

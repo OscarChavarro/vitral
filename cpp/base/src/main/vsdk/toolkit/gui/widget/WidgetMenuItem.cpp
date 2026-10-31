@@ -2,7 +2,8 @@
 
 WidgetMenuItem::WidgetMenuItem(Widget* c)
     : name(""), hasName(false), commandName(""), hasCommandName(false),
-      isSeparatorFlag(false), mnemonic(0), accelerator("")
+      isSeparatorFlag(false), isGrayedFlag(false), isCheckableFlag(false),
+      isCheckedFlag(false), mnemonic(0), accelerator("")
 {
     context = c;
 }
@@ -10,6 +11,21 @@ WidgetMenuItem::WidgetMenuItem(Widget* c)
 bool WidgetMenuItem::isSeparator() const
 {
     return isSeparatorFlag;
+}
+
+bool WidgetMenuItem::isGrayed() const
+{
+    return isGrayedFlag;
+}
+
+bool WidgetMenuItem::isCheckable() const
+{
+    return isCheckableFlag;
+}
+
+bool WidgetMenuItem::isChecked() const
+{
+    return isCheckedFlag;
 }
 
 void WidgetMenuItem::setName(const java::String& n)
@@ -41,10 +57,14 @@ void WidgetMenuItem::setCommandName(const java::String& a)
 void WidgetMenuItem::addModifier(const java::String& m)
 {
     if ( m.equals("CHECKED") ) {
+        isCheckableFlag = true;
+        isCheckedFlag = true;
     }
     else if ( m.equals("GRAYED") ) {
+        isGrayedFlag = true;
     }
     else if ( m.equals("UNCHEKED") ) {
+        isCheckableFlag = true;
     }
     else if ( m.equals("SEPARATOR") ) {
         isSeparatorFlag = true;

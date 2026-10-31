@@ -4,6 +4,7 @@
 #include "programs/top/Top.h"
 #include "programs/shell/Shell.h"
 #include "programs/vga/VgaProgram.h"
+#include "programs/sceneEditor/SceneEditorProgram.h"
 #include "programs/vitralRasterizer/VitralRasterizerProgram.h"
 #include "programs/vitralRaytracer/VitralRaytracerProgram.h"
 #include "programs/ifconfig/IfconfigCommand.h"
@@ -17,6 +18,7 @@ static const Program programsMainFunctionsIndex[] __attribute__((section(".progr
     {"top", &Top::main, false},
     {"shell", &Shell::main},
     {"vga", &VgaProgram::main},
+    {"sceneEditor", &SceneEditorProgram::main},
     {"vitral_rasterizer", &VitralRasterizerProgram::main},
     {"vitral_raytracer", &VitralRaytracerProgram::main},
     {"ifconfig", &IfconfigCommand::main, false},

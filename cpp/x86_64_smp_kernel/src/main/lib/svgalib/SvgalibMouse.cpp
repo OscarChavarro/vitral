@@ -6,12 +6,9 @@
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
-#include "drivers/video/svgalib/SvgalibMouse.h"
-#include "drivers/video/virtualConsole/VirtualConsole.h"
-#include "syscalls/Syscalls.h"
+#include "lib/svgalib/SvgalibMouse.h"
 
 char SvgalibMouse::DEVICE[] = "/dev/input/mice";
-SvgalibMouse::State SvgalibMouse::states[VirtualConsole::COUNT];
 
 // What svgalib writes to an IMPS/2 mouse to turn its wheel on (sample rates 200, 100, 80).
 static const unsigned char WHEEL_KNOCK[] = {0xF3, 200, 0xF3, 100, 0xF3, 80};
@@ -31,7 +28,7 @@ SvgalibMouse::reset(State &s, int owner) {
 
 SvgalibMouse::State &
 SvgalibMouse::mine() {
-    State &s = states[Syscalls::console() % VirtualConsole::COUNT];
+    State &s = contextState();
     int pid = getpid();
     if (s.owner != pid) {
         reset(s, pid);

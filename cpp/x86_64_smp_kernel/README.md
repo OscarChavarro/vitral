@@ -27,7 +27,7 @@ These run scripts accept `-n` to build without starting QEMU. `CPU`, `QEMU`, `SM
 
 The scripts default to a bridged e1000 network connection, which may require `sudo`. Set `QEMU_BRIDGE_IF` to choose the host interface, `QEMU_NET=user` for QEMU NAT, or `QEMU_NET=none` to omit the NIC. On Linux, macvtap requires a wired interface and does not allow the host itself to reach the guest; a bridge requires QEMU bridge-helper configuration.
 
-Useful CMake cache options include `BM_ARCH` (`x86_64` or `i386`), `BUILD_TESTS` (off by default), `VITRAL_BASE_DIR`, `LOOP_ROOT_DIR`, `SVGALIB_KERNEL_MODES`, `VGA_PALETTE_DIR` and `VITRAL_RAYTRACER_DEFAULT_SCENE`. Configure with the supplied toolchain, for example:
+Useful CMake cache options include `BM_ARCH` (`x86_64` or `i386`), `BUILD_TESTS` (off by default), `VITRAL_BASE_DIR`, `VITRAL_SVGALIB_DIR`, `LOOP_ROOT_DIR`, `SVGALIB_KERNEL_MODES`, `VGA_PALETTE_DIR`, `SCENE_EDITOR_GUI_DIR` and `VITRAL_RAYTRACER_DEFAULT_SCENE`. Configure with the supplied toolchain, for example:
 
 ```sh
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake -DBUILD_TESTS=ON
@@ -42,7 +42,9 @@ The VFS provides an in-memory root and `/dev`. An embedded FAT image is availabl
 
 At startup, `init` configures `eth0` as `192.168.1.199/24` when present, waits for its link, starts `httpd` if a network card is available, and runs `top`. Adjust the address in `src/main/os/kernel/InitScripts.cpp` for your network. `httpd` serves its frontend on port 80 and publishes system, CPU and log data over WebSockets. The shell runs registered programs; its `ls` lists program names, and `ps`, `exec` and `exit` are built in.
 
-Included programs are `top`, `shell`, `vga`, `vitral_rasterizer`, `vitral_raytracer`, `ifconfig`, `httpd`, `date`, `uptime` and `dmesg`. The graphics programs use shared svgalib-compatible mode selection and can be built against the corresponding Linux APIs. The compatibility libraries provide the subset of libc, libstdc++, pthreads, svgalib and readline needed by the workloads.
+Included programs are `top`, `shell`, `vga`, `sceneEditor`, `vitral_rasterizer`, `vitral_raytracer`, `ifconfig`, `httpd`, `date`, `uptime` and `dmesg`. The graphics programs use shared svgalib-compatible mode selection and can be built against the corresponding Linux APIs. The compatibility libraries provide the subset of libc, libstdc++, pthreads, svgalib and readline needed by the workloads.
+
+`sceneEditor [english | spanish | FILE.json] [MODE]` shows the Scene Editor's menu bar from `etc/gui` with the framebuffer GUI of the base library and its svgalib backend, full screen in a DECwindows look (white and black in monochrome modes): the menu bar along the top and the work area below it, with no window frame. Use the mouse, or F10, the arrows, Enter and Escape; chosen items are reported, not executed. `r` and `R` step through the graphics modes with 1, 4, 8, 16 or 24 bits per pixel, and Escape quits when no menu is open.
 
 ## Source layout
 

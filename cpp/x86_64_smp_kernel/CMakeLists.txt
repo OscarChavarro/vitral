@@ -74,7 +74,9 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/LocalApi
                   src/main/os/fs/DevFs.cpp src/main/os/fs/Fat.cpp src/main/os/fs/Vfs.cpp
                   src/main/programs/top/Top.cpp src/main/programs/shell/Shell.cpp src/main/programs/vga/VgaProgram.cpp
                   src/main/programs/vitralRasterizer/VitralRasterizerProgram.cpp src/main/programs/vitralRaytracer/VitralRaytracerProgram.cpp
-                  src/main/os/drivers/video/svgalib/Svgalib.cpp src/main/os/drivers/tty/Tty.cpp src/main/lib/readline/Readline.cpp
+                  src/main/programs/sceneEditor/SceneEditorProgram.cpp
+                  src/main/os/drivers/video/svga/Svgalib.cpp src/main/os/drivers/video/svga/SvgalibMouseContext.cpp
+                  src/main/os/drivers/tty/Tty.cpp src/main/lib/readline/Readline.cpp
                   src/main/os/drivers/video/vga/VgaMode.cpp
                   src/main/os/net/Net.cpp src/main/os/net/NetDevice.cpp
                   src/main/os/net/NetDevices.cpp src/main/os/net/Ethernet.cpp
@@ -142,13 +144,13 @@ target_include_directories(objsLib SYSTEM PRIVATE ${LIB_INCLUDES})
 # mouse (it reads /dev/input/mice through the libc), the mouse pointer library (svgalib + libc only), the video mode
 # library (svgalib + readline only) and httpd's file reader. Compiled with the kernel flags, but with the vitralLibC
 # headers and the compat headers that stand for <vga.h>, <vgamouse.h> and <readline/*.h>.
-add_library(objsPortable OBJECT src/main/lib/readline/GnuReadline.cpp
-            src/main/os/drivers/video/svgalib/SvgalibMouse.cpp src/main/lib/mouseCursor/MouseCursor.cpp
+add_library(objsPortable OBJECT src/main/lib/readline/GnuReadline.cpp src/main/lib/svgalib/VgaLine.cpp
+            src/main/lib/svgalib/SvgalibMouse.cpp src/main/lib/mouseCursor/MouseCursor.cpp
             src/main/lib/vgaModes/VgaModes.cpp src/main/lib/dithering/Dithering.cpp
             src/main/programs/httpd/StaticFile.cpp)
 target_compile_options(objsPortable PRIVATE ${ARCH_FLAGS} -nostdinc++)
 target_include_directories(objsPortable SYSTEM PRIVATE ${LIB_INCLUDES})
-target_include_directories(objsPortable PRIVATE src/main/os/drivers/video/svgalib src/main/lib/readline/include)
+target_include_directories(objsPortable PRIVATE src/main/lib/svgalib src/main/lib/readline/include)
 
 # Files the portable programs read: the same constants are defined by the build that compiles them on Linux.
 set(VGA_PALETTE_DIR "/media/ramdisk/etc/palettes" CACHE STRING "Directory of the vga program's palette files")
@@ -168,7 +170,7 @@ add_library(objsRasterizer OBJECT src/main/programs/vitralRasterizer/VitralRaste
 target_compile_options(objsRasterizer PRIVATE ${LIB_FLAGS})
 target_compile_definitions(objsRasterizer PRIVATE VITRAL_WITH_POSIX_THREADS main=vitralRasterizerMain)
 target_include_directories(objsRasterizer SYSTEM PRIVATE ${LIB_INCLUDES})
-target_include_directories(objsRasterizer PRIVATE src/main/os/drivers/video/svgalib src/main/lib/readline/include
+target_include_directories(objsRasterizer PRIVATE src/main/lib/svgalib src/main/lib/readline/include
                            ${CMAKE_SOURCE_DIR}/src/main ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main)
 
 # vitral_raytracer: same as the rasterizer (svgalib client + Vitral base library, main renamed).
@@ -188,7 +190,7 @@ target_compile_definitions(objsRaytracer PRIVATE VITRAL_WITH_POSIX_THREADS
                            VITRAL_RAYTRACER_KERNEL_LOG
                            "VITRAL_RAYTRACER_DEFAULT_SCENE=\"${VITRAL_RAYTRACER_DEFAULT_SCENE}\"")
 target_include_directories(objsRaytracer SYSTEM PRIVATE ${LIB_INCLUDES})
-target_include_directories(objsRaytracer PRIVATE src/main/os/drivers/video/svgalib src/main/lib/readline/include
+target_include_directories(objsRaytracer PRIVATE src/main/lib/svgalib src/main/lib/readline/include
                            ${CMAKE_SOURCE_DIR}/src/main ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main)
 
 # pthreadtest (tests/): a portable POSIX threads self-test. It is NOT part of the kernel image (it would show up in top and
@@ -220,17 +222,33 @@ target_compile_options(objsVga PRIVATE ${LIB_FLAGS})
 target_compile_definitions(objsVga PRIVATE VITRAL_WITH_POSIX_THREADS main=vgaMain
                            "VGA_PALETTE_DIR=\"${VGA_PALETTE_DIR}\"")
 target_include_directories(objsVga SYSTEM PRIVATE ${LIB_INCLUDES})
-target_include_directories(objsVga PRIVATE src/main/os/drivers/video/svgalib src/main/lib/readline/include
+target_include_directories(objsVga PRIVATE src/main/lib/svgalib src/main/lib/readline/include
                            ${CMAKE_SOURCE_DIR}/src/main ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main)
+
+# sceneEditor: the Scene Editor's menus on the framebuffer GUI of the base library, drawn and driven by its svgalib
+# backend (VITRAL_SVGALIB_DIR). Compiled like vga; only its main is renamed.
+set(VITRAL_SVGALIB_DIR "${CMAKE_SOURCE_DIR}/../svgalib" CACHE PATH "Vitral C++ svgalib backends")
+set(SCENE_EDITOR_GUI_DIR "/media/ramdisk/etc/gui" CACHE STRING "Directory of the Scene Editor's GUI definitions")
+add_library(objsSceneEditor OBJECT src/main/programs/sceneEditor/SceneEditor.cpp
+            ${VITRAL_SVGALIB_DIR}/src/main/vsdk/toolkit/gui/framebuffer/svgalib/SvgalibFramebuffer.cpp
+            ${VITRAL_SVGALIB_DIR}/src/main/vsdk/toolkit/gui/framebuffer/svgalib/SvgalibInput.cpp
+)
+target_compile_options(objsSceneEditor PRIVATE ${LIB_FLAGS})
+target_compile_definitions(objsSceneEditor PRIVATE VITRAL_WITH_POSIX_THREADS main=sceneEditorMain
+                           "SCENE_EDITOR_GUI_DIR=\"${SCENE_EDITOR_GUI_DIR}\"")
+target_include_directories(objsSceneEditor SYSTEM PRIVATE ${LIB_INCLUDES})
+target_include_directories(objsSceneEditor PRIVATE src/main/lib/svgalib src/main/lib/readline/include
+                           ${CMAKE_SOURCE_DIR}/src/main ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main
+                           ${VITRAL_SVGALIB_DIR}/src/main)
 
 set(SOURCES_BASE "")
 set(BASE_OBJECTS "")
 if(EXISTS "${VITRAL_BASE_DIR}/src/main")
   # Every source of the base library, not the list of Vitral's own CMakeLists.txt, which may lag behind.
   file(GLOB_RECURSE SOURCES_BASE CONFIGURE_DEPENDS "${VITRAL_BASE_DIR}/src/main/*.cpp")
-  # Left out: what Vitral itself does not build (jackson, the io/wrapper leftovers), what needs a library the kernel
+  # Left out: the io/wrapper leftovers, what needs a library the kernel
   # does not have (FreeType) and java.util.regex (<regex> is not in vitralStdC++; nothing else in the base uses it).
-  list(FILTER SOURCES_BASE EXCLUDE REGEX "/src/main/(jackson/|vsdk/toolkit/io/wrapper/(FileUncompressWrapper|Matrix2x2Printer|PipeInputStream|PipeOutputStream|Vector3DPrinter)\\.cpp|vsdk/toolkit/io/geometry/Freetype2FontReader\\.cpp|java/util/regex/)")
+  list(FILTER SOURCES_BASE EXCLUDE REGEX "/src/main/(vsdk/toolkit/io/wrapper/(FileUncompressWrapper|Matrix2x2Printer|PipeInputStream|PipeOutputStream|Vector3DPrinter)\\.cpp|vsdk/toolkit/io/geometry/Freetype2FontReader\\.cpp|java/util/regex/)")
   add_library(objsBase OBJECT ${SOURCES_BASE})
   target_compile_options(objsBase PRIVATE ${LIB_FLAGS} -w)
   target_compile_definitions(objsBase PRIVATE VITRAL_WITH_POSIX_THREADS)
@@ -242,7 +260,7 @@ else()
 endif()
 
 # ---- The kernel (kernel64 or kernel32): flat image linked at 1 MB, appended to the disk after stage 2 ----
-add_executable(${KERNEL_NAME}.elf $<TARGET_OBJECTS:objsKernel> $<TARGET_OBJECTS:objsLib> $<TARGET_OBJECTS:objsPortable> $<TARGET_OBJECTS:objsRasterizer> $<TARGET_OBJECTS:objsRaytracer> ${TEST_OBJECTS} $<TARGET_OBJECTS:objsVga> ${BASE_OBJECTS})
+add_executable(${KERNEL_NAME}.elf $<TARGET_OBJECTS:objsKernel> $<TARGET_OBJECTS:objsLib> $<TARGET_OBJECTS:objsPortable> $<TARGET_OBJECTS:objsRasterizer> $<TARGET_OBJECTS:objsRaytracer> ${TEST_OBJECTS} $<TARGET_OBJECTS:objsVga> $<TARGET_OBJECTS:objsSceneEditor> ${BASE_OBJECTS})
 set_target_properties(${KERNEL_NAME}.elf PROPERTIES LINKER_LANGUAGE CXX)
 target_link_options(${KERNEL_NAME}.elf PRIVATE
   ${ARCH_LINK_FLAGS} -fuse-ld=${BM_FUSE_LD} -nostdlib -static
@@ -252,7 +270,7 @@ set_target_properties(${KERNEL_NAME}.elf PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT
 # Links every object of the base library (no section garbage collection) to prove that nothing is
 # unresolved. Not part of the image.
 if(SOURCES_BASE)
-  add_executable(base_check.elf EXCLUDE_FROM_ALL $<TARGET_OBJECTS:objsKernel> $<TARGET_OBJECTS:objsLib> $<TARGET_OBJECTS:objsPortable> $<TARGET_OBJECTS:objsRasterizer> $<TARGET_OBJECTS:objsRaytracer> ${TEST_OBJECTS} $<TARGET_OBJECTS:objsVga> ${BASE_OBJECTS})
+  add_executable(base_check.elf EXCLUDE_FROM_ALL $<TARGET_OBJECTS:objsKernel> $<TARGET_OBJECTS:objsLib> $<TARGET_OBJECTS:objsPortable> $<TARGET_OBJECTS:objsRasterizer> $<TARGET_OBJECTS:objsRaytracer> ${TEST_OBJECTS} $<TARGET_OBJECTS:objsVga> $<TARGET_OBJECTS:objsSceneEditor> ${BASE_OBJECTS})
   set_target_properties(base_check.elf PROPERTIES LINKER_LANGUAGE CXX LINK_DEPENDS ${LINKER_SCRIPT_KERNEL})
   target_link_options(base_check.elf PRIVATE
     ${ARCH_LINK_FLAGS} -fuse-ld=${BM_FUSE_LD} -nostdlib -static

@@ -1,5 +1,5 @@
-#include "drivers/video/svgalib/vga.h"
-#include "drivers/video/svgalib/SvgalibMouse.h"
+#include "lib/svgalib/vga.h"
+#include "lib/svgalib/SvgalibMouse.h"
 #include "drivers/tty/Tty.h"
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "syscalls/Syscalls.h"
@@ -395,6 +395,15 @@ int
 vga_drawpixel(int x, int y) {
     unsigned console = Syscalls::console();
     VirtualConsole::putPixel(console, x, y, currentColor[console % VirtualConsole::COUNT]);
+    return 0;
+}
+
+// As svgalib: length is in bytes, one per pixel in 2, 16 and 256 colour modes and the pixel size in the others.
+int
+vga_drawscansegment(unsigned char *colors, int x, int y, int length) {
+    unsigned console = Syscalls::console();
+    unsigned bytes = VgaMode::info(VirtualConsole::mode(console)).pixelBytes();
+    VirtualConsole::putSpan(console, x, y, colors, length / (int)bytes);
     return 0;
 }
 

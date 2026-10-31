@@ -32,6 +32,8 @@ public:
     int at(int index) const { return modes[index]; }
     int indexOf(int mode) const;
     int highest() const { return total > 0 ? modes[total - 1] : -1; }
+    // Drops the modes whose bitsPerPixel() is not one of the given depths, keeping the order of the others.
+    void keepDepths(const int *depths, int count);
 
     static void header(char *out, int size);
     static void row(int mode, char *out, int size);

@@ -74,9 +74,7 @@ VirtualConsole::show(unsigned console) {
     } else if (framebufferText(s)) {
         paintAll();
     } else {
-        if (VgaMode::info(s.mode).usesDac()) {
-            VgaMode::loadPalette(s.palette);
-        }
+        VgaMode::loadPalette(s.mode, s.palette);
         VgaMode::blit(s.mode, s.pixels);
     }
     VgaMode::display();
@@ -191,6 +189,43 @@ VirtualConsole::putPixel(unsigned console, int x, int y, uint32_t color) {
     }
 }
 
+void
+VirtualConsole::putSpan(unsigned console, int x, int y, const uint8_t *pixels, int count) {
+    Locked guard;
+    console = resolve(console);
+    Screen &s = screens[console];
+    if (!s.pixels) {
+        return;
+    }
+    const VgaMode::Info &info = VgaMode::info(s.mode);
+    unsigned bytes = info.pixelBytes();
+    if (y < 0 || y >= info.height || x >= info.width) {
+        return;
+    }
+    if (x < 0) {
+        pixels += (size_t)-x * bytes;
+        count += x;
+        x = 0;
+    }
+    if (count > info.width - x) {
+        count = info.width - x;
+    }
+    if (count <= 0) {
+        return;
+    }
+    Memory::copy(s.pixels + ((size_t)y * info.width + x) * bytes, pixels, (size_t)count * bytes);
+    if (console != activeIndex) {
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        uint32_t color = 0;
+        for (unsigned b = 0; b < bytes; b++) {
+            color |= (uint32_t)pixels[(size_t)i * bytes + b] << (8 * b);
+        }
+        VgaMode::plot(s.mode, x + i, y, color);
+    }
+}
+
 uint32_t
 VirtualConsole::getPixel(unsigned console, int x, int y) {
     Locked guard;
@@ -218,12 +253,12 @@ VirtualConsole::setPalette(unsigned console, unsigned first, unsigned count, con
     Locked guard;
     console = resolve(console);
     Screen &s = screens[console];
-    if (!s.pixels || VgaMode::info(s.mode).colors != 256) {
+    if (!s.pixels || !VgaMode::hasPalette(s.mode) || first + count > VgaMode::info(s.mode).colors) {
         return;
     }
     Memory::copy(s.palette + first * 3, rgb, count * 3);
     if (console == activeIndex) {
-        VgaMode::loadPalette(s.palette);
+        VgaMode::loadPalette(s.mode, s.palette);
     }
 }
 

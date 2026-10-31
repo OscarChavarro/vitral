@@ -118,10 +118,14 @@ kprintf(const char *fmt, ...) {
     }
 
     printf64("%s", message);
+    bool serial = Uart::ready();
     Uart::write(stamp, stampLength);
     Uart::write(message, length);
     if (length == 0 || message[length - 1] != '\n') {
         Uart::write("\n", 1);
+    }
+    if (serial && !Uart::ready()) {
+        kprintf("COM1: much slower than 9600 baud, serial log released\n");
     }
     return count;
 }

@@ -75,6 +75,22 @@ VgaModes::indexOf(int mode) const {
 }
 
 void
+VgaModes::keepDepths(const int *depths, int count) {
+    int kept = 0;
+    for (int i = 0; i < total; i++) {
+        int bits = bitsPerPixel(modes[i]);
+        bool wanted = false;
+        for (int k = 0; k < count && !wanted; k++) {
+            wanted = depths[k] == bits;
+        }
+        if (wanted) {
+            modes[kept++] = modes[i];
+        }
+    }
+    total = kept;
+}
+
+void
 VgaModes::header(char *out, int size) {
     snprintf(out, size, "%3s  %-18s %3s %8s  %-7s %s", "#", "MODE", "BPP", "COLORS", "ORIGIN", "NOTES");
 }

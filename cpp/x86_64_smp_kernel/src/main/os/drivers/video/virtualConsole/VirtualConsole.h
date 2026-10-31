@@ -27,6 +27,8 @@ public:
     static int columns(unsigned console);
     static int rows(unsigned console);
     static void putPixel(unsigned console, int x, int y, uint32_t color);
+    // count pixels of a row from (x, y), packed as the mode stores them (pixel bytes each, least significant first).
+    static void putSpan(unsigned console, int x, int y, const uint8_t *pixels, int count);
     static uint32_t getPixel(unsigned console, int x, int y);
     static void clearPixels(unsigned console, uint32_t color);
     static void setPalette(unsigned console, unsigned first, unsigned count, const uint8_t *rgb);

@@ -239,6 +239,22 @@ VgaMode::loadPalette(const uint8_t *rgb) {
 }
 
 void
+VgaMode::loadPalette(Id id, const uint8_t *rgb) {
+    if (info(id).usesDac()) {
+        loadPalette(rgb);
+        return;
+    }
+    if (!hasPalette(id)) {
+        return;
+    }
+    const ModeRegisters &r = REGISTERS[(unsigned)id];
+    Ports::outb(PEL_MASK, 0xFF);
+    for (unsigned i = 0; i < 16; i++) {
+        dac(r.ac[i], rgb[i * 3] & 0x3F, rgb[i * 3 + 1] & 0x3F, rgb[i * 3 + 2] & 0x3F);
+    }
+}
+
+void
 VgaMode::saveFont() {
     if (fontSaved) {
         return;

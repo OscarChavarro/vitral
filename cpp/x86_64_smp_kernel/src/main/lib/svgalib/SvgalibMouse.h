@@ -1,6 +1,6 @@
 #ifndef __SVGALIB_MOUSE__
 #define __SVGALIB_MOUSE__
-#include "drivers/video/svgalib/vgamouse.h"
+#include "lib/svgalib/vgamouse.h"
 
 // svgalib's mouse (<vgamouse.h> plus the mouse calls of <vga.h>) on top of /dev/input/mice, read with the protocol of
 // the configured type (MOUSE_IMPS2, the type a Linux libvga.config gives that device). What svgalib keeps in globals
@@ -45,7 +45,8 @@ public:
     static void defaultHandler(int button, int dx, int dy, int dz, int drx, int dry, int drz);
 
 private:
-    static State states[];
+    // The host supplies storage for the current execution context.
+    static State &contextState();
 
     static void reset(State &s, int owner);
     static int packetSize(int type) { return type == MOUSE_IMPS2 ? 4 : 3; }

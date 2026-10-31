@@ -120,6 +120,10 @@ vga_setrgbcolor(int r, int g, int b);
 int
 vga_drawpixel(int x, int y);
 int
+vga_drawline(int x1, int y1, int x2, int y2);
+int
+vga_drawscansegment(unsigned char *colors, int x, int y, int length);
+int
 vga_getpixel(int x, int y);
 int
 vga_setpalvec(int start, int num, int *pal);

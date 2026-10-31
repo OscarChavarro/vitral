@@ -34,4 +34,5 @@ echo "ISO: $BUILD/vitral.iso"
 
 [[ "${NO_RUN:-}" == "1" ]] && exit 0
 QEMU_EXTRA=(-smp "${SMP:-$(host_logical_cpus)}")
+QEMU_SERIAL_LOG="${QEMU_SERIAL_LOG:-$BUILD/com1.log}"
 launch_qemu "${QEMU:-qemu-system-x86_64}" "${CPU:-qemu64}" -cdrom "$BUILD/vitral.iso" -boot d

@@ -8,6 +8,9 @@
 # with QEMU's bridge helper and a physical one (eno1) through a macvtap device (wired cards only; the host itself cannot
 # reach the guest through it). macOS vmnet and the bridge helper need root: the QEMU command then runs under sudo (the
 # build does not). The macvtap device is created with sudo and handed to the user, so QEMU itself runs unprivileged.
+# Serial port: COM1, where the kernel copies its log, is written to com1.log in the build directory (QEMU_SERIAL_LOG
+# names another file); QEMU_SERIAL replaces the whole -serial backend (e.g. stdio, or /dev/ttyS0 for a real port).
+# Without -serial, QEMU's graphical displays give COM1 a virtual console that may drain too slowly for the kernel.
 # run_qemu <qemu-binary> <cpu> <build-dir> [extra cmake -D options...]
 #   Builds into <build-dir>, assembles boot.img and boots it, unless -n was given to the script.
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -41,13 +44,22 @@ run_qemu() {
 
     [[ "${NO_RUN:-}" == "1" ]] && exit 0
 
+    QEMU_SERIAL_LOG="${QEMU_SERIAL_LOG:-$build/com1.log}"
     launch_qemu "$qemu" "$cpu" -drive "file=$img,format=raw,if=ide" -boot c
 }
 
 # launch_qemu <qemu-binary> <cpu> <drive/boot options...>
-# Starts QEMU with the common options (RAM, extra -smp from QEMU_EXTRA, display) and waits for it.
+# Starts QEMU with the common options (RAM, extra -smp from QEMU_EXTRA, display, serial port) and waits for it.
 launch_qemu() {
     local qemu="$1" cpu="$2"; shift 2
+    local serial="${QEMU_SERIAL:-}"
+    if [[ -z "$serial" ]]; then
+        local log="${QEMU_SERIAL_LOG:-$ROOT/build/com1.log}"
+        mkdir -p "$(dirname "$log")"
+        : > "$log"  # created by the user, so that a QEMU under sudo does not leave it owned by root
+        serial="file:$log"
+        echo "COM1: $log"
+    fi
     local vga=(-vga std)
     [[ -n "${QEMU_VGA[*]+x}" ]] && vga=("${QEMU_VGA[@]}")
     qemu_network
@@ -58,7 +70,7 @@ launch_qemu() {
     [[ "$display" == "cocoa" ]] && display_opts="cocoa,zoom-to-fit=on"  # content follows the window size
 
     ${runner[@]+"${runner[@]}"} "$qemu" -machine pc -cpu "$cpu" -m "${QEMU_RAM:-64}" ${QEMU_EXTRA[@]+"${QEMU_EXTRA[@]}"} \
-        "${vga[@]}" ${nic[@]+"${nic[@]}"} -display "$display_opts" "$@" &
+        "${vga[@]}" ${nic[@]+"${nic[@]}"} -display "$display_opts" -serial "$serial" "$@" &
     local qemu_pid=$!
     trap 'kill "$qemu_pid" 2>/dev/null' INT TERM
     if [[ "$display" == "cocoa" ]]; then

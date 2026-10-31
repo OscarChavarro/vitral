@@ -10,6 +10,9 @@ private:
     java::String commandName;
     bool hasCommandName;
     bool isSeparatorFlag;
+    bool isGrayedFlag;
+    bool isCheckableFlag;
+    bool isCheckedFlag;
     char mnemonic;
     java::String accelerator;
 
@@ -18,6 +21,9 @@ public:
     virtual ~WidgetMenuItem() {}
 
     bool isSeparator() const;
+    bool isGrayed() const;
+    bool isCheckable() const;
+    bool isChecked() const;
     void setName(const java::String& n);
     java::String getName() const;
     java::String getCommandName() const;

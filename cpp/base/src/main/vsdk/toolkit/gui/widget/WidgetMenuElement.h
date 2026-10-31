@@ -35,6 +35,11 @@ public:
     virtual ~WidgetMenuElement() {}
 
     virtual java::String toString(int level) const = 0;
+
+    /**
+    @return true for a `WidgetMenu`, false for a `WidgetMenuItem`
+    */
+    virtual bool isMenu() const { return false; }
 };
 
 #endif

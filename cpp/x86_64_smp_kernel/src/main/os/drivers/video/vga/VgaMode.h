@@ -82,6 +82,12 @@ public:
     static constexpr unsigned PALETTE_BYTES = 768;
     static void defaultPalette(uint8_t *rgb);
     static void loadPalette(const uint8_t *rgb);
+    // Loads the DAC entries the pixel values of the mode show: all of them with a DAC, or the 16 that the attribute
+    // controller selects in 16 colour planar modes. Nothing for the modes without a palette.
+    static void loadPalette(Id id, const uint8_t *rgb);
+    static bool hasPalette(Id id) {
+        return info(id).usesDac() || (info(id).layout == Layout::Planar && info(id).colors == 16);
+    }
 
     static void blit(Id id, const uint8_t *pixels);
     static void plot(Id id, int x, int y, uint32_t color);
