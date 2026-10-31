@@ -7,9 +7,86 @@ project(SceneEditorApplication CXX)
 # (OpenGL 4.1 core, or OpenGL 1.2 fixed function, without shaders), or the
 # native GTK4 + OpenGL 4.1 macOS/Linux example.
 set(SCENE_EDITOR_VARIANT "xm_opengl4" CACHE STRING
-    "Variant: xm_opengl4, xaw_opengl4, xm_opengl1, xaw_opengl1 or gtk4_opengl4")
+    "Variant: xm_opengl4, xaw_opengl4, xm_opengl1, xaw_opengl1, gtk4_opengl4 or x11_framebuffer")
 set_property(CACHE SCENE_EDITOR_VARIANT PROPERTY STRINGS
-    xm_opengl4 xaw_opengl4 xm_opengl1 xaw_opengl1 gtk4_opengl4)
+    xm_opengl4 xaw_opengl4 xm_opengl1 xaw_opengl1 gtk4_opengl4 x11_framebuffer)
+
+# The framebuffer GUI of the toolkit over its Xlib backend: one X11 window
+# drawn with Xlib primitives and core fonts, with CPU rendered viewports. No
+# OpenGL, no Xt, no widget set: the application classes only use the
+# Framebuffer interfaces, so they are the ones the svgalib (or any other)
+# backend can run.
+if(SCENE_EDITOR_VARIANT STREQUAL "x11_framebuffer")
+    message(STATUS "SceneEditorApplication variant: ${SCENE_EDITOR_VARIANT}")
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+        "${CMAKE_CURRENT_LIST_DIR}/build/${SCENE_EDITOR_VARIANT}")
+    find_package(X11 REQUIRED)
+    set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
+    set(VITRAL_XLIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../xlib")
+    if(NOT TARGET vitral_base)
+        set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
+        set(WITH_JPEG ON CACHE BOOL "Enable JPEG image format support" FORCE)
+        set(WITH_PNG ON CACHE BOOL "Enable PNG image format support" FORCE)
+        add_subdirectory("${VITRAL_BASE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_base")
+    endif()
+    if(NOT TARGET vitral_xlib)
+        add_subdirectory("${VITRAL_XLIB_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_xlib")
+    endif()
+    set_target_properties(vitral_base vitral_xlib PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    add_executable(SceneEditorApplication
+        src/application/framebuffer/xlib/XlibFramebufferSceneEditorApplication.cpp
+        src/application/framebuffer/FramebufferSceneEditor.cpp
+        src/render/framebuffer/FramebufferDrawingAreaRenderer.cpp
+        src/application/commands/GeometryCreationCommandsExecutor.cpp
+        src/application/commands/GuiEventExecutor.cpp
+        src/gui/DrawingAreaInteractionTechniques.cpp
+        src/gui/PointerCursor.cpp
+        src/gui/SelectedBodyMapToggles.cpp
+        src/gui/history/InteractionEditRecorder.cpp
+        src/gui/history/UndoRedoInteractionTechnique.cpp
+        src/io/FileSuffixFilter.cpp
+        src/io/GuiI18nContextBuilder.cpp
+        src/io/GuiJsonReader.cpp
+        src/model/ApplicationModel.cpp
+        src/model/DrawingArea.cpp
+        src/model/GuiState.cpp
+        src/model/ProjectedViewsDebugPlan.cpp
+        src/model/Scene.cpp
+        src/model/SceneLightFactory.cpp
+        src/model/dialog/SceneHierarchyPresenter.cpp
+        src/model/editor/FunctionalExplicitSurfaceEditor.cpp
+        src/model/history/BodyTransformState.cpp
+        src/model/history/CameraState.cpp
+        src/model/history/CompositeOperation.cpp
+        src/model/history/LightTransformState.cpp
+        src/model/history/SceneElementKind.cpp
+        src/model/history/SceneHistory.cpp
+        src/model/history/SceneMembershipOperation.cpp
+        src/model/history/SceneSelectionOperation.cpp
+        src/model/history/SceneSnapshot.cpp
+        src/model/history/SceneTransformationOperation.cpp
+        src/model/history/UndoQueue.cpp
+        src/model/history/ViewportHistory.cpp
+        src/model/history/ViewportState.cpp
+        src/model/history/ViewportStateOperation.cpp
+        src/model/selection/LightPicker.cpp
+        src/model/selection/ScenePicker.cpp
+        src/model/selection/SceneSelectionEditor.cpp
+        src/model/selection/SelectionSet.cpp
+        src/render/DrawingAreaGizmoPresenter.cpp
+        src/render/FrameCaptureService.cpp
+        src/render/ProjectedViewsDebugger.cpp
+    )
+    target_include_directories(SceneEditorApplication PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/src"
+        "${VITRAL_BASE_DIR}/src/main")
+    target_link_libraries(SceneEditorApplication PRIVATE
+        vitral_xlib vitral_base ${X11_LIBRARIES})
+    return()
+endif()
 if(NOT SCENE_EDITOR_VARIANT MATCHES "^(xm|xaw|gtk4)_(opengl4|opengl1)$")
     message(FATAL_ERROR
         "SCENE_EDITOR_VARIANT must be xm_opengl4, xaw_opengl4, xm_opengl1 "

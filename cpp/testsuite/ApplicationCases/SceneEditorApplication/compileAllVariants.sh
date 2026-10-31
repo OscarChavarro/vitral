@@ -2,7 +2,7 @@
 set -uo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VARIANTS=(xaw_opengl1 xaw_opengl4 xm_opengl1 xm_opengl4 gtk4_opengl4)
+VARIANTS=(xaw_opengl1 xaw_opengl4 xm_opengl1 xm_opengl4 gtk4_opengl4 x11_framebuffer)
 FAILED=()
 
 for VARIANT in "${VARIANTS[@]}"; do

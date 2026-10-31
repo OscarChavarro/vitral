@@ -40,6 +40,10 @@ public:
     bool isActive() const { return active; }
     // Closes every menu and disarms the bar.
     void deactivate();
+    // Posts a menu as a Motif popup menu with its top-left corner at (x, y), moved to fit on the surface. It is not
+    // attached to the bar: keyPressed() and mouseEvent() drive it as the bar's menus (Left and Right do not move to
+    // other menus) and takeChosen() returns its chosen item. The menu must live while it is posted.
+    void popup(WidgetMenu *menu, int x, int y);
     // Return true when the event was for the menus.
     bool keyPressed(const KeyEvent &event);
     bool mouseEvent(const FramebufferEvent &event);
@@ -87,6 +91,7 @@ private:
     int barHeight;
     int barArmed;
     bool active;
+    bool popupMode;
     bool pressed;
     WidgetMenuItem *chosen;
 

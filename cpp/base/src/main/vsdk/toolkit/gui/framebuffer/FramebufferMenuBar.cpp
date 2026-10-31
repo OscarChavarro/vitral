@@ -14,7 +14,7 @@ static constexpr int NO_LEVEL = -2;
 
 FramebufferMenuBar::FramebufferMenuBar()
     : surface(nullptr), theme(FramebufferTheme::monochrome()), menubar(nullptr), barX(0), barY(0), barWidth(0),
-      barHeight(0), barArmed(-1), active(false), pressed(false), chosen(nullptr) {}
+      barHeight(0), barArmed(-1), active(false), popupMode(false), pressed(false), chosen(nullptr) {}
 
 FramebufferMenuBar::~FramebufferMenuBar() {
     for (Popup *popup : popups) {
@@ -97,6 +97,7 @@ FramebufferMenuBar::layout(Framebuffer &target, const FramebufferTheme &style, i
     }
     popups.clear();
     active = false;
+    popupMode = false;
     pressed = false;
     barArmed = -1;
     surface = &target;
@@ -335,7 +336,19 @@ FramebufferMenuBar::deactivate() {
     }
     pressed = false;
     active = false;
+    popupMode = false;
     armBar(-1);
+}
+
+void
+FramebufferMenuBar::popup(WidgetMenu *menu, int x, int y) {
+    if (!surface || !menu) {
+        return;
+    }
+    deactivate();
+    active = true;
+    popupMode = true;
+    openPopup(menu, x, y, 0, 0, false);
 }
 
 void
@@ -379,6 +392,7 @@ FramebufferMenuBar::post(int index, bool armFirst) {
         return;
     }
     active = true;
+    popupMode = false;
     closeFrom(0);
     armBar(index);
     const Entry &entry = bar[index];
@@ -493,7 +507,7 @@ FramebufferMenuBar::mnemonic(char key) {
 
 bool
 FramebufferMenuBar::keyPressed(const KeyEvent &event) {
-    if (!surface || bar.empty()) {
+    if (!surface || (bar.empty() && popups.empty())) {
         return false;
     }
     int key = event.keycode;
@@ -523,7 +537,7 @@ FramebufferMenuBar::keyPressed(const KeyEvent &event) {
     } else if (key == KeyEvent::KEY_LEFT) {
         if (level > 0) {
             closeFrom(level);
-        } else {
+        } else if (!popupMode) {
             post((barArmed - 1 + count) % count, true);
         }
     } else if (key == KeyEvent::KEY_RIGHT) {
@@ -531,7 +545,7 @@ FramebufferMenuBar::keyPressed(const KeyEvent &event) {
         if (deepest && deepest->armed >= 0 && deepest->entries[deepest->armed].submenu &&
             deepest->entries[deepest->armed].enabled) {
             postSubmenu(level, true);
-        } else {
+        } else if (!popupMode) {
             post((barArmed + 1) % count, true);
         }
     } else if (key == KeyEvent::KEY_ENTER || key == KeyEvent::KEY_NUMENTER || key == KeyEvent::KEY_SPACE) {
@@ -577,7 +591,7 @@ FramebufferMenuBar::locate(int x, int y, int &level, int &index) const {
 
 bool
 FramebufferMenuBar::mouseEvent(const FramebufferEvent &event) {
-    if (!surface || bar.empty()) {
+    if (!surface || (bar.empty() && popups.empty())) {
         return false;
     }
     int level;
@@ -611,7 +625,7 @@ FramebufferMenuBar::mouseEvent(const FramebufferEvent &event) {
         if (!active) {
             return false;
         }
-        if (level == BAR_LEVEL && index != barArmed) {
+        if (level == BAR_LEVEL && index != barArmed && !popupMode) {
             post(index, false);
         } else if (level >= 0) {
             armAt(level, index);

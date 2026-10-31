@@ -10,6 +10,9 @@ public:
     // Waits for the next event. Returns false only when no more input can arrive.
     virtual bool waitEvent(FramebufferEvent &event) = 0;
     virtual bool hasPointer() const = 0;
+    // Moves the pointer to a surface position, without reporting a MouseMoved event for it. Backends that cannot
+    // place the pointer ignore it and return false.
+    virtual bool warpPointer(int, int) { return false; }
 };
 
 #endif

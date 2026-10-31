@@ -19,6 +19,8 @@ Each executable is built for one **widget set** and one **OpenGL version**:
 | `xm_opengl1`  | Motif         | 1.2 fixed function              |
 | `xaw_opengl1` | Athena (Xaw)  | 1.2 fixed function              |
 
+| `x11_framebuffer` | Framebuffer GUI over Xlib | none (CPU rendering) |
+
 Motif and Athena never share a process. On macOS only the `opengl1` variants
 are supported: XQuartz exposes only legacy OpenGL through GLX.
 
@@ -51,6 +53,37 @@ The dialogs are built from the definitions shared by every port
 interface connection form and the scene selector (`h` key in the drawing
 area), whose tree selects lights and geometry objects (undoable), deletes
 them with the Delete key and hides or shows them from its context menu.
+
+## X11 framebuffer variant
+
+```sh
+./runX11framebuffer.sh [-display name] [-geometry WxH+X+Y] [-fn font] [english|spanish]
+```
+
+The `x11_framebuffer` variant runs the editor on the framebuffer GUI of the
+toolkit (`cpp/base/src/main/vsdk/toolkit/gui/framebuffer`), the same one
+the `sceneEditor` program of the minimal kernel draws with svgalib: menus,
+tool bar, dialogs and viewports are drawn with pixels, lines, rectangles,
+polygons and a core font on one X11 window, using Xlib only (the backend is
+in `cpp/xlib`). Without `-geometry` the window is maximized (the largest
+window the desktop allows, not full screen). The font is `10x20` unless
+`-fn` names another one, and the language comes from the argument or the
+`SCENE_EDITOR_GUI_LANGUAGE` variable.
+
+The viewports are rendered in CPU (hidden lines, or raytracing chosen from
+the menu of the viewport title); there is no OpenGL. At the right, the
+tabbed side panel has the button groups of the GUI definition, as in the Xt
+variants: creation of geometries, lights, import and export (in two
+collapsible sections), GUI, scene components and render; its modify tab
+shows the selected body and the transformation tools. Dialogs are modal and
+drawn inside the same window: file import (also from File → Import) and
+export, palettes, the raytraced image, messages and the scene selector
+(`h`). The application
+class (`src/application/framebuffer/FramebufferSceneEditor`) only uses the
+framebuffer interfaces; only its `main` knows Xlib, so the same class can
+run on the svgalib and future BGI backends. Not available yet in this
+variant: the tangible interface client, the MCP service and the editors of
+the modify panel of the other variants.
 
 To configure and build every variant without running it:
 

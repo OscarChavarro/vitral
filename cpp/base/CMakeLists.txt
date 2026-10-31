@@ -310,6 +310,26 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/dialog/components/DialogFileFilter.cpp
     src/main/vsdk/toolkit/gui/dialog/components/DialogTreeNode.cpp
     src/main/vsdk/toolkit/gui/dialog/runtime/DialogSession.cpp
+    src/main/jackson/databind/JsonNode.cpp
+    src/main/jackson/databind/ObjectMapper.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/Framebuffer.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferMenuBar.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferMenuReader.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferPainter.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferSnapshot.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferTheme.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferWindowFrame.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferButton.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferDialog.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferDialogForm.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferFileDialog.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferImageView.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferLabel.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferList.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferText.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferTextField.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferToolBar.cpp
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferSidePanel.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetMenu.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetMenuElement.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetMenuItem.cpp

@@ -29,6 +29,15 @@ public:
     virtual void line(int x0, int y0, int x1, int y1, uint32_t color) = 0;
     virtual void fillRectangle(int x, int y, int width, int height, uint32_t color) = 0;
     virtual void rectangle(int x, int y, int width, int height, uint32_t color) = 0;
+    // Fills the polygon of count vertices (x0, y0, x1, y1, ...) with the even-odd rule, edges included. The default
+    // implementation fills horizontal spans with fillRectangle(); backends with a native polygon fill override it.
+    virtual void fillPolygon(const int *xy, int count, uint32_t color);
+    // Draws a width x height block of 0xRRGGBB pixels, row by row from the top, with its top-left corner at (x, y).
+    // The default implementation draws it with pixel(); backends that can copy whole images override it.
+    virtual void putImage(int x, int y, int width, int height, const uint32_t *rgb);
+    // Reads back a width x height block of the surface as 0xRRGGBB pixels. Returns false when the backend cannot
+    // read its pixels as colors, which is what the default implementation does.
+    virtual bool readImage(int x, int y, int width, int height, uint32_t *rgb) const;
     // Draws text with the top-left corner of its first character cell at (x, y).
     virtual void text(int x, int y, const char *text, uint32_t color) = 0;
     // Bracket a group of drawing operations so that the backend can remove overlays, such as the mouse pointer,
