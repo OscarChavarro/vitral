@@ -36,7 +36,15 @@ if(APPLE)
 endif()
 
 find_package(PNG REQUIRED)
-find_package(JNI REQUIRED)
+# Only the JNI headers (jni.h, jni_md.h) are needed: the library is loaded
+# from Java with System.loadLibrary, so it does not link against libjvm nor
+# libjawt. find_package(JNI REQUIRED) would also demand those libraries
+# (always, before CMake 3.24), failing on JRE-headless/JDK-headless systems.
+find_package(JNI)
+if(NOT JAVA_INCLUDE_PATH OR NOT JAVA_INCLUDE_PATH2)
+  message(FATAL_ERROR "jni.h not found: install a JDK (e.g. openjdk-17-jdk-headless) or set JAVA_HOME")
+endif()
+set(JNI_INCLUDE_DIRS "${JAVA_INCLUDE_PATH}" "${JAVA_INCLUDE_PATH2}")
 find_package(Java COMPONENTS Development REQUIRED)
 
 #- JNI header generation ---------------------------------------------------

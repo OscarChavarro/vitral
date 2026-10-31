@@ -20,7 +20,15 @@ endif()
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
-find_package(JNI REQUIRED)
+# Only the JNI headers (jni.h, jni_md.h) are needed: the library is loaded
+# from Java with System.loadLibrary, so it does not link against libjvm nor
+# libjawt. find_package(JNI REQUIRED) would also demand those libraries
+# (always, before CMake 3.24), failing on JRE-headless/JDK-headless systems.
+find_package(JNI)
+if(NOT JAVA_INCLUDE_PATH OR NOT JAVA_INCLUDE_PATH2)
+  message(FATAL_ERROR "jni.h not found: install a JDK (e.g. openjdk-17-jdk-headless) or set JAVA_HOME")
+endif()
+set(JNI_INCLUDE_DIRS "${JAVA_INCLUDE_PATH}" "${JAVA_INCLUDE_PATH2}")
 
 #- Shared library, as loaded by vsdk.toolkit.processing.LzwWrapper ---------
 

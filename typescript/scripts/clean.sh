@@ -17,3 +17,5 @@ rm -rf "$typescript_dir/base/dist" \
   "$typescript_dir/coverage" \
   "$typescript_dir/artifacts" \
   "${TMPDIR:-/tmp}/vitral-npm-cache"
+
+rm -rf testsuite/VitralWebTestsuiteContainer/node_modules/
