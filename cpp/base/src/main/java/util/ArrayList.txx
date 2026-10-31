@@ -10,7 +10,7 @@ ArrayList<T>::ArrayList() {
     increaseChunk = 100;
     maxSize = increaseChunk;
     init();
-};
+}
 
 template <class T>
 ArrayList<T>::~ArrayList() {
