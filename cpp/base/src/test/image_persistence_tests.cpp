@@ -1,7 +1,7 @@
+#include "java/lang/String.h"
 #include <gtest/gtest.h>
 
 #include <cstdio>
-#include <string>
 
 #include "java/io/File.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
@@ -15,7 +15,7 @@ TEST(ImagePersistenceTest, ImportRGBAReadsPngPixelsAsOpaque)
     image.init(3, 2);
     image.putPixel(0, 0, (char)255, 0, 0);
     image.putPixel(2, 1, 0, 0, (char)200);
-    std::string path = testing::TempDir() + "vitral_import_rgba.png";
+    java::String path = java::String(testing::TempDir().c_str()) + "vitral_import_rgba.png";
     java::File file(path.c_str());
     if ( !ImagePersistence::exportPNG(file, &image) ) {
         GTEST_SKIP() << "Built without PNG support";

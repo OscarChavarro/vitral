@@ -107,7 +107,7 @@ static MicrofacetConfig defaultConfig()
 static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java::String& materialName)
 {
     MicrofacetConfig d = defaultConfig();
-    if ( csvFileName.empty() || materialName.empty() ) return d;
+    if ( csvFileName.isEmpty() || materialName.isEmpty() ) return d;
 
     FILE* in = fopen(csvFileName.c_str(), "r");
     if ( !in ) return d;
@@ -151,7 +151,7 @@ static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java:
     char lineStr[4096];
     while ( fgets(lineStr, sizeof(lineStr), in) ) {
         java::String line(lineStr);
-        if ( trim(line).empty() ) continue;
+        if ( trim(line).isEmpty() ) continue;
         java::ArrayList<java::String> cols;
         splitCsv(line, cols);
         if ( iName < 0 || iName >= (int)cols.size() ) continue;

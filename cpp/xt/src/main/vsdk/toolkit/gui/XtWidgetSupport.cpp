@@ -1,8 +1,9 @@
 // Before any other header that could include the Xt ones
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/XtIntrinsics.h"
 
 #include <cstring>
-#include <vector>
 
 #include "vsdk/toolkit/gui/CommandListener.h"
 #include "vsdk/toolkit/gui/XtWidgetSupport.h"
@@ -133,7 +134,10 @@ void XtWidgetSupport::removeAll(XtWidget container)
     XtVaGetValues(container, XtNchildren, &children,
                   XtNnumChildren, &count, nullptr);
     // Destroying changes the list of children: work over a copy
-    std::vector<XtWidget> copy(children, children + count);
+    java::ArrayList<XtWidget> copy;
+    for ( Cardinal i = 0; i < count; i++ ) {
+        copy.add(children[i]);
+    }
     for ( size_t i = 0; i < copy.size(); i++ ) {
         XtDestroyWidget(copy[i]);
     }
@@ -146,8 +150,8 @@ void XtWidgetSupport::setColor(XtWidget widget, const char* resource,
                   static_cast<int>(strlen(colorName) + 1), nullptr);
 }
 
-std::string XtWidgetSupport::uniqueName(const char* prefix)
+java::String XtWidgetSupport::uniqueName(const char* prefix)
 {
     static unsigned int sequence = 0;
-    return prefix + std::to_string(sequence++);
+    return prefix + java::String::valueOf(sequence++);
 }

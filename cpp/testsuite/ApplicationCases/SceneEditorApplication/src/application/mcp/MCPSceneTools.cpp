@@ -1,5 +1,6 @@
-#include <stdexcept>
-#include <string>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
 
 #include "java/lang/StringBuilder.h"
 #include "java/util/ArrayList.txx"
@@ -55,7 +56,7 @@ Scene* MCPSceneTools::scene() const
 }
 
 void MCPSceneTools::recordSceneChange(const java::String& tool,
-                                      const std::function<void()>& change)
+                                      const java::Runnable& change)
 {
     model->getEditHistory()->getSceneHistory()->perform(tool, change);
 }
@@ -195,8 +196,8 @@ void MCPSceneTools::moveBody(const java::String& request)
                                                  (double)(bodies.size() - 1));
 
         if ( index < 0 || index >= bodies.size() ) {
-            throw std::invalid_argument(
-                "Body index out of range: " + std::to_string(index));
+            throw java::IllegalArgumentException(
+                "Body index out of range: " + java::String::valueOf(index));
         }
         SimpleBody* body = bodies.get(index);
         Vector3Dd p = body->getPosition();
@@ -216,8 +217,8 @@ void MCPSceneTools::selectBody(const java::String& request)
     scene->selectedThings->unselectAll();
     if ( index >= 0 ) {
         if ( index >= scene->scene->getSimpleBodies().size() ) {
-            throw std::invalid_argument(
-                "Body index out of range: " + std::to_string(index));
+            throw java::IllegalArgumentException(
+                "Body index out of range: " + java::String::valueOf(index));
         }
         scene->selectedThings->select(index);
     }

@@ -5,7 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTOR__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTOR__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -28,12 +28,12 @@ C++ counterpart of Java's `_PolyhedralBoundedSolidSetIntersector`.
 */
 class _PolyhedralBoundedSolidSetIntersector : public _PolyhedralBoundedSolidOperator {
 public:
-    typedef std::vector<_PolyhedralBoundedSolidSetOperatorVertexVertex> VertexVertexList;
-    typedef std::vector<_PolyhedralBoundedSolidSetOperatorVertexFace> VertexFaceList;
+    typedef java::ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> VertexVertexList;
+    typedef java::ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> VertexFaceList;
 
     /** Diagnostic trace: one entry per vertex created during intersection.
     Cleared at the start of each `setOpGenerate` call. */
-    static std::vector<java::String> intersectionTrace;
+    static java::ArrayList<java::String> intersectionTrace;
 
     /**
     Coincidences found by `setOpGenerate`.

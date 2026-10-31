@@ -7,9 +7,9 @@
 //= [SNYD1987] Snyder, John. Barr, Alan. "Ray Tracing Complex Models       =
 //=     Containing Surface Tessellations", SIGGRAPH '87, p. 119-128, 1987.  =
 
-#include <algorithm>
+#include "java/lang/Double.h"
+#include "java/lang/Math.h"
 #include <cmath>
-#include <limits>
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -223,8 +223,8 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
     double origin[3] = { o.x(), o.y(), o.z() };
     double direction[3] = { d.x(), d.y(), d.z() };
     double cellSize[3];
-    double tEnter = -std::numeric_limits<double>::infinity();
-    double tExit = std::numeric_limits<double>::infinity();
+    double tEnter = -java::Double::POSITIVE_INFINITY;
+    double tExit = java::Double::POSITIVE_INFINITY;
     int enterAxis = 0;
     int i;
 
@@ -239,15 +239,15 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
         }
         double t1 = (-1.0 - origin[i]) / direction[i];
         double t2 = (1.0 - origin[i]) / direction[i];
-        double tNear = std::min(t1, t2);
-        double tFar = std::max(t1, t2);
+        double tNear = java::Math::min(t1, t2);
+        double tFar = java::Math::max(t1, t2);
         if ( tNear > tEnter ) {
             tEnter = tNear;
             enterAxis = i;
         }
-        tExit = std::min(tExit, tFar);
+        tExit = java::Math::min(tExit, tFar);
     }
-    if ( tExit < std::max(tEnter, 0.0) ) {
+    if ( tExit < java::Math::max(tEnter, 0.0) ) {
         return false;
     }
     bool startsInside = tEnter < 0.0;
@@ -280,8 +280,8 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
         }
         else {
             step[i] = 0;
-            tDelta[i] = std::numeric_limits<double>::infinity();
-            tNext[i] = std::numeric_limits<double>::infinity();
+            tDelta[i] = java::Double::POSITIVE_INFINITY;
+            tNext[i] = java::Double::POSITIVE_INFINITY;
         }
     }
 

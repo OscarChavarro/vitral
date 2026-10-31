@@ -1,3 +1,5 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <X11/Shell.h>
 #include <Xm/Xm.h>
 #include <Xm/FileSB.h>
@@ -13,7 +15,7 @@ namespace {
 const int DIALOG_WIDTH = 520;
 const int DIALOG_HEIGHT = 420;
 
-std::string withoutTrailingSlash(const std::string& folder)
+java::String withoutTrailingSlash(const java::String& folder)
 {
     if ( folder.size() > 1 && folder[folder.size() - 1] == '/' ) {
         return folder.substr(0, folder.size() - 1);
@@ -22,7 +24,7 @@ std::string withoutTrailingSlash(const std::string& folder)
 }
 }
 
-XmFileDialog::XmFileDialog(const std::vector<FileSuffixFilter>& filters)
+XmFileDialog::XmFileDialog(const java::ArrayList<FileSuffixFilter>& filters)
     : filters(filters), shell(nullptr), box(nullptr), done(false),
       approved(false)
 {
@@ -36,14 +38,14 @@ XmFileDialog::~XmFileDialog()
 }
 
 bool XmFileDialog::showDialog(XtApplicationHost* host,
-                              const std::string& title,
-                              const std::string& folder,
-                              const std::vector<FileSuffixFilter>& filters,
-                              std::string& outPath)
+                              const java::String& title,
+                              const java::String& folder,
+                              const java::ArrayList<FileSuffixFilter>& filters,
+                              java::String& outPath)
 {
     XmFileDialog dialog(filters);
     dialog.create(host, title, FolderListing::isFolder(folder) ? folder :
-                  std::string("."));
+                  java::String("."));
 
     XtPopup(dialog.shell, XtGrabExclusive);
     XmProcessTraversal(XmFileSelectionBoxGetChild(dialog.box, XmDIALOG_TEXT),
@@ -61,8 +63,8 @@ bool XmFileDialog::showDialog(XtApplicationHost* host,
     return dialog.approved;
 }
 
-void XmFileDialog::create(XtApplicationHost* host, const std::string& title,
-                          const std::string& folder)
+void XmFileDialog::create(XtApplicationHost* host, const java::String& title,
+                          const java::String& folder)
 {
     shell = host->createDialogShell("fileDialog", transientShellWidgetClass,
                                     title.c_str());
@@ -117,20 +119,20 @@ void XmFileDialog::searchFiles(Widget box, XtPointer callData)
     XtVaGetValues(box, XmNuserData, &userData, nullptr);
     XmFileDialog* self = static_cast<XmFileDialog*>(userData);
 
-    std::string folder = withoutTrailingSlash(
+    java::String folder = withoutTrailingSlash(
         XmWidgetSupport::toText(search->dir));
-    std::vector<std::string> folders;
-    std::vector<std::string> files;
+    java::ArrayList<java::String> folders;
+    java::ArrayList<java::String> files;
     FolderListing::list(folder, self != nullptr ? self->filters :
-                        std::vector<FileSuffixFilter>(), folders, files);
+                        java::ArrayList<FileSuffixFilter>(), folders, files);
 
-    std::vector<XmString> items;
+    java::ArrayList<XmString> items;
     for ( size_t i = 0; i < files.size(); i++ ) {
         // Relative to the folder, as the path mode of the box asks
-        items.push_back(XmWidgetSupport::createString(files[i]));
+        items.add(XmWidgetSupport::createString(files[i]));
     }
     XtVaSetValues(box,
-                  XmNfileListItems, items.empty() ? nullptr : items.data(),
+                  XmNfileListItems, items.isEmpty() ? nullptr : items.data(),
                   XmNfileListItemCount, static_cast<int>(items.size()),
                   XmNlistUpdated, True, nullptr);
     for ( size_t i = 0; i < items.size(); i++ ) {
@@ -143,8 +145,8 @@ void XmFileDialog::approve(Widget, XtPointer clientData, XtPointer callData)
     XmFileDialog* self = static_cast<XmFileDialog*>(clientData);
     XmFileSelectionBoxCallbackStruct* selection =
         static_cast<XmFileSelectionBoxCallbackStruct*>(callData);
-    std::string chosen = XmWidgetSupport::toText(selection->value);
-    if ( chosen.empty() ) {
+    java::String chosen = XmWidgetSupport::toText(selection->value);
+    if ( chosen.isEmpty() ) {
         return;
     }
     if ( chosen[0] != '/' ) {

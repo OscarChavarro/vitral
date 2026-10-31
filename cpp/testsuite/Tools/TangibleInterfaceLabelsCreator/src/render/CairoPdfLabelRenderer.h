@@ -1,11 +1,11 @@
 #ifndef __CAIRO_PDF_LABEL_RENDERER__
 #define __CAIRO_PDF_LABEL_RENDERER__
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 #include <cairo.h>
 
 #include "model/Label.h"
-#include <string>
-#include <vector>
 class Calligraphic2DBuffer;
 
 class CairoPdfLabelRenderer {
@@ -40,7 +40,7 @@ class CairoPdfLabelRenderer {
         cairo_t* cr,
         const java::String& title,
         const TextLayout& layout) const;
-    std::vector<std::string> splitLines(const char* text) const;
+    java::ArrayList<java::String> splitLines(const char* text) const;
 };
 
 #endif

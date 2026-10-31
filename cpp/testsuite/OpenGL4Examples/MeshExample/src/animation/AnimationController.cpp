@@ -1,5 +1,5 @@
-#include <chrono>
-#include <thread>
+#include "java/lang/Runnable.h"
+#include "java/lang/Thread.h"
 
 #include "animation/AnimationController.h"
 #include "model/MeshModel.h"
@@ -14,7 +14,7 @@ AnimationController::~AnimationController()
     stop();
 }
 
-void AnimationController::start(MeshModel* model, std::function<void()> repaintCallback)
+void AnimationController::start(MeshModel* model, java::Runnable repaintCallback)
 {
     if ( started ) {
         return;
@@ -48,12 +48,12 @@ void* AnimationController::threadEntry(void* arg)
 void AnimationController::loop()
 {
     while ( !stopRequested ) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        java::Thread::sleep(1000);
         if ( model != 0 ) {
             model->getRayGizmo()->update();
         }
         if ( !stopRequested ) {
-            repaintCallback();
+            repaintCallback.run();
         }
     }
 }

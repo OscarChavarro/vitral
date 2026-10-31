@@ -1,7 +1,7 @@
 #ifndef __XM_WIDGET_SUPPORT__
 #define __XM_WIDGET_SUPPORT__
 
-#include <string>
+#include "java/lang/String.h"
 
 #include <Xm/Xm.h>
 
@@ -35,12 +35,12 @@ public:
     @param text UTF-8 text (the locale of the application is UTF-8)
     @return a new compound string (free it with `XmStringFree`)
     */
-    static XmString createString(const std::string& text);
+    static XmString createString(const java::String& text);
 
     /**
     @return the text of a compound string
     */
-    static std::string toText(XmString string);
+    static java::String toText(XmString string);
 
     /**
     @param widget any widget of the display
@@ -52,7 +52,7 @@ public:
     /**
     Changes the text of a label, button or toggle.
     */
-    static void setLabelString(XtWidget widget, const std::string& text);
+    static void setLabelString(XtWidget widget, const java::String& text);
 
     /**
     Changes the font of a widget with texts (its `XmNrenderTable`).
@@ -76,7 +76,7 @@ public:
     Creates a push button of a menu pane (its `XmNactivateCallback` is
     called when it is chosen).
     */
-    static XtWidget createMenuItem(XtWidget menu, const std::string& text,
+    static XtWidget createMenuItem(XtWidget menu, const java::String& text,
                                    XFontSet fontSet);
 
 private:

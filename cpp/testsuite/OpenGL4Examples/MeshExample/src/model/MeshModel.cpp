@@ -1,3 +1,5 @@
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
 #include <cmath>
 
 #include <java/lang/Math.h>
@@ -81,7 +83,7 @@ const java::String& MeshModel::getTangibleServiceUrl() const
 
 void MeshModel::setTangibleServiceUrl(const java::String& tangibleServiceUrl)
 {
-    if ( tangibleServiceUrl.empty() ) {
+    if ( tangibleServiceUrl.isEmpty() ) {
         return;
     }
     this->tangibleServiceUrl = tangibleServiceUrl;

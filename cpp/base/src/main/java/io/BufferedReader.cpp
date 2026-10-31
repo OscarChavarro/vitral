@@ -1,4 +1,4 @@
-#include <string>
+#include "java/lang/StringBuilder.h"
 
 #include "java/io/BufferedReader.h"
 
@@ -26,7 +26,7 @@ BufferedReader::readByte()
 bool
 BufferedReader::readLine(java::String &outLine)
 {
-    std::string line;
+    java::StringBuilder line;
     int c = readByte();
 
     if ( skipLF && c == '\n' ) {
@@ -37,13 +37,13 @@ BufferedReader::readLine(java::String &outLine)
         return false;
     }
     while ( c >= 0 && c != '\n' && c != '\r' ) {
-        line += static_cast<char>(c);
+        line.append(static_cast<char>(c));
         c = readByte();
     }
     // As Java, the "\n" of a "\r\n" is skipped in the next read, so this
     // one does not block waiting for it
     skipLF = c == '\r';
-    outLine = java::String(line.c_str());
+    outLine = line.toString();
     return true;
 }
 

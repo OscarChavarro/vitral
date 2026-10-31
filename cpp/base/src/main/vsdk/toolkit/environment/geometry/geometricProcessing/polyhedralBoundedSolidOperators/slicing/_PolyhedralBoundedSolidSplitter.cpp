@@ -1,9 +1,9 @@
-#include <algorithm>
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
-#include <string>
 
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/slicing/_PolyhedralBoundedSolidSplitter.h"
@@ -27,7 +27,7 @@ _PolyhedralBoundedSolidSplitterSectorClassification()
 
 java::String _PolyhedralBoundedSolidSplitterSectorClassification::toString() const
 {
-    std::string msg = "{";
+    java::String msg = "{";
     msg += sector->toString().c_str();
     switch ( cl ) {
       case ABOVE: msg += " ABOVE"; break;
@@ -108,13 +108,13 @@ int _PolyhedralBoundedSolidSplitterNullEdge::compareTo(
 
 //= _PolyhedralBoundedSolidSplitter =======================================
 
-std::vector<_PolyhedralBoundedSolidVertex*> _PolyhedralBoundedSolidSplitter::soov;
-std::vector<_PolyhedralBoundedSolidSplitterNullEdge> _PolyhedralBoundedSolidSplitter::sone;
-std::vector<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::sonf;
-std::vector<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::facesToFixAbove;
-std::vector<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::facesToFixBelow;
-std::vector<_PolyhedralBoundedSolidHalfEdge*> _PolyhedralBoundedSolidSplitter::ends;
-std::vector<_PolyhedralBoundedSolidHalfEdge*> _PolyhedralBoundedSolidSplitter::tieds;
+java::ArrayList<_PolyhedralBoundedSolidVertex*> _PolyhedralBoundedSolidSplitter::soov;
+java::ArrayList<_PolyhedralBoundedSolidSplitterNullEdge> _PolyhedralBoundedSolidSplitter::sone;
+java::ArrayList<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::sonf;
+java::ArrayList<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::facesToFixAbove;
+java::ArrayList<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::facesToFixBelow;
+java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> _PolyhedralBoundedSolidSplitter::ends;
+java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> _PolyhedralBoundedSolidSplitter::tieds;
 
 int _PolyhedralBoundedSolidSplitter::compareToZero(double value)
 {
@@ -135,7 +135,7 @@ void _PolyhedralBoundedSolidSplitter::addsoov(_PolyhedralBoundedSolidVertex* v)
             return;
         }
     }
-    soov.push_back(v);
+    soov.add(v);
 }
 
 /**
@@ -204,14 +204,14 @@ aid for debugging purposes and specifically the `situation` flag will be
 later used on `splitClassify` to correct the ordering of sectors in order
 to keep consistency with Vitral SDK's interpretation of coordinate system.
 */
-std::vector<_PolyhedralBoundedSolidSplitterSectorClassification>
+java::ArrayList<_PolyhedralBoundedSolidSplitterSectorClassification>
 _PolyhedralBoundedSolidSplitter::getNeighborhood(
     _PolyhedralBoundedSolidVertex* vtx, const InfinitePlane& inSplittingPlane)
 {
     _PolyhedralBoundedSolidHalfEdge* he;
     Vector3Dd bisect;
     double d;
-    std::vector<SectorClassification> neighborSectorsInfo;
+    java::ArrayList<SectorClassification> neighborSectorsInfo;
 
     he = vtx->emanatingHalfEdge;
 
@@ -226,7 +226,7 @@ _PolyhedralBoundedSolidSplitter::getNeighborhood(
         if ( checkSplitterSectorWideness(he) ) {
             bisect = bisector(he);
             c.situation = SectorClassification::CROSSING_EDGE;
-            neighborSectorsInfo.push_back(c);
+            neighborSectorsInfo.add(c);
 
             SectorClassification wide;
             wide.sector = he;
@@ -235,10 +235,10 @@ _PolyhedralBoundedSolidSplitter::getNeighborhood(
             wide.isWide = true;
             wide.position = bisect;
             wide.situation = SectorClassification::CROSSING_EDGE;
-            neighborSectorsInfo.push_back(wide);
+            neighborSectorsInfo.add(wide);
         }
         else {
-            neighborSectorsInfo.push_back(c);
+            neighborSectorsInfo.add(c);
         }
         he = (he->mirrorHalfEdge())->next();
     } while ( he != vtx->emanatingHalfEdge );
@@ -303,7 +303,7 @@ bool _PolyhedralBoundedSolidSplitter::checkSplitterSectorWideness(
 }
 
 bool _PolyhedralBoundedSolidSplitter::inplaneEdgesOn(
-    const std::vector<SectorClassification>& nbr)
+    const java::ArrayList<SectorClassification>& nbr)
 {
     size_t i;
 
@@ -322,7 +322,7 @@ the edge with the corresponding label ABOVE, ON or BELOW.
 Following program [MANT1988].14.5.
 */
 void _PolyhedralBoundedSolidSplitter::reclassifyOnSectors(
-    std::vector<SectorClassification>& nbr,
+    java::ArrayList<SectorClassification>& nbr,
     const InfinitePlane& inSplittingPlane)
 {
     _PolyhedralBoundedSolidFace* f;
@@ -367,7 +367,7 @@ as disconnected models.
 Following program [MANT1988].14.6.
 */
 void _PolyhedralBoundedSolidSplitter::reclassifyOnEdges(
-    std::vector<SectorClassification>& nbr)
+    java::ArrayList<SectorClassification>& nbr)
 {
     size_t i;
     size_t n = nbr.size();
@@ -398,7 +398,7 @@ implementation adds an extra check to ensure the orientation of the
 edges from below to above.
 */
 void _PolyhedralBoundedSolidSplitter::insertNullEdges(
-    std::vector<SectorClassification>& nbr,
+    java::ArrayList<SectorClassification>& nbr,
     PolyhedralBoundedSolid* inSolid, const InfinitePlane& inSplittingPlane)
 {
     size_t start;
@@ -439,13 +439,13 @@ void _PolyhedralBoundedSolidSplitter::insertNullEdges(
         if ( d1 != Geometry::OUTSIDE ) {
             PolyhedralBoundedSolidEulerOperators::lmev(inSolid, tail, head,
                 inSolid->getMaxVertexId()+1, head->startingVertex->position);
-            sone.push_back(_PolyhedralBoundedSolidSplitterNullEdge(
+            sone.add(_PolyhedralBoundedSolidSplitterNullEdge(
                 tail->previous()->parentEdge));
         }
         else {
             PolyhedralBoundedSolidEulerOperators::lmev(inSolid, head, tail,
                 inSolid->getMaxVertexId()+1, head->startingVertex->position);
-            sone.push_back(_PolyhedralBoundedSolidSplitterNullEdge(
+            sone.add(_PolyhedralBoundedSolidSplitterNullEdge(
                 head->previous()->parentEdge));
         }
 
@@ -478,12 +478,12 @@ void _PolyhedralBoundedSolidSplitter::splitClassify(
     sone.clear();
 
     /// Following variable `nbr` from program [MANT1988].14.3.
-    std::vector<SectorClassification> nbr;
+    java::ArrayList<SectorClassification> nbr;
 
     for ( i = 0; i < soov.size(); i++ ) {
         nbr = getNeighborhood(soov[i], inSplittingPlane);
         if ( inplaneEdgesOn(nbr) ) {
-            std::reverse(nbr.begin(), nbr.end());
+            java::Collections::reverse(nbr);
         }
         reclassifyOnSectors(nbr, inSplittingPlane);
         reclassifyOnEdges(nbr);
@@ -503,17 +503,17 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidSplitter::canJoin(
     for ( i = 0; i < ends.size(); i++ ) {
         if ( neighbor(he, ends[i]) ) {
             ret = ends[i];
-            ends.erase(ends.begin() + (long)i);
-            tieds.push_back(ret);
+            ends.remove((long)i);
+            tieds.add(ret);
             return ret;
         }
     }
-    ends.push_back(he);
+    ends.add(he);
     return nullptr;
 }
 
 void _PolyhedralBoundedSolidSplitter::printNbr(
-    const std::vector<SectorClassification>& neighborSectorsInfo)
+    const java::ArrayList<SectorClassification>& neighborSectorsInfo)
 {
     size_t i;
 
@@ -542,7 +542,7 @@ void _PolyhedralBoundedSolidSplitter::cut(_PolyhedralBoundedSolidHalfEdge* he)
 
     if ( he->parentEdge->rightHalf->parentLoop ==
          he->parentEdge->leftHalf->parentLoop ) {
-        sonf.push_back(he->parentLoop->parentFace);
+        sonf.add(he->parentLoop->parentFace);
         PolyhedralBoundedSolidEulerOperators::lkemr(s, he->parentEdge->rightHalf,
             he->parentEdge->leftHalf);
     }
@@ -581,8 +581,7 @@ void _PolyhedralBoundedSolidSplitter::splitConnect()
     sonf.clear();
 
     // As Java `Collections.sort`: stable, with the order of `compareTo`
-    std::stable_sort(sone.begin(), sone.end(),
-        [](const _PolyhedralBoundedSolidSplitterNullEdge& a,
+    sone.sort([](const _PolyhedralBoundedSolidSplitterNullEdge& a,
            const _PolyhedralBoundedSolidSplitterNullEdge& b) {
             return a.compareTo(b) < 0;
         });
@@ -593,7 +592,7 @@ void _PolyhedralBoundedSolidSplitter::splitConnect()
 
         if ( h1 != nullptr ) {
             join(h1, nextedge->rightHalf, false);
-            tieds.push_back(nextedge->rightHalf);
+            tieds.add(nextedge->rightHalf);
             if ( !isLoose(h1->mirrorHalfEdge()) ) {
                 cut(h1);
             }
@@ -602,7 +601,7 @@ void _PolyhedralBoundedSolidSplitter::splitConnect()
 
         if ( h2 != nullptr ) {
             join(h2, nextedge->leftHalf, false);
-            tieds.push_back(nextedge->leftHalf);
+            tieds.add(nextedge->leftHalf);
             if ( !isLoose(h2->mirrorHalfEdge()) ) {
                 cut(h2);
             }
@@ -626,9 +625,9 @@ void _PolyhedralBoundedSolidSplitter::classify(PolyhedralBoundedSolid* /*s*/,
 
     for ( i = 0; i < sonf.size()/2; i++ ) {
         movefac(sonf[i], above);
-        facesToFixAbove.push_back(sonf[i]);
+        facesToFixAbove.add(sonf[i]);
         movefac(sonf[i+sonf.size()/2], below);
-        facesToFixBelow.push_back(sonf[i+sonf.size()/2]);
+        facesToFixBelow.add(sonf[i+sonf.size()/2]);
     }
 }
 
@@ -682,10 +681,10 @@ bool _PolyhedralBoundedSolidSplitter::faceInsideFace(
 }
 
 void _PolyhedralBoundedSolidSplitter::fixNullFaces(
-    std::vector<_PolyhedralBoundedSolidFace*>& l)
+    java::ArrayList<_PolyhedralBoundedSolidFace*>& l)
 {
     if ( l.size() == 1 ) {
-        l.erase(l.begin());
+        l.remove(0L);
         return;
     }
 
@@ -698,7 +697,7 @@ void _PolyhedralBoundedSolidSplitter::fixNullFaces(
             if ( faceInsideFace(l[j], l[i]) ) {
                 PolyhedralBoundedSolidEulerOperators::lkfmrh(
                     l[i]->parentSolid, l[i], l[j]);
-                l.erase(l.begin() + (long)j);
+                l.remove((long)j);
                 // Repeat he process with remaining list
                 fixNullFaces(l);
                 return;
@@ -725,7 +724,7 @@ void _PolyhedralBoundedSolidSplitter::splitFinish(
     for ( i = 0; i < firstHalfSize; i++ ) {
         newface = PolyhedralBoundedSolidEulerOperators::lmfkrh(inSolid,
             sonf[i]->boundariesList.get(1), inSolid->getMaxFaceId()+1);
-        sonf.push_back(newface);
+        sonf.add(newface);
     }
     newAbove = new PolyhedralBoundedSolid();
     newBelow = new PolyhedralBoundedSolid();

@@ -1,6 +1,6 @@
+#include "java/lang/Double.h"
 #include <gtest/gtest.h>
 #include <cmath>
-#include <limits>
 #include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -240,7 +240,7 @@ TEST(RaytracerDepthBufferTest, given_encoder_when_convertingPlaneDistances_then_
         EXPECT_EQ(encoder.eyeDepthToWindowDepth(100), 1.0);
         EXPECT_LT(encoder.eyeDepthToWindowDepth(5), encoder.eyeDepthToWindowDepth(6));
         EXPECT_EQ(encoder.encode(snapshot->getEyePosition(), snapshot->getFront(),
-            std::numeric_limits<double>::infinity()), 1.0f);
+            java::Double::POSITIVE_INFINITY), 1.0f);
         EXPECT_EQ(identity.encode(snapshot->getEyePosition(), snapshot->getFront(), 7.25), 7.25f);
     }
     delete perspective;

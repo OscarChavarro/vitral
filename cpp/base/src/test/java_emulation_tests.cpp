@@ -1,9 +1,8 @@
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/RuntimeException.h"
 #include <gtest/gtest.h>
 
-#include <atomic>
 #include <cstring>
-#include <stdexcept>
-#include <string>
 
 #include "java/io/BufferedReader.h"
 #include "java/io/InputStream.h"
@@ -13,6 +12,8 @@
 #include "java/lang/String.h"
 #include "java/lang/StringBuilder.h"
 #include "java/lang/Thread.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/concurrent/atomic/AtomicLong.h"
 #include "java/util/regex/Matcher.h"
 #include "java/util/regex/Pattern.h"
 
@@ -23,12 +24,12 @@ namespace {
 
 /** Gives its text in chunks of a fixed size, as a socket may do. */
 class ChunkedInputStream : public java::InputStream {
-    std::string text;
+    java::String text;
     size_t position;
     int chunk;
 
 public:
-    ChunkedInputStream(const std::string &text, int chunk)
+    ChunkedInputStream(const java::String &text, int chunk)
         : text(text), position(0), chunk(chunk) {}
 
     int read() override
@@ -55,20 +56,22 @@ public:
 
 class StringOutputStream : public java::OutputStream {
 public:
-    std::string text;
+    java::String text;
     bool failing = false;
     int flushes = 0;
 
     void write(int value) override
     {
-        if ( failing ) throw std::runtime_error("closed");
+        if ( failing ) throw java::RuntimeException("closed");
         text += static_cast<char>(value);
     }
 
     void write(const unsigned char *buffer, int offset, int length) override
     {
-        if ( failing ) throw std::runtime_error("closed");
-        text.append(reinterpret_cast<const char *>(buffer) + offset, length);
+        if ( failing ) throw java::RuntimeException("closed");
+        for ( int i = 0; i < length; i++ ) {
+            text += static_cast<char>(buffer[offset + i]);
+        }
     }
 
     void flush() override { flushes++; }
@@ -77,8 +80,8 @@ public:
 
 class Counter : public java::Runnable {
 public:
-    std::atomic<int> runs{0};
-    void run() override { runs++; }
+    java::AtomicLong runs;
+    void run() override { runs.incrementAndGet(); }
 };
 
 }
@@ -134,7 +137,7 @@ TEST(JavaEmulationTest, PrintWriterFlushesAndReportsErrors)
     java::PrintWriter writer(&out, true);
 
     writer.println("{\"id\":1}");
-    EXPECT_EQ("{\"id\":1}\n", out.text);
+    EXPECT_STREQ("{\"id\":1}\n", out.text.c_str());
     EXPECT_EQ(1, out.flushes);
     EXPECT_FALSE(writer.checkError());
 
@@ -156,7 +159,7 @@ TEST(JavaEmulationTest, PatternFindsSuccessiveMatchesAndGroups)
     ASSERT_TRUE(matcher.find());
     EXPECT_STREQ("2", matcher.group(1).c_str());
     EXPECT_FALSE(matcher.find());
-    EXPECT_THROW(matcher.group(1), std::logic_error);
+    EXPECT_THROW(matcher.group(1), java::IllegalStateException);
 }
 
 TEST(JavaEmulationTest, PatternMatchesEscapedJsonStrings)
@@ -180,7 +183,7 @@ TEST(JavaEmulationTest, ThreadRunsItsTarget)
     thread.setName("counter");
     thread.start();
     thread.join();
-    EXPECT_EQ(1, counter.runs.load());
+    EXPECT_EQ(1, counter.runs.get());
     EXPECT_STREQ("counter", thread.getName().c_str());
 }
 
@@ -188,22 +191,22 @@ TEST(JavaEmulationTest, ThreadMayDestroyItsOwnObject)
 {
     struct SelfDeleting : public java::Runnable {
         java::Thread *thread = nullptr;
-        std::atomic<bool> *done = nullptr;
+        java::AtomicLong *done = nullptr;
         void run() override
         {
             delete thread;
-            done->store(true);
+            done->set(1);
             delete this;
         }
     };
-    std::atomic<bool> done(false);
+    java::AtomicLong done;
     SelfDeleting *task = new SelfDeleting();
     task->done = &done;
     task->thread = new java::Thread(task);
     java::Thread *thread = task->thread;
     thread->start();
-    for ( int i = 0; i < 200 && !done.load(); i++ ) {
+    for ( int i = 0; i < 200 && done.get() == 0; i++ ) {
         java::Thread::sleep(5);
     }
-    EXPECT_TRUE(done.load());
+    EXPECT_EQ(1, done.get());
 }

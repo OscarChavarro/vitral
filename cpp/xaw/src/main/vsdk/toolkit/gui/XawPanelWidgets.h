@@ -1,6 +1,8 @@
 #ifndef __XAW_PANEL_WIDGETS__
 #define __XAW_PANEL_WIDGETS__
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
 
 /**
@@ -13,27 +15,27 @@ class XawPanelWidgets : public XtPanelWidgets {
 public:
     virtual Widget createPanel(Widget parent, const char* name, int x, int y,
                                int width, int height, bool managed) override;
-    virtual Widget createLabel(Widget parent, const std::string& text,
+    virtual Widget createLabel(Widget parent, const java::String& text,
                                XFontSet fontSet, Justify justify,
                                int x, int y, int width, int height) override;
-    virtual void setLabel(Widget label, const std::string& text) override;
-    virtual Widget createTextField(Widget parent, const std::string& text,
+    virtual void setLabel(Widget label, const java::String& text) override;
+    virtual Widget createTextField(Widget parent, const java::String& text,
                                    XFontSet fontSet,
                                    int x, int y, int width, int height,
                                    ActivateProc activate,
                                    void* clientData) override;
-    virtual std::string getText(Widget field) override;
-    virtual void setText(Widget field, const std::string& text) override;
+    virtual java::String getText(Widget field) override;
+    virtual void setText(Widget field, const java::String& text) override;
     virtual void setInvalid(Widget field, bool invalid) override;
     virtual void setForeground(Widget widget, const char* colorName) override;
-    virtual Widget createPushButton(Widget parent, const std::string& label,
+    virtual Widget createPushButton(Widget parent, const java::String& label,
                                     XFontSet fontSet,
                                     int x, int y, int width, int height,
                                     ActivateProc activate,
                                     void* clientData) override;
     virtual Widget createOptionButton(Widget parent,
-                                      const std::string& placeholder,
-                                      const std::vector<std::string>& options,
+                                      const java::String& placeholder,
+                                      const java::ArrayList<java::String>& options,
                                       XFontSet fontSet,
                                       int x, int y, int width, int height,
                                       OptionProc choose,

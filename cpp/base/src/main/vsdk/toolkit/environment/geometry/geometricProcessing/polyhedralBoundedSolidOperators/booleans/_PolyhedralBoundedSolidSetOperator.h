@@ -11,7 +11,8 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR__
 
-#include <vector>
+#include "java/lang/IllegalStateException.h"
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -45,7 +46,7 @@ C++ port notes:
   result), but before returning, every node used by the result is unlisted
   from the operands, so the caller can delete the operands and the result
   independently.
-- Java `IllegalStateException` is thrown as `std::logic_error`.
+- Java `IllegalStateException` is thrown as `java::IllegalStateException`.
 
 C++ counterpart of Java's `_PolyhedralBoundedSolidSetOperator`.
 */
@@ -123,7 +124,7 @@ public:
     @param maximizeResultFaces true to maximize the faces of the result
     @param doStrictValidation true to enforce strict validation of the result
     @return the result solid, owned by the caller
-    @throws std::logic_error (Java IllegalStateException) when
+    @throws java::IllegalStateException (Java IllegalStateException) when
     `doStrictValidation` is true and the result fails strict validation
     */
     static PolyhedralBoundedSolid* setOp(
@@ -157,7 +158,7 @@ private:
     static void weldIntersectionVertices(_SetOperationContext& ctx,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
     static void pruneStaleVertexFaceEntries(
-        std::vector<_PolyhedralBoundedSolidSetOperatorVertexFace>& list,
+        java::ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>& list,
         PolyhedralBoundedSolid* solid);
     static bool sectoroverlap(
         const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex& na,

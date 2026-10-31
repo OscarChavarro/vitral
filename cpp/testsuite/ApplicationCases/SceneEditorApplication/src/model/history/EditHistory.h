@@ -1,7 +1,7 @@
 #ifndef __EDIT_HISTORY__
 #define __EDIT_HISTORY__
 
-#include <functional>
+#include "java/util/function/Supplier.h"
 
 #include "model/history/SceneHistory.h"
 #include "model/history/ViewportHistory.h"
@@ -24,7 +24,7 @@ public:
     /**
     @param sceneSource gives the scene currently edited
     */
-    explicit EditHistory(const std::function<Scene*()>& sceneSource)
+    explicit EditHistory(const java::Supplier<Scene*>& sceneSource)
         : sceneHistory(sceneSource)
     {
     }

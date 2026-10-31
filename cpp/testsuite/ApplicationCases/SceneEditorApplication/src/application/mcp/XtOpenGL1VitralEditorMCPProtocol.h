@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_VITRAL_EDITOR_MCP_PROTOCOL__
 #define __XT_OPENGL1_VITRAL_EDITOR_MCP_PROTOCOL__
 
+#include "java/lang/IllegalArgumentException.h"
 #include "java/lang/Runnable.h"
 #include "java/lang/String.h"
 #include "application/mcp/MCPSceneTools.h"
@@ -25,7 +26,7 @@ delegated to the tool group that owns it:
   images, language, exit).
 
 C++ port note: failures inside the tools are C++ exceptions (i.e.
-`std::invalid_argument` where Java throws `IllegalArgumentException`), with
+`java::IllegalArgumentException` where Java throws `IllegalArgumentException`), with
 the same messages as the Java ones.
 */
 class XtOpenGL1VitralEditorMCPProtocol : public java::Runnable {

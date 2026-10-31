@@ -1,5 +1,5 @@
+#include "java/lang/RuntimeException.h"
 #include <cstdint>
-#include <stdexcept>
 
 #include "java/net/SocketOutputStream.h"
 #include <sys/socket.h>
@@ -10,7 +10,7 @@ namespace net {
 void SocketOutputStream::write(int value) {
     uint8_t b = static_cast<uint8_t>(value & 0xFF);
     if (::send(fd_, &b, 1, 0) <= 0)
-        throw std::runtime_error("socket write error");
+        throw java::RuntimeException("socket write error");
 }
 
 void SocketOutputStream::write(const unsigned char* buffer, int offset, int length) {
@@ -19,7 +19,7 @@ void SocketOutputStream::write(const unsigned char* buffer, int offset, int leng
     while (remaining > 0) {
         ssize_t sent = ::send(fd_, p, static_cast<size_t>(remaining), 0);
         if (sent <= 0)
-            throw std::runtime_error("socket write error");
+            throw java::RuntimeException("socket write error");
         p += sent;
         remaining -= static_cast<int>(sent);
     }

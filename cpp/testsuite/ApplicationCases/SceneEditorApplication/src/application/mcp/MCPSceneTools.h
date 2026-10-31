@@ -1,7 +1,8 @@
 #ifndef __MCP_SCENE_TOOLS__
 #define __MCP_SCENE_TOOLS__
 
-#include <functional>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/Runnable.h"
 
 #include "java/lang/String.h"
 
@@ -18,7 +19,7 @@ in the scene history (named after the tool), so they can be undone. It does not
 depend on any GUI or rendering technology: repainting after a change is up to
 the caller.
 
-C++ port note: failures are C++ exceptions (i.e. `std::invalid_argument`
+C++ port note: failures are C++ exceptions (i.e. `java::IllegalArgumentException`
 where Java throws `IllegalArgumentException`), with the same messages as the
 Java ones.
 */
@@ -28,7 +29,7 @@ private:
 
     Scene* scene() const;
     void recordSceneChange(const java::String& tool,
-                           const std::function<void()>& change);
+                           const java::Runnable& change);
     void createPointLight(const java::String& request);
     void placeNewBody(Geometry* geometry, const java::String& request);
     static java::String queueJson(UndoQueue* queue);

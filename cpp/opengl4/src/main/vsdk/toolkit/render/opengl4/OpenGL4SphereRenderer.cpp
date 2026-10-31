@@ -1,6 +1,7 @@
+#include "java/lang/Math.h"
+#include "java/util/ArrayList.txx"
 #include <cmath>
 #include <cstdio>
-#include <vector>
 
 #include <java/lang/Math.h>
 #include "java/lang/String.h"
@@ -68,7 +69,7 @@ java::String OpenGL4SphereRenderer::findShaderSource(const java::String& shaderF
     for (size_t i = 0; i < sizeof(candidates)/sizeof(candidates[0]); i++) {
         java::String path = java::String(candidates[i]) + shaderFileName;
         java::String src = readTextFile(path);
-        if (!src.empty()) return src;
+        if (!src.isEmpty()) return src;
     }
     return java::String();
 }
@@ -94,7 +95,7 @@ unsigned int OpenGL4SphereRenderer::buildProgram(const char* vsFile, const char*
 {
     java::String vsSource = findShaderSource(vsFile);
     java::String fsSource = findShaderSource(fsFile);
-    if (vsSource.empty() || fsSource.empty()) {
+    if (vsSource.isEmpty() || fsSource.isEmpty()) {
         std::fprintf(stderr, "OpenGL4SphereRenderer shader not found: %s / %s\n", vsFile, fsFile);
         return 0;
     }
@@ -213,11 +214,11 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
     if (entry == nullptr || entry->getVertexCount() <= 0) {
         return false;
     }
-    const std::vector<float>& positions = entry->getPositions();
-    const std::vector<float>& normals = entry->getNormals();
-    const std::vector<float>& uvs = entry->getUvs();
-    const std::vector<float>& tangents = entry->getTangents();
-    const std::vector<float>& binormals = entry->getBiNormals();
+    const java::ArrayList<float>& positions = entry->getPositions();
+    const java::ArrayList<float>& normals = entry->getNormals();
+    const java::ArrayList<float>& uvs = entry->getUvs();
+    const java::ArrayList<float>& tangents = entry->getTangents();
+    const java::ArrayList<float>& binormals = entry->getBiNormals();
 
     glBindVertexArray(vao);
 

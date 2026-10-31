@@ -1,35 +1,37 @@
 #ifndef __PATTERN__
 #define __PATTERN__
 
-#include <regex>
-
 #include "java/lang/String.h"
 #include "java/util/regex/Matcher.h"
+#include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
 
 namespace java {
 namespace util {
 namespace regex {
 
 /**
-Emulation of `java.util.regex.Pattern` over `std::regex` (ECMAScript
-grammar). The common syntax of both works the same: character classes,
-groups, non capturing groups `(?:...)`, quantifiers, `\\s`, `\\d` and
-escapes. Java only features (possessive quantifiers, `\\Q...\\E` inside
-patterns, lookbehind) are not supported: `quote` escapes each special
-character instead.
+Emulation of `java.util.regex.Pattern` over POSIX extended regular
+expressions. The Java expression is translated to the POSIX syntax:
+character classes, groups, non capturing groups `(?:...)`, alternatives,
+quantifiers, `\\s`, `\\S`, `\\d`, `\\D`, `\\w`, `\\W` and escapes are
+supported. Java only features (lazy and possessive quantifiers,
+lookaround, backreferences, `\\Q...\\E` inside patterns) are not: `quote`
+escapes each special character instead. As POSIX matching finds the
+longest match at the leftmost position, alternatives that are prefixes of
+other alternatives may select a longer text than Java.
 */
 class Pattern {
   private:
     java::String patternText;
-    std::regex expression;
+    SharedPointer<CompiledExpression> expression;
 
     explicit Pattern(const java::String &regex);
 
   public:
     /**
     @param regex regular expression
-    @throws std::regex_error if the expression is not valid (Java throws
-    PatternSyntaxException)
+    @throws java::IllegalArgumentException if the expression is not valid
+    (Java throws PatternSyntaxException)
     */
     static Pattern
     compile(const java::String &regex);

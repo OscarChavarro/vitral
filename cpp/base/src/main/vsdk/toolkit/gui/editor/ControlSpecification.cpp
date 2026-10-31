@@ -1,8 +1,7 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <cctype>
 #include <cmath>
-#include <limits>
-#include <string>
-#include <vector>
 
 #include "java/lang/Double.h"
 #include "java/lang/NumberFormatException.h"
@@ -13,7 +12,7 @@ const char *const ControlSpecification::INFINITE = "INFINITE";
 
 namespace {
 
-std::string trim(const std::string &text)
+java::String trim(const java::String &text)
 {
     size_t begin = 0;
     size_t end = text.size();
@@ -30,33 +29,33 @@ std::string trim(const std::string &text)
 Splits as Java `String.split` does with a one character pattern: trailing
 empty fields are dropped.
 */
-std::vector<std::string> split(const std::string &text, char separator)
+java::ArrayList<java::String> split(const java::String &text, char separator)
 {
-    std::vector<std::string> parts;
+    java::ArrayList<java::String> parts;
     size_t begin = 0;
     for ( ;; ) {
         size_t end = text.find(separator, begin);
-        if ( end == std::string::npos ) {
-            parts.push_back(text.substr(begin));
+        if ( end == -1 ) {
+            parts.add(text.substr(begin));
             break;
         }
-        parts.push_back(text.substr(begin, end - begin));
+        parts.add(text.substr(begin, end - begin));
         begin = end + 1;
     }
-    while ( !parts.empty() && parts.back().empty() ) {
-        parts.pop_back();
+    while ( !parts.isEmpty() && parts[parts.size() - 1].isEmpty() ) {
+        parts.remove(parts.size() - 1);
     }
     return parts;
 }
 
-double parseLimit(const std::string &limit)
+double parseLimit(const java::String &limit)
 {
-    const std::string infinite(ControlSpecification::INFINITE);
+    const java::String infinite(ControlSpecification::INFINITE);
     if ( limit == infinite || limit == "+" + infinite ) {
-        return std::numeric_limits<double>::infinity();
+        return java::Double::POSITIVE_INFINITY;
     }
     if ( limit == "-" + infinite ) {
-        return -std::numeric_limits<double>::infinity();
+        return -java::Double::POSITIVE_INFINITY;
     }
     return java::Double::parseDouble(java::String(limit.c_str()));
 }
@@ -76,27 +75,27 @@ ControlSpecification::ControlSpecification(const java::String &type,
 ControlSpecification *
 ControlSpecification::parse(const java::String &specification)
 {
-    std::vector<std::string> parts = split(specification.c_str(), ';');
+    java::ArrayList<java::String> parts = split(specification.c_str(), ';');
     if ( parts.size() < 2 || parts.size() > 3 ) {
         reportMalformed(specification,
             "expected \"type;name\" or \"type;name;interval\"");
         return nullptr;
     }
 
-    std::string type = trim(parts[0]);
-    std::string name = trim(parts[1]);
-    if ( type.empty() || name.empty() ) {
+    java::String type = trim(parts[0]);
+    java::String name = trim(parts[1]);
+    if ( type.isEmpty() || name.isEmpty() ) {
         reportMalformed(specification, "empty type or name");
         return nullptr;
     }
 
-    if ( parts.size() == 2 || trim(parts[2]).empty() ) {
+    if ( parts.size() == 2 || trim(parts[2]).isEmpty() ) {
         return new ControlSpecification(type.c_str(), name.c_str(), "",
-            -std::numeric_limits<double>::infinity(),
-            std::numeric_limits<double>::infinity(), false, false);
+            -java::Double::POSITIVE_INFINITY,
+            java::Double::POSITIVE_INFINITY, false, false);
     }
 
-    std::string interval = trim(parts[2]);
+    java::String interval = trim(parts[2]);
     char open = interval[0];
     char close = interval[interval.size() - 1];
     if ( (open != '[' && open != '(') || (close != ']' && close != ')') ) {
@@ -105,7 +104,7 @@ ControlSpecification::parse(const java::String &specification)
         return nullptr;
     }
 
-    std::vector<std::string> limits =
+    java::ArrayList<java::String> limits =
         split(interval.substr(1, interval.size() - 2), ',');
     if ( limits.size() != 2 ) {
         reportMalformed(specification,
@@ -148,8 +147,8 @@ ControlSpecification::reportMalformed(const java::String &specification,
 java::String
 ControlSpecification::getLabel() const
 {
-    std::string label(name.c_str());
-    if ( !label.empty() ) {
+    java::String label(name.c_str());
+    if ( !label.isEmpty() ) {
         label[0] = (char)std::toupper((unsigned char)label[0]);
     }
     return java::String(label.c_str());

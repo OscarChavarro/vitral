@@ -1,6 +1,5 @@
-#include <algorithm>
+#include "java/lang/Math.h"
 #include <cmath>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -18,6 +17,8 @@ struct FaceSegment {
     Vector3Dd start;
     Vector3Dd end;
 
+    // Default constructible, as the elements of `java::ArrayList`
+    FaceSegment() {}
     FaceSegment(const Vector3Dd& start, const Vector3Dd& end)
         : start(start), end(end) {}
 
@@ -41,9 +42,9 @@ double clamp(double value, double min, double max)
     return value;
 }
 
-std::vector<FaceSegment> collectFaceSegments(_PolyhedralBoundedSolidFace* face)
+java::ArrayList<FaceSegment> collectFaceSegments(_PolyhedralBoundedSolidFace* face)
 {
-    std::vector<FaceSegment> segments;
+    java::ArrayList<FaceSegment> segments;
     for ( long i = 0; i < face->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
         _PolyhedralBoundedSolidHalfEdge* he = loop->boundaryStartHalfEdge;
@@ -56,7 +57,7 @@ std::vector<FaceSegment> collectFaceSegments(_PolyhedralBoundedSolidFace* face)
             if ( next == nullptr ) {
                 break;
             }
-            segments.push_back(FaceSegment(he->startingVertex->position,
+            segments.add(FaceSegment(he->startingVertex->position,
                 next->startingVertex->position));
             he = next;
         } while ( he != start );
@@ -165,8 +166,8 @@ bool _PolyhedralBoundedSolidFaceValidator::hasCloseNonAdjacentEdges(
     _PolyhedralBoundedSolidFace* face,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext)
 {
-    std::vector<FaceSegment> segments = collectFaceSegments(face);
-    double tolerance = std::max(numericContext.bigEpsilon() * 10.0,
+    java::ArrayList<FaceSegment> segments = collectFaceSegments(face);
+    double tolerance = java::Math::max(numericContext.bigEpsilon() * 10.0,
         numericContext.modelScale() * 1.0e-5);
     for ( size_t i = 0; i < segments.size(); i++ ) {
         for ( size_t j = i + 1; j < segments.size(); j++ ) {

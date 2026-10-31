@@ -1,6 +1,6 @@
+#include "java/lang/String.h"
 #include <cstdint>
 #include <cstring>
-#include <string>
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexFace.h"
@@ -95,10 +95,10 @@ Vector3Dd canonicalSecondEndpoint(_PolyhedralBoundedSolidEdge* edge)
     return right;
 }
 
-std::string vectorText(const Vector3Dd& v)
+java::String vectorText(const Vector3Dd& v)
 {
     java::String* text = v.toString();
-    std::string result(text->c_str());
+    java::String result(text->c_str());
     delete text;
     return result;
 }
@@ -152,7 +152,7 @@ bool _PolyhedralBoundedSolidSetOperatorNullEdge::operator<(
 
 java::String _PolyhedralBoundedSolidSetOperatorNullEdge::toString() const
 {
-    std::string msg = std::string(e->toString().c_str()) +
+    java::String msg = java::String(e->toString().c_str()) +
         " (sorted with respect to segment " +
         vectorText(canonicalFirstEndpoint(this->e)) + " -> " +
         vectorText(canonicalSecondEndpoint(this->e)) + ")";
@@ -163,14 +163,14 @@ java::String _PolyhedralBoundedSolidSetOperatorNullEdge::toString() const
 
 java::String _PolyhedralBoundedSolidSetOperatorVertexFace::toString() const
 {
-    std::string msg = "{" + std::string(v->toString().c_str()) + " / " +
+    java::String msg = "{" + java::String(v->toString().c_str()) + " / " +
         f->toString().c_str() + "}";
     return java::String(msg.c_str());
 }
 
 java::String _PolyhedralBoundedSolidSetOperatorVertexVertex::toString() const
 {
-    std::string msg = "(" + std::string(va->toString().c_str()) + ") / (" +
+    java::String msg = "(" + java::String(va->toString().c_str()) + ") / (" +
         vb->toString().c_str() + "}";
     return java::String(msg.c_str());
 }

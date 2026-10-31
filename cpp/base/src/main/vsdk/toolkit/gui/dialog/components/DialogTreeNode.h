@@ -1,7 +1,7 @@
 #ifndef __DIALOG_TREE_NODE__
 #define __DIALOG_TREE_NODE__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 
@@ -17,9 +17,12 @@ class DialogTreeNode {
 private:
     java::String label;
     const void* identity;
-    std::vector<DialogTreeNode> children;
+    java::ArrayList<DialogTreeNode> children;
 
 public:
+    // Default constructible, as the elements of `java::ArrayList`
+    DialogTreeNode() : identity(nullptr) {}
+
     /**
     @param label text of the row
     @param identity what the row stands for, for the application (not
@@ -29,7 +32,7 @@ public:
 
     const java::String& getLabel() const;
     const void* getIdentity() const;
-    const std::vector<DialogTreeNode>& getChildren() const;
+    const java::ArrayList<DialogTreeNode>& getChildren() const;
 
     /**
     @return the child added (a copy of the given node)

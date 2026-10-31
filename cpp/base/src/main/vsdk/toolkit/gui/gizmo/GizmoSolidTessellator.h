@@ -1,6 +1,7 @@
 #ifndef __GIZMO_SOLID_TESSELLATOR__
 #define __GIZMO_SOLID_TESSELLATOR__
 
+#include "java/util/Collections.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -72,8 +73,7 @@ public:
     @param radius radius of the base of the cone
     @return fan with the center of the base as its first point
     */
-    static java::ArrayList<Vector3Dd> buildConeBaseFan(const Matrix4x4d& local,
-        double radius);
+    static java::ArrayList<Vector3Dd> buildConeBaseFan(const Matrix4x4d& local, double radius);
 
     /**
     Tessellates a box centered at the local origin, as its 6 faces.

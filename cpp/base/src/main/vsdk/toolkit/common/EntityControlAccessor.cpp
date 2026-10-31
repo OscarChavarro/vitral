@@ -1,4 +1,4 @@
-#include <limits>
+#include "java/lang/String.h"
 
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
@@ -59,8 +59,8 @@ long
 EntityControlValue<long>::parse(const java::String &text)
 {
     long long value = java::Long::parseLong(text);
-    if ( value < std::numeric_limits<long>::min() ||
-         value > std::numeric_limits<long>::max() ) {
+    if ( value < java::Long::MIN_VALUE ||
+         value > java::Long::MAX_VALUE ) {
         throw java::NumberFormatException(
             java::String("For input string: \"") + text + "\"");
     }

@@ -34,6 +34,7 @@ protected:
 public:
     virtual ~WidgetMenuElement() {}
 
+    using WidgetElement::toString;
     virtual java::String toString(int level) const = 0;
 
     /**

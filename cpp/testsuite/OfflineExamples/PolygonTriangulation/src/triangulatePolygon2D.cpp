@@ -1,3 +1,5 @@
+#include "java/lang/Double.h"
+#include "java/lang/Exception.h"
 #include <cerrno>
 #include <climits>
 #include <cstdio>
@@ -6,7 +8,6 @@
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -107,7 +108,7 @@ java::String deriveOutputFileName(const java::String& inputFileName)
         const java::String number = inputBaseName.substr(
             prefix.size(),
             inputBaseName.size() - prefix.size() - suffix.size());
-        bool allDigits = !number.empty();
+        bool allDigits = !number.isEmpty();
         for (int i = 0; allDigits && i < number.size(); ++i) {
             const char c = number[i];
             if (c < '0' || c > '9') {
@@ -200,7 +201,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
             continue;
         }
 
-        if (!argument.empty() && argument[0] == '-') {
+        if (!argument.isEmpty() && argument[0] == '-') {
             fail("parseCommandLineOptions", java::String("Unknown option: ").concat(argument));
         }
 
@@ -217,7 +218,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
         positionalIndex++;
     }
 
-    if (options.outputFileName.empty()) {
+    if (options.outputFileName.isEmpty()) {
         options.outputFileName = deriveOutputFileName(options.inputFileName);
     }
 
@@ -304,10 +305,10 @@ void printTriangles(
 RenderTransform computeRenderTransform(const Polygon2D& polygon,
     const PolygonModel& model)
 {
-    double minX = std::numeric_limits<double>::max();
-    double minY = std::numeric_limits<double>::max();
-    double maxX = -std::numeric_limits<double>::max();
-    double maxY = -std::numeric_limits<double>::max();
+    double minX = java::Double::MAX_VALUE;
+    double minY = java::Double::MAX_VALUE;
+    double maxX = -java::Double::MAX_VALUE;
+    double maxY = -java::Double::MAX_VALUE;
 
     for (long int i = 0; i < polygon.loops.size(); ++i) {
         _Polygon2DContour* contour = polygon.loops.get(i);
@@ -548,7 +549,7 @@ int run(int argc, char* argv[])
     try {
         commandLineOptions = parseCommandLineOptions(argc, argv);
     }
-    catch (const std::exception& exception) {
+    catch (const java::Exception& exception) {
         Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "run", "invalid command line argument", &exception);
         printUsage();
         return 0;
@@ -591,7 +592,7 @@ int main(int argc, char* argv[])
     try {
         return run(argc, argv);
     }
-    catch (const std::exception& exception) {
+    catch (const java::Exception& exception) {
         Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "main", "PolygonTriangulation failed", &exception);
         return 1;
     }

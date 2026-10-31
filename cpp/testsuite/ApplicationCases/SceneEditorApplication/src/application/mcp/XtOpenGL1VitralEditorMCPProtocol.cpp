@@ -1,7 +1,9 @@
+#include "java/lang/Exception.h"
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
+#include "java/util/function/Supplier.h"
 #include <cstdio>
-#include <exception>
-#include <functional>
-#include <stdexcept>
 
 #include "java/io/BufferedReader.h"
 #include "java/io/PrintWriter.h"
@@ -18,24 +20,24 @@ A tool executed in the thread of the GUI.
 */
 class ToolCall : public java::Runnable {
 private:
-    std::function<java::String()> tool;
+    java::Supplier<java::String> tool;
 
 public:
     java::String result;
     bool failed;
     java::String failure;
 
-    explicit ToolCall(const std::function<java::String()>& tool)
+    explicit ToolCall(const java::Supplier<java::String>& tool)
         : tool(tool), failed(false) {}
 
     virtual void run() override
     {
         try {
-            result = tool();
+            result = tool.get();
         }
-        catch ( const std::exception& e ) {
+        catch ( const java::Exception& e ) {
             failed = true;
-            failure = e.what();
+            failure = e.getMessage().c_str();
         }
     }
 };
@@ -65,9 +67,9 @@ void XtOpenGL1VitralEditorMCPProtocol::run()
             }
         }
     }
-    catch ( const std::exception& e ) {
+    catch ( const java::Exception& e ) {
         fprintf(stderr, "Error on XtOpenGL1VitralEditorMCPProtocol!\n%s\n",
-                e.what());
+                e.getMessage().c_str());
     }
 }
 
@@ -91,8 +93,8 @@ java::String XtOpenGL1VitralEditorMCPProtocol::handle(
         }
         return MCPJson::error(id, -32601, java::String("Unknown method: ") + method);
     }
-    catch ( const std::exception& e ) {
-        return MCPJson::error(id, -32000, e.what());
+    catch ( const java::Exception& e ) {
+        return MCPJson::error(id, -32000, e.getMessage().c_str());
     }
 }
 
@@ -225,7 +227,7 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
     if ( tool.equals("app.exit") ) {
         return applicationTools.exitApplication();
     }
-    throw std::invalid_argument(
+    throw java::IllegalArgumentException(
         (java::String("Unknown tool: ") + tool).c_str());
 }
 

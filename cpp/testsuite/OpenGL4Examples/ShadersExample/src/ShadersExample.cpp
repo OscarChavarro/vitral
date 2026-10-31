@@ -1,7 +1,12 @@
+#include "java/lang/Runnable.h"
+#include "java/lang/RuntimeException.h"
+#include "java/util/concurrent/atomic/AtomicLong.h"
+#include "java/lang/Thread.h"
+#include "java/lang/Exception.h"
+#include "java/lang/Math.h"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <exception>
 
 #include <java/lang/Math.h>
 #include "java/lang/String.h"
@@ -9,8 +14,7 @@
 #include <glad/gl.h>
 #include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #include <GL/gl.h>
-#include <atomic>
-#include <thread>
+#include <unistd.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -57,7 +61,7 @@ static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
 static int detectCpuCount()
 {
-    const unsigned int hc = std::thread::hardware_concurrency();
+    const long hc = sysconf(_SC_NPROCESSORS_ONLN);
     if ( hc > 0 ) return (int)hc;
     return 1;
 }
@@ -250,17 +254,16 @@ public:
                 softwareFrameImage->getYSize(),
                 softwareThreadCount);
             const java::ArrayList<RasterTileArea>& tiles = tileGenerator.getTiles();
-            std::atomic<size_t> nextTileIndex(0);
-            std::thread* workers = new std::thread[softwareThreadCount];
-            std::atomic<bool> failed(false);
-            std::exception_ptr firstError;
-
-            for (int w = 0; w < softwareThreadCount; w++) {
-                workers[w] = std::thread([&]() {
+            java::AtomicLong nextTileIndex;
+            java::AtomicLong failed;
+            // As a Future of Java, the first failure is given again as an
+            // exception with its message
+            java::String firstError;
+            java::Runnable work([&]() {
                     SimpleRaytracer raytracer;
                     try {
                         while (true) {
-                            size_t tileIndex = nextTileIndex.fetch_add(1);
+                            long long tileIndex = nextTileIndex.getAndIncrement();
                             if ((long int)tileIndex >= tiles.size()) break;
                             RasterTileArea tile = tiles.get((long int)tileIndex);
                             raytracer.execute(
@@ -275,16 +278,27 @@ public:
                                 tile.getEndY());
                         }
                     }
+                    catch (const java::Exception& e) {
+                        if (failed.compareAndSet(0, 1)) {
+                            firstError = e.getMessage();
+                        }
+                    }
                     catch (...) {
-                        if (!failed.exchange(true)) {
-                            firstError = std::current_exception();
+                        if (failed.compareAndSet(0, 1)) {
+                            firstError = "Raytracer worker failed";
                         }
                     }
                 });
+            java::ArrayList<java::Thread*> workers;
+            for (int w = 0; w < softwareThreadCount; w++) {
+                workers.add(new java::Thread(&work));
+                workers[w]->start();
             }
-            for (int i = 0; i < softwareThreadCount; i++) workers[i].join();
-            delete[] workers;
-            if (firstError) std::rethrow_exception(firstError);
+            for (int i = 0; i < softwareThreadCount; i++) {
+                workers[i]->join();
+                delete workers[i];
+            }
+            if (failed.get() != 0) throw java::RuntimeException(firstError);
         }
         catch (...) {
             if (snapshot != 0) delete snapshot;
@@ -320,7 +334,7 @@ public:
 
     java::String getCookTorranceMaterialLabel() const
     {
-        if (!cookTorranceMaterial || cookTorranceMaterial->getName().empty()) return "Copper";
+        if (!cookTorranceMaterial || cookTorranceMaterial->getName().isEmpty()) return "Copper";
         return cookTorranceMaterial->getName();
     }
 
@@ -425,7 +439,7 @@ public:
             if (fgets(lineStr, sizeof(lineStr), csv)) {
                 while (fgets(lineStr, sizeof(lineStr), csv)) {
                     java::String line(lineStr);
-                    if (line.empty()) continue;
+                    if (line.isEmpty()) continue;
                     java::ArrayList<java::String> cols;
                     int prev = 0;
                     for (int i = 0; i <= (int)line.size(); i++) {
@@ -434,7 +448,7 @@ public:
                             prev = i + 1;
                         }
                     }
-                    if (cols.size() == 0 || cols[0].empty()) continue;
+                    if (cols.size() == 0 || cols[0].isEmpty()) continue;
                     cookTorranceMaterialNames.add(cols[0]);
                     if (cols[0] == "Copper") cookTorranceMaterialIndex = (int)cookTorranceMaterialNames.size() - 1;
                 }
@@ -634,8 +648,8 @@ int main(int argc, char** argv)
         app.run();
         return 0;
     }
-    catch (const std::exception& e) {
-        fprintf(stderr, "%s\n", e.what());
+    catch (const java::Exception& e) {
+        fprintf(stderr, "%s\n", e.getMessage().c_str());
         return 1;
     }
 }

@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cmath>
 
 #include "java/lang/Double.h"
@@ -43,7 +42,7 @@ bool FallbackGeometry::boundsMatch(const double* a, const double* b)
     return true;
 }
 
-void FallbackGeometry::addUniqueCoordinate(std::vector<double>& values,
+void FallbackGeometry::addUniqueCoordinate(java::ArrayList<double>& values,
     double value)
 {
     size_t i;
@@ -53,16 +52,15 @@ void FallbackGeometry::addUniqueCoordinate(std::vector<double>& values,
             return;
         }
     }
-    values.push_back(value);
+    values.add(value);
     // As Java `Collections.sort` over `Double`
-    std::stable_sort(values.begin(), values.end(),
-        [](double x, double y) { return java::Double::compare(x, y) < 0; });
+    values.sort([](double x, double y) { return java::Double::compare(x, y) < 0; });
 }
 
-std::vector<double> FallbackGeometry::uniqueVertexCoordinates(
+java::ArrayList<double> FallbackGeometry::uniqueVertexCoordinates(
     PolyhedralBoundedSolid* solid, int axis)
 {
-    std::vector<double> values;
+    java::ArrayList<double> values;
     long int i;
 
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
@@ -115,7 +113,7 @@ FallbackGeometry::Profile FallbackGeometry::extractProfileAtX(
                     onPlane = false;
                     break;
                 }
-                profile.push_back(p);
+                profile.add(p);
             }
             if ( !onPlane ) {
                 continue;
@@ -139,10 +137,10 @@ bool FallbackGeometry::sameProfilePoint(const Vector3Dd& a, const Vector3Dd& b)
 
 void FallbackGeometry::appendProfilePoint(Profile& profile, const Vector3Dd& point)
 {
-    if ( !profile.empty() && sameProfilePoint(profile.back(), point) ) {
+    if ( !profile.isEmpty() && sameProfilePoint(profile[profile.size() - 1], point) ) {
         return;
     }
-    profile.push_back(point);
+    profile.add(point);
 }
 
 Vector3Dd FallbackGeometry::projectProfilePoint(const Vector3Dd& point,
@@ -183,7 +181,7 @@ FallbackGeometry::Profile FallbackGeometry::clipProfileAboveZ(
         return clipped;
     }
 
-    previous = profile.back();
+    previous = profile[profile.size() - 1];
     previousInside = previous.z() + numericContext.bigEpsilon() >= zCut;
     for ( i = 0; i < profile.size(); i++ ) {
         Vector3Dd current = profile[i];
@@ -205,8 +203,8 @@ FallbackGeometry::Profile FallbackGeometry::clipProfileAboveZ(
         previousInside = currentInside;
     }
 
-    if ( clipped.size() > 1 && sameProfilePoint(clipped.front(), clipped.back()) ) {
-        clipped.pop_back();
+    if ( clipped.size() > 1 && sameProfilePoint(clipped[0], clipped[clipped.size() - 1]) ) {
+        clipped.remove(clipped.size() - 1);
     }
     return clipped;
 }

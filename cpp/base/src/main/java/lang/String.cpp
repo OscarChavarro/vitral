@@ -374,6 +374,19 @@ String::operator+=(const char *other) {
     return *this;
 }
 
+String
+String::operator+(char other) const {
+    const char text[2] = { other, '\0' };
+    return concat(text);
+}
+
+String &
+String::operator+=(char other) {
+    const char text[2] = { other, '\0' };
+    *this = concat(text);
+    return *this;
+}
+
 bool
 String::operator==(const String &other) const {
     return equals(other);
@@ -471,6 +484,15 @@ String::valueOf(float value) {
 }
 
 String
+String::format(const char *format, ...) {
+    va_list arguments;
+    va_start(arguments, format);
+    String result = formatCStringToJavaString(format, arguments);
+    va_end(arguments);
+    return result;
+}
+
+String
 String::formatCStringToJavaString(const char *format, va_list arguments) {
     if ( format == nullptr ) {
         return String();
@@ -501,6 +523,20 @@ String::formatCStringToJavaString(const char *format, va_list arguments) {
     String result(dynamicBuffer);
     delete[] dynamicBuffer;
     return result;
+}
+
+bool
+String::startsWith(const char *prefix, int offset) const {
+    if ( prefix == nullptr || offset < 0 ) {
+        return false;
+    }
+    const std::size_t prefixLength = std::strlen(prefix);
+    const std::size_t sourceLength = std::strlen(toCString());
+    if ( static_cast<std::size_t>(offset) > sourceLength ||
+         prefixLength > sourceLength - static_cast<std::size_t>(offset) ) {
+        return false;
+    }
+    return std::strncmp(toCString() + offset, prefix, prefixLength) == 0;
 }
 
 int

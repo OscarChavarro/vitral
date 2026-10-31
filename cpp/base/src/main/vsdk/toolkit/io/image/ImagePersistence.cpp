@@ -1,8 +1,8 @@
+#include "java/util/Collections.h"
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <vector>
 
 #include "java/io/BufferedInputStream.h"
 #include "java/io/BufferedOutputStream.h"
@@ -603,8 +603,8 @@ RGBAImageUncompressed* ImagePersistence::importRGBA(const java::File& inImageFd)
         }
         png_read_update_info(png_ptr, info_ptr);
 
-        std::vector<unsigned char> pixels((size_t)width * (size_t)height * 4);
-        std::vector<png_bytep> rows((size_t)height);
+        java::ArrayList<unsigned char> pixels = java::Collections::nCopies<unsigned char>((size_t)width * (size_t)height * 4, (unsigned char)0);
+        java::ArrayList<png_bytep> rows = java::Collections::nCopies<png_bytep>((size_t)height, nullptr);
         for (int y = 0; y < height; y++) {
             rows[(size_t)y] = &pixels[(size_t)y * (size_t)width * 4];
         }

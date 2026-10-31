@@ -1,11 +1,11 @@
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
 #include <gtest/gtest.h>
 
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-
+#include "java/io/FileInputStream.h"
+#include "java/lang/StringBuilder.h"
 #include "java/util/ArrayList.txx"
+#include "java/util/TreeMap.txx"
 #include "vsdk/toolkit/gui/dialog/components/DialogFileFilter.h"
 #include "vsdk/toolkit/gui/dialog/components/DialogTreeNode.h"
 #include "vsdk/toolkit/gui/dialog/runtime/DialogSession.h"
@@ -15,22 +15,27 @@
 
 namespace {
 
-std::string readFile(const std::string& path)
+java::String readFile(const java::String& path)
 {
-    std::ifstream input(path.c_str());
-    std::stringstream text;
-    text << input.rdbuf();
-    return text.str();
+    java::FileInputStream input(path.c_str());
+    java::StringBuilder text;
+    unsigned char buffer[4096];
+    int count;
+    while ( (count = input.read(buffer, 0, (int)sizeof(buffer))) > 0 ) {
+        text.append((const char *)buffer, count);
+    }
+    input.close();
+    return text.toString();
 }
 
-std::string importError(const char* json)
+java::String importError(const char* json)
 {
     Widget widget;
     try {
         DialogPersistence::importDialogs(json, &widget);
     }
-    catch ( const std::invalid_argument& e ) {
-        return e.what();
+    catch ( const java::IllegalArgumentException& e ) {
+        return e.getMessage().c_str();
     }
     return "";
 }
@@ -41,7 +46,7 @@ TEST(DialogPersistenceTest, ImportsSharedDialogDefinitions)
 {
     Widget widget;
     DialogPersistence::importDialogs(
-        readFile(std::string(VITRAL_REPOSITORY_ROOT) +
+        readFile(java::String(VITRAL_REPOSITORY_ROOT) +
                  "/etc/gui/dialogs.json").c_str(), &widget);
 
     WidgetDialog* tangible = widget.getDialogById("tangible.connect");
@@ -125,7 +130,7 @@ TEST(DialogSessionTest, IgnoresStaleAndClosedActions)
     session.setDraft("serviceUrl", "ws://host");
     EXPECT_STREQ(session.getDraft("serviceUrl").c_str(), "ws://host");
     EXPECT_STREQ(session.getDraft("missing").c_str(), "");
-    EXPECT_THROW(DialogSession(nullptr), std::invalid_argument);
+    EXPECT_THROW(DialogSession(nullptr), java::IllegalArgumentException);
 }
 
 TEST(DialogFileFilterTest, AcceptsSuffixIgnoringCase)

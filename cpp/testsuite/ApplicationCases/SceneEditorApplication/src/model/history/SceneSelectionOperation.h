@@ -1,7 +1,8 @@
 #ifndef __SCENE_SELECTION_OPERATION__
 #define __SCENE_SELECTION_OPERATION__
 
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include "model/history/UndoableOperation.h"
 
@@ -17,26 +18,26 @@ class SceneSelectionOperation : public UndoableOperation {
 private:
     Scene* scene;
     java::String name;
-    std::vector<bool> beforeBodies;
-    std::vector<bool> beforeLights;
-    std::vector<bool> beforeGizmos;
-    std::vector<bool> afterBodies;
-    std::vector<bool> afterLights;
-    std::vector<bool> afterGizmos;
+    java::ArrayList<bool> beforeBodies;
+    java::ArrayList<bool> beforeLights;
+    java::ArrayList<bool> beforeGizmos;
+    java::ArrayList<bool> afterBodies;
+    java::ArrayList<bool> afterLights;
+    java::ArrayList<bool> afterGizmos;
 
-    void apply(const std::vector<bool>& bodies,
-               const std::vector<bool>& lights,
-               const std::vector<bool>& gizmos);
-    static void apply(SelectionSet* selection, const std::vector<bool>& state);
+    void apply(const java::ArrayList<bool>& bodies,
+               const java::ArrayList<bool>& lights,
+               const java::ArrayList<bool>& gizmos);
+    static void apply(SelectionSet* selection, const java::ArrayList<bool>& state);
 
 public:
     SceneSelectionOperation(const java::String& name, Scene* scene,
-                            const std::vector<bool>& beforeBodies,
-                            const std::vector<bool>& beforeLights,
-                            const std::vector<bool>& beforeGizmos,
-                            const std::vector<bool>& afterBodies,
-                            const std::vector<bool>& afterLights,
-                            const std::vector<bool>& afterGizmos);
+                            const java::ArrayList<bool>& beforeBodies,
+                            const java::ArrayList<bool>& beforeLights,
+                            const java::ArrayList<bool>& beforeGizmos,
+                            const java::ArrayList<bool>& afterBodies,
+                            const java::ArrayList<bool>& afterLights,
+                            const java::ArrayList<bool>& afterGizmos);
 
     virtual void undo() override;
     virtual void redo() override;
@@ -45,9 +46,9 @@ public:
     /**
     @return the selection state of each element of the selection set
     */
-    static std::vector<bool> capture(SelectionSet* selection);
+    static java::ArrayList<bool> capture(SelectionSet* selection);
 
-    static bool isSame(const std::vector<bool>& a, const std::vector<bool>& b);
+    static bool isSame(const java::ArrayList<bool>& a, const java::ArrayList<bool>& b);
 };
 
 #endif

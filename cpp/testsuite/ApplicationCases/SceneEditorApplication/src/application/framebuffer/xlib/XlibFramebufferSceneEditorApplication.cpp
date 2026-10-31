@@ -1,7 +1,8 @@
+#include "java/lang/Exception.h"
+#include "java/lang/String.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <exception>
 
 #include "application/framebuffer/FramebufferSceneEditor.h"
 #include "java/util/ArrayList.txx"
@@ -12,7 +13,7 @@
 // The scene editor on the Xlib backend of the framebuffer GUI: one X11 window
 // drawn with Xlib primitives and a core font, without toolkits or OpenGL (see
 // FramebufferSceneEditor). The VSDKFatalException of the model are
-// std::exceptions.
+// java::Exceptions.
 namespace {
 
 void usage()
@@ -93,8 +94,8 @@ int main(int argc, char** argv)
         FramebufferSceneEditor editor(surface, input, language);
         status = editor.run();
     }
-    catch ( const std::exception& exception ) {
-        std::fprintf(stderr, "SceneEditorApplication: %s\n", exception.what());
+    catch ( const java::Exception& exception ) {
+        std::fprintf(stderr, "SceneEditorApplication: %s\n", exception.getMessage().c_str());
     }
     surface.close();
     return status;

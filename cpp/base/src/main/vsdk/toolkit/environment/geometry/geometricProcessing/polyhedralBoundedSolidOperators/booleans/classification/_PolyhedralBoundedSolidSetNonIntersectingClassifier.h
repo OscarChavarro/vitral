@@ -5,7 +5,8 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_NON_INTERSECTING_CLASSIFIER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_NON_INTERSECTING_CLASSIFIER__
 
-#include <vector>
+#include "java/util/Collections.h"
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -150,7 +151,7 @@ public:
         _PreflightCache& cache);
 
 private:
-    typedef std::vector<Vector3Dd> Polygon;
+    typedef java::ArrayList<Vector3Dd> Polygon;
 
     /**
     Containing planes of every face of a solid, indexed by face position,
@@ -162,7 +163,7 @@ private:
         ~FacePlanes();
         InfinitePlane* get(long int i) const;
     private:
-        std::vector<InfinitePlane*> planes;
+        java::ArrayList<InfinitePlane*> planes;
         FacePlanes(const FacePlanes&);
         FacePlanes& operator=(const FacePlanes&);
     };
@@ -179,24 +180,23 @@ private:
         const Vector3Dd& point);
     static int classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
         const FacePlanes& facePlanes, const Vector3Dd& point);
-    static std::vector<double> overlappingBounds(PolyhedralBoundedSolid* solidA,
-        PolyhedralBoundedSolid* solidB);
-    static bool hasPositiveOverlapVolume(const std::vector<double>& bounds);
+    static java::ArrayList<double> overlappingBounds(PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
+    static bool hasPositiveOverlapVolume(const java::ArrayList<double>& bounds);
     static bool hasInteriorOverlapWitnessInAabb(
-        const std::vector<double>& bounds,
+        const java::ArrayList<double>& bounds,
         PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB,
         const FacePlanes& planesA,
         const FacePlanes& planesB);
-    static std::vector<double> axisProbeCoordinates(double min, double max);
+    static java::ArrayList<double> axisProbeCoordinates(double min, double max);
     static double vertexCoordinate(_PolyhedralBoundedSolidVertex* vertex,
         int axis);
-    static void appendInteriorVertexCoordinates(std::vector<double>& coords,
+    static void appendInteriorVertexCoordinates(java::ArrayList<double>& coords,
         PolyhedralBoundedSolid* solid, int axis, double min, double max,
         double eps);
-    static void appendUniqueInteriorSample(std::vector<double>& samples,
+    static void appendUniqueInteriorSample(java::ArrayList<double>& samples,
         double value, double min, double max, double eps);
-    static std::vector<double> sampleCoordinates(double min, double max,
+    static java::ArrayList<double> sampleCoordinates(double min, double max,
         PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB,
         int axis);
     static bool hasConfirmedInteriorOverlap(PolyhedralBoundedSolid* solidA,
@@ -208,8 +208,7 @@ private:
         PolyhedralBoundedSolid* other);
     static bool hasPartialCoplanarFaceAreaOverlap(
         PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
-    static std::vector<Polygon> partialCoplanarFaceAreaOverlapPolygons(
-        PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
+    static java::ArrayList<Polygon> partialCoplanarFaceAreaOverlapPolygons(PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
     static bool coplanarFaces(_PolyhedralBoundedSolidFace* faceA,
         _PolyhedralBoundedSolidFace* faceB);
     static bool partialCoplanarFaceAreaOverlap(

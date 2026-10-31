@@ -1,7 +1,6 @@
 // Before any other header that could include the Xt ones
 #include "vsdk/toolkit/gui/XmIntrinsics.h"
 
-#include <string>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/CommandListener.h"

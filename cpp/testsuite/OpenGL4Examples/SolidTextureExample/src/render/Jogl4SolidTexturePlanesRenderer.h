@@ -1,7 +1,6 @@
 #ifndef __JOGL4_SOLID_TEXTURE_PLANES_RENDERER_CPP__
 #define __JOGL4_SOLID_TEXTURE_PLANES_RENDERER_CPP__
 
-#include <vector>
 
 #include "java/util/ArrayList.h"
 
@@ -17,11 +16,11 @@ private:
     unsigned int uvVboId;
 
     void ensureBuffers();
-    void buildPlaneFrame(int planeCount, std::vector<float>& positions,
-                         std::vector<float>& normals, std::vector<float>& uvs);
-    void uploadFrame(const std::vector<float>& positions,
-                     const std::vector<float>& normals,
-                     const std::vector<float>& uvs);
+    void buildPlaneFrame(int planeCount, java::ArrayList<float>& positions,
+                         java::ArrayList<float>& normals, java::ArrayList<float>& uvs);
+    void uploadFrame(const java::ArrayList<float>& positions,
+                     const java::ArrayList<float>& normals,
+                     const java::ArrayList<float>& uvs);
     void configureClippingPlane(unsigned int programId,
                                 InfinitePlane* clippingPlane);
 

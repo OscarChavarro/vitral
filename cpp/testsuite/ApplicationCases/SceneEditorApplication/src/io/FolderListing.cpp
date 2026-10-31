@@ -1,4 +1,5 @@
-#include <algorithm>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <climits>
 #include <cstdlib>
 #include <dirent.h>
@@ -6,13 +7,13 @@
 
 #include "io/FolderListing.h"
 
-bool FolderListing::isFolder(const std::string& path)
+bool FolderListing::isFolder(const java::String& path)
 {
     struct stat status;
     return stat(path.c_str(), &status) == 0 && S_ISDIR(status.st_mode);
 }
 
-std::string FolderListing::normalizeFolder(const std::string& folder)
+java::String FolderListing::normalizeFolder(const java::String& folder)
 {
     char resolved[PATH_MAX];
     if ( realpath(folder.c_str(), resolved) != nullptr ) {
@@ -21,10 +22,10 @@ std::string FolderListing::normalizeFolder(const std::string& folder)
     return folder;
 }
 
-bool FolderListing::accepts(const std::vector<FileSuffixFilter>& filters,
-                            const std::string& path)
+bool FolderListing::accepts(const java::ArrayList<FileSuffixFilter>& filters,
+                            const java::String& path)
 {
-    if ( filters.empty() || isFolder(path) ) {
+    if ( filters.isEmpty() || isFolder(path) ) {
         return true;
     }
     java::File file(path.c_str());
@@ -36,10 +37,10 @@ bool FolderListing::accepts(const std::vector<FileSuffixFilter>& filters,
     return false;
 }
 
-void FolderListing::list(const std::string& folder,
-                         const std::vector<FileSuffixFilter>& filters,
-                         std::vector<std::string>& folders,
-                         std::vector<std::string>& files)
+void FolderListing::list(const java::String& folder,
+                         const java::ArrayList<FileSuffixFilter>& filters,
+                         java::ArrayList<java::String>& folders,
+                         java::ArrayList<java::String>& files)
 {
     folders.clear();
     files.clear();
@@ -49,19 +50,19 @@ void FolderListing::list(const std::string& folder,
     }
     struct dirent* entry;
     while ( (entry = readdir(directory)) != nullptr ) {
-        std::string name = entry->d_name;
-        if ( name.empty() || name[0] == '.' ) {
+        java::String name = entry->d_name;
+        if ( name.isEmpty() || name[0] == '.' ) {
             continue;
         }
-        std::string path = folder + "/" + name;
+        java::String path = folder + "/" + name;
         if ( isFolder(path) ) {
-            folders.push_back(name);
+            folders.add(name);
         }
         else if ( accepts(filters, path) ) {
-            files.push_back(name);
+            files.add(name);
         }
     }
     closedir(directory);
-    std::sort(folders.begin(), folders.end());
-    std::sort(files.begin(), files.end());
+    folders.sort(nullptr);
+    files.sort(nullptr);
 }

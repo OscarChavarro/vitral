@@ -1,5 +1,8 @@
-#include <stdexcept>
-#include <vector>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 
 #include <X11/Shell.h>
 
@@ -26,20 +29,20 @@ XtSelectorDialog::XtSelectorDialog(XtApplicationHost* host)
 {
     const WidgetDialog* definition = host->getDialogById(DIALOG_ID);
     if ( definition == nullptr ) {
-        throw std::logic_error("Missing scene.selector dialog");
+        throw java::IllegalStateException("Missing scene.selector dialog");
     }
     XtApplicationHost* messages = host;
     form = XtDialogHost::form(
         host->createDialogShell("sceneSelector", transientShellWidgetClass, ""),
         host->getUiFactory()->getWidgetSet(), host->getPanelFontSet(),
-        [messages](const std::string& key) {
+        [messages](const java::String& key) {
             return messages->getMessage(key.c_str());
         },
-        definition, [](const std::string&) {});
+        definition, [](const java::String&) {});
     XtTreeView* tree = form->tree(TREE_BINDING);
     if ( tree == nullptr ) {
         delete form;
-        throw std::logic_error("The scene.selector dialog has no tree");
+        throw java::IllegalStateException("The scene.selector dialog has no tree");
     }
     tree->setSelectionListener([this]() { applyTreeSelection(); });
     tree->setDeleteListener([this]() { performAction("deleteSelected"); });
@@ -63,17 +66,17 @@ void XtSelectorDialog::rebuild()
     tree->setRoot(nullptr);
     hierarchy = presenter.hierarchy();
     tree->setRoot(&hierarchy);
-    std::vector<const DialogTreeNode*> selected;
+    java::ArrayList<const DialogTreeNode*> selected;
     collectSelected(&hierarchy, selected);
     tree->setSelection(selected);
     updating = false;
 }
 
 void XtSelectorDialog::collectSelected(
-    const DialogTreeNode* node, std::vector<const DialogTreeNode*>& selected)
+    const DialogTreeNode* node, java::ArrayList<const DialogTreeNode*>& selected)
 {
     if ( presenter.isSelected(node) ) {
-        selected.push_back(node);
+        selected.add(node);
     }
     for ( size_t i = 0; i < node->getChildren().size(); i++ ) {
         collectSelected(&node->getChildren()[i], selected);
@@ -110,23 +113,23 @@ void XtSelectorDialog::selectBody(int index)
         return;
     }
     // The geometry objects are the third group, as in the Java selector
-    const DialogTreeNode& bodies = hierarchy.getChildren().at(2);
-    tree->selectOnly(&bodies.getChildren().at(index));
+    const DialogTreeNode& bodies = hierarchy.getChildren()[2];
+    tree->selectOnly(&bodies.getChildren()[index]);
 }
 
-void XtSelectorDialog::performAction(const std::string& action)
+void XtSelectorDialog::performAction(const java::String& action)
 {
     if ( !form->hasAction(action) ) {
-        throw std::invalid_argument("Unknown selector action: " + action);
+        throw java::IllegalArgumentException("Unknown selector action: " + action);
     }
     if ( action == "deleteSelected" ) {
         presenter.deleteSelected();
         rebuild();
     }
     else if ( action == "toggleVisibility" ) {
-        std::vector<SimpleBody*> bodies = presenter.selectedBodies(
+        java::ArrayList<SimpleBody*> bodies = presenter.selectedBodies(
             form->tree(TREE_BINDING)->getSelection());
-        if ( !bodies.empty() ) {
+        if ( !bodies.isEmpty() ) {
             presenter.setHidden(bodies, !presenter.anyHidden(bodies));
             rebuild();
         }
@@ -136,8 +139,8 @@ void XtSelectorDialog::performAction(const std::string& action)
 void XtSelectorDialog::showPopup(int rootX, int rootY)
 {
     XtTreeView* tree = form->tree(TREE_BINDING);
-    std::vector<SimpleBody*> bodies = presenter.selectedBodies(tree->getSelection());
-    if ( bodies.empty() ) {
+    java::ArrayList<SimpleBody*> bodies = presenter.selectedBodies(tree->getSelection());
+    if ( bodies.isEmpty() ) {
         return;
     }
     bool anyHidden = presenter.anyHidden(bodies);
@@ -146,7 +149,7 @@ void XtSelectorDialog::showPopup(int rootX, int rootY)
         anyHidden ? "Show objects" : "Hide objects").c_str();
     item.checked = false;
     item.separator = false;
-    std::vector<XtWidgetSet::MenuChoice> items(1, item);
+    java::ArrayList<XtWidgetSet::MenuChoice> items = java::Collections::nCopies<XtWidgetSet::MenuChoice>(1, item);
     XtWidgetSet* widgetSet = host->getUiFactory()->getWidgetSet();
     if ( popupMenu != nullptr ) {
         XtDestroyWidget(popupMenu);

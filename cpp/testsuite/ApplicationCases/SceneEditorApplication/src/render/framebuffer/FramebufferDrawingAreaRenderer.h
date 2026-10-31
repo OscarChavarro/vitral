@@ -1,7 +1,7 @@
 #ifndef __FRAMEBUFFER_DRAWING_AREA_RENDERER__
 #define __FRAMEBUFFER_DRAWING_AREA_RENDERER__
 
-#include <functional>
+#include "java/util/function/Consumer.h"
 #include <stdint.h>
 
 class ApplicationModel;
@@ -30,7 +30,7 @@ private:
     ApplicationModel* model;
     DrawingAreaHost* host;
     FrameCaptureService* frameCapture;
-    std::function<void(Viewport*)> selectedListener;
+    java::Consumer<Viewport*> selectedListener;
 
     void drawLines(Framebuffer& surface, const Calligraphic2DBuffer& lines,
                    int x, int y, int width, int height, uint32_t color,
@@ -53,7 +53,7 @@ public:
     */
     FramebufferDrawingAreaRenderer(
         ApplicationModel* model, DrawingAreaHost* host,
-        const std::function<void(Viewport*)>& selected);
+        const java::Consumer<Viewport*>& selected);
     ~FramebufferDrawingAreaRenderer();
 
     /**

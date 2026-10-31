@@ -1,7 +1,7 @@
 #ifndef __DRAWING_AREA_INTERACTION_TECHNIQUES__
 #define __DRAWING_AREA_INTERACTION_TECHNIQUES__
 
-#include <functional>
+#include "java/util/function/Predicate.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -65,7 +65,7 @@ edition history of the model by an `InteractionEditRecorder`.
 */
 class DrawingAreaInteractionTechniques {
 private:
-    typedef std::function<bool(const MouseEvent&)> MouseTechnique;
+    typedef java::Predicate<const MouseEvent&> MouseTechnique;
 
     DrawingArea* drawingArea;
     ApplicationModel* model;

@@ -1,6 +1,7 @@
 #ifndef __XM_WIDGET_SET__
 #define __XM_WIDGET_SET__
 
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/gui/XmPanelWidgets.h"
 #include "vsdk/toolkit/gui/XtWidgetSet.h"
 #include "vsdk/toolkit/render/xm/XmGuiRenderer.h"
@@ -35,7 +36,7 @@ public:
     menu)
     */
     virtual Widget createChoiceMenu(Widget owner,
-                                    const std::vector<MenuChoice>& items,
+                                    const java::ArrayList<MenuChoice>& items,
                                     XFontSet fontSet, ChoiceProc choose,
                                     void* clientData) override;
     virtual void popupChoiceMenu(Widget menu, int rootX, int rootY,

@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <cstdio>
 
 #include "java/util/ArrayList.txx"
@@ -58,7 +59,7 @@ static java::String findShaderSource(const java::String& shaderFileName)
     for ( size_t i = 0; i < sizeof(candidates) / sizeof(candidates[0]); i++ ) {
         java::String path = java::String(candidates[i]) + shaderFileName;
         java::String src = readTextFile(path);
-        if ( !src.empty() ) return src;
+        if ( !src.isEmpty() ) return src;
     }
     return java::String();
 }
@@ -84,7 +85,7 @@ static unsigned int buildProgram(const char* vsFile, const char* fsFile)
 {
     java::String vsSource = findShaderSource(vsFile);
     java::String fsSource = findShaderSource(fsFile);
-    if ( vsSource.empty() || fsSource.empty() ) {
+    if ( vsSource.isEmpty() || fsSource.isEmpty() ) {
         std::fprintf(stderr, "MeshExample shader not found: %s / %s\n", vsFile, fsFile);
         return 0;
     }

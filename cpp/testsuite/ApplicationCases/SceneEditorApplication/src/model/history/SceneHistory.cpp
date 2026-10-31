@@ -1,9 +1,12 @@
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
+#include "java/util/function/Supplier.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "model/history/SceneHistory.h"
 #include "model/history/SceneSnapshot.h"
 #include "model/history/UndoableOperation.h"
 
-SceneHistory::SceneHistory(const std::function<Scene*()>& sceneSource)
+SceneHistory::SceneHistory(const java::Supplier<Scene*>& sceneSource)
     : sceneSource(sceneSource), before(nullptr), depth(0)
 {
 }
@@ -26,7 +29,7 @@ bool SceneHistory::isRecording() const
 void SceneHistory::begin()
 {
     if ( depth == 0 ) {
-        Scene* scene = sceneSource ? sceneSource() : nullptr;
+        Scene* scene = sceneSource ? sceneSource.get() : nullptr;
 
         delete before;
         before = scene == nullptr ? nullptr : SceneSnapshot::capture(scene);
@@ -52,7 +55,7 @@ bool SceneHistory::end(const java::String& name, bool mergeable)
     }
     start = before;
     before = nullptr;
-    scene = sceneSource ? sceneSource() : nullptr;
+    scene = sceneSource ? sceneSource.get() : nullptr;
     if ( start == nullptr || scene == nullptr || start->getScene() != scene ) {
         // The whole scene was replaced: the action can not be undone
         delete start;
@@ -70,11 +73,12 @@ bool SceneHistory::end(const java::String& name, bool mergeable)
 }
 
 bool SceneHistory::perform(const java::String& name,
-                           const std::function<void()>& action)
+                           const java::Runnable& action)
 {
     begin();
     try {
-        action();
+        java::Runnable task(action);
+        task.run();
     }
     catch ( ... ) {
         // What the action did before failing is still recorded

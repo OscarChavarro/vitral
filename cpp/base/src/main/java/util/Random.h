@@ -1,7 +1,7 @@
 #ifndef __JAVA_UTIL_RANDOM__
 #define __JAVA_UTIL_RANDOM__
 
-#include <chrono>
+#include "java/lang/System.h"
 
 namespace java {
 
@@ -32,8 +32,7 @@ private:
 public:
     Random()
         : seed(initialScramble((long long)(
-              (unsigned long long)std::chrono::steady_clock::now()
-                  .time_since_epoch().count() ^
+              (unsigned long long)java::System::nanoTime() ^
               (8682522807148012ULL * 181783497276652981ULL))))
     {
     }

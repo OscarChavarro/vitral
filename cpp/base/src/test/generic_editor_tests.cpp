@@ -1,7 +1,6 @@
+#include "java/lang/String.h"
 #include <gtest/gtest.h>
 
-#include <string>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/Entity.h"
@@ -16,10 +15,10 @@ namespace {
 /** Records the presentation hooks instead of creating widgets. */
 class RecordingEditor : public GenericEditor {
 public:
-    std::vector<std::string> controls;
+    java::ArrayList<java::String> controls;
     bool hasMessage = false;
-    std::string message;
-    std::string clearedMessage;
+    java::String message;
+    java::String clearedMessage;
 
     const ControlSpecification *at(long int i) const
     {
@@ -35,7 +34,7 @@ protected:
     void addControl(const ControlSpecification *specification,
                     const java::String &value) override
     {
-        controls.push_back(std::string(specification->getLabel().c_str()) +
+        controls.add(java::String(specification->getLabel().c_str()) +
             "=" + value.c_str());
     }
 
@@ -50,10 +49,10 @@ protected:
     void setControlValue(const ControlSpecification *specification,
                          const java::String &value) override
     {
-        std::string prefix =
-            std::string(specification->getLabel().c_str()) + "=";
+        java::String prefix =
+            java::String(specification->getLabel().c_str()) + "=";
         for ( size_t i = 0; i < controls.size(); i++ ) {
-            if ( controls[i].compare(0, prefix.size(), prefix) == 0 ) {
+            if ( controls[i].startsWith(prefix.c_str()) ) {
                 controls[i] = prefix + value.c_str();
             }
         }
@@ -68,10 +67,10 @@ protected:
 
 class CountingListener : public GenericEditorListener {
 public:
-    std::vector<Entity *> changed;
+    java::ArrayList<Entity *> changed;
     void notifyEntityChanged(Entity *entity) override
     {
-        changed.push_back(entity);
+        changed.add(entity);
     }
 };
 
@@ -109,9 +108,15 @@ public:
     void setWeight(double value) { weight = value; }
 };
 
-std::vector<std::string> list(std::initializer_list<const char *> items)
+template <typename... Items>
+java::ArrayList<java::String> list(Items... items)
 {
-    return std::vector<std::string>(items.begin(), items.end());
+    const char *values[] = { items... };
+    java::ArrayList<java::String> result;
+    for ( const char *value : values ) {
+        result.add(value);
+    }
+    return result;
 }
 
 }
@@ -159,7 +164,7 @@ TEST(GenericEditorTest, EditsSphereRadiusThroughAccessors) {
     editor.setListener(&listener);
 
     editor.build(&sphere);
-    EXPECT_EQ(list({"Radius=1.0"}), editor.controls);
+    EXPECT_TRUE(list("Radius=1.0").equals(editor.controls));
 
     EXPECT_TRUE(editor.updateValue(editor.at(0), "2.5"));
     EXPECT_DOUBLE_EQ(2.5, sphere.getRadius());
@@ -180,8 +185,7 @@ TEST(GenericEditorTest, EditsConeAttributesThroughAccessors) {
     RecordingEditor editor;
 
     editor.build(&cone);
-    EXPECT_EQ(list({"BottomRadius=1.0", "TopRadius=0.0", "Height=2.0"}),
-        editor.controls);
+    EXPECT_TRUE(list("BottomRadius=1.0", "TopRadius=0.0", "Height=2.0").equals(editor.controls));
 
     const ControlSpecification *bottom = editor.at(0);
     const ControlSpecification *top = editor.at(1);
@@ -201,7 +205,7 @@ TEST(GenericEditorTest, EditsEveryAccessorType) {
     RecordingEditor editor;
 
     editor.build(&counters);
-    EXPECT_EQ(list({"Count=1", "Total=10", "Ratio=0.1"}), editor.controls);
+    EXPECT_TRUE(list("Count=1", "Total=10", "Ratio=0.1").equals(editor.controls));
 
     EXPECT_TRUE(editor.updateValue(editor.at(0), " 7 "));
     EXPECT_FALSE(editor.updateValue(editor.at(0), "11"));
@@ -212,8 +216,7 @@ TEST(GenericEditorTest, EditsEveryAccessorType) {
     EXPECT_EQ(7, counters.getCount());
     EXPECT_EQ(-9000000000LL, counters.getTotal());
     EXPECT_FLOAT_EQ(0.25f, counters.getRatio());
-    EXPECT_EQ(list({"Count=7", "Total=-9000000000", "Ratio=0.25"}),
-        editor.controls);
+    EXPECT_TRUE(list("Count=7", "Total=-9000000000", "Ratio=0.25").equals(editor.controls));
 }
 
 TEST(GenericEditorTest, CopiedEntitiesKeepTheirAccessors) {
@@ -223,7 +226,7 @@ TEST(GenericEditorTest, CopiedEntitiesKeepTheirAccessors) {
     RecordingEditor editor;
 
     editor.build(&copy);
-    EXPECT_EQ(list({"Radius=3.0"}), editor.controls);
+    EXPECT_TRUE(list("Radius=3.0").equals(editor.controls));
     EXPECT_TRUE(editor.updateValue(editor.at(0), "4"));
     EXPECT_DOUBLE_EQ(4.0, copy.getRadius());
     EXPECT_DOUBLE_EQ(1.0, original.getRadius());
@@ -237,7 +240,7 @@ TEST(GenericEditorTest, RefreshesControlsWhenEntityIsUpdated) {
     // A change made by another tool, announced with update()
     sphere.setRadius(4.0);
     sphere.update();
-    EXPECT_EQ(list({"Radius=4.0"}), editor.controls);
+    EXPECT_TRUE(list("Radius=4.0").equals(editor.controls));
 }
 
 TEST(GenericEditorTest, ClearsControlsWhenEntityIsDisposed) {
@@ -248,8 +251,8 @@ TEST(GenericEditorTest, ClearsControlsWhenEntityIsDisposed) {
     sphere.dispose();
     EXPECT_TRUE(editor.isEntityDeleted());
     EXPECT_EQ(nullptr, editor.getEntity());
-    EXPECT_TRUE(editor.controls.empty());
-    EXPECT_EQ("Entity deleted (Sphere).", editor.clearedMessage);
+    EXPECT_TRUE(editor.controls.isEmpty());
+    EXPECT_STREQ("Entity deleted (Sphere).", editor.clearedMessage.c_str());
     ControlSpecification *radius = ControlSpecification::parse(
         "double;radius;(0, INFINITE)");
     EXPECT_FALSE(editor.updateValue(radius, "2"));
@@ -263,7 +266,7 @@ TEST(GenericEditorTest, ClearsControlsWhenEntityIsDestroyed) {
         editor.build(&cone);
     }
     EXPECT_TRUE(editor.isEntityDeleted());
-    EXPECT_EQ("Entity deleted (Cone).", editor.clearedMessage);
+    EXPECT_STREQ("Entity deleted (Cone).", editor.clearedMessage.c_str());
 }
 
 TEST(GenericEditorTest, StopsListeningToPreviousEntity) {
@@ -275,13 +278,13 @@ TEST(GenericEditorTest, StopsListeningToPreviousEntity) {
 
     first.dispose();
     EXPECT_FALSE(editor.isEntityDeleted());
-    EXPECT_EQ(list({"Radius=2.0"}), editor.controls);
+    EXPECT_TRUE(list("Radius=2.0").equals(editor.controls));
 }
 
 TEST(GenericEditorTest, ReportsEntitiesWithoutSpecifications) {
     RecordingEditor editor;
     Entity entity;
     editor.build(&entity);
-    EXPECT_TRUE(editor.controls.empty());
+    EXPECT_TRUE(editor.controls.isEmpty());
     EXPECT_TRUE(editor.hasMessage);
 }

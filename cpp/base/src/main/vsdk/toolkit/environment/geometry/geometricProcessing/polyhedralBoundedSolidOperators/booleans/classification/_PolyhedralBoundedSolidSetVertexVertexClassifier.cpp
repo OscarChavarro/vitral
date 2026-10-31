@@ -1,5 +1,5 @@
+#include "java/lang/String.h"
 #include <cstdio>
-#include <string>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -119,12 +119,12 @@ Classifier::VertexVertexClassificationData Classifier::classify(
 /**
 Following program [MANT1988].15.8.
 */
-std::vector<Classifier::SectorOnVertex> Classifier::nbrpreproc(
+java::ArrayList<Classifier::SectorOnVertex> Classifier::nbrpreproc(
     _PolyhedralBoundedSolidVertex* v)
 {
     Vector3Dd bisec;
     _PolyhedralBoundedSolidHalfEdge* he;
-    std::vector<SectorOnVertex> nb;
+    java::ArrayList<SectorOnVertex> nb;
 
     he = v->emanatingHalfEdge;
     Vector3Dd oldref2;
@@ -155,7 +155,7 @@ std::vector<Classifier::SectorOnVertex> Classifier::nbrpreproc(
             oldref2 = n.ref2;
             n.ref2 = bisec;
             n.ref12 = n.ref1.crossProduct(n.ref2);
-            nb.push_back(n);
+            nb.add(n);
 
             n = SectorOnVertex();
             n.he = he;
@@ -165,7 +165,7 @@ std::vector<Classifier::SectorOnVertex> Classifier::nbrpreproc(
             n.wide = true;
         }
 
-        nb.push_back(n);
+        nb.add(n);
 
         he = (he->mirrorHalfEdge())->next();
     } while( he != v->emanatingHalfEdge );
@@ -322,7 +322,7 @@ void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
                 s.s1b = compareToZero(d3);
                 s.s2b = compareToZero(d4);
                 s.intersect = true;
-                sectors.push_back(s);
+                sectors.add(s);
             }
 
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0 ) {
@@ -420,7 +420,7 @@ void Classifier::vertexVertexReclassifyOnSectors(int op)
             si.intersect = false;
             _SetOperationTrace::traceCoplanarTangential(
                 java::String(("  deactivated vv sector pair sectA=" +
-                std::to_string(secta) + " sectB=" + std::to_string(sectb)).c_str()));
+                java::String::valueOf(secta) + " sectB=" + java::String::valueOf(sectb)).c_str()));
         }
     }
 }

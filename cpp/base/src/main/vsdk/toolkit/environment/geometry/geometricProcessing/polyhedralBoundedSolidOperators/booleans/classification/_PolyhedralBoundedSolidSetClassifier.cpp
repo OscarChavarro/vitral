@@ -1,5 +1,5 @@
+#include "java/lang/String.h"
 #include <cstdio>
-#include <string>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -29,12 +29,12 @@ const int DEBUG_01_STRUCTURE = 0x01;
 const int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
 const int DEBUG_99_SHOW_OPERATIONS = 0x40;
 
-void tracePipelineSummary(const std::string& message)
+void tracePipelineSummary(const java::String& message)
 {
     _SetOperationTrace::tracePipelineSummary(java::String(message.c_str()));
 }
 
-void traceCoplanarTangential(const std::string& message)
+void traceCoplanarTangential(const java::String& message)
 {
     _SetOperationTrace::traceCoplanarTangential(java::String(message.c_str()));
 }
@@ -44,9 +44,9 @@ const char* booleanName(bool value)
     return value ? "true" : "false";
 }
 
-std::string halfEdgeText(_PolyhedralBoundedSolidHalfEdge* he)
+java::String halfEdgeText(_PolyhedralBoundedSolidHalfEdge* he)
 {
-    return he == nullptr ? std::string("null") : std::string(he->toString().c_str());
+    return he == nullptr ? java::String("null") : java::String(he->toString().c_str());
 }
 
 }
@@ -60,12 +60,12 @@ void Classifier::runSetOpClassify(int op,
     debugFlags = flags;
     setOpClassify(ctx, op, inSolidA, inSolidB);
     tracePipelineSummary(
-        "classify done op=" + std::to_string(op) +
-        " sonva=" + std::to_string(ctx.sonva.size()) +
-        " sonvb=" + std::to_string(ctx.sonvb.size()) +
-        " sonvv=" + std::to_string(ctx.sonvv.size()) +
-        " sonea=" + std::to_string(ctx.sonea.size()) +
-        " soneb=" + std::to_string(ctx.soneb.size()));
+        "classify done op=" + java::String::valueOf(op) +
+        " sonva=" + java::String::valueOf(ctx.sonva.size()) +
+        " sonvb=" + java::String::valueOf(ctx.sonvb.size()) +
+        " sonvv=" + java::String::valueOf(ctx.sonvv.size()) +
+        " sonea=" + java::String::valueOf(ctx.sonea.size()) +
+        " soneb=" + java::String::valueOf(ctx.soneb.size()));
 }
 
 int Classifier::compareToZero(double value)
@@ -73,17 +73,17 @@ int Classifier::compareToZero(double value)
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor::compareToZero(value);
 }
 
-std::string Classifier::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
+java::String Classifier::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     if ( he == nullptr ) {
         return "null";
     }
 
-    return "he(v=" + std::to_string(he->startingVertex->id) +
-        ",f=" + std::to_string(he->parentLoop->parentFace->id) + ")";
+    return "he(v=" + java::String::valueOf(he->startingVertex->id) +
+        ",f=" + java::String::valueOf(he->parentLoop->parentFace->id) + ")";
 }
 
-std::string Classifier::summarizeNullEdge(
+java::String Classifier::summarizeNullEdge(
     const _PolyhedralBoundedSolidSetOperatorNullEdge* edge)
 {
     if ( edge == nullptr || edge->e == nullptr ) {
@@ -93,17 +93,17 @@ std::string Classifier::summarizeNullEdge(
         summarizeHalfEdge(edge->e->leftHalf);
 }
 
-std::string Classifier::formatVertexVertexTraceContext(int op, int cursor,
-    const std::string& caseName, const std::string& action, int type)
+java::String Classifier::formatVertexVertexTraceContext(int op, int cursor,
+    const java::String& caseName, const java::String& action, int type)
 {
-    return "op=" + std::to_string(op) +
-        " cursor=" + std::to_string(cursor) +
+    return "op=" + java::String::valueOf(op) +
+        " cursor=" + java::String::valueOf(cursor) +
         " case=" + caseName +
         " action=" + action +
         " target=" + (type == 0 ? "A" : "B");
 }
 
-std::string Classifier::labelSectorState(int state)
+java::String Classifier::labelSectorState(int state)
 {
     switch ( state ) {
         case OnSector::ON:
@@ -113,21 +113,21 @@ std::string Classifier::labelSectorState(int state)
         case OnSector::IN:
             return "IN";
         default:
-            return "?" + std::to_string(state);
+            return "?" + java::String::valueOf(state);
     }
 }
 
-std::string Classifier::summarizeSector(const VertexVertexClassificationData& data,
+java::String Classifier::summarizeSector(const VertexVertexClassificationData& data,
                                         int index)
 {
     if ( index < 0 || index >= (int)data.sectors.size() ) {
-        return "sector[idx=" + std::to_string(index) + "]=<out>";
+        return "sector[idx=" + java::String::valueOf(index) + "]=<out>";
     }
     const OnSector& sector = data.sectors[(size_t)index];
-    return "sector[idx=" + std::to_string(index) +
+    return "sector[idx=" + java::String::valueOf(index) +
         ",intersect=" + booleanName(sector.intersect) +
-        ",sectA=" + std::to_string(sector.secta) +
-        ",sectB=" + std::to_string(sector.sectb) +
+        ",sectA=" + java::String::valueOf(sector.secta) +
+        ",sectB=" + java::String::valueOf(sector.sectb) +
         ",s1a=" + labelSectorState(sector.s1a) +
         ",s2a=" + labelSectorState(sector.s2a) +
         ",s1b=" + labelSectorState(sector.s1b) +
@@ -139,12 +139,12 @@ std::string Classifier::summarizeSector(const VertexVertexClassificationData& da
 
 void Classifier::traceVertexVertexDecisionStep(
     const VertexVertexClassificationData& data, int op,
-    const std::string& phase, int index,
+    const java::String& phase, int index,
     _PolyhedralBoundedSolidHalfEdge* ha1, _PolyhedralBoundedSolidHalfEdge* ha2,
     _PolyhedralBoundedSolidHalfEdge* hb1, _PolyhedralBoundedSolidHalfEdge* hb2)
 {
     tracePipelineSummary(
-        "vv-step op=" + std::to_string(op) +
+        "vv-step op=" + java::String::valueOf(op) +
         " phase=" + phase +
         " " + summarizeSector(data, index) +
         " => ha1=" + summarizeHalfEdge(ha1) +
@@ -154,13 +154,13 @@ void Classifier::traceVertexVertexDecisionStep(
 }
 
 void Classifier::traceVertexVertexDecisionReason(int op, int cursor,
-    const std::string& caseName, const std::string& reason,
+    const java::String& caseName, const java::String& reason,
     _PolyhedralBoundedSolidHalfEdge* ha1, _PolyhedralBoundedSolidHalfEdge* ha2,
     _PolyhedralBoundedSolidHalfEdge* hb1, _PolyhedralBoundedSolidHalfEdge* hb2)
 {
     tracePipelineSummary(
-        "vv-decision op=" + std::to_string(op) +
-        " cursor=" + std::to_string(cursor) +
+        "vv-decision op=" + java::String::valueOf(op) +
+        " cursor=" + java::String::valueOf(cursor) +
         " case=" + caseName +
         " reason=" + reason +
         " ha1=" + summarizeHalfEdge(ha1) +
@@ -178,7 +178,7 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::selectAlternativeBHalfEdge(
     int prevsectb;
     int nbbSize = (int)data.nbb.size();
 
-    if ( data.nbb.empty() ) {
+    if ( data.nbb.isEmpty() ) {
         return nullptr;
     }
     if ( sectb < 0 || sectb >= nbbSize ) {
@@ -220,8 +220,8 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::resolveBEndpointCandidate(
         alternative = selectAlternativeBHalfEdge(data, sector.sectb, avoid);
         if ( alternative != nullptr ) {
             tracePipelineSummary(
-                "vv-adjust B endpoint sectorIdx=" + std::to_string(sectorIndex) +
-                " sectB=" + std::to_string(sector.sectb) +
+                "vv-adjust B endpoint sectorIdx=" + java::String::valueOf(sectorIndex) +
+                " sectB=" + java::String::valueOf(sector.sectb) +
                 " select=" + (selectHb1 ? "hb1" : "hb2") +
                 " repeated=" + summarizeHalfEdge(candidate) +
                 " alternative=" + summarizeHalfEdge(alternative) +
@@ -247,14 +247,14 @@ void Classifier::traceIntersectingSectorsSnapshot(
             continue;
         }
         traceCoplanarTangential(
-            "  sector idx=" + std::to_string(idx) +
-            " cursor=" + std::to_string(cursor) +
-            " sectA=" + std::to_string(data.sectors[idx].secta) +
-            " sectB=" + std::to_string(data.sectors[idx].sectb) +
-            " s1a=" + std::to_string(data.sectors[idx].s1a) +
-            " s2a=" + std::to_string(data.sectors[idx].s2a) +
-            " s1b=" + std::to_string(data.sectors[idx].s1b) +
-            " s2b=" + std::to_string(data.sectors[idx].s2b));
+            "  sector idx=" + java::String::valueOf(idx) +
+            " cursor=" + java::String::valueOf(cursor) +
+            " sectA=" + java::String::valueOf(data.sectors[idx].secta) +
+            " sectB=" + java::String::valueOf(data.sectors[idx].sectb) +
+            " s1a=" + java::String::valueOf(data.sectors[idx].s1a) +
+            " s2a=" + java::String::valueOf(data.sectors[idx].s2a) +
+            " s1b=" + java::String::valueOf(data.sectors[idx].s1b) +
+            " s2b=" + java::String::valueOf(data.sectors[idx].s2b));
     }
 }
 
@@ -360,7 +360,7 @@ Taking in to account the updated version modifications from
 void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
     _PolyhedralBoundedSolidHalfEdge* from,
     _PolyhedralBoundedSolidHalfEdge* to,
-    int type, const std::string& traceContext,
+    int type, const java::String& traceContext,
     PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB)
 {
     //-----------------------------------------------------------------
@@ -475,18 +475,18 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
 
     _PolyhedralBoundedSolidSetOperatorNullEdge edge(from->previous()->parentEdge);
     if ( type == 0 ) {
-        ctx.sonea.push_back(edge);
+        ctx.sonea.add(edge);
     }
     else {
-        ctx.soneb.push_back(edge);
+        ctx.soneb.add(edge);
     }
     tracePipelineSummary(
         "emit " + traceContext +
         " separateEdgeSequence sourceFrom=" + summarizeHalfEdge(from) +
         " sourceTo=" + summarizeHalfEdge(to) +
         " inserted=" + summarizeNullEdge(&edge) +
-        " soneaSize=" + std::to_string(ctx.sonea.size()) +
-        " sonebSize=" + std::to_string(ctx.soneb.size()));
+        " soneaSize=" + java::String::valueOf(ctx.sonea.size()) +
+        " sonebSize=" + java::String::valueOf(ctx.soneb.size()));
 }
 
 /**
@@ -502,7 +502,7 @@ edge from the side that would otherwise produce an inward-facing null-edge.
 */
 void Classifier::flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
     _PolyhedralBoundedSolidHalfEdge* he, int type, bool orient,
-    const std::string& traceContext,
+    const java::String& traceContext,
     PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB)
 {
     if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
@@ -530,18 +530,18 @@ void Classifier::flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
 
     _PolyhedralBoundedSolidSetOperatorNullEdge edge(he->previous()->parentEdge);
     if ( type == 0 ) {
-        ctx.sonea.push_back(edge);
+        ctx.sonea.add(edge);
     }
     else {
-        ctx.soneb.push_back(edge);
+        ctx.soneb.add(edge);
     }
     tracePipelineSummary(
         "emit " + traceContext +
         " flipNullEdgeOrientationForOpenSide orient=" + booleanName(orient) +
         " source=" + summarizeHalfEdge(he) +
         " inserted=" + summarizeNullEdge(&edge) +
-        " soneaSize=" + std::to_string(ctx.sonea.size()) +
-        " sonebSize=" + std::to_string(ctx.soneb.size()));
+        " soneaSize=" + java::String::valueOf(ctx.sonea.size()) +
+        " sonebSize=" + java::String::valueOf(ctx.soneb.size()));
 }
 
 /**
@@ -738,12 +738,12 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
     }
 
     traceCoplanarTangential(
-        "vv insert null edges intersectCount=" + std::to_string(count) +
-        " totalSectors=" + std::to_string(n));
+        "vv insert null edges intersectCount=" + java::String::valueOf(count) +
+        " totalSectors=" + java::String::valueOf(n));
 
     i = 0;
     while ( true ) {
-        std::string traceContext;
+        java::String traceContext;
         //-------------------------------------------------------------
         if ( i >= n ) {
             return;

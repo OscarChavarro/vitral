@@ -1,6 +1,7 @@
+#include "java/lang/Math.h"
+#include "java/lang/RuntimeException.h"
+#include "java/util/function/Function.h"
 #include <cmath>
-#include <algorithm>
-#include <stdexcept>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -38,7 +39,7 @@ RayGizmo::RaySnapshot::RaySnapshot(
     : rotationAngleInRadians(rotationAngleInRadians)
 {
     if ( rays.size() != intersections.size() ) {
-        throw std::runtime_error("rays and intersections must be the same size");
+        throw java::RuntimeException("rays and intersections must be the same size");
     }
     for ( long i = 0; i < rays.size(); i++ ) {
         this->rays.add(rays.get(i));
@@ -86,7 +87,7 @@ void RayGizmo::RaySnapshot::clear()
     rays.clear();
 }
 
-RayGizmo::RayGizmo(std::function<Intersection*(const Ray&)> intersectionCallback, int maxNumOfReflections)
+RayGizmo::RayGizmo(java::Function<const Ray&, Intersection*> intersectionCallback, int maxNumOfReflections)
     : arrow(new Arrow(ARROW_BASE_LENGTH, ARROW_HEAD_LENGTH, ARROW_BASE_RADIUS, ARROW_HEAD_RADIUS)),
       dotSphere(new Sphere(ARROW_BASE_RADIUS)),
       body(new SimpleBody()),
@@ -158,7 +159,7 @@ void RayGizmo::setRay(const Ray& ray, double rotationAngleInRadians)
     java::ArrayList<Ray> rays;
     java::ArrayList<Intersection*> intersections;
 
-    Intersection* primaryIntersection = intersectionCallback ? intersectionCallback(ray) : 0;
+    Intersection* primaryIntersection = intersectionCallback ? intersectionCallback.apply(ray) : 0;
     rays.add(ray);
     intersections.add(primaryIntersection);
 
@@ -170,7 +171,7 @@ void RayGizmo::setRay(const Ray& ray, double rotationAngleInRadians)
             if ( reflectedRay == 0 ) {
                 break;
             }
-            Intersection* reflectedIntersection = intersectionCallback(*reflectedRay);
+            Intersection* reflectedIntersection = intersectionCallback.apply(*reflectedRay);
             rays.add(*reflectedRay);
             intersections.add(reflectedIntersection);
             delete reflectedRay;
@@ -492,7 +493,7 @@ void RayGizmo::syncInputGizmo(const Vector3Dd& position, const Vector3Dd& direct
     Vector3Dd d = direction.length() > VSDK::EPSILON ?
         direction.normalized() : Vector3Dd(0, 0, 1);
     double yaw = std::atan2(d.y(), d.x());
-    double pitch = std::asin(std::max(-1.0, std::min(1.0, d.z())));
+    double pitch = std::asin(java::Math::max(-1.0, java::Math::min(1.0, d.z())));
 
     inputGizmo.setValue(0, position.x());
     inputGizmo.setValue(1, position.y());

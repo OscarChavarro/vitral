@@ -1,17 +1,13 @@
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include <glad/gl.h>
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #else
 #include <GL/glu.h>
 #endif
-#include <algorithm>
-#include <array>
 #include <cmath>
-#include <deque>
-#include <map>
-#include <string>
-#include <tuple>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -48,8 +44,28 @@ const float SURFACE_POLYGON_OFFSET_UNITS = 2.0f;
 const double VERTEX_KEY_QUANTIZATION = 1.0e6;
 
 /// Quantized coordinates of a vertex (Java `VertexCoordinateKey`)
-typedef std::tuple<long long, long long, long long> VertexCoordinateKey;
-typedef std::map<VertexCoordinateKey, std::vector<Vector3Dd> > VertexNormalsMap;
+class VertexCoordinateKey {
+  public:
+    long long x;
+    long long y;
+    long long z;
+
+    VertexCoordinateKey() : x(0), y(0), z(0) {}
+    VertexCoordinateKey(long long x, long long y, long long z)
+        : x(x), y(y), z(z) {}
+
+    bool operator<(const VertexCoordinateKey& other) const
+    {
+        if ( x != other.x ) {
+            return x < other.x;
+        }
+        if ( y != other.y ) {
+            return y < other.y;
+        }
+        return z < other.z;
+    }
+};
+typedef java::TreeMap<VertexCoordinateKey, java::ArrayList<Vector3Dd> > VertexNormalsMap;
 
 /**
 As Java `Math.round`.
@@ -72,13 +88,31 @@ its end, and then emitted as separate triangles (x, y, z, 1).
 */
 struct FaceTessellationCollector {
     /// Vertices given to GLU, and the ones it creates at intersections
-    std::deque<std::array<double, 3> > kept;
+    /// (owned, of 3 coordinates each; GLU keeps their addresses)
+    java::ArrayList<double*> kept;
     java::ArrayList<float>* out;
-    std::vector<const double*> pending;
+    java::ArrayList<const double*> pending;
     GLenum mode;
 
     explicit FaceTessellationCollector(java::ArrayList<float>* out)
         : out(out), mode((GLenum)-1) {}
+
+    ~FaceTessellationCollector()
+    {
+        for ( long i = 0; i < kept.size(); i++ ) {
+            delete[] kept[i];
+        }
+    }
+
+    double* keep(double x, double y, double z)
+    {
+        double* vertex = new double[3];
+        vertex[0] = x;
+        vertex[1] = y;
+        vertex[2] = z;
+        kept.add(vertex);
+        return vertex;
+    }
 
     void emitVertex(const double* v)
     {
@@ -133,7 +167,7 @@ void GLAPIENTRY tessVertex(void* vertexData, void* data)
     if ( vertexData == nullptr ) {
         return;
     }
-    ((FaceTessellationCollector*)data)->pending.push_back(
+    ((FaceTessellationCollector*)data)->pending.add(
         (const double*)vertexData);
 }
 
@@ -146,9 +180,7 @@ void GLAPIENTRY tessCombine(GLdouble coords[3], void*[4], GLfloat[4],
                             void** outData, void* data)
 {
     FaceTessellationCollector* collector = (FaceTessellationCollector*)data;
-    std::array<double, 3> combined = {{ coords[0], coords[1], coords[2] }};
-    collector->kept.push_back(combined);
-    *outData = collector->kept.back().data();
+    *outData = collector->keep(coords[0], coords[1], coords[2]);
 }
 
 void GLAPIENTRY tessError(GLenum, void* data)
@@ -193,9 +225,7 @@ void tessellateFace(_PolyhedralBoundedSolidFace* face,
                 break;
             }
             const Vector3Dd& p = he->startingVertex->position;
-            std::array<double, 3> vertex = {{ p.x(), p.y(), p.z() }};
-            collector.kept.push_back(vertex);
-            double* kept = collector.kept.back().data();
+            double* kept = collector.keep(p.x(), p.y(), p.z());
             gluTessVertex(tess, kept, kept);
         } while ( he != start );
         gluTessEndContour(tess);
@@ -233,8 +263,9 @@ void buildSmoothedVertexNormals(PolyhedralBoundedSolid* solid,
             _PolyhedralBoundedSolidHalfEdge* he = start;
             do {
                 if ( he->startingVertex != nullptr ) {
-                    incidentNormals[keyFrom(he->startingVertex->position)]
-                        .push_back(faceNormal);
+                    incidentNormals.putIfAbsent(
+                        keyFrom(he->startingVertex->position),
+                        java::ArrayList<Vector3Dd>()).add(faceNormal);
                 }
                 he = he->next();
             } while ( he != nullptr && he != start );
@@ -250,19 +281,19 @@ Vector3Dd resolveVertexNormal(
     const Vector3Dd& fallback,
     double smoothingThresholdDegrees)
 {
-    if ( vertexNormals == nullptr || vertexNormals->empty() ) {
+    if ( vertexNormals == nullptr || vertexNormals->isEmpty() ) {
         return fallback;
     }
-    VertexNormalsMap::const_iterator found = vertexNormals->find(
+    const java::ArrayList<Vector3Dd>* found = vertexNormals->get(
         VertexCoordinateKey(quantizeCoordinate(px), quantizeCoordinate(py),
                             quantizeCoordinate(pz)));
-    if ( found == vertexNormals->end() || found->second.empty() ) {
+    if ( found == nullptr || found->isEmpty() ) {
         return fallback;
     }
-    const std::vector<Vector3Dd>& incidentNormals = found->second;
+    const java::ArrayList<Vector3Dd>& incidentNormals = *found;
 
-    double clampedThreshold = std::max(0.0,
-        std::min(180.0, smoothingThresholdDegrees));
+    double clampedThreshold = java::Math::max(0.0,
+        java::Math::min(180.0, smoothingThresholdDegrees));
     double cosineThreshold = std::cos(clampedThreshold * M_PI / 180.0);
     Vector3Dd sum(0, 0, 0);
     int count = 0;
@@ -382,12 +413,12 @@ ColorRgb evaluateFlatColor(
             continue;
         }
         lightDir = lightDir.normalized();
-        double ndotl = std::max(normal.dotProduct(lightDir), 0.0);
+        double ndotl = java::Math::max(normal.dotProduct(lightDir), 0.0);
         Vector3Dd reflection = normal.multiply(2.0 * ndotl).subtract(lightDir);
         double spec = 0.0;
         if ( ndotl > 0.0 && viewDir.length() > VSDK::EPSILON &&
              reflection.length() > VSDK::EPSILON ) {
-            spec = std::pow(std::max(reflection.normalized()
+            spec = std::pow(java::Math::max(reflection.normalized()
                 .dotProduct(viewDir), 0.0), material.getPhongExponent());
         }
 
@@ -737,10 +768,10 @@ void OpenGL4PolyhedralBoundedSolidRenderer::configureSurfaceProgram(
 
     int lightCount = 0;
     if ( lights != nullptr ) {
-        lightCount = (int)std::min(lights->size(), 8L);
+        lightCount = (int)java::Math::min(lights->size(), 8L);
         for ( int i = 0; i < lightCount; i++ ) {
             Light* light = lights->get(i);
-            std::string index = std::to_string(i);
+            java::String index = java::String::valueOf(i);
             setVector3(programId,
                 ("lightPositionsGlobal[" + index + "]").c_str(),
                 light->getPosition());

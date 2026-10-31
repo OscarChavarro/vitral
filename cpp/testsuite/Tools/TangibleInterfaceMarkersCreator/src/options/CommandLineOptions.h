@@ -1,7 +1,7 @@
 #ifndef __COMMAND_LINE_OPTIONS__
 #define __COMMAND_LINE_OPTIONS__
 
-#include <string>
+#include "java/lang/String.h"
 class CommandLineOptions {
 public:
     CommandLineOptions(int argc, char** argv);
@@ -14,8 +14,8 @@ public:
 private:
     int startId;
     double markerSizeMm;
-    std::string outputPdfArgument;
-    mutable std::string generatedOutputPdf;
+    java::String outputPdfArgument;
+    mutable java::String generatedOutputPdf;
 };
 
 #endif

@@ -1,8 +1,7 @@
-#include <algorithm>
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/TreeSet.txx"
 #include <cmath>
-#include <set>
-#include <string>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -47,9 +46,11 @@ double distanceSquared2D(const Vector3Dd& a, const Vector3Dd& b)
 Vertices labeled together, with the position of the first one.
 */
 struct VertexLabelGroup {
-    std::vector<_PolyhedralBoundedSolidVertex*> vertices;
-    std::vector<Vector3Dd> projectedPositions;
+    java::ArrayList<_PolyhedralBoundedSolidVertex*> vertices;
+    java::ArrayList<Vector3Dd> projectedPositions;
     Vector3Dd projectedPosition;
+
+    VertexLabelGroup() {}
 
     VertexLabelGroup(_PolyhedralBoundedSolidVertex* vertex,
                      const Vector3Dd& projectedPosition)
@@ -61,8 +62,8 @@ struct VertexLabelGroup {
     void add(_PolyhedralBoundedSolidVertex* vertex,
              const Vector3Dd& projectedPosition)
     {
-        vertices.push_back(vertex);
-        projectedPositions.push_back(projectedPosition);
+        vertices.add(vertex);
+        projectedPositions.add(projectedPosition);
     }
 
     bool containsCloseVertex(_PolyhedralBoundedSolidVertex* vertex,
@@ -115,8 +116,8 @@ bool projectVertexToViewport(const Vector3Dd& worldPosition, Camera* camera,
         return false;
     }
 
-    double width = std::max(1, viewportWidth);
-    double height = std::max(1, viewportHeight);
+    double width = java::Math::max(1, viewportWidth);
+    double height = java::Math::max(1, viewportHeight);
     double x = ((ndcX + 1.0) * 0.5) * width;
     double y = height - (((ndcY + 1.0) * 0.5) * height);
     double z = (ndcZ + 1.0) * 0.5;
@@ -124,11 +125,11 @@ bool projectVertexToViewport(const Vector3Dd& worldPosition, Camera* camera,
     return true;
 }
 
-std::vector<VertexLabelGroup> buildVertexGroups(
+java::ArrayList<VertexLabelGroup> buildVertexGroups(
     PolyhedralBoundedSolid* solid, Camera* camera,
     int viewportWidth, int viewportHeight)
 {
-    std::vector<VertexLabelGroup> vertexGroups;
+    java::ArrayList<VertexLabelGroup> vertexGroups;
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext =
         PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
     double spatialTolerance = numericContext.bigEpsilon() * SCREEN_DISTANCE_DELTA;
@@ -150,7 +151,7 @@ std::vector<VertexLabelGroup> buildVertexGroups(
             }
         }
         if ( group == nullptr ) {
-            vertexGroups.push_back(VertexLabelGroup(vertex, projectedPosition));
+            vertexGroups.add(VertexLabelGroup(vertex, projectedPosition));
         }
         else {
             group->add(vertex, projectedPosition);
@@ -159,12 +160,12 @@ std::vector<VertexLabelGroup> buildVertexGroups(
     return vertexGroups;
 }
 
-std::vector<Vector3Dd> collectProjectedFaceVertices(
+java::ArrayList<Vector3Dd> collectProjectedFaceVertices(
     _PolyhedralBoundedSolidFace* face, Camera* camera,
     int viewportWidth, int viewportHeight)
 {
-    std::vector<Vector3Dd> projected;
-    std::set<int> visitedVertexIds;
+    java::ArrayList<Vector3Dd> projected;
+    java::TreeSet<int> visitedVertexIds;
 
     for ( long i = 0; i < face->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
@@ -177,11 +178,11 @@ std::vector<Vector3Dd> collectProjectedFaceVertices(
         do {
             _PolyhedralBoundedSolidVertex* vertex = he->startingVertex;
             if ( vertex != nullptr &&
-                 visitedVertexIds.insert(vertex->id).second ) {
+                 visitedVertexIds.add(vertex->id) ) {
                 Vector3Dd projectedVertex;
                 if ( projectVertexToViewport(vertex->position, camera,
                          viewportWidth, viewportHeight, projectedVertex) ) {
-                    projected.push_back(projectedVertex);
+                    projected.add(projectedVertex);
                 }
             }
             he = he->next();
@@ -224,21 +225,21 @@ bool isVertexLabelVisible(_PolyhedralBoundedSolidVertex* vertex,
     return !(vertexRayT - hitT >= numericContext.bigEpsilon());
 }
 
-std::vector<_PolyhedralBoundedSolidVertex*> filterVisibleVertices(
-    const std::vector<_PolyhedralBoundedSolidVertex*>& vertices,
+java::ArrayList<_PolyhedralBoundedSolidVertex*> filterVisibleVertices(
+    const java::ArrayList<_PolyhedralBoundedSolidVertex*>& vertices,
     PolyhedralBoundedSolid* solid, Camera* camera)
 {
-    std::vector<_PolyhedralBoundedSolidVertex*> visibleVertices;
+    java::ArrayList<_PolyhedralBoundedSolidVertex*> visibleVertices;
 
     for ( size_t i = 0; i < vertices.size(); i++ ) {
         if ( isVertexLabelVisible(vertices[i], solid, camera) ) {
-            visibleVertices.push_back(vertices[i]);
+            visibleVertices.add(vertices[i]);
         }
     }
     return visibleVertices;
 }
 
-Vector3Dd averageProjectedPosition(const std::vector<Vector3Dd>& projectedVertices)
+Vector3Dd averageProjectedPosition(const java::ArrayList<Vector3Dd>& projectedVertices)
 {
     double sx = 0.0;
     double sy = 0.0;
@@ -256,15 +257,15 @@ Vector3Dd averageProjectedPosition(const std::vector<Vector3Dd>& projectedVertic
 }
 
 java::String buildVertexIdsLabel(
-    const std::vector<_PolyhedralBoundedSolidVertex*>& vertices)
+    const java::ArrayList<_PolyhedralBoundedSolidVertex*>& vertices)
 {
-    std::string label;
+    java::String label;
 
     for ( size_t i = 0; i < vertices.size(); i++ ) {
         if ( i > 0 ) {
             label += ", ";
         }
-        label += std::to_string(vertices[i]->id);
+        label += java::String::valueOf(vertices[i]->id);
     }
     return java::String(label.c_str());
 }
@@ -293,15 +294,15 @@ void OpenGL4PolyhedralBoundedSolidDebugHUDRenderer::drawSelectedFaceLabel(
     }
 
     _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(faceIndex);
-    std::vector<Vector3Dd> projectedVertices = collectProjectedFaceVertices(
+    java::ArrayList<Vector3Dd> projectedVertices = collectProjectedFaceVertices(
         face, camera, viewportWidth, viewportHeight);
-    if ( projectedVertices.empty() ) {
+    if ( projectedVertices.isEmpty() ) {
         return;
     }
 
     Vector3Dd projectedMidpoint = averageProjectedPosition(projectedVertices);
     g->setColor(ColorRgb(0, 1, 1));
-    g->drawString(java::String(std::to_string(face->id).c_str()),
+    g->drawString(java::String(java::String::valueOf(face->id).c_str()),
         roundToInt(projectedMidpoint.x()), roundToInt(projectedMidpoint.y()));
 }
 
@@ -316,15 +317,15 @@ void OpenGL4PolyhedralBoundedSolidDebugHUDRenderer::drawDebugVertexLabels(
         return;
     }
 
-    std::vector<VertexLabelGroup> vertexGroups = buildVertexGroups(solid,
+    java::ArrayList<VertexLabelGroup> vertexGroups = buildVertexGroups(solid,
         camera, viewportWidth, viewportHeight);
 
     for ( size_t i = 0; i < vertexGroups.size(); i++ ) {
         const VertexLabelGroup& group = vertexGroups[i];
-        std::vector<_PolyhedralBoundedSolidVertex*> visibleVertices =
+        java::ArrayList<_PolyhedralBoundedSolidVertex*> visibleVertices =
             filterVisibleVertices(group.vertices, solid, camera);
 
-        if ( !visibleVertices.empty() ) {
+        if ( !visibleVertices.isEmpty() ) {
             g->setColor(ColorRgb(1, 1, 1));
             g->drawString(buildVertexIdsLabel(visibleVertices),
                 roundToInt(group.projectedPosition.x()) + 4,

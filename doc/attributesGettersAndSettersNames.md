@@ -124,7 +124,6 @@ C++ / 109 TS; testsuites 93 / 92 / 13; más ~150 accessors `M`.
 - `scripts/checkAttributeNames.py --all` (0 violaciones):
   - Gradle: tarea `verifyAttributeNames`, dependencia de `check`.
   - npm: `npm run check:names`, incluido en `npm run lint`.
-  - CMake/CTest: test `attribute_names`.
 - Tests de accessors de especificaciones de control:
   `EntityControlSpecificationsTest` (Java) y `Entity.spec.ts` (TS).
 

@@ -104,6 +104,13 @@ class String {
     startsWith(const char *prefix) const;
 
     /**
+    Emulation of `String.startsWith(String, int)`.
+    @return true if `prefix` occurs at `offset`
+    */
+    bool
+    startsWith(const char *prefix, int offset) const;
+
+    /**
     @return the index of the first occurrence of the text, or -1
     */
     int
@@ -170,6 +177,12 @@ class String {
     String &
     operator+=(const char *other);
 
+    String
+    operator+(char other) const;
+
+    String &
+    operator+=(char other);
+
     bool
     operator==(const String &other) const;
 
@@ -220,6 +233,13 @@ class String {
 
     static String
     formatCStringToJavaString(const char *format, va_list arguments);
+
+    /**
+    Emulation of `String.format`, with the conversions of C `printf`.
+    */
+    static String
+    format(const char *format, ...);
+
 };
 
 String operator+(const char *left, const String &right);

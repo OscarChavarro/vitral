@@ -1,5 +1,6 @@
+#include "java/lang/Double.h"
+#include "java/lang/Math.h"
 #include <cmath>
-#include <limits>
 #include <gtest/gtest.h>
 #include "java/util/Random.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -45,7 +46,7 @@ voxel, or infinity
 double bruteForceFirstHit(const VoxelVolume& volume,
     const Vector3Dd& origin, const Vector3Dd& direction)
 {
-    const double infinity = std::numeric_limits<double>::infinity();
+    const double infinity = java::Double::POSITIVE_INFINITY;
     double best = infinity;
     int n = volume.getXSize();
     double cell = 2.0 / n;
@@ -72,8 +73,8 @@ double bruteForceFirstHit(const VoxelVolume& volume,
                     }
                     double t1 = (lo - o[a]) / d[a];
                     double t2 = (hi - o[a]) / d[a];
-                    tNear = std::max(tNear, std::min(t1, t2));
-                    tFar = std::min(tFar, std::max(t1, t2));
+                    tNear = java::Math::max(tNear, java::Math::min(t1, t2));
+                    tFar = java::Math::min(tFar, java::Math::max(t1, t2));
                 }
                 if ( tNear <= tFar && tNear >= 0 && tNear < best ) {
                     best = tNear;

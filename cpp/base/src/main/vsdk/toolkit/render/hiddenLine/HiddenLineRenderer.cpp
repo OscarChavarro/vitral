@@ -1,8 +1,6 @@
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
-#include <algorithm>
-#include <vector>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -403,8 +401,8 @@ void processLineToBeDrawn(
     Vector3Dd sp1c = inCamera->getPosition();
     Vector3Dd sp2c = inCamera->getPosition();
 
-    std::vector<AppelEdgeSegment> segments;
-    segments.push_back(AppelEdgeSegment());
+    java::ArrayList<AppelEdgeSegment> segments;
+    segments.add(AppelEdgeSegment());
 
     for (long int i = 0; i < contourCache.size(); ++i) {
         AppelEdgeCache* cl = contourCache[i];
@@ -427,7 +425,7 @@ void processLineToBeDrawn(
                 AppelEdgeSegment segment;
                 segment.lineParameter = planeHit->getT() / inEdge.direction.length();
                 if (isUnitInterval(segment.lineParameter)) {
-                    segments.push_back(segment);
+                    segments.add(segment);
                 }
                 delete planeHit;
             }
@@ -437,10 +435,9 @@ void processLineToBeDrawn(
 
     AppelEdgeSegment endSegment;
     endSegment.lineParameter = 1.0;
-    segments.push_back(endSegment);
+    segments.add(endSegment);
 
-    std::sort(segments.begin(), segments.end(),
-        [](const AppelEdgeSegment& a, const AppelEdgeSegment& b) {
+    segments.sort([](const AppelEdgeSegment& a, const AppelEdgeSegment& b) {
             if (a.lineParameter < b.lineParameter - VSDK::EPSILON) return true;
             if (a.lineParameter > b.lineParameter + VSDK::EPSILON) return false;
             return false;
@@ -449,7 +446,7 @@ void processLineToBeDrawn(
     for (size_t i = 0; i + 1 < segments.size(); ) {
         if (segments[i].samePosition(segments[i + 1])) {
             segments[i + 1].deltaQI += segments[i].deltaQI;
-            segments.erase(segments.begin() + static_cast<long>(i));
+            segments.remove(static_cast<long>(i));
         }
         else {
             ++i;

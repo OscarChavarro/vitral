@@ -1,7 +1,8 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_VALIDATION_ENGINE__
 #define __POLYHEDRAL_BOUNDED_SOLID_VALIDATION_ENGINE__
 
-#include <atomic>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/util/concurrent/atomic/AtomicLong.h"
 
 #include "java/lang/String.h"
 class PolyhedralBoundedSolid;
@@ -30,7 +31,7 @@ public:
     @param solidB second operand
     @param msg receives failure details, can be null
     @return true only when both solids pass all checks
-    @throws std::invalid_argument (Java IllegalArgumentException) when a
+    @throws java::IllegalArgumentException (Java IllegalArgumentException) when a
     solid remains invalid after the automated repair
     */
     static bool validateBooleanInputs(PolyhedralBoundedSolid* solidA,
@@ -77,7 +78,7 @@ public:
         PolyhedralBoundedSolid* b, double tolerance);
 
 private:
-    static std::atomic<long> strictValidationInvocationCount;
+    static java::AtomicLong strictValidationInvocationCount;
     PolyhedralBoundedSolidValidationEngine();
 };
 

@@ -1,3 +1,5 @@
+#include "java/lang/Exception.h"
+#include "java/lang/Math.h"
 #include <cctype>
 #include <cstdio>
 
@@ -25,7 +27,6 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Shape.hxx>
-#include <exception>
 enum class OpCode {
   Union,
   AMinusB,
@@ -242,8 +243,8 @@ int main(int argc, char** argv) {
   } catch (const Standard_Failure&) {
     std::fprintf(stderr, "Operation failed with Standard_Failure\n");
     return 3;
-  } catch (const std::exception& e) {
-    std::fprintf(stderr, "Error: %s\n", e.what());
+  } catch (const java::Exception& e) {
+    std::fprintf(stderr, "Error: %s\n", e.getMessage().c_str());
     return 4;
   }
 }

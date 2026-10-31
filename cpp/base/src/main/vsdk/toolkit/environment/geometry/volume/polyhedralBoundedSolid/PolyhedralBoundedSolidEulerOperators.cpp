@@ -5,7 +5,7 @@
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -38,7 +38,7 @@ void report(int level, const char* method, const java::String& message)
 
 java::String str(int value)
 {
-    return java::String(std::to_string(value).c_str());
+    return java::String(java::String::valueOf(value).c_str());
 }
 
 /**

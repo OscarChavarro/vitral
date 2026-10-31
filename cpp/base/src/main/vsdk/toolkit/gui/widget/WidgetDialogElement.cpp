@@ -1,10 +1,12 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/widget/WidgetDialogElement.h"
 
 WidgetDialogElement::WidgetDialogElement(
     const java::String& kind, const java::String& id,
     const java::String& labelKey, const java::String& binding,
     const java::String& action,
-    const std::vector<WidgetDialogElement>& children)
+    const java::ArrayList<WidgetDialogElement>& children)
     : kind(kind), id(id), labelKey(labelKey), binding(binding),
       action(action), children(children)
 {
@@ -35,7 +37,7 @@ const java::String& WidgetDialogElement::getAction() const
     return action;
 }
 
-const std::vector<WidgetDialogElement>& WidgetDialogElement::getChildren() const
+const java::ArrayList<WidgetDialogElement>& WidgetDialogElement::getChildren() const
 {
     return children;
 }

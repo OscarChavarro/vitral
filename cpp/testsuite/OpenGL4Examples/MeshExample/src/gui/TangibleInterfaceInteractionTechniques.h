@@ -1,7 +1,7 @@
 #ifndef __TANGIBLE_INTERFACE_INTERACTION_TECHNIQUES__
 #define __TANGIBLE_INTERFACE_INTERACTION_TECHNIQUES__
 
-#include <functional>
+#include "java/lang/Runnable.h"
 
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.h"
@@ -12,11 +12,11 @@ private:
     static const char* RAY_CUBE_TANGIBLE_ELEMENT_ID;
 
     MeshModel* model;
-    std::function<void()> repaintCallback;
+    java::Runnable repaintCallback;
     TangibleInterfaceEvent2RayGizmoMapper mapper;
 
 public:
-    TangibleInterfaceInteractionTechniques(MeshModel* model, std::function<void()> repaintCallback);
+    TangibleInterfaceInteractionTechniques(MeshModel* model, java::Runnable repaintCallback);
 
     virtual void tangibleInterfaceEventReceived(const TangibleInterfaceEvent& event) override;
 };

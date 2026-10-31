@@ -89,7 +89,7 @@ unsigned int OpenGL4SimpleCorridorSample::compileShaders() {
     java::String vertexSource = readShaderFile("../etc/glslShaders/constantVertexShader.glsl");
     java::String fragmentSource = readShaderFile("../etc/glslShaders/constantPixelShader.glsl");
 
-    if (vertexSource.empty() || fragmentSource.empty()) {
+    if (vertexSource.isEmpty() || fragmentSource.isEmpty()) {
         fprintf(stderr, "Error: Shader files not found\n");
         return 0;
     }

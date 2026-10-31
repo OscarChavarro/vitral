@@ -1,4 +1,4 @@
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
@@ -201,11 +201,7 @@ GenericEditor::updateValue(const ControlSpecification *specification,
         return false;
     }
 
-    std::string raw(text.c_str());
-    size_t begin = raw.find_first_not_of(" \t\n\r\f\v");
-    size_t end = raw.find_last_not_of(" \t\n\r\f\v");
-    java::String trimmed = begin == std::string::npos ? java::String("") :
-        java::String(raw.substr(begin, end - begin + 1).c_str());
+    java::String trimmed = text.trim();
 
     double numeric;
     try {

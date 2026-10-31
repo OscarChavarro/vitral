@@ -9,8 +9,6 @@ class Camera;
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "java/util/ArrayList.h"
 
-#include <utility>
-#include <vector>
 
 class OpenGL4LightRenderer {
 public:
@@ -49,7 +47,14 @@ public:
 private:
     /// Copies of the active lights by id, in activation order (Java uses a
     /// `LinkedHashMap`)
-    static std::vector<std::pair<int, Light*> > activeLights;
+    class ActiveLight {
+      public:
+        int id;
+        Light* light;
+        ActiveLight() : id(0), light(nullptr) {}
+        ActiveLight(int id, Light* light) : id(id), light(light) {}
+    };
+    static java::ArrayList<ActiveLight> activeLights;
     static Light* defaultLight();
 
     static double scale;

@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include "java/util/Collections.txx"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MeshBuilder.h"
 
 OpenGL4MeshBuilder::OpenGL4MeshBuilder(double characteristicSize)
@@ -125,11 +126,11 @@ OpenGL4MeshRenderer::Mesh* OpenGL4MeshBuilder::build()
     OpenGL4MeshRenderer::Mesh* mesh =
         new OpenGL4MeshRenderer::Mesh(characteristicSize);
 
-    mesh->positions.resize((size_t)count * 3);
-    mesh->normals.resize((size_t)count * 3);
-    mesh->uvs.resize((size_t)count * 2);
-    mesh->tangents.resize((size_t)count * 3);
-    mesh->biNormals.resize((size_t)count * 3);
+    mesh->positions = java::Collections::nCopies<float>((long)count * 3, 0.0f);
+    mesh->normals = java::Collections::nCopies<float>((long)count * 3, 0.0f);
+    mesh->uvs = java::Collections::nCopies<float>((long)count * 2, 0.0f);
+    mesh->tangents = java::Collections::nCopies<float>((long)count * 3, 0.0f);
+    mesh->biNormals = java::Collections::nCopies<float>((long)count * 3, 0.0f);
     for ( int i = 0; i < count; i++ ) {
         const float* v = &vertices[(size_t)i * VERTEX_SIZE];
         for ( int c = 0; c < 3; c++ ) {
@@ -161,7 +162,9 @@ void OpenGL4MeshBuilder::addVertex(const Vector3Dd& p, const Vector3Dd& n,
         (float)tangent.x(), (float)tangent.y(), (float)tangent.z(),
         (float)binormal.x(), (float)binormal.y(), (float)binormal.z()
     };
-    vertices.insert(vertices.end(), vertex, vertex + VERTEX_SIZE);
+    for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+        vertices.add(vertex[c]);
+    }
 }
 
 /**
@@ -184,7 +187,9 @@ void OpenGL4MeshBuilder::addBackSides(int frontCount)
             for ( int c = 8; c < 14; c++ ) {
                 v[c] = -v[c];
             }
-            vertices.insert(vertices.end(), v, v + VERTEX_SIZE);
+            for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+                vertices.add(v[c]);
+            }
         }
     }
 }

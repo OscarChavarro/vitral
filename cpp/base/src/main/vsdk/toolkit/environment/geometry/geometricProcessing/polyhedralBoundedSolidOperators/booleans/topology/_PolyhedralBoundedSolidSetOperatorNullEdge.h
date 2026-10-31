@@ -24,6 +24,8 @@ private:
 public:
     _PolyhedralBoundedSolidEdge* e;
 
+    // Default constructible, as the elements of `java::ArrayList`
+    _PolyhedralBoundedSolidSetOperatorNullEdge() : e(nullptr) {}
     explicit _PolyhedralBoundedSolidSetOperatorNullEdge(_PolyhedralBoundedSolidEdge* e);
 
     static void setNumericContext(
@@ -36,7 +38,7 @@ public:
     int compareTo(const _PolyhedralBoundedSolidSetOperatorNullEdge& other) const;
 
     /**
-    @return true if this edge goes before `other` (for `std::sort`)
+    @return true if this edge goes before `other` (natural order of `ArrayList::sort`)
     */
     bool operator<(const _PolyhedralBoundedSolidSetOperatorNullEdge& other) const;
 

@@ -36,7 +36,7 @@ int main(int argc, char** argv)
         // Same text as the Java version prints for the exception
         std::printf("Error processing regular expression."
                     "vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException: %s\n",
-                    e.what());
+                    e.getMessage().c_str());
     }
     return 0;
 }

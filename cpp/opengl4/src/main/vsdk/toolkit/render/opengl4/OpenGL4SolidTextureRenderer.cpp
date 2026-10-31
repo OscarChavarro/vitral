@@ -1,5 +1,5 @@
+#include "java/lang/String.h"
 #include <cstdio>
-#include <vector>
 
 #include <glad/gl.h>
 
@@ -41,7 +41,7 @@ OpenGL4SolidTextureRenderer::~OpenGL4SolidTextureRenderer()
 
 void OpenGL4SolidTextureRenderer::draw(
     SimpleScene* scene, Camera* camera, const java::ArrayList<Light*>& lights,
-    const std::vector<unsigned char>& solidTextureVolumeRgb8,
+    const java::ArrayList<unsigned char>& solidTextureVolumeRgb8,
     int solidTextureSize, long solidTextureRevision,
     InfinitePlane* clippingPlane)
 {
@@ -53,7 +53,7 @@ void OpenGL4SolidTextureRenderer::draw(
 
 void OpenGL4SolidTextureRenderer::draw(
     SimpleScene* scene, Camera* camera, const java::ArrayList<Light*>& lights,
-    const std::vector<unsigned char>& solidTextureVolumeRgb8,
+    const java::ArrayList<unsigned char>& solidTextureVolumeRgb8,
     int solidTextureSize, long solidTextureRevision,
     InfinitePlane* clippingPlane, RendererConfiguration* quality)
 {
@@ -150,7 +150,7 @@ void OpenGL4SolidTextureRenderer::drawBody(SimpleBody* body, Camera* camera,
     TriangleMesh* mesh = dynamic_cast<TriangleMesh*>(geometry);
     TriangleMeshGroup* group = dynamic_cast<TriangleMeshGroup*>(geometry);
     if ( mesh != 0 ) {
-        std::vector<float> p, n;
+        java::ArrayList<float> p, n;
         if ( buildFrame(mesh, p, n) ) {
             uploadFrame(p, n);
             glBindVertexArray(vaoId);
@@ -160,7 +160,7 @@ void OpenGL4SolidTextureRenderer::drawBody(SimpleBody* body, Camera* camera,
     else if ( group != 0 ) {
         java::ArrayList<TriangleMesh>& meshes = group->getMeshes();
         for ( long i = 0; i < meshes.size(); i++ ) {
-            std::vector<float> p, n;
+            java::ArrayList<float> p, n;
             if ( buildFrame(&meshes[i], p, n) ) {
                 uploadFrame(p, n);
                 glBindVertexArray(vaoId);
@@ -215,8 +215,8 @@ void OpenGL4SolidTextureRenderer::drawMesh(RendererConfiguration* quality)
 }
 
 bool OpenGL4SolidTextureRenderer::buildFrame(
-    TriangleMesh* mesh, std::vector<float>& positions,
-    std::vector<float>& normals)
+    TriangleMesh* mesh, java::ArrayList<float>& positions,
+    java::ArrayList<float>& normals)
 {
     if ( mesh == 0 ) return false;
     java::ArrayList<int>& indices = mesh->getTriangleIndexes();
@@ -229,25 +229,25 @@ bool OpenGL4SolidTextureRenderer::buildFrame(
     for ( long i = 0; i < indices.size(); i++ ) {
         int idx = indices.get(i);
         int vp = idx * 3;
-        positions.push_back((float)vertices.get(vp));
-        positions.push_back((float)vertices.get(vp + 1));
-        positions.push_back((float)vertices.get(vp + 2));
+        positions.add((float)vertices.get(vp));
+        positions.add((float)vertices.get(vp + 1));
+        positions.add((float)vertices.get(vp + 2));
         if ( hasNormals ) {
-            normals.push_back((float)vertexNormals.get(vp));
-            normals.push_back((float)vertexNormals.get(vp + 1));
-            normals.push_back((float)vertexNormals.get(vp + 2));
+            normals.add((float)vertexNormals.get(vp));
+            normals.add((float)vertexNormals.get(vp + 1));
+            normals.add((float)vertexNormals.get(vp + 2));
         }
         else {
-            normals.push_back(0.0f);
-            normals.push_back(0.0f);
-            normals.push_back(1.0f);
+            normals.add(0.0f);
+            normals.add(0.0f);
+            normals.add(1.0f);
         }
     }
     return true;
 }
 
 void OpenGL4SolidTextureRenderer::uploadFrame(
-    const std::vector<float>& positions, const std::vector<float>& normals)
+    const java::ArrayList<float>& positions, const java::ArrayList<float>& normals)
 {
     vertexCount = (int)positions.size() / 3;
     glBindVertexArray(vaoId);
@@ -281,9 +281,9 @@ void OpenGL4SolidTextureRenderer::ensureProgram()
 }
 
 void OpenGL4SolidTextureRenderer::ensureSolidTexture(
-    const std::vector<unsigned char>& volume, int size, long revision)
+    const java::ArrayList<unsigned char>& volume, int size, long revision)
 {
-    if ( volume.empty() || size <= 0 ) return;
+    if ( volume.isEmpty() || size <= 0 ) return;
     if ( solidTextureId != 0 && uploadedTextureRevision == revision &&
          uploadedTextureSize == size ) {
         return;
@@ -360,12 +360,12 @@ unsigned int OpenGL4SolidTextureRenderer::buildProgram(
     const java::String& shaderDirectory, const char* vsFile, const char* fsFile)
 {
     java::String prefix = shaderDirectory;
-    if ( !prefix.empty() && prefix[prefix.length() - 1] != '/' ) {
+    if ( !prefix.isEmpty() && prefix[prefix.length() - 1] != '/' ) {
         prefix += "/";
     }
     java::String vsSource = readTextFile(prefix + vsFile);
     java::String fsSource = readTextFile(prefix + fsFile);
-    if ( vsSource.empty() || fsSource.empty() ) {
+    if ( vsSource.isEmpty() || fsSource.isEmpty() ) {
         const char* candidates[] = {
             "../../../../etc/glslShaders/",
             "../../../etc/glslShaders/",
@@ -377,10 +377,10 @@ unsigned int OpenGL4SolidTextureRenderer::buildProgram(
             java::String candidate(candidates[i]);
             vsSource = readTextFile(candidate + vsFile);
             fsSource = readTextFile(candidate + fsFile);
-            if ( !vsSource.empty() && !fsSource.empty() ) break;
+            if ( !vsSource.isEmpty() && !fsSource.isEmpty() ) break;
         }
     }
-    if ( vsSource.empty() || fsSource.empty() ) {
+    if ( vsSource.isEmpty() || fsSource.isEmpty() ) {
         std::fprintf(stderr, "OpenGL4SolidTextureRenderer shader not found: %s / %s\n", vsFile, fsFile);
         return 0;
     }

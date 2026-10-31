@@ -2,6 +2,7 @@
 #include <cmath>
 #include <typeinfo>
 
+#include "java/util/TreeSet.txx"
 #include "java/io/File.h"
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
@@ -238,16 +239,16 @@ SimpleBody* Scene::addThing(Geometry* g)
 
 bool Scene::isHidden(SimpleBody* body) const
 {
-    return hiddenBodies.find(body) != hiddenBodies.end();
+    return hiddenBodies.contains(body);
 }
 
 void Scene::setHidden(SimpleBody* body, bool hidden)
 {
     if ( hidden ) {
-        hiddenBodies.insert(body);
+        hiddenBodies.add(body);
     }
     else {
-        hiddenBodies.erase(body);
+        hiddenBodies.remove(body);
     }
 }
 

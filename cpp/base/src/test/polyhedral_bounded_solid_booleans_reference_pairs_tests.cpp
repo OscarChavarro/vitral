@@ -1,8 +1,7 @@
-#include <algorithm>
+#include "java/lang/String.h"
 #include <cmath>
-#include <sstream>
-#include <string>
-#include <vector>
+#include <ostream>
+#include "java/lang/StringBuilder.h"
 #include <gtest/gtest.h>
 #include "java/lang/Math.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
@@ -39,10 +38,10 @@ struct TopologicalSummary {
     int loopCount;
     int multiLoopFaceCount;
     int eulerCharacteristic;
-    std::vector<int> shellFaceCountsSorted;
-    std::vector<int> loopsPerFaceSorted;
-    std::vector<int> verticesPerLoopSorted;
-    std::vector<long long> minMaxMicrounits;
+    java::ArrayList<int> shellFaceCountsSorted;
+    java::ArrayList<int> loopsPerFaceSorted;
+    java::ArrayList<int> verticesPerLoopSorted;
+    java::ArrayList<long long> minMaxMicrounits;
 
     bool operator==(const TopologicalSummary& o) const
     {
@@ -51,23 +50,34 @@ struct TopologicalSummary {
             loopCount == o.loopCount &&
             multiLoopFaceCount == o.multiLoopFaceCount &&
             eulerCharacteristic == o.eulerCharacteristic &&
-            shellFaceCountsSorted == o.shellFaceCountsSorted &&
-            loopsPerFaceSorted == o.loopsPerFaceSorted &&
-            verticesPerLoopSorted == o.verticesPerLoopSorted &&
-            minMaxMicrounits == o.minMaxMicrounits;
+            shellFaceCountsSorted.equals(o.shellFaceCountsSorted) &&
+            loopsPerFaceSorted.equals(o.loopsPerFaceSorted) &&
+            verticesPerLoopSorted.equals(o.verticesPerLoopSorted) &&
+            minMaxMicrounits.equals(o.minMaxMicrounits);
     }
 };
 
-template <typename T>
-std::string join(const std::vector<T>& values)
+template <typename T, typename... Items>
+java::ArrayList<T> listOf(Items... items)
 {
-    std::ostringstream out;
-    out << "[";
-    for ( size_t i = 0; i < values.size(); i++ ) {
-        out << (i > 0 ? ", " : "") << values[i];
+    T values[] = { static_cast<T>(items)... };
+    java::ArrayList<T> result;
+    for ( const T& value : values ) {
+        result.add(value);
     }
-    out << "]";
-    return out.str();
+    return result;
+}
+
+template <typename T>
+java::String join(const java::ArrayList<T>& values)
+{
+    java::StringBuilder out;
+    out.append("[");
+    for ( int i = 0; i < values.size(); i++ ) {
+        out.append(i > 0 ? ", " : "").append(values[i]);
+    }
+    out.append("]");
+    return out.toString();
 }
 
 std::ostream& operator<<(std::ostream& out, const TopologicalSummary& s)
@@ -77,17 +87,17 @@ std::ostream& operator<<(std::ostream& out, const TopologicalSummary& s)
         << ", vertexCount=" << s.vertexCount << ", loopCount=" << s.loopCount
         << ", multiLoopFaceCount=" << s.multiLoopFaceCount
         << ", eulerCharacteristic=" << s.eulerCharacteristic
-        << ", shellFaceCountsSorted=" << join(s.shellFaceCountsSorted)
-        << ", loopsPerFaceSorted=" << join(s.loopsPerFaceSorted)
-        << ", verticesPerLoopSorted=" << join(s.verticesPerLoopSorted)
-        << ", minMaxMicrounits=" << join(s.minMaxMicrounits) << "}";
+        << ", shellFaceCountsSorted=" << join(s.shellFaceCountsSorted).c_str()
+        << ", loopsPerFaceSorted=" << join(s.loopsPerFaceSorted).c_str()
+        << ", verticesPerLoopSorted=" << join(s.verticesPerLoopSorted).c_str()
+        << ", minMaxMicrounits=" << join(s.minMaxMicrounits).c_str() << "}";
 }
 
 TopologicalSummary of(int shellCount, int faceCount, int edgeCount,
     int vertexCount, int loopCount, int multiLoopFaceCount,
-    int eulerCharacteristic, std::vector<int> shellFaceCountsSorted,
-    std::vector<int> loopsPerFaceSorted, std::vector<int> verticesPerLoopSorted,
-    std::vector<long long> minMaxMicrounits)
+    int eulerCharacteristic, java::ArrayList<int> shellFaceCountsSorted,
+    java::ArrayList<int> loopsPerFaceSorted, java::ArrayList<int> verticesPerLoopSorted,
+    java::ArrayList<long long> minMaxMicrounits)
 {
     TopologicalSummary s;
     s.shellCount = shellCount;
@@ -116,31 +126,31 @@ TopologicalSummary summaryFrom(PolyhedralBoundedSolid* solid)
     for ( long i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
         int loopsInFace = (int)face->boundariesList.size();
-        s.loopsPerFaceSorted.push_back(loopsInFace);
+        s.loopsPerFaceSorted.add(loopsInFace);
         s.loopCount += loopsInFace;
         if ( loopsInFace > 1 ) {
             s.multiLoopFaceCount++;
         }
         for ( int j = 0; j < loopsInFace; j++ ) {
-            s.verticesPerLoopSorted.push_back(
+            s.verticesPerLoopSorted.add(
                 (int)face->boundariesList.get(j)->halfEdgesList.size());
         }
     }
-    std::sort(s.loopsPerFaceSorted.begin(), s.loopsPerFaceSorted.end());
-    std::sort(s.verticesPerLoopSorted.begin(), s.verticesPerLoopSorted.end());
+    s.loopsPerFaceSorted.sort(nullptr);
+    s.verticesPerLoopSorted.sort(nullptr);
 
     PolyhedralBoundedSolidTopologySummary shared =
         PolyhedralBoundedSolidTopologySummary::from(solid);
     for ( size_t i = 0; i < shared.getShells().size(); i++ ) {
-        s.shellFaceCountsSorted.push_back(shared.getShells()[i].getFaceCount());
+        s.shellFaceCountsSorted.add(shared.getShells()[i].getFaceCount());
     }
-    std::sort(s.shellFaceCountsSorted.begin(), s.shellFaceCountsSorted.end());
+    s.shellFaceCountsSorted.sort(nullptr);
     s.shellCount = (int)s.shellFaceCountsSorted.size();
 
     double* minMax = solid->getMinMax();
     for ( int i = 0; i < 6; i++ ) {
         // As Java `Math.round`
-        s.minMaxMicrounits.push_back((long long)std::floor(minMax[i] * 1000000.0 + 0.5));
+        s.minMaxMicrounits.add((long long)std::floor(minMax[i] * 1000000.0 + 0.5));
     }
     delete[] minMax;
     return s;
@@ -197,30 +207,30 @@ PolyhedralBoundedSolid* setOpAndRelease(PolyhedralBoundedSolid* a,
 }
 
 /** C++ counterpart of Java's `CsgSampleCorpusFixtures.createPair`. */
-std::vector<PolyhedralBoundedSolid*> createPair(const std::string& sample)
+java::ArrayList<PolyhedralBoundedSolid*> createPair(const java::String& sample)
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
     if ( sample == "HOLLOW_BRICK" ) {
         PolyhedralBoundedSolid* a = createTranslatedBox(1.0, 0.2, 0.2, 0.5, 0.1, 0.1);
         PolyhedralBoundedSolid* b = createTranslatedBox(1.0, 0.2, 0.2, 0.5, 0.9, 0.1);
         PolyhedralBoundedSolid* c = createTranslatedBox(0.2, 1.0, 0.2, 0.1, 0.5, 0.1);
         PolyhedralBoundedSolid* d = createTranslatedBox(0.2, 1.0, 0.2, 0.9, 0.5, 0.1);
-        operands.push_back(setOpAndRelease(b, c, Modeler::UNION, true));
-        operands.push_back(setOpAndRelease(a, d, Modeler::UNION, true));
+        operands.add(setOpAndRelease(b, c, Modeler::UNION, true));
+        operands.add(setOpAndRelease(a, d, Modeler::UNION, true));
     }
     else if ( sample == "MANT1986_2" ) {
         operands = SimpleTestGeometryLibrary::createTestObjectPairMANT1986_2();
     }
     else if ( sample == "STACKED_BLOCKS" ) {
-        operands.push_back(createTranslatedBox(1.0, 0.5, 0.3, 0.5, 0.5, 0.15));
-        operands.push_back(createTranslatedBox(0.5, 1.0, 0.3, 0.5, 0.5, 0.45));
+        operands.add(createTranslatedBox(1.0, 0.5, 0.3, 0.5, 0.5, 0.15));
+        operands.add(createTranslatedBox(0.5, 1.0, 0.3, 0.5, 0.5, 0.45));
     }
     else if ( sample == "CROSS_PAIR" ) {
         PolyhedralBoundedSolid* a = createTranslatedBox(1.0, 0.2, 0.2, 0.5, 0.1, 0.1);
         PolyhedralBoundedSolid* c = createTranslatedBox(0.2, 1.0, 0.2, 0.1, 0.5, 0.1);
         PolyhedralBoundedSolid* g = createTranslatedBox(0.2, 0.2, 1.0, 0.1, 0.1, 0.5);
-        operands.push_back(setOpAndRelease(a, c, Modeler::UNION, true));
-        operands.push_back(g);
+        operands.add(setOpAndRelease(a, c, Modeler::UNION, true));
+        operands.add(g);
     }
     else if ( sample == "MOON_BLOCK" ) {
         PolyhedralBoundedSolid* cylinderA = createTranslatedCylinder(0.5, 1.0);
@@ -230,8 +240,8 @@ std::vector<PolyhedralBoundedSolid*> createPair(const std::string& sample)
         Modeler::applyTransformation(cylinderB, translation);
         PolyhedralBoundedSolidValidationEngine::validateIntermediate(cylinderA);
         PolyhedralBoundedSolidValidationEngine::validateIntermediate(cylinderB);
-        operands.push_back(cylinderA);
-        operands.push_back(cylinderB);
+        operands.add(cylinderA);
+        operands.add(cylinderB);
     }
     else if ( sample == "MANT1988_6_13" ) {
         operands = SimpleTestGeometryLibrary::createTestObjectPairMANT1988_6_13();
@@ -293,41 +303,41 @@ PolyhedralBoundedSolid* createCsgLampShellReference()
     return setOpAndRelease(sphericalShell, clipCube, Modeler::INTERSECTION, true);
 }
 
-TopologicalSummary expectedMANT1986_2Union() { return of(1, 12, 30, 20, 12, 0, 2, {12}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6}, {0LL, -180000LL, 0LL, 1240000LL, 500000LL, 1020000LL}); }
-TopologicalSummary expectedMANT1986_2Intersection() { return of(1, 6, 12, 8, 6, 0, 2, {6}, {1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4}, {240000LL, 0LL, 420000LL, 1000000LL, 320000LL, 600000LL}); }
-TopologicalSummary expectedMANT1986_2DifferenceAB() { return of(1, 9, 21, 14, 9, 0, 2, {9}, {1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6, 6}, {0LL, 0LL, 0LL, 1000000LL, 500000LL, 600000LL}); }
-TopologicalSummary expectedMANT1986_2DifferenceBA() { return of(1, 9, 21, 14, 9, 0, 2, {9}, {1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6, 6}, {240000LL, -180000LL, 420000LL, 1240000LL, 320000LL, 1020000LL}); }
-TopologicalSummary expectedSTACKED_BLOCKSUnion() { return of(1, 14, 32, 20, 14, 0, 2, {14}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 600000LL}); }
-TopologicalSummary expectedSTACKED_BLOCKSIntersection() { return of(1, 2, 4, 4, 2, 0, 2, {2}, {1, 1}, {4, 4}, {250000LL, 250000LL, 300000LL, 750000LL, 750000LL, 300000LL}); }
-TopologicalSummary expectedSTACKED_BLOCKSDifferenceAB() { return of(1, 6, 12, 8, 6, 0, 2, {6}, {1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4}, {0LL, 250000LL, 0LL, 1000000LL, 750000LL, 300000LL}); }
-TopologicalSummary expectedSTACKED_BLOCKSDifferenceBA() { return of(1, 6, 12, 8, 6, 0, 2, {6}, {1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4}, {250000LL, 0LL, 300000LL, 750000LL, 1000000LL, 600000LL}); }
-TopologicalSummary expectedMOON_BLOCKUnion() { return of(1, 76, 222, 148, 76, 0, 2, {76}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 36, 36, 38, 38}, {50000LL, 50000LL, -450000LL, 1325000LL, 1050000LL, 1550000LL}); }
-TopologicalSummary expectedMOON_BLOCKIntersection() { return of(1, 34, 96, 64, 34, 0, 2, {34}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 32, 32}, {325000LL, 71175LL, 50000LL, 1050000LL, 1028825LL, 1050000LL}); }
-TopologicalSummary expectedMOON_BLOCKDifferenceAB() { return of(1, 40, 114, 76, 40, 0, 2, {40}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 38, 38}, {50000LL, 50000LL, 50000LL, 687500LL, 1050000LL, 1050000LL}); }
-TopologicalSummary expectedMOON_BLOCKDifferenceBA() { return of(1, 70, 204, 136, 70, 0, 2, {70}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 32, 32, 36, 36}, {325000LL, 50000LL, -450000LL, 1325000LL, 1050000LL, 1550000LL}); }
-TopologicalSummary expectedCROSS_PAIRUnion() { return of(1, 12, 27, 17, 12, 0, 2, {12}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL}); }
-TopologicalSummary expectedHOLLOW_BRICKUnion() { return of(1, 10, 24, 16, 12, 2, 2, {10}, {1, 1, 1, 1, 1, 1, 1, 1, 2, 2}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 200000LL}); }
-TopologicalSummary expectedHOLLOW_BRICKIntersection() { return of(2, 12, 24, 16, 12, 0, 4, {6, 6}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 200000LL}); }
-TopologicalSummary expectedHOLLOW_BRICKDifferenceAB() { return of(1, 8, 18, 12, 8, 0, 2, {8}, {1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6}, {0LL, 200000LL, 0LL, 800000LL, 1000000LL, 200000LL}); }
-TopologicalSummary expectedHOLLOW_BRICKDifferenceBA() { return of(1, 8, 18, 12, 8, 0, 2, {8}, {1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6}, {200000LL, 0LL, 0LL, 1000000LL, 800000LL, 200000LL}); }
-TopologicalSummary expectedMANT1988_6_13Union() { return of(1, 11, 27, 18, 11, 0, 2, {11}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 5, 5, 8, 8}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 324324LL}); }
-TopologicalSummary expectedMANT1988_6_13Intersection() { return of(1, 12, 30, 20, 12, 0, 2, {12}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 8, 8}, {0LL, 0LL, 0LL, 837838LL, 1000000LL, 324324LL}); }
-TopologicalSummary expectedMANT1988_6_13DifferenceAB() { return of(1, 7, 15, 10, 7, 0, 2, {7}, {1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 5, 5}, {0LL, 243243LL, 81081LL, 837838LL, 756757LL, 324324LL}); }
-TopologicalSummary expectedMANT1988_6_13DifferenceBA() { return of(1, 12, 30, 20, 12, 0, 2, {12}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 8, 8}, {432432LL, 0LL, 0LL, 1000000LL, 1000000LL, 324324LL}); }
-TopologicalSummary expectedMANT1988_15_2HoledUnion() { return of(1, 14, 30, 20, 16, 2, 4, {14}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2}, {3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4}, {0LL, 0LL, 0LL, 775000LL, 1000000LL, 600000LL}); }
-TopologicalSummary expectedMANT1988_15_2HoledIntersection() { return of(1, 7, 15, 12, 9, 2, 4, {7}, {1, 1, 1, 1, 1, 2, 2}, {3, 3, 3, 3, 3, 3, 4, 4, 4}, {137500LL, 225000LL, 250000LL, 637500LL, 775000LL, 550000LL}); }
-TopologicalSummary expectedMANT1988_15_2HoledDifferenceAB() { return of(1, 9, 21, 14, 11, 2, 2, {9}, {1, 1, 1, 1, 1, 1, 1, 2, 2}, {3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4}, {137500LL, 0LL, 0LL, 637500LL, 1000000LL, 600000LL}); }
-TopologicalSummary expectedMANT1988_15_2HoledDifferenceBA() { return of(2, 12, 24, 18, 14, 2, 6, {6, 6}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2}, {3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, {0LL, 225000LL, 250000LL, 775000LL, 775000LL, 550000LL}); }
-TopologicalSummary expectedMANT1988_15_1Union() { return of(1, 10, 24, 16, 10, 0, 2, {10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {3, 3, 4, 4, 4, 4, 6, 6, 6, 8}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL}); }
-TopologicalSummary expectedMANT1988_15_1Intersection() { return of(1, 10, 24, 16, 10, 0, 2, {10}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6, 6, 6}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL}); }
-TopologicalSummary expectedMANT1988_15_1DifferenceAB() { return of(2, 10, 18, 12, 10, 0, 4, {5, 5}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, {0LL, 0LL, 583333LL, 333333LL, 1000000LL, 1000000LL}); }
-TopologicalSummary expectedMANT1988_15_1DifferenceBA() { return of(1, 8, 18, 12, 8, 0, 2, {8}, {1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6}, {333333LL, 0LL, 250000LL, 1000000LL, 1000000LL, 1000000LL}); }
-TopologicalSummary expectedMANT1988_3Union() { return of(1, 14, 35, 23, 14, 0, 2, {14}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 5, 5, 6, 6, 6, 6, 8}, {50000LL, -160000LL, 50000LL, 970000LL, 470000LL, 770000LL}); }
-TopologicalSummary expectedMANT1988_3Intersection() { return of(1, 6, 12, 8, 6, 0, 2, {6}, {1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4}, {750000LL, 50000LL, 230000LL, 970000LL, 260000LL, 410000LL}); }
-TopologicalSummary expectedMANT1988_3DifferenceAB() { return of(1, 11, 27, 18, 11, 0, 2, {11}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 8}, {50000LL, 50000LL, 50000LL, 970000LL, 470000LL, 770000LL}); }
-TopologicalSummary expectedMANT1988_3DifferenceBA() { return of(1, 8, 18, 12, 8, 0, 2, {8}, {1, 1, 1, 1, 1, 1, 1, 1}, {4, 4, 4, 4, 4, 4, 6, 6}, {390000LL, -160000LL, 230000LL, 970000LL, 260000LL, 410000LL}); }
-TopologicalSummary expectedLampShellSummary() { return of(1, 13, 24, 14, 14, 1, 3, {13}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2}, {3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, {300000LL, 116987LL, 50000LL, 1050000LL, 983013LL, 850000LL}); }
-TopologicalSummary expectedFeaturedObjectSummary() { return of(2, 32, 84, 54, 34, 2, 2, {16, 16}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2}, {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 8, 8, 8, 8, 10, 10}, {0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL}); }
+TopologicalSummary expectedMANT1986_2Union() { return of(1, 12, 30, 20, 12, 0, 2, listOf<int>(12), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6), listOf<long long>(0LL, -180000LL, 0LL, 1240000LL, 500000LL, 1020000LL)); }
+TopologicalSummary expectedMANT1986_2Intersection() { return of(1, 6, 12, 8, 6, 0, 2, listOf<int>(6), listOf<int>(1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4), listOf<long long>(240000LL, 0LL, 420000LL, 1000000LL, 320000LL, 600000LL)); }
+TopologicalSummary expectedMANT1986_2DifferenceAB() { return of(1, 9, 21, 14, 9, 0, 2, listOf<int>(9), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6, 6), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 500000LL, 600000LL)); }
+TopologicalSummary expectedMANT1986_2DifferenceBA() { return of(1, 9, 21, 14, 9, 0, 2, listOf<int>(9), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6, 6), listOf<long long>(240000LL, -180000LL, 420000LL, 1240000LL, 320000LL, 1020000LL)); }
+TopologicalSummary expectedSTACKED_BLOCKSUnion() { return of(1, 14, 32, 20, 14, 0, 2, listOf<int>(14), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 600000LL)); }
+TopologicalSummary expectedSTACKED_BLOCKSIntersection() { return of(1, 2, 4, 4, 2, 0, 2, listOf<int>(2), listOf<int>(1, 1), listOf<int>(4, 4), listOf<long long>(250000LL, 250000LL, 300000LL, 750000LL, 750000LL, 300000LL)); }
+TopologicalSummary expectedSTACKED_BLOCKSDifferenceAB() { return of(1, 6, 12, 8, 6, 0, 2, listOf<int>(6), listOf<int>(1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 250000LL, 0LL, 1000000LL, 750000LL, 300000LL)); }
+TopologicalSummary expectedSTACKED_BLOCKSDifferenceBA() { return of(1, 6, 12, 8, 6, 0, 2, listOf<int>(6), listOf<int>(1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4), listOf<long long>(250000LL, 0LL, 300000LL, 750000LL, 1000000LL, 600000LL)); }
+TopologicalSummary expectedMOON_BLOCKUnion() { return of(1, 76, 222, 148, 76, 0, 2, listOf<int>(76), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 36, 36, 38, 38), listOf<long long>(50000LL, 50000LL, -450000LL, 1325000LL, 1050000LL, 1550000LL)); }
+TopologicalSummary expectedMOON_BLOCKIntersection() { return of(1, 34, 96, 64, 34, 0, 2, listOf<int>(34), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 32, 32), listOf<long long>(325000LL, 71175LL, 50000LL, 1050000LL, 1028825LL, 1050000LL)); }
+TopologicalSummary expectedMOON_BLOCKDifferenceAB() { return of(1, 40, 114, 76, 40, 0, 2, listOf<int>(40), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 38, 38), listOf<long long>(50000LL, 50000LL, 50000LL, 687500LL, 1050000LL, 1050000LL)); }
+TopologicalSummary expectedMOON_BLOCKDifferenceBA() { return of(1, 70, 204, 136, 70, 0, 2, listOf<int>(70), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 32, 32, 36, 36), listOf<long long>(325000LL, 50000LL, -450000LL, 1325000LL, 1050000LL, 1550000LL)); }
+TopologicalSummary expectedCROSS_PAIRUnion() { return of(1, 12, 27, 17, 12, 0, 2, listOf<int>(12), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL)); }
+TopologicalSummary expectedHOLLOW_BRICKUnion() { return of(1, 10, 24, 16, 12, 2, 2, listOf<int>(10), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 200000LL)); }
+TopologicalSummary expectedHOLLOW_BRICKIntersection() { return of(2, 12, 24, 16, 12, 0, 4, listOf<int>(6, 6), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 200000LL)); }
+TopologicalSummary expectedHOLLOW_BRICKDifferenceAB() { return of(1, 8, 18, 12, 8, 0, 2, listOf<int>(8), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6), listOf<long long>(0LL, 200000LL, 0LL, 800000LL, 1000000LL, 200000LL)); }
+TopologicalSummary expectedHOLLOW_BRICKDifferenceBA() { return of(1, 8, 18, 12, 8, 0, 2, listOf<int>(8), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6), listOf<long long>(200000LL, 0LL, 0LL, 1000000LL, 800000LL, 200000LL)); }
+TopologicalSummary expectedMANT1988_6_13Union() { return of(1, 11, 27, 18, 11, 0, 2, listOf<int>(11), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 5, 5, 8, 8), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 324324LL)); }
+TopologicalSummary expectedMANT1988_6_13Intersection() { return of(1, 12, 30, 20, 12, 0, 2, listOf<int>(12), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 8, 8), listOf<long long>(0LL, 0LL, 0LL, 837838LL, 1000000LL, 324324LL)); }
+TopologicalSummary expectedMANT1988_6_13DifferenceAB() { return of(1, 7, 15, 10, 7, 0, 2, listOf<int>(7), listOf<int>(1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 5, 5), listOf<long long>(0LL, 243243LL, 81081LL, 837838LL, 756757LL, 324324LL)); }
+TopologicalSummary expectedMANT1988_6_13DifferenceBA() { return of(1, 12, 30, 20, 12, 0, 2, listOf<int>(12), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 8, 8), listOf<long long>(432432LL, 0LL, 0LL, 1000000LL, 1000000LL, 324324LL)); }
+TopologicalSummary expectedMANT1988_15_2HoledUnion() { return of(1, 14, 30, 20, 16, 2, 4, listOf<int>(14), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 0LL, 0LL, 775000LL, 1000000LL, 600000LL)); }
+TopologicalSummary expectedMANT1988_15_2HoledIntersection() { return of(1, 7, 15, 12, 9, 2, 4, listOf<int>(7), listOf<int>(1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 3, 3, 3, 3, 4, 4, 4), listOf<long long>(137500LL, 225000LL, 250000LL, 637500LL, 775000LL, 550000LL)); }
+TopologicalSummary expectedMANT1988_15_2HoledDifferenceAB() { return of(1, 9, 21, 14, 11, 2, 2, listOf<int>(9), listOf<int>(1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4), listOf<long long>(137500LL, 0LL, 0LL, 637500LL, 1000000LL, 600000LL)); }
+TopologicalSummary expectedMANT1988_15_2HoledDifferenceBA() { return of(2, 12, 24, 18, 14, 2, 6, listOf<int>(6, 6), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 225000LL, 250000LL, 775000LL, 775000LL, 550000LL)); }
+TopologicalSummary expectedMANT1988_15_1Union() { return of(1, 10, 24, 16, 10, 0, 2, listOf<int>(10), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(3, 3, 4, 4, 4, 4, 6, 6, 6, 8), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL)); }
+TopologicalSummary expectedMANT1988_15_1Intersection() { return of(1, 10, 24, 16, 10, 0, 2, listOf<int>(10), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6, 6, 6), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL)); }
+TopologicalSummary expectedMANT1988_15_1DifferenceAB() { return of(2, 10, 18, 12, 10, 0, 4, listOf<int>(5, 5), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(3, 3, 3, 3, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 0LL, 583333LL, 333333LL, 1000000LL, 1000000LL)); }
+TopologicalSummary expectedMANT1988_15_1DifferenceBA() { return of(1, 8, 18, 12, 8, 0, 2, listOf<int>(8), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6), listOf<long long>(333333LL, 0LL, 250000LL, 1000000LL, 1000000LL, 1000000LL)); }
+TopologicalSummary expectedMANT1988_3Union() { return of(1, 14, 35, 23, 14, 0, 2, listOf<int>(14), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 5, 5, 6, 6, 6, 6, 8), listOf<long long>(50000LL, -160000LL, 50000LL, 970000LL, 470000LL, 770000LL)); }
+TopologicalSummary expectedMANT1988_3Intersection() { return of(1, 6, 12, 8, 6, 0, 2, listOf<int>(6), listOf<int>(1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4), listOf<long long>(750000LL, 50000LL, 230000LL, 970000LL, 260000LL, 410000LL)); }
+TopologicalSummary expectedMANT1988_3DifferenceAB() { return of(1, 11, 27, 18, 11, 0, 2, listOf<int>(11), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 8), listOf<long long>(50000LL, 50000LL, 50000LL, 970000LL, 470000LL, 770000LL)); }
+TopologicalSummary expectedMANT1988_3DifferenceBA() { return of(1, 8, 18, 12, 8, 0, 2, listOf<int>(8), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6), listOf<long long>(390000LL, -160000LL, 230000LL, 970000LL, 260000LL, 410000LL)); }
+TopologicalSummary expectedLampShellSummary() { return of(1, 13, 24, 14, 14, 1, 3, listOf<int>(13), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2), listOf<int>(3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4), listOf<long long>(300000LL, 116987LL, 50000LL, 1050000LL, 983013LL, 850000LL)); }
+TopologicalSummary expectedFeaturedObjectSummary() { return of(2, 32, 84, 54, 34, 2, 2, listOf<int>(16, 16), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 8, 8, 8, 8, 10, 10), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL)); }
 
 /**
 C++ counterpart of the Java test's local `KurlanderBowlBuilder`.
@@ -402,7 +412,7 @@ private:
     }
 
     static PolyhedralBoundedSolid* createExtrudedPolygon(
-        const std::vector<Vector3Dd>& points, double thickness)
+        const java::ArrayList<Vector3Dd>& points, double thickness)
     {
         int n = (int)points.size();
         PolyhedralBoundedSolid* solid = new PolyhedralBoundedSolid();
@@ -423,11 +433,11 @@ private:
         double outerR = s(2.0);
         double innerR = s(0.77);
         double start = java::Math::toRadians(-90.0);
-        std::vector<Vector3Dd> points;
+        java::ArrayList<Vector3Dd> points;
         for ( int i = 0; i < n; i++ ) {
             double a = start + i * M_PI / 5.0;
             double r = (i % 2 == 0) ? outerR : innerR;
-            points.push_back(Vector3Dd(r * std::cos(a), r * std::sin(a), 0.0));
+            points.add(Vector3Dd(r * std::cos(a), r * std::sin(a), 0.0));
         }
         return createExtrudedPolygon(points, s(5.5));
     }
@@ -501,9 +511,9 @@ const ReferencePairCase REFERENCE_PAIRS[] = {
 TEST(BooleansFromReferenceObjectPairsTest, ReferencePairsMatchJavaTopologySummaries) {
     for ( size_t i = 0; i < sizeof(REFERENCE_PAIRS)/sizeof(REFERENCE_PAIRS[0]); i++ ) {
         const ReferencePairCase& c = REFERENCE_PAIRS[i];
-        SCOPED_TRACE(std::string(c.sample) + " + " + operationLabel(c.operation));
+        SCOPED_TRACE((java::String(c.sample) + " + " + operationLabel(c.operation)).c_str());
 
-        std::vector<PolyhedralBoundedSolid*> operands = createPair(c.sample);
+        java::ArrayList<PolyhedralBoundedSolid*> operands = createPair(c.sample);
         PolyhedralBoundedSolid* result =
             runBooleanOperation(c.operation, operands[0], operands[1]);
 

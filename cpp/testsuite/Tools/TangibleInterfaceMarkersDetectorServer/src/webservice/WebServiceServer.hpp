@@ -1,9 +1,9 @@
 #ifndef __WEB_SERVICE_SERVER__
 #define __WEB_SERVICE_SERVER__
 
+#include "java/util/ArrayList.txx"
 #include <atomic>
 #include <pthread.h>
-#include <vector>
 
 #include "java/net/ServerSocket.h"
 
@@ -38,7 +38,7 @@ private:
     std::atomic<bool> shouldStop_{false};
     java::net::ServerSocket* serverSocket_{nullptr};
     pthread_mutex_t serverSocketMutex = PTHREAD_MUTEX_INITIALIZER;
-    std::vector<pthread_t> clientThreads;
+    java::ArrayList<pthread_t> clientThreads;
     pthread_mutex_t clientThreadsMutex = PTHREAD_MUTEX_INITIALIZER;
 };
 

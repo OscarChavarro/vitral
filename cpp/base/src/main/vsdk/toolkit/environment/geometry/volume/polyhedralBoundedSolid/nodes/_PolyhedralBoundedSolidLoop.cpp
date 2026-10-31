@@ -1,5 +1,5 @@
-#include <vector>
 
+#include "java/util/Collections.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
@@ -129,8 +129,8 @@ void _PolyhedralBoundedSolidLoop::revert()
 
     //-----------------------------------------------------------------
     _PolyhedralBoundedSolidHalfEdge* he;
-    std::vector<_PolyhedralBoundedSolidEdge*> edges((size_t)n);
-    std::vector<bool> sides((size_t)n);
+    java::ArrayList<_PolyhedralBoundedSolidEdge*> edges = java::Collections::nCopies<_PolyhedralBoundedSolidEdge*>((size_t)n, nullptr);
+    java::ArrayList<bool> sides = java::Collections::nCopies<bool>((size_t)n, false);
     long int i;
 
     for ( i = 0; i < n; i++ ) {

@@ -1,21 +1,23 @@
 #ifndef __SOLID_TEXTURE_ANIMATION_CONTROLLER__
 #define __SOLID_TEXTURE_ANIMATION_CONTROLLER__
 
-#include <atomic>
-#include <functional>
-#include <thread>
+#include "java/lang/Runnable.h"
+#include "java/lang/Thread.h"
+#include "java/util/concurrent/atomic/AtomicLong.h"
 
 class SolidTextureModel;
 
 class AnimationController {
 private:
-    std::atomic<bool> running;
-    std::thread worker;
+    /// 1 while the worker thread runs
+    java::AtomicLong running;
+    java::Runnable* task;
+    java::Thread* worker;
 
 public:
     AnimationController();
     ~AnimationController();
-    void start(SolidTextureModel* model, const std::function<void()>& repaintCallback);
+    void start(SolidTextureModel* model, const java::Runnable& repaintCallback);
     void stop();
 };
 

@@ -7,13 +7,17 @@
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 
 #include <cstdio>
-#include <mutex>
+#include "java/util/concurrent/locks/ReentrantLock.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
+
+namespace {
+java::ReentrantLock& rayIntersectorAccess();
+}
 ParametricBiCubicPatch::ParametricBiCubicPatch()
     : contourCurve(nullptr), hasControlMeshPoints(false),
       hasCoefficientMatrices(false), approximationSteps(INITIAL_APPROXIMATION_STEPS), type(ParametricCurve::HERMITE)
@@ -65,19 +69,21 @@ void ParametricBiCubicPatch::calculateMatrices()
     sDerivativeParameterMatrix = Matrix4x4d();
     tDerivativeParameterMatrix = Matrix4x4d();
     hasCoefficientMatrices = true;
-    std::atomic_store(&rayIntersector,
-        std::shared_ptr<const _ParametricBiCubicPatchIntersector>());
+    {
+        java::ReentrantLockGuard guard(rayIntersectorAccess());
+        rayIntersector.reset();
+    }
 }
 
 namespace {
 /**
-Serializes the lazy creation of the intersectors of the patches, as the
-synchronized block of the Java version.
+Serializes the lazy creation (and the reads) of the intersectors of the
+patches, as the synchronized block of the Java version.
 */
-std::mutex& rayIntersectorCreation()
+java::ReentrantLock& rayIntersectorAccess()
 {
-    static std::mutex mutex;
-    return mutex;
+    static java::ReentrantLock lock;
+    return lock;
 }
 }
 
@@ -86,23 +92,20 @@ Returns the ray intersection structures for current patch, building them
 on first use.
 @return intersector, or null if the patch has not been built yet
 */
-std::shared_ptr<const _ParametricBiCubicPatchIntersector>
+SharedPointer<const _ParametricBiCubicPatchIntersector>
 ParametricBiCubicPatch::getRayIntersector() const
 {
-    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
-        std::atomic_load(&rayIntersector);
-    if ( intersector ) {
-        return intersector;
-    }
-    std::lock_guard<std::mutex> lock(rayIntersectorCreation());
-    intersector = std::atomic_load(&rayIntersector);
+    java::ReentrantLockGuard guard(rayIntersectorAccess());
+    SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
+        rayIntersector;
     if ( !intersector ) {
         if ( !hasCoefficientMatrices ) {
             return intersector;
         }
-        intersector = std::make_shared<const _ParametricBiCubicPatchIntersector>(
-            coefficientMatrixX, coefficientMatrixY, coefficientMatrixZ);
-        std::atomic_store(&rayIntersector, intersector);
+        intersector = SharedPointer<const _ParametricBiCubicPatchIntersector>(
+            new _ParametricBiCubicPatchIntersector(
+                coefficientMatrixX, coefficientMatrixY, coefficientMatrixZ));
+        rayIntersector = intersector;
     }
     return intersector;
 }
@@ -110,7 +113,7 @@ ParametricBiCubicPatch::getRayIntersector() const
 bool ParametricBiCubicPatch::getBezierControlPoint(int i, int j,
                                                    Vector3Dd& outPoint) const
 {
-    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+    SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
         getRayIntersector();
     if ( !intersector ) {
         return false;
@@ -289,7 +292,7 @@ or null if the ray misses the patch
 */
 Ray* ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& r)
 {
-    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+    SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
         getRayIntersector();
     _ParametricBiCubicPatchIntersector::PatchHit hit;
     if ( !intersector || !intersector->intersect(r, hit) ) {
@@ -301,7 +304,7 @@ Ray* ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& r)
 bool ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& inRay,
                                                     RayHit* outHit)
 {
-    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+    SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
         getRayIntersector();
     _ParametricBiCubicPatchIntersector::PatchHit hit;
     if ( !intersector || !intersector->intersect(inRay, hit) ) {
@@ -337,7 +340,7 @@ information reported is the one for the nearest hit.
 void ParametricBiCubicPatch::doExtraInformation(const Ray& inRay, double intT,
                                                 RayHit* outData)
 {
-    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+    SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
         getRayIntersector();
     if ( outData == nullptr || !intersector ) {
         return;
@@ -414,7 +417,7 @@ bounding box for current geometry.
 */
 double* ParametricBiCubicPatch::getMinMax()
 {
-    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+    SharedPointer<const _ParametricBiCubicPatchIntersector> intersector =
         getRayIntersector();
     if ( intersector ) {
         double* minMax = new double[6];

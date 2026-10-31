@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -160,7 +161,7 @@ bool WebSocket::parseUrl(const java::String& url, ParsedUrl* outUrl)
         outUrl->host = hostPort.substr(0, colon);
         outUrl->port = std::atoi(hostPort.substr(colon + 1).c_str());
     }
-    return !outUrl->host.empty() && outUrl->port > 0;
+    return !outUrl->host.isEmpty() && outUrl->port > 0;
 }
 
 bool WebSocket::extractStringPrefix(const java::String& text, const char* prefix)

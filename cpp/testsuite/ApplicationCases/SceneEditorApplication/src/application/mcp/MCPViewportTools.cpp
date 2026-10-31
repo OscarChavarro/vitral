@@ -1,5 +1,5 @@
-#include <stdexcept>
-#include <string>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
 
 #include "java/lang/StringBuilder.h"
 #include "java/util/ArrayList.txx"
@@ -27,7 +27,7 @@ const char* shadingTypeName(ShadingType type)
 
 /**
 As Java `ShadingType.valueOf`.
-@throws std::invalid_argument if there is no type with that name
+@throws java::IllegalArgumentException if there is no type with that name
 */
 ShadingType shadingTypeValueOf(const java::String& name)
 {
@@ -40,7 +40,7 @@ ShadingType shadingTypeValueOf(const java::String& name)
             return types[i];
         }
     }
-    throw std::invalid_argument((java::String(
+    throw java::IllegalArgumentException((java::String(
         "No enum constant vsdk.toolkit.environment.material.ShadingType.") +
         name).c_str());
 }
@@ -63,7 +63,7 @@ java::String MCPViewportTools::setInteractionMode(const java::String& request)
     else if ( mode.equals("rotate") ) value = InteractionMode::ROTATE;
     else if ( mode.equals("scale") ) value = InteractionMode::SCALE;
     else {
-        throw std::invalid_argument((java::String("Unknown mode \"") + mode +
+        throw java::IllegalArgumentException((java::String("Unknown mode \"") + mode +
             "\". Use camera, select, translate, rotate or scale").c_str());
     }
     model->getDrawingArea()->setInteractionMode(value);
@@ -86,8 +86,8 @@ java::ArrayList<Viewport*> MCPViewportTools::selectedViewports(
         out.add(set->getViewport((int)index));
     }
     else {
-        throw std::invalid_argument(
-            "Viewport index out of range: " + std::to_string((int)index));
+        throw java::IllegalArgumentException(
+            "Viewport index out of range: " + java::String::valueOf((int)index));
     }
     return out;
 }
@@ -103,7 +103,7 @@ void MCPViewportTools::setRendererConfiguration(const java::String& request)
             renderMode.equalsIgnoreCase("cpu") ? Viewport::RENDER_MODE_RAYTRACING :
             renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES : 0;
         if ( mode == 0 )
-            throw std::invalid_argument("renderMode must be gpu, cpu or hidden_lines");
+            throw java::IllegalArgumentException("renderMode must be gpu, cpu or hidden_lines");
         if ( supportsXlib && (mode == Viewport::RENDER_MODE_HIDDEN_LINES ||
                               mode == Viewport::RENDER_MODE_Z_BUFFER) ) {
             java::ArrayList<int> modes;
@@ -112,7 +112,7 @@ void MCPViewportTools::setRendererConfiguration(const java::String& request)
             set->setAvailableRenderModes(modes);
         }
         if ( !set->isRenderModeAvailable(mode) )
-            throw std::invalid_argument("renderMode is not available with this rendering technology");
+            throw java::IllegalArgumentException("renderMode is not available with this rendering technology");
     }
 
     for ( long i = 0; i < viewports.size(); i++ ) {

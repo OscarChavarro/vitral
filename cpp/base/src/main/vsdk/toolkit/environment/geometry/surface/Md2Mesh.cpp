@@ -72,7 +72,7 @@ void Md2Mesh::returnStartEndAnim(const java::String& inNameAnim, short outStartE
 _AnimationInfo* Md2Mesh::getAniInfo(const java::String& nameAnim)
 {
     java::String needle = nameAnim;
-    while (!needle.empty() && std::isspace((unsigned char)needle[needle.size()-1])) {
+    while (!needle.isEmpty() && std::isspace((unsigned char)needle[needle.size()-1])) {
         needle.erase(needle.size()-1);
     }
     for (size_t i = 0; i < aniInfos.size(); i++) {
@@ -93,7 +93,7 @@ void Md2Mesh::fillAniInfo()
     for (i = 0; i < (short)frameNames.size(); i++) {
         java::String fName = frameNames[i];
 
-        while (!fName.empty() && std::isspace((unsigned char)fName[fName.size()-1])) {
+        while (!fName.isEmpty() && std::isspace((unsigned char)fName[fName.size()-1])) {
             fName.erase(fName.size()-1);
         }
 

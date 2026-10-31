@@ -1,5 +1,6 @@
+#include "java/lang/String.h"
+#include "java/lang/StringBuilder.h"
 #include <cstdio>
-#include <string>
 
 #include <glad/gl.h>
 
@@ -11,7 +12,7 @@ namespace {
 @return the source of a file of `etc/glslShaders`, looked for from the usual
 working directories of the examples and applications, or an empty string
 */
-std::string readShaderSource(const char* fileName)
+java::String readShaderSource(const char* fileName)
 {
     const char* folders[] = {
         "../../../../etc/glslShaders/",
@@ -21,26 +22,27 @@ std::string readShaderSource(const char* fileName)
         "etc/glslShaders/"
     };
     for ( size_t i = 0; i < sizeof(folders) / sizeof(folders[0]); i++ ) {
-        std::string path = std::string(folders[i]) + fileName;
+        java::String path = java::String(folders[i]) + fileName;
         FILE* file = fopen(path.c_str(), "rb");
         if ( file == nullptr ) {
             continue;
         }
-        std::string source;
+        java::StringBuilder text;
         char buffer[4096];
         size_t count;
         while ( (count = fread(buffer, 1, sizeof(buffer), file)) > 0 ) {
-            source.append(buffer, count);
+            text.append(buffer, (int)count);
         }
         fclose(file);
-        if ( !source.empty() ) {
+        java::String source = text.toString();
+        if ( !source.isEmpty() ) {
             return source;
         }
     }
-    return std::string();
+    return java::String();
 }
 
-GLuint compileShader(GLenum type, const std::string& source, const char* fileName)
+GLuint compileShader(GLenum type, const java::String& source, const char* fileName)
 {
     GLuint shader = glCreateShader(type);
     const char* text = source.c_str();
@@ -64,9 +66,9 @@ GLuint compileShader(GLenum type, const std::string& source, const char* fileNam
 unsigned int OpenGL4ShaderProgramUtil::createProgramFromFiles(
     const char* vertexFile, const char* pixelFile)
 {
-    std::string vertexSource = readShaderSource(vertexFile);
-    std::string pixelSource = readShaderSource(pixelFile);
-    if ( vertexSource.empty() || pixelSource.empty() ) {
+    java::String vertexSource = readShaderSource(vertexFile);
+    java::String pixelSource = readShaderSource(pixelFile);
+    if ( vertexSource.isEmpty() || pixelSource.isEmpty() ) {
         fprintf(stderr, "OpenGL4ShaderProgramUtil: shader not found: %s / %s\n",
                 vertexFile, pixelFile);
         return 0;

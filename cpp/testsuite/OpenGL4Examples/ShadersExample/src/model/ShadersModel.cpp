@@ -1,3 +1,5 @@
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
 
@@ -51,7 +53,7 @@ ShadersModel::ShadersModel()
         if ( fgets(lineStr, sizeof(lineStr), csv) ) {
             while ( fgets(lineStr, sizeof(lineStr), csv) ) {
                 java::String line(lineStr);
-                if ( line.empty() ) continue;
+                if ( line.isEmpty() ) continue;
                 java::ArrayList<java::String> cols;
                 int prev = 0;
                 for (int i = 0; i <= (int)line.size(); i++) {
@@ -62,7 +64,7 @@ ShadersModel::ShadersModel()
                 }
                 if ( cols.size() < 16 ) continue;
                 const java::String& name = cols[0];
-                if ( name.empty() ) continue;
+                if ( name.isEmpty() ) continue;
                 cookTorranceMaterialNames.add(name);
                 if ( name == "Copper" ) {
                     cookTorranceMaterialIndex = (int)cookTorranceMaterialNames.size() - 1;
@@ -149,7 +151,7 @@ void ShadersModel::updateSoftwareViewportAndCamera(int width, int height)
 
 java::String ShadersModel::getCookTorranceMaterialLabel() const
 {
-    if ( cookTorranceMaterial == 0 || cookTorranceMaterial->getName().empty() ) return "Copper";
+    if ( cookTorranceMaterial == 0 || cookTorranceMaterial->getName().isEmpty() ) return "Copper";
     return cookTorranceMaterial->getName();
 }
 

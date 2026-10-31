@@ -1,26 +1,26 @@
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <cmath>
 
 #include "render/CairoPdfCalligraphic2DBufferRenderer.h"
 #include "render/CairoPdfLabelRenderer.h"
-#include <algorithm>
-#include <string>
-#include <vector>
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 const double kIconAreaRatio = 0.34;
 
-std::vector<std::string> CairoPdfLabelRenderer::splitLines(const char* text) const {
-    std::vector<std::string> lines;
-    std::string current;
+java::ArrayList<java::String> CairoPdfLabelRenderer::splitLines(const char* text) const {
+    java::ArrayList<java::String> lines;
+    java::String current;
 
     for (const char* p = text; *p != '\0'; ++p) {
         if (*p == '\n') {
-            lines.push_back(current);
-            current.clear();
+            lines.add(current);
+            current = "";
         } else {
-            current.push_back(*p);
+            current += *p;
         }
     }
-    lines.push_back(current);
+    lines.add(current);
 
     return lines;
 }
@@ -43,7 +43,7 @@ double CairoPdfLabelRenderer::calculateMaxFontSizeMm(
     double yMm,
     double labelSizeMm,
     double circleRadiusMm) const {
-    const std::vector<std::string> lines = splitLines(title.toCString());
+    const java::ArrayList<java::String> lines = splitLines(title.toCString());
     const double marginMm = labelSizeMm * 0.08;
     const double contentTopMm = yMm + marginMm;
     const double circleTopMm = yMm + labelSizeMm * 0.5 - circleRadiusMm;
@@ -53,8 +53,8 @@ double CairoPdfLabelRenderer::calculateMaxFontSizeMm(
     const double textRightMm = xMm + labelSizeMm - marginMm;
     const double textTopMm = contentTopMm;
     const double textBottomMm = circleTopMm - marginMm;
-    const double textWidthMm = std::max(0.0, textRightMm - textLeftMm);
-    const double textHeightMm = std::max(0.0, textBottomMm - textTopMm);
+    const double textWidthMm = java::Math::max(0.0, textRightMm - textLeftMm);
+    const double textHeightMm = java::Math::max(0.0, textBottomMm - textTopMm);
     const double lineHeightFactor = 1.15;
 
     cairo_select_font_face(cr, "Helvetica", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
@@ -65,7 +65,7 @@ double CairoPdfLabelRenderer::calculateMaxFontSizeMm(
         cairo_text_extents_t extents;
         cairo_text_extents(cr, lines[i].c_str(), &extents);
         const double lineWidthMm = extents.width * 25.4 / 72.0;
-        maxLineWidthMmAtOneMm = std::max(maxLineWidthMmAtOneMm, lineWidthMm);
+        maxLineWidthMmAtOneMm = java::Math::max(maxLineWidthMmAtOneMm, lineWidthMm);
     }
 
     const double blockHeightAtOneMm =
@@ -78,11 +78,11 @@ double CairoPdfLabelRenderer::calculateMaxFontSizeMm(
     if (widthLimitedFontSizeMm <= 0.0 || heightLimitedFontSizeMm <= 0.0) {
         return 0.0;
     }
-    return std::min(widthLimitedFontSizeMm, heightLimitedFontSizeMm);
+    return java::Math::min(widthLimitedFontSizeMm, heightLimitedFontSizeMm);
 }
 
 void CairoPdfLabelRenderer::renderTitle(cairo_t* cr, const java::String& title, const TextLayout& layout) const {
-    const std::vector<std::string> lines = splitLines(title.toCString());
+    const java::ArrayList<java::String> lines = splitLines(title.toCString());
     cairo_select_font_face(cr, "Helvetica", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
     cairo_set_font_size(cr, mmToPt(layout.fontSizeMm));
     cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
@@ -106,7 +106,7 @@ CairoPdfLabelRenderer::TextLayout CairoPdfLabelRenderer::calculateTextLayout(
     double labelSizeMm,
     double circleRadiusMm,
     double preferredFontSizeMm) const {
-    const std::vector<std::string> lines = splitLines(title.toCString());
+    const java::ArrayList<java::String> lines = splitLines(title.toCString());
     const double marginMm = labelSizeMm * 0.08;
     const double contentTopMm = yMm + marginMm;
     const double circleTopMm = yMm + labelSizeMm * 0.5 - circleRadiusMm;
@@ -116,12 +116,12 @@ CairoPdfLabelRenderer::TextLayout CairoPdfLabelRenderer::calculateTextLayout(
     const double textRightMm = xMm + labelSizeMm - marginMm;
     const double textTopMm = contentTopMm;
     const double textBottomMm = circleTopMm - marginMm;
-    const double textWidthMm = std::max(0.0, textRightMm - textLeftMm);
-    const double textHeightMm = std::max(0.0, textBottomMm - textTopMm);
+    const double textWidthMm = java::Math::max(0.0, textRightMm - textLeftMm);
+    const double textHeightMm = java::Math::max(0.0, textBottomMm - textTopMm);
     double fontSizeMm = calculateMaxFontSizeMm(cr, title, hasIcon, xMm, yMm, labelSizeMm, circleRadiusMm);
     const double lineHeightFactor = 1.15;
     if (preferredFontSizeMm > 0.0) {
-        fontSizeMm = std::min(fontSizeMm, preferredFontSizeMm);
+        fontSizeMm = java::Math::min(fontSizeMm, preferredFontSizeMm);
     }
 
     cairo_set_font_size(cr, mmToPt(fontSizeMm));
@@ -130,7 +130,7 @@ CairoPdfLabelRenderer::TextLayout CairoPdfLabelRenderer::calculateTextLayout(
     const double textBlockHeightMm = fontSizeMm + (static_cast<double>(lines.size()) - 1.0) * lineHeightMm;
     const double textAreaCenterMm = textTopMm + textHeightMm * 0.5;
     double firstBaselineMm = textAreaCenterMm - textBlockHeightMm * 0.5 + fontSizeMm * 0.5;
-    firstBaselineMm = std::max(firstBaselineMm, textTopMm + fontSizeMm);
+    firstBaselineMm = java::Math::max(firstBaselineMm, textTopMm + fontSizeMm);
 
     TextLayout layout;
     layout.centerXmm = hasIcon ? (textLeftMm + textWidthMm * 0.5) : (xMm + labelSizeMm * 0.5);

@@ -1,6 +1,6 @@
-#include <algorithm>
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include <cctype>
-#include <string>
 
 #include "vsdk/toolkit/gui/editor/ControlSpecification.h"
 #include "vsdk/toolkit/gui/editor/Gtk4GenericEditor.h"
@@ -33,9 +33,7 @@ Gtk4GenericEditor::beginBuild(const java::String& title)
     messageLabel = nullptr;
     clearBox(container);
 
-    std::string text = title.c_str();
-    std::transform(text.begin(), text.end(), text.begin(),
-        [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+    java::String text = java::String(title.c_str()).toUpperCase();
     GtkWidget* titleLabel = gtk_label_new(text.c_str());
     gtk_label_set_xalign(GTK_LABEL(titleLabel), 0.5f);
     gtk_widget_set_margin_bottom(titleLabel, 8);
@@ -51,7 +49,7 @@ Gtk4GenericEditor::addControl(const ControlSpecification* specification,
     GtkWidget* row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_hexpand(row, TRUE);
 
-    std::string labelText = specification->getLabel().c_str();
+    java::String labelText = specification->getLabel().c_str();
     if ( specification->getIntervalText().length() > 0 ) {
         labelText += "\n";
         labelText += specification->getIntervalText().c_str();
@@ -66,7 +64,7 @@ Gtk4GenericEditor::addControl(const ControlSpecification* specification,
     GtkWidget* field = gtk_entry_new();
     gtk_editable_set_text(GTK_EDITABLE(field), value.c_str());
     gtk_widget_set_hexpand(field, TRUE);
-    fields[field] = specification;
+    fields.put(field, specification);
     g_signal_connect(field, "activate", G_CALLBACK(fieldActivatedThunk), this);
     g_signal_connect(field, "changed", G_CALLBACK(fieldChangedThunk), this);
     gtk_box_append(GTK_BOX(row), field);
@@ -105,11 +103,10 @@ void
 Gtk4GenericEditor::setControlValue(
     const ControlSpecification* specification, const java::String& value)
 {
-    for ( std::map<GtkWidget*, const ControlSpecification*>::iterator it =
-              fields.begin(); it != fields.end(); ++it ) {
-        if ( it->second != specification ) continue;
-        gtk_editable_set_text(GTK_EDITABLE(it->first), value.c_str());
-        gtk_widget_remove_css_class(it->first, "error");
+    for (long it = 0; it < fields.size(); it++) {
+        if ( fields.getValue(it) != specification ) continue;
+        gtk_editable_set_text(GTK_EDITABLE(fields.getKey(it)), value.c_str());
+        gtk_widget_remove_css_class(fields.getKey(it), "error");
         return;
     }
 }
@@ -129,12 +126,11 @@ Gtk4GenericEditor::clearControls(const java::String& message)
 void
 Gtk4GenericEditor::fieldActivated(GtkWidget* field)
 {
-    std::map<GtkWidget*, const ControlSpecification*>::iterator it =
-        fields.find(field);
-    if ( it == fields.end() ) return;
+    const ControlSpecification** it = fields.get(field);
+    if ( it == nullptr ) return;
 
     const char* text = gtk_editable_get_text(GTK_EDITABLE(field));
-    if ( updateValue(it->second, text != nullptr ? text : "") ) {
+    if ( updateValue((*it), text != nullptr ? text : "") ) {
         gtk_widget_remove_css_class(field, "error");
     }
     else {

@@ -1,12 +1,30 @@
+#include "java/util/Collections.txx"
+#include "java/util/TreeMap.txx"
+#include "java/util/TreeSet.txx"
 #include "java/util/ArrayList.txx"
 #include "processing/ConstructivePolygonGeometryProcessor.h"
-#include <algorithm>
-#include <map>
-#include <set>
-#include <utility>
-#include <vector>
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
+/** A vertex of the cell grid, by its column and row indices */
+class GridPoint {
+  public:
+    long x;
+    long y;
+
+    GridPoint() : x(0), y(0) {}
+    GridPoint(long x, long y) : x(x), y(y) {}
+
+    bool operator<(const GridPoint& other) const
+    {
+        return x < other.x || (x == other.x && y < other.y);
+    }
+
+    bool operator==(const GridPoint& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+};
+
 static bool pointInLoop(const _Polygon2DContour* loop, double x, double y)
 {
     if (!loop || loop->vertices.size() < 3) return false;
@@ -34,38 +52,38 @@ static bool pointInPolygon(const Polygon2D* polygon, double x, double y)
     return inside;
 }
 
-static void addVertexIfNeeded(std::vector<std::pair<long, long> >& loop, long x, long y)
+static void addVertexIfNeeded(java::ArrayList<GridPoint >& loop, long x, long y)
 {
-    if (loop.empty() || loop.back().first != x || loop.back().second != y) {
-        loop.push_back(std::make_pair(x, y));
+    if (loop.isEmpty() || loop[loop.size() - 1].x != x || loop[loop.size() - 1].y != y) {
+        loop.add(GridPoint(x, y));
     }
 }
 
-static std::vector<std::pair<long, long> > traceLoop(
-    std::map<std::pair<long, long>, std::vector<std::pair<long, long> > >& adjacency)
+static java::ArrayList<GridPoint > traceLoop(
+    java::TreeMap<GridPoint, java::ArrayList<GridPoint > >& adjacency)
 {
-    std::vector<std::pair<long, long> > loop;
-    std::pair<long, long> start;
+    java::ArrayList<GridPoint > loop;
+    GridPoint start;
     bool foundStart = false;
 
-    for (std::map<std::pair<long, long>, std::vector<std::pair<long, long> > >::iterator it = adjacency.begin(); it != adjacency.end(); ++it) {
-        if (!it->second.empty()) {
-            start = it->first;
+    for (long it = 0; it < adjacency.size(); it++) {
+        if (!adjacency.getValue(it).isEmpty()) {
+            start = adjacency.getKey(it);
             foundStart = true;
             break;
         }
     }
     if (!foundStart) return loop;
 
-    std::pair<long, long> current = start;
-    std::pair<long, long> prev = std::make_pair(9223372036854775807LL, 9223372036854775807LL);
-    addVertexIfNeeded(loop, current.first, current.second);
+    GridPoint current = start;
+    GridPoint prev = GridPoint(9223372036854775807LL, 9223372036854775807LL);
+    addVertexIfNeeded(loop, current.x, current.y);
 
     for (long guard = 0; guard < 1000000; ++guard) {
-        std::vector<std::pair<long, long> >& nexts = adjacency[current];
-        if (nexts.empty()) break;
+        java::ArrayList<GridPoint >& nexts = adjacency.putIfAbsent(current, java::ArrayList<GridPoint >());
+        if (nexts.isEmpty()) break;
 
-        std::pair<long, long> next = nexts.back();
+        GridPoint next = nexts[nexts.size() - 1];
         if (nexts.size() > 1 && next == prev) {
             next = nexts[nexts.size() - 2];
         }
@@ -73,24 +91,24 @@ static std::vector<std::pair<long, long> > traceLoop(
         bool removed = false;
         for (long i = 0; i < (long)nexts.size(); ++i) {
             if (nexts[i] == next) {
-                nexts.erase(nexts.begin() + i);
+                nexts.remove(i);
                 removed = true;
                 break;
             }
         }
         if (!removed) break;
 
-        std::vector<std::pair<long, long> >& backList = adjacency[next];
+        java::ArrayList<GridPoint >& backList = adjacency.putIfAbsent(next, java::ArrayList<GridPoint >());
         for (long i = 0; i < (long)backList.size(); ++i) {
             if (backList[i] == current) {
-                backList.erase(backList.begin() + i);
+                backList.remove(i);
                 break;
             }
         }
 
         prev = current;
         current = next;
-        addVertexIfNeeded(loop, current.first, current.second);
+        addVertexIfNeeded(loop, current.x, current.y);
 
         if (current == start) break;
     }
@@ -111,8 +129,8 @@ Polygon2D ConstructivePolygonGeometryProcessor::execute(java::ArrayList<Polygon2
         return out;
     }
 
-    std::set<double> xs;
-    std::set<double> ys;
+    java::TreeSet<double> xs;
+    java::TreeSet<double> ys;
     for (long p = 0; p < polygons->size(); ++p) {
         Polygon2D* polygon = polygons->get(p);
         if (!polygon) continue;
@@ -121,8 +139,8 @@ Polygon2D ConstructivePolygonGeometryProcessor::execute(java::ArrayList<Polygon2
             if (!loop) continue;
             for (long j = 0; j < loop->vertices.size(); ++j) {
                 const Vertex2D v = loop->vertices.get(j);
-                xs.insert(v.x);
-                ys.insert(v.y);
+                xs.add(v.x);
+                ys.add(v.y);
             }
         }
     }
@@ -131,12 +149,14 @@ Polygon2D ConstructivePolygonGeometryProcessor::execute(java::ArrayList<Polygon2
         return out;
     }
 
-    std::vector<double> xv(xs.begin(), xs.end());
-    std::vector<double> yv(ys.begin(), ys.end());
+    java::ArrayList<double> xv;
+    java::ArrayList<double> yv;
+    for (long i = 0; i < xs.size(); ++i) xv.add(xs.get(i));
+    for (long i = 0; i < ys.size(); ++i) yv.add(ys.get(i));
     const long nx = (long)xv.size();
     const long ny = (long)yv.size();
 
-    std::vector<std::vector<unsigned char> > filled(nx - 1, std::vector<unsigned char>(ny - 1, 0));
+    java::ArrayList<java::ArrayList<unsigned char> > filled = java::Collections::nCopies<java::ArrayList<unsigned char> >(nx - 1, java::Collections::nCopies<unsigned char>(ny - 1, (unsigned char)0));
     for (long ix = 0; ix < nx - 1; ++ix) {
         for (long iy = 0; iy < ny - 1; ++iy) {
             const double cx = (xv[ix] + xv[ix + 1]) * 0.5;
@@ -152,48 +172,48 @@ Polygon2D ConstructivePolygonGeometryProcessor::execute(java::ArrayList<Polygon2
         }
     }
 
-    std::map<std::pair<long, long>, std::vector<std::pair<long, long> > > adjacency;
+    java::TreeMap<GridPoint, java::ArrayList<GridPoint > > adjacency;
     for (long ix = 0; ix < nx - 1; ++ix) {
         for (long iy = 0; iy < ny - 1; ++iy) {
             if (!filled[ix][iy]) continue;
 
             if (iy == 0 || !filled[ix][iy - 1]) {
-                std::pair<long, long> a = std::make_pair(ix, iy);
-                std::pair<long, long> b = std::make_pair(ix + 1, iy);
-                adjacency[a].push_back(b);
-                adjacency[b].push_back(a);
+                GridPoint a = GridPoint(ix, iy);
+                GridPoint b = GridPoint(ix + 1, iy);
+                adjacency.putIfAbsent(a, java::ArrayList<GridPoint >()).add(b);
+                adjacency.putIfAbsent(b, java::ArrayList<GridPoint >()).add(a);
             }
             if (ix == nx - 2 || !filled[ix + 1][iy]) {
-                std::pair<long, long> a = std::make_pair(ix + 1, iy);
-                std::pair<long, long> b = std::make_pair(ix + 1, iy + 1);
-                adjacency[a].push_back(b);
-                adjacency[b].push_back(a);
+                GridPoint a = GridPoint(ix + 1, iy);
+                GridPoint b = GridPoint(ix + 1, iy + 1);
+                adjacency.putIfAbsent(a, java::ArrayList<GridPoint >()).add(b);
+                adjacency.putIfAbsent(b, java::ArrayList<GridPoint >()).add(a);
             }
             if (iy == ny - 2 || !filled[ix][iy + 1]) {
-                std::pair<long, long> a = std::make_pair(ix + 1, iy + 1);
-                std::pair<long, long> b = std::make_pair(ix, iy + 1);
-                adjacency[a].push_back(b);
-                adjacency[b].push_back(a);
+                GridPoint a = GridPoint(ix + 1, iy + 1);
+                GridPoint b = GridPoint(ix, iy + 1);
+                adjacency.putIfAbsent(a, java::ArrayList<GridPoint >()).add(b);
+                adjacency.putIfAbsent(b, java::ArrayList<GridPoint >()).add(a);
             }
             if (ix == 0 || !filled[ix - 1][iy]) {
-                std::pair<long, long> a = std::make_pair(ix, iy + 1);
-                std::pair<long, long> b = std::make_pair(ix, iy);
-                adjacency[a].push_back(b);
-                adjacency[b].push_back(a);
+                GridPoint a = GridPoint(ix, iy + 1);
+                GridPoint b = GridPoint(ix, iy);
+                adjacency.putIfAbsent(a, java::ArrayList<GridPoint >()).add(b);
+                adjacency.putIfAbsent(b, java::ArrayList<GridPoint >()).add(a);
             }
         }
     }
 
     bool firstLoop = true;
     while (true) {
-        std::vector<std::pair<long, long> > loop = traceLoop(adjacency);
+        java::ArrayList<GridPoint > loop = traceLoop(adjacency);
         if (loop.size() < 4) break;
         if (!firstLoop) out.nextLoop();
         firstLoop = false;
 
         for (long i = 0; i < (long)loop.size() - 1; ++i) {
-            const long gx = loop[i].first;
-            const long gy = loop[i].second;
+            const long gx = loop[i].x;
+            const long gy = loop[i].y;
             out.addVertex(xv[gx], yv[gy], 0.0, 0.0, 0.0);
         }
     }

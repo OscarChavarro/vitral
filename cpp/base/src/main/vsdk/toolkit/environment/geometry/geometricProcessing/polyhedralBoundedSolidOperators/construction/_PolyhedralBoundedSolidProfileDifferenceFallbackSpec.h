@@ -1,7 +1,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_PROFILE_DIFFERENCE_FALLBACK_SPEC__
 #define ___POLYHEDRAL_BOUNDED_SOLID_PROFILE_DIFFERENCE_FALLBACK_SPEC__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
@@ -13,13 +13,13 @@ C++ counterpart of Java's `_PolyhedralBoundedSolidProfileDifferenceFallbackSpec`
 */
 class _PolyhedralBoundedSolidProfileDifferenceFallbackSpec {
 public:
-    std::vector<Vector3Dd> clippedProfileAtCut;
+    java::ArrayList<Vector3Dd> clippedProfileAtCut;
     double xCut;
     double xMax;
     double minuendBounds[6];
 
     _PolyhedralBoundedSolidProfileDifferenceFallbackSpec(
-        const std::vector<Vector3Dd>& clippedProfileAtCut,
+        const java::ArrayList<Vector3Dd>& clippedProfileAtCut,
         double xCut,
         double xMax,
         const double* minuendBounds)

@@ -1,4 +1,4 @@
-#include <stdexcept>
+#include "java/lang/RuntimeException.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/gizmo/InfinitePlaneGizmo.h"
@@ -20,7 +20,7 @@ InfinitePlaneGizmo::PlaneSnapshot::PlaneSnapshot(
       normal(normal.normalized())
 {
     if ( normal.length() < VSDK::EPSILON ) {
-        throw std::runtime_error("normal cannot be null or zero");
+        throw java::RuntimeException("normal cannot be null or zero");
     }
 }
 

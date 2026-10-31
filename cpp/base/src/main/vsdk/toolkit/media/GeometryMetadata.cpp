@@ -1,9 +1,9 @@
+#include "java/lang/Double.h"
 #include <cmath>
 #include <cstdio>
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/media/GeometryMetadata.h"
 #include "vsdk/toolkit/media/ShapeDescriptor.h"
 long GeometryMetadata::lastId = 0;
@@ -33,7 +33,7 @@ double GeometryMetadata::doMinskowskiDistance(
     double s,
     const java::String* subGroup) const {
     if (other == nullptr || subGroup == nullptr) {
-        return std::numeric_limits<double>::max();
+        return java::Double::MAX_VALUE;
     }
 
     ShapeDescriptor* a = nullptr;
@@ -50,7 +50,7 @@ double GeometryMetadata::doMinskowskiDistance(
         }
     }
     if (a == nullptr) {
-        return std::numeric_limits<double>::max();
+        return java::Double::MAX_VALUE;
     }
 
     for (long int i = 0; i < other->descriptors.size(); i++) {
@@ -64,7 +64,7 @@ double GeometryMetadata::doMinskowskiDistance(
         }
     }
     if (b == nullptr) {
-        return std::numeric_limits<double>::max();
+        return java::Double::MAX_VALUE;
     }
 
     double* av = a->getFeatureVector();
@@ -73,7 +73,7 @@ double GeometryMetadata::doMinskowskiDistance(
     if (av == nullptr || bv == nullptr) {
         if (av != nullptr) delete[] av;
         if (bv != nullptr) delete[] bv;
-        return std::numeric_limits<double>::max();
+        return java::Double::MAX_VALUE;
     }
 
     int avLength = 0;
@@ -96,7 +96,7 @@ double GeometryMetadata::doMinskowskiDistance(
     if (avLength != bvLength) {
         delete[] av;
         delete[] bv;
-        return std::numeric_limits<double>::max();
+        return java::Double::MAX_VALUE;
     }
 
     double acum = 0.0;

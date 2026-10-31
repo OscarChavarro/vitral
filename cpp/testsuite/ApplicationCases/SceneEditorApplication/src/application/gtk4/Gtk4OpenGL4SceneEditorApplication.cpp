@@ -1,13 +1,14 @@
+#include "java/lang/Exception.h"
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <algorithm>
 #include <cctype>
 #include <dlfcn.h>
-#include <exception>
-#include <fstream>
-#include <string>
-#include <vector>
+#include "java/nio/file/Files.h"
 
 #include <gtk/gtk.h>
 
@@ -73,7 +74,7 @@ static GLADapiproc gtk4GetProcAddress(const char* name)
 
 /// Arguments of the editor that GApplication does not know
 /// (`-tangibleServer <url>`), taken out of its command line by `main`
-static std::vector<char*> editorArguments;
+static java::ArrayList<char*> editorArguments;
 
 static const int INITIAL_SIDE_PANEL_WIDTH = 260;
 static const int MIN_SIDE_PANEL_WIDTH = 220;
@@ -100,7 +101,7 @@ private:
     FunctionalExplicitSurfaceEditor* editor;
     GtkWidget* fields[FunctionalExplicitSurfaceEditor::PARAMETER_COUNT];
     GtkWidget* messageLabel;
-    std::vector<std::string> presets;
+    java::ArrayList<java::String> presets;
 
     Gtk4FunctionalExplicitSurfaceEditor(
         const Gtk4FunctionalExplicitSurfaceEditor& other);
@@ -242,8 +243,8 @@ public:
         java::ArrayList<java::String> presetNames =
             FunctionalExplicitSurfaceEditor::getPresets();
         for ( long i = 0; i < presetNames.size(); i++ ) {
-            std::string preset = presetNames.get(i).c_str();
-            presets.push_back(preset);
+            java::String preset = presetNames.get(i).c_str();
+            presets.add(preset);
             GtkWidget* row = gtk_list_box_row_new();
             GtkWidget* label = gtk_label_new(preset.c_str());
             gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
@@ -262,9 +263,9 @@ public:
         for ( int i = 0; i < FunctionalExplicitSurfaceEditor::PARAMETER_COUNT; i++ ) {
             FunctionalExplicitSurfaceEditor::Parameter parameter =
                 static_cast<FunctionalExplicitSurfaceEditor::Parameter>(i);
-            std::string labelText =
+            java::String labelText =
                 FunctionalExplicitSurfaceEditor::getLabel(parameter).c_str();
-            std::string value = editor->getValue(parameter).c_str();
+            java::String value = editor->getValue(parameter).c_str();
 
             if ( parameter == FunctionalExplicitSurfaceEditor::FUNCTION ) {
                 GtkWidget* label = gtk_label_new(labelText.c_str());
@@ -435,9 +436,9 @@ private:
     }
 
     void collectSelected(const DialogTreeNode* node,
-                         std::vector<const DialogTreeNode*>& selected)
+                         java::ArrayList<const DialogTreeNode*>& selected)
     {
-        if ( presenter.isSelected(node) ) selected.push_back(node);
+        if ( presenter.isSelected(node) ) selected.add(node);
         for ( size_t i = 0; i < node->getChildren().size(); i++ ) {
             collectSelected(&node->getChildren()[i], selected);
         }
@@ -452,9 +453,9 @@ private:
 
     void showPopup(GtkWidget* list, double x, double y)
     {
-        std::vector<SimpleBody*> bodies =
+        java::ArrayList<SimpleBody*> bodies =
             presenter.selectedBodies(tree()->getSelection());
-        if ( bodies.empty() ) return;
+        if ( bodies.isEmpty() ) return;
         bool anyHidden = presenter.anyHidden(bodies);
         if ( popover == nullptr ) {
             popover = gtk_popover_new();
@@ -499,7 +500,7 @@ private:
 
 public:
     Gtk4SelectorDialog(GtkWindow* owner, ApplicationModel* model,
-                       const std::function<void()>& repaint)
+                       const java::Runnable& repaint)
         : presenter(model, repaint),
           form(nullptr),
           hierarchy("Scene", nullptr),
@@ -511,14 +512,14 @@ public:
         const WidgetDialog* definition = messages != nullptr ?
             messages->getDialogById("scene.selector") : nullptr;
         if ( definition == nullptr ) {
-            throw std::logic_error("Missing scene.selector dialog");
+            throw java::IllegalStateException("Missing scene.selector dialog");
         }
         form = Gtk4DialogHost::form(owner, messages, definition,
-                                    [](const std::string&) {});
+                                    [](const java::String&) {});
         if ( tree() == nullptr ) {
             form->close();
             form = nullptr;
-            throw std::logic_error("The scene.selector dialog has no tree");
+            throw java::IllegalStateException("The scene.selector dialog has no tree");
         }
         gtk_window_set_hide_on_close(GTK_WINDOW(form->dialog()), TRUE);
         g_signal_connect(form->dialog(), "destroy",
@@ -546,7 +547,7 @@ public:
         tree()->setRoot(nullptr);
         hierarchy = presenter.hierarchy();
         tree()->setRoot(&hierarchy);
-        std::vector<const DialogTreeNode*> selected;
+        java::ArrayList<const DialogTreeNode*> selected;
         collectSelected(&hierarchy, selected);
         tree()->setSelection(selected);
         updating = false;
@@ -572,22 +573,22 @@ public:
             return;
         }
         // The geometry objects are the third group, as in the Java selector
-        tree()->selectOnly(&hierarchy.getChildren().at(2).getChildren().at(index));
+        tree()->selectOnly(&hierarchy.getChildren()[2].getChildren()[index]);
     }
 
-    void performAction(const std::string& action)
+    void performAction(const java::String& action)
     {
         if ( form == nullptr || !form->hasAction(action) ) {
-            throw std::invalid_argument("Unknown selector action: " + action);
+            throw java::IllegalArgumentException("Unknown selector action: " + action);
         }
         if ( action == "deleteSelected" ) {
             presenter.deleteSelected();
             rebuild();
         }
         else if ( action == "toggleVisibility" ) {
-            std::vector<SimpleBody*> bodies =
+            java::ArrayList<SimpleBody*> bodies =
                 presenter.selectedBodies(tree()->getSelection());
-            if ( !bodies.empty() ) {
+            if ( !bodies.isEmpty() ) {
                 presenter.setHidden(bodies, !presenter.anyHidden(bodies));
                 rebuild();
             }
@@ -612,7 +613,7 @@ private:
     Gtk4ModifyPanel* modifyPanel;
     guint modifyUpdateSource;
     GMenu* applicationMenu;
-    std::string guiLanguage;
+    java::String guiLanguage;
     Gtk4LabelImageProvider labels;
     XtOpenGL4SceneBridge sceneBridge;
     bool glLoaded;
@@ -769,22 +770,20 @@ public:
 private:
     void loadGuiDefinition()
     {
-        std::string path = GuiState::languageFile(guiLanguage.c_str()).c_str();
-        std::ifstream input(path.c_str());
-        if ( !input ) {
+        java::String path = GuiState::languageFile(guiLanguage.c_str()).c_str();
+        java::String json;
+        if ( !java::Files::readString(path, json) ) {
             throw VSDKFatalException(
                 java::String(("Could not open Java GUI definition: " + path).c_str()));
         }
-        std::string json((std::istreambuf_iterator<char>(input)),
-                         std::istreambuf_iterator<char>());
         sceneBridge.getGuiState()->setLanguageGuiFile(path.c_str());
         sceneBridge.setGuiDefinition(json);
     }
 
-    static std::string selectedGuiLanguage()
+    static java::String selectedGuiLanguage()
     {
         const char* selected = std::getenv("SCENE_EDITOR_GUI_LANGUAGE");
-        std::string requested =
+        java::String requested =
             selected != nullptr && selected[0] != '\0' ? selected : "english";
         if ( isKnownLanguageId(requested) ) return requested;
         if ( isKnownLanguageId("english") ) return "english";
@@ -793,7 +792,7 @@ private:
         return languages.size() > 0 ? languages.get(0).c_str() : "english";
     }
 
-    static bool isKnownLanguageId(const std::string& language)
+    static bool isKnownLanguageId(const java::String& language)
     {
         java::ArrayList<java::String> languages = GuiState::listLanguages();
         for ( long i = 0; i < languages.size(); i++ ) {
@@ -802,14 +801,14 @@ private:
         return false;
     }
 
-    std::string message(const char* id)
+    java::String message(const char* id)
     {
         ApplicationModel* model = sceneBridge.getApplicationModel();
         Widget* context = model != nullptr ? model->getI18nContext() : nullptr;
         return context != nullptr ? context->getMessage(id).c_str() : id;
     }
 
-    static std::string labelOf(const java::String& value, const char* fallback)
+    static java::String labelOf(const java::String& value, const char* fallback)
     {
         const char* text = value.c_str();
         return text != nullptr && text[0] != '\0' ? text : fallback;
@@ -863,7 +862,7 @@ private:
     }
 
     static GtkWidget* createIconButton(WidgetCommand* command,
-                                       const std::string& fallbackLabel)
+                                       const java::String& fallbackLabel)
     {
         GdkTexture* texture = createTexture(command->getIcon());
         if ( texture == nullptr ) return createTextButton(fallbackLabel.c_str());
@@ -1045,9 +1044,9 @@ private:
 
     void appendGMenuItem(GMenu* menu, WidgetMenuItem* item)
     {
-        std::string label = labelOf(item->getName(), "Command");
-        std::string command = item->getCommandName().c_str();
-        if ( command.empty() ) return;
+        java::String label = labelOf(item->getName(), "Command");
+        java::String command = item->getCommandName().c_str();
+        if ( command.isEmpty() ) return;
         GMenuItem* menuItem = g_menu_item_new(label.c_str(), nullptr);
         g_menu_item_set_action_and_target(menuItem, "app.command", "s",
                                           command.c_str());
@@ -1138,12 +1137,12 @@ private:
         for ( long i = 0; i < commands.size(); i++ ) {
             WidgetCommand* command = commands.get(i);
             if ( command == nullptr ) continue;
-            std::string label = labelOf(command->getName(), command->getId().c_str());
+            java::String label = labelOf(command->getName(), command->getId().c_str());
             GtkWidget* button = compact ?
                 createIconButton(command, label) : createTextButton(label.c_str());
             gtk_widget_set_hexpand(button, !compact);
             gtk_widget_set_halign(button, GTK_ALIGN_FILL);
-            std::string tooltip = command->getBriefDescription().length() > 0 ?
+            java::String tooltip = command->getBriefDescription().length() > 0 ?
                 command->getBriefDescription().c_str() : label;
             gtk_widget_set_tooltip_text(button, tooltip.c_str());
             bindCommand(button, command->getId().c_str());
@@ -1333,7 +1332,7 @@ private:
         return gtk_event_controller_get_current_event_state(controller);
     }
 
-    void setStatus(const std::string& message)
+    void setStatus(const java::String& message)
     {
         if ( status != nullptr ) gtk_label_set_text(GTK_LABEL(status), message.c_str());
     }
@@ -1350,7 +1349,7 @@ private:
         GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         gtk_popover_set_child(GTK_POPOVER(viewportMenu), box);
 
-        std::vector<XtOpenGL4SceneBridge::ViewportMenuItem> items =
+        java::ArrayList<XtOpenGL4SceneBridge::ViewportMenuItem> items =
             sceneBridge.getViewportMenuItems();
         for ( size_t i = 0; i < items.size(); i++ ) {
             if ( items[i].separator ) {
@@ -1398,7 +1397,7 @@ private:
     void executeCommand(const char* rawCommand, bool viewportCommand)
     {
         if ( rawCommand == nullptr || rawCommand[0] == '\0' ) return;
-        std::string command(rawCommand);
+        java::String command(rawCommand);
         if ( viewportCommand ) {
             sceneBridge.executeViewportCommand(command.c_str());
         }
@@ -1475,14 +1474,14 @@ private:
                         setStatus("Failed to read file");
                     }
                     else {
-                        size_t slash = std::string(path).rfind('/');
+                        size_t slash = java::String(path).rfind('/');
                         sceneBridge.getGuiState()->setReadFolder(
-                            (slash == std::string::npos ? "." :
-                             std::string(path).substr(0, slash)).c_str());
+                            (slash == -1 ? "." :
+                             java::String(path).substr(0, slash)).c_str());
                         repaintRequested();
                     }
                 }
-                catch ( const std::exception& e ) { setStatus(e.what()); }
+                catch ( const java::Exception& e ) { setStatus(e.getMessage().c_str()); }
                 g_free(path);
             }
             if ( selected != nullptr ) g_object_unref(selected);
@@ -1516,7 +1515,7 @@ private:
         if ( tangibleForm != nullptr ) tangibleForm->close();
         installTangibleDialogStyle();
         tangibleForm = Gtk4DialogHost::form(GTK_WINDOW(window), context,
-            definition, [this](const std::string& action) {
+            definition, [this](const java::String& action) {
                 tangibleAction(action);
             });
         ++tangibleFormSerial;
@@ -1533,15 +1532,21 @@ private:
         if ( installed ) return;
         installed = true;
         GtkCssProvider* provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_string(provider,
-            "button.tangible-retry { background: #ff0000; color: #ffffff; }");
+        const char* css =
+            "button.tangible-retry { background: #ff0000; color: #ffffff; }";
+#if GTK_CHECK_VERSION(4, 12, 0)
+        gtk_css_provider_load_from_string(provider, css);
+#else
+        // GTK 4.6 to 4.10 (i.e. Ubuntu 22.04)
+        gtk_css_provider_load_from_data(provider, css, -1);
+#endif
         gtk_style_context_add_provider_for_display(gdk_display_get_default(),
             GTK_STYLE_PROVIDER(provider),
             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
         g_object_unref(provider);
     }
 
-    void tangibleAction(const std::string& action)
+    void tangibleAction(const java::String& action)
     {
         Gtk4DialogHost::Form* form = tangibleForm;
         if ( form == nullptr ) return;
@@ -1550,13 +1555,11 @@ private:
             return;
         }
         if ( action != "connect" ) return;
-        std::string serviceUrl = gtk_editable_get_text(
+        java::String serviceUrl = gtk_editable_get_text(
             GTK_EDITABLE(form->field("serviceUrl")));
-        size_t start = serviceUrl.find_first_not_of(" \t");
-        serviceUrl = start == std::string::npos ? std::string() :
-            serviceUrl.substr(start, serviceUrl.find_last_not_of(" \t") - start + 1);
+        serviceUrl = serviceUrl.trim();
         form->session()->setDraft("serviceUrl", serviceUrl.c_str());
-        if ( serviceUrl.empty() ) return;
+        if ( serviceUrl.isEmpty() ) return;
         long request = form->session()->beginAction();
         if ( request < 0 ) return;
 
@@ -1628,30 +1631,27 @@ private:
         return G_SOURCE_REMOVE;
     }
 
-    static bool isLanguageCommand(const std::string& command)
+    static bool isLanguageCommand(const java::String& command)
     {
-        return command.find("IDC_CUSTOMIZE_LANGUAGE_") == 0;
+        return command.startsWith("IDC_CUSTOMIZE_LANGUAGE_");
     }
 
-    static std::string languageFromCommand(const std::string& command)
+    static java::String languageFromCommand(const java::String& command)
     {
-        std::string language = command.substr(strlen("IDC_CUSTOMIZE_LANGUAGE_"));
-        std::transform(language.begin(), language.end(), language.begin(),
-            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        return language;
+        return command.substr(strlen("IDC_CUSTOMIZE_LANGUAGE_")).toLowerCase();
     }
 
-    bool isKnownLanguage(const std::string& language)
+    bool isKnownLanguage(const java::String& language)
     {
         return isKnownLanguageId(language);
     }
 
-    bool setGuiLanguageByCommand(const std::string& command)
+    bool setGuiLanguageByCommand(const java::String& command)
     {
         return setGuiLanguage(languageFromCommand(command));
     }
 
-    bool setGuiLanguage(const std::string& language)
+    bool setGuiLanguage(const java::String& language)
     {
         if ( language == guiLanguage ) return true;
         if ( !isKnownLanguage(language) ) return false;
@@ -1880,7 +1880,7 @@ private:
     {
     }
 
-    void statusMessageRequested(const std::string& message) override
+    void statusMessageRequested(const java::String& message) override
     {
         setStatus(message);
     }
@@ -1930,8 +1930,8 @@ private:
             selectorDialog->rebuild();
             selectorDialog->setVisible(true);
         }
-        catch ( const std::exception& e ) {
-            setStatus(e.what());
+        catch ( const java::Exception& e ) {
+            setStatus(e.getMessage().c_str());
         }
     }
 
@@ -1951,8 +1951,8 @@ static void activate(GtkApplication* app, gpointer)
                                });
         editor->show();
     }
-    catch ( const std::exception& e ) {
-        std::fprintf(stderr, "SceneEditorApplication GTK4: %s\n", e.what());
+    catch ( const java::Exception& e ) {
+        std::fprintf(stderr, "SceneEditorApplication GTK4: %s\n", e.getMessage().c_str());
         g_application_quit(G_APPLICATION(app));
     }
 }
@@ -1962,20 +1962,20 @@ static void activate(GtkApplication* app, gpointer)
 int main(int argc, char** argv)
 {
     // GApplication rejects the options it does not know
-    std::vector<char*> gtkArguments;
-    editorArguments.push_back(argv[0]);
-    gtkArguments.push_back(argv[0]);
+    java::ArrayList<char*> gtkArguments;
+    editorArguments.add(argv[0]);
+    gtkArguments.add(argv[0]);
     for ( int i = 1; i < argc; i++ ) {
         if ( std::strcmp(argv[i], "-tangibleServer") == 0 && i + 1 < argc ) {
-            editorArguments.push_back(argv[i]);
-            editorArguments.push_back(argv[++i]);
+            editorArguments.add(argv[i]);
+            editorArguments.add(argv[++i]);
         }
         else {
-            gtkArguments.push_back(argv[i]);
+            gtkArguments.add(argv[i]);
         }
     }
     argc = static_cast<int>(gtkArguments.size());
-    gtkArguments.push_back(nullptr);
+    gtkArguments.add(nullptr);
     argv = gtkArguments.data();
 
     GtkApplication* app = gtk_application_new(

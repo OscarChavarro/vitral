@@ -1,6 +1,7 @@
 #ifndef __GIZMO_VERTEX_ARRAY_BUILDER__
 #define __GIZMO_VERTEX_ARRAY_BUILDER__
 
+#include "java/util/Collections.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -55,8 +56,7 @@ public:
     @param color color of every vertex
     @return an opaque colors array, with 3 floats per vertex
     */
-    static java::ArrayList<float> buildRgbColors(long numberOfVertexes,
-                                                 const ColorRgb& color);
+    static java::ArrayList<float> buildRgbColors(long numberOfVertexes, const ColorRgb& color);
 
     /**
     @param numberOfVertexes number of vertexes of the primitive

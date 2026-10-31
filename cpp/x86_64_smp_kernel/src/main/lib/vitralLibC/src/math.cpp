@@ -7,7 +7,6 @@ typedef long double Real;
 static const Real LN2 = 0.693147180559945309417232121458176568L;
 static const Real PI = 3.14159265358979323846264338327950288L;
 static const Real TWO_PI = 6.28318530717958647692528676655900577L;
-static const Real PI_2 = 1.57079632679489661923132169163975144L;
 
 static inline Real
 truncated(Real x) {

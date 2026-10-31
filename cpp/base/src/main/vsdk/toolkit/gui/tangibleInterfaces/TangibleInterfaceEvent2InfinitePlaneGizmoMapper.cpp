@@ -1,4 +1,4 @@
-#include <algorithm>
+#include "java/lang/Math.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -39,9 +39,9 @@ void TangibleInterfaceEvent2InfinitePlaneGizmoMapper::map(const TangibleInterfac
     double netZRef = 0.5;
     double depthScale = midDepth / netZRef;
 
-    double safeNetZ = std::max(netPosition.z(), 0.05);
-    double gizmoZ = std::min(depthScale * MAX_GIZMO_DEPTH_FACTOR,
-        std::max(nearPlane * 1.5, depthScale * netZRef * netZRef / safeNetZ)) - 14;
+    double safeNetZ = java::Math::max(netPosition.z(), 0.05);
+    double gizmoZ = java::Math::min(depthScale * MAX_GIZMO_DEPTH_FACTOR,
+        java::Math::max(nearPlane * 1.5, depthScale * netZRef * netZRef / safeNetZ)) - 14;
 
     Vector3Dd worldPosition =
         camPos

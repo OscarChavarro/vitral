@@ -1,8 +1,8 @@
+#include "java/lang/String.h"
 #include "application/framebuffer/FramebufferSceneEditor.h"
 
 #include <cstdio>
-#include <fstream>
-#include <string>
+#include "java/nio/file/Files.h"
 #include <unistd.h>
 
 #include "application/commands/GuiEventExecutor.h"
@@ -126,13 +126,13 @@ public:
         }
     }
 
-    std::vector<const DialogTreeNode*> selection() const
+    java::ArrayList<const DialogTreeNode*> selection() const
     {
-        std::vector<const DialogTreeNode*> nodes;
+        java::ArrayList<const DialogTreeNode*> nodes;
         FramebufferList* list = form.tree(SELECTOR_TREE);
         for ( int row = 0; row < list->count(); row++ ) {
             if ( list->isSelected(row) ) {
-                nodes.push_back(form.node(SELECTOR_TREE, row));
+                nodes.add(form.node(SELECTOR_TREE, row));
             }
         }
         return nodes;
@@ -160,7 +160,7 @@ public:
             presenter.deleteSelected();
         }
         else if ( action.equals("toggleVisibility") ) {
-            std::vector<SimpleBody*> bodies = presenter.selectedBodies(selection());
+            java::ArrayList<SimpleBody*> bodies = presenter.selectedBodies(selection());
             presenter.setHidden(bodies, !presenter.anyHidden(bodies));
         }
         else {
@@ -242,13 +242,11 @@ void FramebufferSceneEditor::createModel()
 bool FramebufferSceneEditor::loadGuiDefinition(const java::String& language)
 {
     java::String path = GuiState::languageFile(language);
-    std::ifstream file(path.c_str());
-    if ( !file ) {
+    java::String json;
+    if ( !java::Files::readString(path, json) ) {
         throw VSDKFatalException(
             java::String("Could not open GUI definition: ") + path);
     }
-    std::string json((std::istreambuf_iterator<char>(file)),
-                     std::istreambuf_iterator<char>());
     deleteViewportMenu();
     menuBar.setMenu(nullptr);
     // The model deletes the previous context, with its menus and commands.

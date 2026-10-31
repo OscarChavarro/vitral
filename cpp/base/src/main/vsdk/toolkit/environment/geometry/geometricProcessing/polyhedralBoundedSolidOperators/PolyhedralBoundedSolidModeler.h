@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_MODELER__
 #define __POLYHEDRAL_BOUNDED_SOLID_MODELER__
 
+#include "java/lang/IllegalStateException.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/processing/ProcessingElement.h"
 
@@ -133,7 +134,7 @@ public:
     @param maximizeResultFaces true to maximize the result faces
     @param doStrictValidation true to validate the result strictly
     @return the result, owned by the caller
-    @throws std::logic_error (Java IllegalStateException) when a completed
+    @throws java::IllegalStateException (Java IllegalStateException) when a completed
     boolean result fails the strict B-Rep postcondition
     */
     static PolyhedralBoundedSolid* setOp(

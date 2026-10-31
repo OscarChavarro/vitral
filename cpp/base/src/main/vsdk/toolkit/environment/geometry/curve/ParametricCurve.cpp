@@ -1,7 +1,7 @@
+#include "java/lang/Double.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 static Matrix4x4d buildLinearMatrix()
 {
@@ -337,8 +337,8 @@ java::ArrayList<Vector3Dd> ParametricCurve::calculatePoints(int endingPointForSe
 double* ParametricCurve::getMinMax()
 {
     double* minmax = new double[6];
-    minmax[0] = minmax[1] = minmax[2] = std::numeric_limits<double>::max();
-    minmax[3] = minmax[4] = minmax[5] = std::numeric_limits<double>::lowest();
+    minmax[0] = minmax[1] = minmax[2] = java::Double::MAX_VALUE;
+    minmax[3] = minmax[4] = minmax[5] = (-java::Double::MAX_VALUE);
 
     for ( int i = 1; i < (int)types.size(); ++i ) {
         java::ArrayList<Vector3Dd> polyline = calculatePoints(i, false);

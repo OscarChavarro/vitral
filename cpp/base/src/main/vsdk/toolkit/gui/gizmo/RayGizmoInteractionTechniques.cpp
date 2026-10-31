@@ -1,5 +1,5 @@
+#include "java/lang/Math.h"
 #include <cmath>
-#include <algorithm>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
@@ -204,7 +204,7 @@ void RayGizmoInteractionTechniques::updateAnglesFromDirection(
         direction.normalized() : Vector3Dd(0, 0, 1);
 
     yawInDegrees = std::atan2(d.y(), d.x()) * 180.0 / M_PI;
-    pitchInDegrees = std::asin(std::max(-1.0, std::min(1.0, d.z()))) *
+    pitchInDegrees = std::asin(java::Math::max(-1.0, java::Math::min(1.0, d.z()))) *
         180.0 / M_PI;
     clampPitch();
 }

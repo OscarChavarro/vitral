@@ -1,7 +1,7 @@
+#include "java/lang/Double.h"
+#include "java/lang/RuntimeException.h"
+#include "java/lang/String.h"
 #include <cmath>
-#include <limits>
-#include <stdexcept>
-#include <vector>
 #include <gtest/gtest.h>
 #include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
@@ -38,7 +38,7 @@ const int THIRD_MOON_MOTIF_INDEX = 22;
 const int STAR_VERTEX_COUNT = 10;
 
 /** Runs `setOp` and releases the operands. */
-PolyhedralBoundedSolid* setOpAndRelease(std::vector<PolyhedralBoundedSolid*>& operands,
+PolyhedralBoundedSolid* setOpAndRelease(java::ArrayList<PolyhedralBoundedSolid*>& operands,
     int op, bool maximizeResultFaces)
 {
     PolyhedralBoundedSolid* result = Modeler::setOp(operands[0], operands[1],
@@ -96,8 +96,8 @@ bool isTopFace(_PolyhedralBoundedSolidFace* face, double topZ)
 
 double findExtremeRadius(_PolyhedralBoundedSolidFace* face, bool minimum)
 {
-    double radius = minimum ? std::numeric_limits<double>::infinity() :
-        -std::numeric_limits<double>::infinity();
+    double radius = minimum ? java::Double::POSITIVE_INFINITY :
+        -java::Double::POSITIVE_INFINITY;
 
     for ( long i = 0; i < face->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
@@ -131,7 +131,7 @@ int countHalfEdges(_PolyhedralBoundedSolidFace* face)
 double findReferenceTopInnerMouthRadius(PolyhedralBoundedSolid* referenceBowl,
     double topZ)
 {
-    double innerRadius = std::numeric_limits<double>::infinity();
+    double innerRadius = java::Double::POSITIVE_INFINITY;
 
     for ( long i = 0; i < referenceBowl->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = referenceBowl->getPolygonsList().get(i);
@@ -140,7 +140,7 @@ double findReferenceTopInnerMouthRadius(PolyhedralBoundedSolid* referenceBowl,
         }
     }
     if ( std::isinf(innerRadius) ) {
-        throw std::runtime_error(
+        throw java::RuntimeException(
             "Expected reference bowl to expose an open top annulus");
     }
     return innerRadius;
@@ -190,9 +190,9 @@ void expectNonEmptyAndIntermediateValid(PolyhedralBoundedSolid* result)
 
 //= First star helpers ==============================================
 
-std::vector<Vector3Dd> createStarPoints()
+java::ArrayList<Vector3Dd> createStarPoints()
 {
-    std::vector<Vector3Dd> points;
+    java::ArrayList<Vector3Dd> points;
     double outerRadius = 2.0;
     double innerRadius = 0.77;
     double start = java::Math::toRadians(-90.0);
@@ -200,7 +200,7 @@ std::vector<Vector3Dd> createStarPoints()
     for ( int i = 0; i < STAR_VERTEX_COUNT; i++ ) {
         double angle = start + i * M_PI / 5.0;
         double radius = (i % 2 == 0) ? outerRadius : innerRadius;
-        points.push_back(Vector3Dd(radius * std::cos(angle),
+        points.add(Vector3Dd(radius * std::cos(angle),
             radius * std::sin(angle), 0.0));
     }
     return points;
@@ -209,7 +209,7 @@ std::vector<Vector3Dd> createStarPoints()
 PolyhedralBoundedSolid* createClosedDoubleWalkStarLamina()
 {
     PolyhedralBoundedSolid* solid = new PolyhedralBoundedSolid();
-    std::vector<Vector3Dd> starPoints = createStarPoints();
+    java::ArrayList<Vector3Dd> starPoints = createStarPoints();
     int vertexId = 1;
     int i;
 
@@ -308,7 +308,7 @@ int countZeroAreaClosedStarDoubleWalkLoops(PolyhedralBoundedSolid* solid,
 //= CsgKurlanderBowlAllMotifsRegressionTest ===========================
 
 TEST(CsgKurlanderBowlAllMotifsRegressionTest, BowlMinusFirstMoonStaysNonEmptyAndKeepsMouthOpen) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(FIRST_MOON_MOTIF_INDEX);
     double topZ = maxZ(operands[0]);
     double innerMouthRadius = findReferenceTopInnerMouthRadius(operands[0], topZ);
@@ -323,7 +323,7 @@ TEST(CsgKurlanderBowlAllMotifsRegressionTest, BowlMinusFirstMoonStaysNonEmptyAnd
 }
 
 TEST(CsgKurlanderBowlAllMotifsRegressionTest, BowlMinusThirdMoonModifiesTheBowl) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(THIRD_MOON_MOTIF_INDEX);
     long originalFaces = operands[0]->getPolygonsList().size();
     long originalEdges = operands[0]->getEdgesList().size();
@@ -347,7 +347,7 @@ TEST(CsgKurlanderBowlAllMotifsRegressionTest, BowlMinusThirdMoonModifiesTheBowl)
 }
 
 TEST(CsgKurlanderBowlAllMotifsRegressionTest, ShellMinusFirstMoonStaysValid) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createShellAndFirstMoonOperands();
     PolyhedralBoundedSolid* result = setOpAndRelease(operands,
         Modeler::SUBTRACT, false);
@@ -371,7 +371,7 @@ TEST(CsgKurlanderBowlAllMotifsRegressionTest, FirstStarPlacementKeepsTopTipUprig
 }
 
 TEST(CsgKurlanderBowlAllMotifsRegressionTest, FirstMoonOperandIsRolledAndInsetIntoBowl) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(FIRST_MOON_MOTIF_INDEX);
     PolyhedralBoundedSolid* moon = operands[1];
     double* minMax = moon->getMinMax();
@@ -407,14 +407,14 @@ TEST(CsgKurlanderBowlFirstStarRegressionTest, SingleMotifSelectorPutsStarsBefore
     EXPECT_EQ(0, CsgKurlanderBowlFixture::normalizeSingleMotifIndex(0));
     EXPECT_EQ(0, CsgKurlanderBowlFixture::normalizeSingleMotifIndex(motifCount));
     EXPECT_EQ(motifCount - 1, CsgKurlanderBowlFixture::normalizeSingleMotifIndex(-1));
-    EXPECT_EQ(0, std::string(CsgKurlanderBowlFixture::describeSingleMotif(0).c_str())
-        .find("STAR 1/20"));
-    EXPECT_EQ(0, std::string(CsgKurlanderBowlFixture::describeSingleMotif(starCount).c_str())
-        .find("MOON 1/20"));
+    EXPECT_EQ(0, java::String(CsgKurlanderBowlFixture::describeSingleMotif(0).c_str())
+        .indexOf("STAR 1/20"));
+    EXPECT_EQ(0, java::String(CsgKurlanderBowlFixture::describeSingleMotif(starCount).c_str())
+        .indexOf("MOON 1/20"));
 }
 
 TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFirstStarStaysNonEmptyAndIntermediateValid) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(0);
     PolyhedralBoundedSolid* result = setOpAndRelease(operands,
         Modeler::SUBTRACT, true);
@@ -424,7 +424,7 @@ TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFirstStarStaysNonEmptyAnd
 }
 
 TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFirstStarConnectClosesAllStarEdges) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createBowlAndFirstStarOperands();
     PolyhedralBoundedSolid* result = setOpAndRelease(operands,
         Modeler::SUBTRACT, true);
@@ -436,7 +436,7 @@ TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFirstStarConnectClosesAll
 }
 
 TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFirstStarHasNoZeroAreaDoubleWalkLoop) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createBowlAndFirstStarOperands();
     PolyhedralBoundedSolid* result = setOpAndRelease(operands,
         Modeler::SUBTRACT, true);
@@ -447,7 +447,7 @@ TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFirstStarHasNoZeroAreaDou
 }
 
 TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFifthStarIsValidAndPairIndexMatchingSucceeds) {
-    std::vector<PolyhedralBoundedSolid*> operands =
+    java::ArrayList<PolyhedralBoundedSolid*> operands =
         CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(4);
     PolyhedralBoundedSolid* result = setOpAndRelease(operands,
         Modeler::SUBTRACT, true);

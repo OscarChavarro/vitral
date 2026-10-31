@@ -1,6 +1,10 @@
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/IndexOutOfBoundsException.h"
+#include "java/lang/Runnable.h"
+#include "java/lang/RuntimeException.h"
+#include "java/lang/String.h"
 #include <cmath>
-#include <stdexcept>
-#include <string>
 
 #include "java/io/File.h"
 #include "java/lang/StringBuilder.h"
@@ -43,10 +47,10 @@ public:
 /**
 @return the message of the Java `IndexOutOfBoundsException` of lists
 */
-std::string indexOutOfBounds(int index, int length)
+java::String indexOutOfBounds(int index, int length)
 {
-    return "Index " + std::to_string(index) + " out of bounds for length " +
-        std::to_string(length);
+    return "Index " + java::String::valueOf(index) + " out of bounds for length " +
+        java::String::valueOf(length);
 }
 
 }
@@ -69,7 +73,7 @@ XtOpenGL4MCPApplicationTools::getDrawingAreaController()
         parent->getOpenGL4Controller();
 
     if ( !controller->isDrawingAreaCreated() ) {
-        throw std::logic_error("The drawing area has not been created");
+        throw java::IllegalStateException("The drawing area has not been created");
     }
     return controller;
 }
@@ -102,7 +106,7 @@ void XtOpenGL4MCPApplicationTools::injectKey(const java::String& request)
 java::String XtOpenGL4MCPApplicationTools::showImportDialog()
 {
     if ( parent->getApplicationModel() == nullptr ) {
-        throw std::logic_error("The windowed editor GUI has not been created");
+        throw java::IllegalStateException("The windowed editor GUI has not been created");
     }
     return parent->showImportSceneDialog() ? "{\"ok\":true}" : "{\"ok\":false}";
 }
@@ -117,10 +121,10 @@ java::String XtOpenGL4MCPApplicationTools::projectSelectedBody(
     int selected = scene->selectedThings->firstSelected();
 
     if ( selected < 0 ) {
-        throw std::logic_error("No body is selected");
+        throw java::IllegalStateException("No body is selected");
     }
     if ( viewportIndex < 0 || viewportIndex >= set->getViewportCount() ) {
-        throw std::out_of_range(indexOutOfBounds(viewportIndex,
+        throw java::IndexOutOfBoundsException(indexOutOfBounds(viewportIndex,
                                                  set->getViewportCount()));
     }
     Viewport* viewport = set->getViewport(viewportIndex);
@@ -167,7 +171,7 @@ java::String XtOpenGL4MCPApplicationTools::raytracePng(
     java::File out(path);
     if ( !ImagePersistence::exportPNG(out,
              parent->getApplicationModel()->getRaytracedImage()) ) {
-        throw std::runtime_error((java::String("Can not write ") +
+        throw java::RuntimeException((java::String("Can not write ") +
             out.getAbsolutePath()).c_str());
     }
     return MCPJson::writtenFile(out.getAbsolutePath());
@@ -206,7 +210,7 @@ java::String XtOpenGL4MCPApplicationTools::selectBodyInDialog(
     const java::String& request)
 {
     if ( !parent->isSelectorDialogVisible() ) {
-        throw std::logic_error("Selector is not open");
+        throw java::IllegalStateException("Selector is not open");
     }
     parent->selectorSelectBody(
         (int)MCPJson::numberProperty(request, "index", -1));
@@ -219,7 +223,7 @@ java::String XtOpenGL4MCPApplicationTools::selectorAction(
     const java::String& request)
 {
     if ( !parent->isSelectorDialogVisible() ) {
-        throw std::logic_error("Selector is not open");
+        throw java::IllegalStateException("Selector is not open");
     }
     parent->selectorAction(MCPJson::stringProperty(request, "action", ""));
     return "{\"ok\":true}";
@@ -257,7 +261,7 @@ java::String XtOpenGL4MCPApplicationTools::tangibleAction(
     const java::String& request)
 {
     if ( !parent->isTangibleInterfaceDialogVisible() ) {
-        throw std::logic_error("Tangible dialog is not open");
+        throw java::IllegalStateException("Tangible dialog is not open");
     }
     java::String action = MCPJson::stringProperty(request, "action", "cancel");
     java::String serviceUrl;
@@ -268,7 +272,7 @@ java::String XtOpenGL4MCPApplicationTools::tangibleAction(
     }
     if ( !parent->tangibleInterfaceDialogAction(action,
              withServiceUrl ? &serviceUrl : nullptr) ) {
-        throw std::invalid_argument(
+        throw java::IllegalArgumentException(
             (java::String("Unknown dialog action: ") + action).c_str());
     }
     return dialogState();
@@ -315,7 +319,7 @@ java::String XtOpenGL4MCPApplicationTools::setLanguage(
             available.append(languages.get(i));
         }
         available.append(']');
-        throw std::invalid_argument((java::String("Unknown language \"") +
+        throw java::IllegalArgumentException((java::String("Unknown language \"") +
             language + "\". Available languages: " +
             available.toString()).c_str());
     }

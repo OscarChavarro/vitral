@@ -1,5 +1,6 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <cctype>
-#include <string>
 
 #include "vsdk/toolkit/gui/editor/XtGenericEditor.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
@@ -27,7 +28,7 @@ void XtGenericEditor::beginBuild(const java::String& title)
     fields.clear();
     nextY = MARGIN;
 
-    std::string upper(title.c_str());
+    java::String upper(title.c_str());
     for (size_t i = 0; i < upper.size(); ++i)
         upper[i] = static_cast<char>(std::toupper(static_cast<unsigned char>(upper[i])));
     widgets->createLabel(container, upper + " EDITOR", fontSet,
@@ -40,9 +41,9 @@ void XtGenericEditor::beginBuild(const java::String& title)
 void XtGenericEditor::addControl(const ControlSpecification* specification,
                                  const java::String& value)
 {
-    std::string label(specification->getLabel().c_str());
+    java::String label(specification->getLabel().c_str());
     if (!specification->getIntervalText().isEmpty())
-        label += std::string(" ") + specification->getIntervalText().c_str();
+        label += java::String(" ") + specification->getIntervalText().c_str();
 
     const int fieldX = width - MARGIN - FIELD_WIDTH;
     widgets->createLabel(container, label + ": ", fontSet,
@@ -52,7 +53,7 @@ void XtGenericEditor::addControl(const ControlSpecification* specification,
         container, value.c_str(), fontSet, fieldX, nextY, FIELD_WIDTH,
         ROW_HEIGHT,
         &XtGenericEditor::fieldActivated, this);
-    fields.push_back(std::make_pair(field, specification));
+    fields.add(Field(field, specification));
     nextY += ROW_HEIGHT + ROW_SPACING;
 }
 
@@ -64,7 +65,7 @@ void XtGenericEditor::endBuild()
     widgets->setForeground(messageLabel, MESSAGE_COLOR);
     nextY += ROW_HEIGHT + ROW_SPACING;
     // The message given while building was shown before the label existed
-    showValidationMessage(pendingMessage.empty() ? nullptr :
+    showValidationMessage(pendingMessage.isEmpty() ? nullptr :
                           pendingMessage.c_str());
 }
 
@@ -79,8 +80,8 @@ void XtGenericEditor::setControlValue(
     const ControlSpecification* specification, const java::String& value)
 {
     for (size_t i = 0; i < fields.size(); ++i) {
-        if (fields[i].second == specification)
-            widgets->setText(fields[i].first, value.c_str());
+        if (fields[i].specification == specification)
+            widgets->setText(fields[i].widget, value.c_str());
     }
 }
 
@@ -98,10 +99,10 @@ void XtGenericEditor::fieldActivated(Widget field, void* clientData)
 {
     XtGenericEditor* self = static_cast<XtGenericEditor*>(clientData);
     for (size_t i = 0; i < self->fields.size(); ++i) {
-        if (self->fields[i].first != field) continue;
+        if (self->fields[i].widget != field) continue;
         // On success the entity emits UPDATED and `setControlValue`
         // refreshes the field
-        if (!self->updateValue(self->fields[i].second,
+        if (!self->updateValue(self->fields[i].specification,
                                self->widgets->getText(field).c_str()))
             self->widgets->setInvalid(field, true);
         return;

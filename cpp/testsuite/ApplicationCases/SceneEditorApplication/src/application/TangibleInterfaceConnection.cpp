@@ -1,3 +1,6 @@
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
+#include "java/util/function/Consumer.h"
 #include <cstring>
 
 #include "application/TangibleInterfaceConnection.h"
@@ -10,20 +13,14 @@ namespace {
 const char* DEFAULT_TANGIBLE_SERVICE_URL = "ws://127.0.0.1:8090/v1/values";
 const char* RAY_CUBE_TANGIBLE_ELEMENT_ID = "rayCube1";
 
-std::string trim(const std::string& text)
+java::String trim(const java::String& text)
 {
-    const char* blanks = " \t\r\n";
-    size_t start = text.find_first_not_of(blanks);
-    if ( start == std::string::npos ) {
-        return "";
-    }
-    size_t end = text.find_last_not_of(blanks);
-    return text.substr(start, end - start + 1);
+    return text.trim();
 }
 }
 
 TangibleInterfaceConnection::TangibleInterfaceConnection(
-    const std::function<void()>& eventArrived)
+    const java::Runnable& eventArrived)
     : serviceUrl(DEFAULT_TANGIBLE_SERVICE_URL),
       client(nullptr),
       eventArrived(eventArrived),
@@ -48,22 +45,22 @@ void TangibleInterfaceConnection::processArguments(int argc, char** argv)
     }
 }
 
-const std::string& TangibleInterfaceConnection::getServiceUrl() const
+const java::String& TangibleInterfaceConnection::getServiceUrl() const
 {
     return serviceUrl;
 }
 
-void TangibleInterfaceConnection::setServiceUrl(const std::string& serviceUrl)
+void TangibleInterfaceConnection::setServiceUrl(const java::String& serviceUrl)
 {
-    std::string url = trim(serviceUrl);
-    if ( !url.empty() ) {
+    java::String url = trim(serviceUrl);
+    if ( !url.isEmpty() ) {
         this->serviceUrl = url;
     }
 }
 
 void TangibleInterfaceConnection::connect(
-    const std::string& serviceUrl,
-    const std::function<void(bool)>& connectionListener)
+    const java::String& serviceUrl,
+    const java::Consumer<bool>& connectionListener)
 {
     setServiceUrl(serviceUrl);
     // Stops the previous client (and its thread) before the new one
@@ -85,7 +82,7 @@ void TangibleInterfaceConnection::tangibleInterfaceEventReceived(
     hasPendingEvent = true;
     pthread_mutex_unlock(&pendingMutex);
     if ( notify && eventArrived ) {
-        eventArrived();
+        eventArrived.run();
     }
 }
 

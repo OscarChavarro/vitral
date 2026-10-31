@@ -1,9 +1,9 @@
-#include <chrono>
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include <cstdlib>
 #include <cstring>
-#include <map>
-#include <mutex>
-#include <string>
+#include <ctime>
+#include "java/util/concurrent/locks/ReentrantLock.h"
 
 #include "java/lang/System.h"
 namespace java {
@@ -20,28 +20,30 @@ System::exit(int status) {
 
 long long
 System::nanoTime() {
-    const auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return static_cast<long long>(now.tv_sec) * 1000000000LL + now.tv_nsec;
 }
 
 long long
 System::currentTimeMillis() {
-    const auto now = std::chrono::system_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME, &now);
+    return static_cast<long long>(now.tv_sec) * 1000LL + now.tv_nsec / 1000000;
 }
 
 namespace {
 
-std::map<std::string, std::string>& properties()
+java::TreeMap<java::String, java::String>& properties()
 {
-    static std::map<std::string, std::string> table;
+    static java::TreeMap<java::String, java::String> table;
     return table;
 }
 
-std::mutex& propertiesMutex()
+java::ReentrantLock& propertiesLock()
 {
-    static std::mutex mutex;
-    return mutex;
+    static java::ReentrantLock lock;
+    return lock;
 }
 
 }
@@ -53,19 +55,18 @@ System::getProperty(const java::String& key) {
 
 java::String
 System::getProperty(const java::String& key, const java::String& defaultValue) {
-    std::lock_guard<std::mutex> lock(propertiesMutex());
-    std::map<std::string, std::string>::const_iterator found =
-        properties().find(key.c_str());
-    if ( found == properties().end() ) {
+    java::ReentrantLockGuard guard(propertiesLock());
+    const java::String *found = properties().get(key);
+    if ( found == nullptr ) {
         return defaultValue;
     }
-    return java::String(found->second.c_str());
+    return *found;
 }
 
 void
 System::setProperty(const java::String& key, const java::String& value) {
-    std::lock_guard<std::mutex> lock(propertiesMutex());
-    properties()[key.c_str()] = value.c_str();
+    java::ReentrantLockGuard guard(propertiesLock());
+    properties().put(key, value);
 }
 
 void
@@ -74,9 +75,9 @@ System::setPropertiesFromArguments(int argc, char* argv[]) {
         if ( argv[i] == nullptr || std::strncmp(argv[i], "-D", 2) != 0 ) {
             continue;
         }
-        std::string definition(argv[i] + 2);
-        std::string::size_type equals = definition.find('=');
-        if ( equals == std::string::npos ) {
+        java::String definition(argv[i] + 2);
+        int equals = definition.find('=');
+        if ( equals == -1 ) {
             setProperty(definition.c_str(), "true");
         }
         else {

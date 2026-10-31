@@ -1,6 +1,7 @@
 #ifndef __MCP_VIEWPORT_TOOLS__
 #define __MCP_VIEWPORT_TOOLS__
 
+#include "java/lang/IllegalArgumentException.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -13,7 +14,7 @@ viewports of the application model are shown and used: the rendering
 configuration of each viewport and the interaction mode of the drawing area.
 It does not depend on any GUI or rendering technology.
 
-C++ port note: failures are C++ exceptions (i.e. `std::invalid_argument`
+C++ port note: failures are C++ exceptions (i.e. `java::IllegalArgumentException`
 where Java throws `IllegalArgumentException`), with the same messages as the
 Java ones.
 */

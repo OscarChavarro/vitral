@@ -1,3 +1,5 @@
+#include "java/lang/String.h"
+#include "java/util/function/Consumer.h"
 #include "render/framebuffer/FramebufferDrawingAreaRenderer.h"
 
 #include <cmath>
@@ -110,7 +112,7 @@ bool projectLine(const Matrix4x4d& projection, const Vector3Dd& a,
 
 FramebufferDrawingAreaRenderer::FramebufferDrawingAreaRenderer(
     ApplicationModel* m, DrawingAreaHost* h,
-    const std::function<void(Viewport*)>& selected)
+    const java::Consumer<Viewport*>& selected)
     : model(m), host(h), frameCapture(new FrameCaptureService(m, h)),
       selectedListener(selected)
 {
@@ -356,7 +358,7 @@ void FramebufferDrawingAreaRenderer::display(Framebuffer& surface, int left,
         int w = full ? width : v->getPixelSizeX();
         int h = full ? height : v->getPixelSizeY();
         if ( set->isSelected(v) && selectedListener ) {
-            selectedListener(v);
+            selectedListener.accept(v);
         }
         surface.setClip(left + x, top + y, w, h);
         drawView(surface, v, left + x, top + y, w, h);

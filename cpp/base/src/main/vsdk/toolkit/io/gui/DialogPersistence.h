@@ -1,6 +1,7 @@
 #ifndef __DIALOG_PERSISTENCE__
 #define __DIALOG_PERSISTENCE__
 
+#include "java/lang/IllegalArgumentException.h"
 #include "java/lang/String.h"
 
 class Widget;
@@ -13,7 +14,7 @@ with its title key, its modality and its `WidgetDialogElement`s.
 
 The definitions are validated as in Java: schema version 1, unique dialog
 and element identifiers, known element kinds, and the bindings and actions
-each kind needs. Failures are `std::invalid_argument` exceptions with the
+each kind needs. Failures are `java::IllegalArgumentException` exceptions with the
 messages of the Java `IllegalArgumentException`s.
 
 C++ port note: it takes the JSON text instead of an `InputStream`, and

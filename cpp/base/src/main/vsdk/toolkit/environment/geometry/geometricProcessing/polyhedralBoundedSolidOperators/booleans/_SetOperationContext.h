@@ -1,7 +1,7 @@
 #ifndef ___SET_OPERATION_CONTEXT__
 #define ___SET_OPERATION_CONTEXT__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexFace.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexVertex.h"
@@ -25,25 +25,25 @@ C++ counterpart of Java's `_SetOperationContext`.
 class _SetOperationContext {
 public:
     /** Following variable `sonvv` from program [MANT1988].15.1. */
-    std::vector<_PolyhedralBoundedSolidSetOperatorVertexVertex> sonvv;
+    java::ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> sonvv;
 
     /** Following variable `sonva` from program [MANT1988].15.1. */
-    std::vector<_PolyhedralBoundedSolidSetOperatorVertexFace> sonva;
+    java::ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonva;
 
     /** Following variable `sonvb` from program [MANT1988].15.1. */
-    std::vector<_PolyhedralBoundedSolidSetOperatorVertexFace> sonvb;
+    java::ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonvb;
 
     /** Following variable `sonea` from program [MANT1988].15.1. */
-    std::vector<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
+    java::ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
 
     /** Following variable `soneb` from program [MANT1988].15.1. */
-    std::vector<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
+    java::ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
 
     /** Following variable `sonfa` from program [MANT1988].15.1. */
-    std::vector<_PolyhedralBoundedSolidFace*> sonfa;
+    java::ArrayList<_PolyhedralBoundedSolidFace*> sonfa;
 
     /** Following variable `sonfb` from program [MANT1988].15.1. */
-    std::vector<_PolyhedralBoundedSolidFace*> sonfb;
+    java::ArrayList<_PolyhedralBoundedSolidFace*> sonfb;
 };
 
 #endif

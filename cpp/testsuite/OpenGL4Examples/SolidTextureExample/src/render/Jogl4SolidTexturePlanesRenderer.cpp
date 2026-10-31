@@ -1,4 +1,3 @@
-#include <vector>
 
 #include <glad/gl.h>
 
@@ -59,7 +58,7 @@ void Jogl4SolidTexturePlanesRenderer::draw(
 {
     if ( images.size() == 0 || camera == 0 ) return;
     ensureBuffers();
-    std::vector<float> positions, normals, uvs;
+    java::ArrayList<float> positions, normals, uvs;
     buildPlaneFrame((int)images.size(), positions, normals, uvs);
     uploadFrame(positions, normals, uvs);
 
@@ -128,8 +127,8 @@ void Jogl4SolidTexturePlanesRenderer::ensureBuffers()
 }
 
 void Jogl4SolidTexturePlanesRenderer::buildPlaneFrame(
-    int planeCount, std::vector<float>& positions, std::vector<float>& normals,
-    std::vector<float>& uvs)
+    int planeCount, java::ArrayList<float>& positions, java::ArrayList<float>& normals,
+    java::ArrayList<float>& uvs)
 {
     positions.reserve(planeCount * 12);
     normals.reserve(planeCount * 12);
@@ -139,17 +138,17 @@ void Jogl4SolidTexturePlanesRenderer::buildPlaneFrame(
             -1.0f + (2.0f * i) / (float)(planeCount - 1);
         float p[12] = {-1,-1,z, 1,-1,z, 1,1,z, -1,1,z};
         float t[8] = {0,0, 1,0, 1,1, 0,1};
-        positions.insert(positions.end(), p, p + 12);
-        uvs.insert(uvs.end(), t, t + 8);
+        for ( int k = 0; k < 12; k++ ) positions.add(p[k]);
+        for ( int k = 0; k < 8; k++ ) uvs.add(t[k]);
         for ( int j = 0; j < 4; j++ ) {
-            normals.push_back(0); normals.push_back(0); normals.push_back(1);
+            normals.add(0); normals.add(0); normals.add(1);
         }
     }
 }
 
 void Jogl4SolidTexturePlanesRenderer::uploadFrame(
-    const std::vector<float>& positions, const std::vector<float>& normals,
-    const std::vector<float>& uvs)
+    const java::ArrayList<float>& positions, const java::ArrayList<float>& normals,
+    const java::ArrayList<float>& uvs)
 {
     glBindVertexArray(vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, positionVboId);

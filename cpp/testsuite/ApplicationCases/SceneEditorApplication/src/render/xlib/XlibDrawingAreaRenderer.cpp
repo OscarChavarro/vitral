@@ -1,7 +1,9 @@
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/function/Consumer.h"
 #include "render/xlib/XlibDrawingAreaRenderer.h"
 
 #include <X11/Xutil.h>
-#include <algorithm>
 #include <cmath>
 #include <cstdio>
 
@@ -36,9 +38,9 @@ namespace {
 unsigned long pixel(Visual* visual, const ColorRgb& color)
 {
     return XlibRGBImageUncompressedRenderer::rgbToPixel(visual,
-        static_cast<int>(std::max(0.0, std::min(1.0, color.r())) * 255),
-        static_cast<int>(std::max(0.0, std::min(1.0, color.g())) * 255),
-        static_cast<int>(std::max(0.0, std::min(1.0, color.b())) * 255));
+        static_cast<int>(java::Math::max(0.0, java::Math::min(1.0, color.r())) * 255),
+        static_cast<int>(java::Math::max(0.0, java::Math::min(1.0, color.g())) * 255),
+        static_cast<int>(java::Math::max(0.0, java::Math::min(1.0, color.b())) * 255));
 }
 
 int channel(unsigned long value, unsigned long mask)
@@ -163,7 +165,7 @@ void drawGrid(Display* display, Drawable frame, GC gc, Visual* visual,
 
 XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
     ApplicationModel* m, DrawingAreaHost* h,
-    const std::function<void(Viewport*)>& selected)
+    const java::Consumer<Viewport*>& selected)
     : model(m), host(h), frameCapture(new FrameCaptureService(m,h)),
       selectedListener(selected), fontDisplay(nullptr), titleFont(nullptr),
       titleFontSize(0) {}
@@ -341,7 +343,7 @@ void XlibDrawingAreaRenderer::display(Display* display, Window window,
         int y = full ? 0 : height-v->getPixelStartY()-v->getPixelSizeY();
         int w = full ? width : v->getPixelSizeX();
         int h = full ? height : v->getPixelSizeY();
-        if (set->isSelected(v) && selectedListener) selectedListener(v);
+        if (set->isSelected(v) && selectedListener) selectedListener.accept(v);
         XRectangle clip = {static_cast<short>(x), static_cast<short>(y),
                            static_cast<unsigned short>(w),
                            static_cast<unsigned short>(h)};

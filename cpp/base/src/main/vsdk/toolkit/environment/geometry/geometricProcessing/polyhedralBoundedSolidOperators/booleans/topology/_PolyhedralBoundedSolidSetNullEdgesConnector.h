@@ -5,8 +5,8 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_NULL_EDGES_CONNECTOR__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_NULL_EDGES_CONNECTOR__
 
-#include <map>
-#include <vector>
+#include "java/util/ArrayList.h"
+#include "java/util/TreeMap.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -28,9 +28,9 @@ version does.
 class _PolyhedralBoundedSolidSetNullEdgesConnector
     : public _PolyhedralBoundedSolidOperator {
 public:
-    typedef std::vector<_PolyhedralBoundedSolidSetOperatorNullEdge> NullEdgeList;
-    typedef std::vector<_PolyhedralBoundedSolidFace*> FaceList;
-    typedef std::vector<_PolyhedralBoundedSolidHalfEdge*> HalfEdgeList;
+    typedef java::ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> NullEdgeList;
+    typedef java::ArrayList<_PolyhedralBoundedSolidFace*> FaceList;
+    typedef java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> HalfEdgeList;
 
     class ConnectResult {
     public:
@@ -55,7 +55,7 @@ public:
     sonea/soneb by this permutation (entry `position -> originalIndex`)
     instead of the production ordering. Always unset in production.
     */
-    static std::vector<int> testOnlyForcedConnectOrder;
+    static java::ArrayList<int> testOnlyForcedConnectOrder;
     static bool hasTestOnlyForcedConnectOrder;
 
     _PolyhedralBoundedSolidSetNullEdgesConnector();
@@ -107,8 +107,8 @@ private:
     static HalfEdgeList endsb;
     FaceList sonfa;
     FaceList sonfb;
-    static std::map<int, int> sonfaPairIndexByFaceId;
-    static std::map<int, int> sonfbPairIndexByFaceId;
+    static java::TreeMap<int, int> sonfaPairIndexByFaceId;
+    static java::TreeMap<int, int> sonfbPairIndexByFaceId;
     static bool hasPairIndexMaps;
     static int lastLooseACount;
     static int lastLooseBCount;
@@ -129,13 +129,13 @@ private:
     Junction adjacency in processing-position space when the curve order is
     active; empty (Java null) otherwise.
     */
-    static std::vector<std::vector<int> > curveNeighborPositions;
+    static java::ArrayList<java::ArrayList<int> > curveNeighborPositions;
 
     /**
     Processing pair index that pushed each loose entry, parallel to
     `endsa`/`endsb`.
     */
-    static std::vector<int> endsPairIndex;
+    static java::ArrayList<int> endsPairIndex;
 
     static bool isPipelineSummaryTraceEnabled();
     static bool isKeepInsertionOrderEnabled();
@@ -196,8 +196,8 @@ private:
         _PolyhedralBoundedSolidHalfEdge* currentBRight);
     void sortNullEdges();
     static void dbgDumpNullEdges(const char* label, const NullEdgeList& sone);
-    void applyOrderPermutation(const std::vector<int>& order);
-    static int curveComponentFind(std::vector<int>& parent, int x);
+    void applyOrderPermutation(const java::ArrayList<int>& order);
+    static int curveComponentFind(java::ArrayList<int>& parent, int x);
     void groupNullEdgesByRing();
     bool sgetnextnulledge(NullEdgePair& out);
     bool scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,

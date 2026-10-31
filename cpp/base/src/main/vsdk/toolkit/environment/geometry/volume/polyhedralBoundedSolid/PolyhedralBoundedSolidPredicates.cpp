@@ -1,8 +1,9 @@
+#include "java/lang/Math.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
-#include <algorithm>
-#include <vector>
+#include "java/util/Collections.h"
+#include "java/util/Comparator.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
@@ -12,27 +13,27 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 namespace {
 
-std::vector<Vector3Dd> buildProbeDirections()
+java::ArrayList<Vector3Dd> buildProbeDirections()
 {
-    std::vector<Vector3Dd> probes;
-    probes.push_back(Vector3Dd(0.3172, 0.5490, 0.7725).normalized());
-    probes.push_back(Vector3Dd(0.8030, -0.1399, 0.5793).normalized());
-    probes.push_back(Vector3Dd(-0.4211, 0.7022, 0.5735).normalized());
-    probes.push_back(Vector3Dd(0.6110, 0.4561, -0.6470).normalized());
-    probes.push_back(Vector3Dd(-0.5121, -0.3307, 0.7925).normalized());
-    probes.push_back(Vector3Dd(0.2671, -0.8113, 0.5201).normalized());
-    probes.push_back(Vector3Dd(-0.7402, 0.4517, 0.4983).normalized());
+    java::ArrayList<Vector3Dd> probes;
+    probes.add(Vector3Dd(0.3172, 0.5490, 0.7725).normalized());
+    probes.add(Vector3Dd(0.8030, -0.1399, 0.5793).normalized());
+    probes.add(Vector3Dd(-0.4211, 0.7022, 0.5735).normalized());
+    probes.add(Vector3Dd(0.6110, 0.4561, -0.6470).normalized());
+    probes.add(Vector3Dd(-0.5121, -0.3307, 0.7925).normalized());
+    probes.add(Vector3Dd(0.2671, -0.8113, 0.5201).normalized());
+    probes.add(Vector3Dd(-0.7402, 0.4517, 0.4983).normalized());
     return probes;
 }
 
-const std::vector<Vector3Dd>& probeDirections()
+const java::ArrayList<Vector3Dd>& probeDirections()
 {
-    static const std::vector<Vector3Dd> probes = buildProbeDirections();
+    static const java::ArrayList<Vector3Dd> probes = buildProbeDirections();
     return probes;
 }
 
 bool containsApproxDistance(
-    const std::vector<double>& values,
+    const java::ArrayList<double>& values,
     double value,
     double tolerance)
 {
@@ -52,7 +53,7 @@ int countBoundaryCrossingsToInfinity(
     double bigEps)
 {
     Ray ray(point, direction);
-    std::vector<double> crossings;
+    java::ArrayList<double> crossings;
     bool borrowedPlanes = solid->visibilityQueriesActive();
 
     for (long int i = 0; i < solid->getPolygonsList().size(); ++i) {
@@ -98,14 +99,14 @@ int countBoundaryCrossingsToInfinity(
             continue;
         }
         if (!containsApproxDistance(crossings, t, bigEps)) {
-            crossings.push_back(t);
+            crossings.add(t);
         }
     }
 
     return static_cast<int>(crossings.size());
 }
 
-std::vector<double> collectBoundaryCrossings(
+java::ArrayList<double> collectBoundaryCrossings(
     PolyhedralBoundedSolid* solid,
     const Vector3Dd& eye,
     const Vector3Dd& direction,
@@ -114,7 +115,7 @@ std::vector<double> collectBoundaryCrossings(
 {
     Ray ray(eye, direction);
     double bigEps = context.bigEpsilon();
-    std::vector<double> crossings;
+    java::ArrayList<double> crossings;
     bool borrowedPlanes = solid->visibilityQueriesActive();
 
     for (long int i = 0; i < solid->getPolygonsList().size(); ++i) {
@@ -156,11 +157,11 @@ std::vector<double> collectBoundaryCrossings(
             continue;
         }
         if (!containsApproxDistance(crossings, t, bigEps)) {
-            crossings.push_back(t);
+            crossings.add(t);
         }
     }
 
-    std::sort(crossings.begin(), crossings.end());
+    java::Collections::sort(crossings, java::NaturalOrderComparator<double>());
     return crossings;
 }
 
@@ -176,7 +177,7 @@ bool PolyhedralBoundedSolidPredicates::isPointInside(
     double maxT = context.modelScale() * 100.0 + 1.0;
     int lastCrossings = 0;
 
-    const std::vector<Vector3Dd>& probes = probeDirections();
+    const java::ArrayList<Vector3Dd>& probes = probeDirections();
     for (size_t i = 0; i < probes.size(); ++i) {
         int crossings = countBoundaryCrossingsToInfinity(
             solid, point, probes[i], maxT, bigEps);
@@ -194,7 +195,7 @@ int PolyhedralBoundedSolidPredicates::classifyPoint(
     const Vector3Dd& point,
     double distanceTolerance)
 {
-    double tolerance = std::max(distanceTolerance,
+    double tolerance = java::Math::max(distanceTolerance,
         solid->queryToleranceContext().bigEpsilon());
 
     for ( int i = 0; i < (int)solid->getPolygonsList().size(); i++ ) {
@@ -231,9 +232,9 @@ int PolyhedralBoundedSolidPredicates::quantitativeInvisibility(
 
     direction = direction.multiply(1.0 / distance);
     double reach = distance - distance * 1.0e-3;
-    std::vector<double> crossings =
+    java::ArrayList<double> crossings =
         collectBoundaryCrossings(solid, eye, direction, reach, context);
-    if (crossings.empty()) {
+    if (crossings.isEmpty()) {
         return 0;
     }
 

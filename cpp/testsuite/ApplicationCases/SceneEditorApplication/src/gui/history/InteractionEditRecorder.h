@@ -1,7 +1,7 @@
 #ifndef __INTERACTION_EDIT_RECORDER__
 #define __INTERACTION_EDIT_RECORDER__
 
-#include <functional>
+#include "java/lang/Runnable.h"
 
 #include "java/lang/String.h"
 
@@ -82,7 +82,7 @@ public:
     @param action what the user does
     */
     void record(const java::String& sceneOperationName,
-                const std::function<void()>& action);
+                const java::Runnable& action);
 };
 
 #endif

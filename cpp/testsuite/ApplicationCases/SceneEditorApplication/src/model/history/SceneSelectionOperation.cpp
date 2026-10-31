@@ -1,15 +1,18 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "model/Scene.h"
 #include "model/history/SceneSelectionOperation.h"
 #include "model/selection/SelectionSet.h"
 
 SceneSelectionOperation::SceneSelectionOperation(
     const java::String& name, Scene* scene,
-    const std::vector<bool>& beforeBodies,
-    const std::vector<bool>& beforeLights,
-    const std::vector<bool>& beforeGizmos,
-    const std::vector<bool>& afterBodies,
-    const std::vector<bool>& afterLights,
-    const std::vector<bool>& afterGizmos)
+    const java::ArrayList<bool>& beforeBodies,
+    const java::ArrayList<bool>& beforeLights,
+    const java::ArrayList<bool>& beforeGizmos,
+    const java::ArrayList<bool>& afterBodies,
+    const java::ArrayList<bool>& afterLights,
+    const java::ArrayList<bool>& afterGizmos)
     : scene(scene), name(name), beforeBodies(beforeBodies),
       beforeLights(beforeLights), beforeGizmos(beforeGizmos),
       afterBodies(afterBodies), afterLights(afterLights),
@@ -32,9 +35,9 @@ java::String SceneSelectionOperation::getName() const
     return name;
 }
 
-void SceneSelectionOperation::apply(const std::vector<bool>& bodies,
-                                    const std::vector<bool>& lights,
-                                    const std::vector<bool>& gizmos)
+void SceneSelectionOperation::apply(const java::ArrayList<bool>& bodies,
+                                    const java::ArrayList<bool>& lights,
+                                    const java::ArrayList<bool>& gizmos)
 {
     apply(scene->selectedThings, bodies);
     apply(scene->selectedLights, lights);
@@ -42,7 +45,7 @@ void SceneSelectionOperation::apply(const std::vector<bool>& bodies,
 }
 
 void SceneSelectionOperation::apply(SelectionSet* selection,
-                                    const std::vector<bool>& state)
+                                    const java::ArrayList<bool>& state)
 {
     selection->sync();
     selection->unselectAll();
@@ -54,18 +57,18 @@ void SceneSelectionOperation::apply(SelectionSet* selection,
     }
 }
 
-std::vector<bool> SceneSelectionOperation::capture(SelectionSet* selection)
+java::ArrayList<bool> SceneSelectionOperation::capture(SelectionSet* selection)
 {
     selection->sync();
-    std::vector<bool> result(selection->size());
+    java::ArrayList<bool> result = java::Collections::nCopies<bool>(selection->size(), false);
     for ( int i = 0; i < static_cast<int>(result.size()); i++ ) {
         result[i] = selection->isSelected(i);
     }
     return result;
 }
 
-bool SceneSelectionOperation::isSame(const std::vector<bool>& a,
-                                     const std::vector<bool>& b)
+bool SceneSelectionOperation::isSame(const java::ArrayList<bool>& a,
+                                     const java::ArrayList<bool>& b)
 {
-    return a == b;
+    return a.equals(b);
 }

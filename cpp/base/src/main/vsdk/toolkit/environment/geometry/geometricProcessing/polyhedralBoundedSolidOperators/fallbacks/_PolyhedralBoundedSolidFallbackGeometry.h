@@ -1,7 +1,8 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_FALLBACK_GEOMETRY__
 #define ___POLYHEDRAL_BOUNDED_SOLID_FALLBACK_GEOMETRY__
 
-#include <vector>
+#include "java/util/Collections.h"
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -19,7 +20,7 @@ null profiles are empty vectors here.
 */
 class _PolyhedralBoundedSolidFallbackGeometry : public _PolyhedralBoundedSolidOperator {
 public:
-    typedef std::vector<Vector3Dd> Profile;
+    typedef java::ArrayList<Vector3Dd> Profile;
 
     static double coordinate(const Vector3Dd& p, int axis);
     static bool sameCoordinate(double a, double b);
@@ -35,9 +36,8 @@ public:
     Inserts `value` when no coordinate within tolerance is present, keeping
     the list sorted.
     */
-    static void addUniqueCoordinate(std::vector<double>& values, double value);
-    static std::vector<double> uniqueVertexCoordinates(
-        PolyhedralBoundedSolid* solid, int axis);
+    static void addUniqueCoordinate(java::ArrayList<double>& values, double value);
+    static java::ArrayList<double> uniqueVertexCoordinates(PolyhedralBoundedSolid* solid, int axis);
     static double signedAreaOnYZ(const Profile& profile);
 
     /**

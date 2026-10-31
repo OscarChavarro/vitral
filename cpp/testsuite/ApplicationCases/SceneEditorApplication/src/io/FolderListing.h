@@ -1,8 +1,8 @@
 #ifndef __FOLDER_LISTING__
 #define __FOLDER_LISTING__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include "io/FileSuffixFilter.h"
 
@@ -17,21 +17,21 @@ public:
     /**
     @return true if the path exists and is a folder
     */
-    static bool isFolder(const std::string& path);
+    static bool isFolder(const java::String& path);
 
     /**
     @return the folder without "." and ".." components, as
     `File.getCanonicalPath`, or the folder if it does not exist
     */
-    static std::string normalizeFolder(const std::string& folder);
+    static java::String normalizeFolder(const java::String& folder);
 
     /**
     @param filters accepted kinds of files, or none for all of them
     @param path path of a file or folder
     @return true if the path is a folder or a file accepted by any filter
     */
-    static bool accepts(const std::vector<FileSuffixFilter>& filters,
-                        const std::string& path);
+    static bool accepts(const java::ArrayList<FileSuffixFilter>& filters,
+                        const java::String& path);
 
     /**
     Lists a folder, skipping hidden entries (whose names start with a dot).
@@ -40,10 +40,10 @@ public:
     @param folders names of its subfolders, sorted
     @param files names of its accepted files, sorted
     */
-    static void list(const std::string& folder,
-                     const std::vector<FileSuffixFilter>& filters,
-                     std::vector<std::string>& folders,
-                     std::vector<std::string>& files);
+    static void list(const java::String& folder,
+                     const java::ArrayList<FileSuffixFilter>& filters,
+                     java::ArrayList<java::String>& folders,
+                     java::ArrayList<java::String>& files);
 
 private:
     FolderListing();

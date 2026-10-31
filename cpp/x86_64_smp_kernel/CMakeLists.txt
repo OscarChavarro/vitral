@@ -247,7 +247,7 @@ if(EXISTS "${VITRAL_BASE_DIR}/src/main")
   # Every source of the base library, not the list of Vitral's own CMakeLists.txt, which may lag behind.
   file(GLOB_RECURSE SOURCES_BASE CONFIGURE_DEPENDS "${VITRAL_BASE_DIR}/src/main/*.cpp")
   # Left out: the io/wrapper leftovers, what needs a library the kernel
-  # does not have (FreeType) and java.util.regex (<regex> is not in vitralStdC++; nothing else in the base uses it).
+  # does not have (FreeType) and java.util.regex (POSIX <regex.h> is not in vitralLibC; nothing else in the base uses it).
   list(FILTER SOURCES_BASE EXCLUDE REGEX "/src/main/(vsdk/toolkit/io/wrapper/(FileUncompressWrapper|Matrix2x2Printer|PipeInputStream|PipeOutputStream|Vector3DPrinter)\\.cpp|vsdk/toolkit/io/geometry/Freetype2FontReader\\.cpp|java/util/regex/)")
   add_library(objsBase OBJECT ${SOURCES_BASE})
   target_compile_options(objsBase PRIVATE ${LIB_FLAGS} -w)

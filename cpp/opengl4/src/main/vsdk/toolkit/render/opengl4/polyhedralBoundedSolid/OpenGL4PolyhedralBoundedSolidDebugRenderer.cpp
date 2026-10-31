@@ -1,5 +1,5 @@
+#include "java/lang/Math.h"
 #include <glad/gl.h>
-#include <algorithm>
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -175,8 +175,8 @@ void appendCurvedArrowOverPlane(
         return;
     }
 
-    sizePercent = std::min(1.0, std::max(VSDK::EPSILON, sizePercent));
-    curveOffsetPercent = std::min(1.0, std::max(0.0, curveOffsetPercent));
+    sizePercent = java::Math::min(1.0, java::Math::max(VSDK::EPSILON, sizePercent));
+    curveOffsetPercent = java::Math::min(1.0, java::Math::max(0.0, curveOffsetPercent));
 
     double factor = fullLength * sizePercent;
     double delta = factor / CURVED_ARROW_SEGMENTS;

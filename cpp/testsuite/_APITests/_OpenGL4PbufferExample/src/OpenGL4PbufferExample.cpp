@@ -1,3 +1,4 @@
+#include "java/lang/Exception.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -227,8 +228,8 @@ int main()
         delete[] rgb;
         std::printf("OpenGL4PbufferExample: exported ./output.ppm\n");
     }
-    catch (const std::exception& e) {
-        std::fprintf(stderr, "%s\n", e.what());
+    catch (const java::Exception& e) {
+        std::fprintf(stderr, "%s\n", e.getMessage().c_str());
         if (vbo) glDeleteBuffers(1, &vbo);
         if (vao) glDeleteVertexArrays(1, &vao);
         if (program) glDeleteProgram(program);

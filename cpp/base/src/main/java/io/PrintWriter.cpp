@@ -1,4 +1,5 @@
-#include <exception>
+#include "java/lang/Exception.h"
+#include "java/lang/String.h"
 
 #include "java/io/PrintWriter.h"
 
@@ -16,7 +17,7 @@ PrintWriter::print(const java::String &text)
         out->write(reinterpret_cast<const unsigned char *>(text.c_str()), 0,
                    text.length());
     }
-    catch ( const std::exception & ) {
+    catch ( const java::Exception & ) {
         error = true;
     }
 }
@@ -37,7 +38,7 @@ PrintWriter::flush()
     try {
         out->flush();
     }
-    catch ( const std::exception & ) {
+    catch ( const java::Exception & ) {
         error = true;
     }
 }

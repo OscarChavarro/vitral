@@ -1,6 +1,6 @@
-#include <algorithm>
 
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidProfileDifferenceFallback.h"
@@ -39,11 +39,11 @@ ProfileFallback::prepareProfileDifferenceFallbackSpec(
     _PolyhedralBoundedSolidProfileDifferenceFallbackSpec* spec = 0;
 
     if ( sameBounds ) {
-        std::vector<double> minuendX =
+        java::ArrayList<double> minuendX =
             FallbackGeometry::uniqueVertexCoordinates(minuend, 0);
-        std::vector<double> subtrahendX =
+        java::ArrayList<double> subtrahendX =
             FallbackGeometry::uniqueVertexCoordinates(subtrahend, 0);
-        std::vector<double> subtrahendZ =
+        java::ArrayList<double> subtrahendZ =
             FallbackGeometry::uniqueVertexCoordinates(subtrahend, 2);
         if ( minuendX.size() == 2 &&
              subtrahendX.size() == 3 &&
@@ -57,7 +57,7 @@ ProfileFallback::prepareProfileDifferenceFallbackSpec(
                 FallbackGeometry::Profile clippedProfile =
                     FallbackGeometry::clipProfileAboveZ(profile, xCut, zCut);
                 if ( clippedProfile.size() >= 3 ) {
-                    std::reverse(clippedProfile.begin(), clippedProfile.end());
+                    java::Collections::reverse(clippedProfile);
                     spec = new _PolyhedralBoundedSolidProfileDifferenceFallbackSpec(
                         clippedProfile, xCut, minuendBounds[3], minuendBounds);
                 }

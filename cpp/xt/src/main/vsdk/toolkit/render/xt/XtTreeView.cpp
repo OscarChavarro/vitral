@@ -1,8 +1,10 @@
 // Before any other header that could include the Xt ones
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/TreeSet.txx"
 #include "vsdk/toolkit/gui/XtIntrinsics.h"
 
-#include <algorithm>
-#include <string>
 
 #include <X11/keysym.h>
 #include <X11/Xutil.h>
@@ -39,7 +41,7 @@ struct XtTreeViewCallbacks {
         else if ( event->type == ButtonRelease && button->button == Button3 &&
                   self->contextMenuListener ) {
             XtTreeView::ContextMenuListener listener = self->contextMenuListener;
-            listener(button->x_root, button->y_root);
+            listener.accept(button->x_root, button->y_root);
         }
     }
 
@@ -116,9 +118,9 @@ void XtTreeView::setRoot(const DialogTreeNode* root)
     anchor = -1;
     if ( root != nullptr ) {
         // As the Java selector, the children of the root start expanded
-        expanded.insert(root);
+        expanded.add(root);
         for ( size_t i = 0; i < root->getChildren().size(); i++ ) {
-            expanded.insert(&root->getChildren()[i]);
+            expanded.add(&root->getChildren()[i]);
         }
     }
     buildRows();
@@ -128,13 +130,13 @@ void XtTreeView::setRoot(const DialogTreeNode* root)
 
 void XtTreeView::addRows(const DialogTreeNode* node, int depth)
 {
-    const std::vector<DialogTreeNode>& children = node->getChildren();
+    const java::ArrayList<DialogTreeNode>& children = node->getChildren();
     for ( size_t i = 0; i < children.size(); i++ ) {
         Row row;
         row.node = &children[i];
         row.depth = depth;
-        rows.push_back(row);
-        if ( expanded.count(&children[i]) > 0 ) {
+        rows.add(row);
+        if ( expanded.contains(&children[i]) ) {
             addRows(&children[i], depth + 1);
         }
     }
@@ -147,28 +149,27 @@ void XtTreeView::buildRows()
         addRows(root, 0);
     }
     // Rows that are not shown are not selected (as collapsing in a JTree)
-    std::set<const DialogTreeNode*> shown;
-    for ( size_t i = 0; i < rows.size(); i++ ) shown.insert(rows[i].node);
-    for ( std::set<const DialogTreeNode*>::iterator it = selected.begin();
-          it != selected.end(); ) {
-        if ( shown.count(*it) == 0 ) selected.erase(it++);
-        else ++it;
+    java::TreeSet<const DialogTreeNode*> shown;
+    for ( size_t i = 0; i < rows.size(); i++ ) shown.add(rows[i].node);
+    for ( long i = 0; i < selected.size(); ) {
+        if ( !shown.contains(selected.get(i)) ) selected.remove(selected.get(i));
+        else i++;
     }
     if ( anchor >= static_cast<int>(rows.size()) ) anchor = -1;
 }
 
-void XtTreeView::setSelection(const std::vector<const DialogTreeNode*>& nodes)
+void XtTreeView::setSelection(const java::ArrayList<const DialogTreeNode*>& nodes)
 {
     selected.clear();
-    selected.insert(nodes.begin(), nodes.end());
+    for ( long i = 0; i < nodes.size(); i++ ) selected.add(nodes[i]);
     redraw();
 }
 
-std::vector<const DialogTreeNode*> XtTreeView::getSelection() const
+java::ArrayList<const DialogTreeNode*> XtTreeView::getSelection() const
 {
-    std::vector<const DialogTreeNode*> result;
+    java::ArrayList<const DialogTreeNode*> result;
     for ( size_t i = 0; i < rows.size(); i++ ) {
-        if ( selected.count(rows[i].node) > 0 ) result.push_back(rows[i].node);
+        if ( selected.contains(rows[i].node) ) result.add(rows[i].node);
     }
     return result;
 }
@@ -179,7 +180,7 @@ void XtTreeView::selectOnly(const DialogTreeNode* node)
     anchor = -1;
     for ( size_t i = 0; node != nullptr && i < rows.size(); i++ ) {
         if ( rows[i].node == node ) {
-            selected.insert(node);
+            selected.add(node);
             anchor = static_cast<int>(i);
             ensureVisible(anchor);
         }
@@ -207,7 +208,7 @@ void XtTreeView::notifySelection()
 {
     if ( selectionListener ) {
         Listener listener = selectionListener;
-        listener();
+        listener.run();
     }
 }
 
@@ -215,13 +216,13 @@ int XtTreeView::visibleRows() const
 {
     Dimension height = 0;
     if ( widget != nullptr ) XtVaGetValues(widget, XtNheight, &height, nullptr);
-    return std::max(1, (static_cast<int>(height) - MARGIN) / rowHeight);
+    return java::Math::max(1, (static_cast<int>(height) - MARGIN) / rowHeight);
 }
 
 void XtTreeView::clampScroll()
 {
-    int maximum = std::max(0, static_cast<int>(rows.size()) - visibleRows());
-    scrollTop = std::max(0, std::min(scrollTop, maximum));
+    int maximum = java::Math::max(0, static_cast<int>(rows.size()) - visibleRows());
+    scrollTop = java::Math::max(0, java::Math::min(scrollTop, maximum));
 }
 
 void XtTreeView::ensureVisible(int row)
@@ -266,8 +267,8 @@ void XtTreeView::redraw()
         const Row& row = rows[scrollTop + i];
         int y = MARGIN / 2 + i * rowHeight;
         int x = MARGIN + row.depth * INDENT;
-        bool isSelected = selected.count(row.node) > 0;
-        std::string label = row.node->getLabel().c_str();
+        bool isSelected = selected.contains(row.node);
+        java::String label = row.node->getLabel().c_str();
         int labelX = x + INDENT;
         if ( isSelected ) {
             int labelWidth = fontSet != nullptr ?
@@ -278,11 +279,11 @@ void XtTreeView::redraw()
             XFillRectangle(display, window, graphicsContext, labelX - 2, y,
                            labelWidth + 4, rowHeight);
         }
-        if ( !row.node->getChildren().empty() ) {
+        if ( !row.node->getChildren().isEmpty() ) {
             // Expansion triangle: down when expanded, right when collapsed
             XPoint points[3];
             int cx = x + 4, cy = y + rowHeight / 2;
-            if ( expanded.count(row.node) > 0 ) {
+            if ( expanded.contains(row.node) ) {
                 points[0].x = cx; points[0].y = cy - 3;
                 points[1].x = cx + TOGGLE_SIZE; points[1].y = cy - 3;
                 points[2].x = cx + TOGGLE_SIZE / 2; points[2].y = cy + 4;
@@ -303,11 +304,11 @@ void XtTreeView::redraw()
     }
 
     // Scroll indicator, when the rows do not fit
-    if ( static_cast<int>(rows.size()) > count && !rows.empty() ) {
-        int barHeight = std::max(12, static_cast<int>(height) * count /
+    if ( static_cast<int>(rows.size()) > count && !rows.isEmpty() ) {
+        int barHeight = java::Math::max(12, static_cast<int>(height) * count /
                                      static_cast<int>(rows.size()));
         int barY = (static_cast<int>(height) - barHeight) * scrollTop /
-            std::max(1, static_cast<int>(rows.size()) - count);
+            java::Math::max(1, static_cast<int>(rows.size()) - count);
         XSetForeground(display, graphicsContext, colors[LINE]);
         XFillRectangle(display, window, graphicsContext, width - SCROLLBAR_WIDTH - 2, barY,
                        SCROLLBAR_WIDTH, barHeight);
@@ -330,40 +331,40 @@ void XtTreeView::click(int x, int y, unsigned int button, unsigned int state)
         if ( !onRow ) return;
         const Row& row = rows[index];
         int toggleX = MARGIN + row.depth * INDENT;
-        if ( !row.node->getChildren().empty() && x >= toggleX &&
+        if ( !row.node->getChildren().isEmpty() && x >= toggleX &&
              x < toggleX + INDENT ) {
-            if ( expanded.count(row.node) > 0 ) expanded.erase(row.node);
-            else expanded.insert(row.node);
-            std::set<const DialogTreeNode*> before = selected;
+            if ( expanded.contains(row.node) ) expanded.remove(row.node);
+            else expanded.add(row.node);
+            java::TreeSet<const DialogTreeNode*> before = selected;
             buildRows();
             clampScroll();
             redraw();
-            if ( before != selected ) notifySelection();
+            if ( !before.equals(selected) ) notifySelection();
             return;
         }
         if ( (state & ShiftMask) != 0 && anchor >= 0 ) {
             selected.clear();
-            for ( int i = std::min(anchor, index); i <= std::max(anchor, index); i++ ) {
-                selected.insert(rows[i].node);
+            for ( int i = java::Math::min(anchor, index); i <= java::Math::max(anchor, index); i++ ) {
+                selected.add(rows[i].node);
             }
         }
         else if ( (state & ControlMask) != 0 ) {
-            if ( selected.count(row.node) > 0 ) selected.erase(row.node);
-            else selected.insert(row.node);
+            if ( selected.contains(row.node) ) selected.remove(row.node);
+            else selected.add(row.node);
             anchor = index;
         }
         else {
             selected.clear();
-            selected.insert(row.node);
+            selected.add(row.node);
             anchor = index;
         }
         redraw();
         notifySelection();
     }
     else if ( button == Button3 ) {
-        if ( onRow && selected.count(rows[index].node) == 0 ) {
+        if ( onRow && !selected.contains(rows[index].node) ) {
             selected.clear();
-            selected.insert(rows[index].node);
+            selected.add(rows[index].node);
             anchor = index;
             redraw();
             notifySelection();
@@ -380,16 +381,16 @@ void XtTreeView::key(XKeyEvent* event)
          keysym == XK_BackSpace ) {
         if ( deleteListener ) {
             Listener listener = deleteListener;
-            listener();
+            listener.run();
         }
         return;
     }
-    if ( (keysym == XK_Up || keysym == XK_Down) && !rows.empty() ) {
+    if ( (keysym == XK_Up || keysym == XK_Down) && !rows.isEmpty() ) {
         int current = anchor >= 0 ? anchor : -1;
-        int next = keysym == XK_Up ? std::max(0, current - 1) :
-            std::min(static_cast<int>(rows.size()) - 1, current + 1);
+        int next = keysym == XK_Up ? java::Math::max(0, current - 1) :
+            java::Math::min(static_cast<int>(rows.size()) - 1, current + 1);
         selected.clear();
-        selected.insert(rows[next].node);
+        selected.add(rows[next].node);
         anchor = next;
         ensureVisible(next);
         redraw();

@@ -1,7 +1,6 @@
 #ifndef __SOLID_TEXTURE_MODEL__
 #define __SOLID_TEXTURE_MODEL__
 
-#include <vector>
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -38,7 +37,7 @@ private:
     ColorTextureFixture* colorTextureFixture;
     ImageTexture imageTexture;
     int solidTextureSize;
-    std::vector<unsigned char> solidTextureVolumeRgb8;
+    java::ArrayList<unsigned char> solidTextureVolumeRgb8;
     long solidTextureRevision;
     SolidTextureExampleColorNames selectedSolidTexture;
     bool animationEnabled;
@@ -88,7 +87,7 @@ public:
     RayGizmo* getRayGizmo();
     InfinitePlaneGizmo* getInfinitePlaneGizmo();
     java::ArrayList<Image*>& getTexture2DStack();
-    const std::vector<unsigned char>& getSolidTextureVolumeRgb8() const;
+    const java::ArrayList<unsigned char>& getSolidTextureVolumeRgb8() const;
     long getSolidTextureRevision() const;
     int getSolidTextureSize() const;
     SolidTextureExampleColorNames getSelectedSolidTexture() const;

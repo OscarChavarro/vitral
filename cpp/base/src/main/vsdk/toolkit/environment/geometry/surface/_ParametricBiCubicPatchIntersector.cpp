@@ -1,4 +1,5 @@
-#include <algorithm>
+#include "java/lang/Math.h"
+#include "java/util/ArrayList.txx"
 #include <cfloat>
 #include <cmath>
 
@@ -37,8 +38,8 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
     double centerY;
     double centerZ;
     double radiusSquared;
-    /// Empty for leaves
-    std::vector<std::unique_ptr<PatchNode> > children;
+    /// Empty for leaves; owned by this node
+    java::ArrayList<PatchNode*> children;
     double corners[12];
     double uMin;
     double uMax;
@@ -64,9 +65,16 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
         }
     }
 
+    ~PatchNode()
+    {
+        for ( long i = 0; i < children.size(); i++ ) {
+            delete children[i];
+        }
+    }
+
     bool isLeaf() const
     {
-        return children.empty();
+        return children.isEmpty();
     }
 };
 
@@ -97,11 +105,12 @@ _ParametricBiCubicPatchIntersector::_ParametricBiCubicPatchIntersector(
         depth = MIN_SUBDIVISION_DEPTH;
     }
     subdivisionDepth = depth;
-    root.reset(buildTree(bezierNet, 0, 0.0, 1.0, 0.0, 1.0));
+    root = buildTree(bezierNet, 0, 0.0, 1.0, 0.0, 1.0);
 }
 
 _ParametricBiCubicPatchIntersector::~_ParametricBiCubicPatchIntersector()
 {
+    delete root;
 }
 
 int _ParametricBiCubicPatchIntersector::getSubdivisionDepth() const
@@ -152,7 +161,7 @@ bool _ParametricBiCubicPatchIntersector::intersect(const Ray& ray,
     }
 
     PatchHit best;
-    walkTree(root.get(), o, d, directionLengthSquared, best);
+    walkTree(root, o, d, directionLengthSquared, best);
     if ( best.t == DBL_MAX ) {
         return false;
     }
@@ -261,14 +270,14 @@ _ParametricBiCubicPatchIntersector::buildTree(
     splitInFour(net, quarters);
     PatchNode* node = new PatchNode(net, false, u0, u1, v0, v1);
     node->children.reserve(4);
-    node->children.push_back(std::unique_ptr<PatchNode>(
-        buildTree(quarters[0], depth + 1, u0, um, v0, vm)));
-    node->children.push_back(std::unique_ptr<PatchNode>(
-        buildTree(quarters[1], depth + 1, u0, um, vm, v1)));
-    node->children.push_back(std::unique_ptr<PatchNode>(
-        buildTree(quarters[2], depth + 1, um, u1, v0, vm)));
-    node->children.push_back(std::unique_ptr<PatchNode>(
-        buildTree(quarters[3], depth + 1, um, u1, vm, v1)));
+    node->children.add(
+        buildTree(quarters[0], depth + 1, u0, um, v0, vm));
+    node->children.add(
+        buildTree(quarters[1], depth + 1, u0, um, vm, v1));
+    node->children.add(
+        buildTree(quarters[2], depth + 1, um, u1, v0, vm));
+    node->children.add(
+        buildTree(quarters[3], depth + 1, um, u1, vm, v1));
     return node;
 }
 
@@ -442,7 +451,7 @@ void _ParametricBiCubicPatchIntersector::walkTree(
     }
     if ( !node->isLeaf() ) {
         for ( size_t i = 0; i < node->children.size(); i++ ) {
-            walkTree(node->children[i].get(), o, d, directionLengthSquared,
+            walkTree(node->children[i], o, d, directionLengthSquared,
                      best);
         }
         return;
@@ -549,8 +558,8 @@ bool _ParametricBiCubicPatchIntersector::intersectTriangle(
         return false;
     }
     result[0] = t;
-    result[1] = std::max(0.0, b1);
-    result[2] = std::max(0.0, b2);
+    result[1] = java::Math::max(0.0, b1);
+    result[2] = java::Math::max(0.0, b2);
     return true;
 }
 

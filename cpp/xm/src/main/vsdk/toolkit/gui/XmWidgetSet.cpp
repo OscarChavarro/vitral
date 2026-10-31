@@ -1,3 +1,4 @@
+#include "java/util/ArrayList.txx"
 #include <cstring>
 
 #include <Xm/Xm.h>
@@ -128,7 +129,7 @@ void XmWidgetSet::setWindowCloseHandler(Widget shell, NotifyProc close,
 }
 
 Widget XmWidgetSet::createChoiceMenu(Widget owner,
-                                     const std::vector<MenuChoice>& items,
+                                     const java::ArrayList<MenuChoice>& items,
                                      XFontSet fontSet, ChoiceProc choose,
                                      void* clientData)
 {

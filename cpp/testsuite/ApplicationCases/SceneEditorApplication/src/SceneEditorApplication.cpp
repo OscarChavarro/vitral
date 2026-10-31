@@ -1,14 +1,13 @@
+#include "java/lang/Exception.h"
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/Runnable.h"
+#include "java/util/TreeMap.txx"
+#include "java/util/function/Consumer.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <exception>
-#include <functional>
 #include <clocale>
-#include <fstream>
-#include <map>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include "java/nio/file/Files.h"
 #include <sys/time.h>
 
 #ifdef VITRAL_SCENE_EDITOR_OPENGL1
@@ -113,15 +112,15 @@ A task for `XtEventQueue`, given as a function.
 */
 class FunctionTask : public java::Runnable {
 private:
-    std::function<void()> function;
+    java::Runnable function;
 
 public:
-    explicit FunctionTask(const std::function<void()>& function)
+    explicit FunctionTask(const java::Runnable& function)
         : function(function) {}
 
     virtual void run() override
     {
-        function();
+        function.run();
     }
 };
 
@@ -262,8 +261,8 @@ public:
         executor = nullptr;
         clearSideBindings();
         if (display != nullptr) {
-            for (std::map<int, Cursor>::iterator it = cursors.begin(); it != cursors.end(); ++it)
-                XFreeCursor(display, it->second);
+            for (long it = 0; it < cursors.size(); it++)
+                XFreeCursor(display, cursors.getValue(it));
             cursors.clear();
         }
         clearCreationSections();
@@ -289,7 +288,7 @@ public:
         // Before Xt takes its own options from the command line
         bool withAutomationService = false;
         for (int i = 1; i < argc; ++i)
-            if (std::string(argv[i]) == "-s") withAutomationService = true;
+            if (java::String(argv[i]) == "-s") withAutomationService = true;
         tangibleConnection.processArguments(argc, argv);
         try {
             createWindow(argc, argv);
@@ -303,11 +302,11 @@ public:
             XtAppMainLoop(appContext);
         }
         catch (const VSDKFatalException& ex) {
-            fprintf(stderr, "SceneEditorApplication fatal error: %s\n", ex.what());
+            fprintf(stderr, "SceneEditorApplication fatal error: %s\n", ex.getMessage().c_str());
             return 1;
         }
-        catch (const std::exception& ex) {
-            fprintf(stderr, "SceneEditorApplication error: %s\n", ex.what());
+        catch (const java::Exception& ex) {
+            fprintf(stderr, "SceneEditorApplication error: %s\n", ex.getMessage().c_str());
             return 1;
         }
         return 0;
@@ -331,7 +330,7 @@ private:
     // Bold font set of the headers of the collapsible sections (the menu
     // one if the display has no bold font)
     XFontSet sectionFontSet;
-    std::vector<XtCollapsibleSection*> creationSections;
+    java::ArrayList<XtCollapsibleSection*> creationSections;
     Widget rightPanel;
     Widget creationPage;
     Widget modifyPage;
@@ -349,7 +348,7 @@ private:
     XtOpenGLVitralEditorMCP* automationService;
     Widget viewportMenu;
     /// Commands of the items of the viewport menu shown
-    std::vector<std::string> viewportMenuCommands;
+    java::ArrayList<java::String> viewportMenuCommands;
     XlibLabelImageProvider* labelProvider;
     Window window;
 #ifdef VITRAL_SCENE_EDITOR_OPENGL1
@@ -366,17 +365,17 @@ private:
     int height;
     int canvasWidth;
     int canvasHeight;
-    std::string guiLanguage;
-    std::string guiDefinition;
-    std::string pendingGuiLanguage;
+    java::String guiLanguage;
+    java::String guiDefinition;
+    java::String pendingGuiLanguage;
     bool guiRebuildQueued;
-    std::vector<TabBinding*> tabBindings;
-    std::map<std::string, std::string> messages;
+    java::ArrayList<TabBinding*> tabBindings;
+    java::TreeMap<java::String, java::String> messages;
     XtOpenGLSceneBridge* sceneBridge;
     bool ready;
     bool closing;
     bool repaintQueued;
-    std::map<int, Cursor> cursors;
+    java::TreeMap<int, Cursor> cursors;
     PointerCursor::Value currentCursor;
     PopupDismissClickFilter popupDismissFilter;
     int viewportMenuX;
@@ -392,7 +391,7 @@ private:
 
     Widget activeCanvas() const { return drawingCanvas; }
 
-    static std::string selectedGuiLanguage()
+    static java::String selectedGuiLanguage()
     {
         const char* language = std::getenv("SCENE_EDITOR_GUI_LANGUAGE");
         return language != nullptr ? language : "english";
@@ -423,13 +422,11 @@ private:
     */
     void loadGuiDefinition()
     {
-        const std::string path = GuiState::languageFile(guiLanguage.c_str()).c_str();
-        std::ifstream input(path.c_str());
-        if (!input) {
+        const java::String path = GuiState::languageFile(guiLanguage.c_str()).c_str();
+        if (!java::Files::readString(path, guiDefinition)) {
             throw VSDKFatalException(
                 java::String(("Could not open Java GUI definition: " + path).c_str()));
         }
-        guiDefinition.assign((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
         messages = GuiJsonReader(guiDefinition).readMessages();
         sceneBridge->getGuiState()->setLanguageGuiFile(
             GuiState::languageFile(guiLanguage.c_str()));
@@ -444,10 +441,10 @@ private:
         tabBindings.clear();
     }
 
-    std::string text(const char* id) const
+    java::String text(const char* id) const
     {
-        std::map<std::string, std::string>::const_iterator it = messages.find(id);
-        return it != messages.end() ? it->second : id;
+        java::String const* it = messages.get(id);
+        return it != nullptr ? (*it) : id;
     }
 
     static const int CREATION_PAGE = 0;
@@ -536,7 +533,7 @@ private:
         };
         for (int i = 0; i < 5; ++i) {
             TabBinding* binding = new TabBinding{this, i};
-            tabBindings.push_back(binding);
+            tabBindings.add(binding);
             panelWidgets->createPushButton(
                 rightPanel, text(tabs[i]), menuFontSet,
                 i * SIDE_TAB_WIDTH, 0, SIDE_TAB_WIDTH, SIDE_TAB_HEIGHT - 4,
@@ -588,7 +585,7 @@ private:
                 executor, menuFontSet, 0, 0, SIDE_PANEL_WIDTH));
             section->setLayoutListener(
                 &SceneEditorApplication::creationSectionResized, this);
-            creationSections.push_back(section);
+            creationSections.add(section);
             y += section->getHeight();
         }
     }
@@ -597,7 +594,7 @@ private:
     {
         SceneEditorApplication* self =
             reinterpret_cast<SceneEditorApplication*>(clientData);
-        if (self == nullptr || self->creationSections.empty()) return;
+        if (self == nullptr || self->creationSections.isEmpty()) return;
         XtCollapsibleSection::stack(
             &self->creationSections[0],
             static_cast<int>(self->creationSections.size()), 0);
@@ -676,7 +673,7 @@ private:
         self->rebuildMenus(self->pendingGuiLanguage);
     }
 
-    void scheduleMenuRebuild(const std::string& language)
+    void scheduleMenuRebuild(const java::String& language)
     {
         if (language == guiLanguage || guiRebuildQueued) return;
         pendingGuiLanguage = language;
@@ -686,7 +683,7 @@ private:
             reinterpret_cast<XtPointer>(this));
     }
 
-    void rebuildMenus(const std::string& language)
+    void rebuildMenus(const java::String& language)
     {
         if (language == guiLanguage || workspace == nullptr) return;
         guiLanguage = language;
@@ -816,11 +813,11 @@ private:
         XtSetArg(args[n], XtNwidth, width); ++n;
         XtSetArg(args[n], XtNheight, height); ++n;
 #ifdef VITRAL_SCENE_EDITOR_OPENGL1
-        const std::string title = std::string("VITRAL Scene Editor - ") +
+        const java::String title = java::String("VITRAL Scene Editor - ") +
             widgetSet->getName() + (cpu ? " Xlib CPU hidden lines" :
                                         " GLX OpenGL 1.2");
 #else
-        const std::string title = std::string("VITRAL Scene Editor - ") +
+        const java::String title = java::String("VITRAL Scene Editor - ") +
             widgetSet->getName() + " GLX OpenGL 4";
 #endif
         XtSetArg(args[n], XtNtitle, title.c_str()); ++n;
@@ -1298,8 +1295,8 @@ private:
         try {
             self->processEvent(event);
         }
-        catch (const std::exception& ex) {
-            fprintf(stderr, "SceneEditorApplication: event processing failed: %s\n", ex.what());
+        catch (const java::Exception& ex) {
+            fprintf(stderr, "SceneEditorApplication: event processing failed: %s\n", ex.getMessage().c_str());
         }
     }
 
@@ -1509,19 +1506,19 @@ private:
             XtDestroyWidget(viewportMenu);
             viewportMenu = nullptr;
         }
-        const std::vector<XtOpenGLSceneBridge::ViewportMenuItem> items =
+        const java::ArrayList<XtOpenGLSceneBridge::ViewportMenuItem> items =
             sceneBridge->getViewportMenuItems();
-        if (items.empty()) return;
+        if (items.isEmpty()) return;
 
-        std::vector<XtWidgetSet::MenuChoice> choices;
+        java::ArrayList<XtWidgetSet::MenuChoice> choices;
         viewportMenuCommands.clear();
         for (size_t i = 0; i < items.size(); ++i) {
             XtWidgetSet::MenuChoice choice;
             choice.label = items[i].label;
             choice.checked = items[i].current;
             choice.separator = items[i].separator;
-            choices.push_back(choice);
-            viewportMenuCommands.push_back(items[i].command);
+            choices.add(choice);
+            viewportMenuCommands.add(items[i].command);
         }
         viewportMenu = widgetSet->createChoiceMenu(
             activeCanvas(), choices, menuFontSet,
@@ -1557,10 +1554,10 @@ private:
         case PointerCursor::SCALE: shape = XC_sizing; break;
         default: shape = XC_left_ptr; break;
         }
-        std::map<int, Cursor>::iterator known = cursors.find(static_cast<int>(shape));
-        if (known != cursors.end()) return known->second;
+        Cursor* known = cursors.get(static_cast<int>(shape));
+        if (known != nullptr) return (*known);
         Cursor created = XCreateFontCursor(display, shape);
-        cursors[static_cast<int>(shape)] = created;
+        cursors.put(static_cast<int>(shape), created);
         return created;
     }
 
@@ -1577,7 +1574,7 @@ private:
         XWarpPointer(display, None, window, 0, 0, 0, 0, canvasX, canvasY);
     }
 
-    void statusMessageRequested(const std::string& message) override
+    void statusMessageRequested(const java::String& message) override
     {
         showStatusMessage(message);
     }
@@ -1696,12 +1693,12 @@ private:
         return uiFactory;
     }
 
-    std::string getMessage(const char* id) override
+    java::String getMessage(const char* id) override
     {
         return text(id);
     }
 
-    void showStatusMessage(const std::string& message) override
+    void showStatusMessage(const java::String& message) override
     {
         if (statusBar != nullptr) panelWidgets->setLabel(statusBar, message);
     }
@@ -1726,7 +1723,7 @@ private:
         return XtCreatePopupShell(name, shellClass, shell, args, n);
     }
 
-    void setGuiLanguage(const std::string& language) override
+    void setGuiLanguage(const java::String& language) override
     {
         scheduleMenuRebuild(language);
     }
@@ -1738,18 +1735,18 @@ private:
         tangibleDialog->show();
     }
 
-    std::string getTangibleServiceUrl() override
+    java::String getTangibleServiceUrl() override
     {
         return tangibleConnection.getServiceUrl();
     }
 
-    void connectTangibleInterface(const std::string& serviceUrl,
-        const std::function<void(bool)>& connectionListener) override
+    void connectTangibleInterface(const java::String& serviceUrl,
+        const java::Consumer<bool>& connectionListener) override
     {
         tangibleConnection.connect(serviceUrl, [connectionListener](bool connected) {
             // From the thread of the network client
             XtEventQueue::invokeLater(new FunctionTask([connectionListener, connected]() {
-                connectionListener(connected);
+                connectionListener.accept(connected);
             }));
         });
     }
@@ -1855,7 +1852,7 @@ private:
                                        const java::String* serviceUrl) override
     {
         if (tangibleDialog == nullptr) return false;
-        std::string url = serviceUrl != nullptr ? serviceUrl->c_str() : "";
+        java::String url = serviceUrl != nullptr ? serviceUrl->c_str() : "";
         return tangibleDialog->performAction(action.c_str(),
                                              serviceUrl != nullptr ? &url : nullptr);
     }
@@ -1939,7 +1936,7 @@ private:
             sceneBridge->mouseReleased(event);
         }
         else {
-            throw std::invalid_argument((java::String("Unknown mouse event type \"") +
+            throw java::IllegalArgumentException((java::String("Unknown mouse event type \"") +
                 type + "\". Use move, press, drag or release").c_str());
         }
         requestRedraw();
@@ -1978,7 +1975,7 @@ private:
         else if (key.equals("num.")) { keysym = XK_KP_Decimal; keyChar = '.'; }
         else {
             if (key.length() != 1) {
-                throw std::invalid_argument((java::String("Unknown key \"") + key +
+                throw java::IllegalArgumentException((java::String("Unknown key \"") + key +
                     "\". Use a single character, tab, enter, backspace, delete, escape, left, right, up, down, pageup, pagedown, num0..num9, num/, num*, num-, num+, num. or numenter").c_str());
             }
             keyChar = key.charAt(0);

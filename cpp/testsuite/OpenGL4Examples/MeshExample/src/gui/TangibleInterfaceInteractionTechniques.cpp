@@ -1,3 +1,4 @@
+#include "java/lang/Runnable.h"
 #include "gui/TangibleInterfaceInteractionTechniques.h"
 #include "model/MeshModel.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.h"
@@ -5,7 +6,7 @@
 const char* TangibleInterfaceInteractionTechniques::RAY_CUBE_TANGIBLE_ELEMENT_ID = "rayCube1";
 
 TangibleInterfaceInteractionTechniques::TangibleInterfaceInteractionTechniques(
-    MeshModel* model, std::function<void()> repaintCallback)
+    MeshModel* model, java::Runnable repaintCallback)
     : model(model),
       repaintCallback(repaintCallback),
       mapper(model->getCamera())
@@ -19,5 +20,5 @@ void TangibleInterfaceInteractionTechniques::tangibleInterfaceEventReceived(cons
     }
 
     mapper.map(event, model->getRayGizmo());
-    repaintCallback();
+    repaintCallback.run();
 }

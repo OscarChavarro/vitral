@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "application/commands/GuiEventExecutor.h"
 #include "gui/DrawingAreaInteractionListener.h"
@@ -177,7 +178,7 @@ public:
         return false;
     }
 
-    void addMenuItems(std::vector<ViewportMenuItem>& items,
+    void addMenuItems(java::ArrayList<ViewportMenuItem>& items,
                       const char* popupName,
                       const java::String& currentCommand) const
     {
@@ -202,7 +203,7 @@ public:
                 item.current = definition->getCommandName().equals(
                     currentCommand);
             }
-            items.push_back(item);
+            items.add(item);
         }
     }
 
@@ -300,7 +301,7 @@ XtOpenGL1SceneBridge::XtOpenGL1SceneBridge(
 
 XtOpenGL1SceneBridge::~XtOpenGL1SceneBridge() { delete impl; }
 
-void XtOpenGL1SceneBridge::setGuiDefinition(const std::string& json)
+void XtOpenGL1SceneBridge::setGuiDefinition(const java::String& json)
 {
     impl->model->setI18nContext(GuiI18nContextBuilder::build(
         json, GuiState::APPLICATION_DATA_FOLDER));
@@ -368,7 +369,7 @@ GuiEventExecutor* XtOpenGL1SceneBridge::getCommands()
 }
 
 CommandResult XtOpenGL1SceneBridge::executeCommand(
-    const std::string& command)
+    const java::String& command)
 {
     return impl->executor->execute(command.c_str());
 }
@@ -467,30 +468,30 @@ void XtOpenGL1SceneBridge::keyReleased(const KeyEvent& event)
     impl->techniques->processKeyReleasedEvent(event);
 }
 
-std::vector<XtOpenGL1SceneBridge::ViewportMenuItem>
+java::ArrayList<XtOpenGL1SceneBridge::ViewportMenuItem>
 XtOpenGL1SceneBridge::getViewportMenuItems() const
 {
-    std::vector<ViewportMenuItem> items;
+    java::ArrayList<ViewportMenuItem> items;
     Viewport* viewport = impl->menuViewport;
     if ( viewport == nullptr || !impl->isKnownViewport(viewport) ) {
         return items;
     }
     impl->addMenuItems(items, ViewportSetCommands::POPUP_PROJECTION_LOCATION,
                        viewport->getProjectionLocationCommand());
-    std::vector<ViewportMenuItem> renderModes;
+    java::ArrayList<ViewportMenuItem> renderModes;
     impl->addMenuItems(renderModes, ViewportSetCommands::POPUP_RENDER_MODE,
                        viewport->getRenderModeCommand());
-    if ( !items.empty() && !renderModes.empty() ) {
+    if ( !items.isEmpty() && !renderModes.isEmpty() ) {
         ViewportMenuItem separator;
         separator.separator = true;
         separator.current = false;
-        items.push_back(separator);
+        items.add(separator);
     }
-    items.insert(items.end(), renderModes.begin(), renderModes.end());
+    items.addAll(renderModes);
     return items;
 }
 
-void XtOpenGL1SceneBridge::executeViewportCommand(const std::string& command)
+void XtOpenGL1SceneBridge::executeViewportCommand(const java::String& command)
 {
     Viewport* viewport = impl->menuViewport;
     if ( viewport == nullptr || !impl->isKnownViewport(viewport) ) {

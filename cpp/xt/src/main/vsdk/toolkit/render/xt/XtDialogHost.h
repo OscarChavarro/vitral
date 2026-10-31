@@ -1,11 +1,12 @@
 #ifndef __XT_DIALOG_HOST__
 #define __XT_DIALOG_HOST__
 
-#include <functional>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
+#include "java/util/TreeMap.h"
+#include "java/util/function/Consumer.h"
+#include "java/util/function/Function.h"
 
 #include <X11/Xlib.h>
 
@@ -39,12 +40,12 @@ public:
     /**
     @return the text of a message of the GUI context, from its key
     */
-    typedef std::function<std::string(const std::string& key)> MessageSource;
+    typedef java::Function<const java::String&, java::String> MessageSource;
 
     /**
     Called with the action of the button clicked.
     */
-    typedef std::function<void(const std::string& action)> ActionListener;
+    typedef java::Consumer<const java::String&> ActionListener;
 
     /**
     A dialog built from its definition: its shell, its widgets (fields by
@@ -59,39 +60,39 @@ public:
         /**
         @return the text field of a binding, or null
         */
-        XtWidget field(const std::string& binding) const;
+        XtWidget field(const java::String& binding) const;
 
         /**
         @return the button of an action, or null
         */
-        XtWidget action(const std::string& action) const;
+        XtWidget action(const java::String& action) const;
 
         /**
         @return the tree of a binding, or null
         */
-        XtTreeView* tree(const std::string& binding) const;
+        XtTreeView* tree(const java::String& binding) const;
 
         /**
         @return true if the definition has an element (a button or an
         `action` element) with the action
         */
-        bool hasAction(const std::string& action) const;
+        bool hasAction(const java::String& action) const;
         DialogSession* session();
 
-        std::string getText(const std::string& binding) const;
-        void setText(const std::string& binding, const std::string& text);
+        java::String getText(const java::String& binding) const;
+        void setText(const java::String& binding, const java::String& text);
 
         /**
         @return the text shown by the button of an action
         */
-        std::string getActionLabel(const std::string& action) const;
+        java::String getActionLabel(const java::String& action) const;
 
         /**
         Replaces the text of the button of an action, resizing the buttons
         row to fit it (as a Swing `FlowLayout` does).
         */
-        void setActionLabel(const std::string& action,
-                            const std::string& label);
+        void setActionLabel(const java::String& action,
+                            const java::String& label);
 
         /**
         Shows the dialog over the application: modal dialogs take its input
@@ -121,14 +122,15 @@ public:
         int buttonsY;
         DialogSession dialogSession;
         ActionListener onAction;
-        std::map<std::string, XtWidget> fields;
-        std::map<std::string, XtTreeView*> trees;
-        std::vector<std::unique_ptr<Button> > buttons;
+        java::TreeMap<java::String, XtWidget> fields;
+        java::TreeMap<java::String, XtTreeView*> trees;
+        /// Owned
+        java::ArrayList<Button*> buttons;
 
         Form(XtWidgetSet* widgetSet, XFontSet fontSet, XtWidget shell,
              const WidgetDialog* definition, const ActionListener& onAction);
         void layoutButtons();
-        Button* findButton(const std::string& action) const;
+        Button* findButton(const java::String& action) const;
 
         static void buttonPressed(XtWidget, void* clientData);
         static void closeRequested(void* clientData);
@@ -149,7 +151,7 @@ public:
     form)
     @param onAction called with the action of each button clicked
     @return the form, owned by the caller
-    @throws std::invalid_argument for elements that are not text inputs,
+    @throws java::IllegalArgumentException for elements that are not text inputs,
     trees, buttons, actions, rows or columns
     */
     static Form* form(XtWidget shell, XtWidgetSet* widgetSet,

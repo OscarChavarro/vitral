@@ -1,4 +1,4 @@
-#include <algorithm>
+#include "java/lang/Math.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -103,7 +103,7 @@ java::ArrayList<double> Torus::findRealRoots(
     double bound = 0;
 
     for ( int k = 0; k < degree; k++ ) {
-        bound = std::max(bound, std::fabs(polynomial.get(k) / polynomial.get(degree)));
+        bound = java::Math::max(bound, std::fabs(polynomial.get(k) / polynomial.get(degree)));
     }
     bound += 1;
 
@@ -111,7 +111,7 @@ java::ArrayList<double> Torus::findRealRoots(
 
     limits.add(-bound);
     for ( long k = 0; k < critical.size(); k++ ) {
-        limits.add(std::max(-bound, std::min(bound, critical.get(k))));
+        limits.add(java::Math::max(-bound, java::Math::min(bound, critical.get(k))));
     }
     limits.add(bound);
 
@@ -165,7 +165,7 @@ bool Torus::isOnSurface(const Vector3Dd& origin, const Vector3Dd& direction,
 {
     Vector3Dd hit = origin.add(direction.multiply(t));
     double distanceToCircle = std::hypot(std::hypot(hit.x(), hit.y()) - majorRadius, hit.z());
-    double tolerance = ROOT_VALIDATION_TOLERANCE * std::max(majorRadius, minorRadius);
+    double tolerance = ROOT_VALIDATION_TOLERANCE * java::Math::max(majorRadius, minorRadius);
 
     return std::fabs(distanceToCircle - minorRadius) <= tolerance;
 }

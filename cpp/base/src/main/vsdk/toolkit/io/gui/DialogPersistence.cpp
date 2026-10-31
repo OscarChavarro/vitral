@@ -1,9 +1,9 @@
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
+#include <cstring>
+#include "java/util/TreeMap.txx"
+#include "java/util/TreeSet.txx"
 #include <cstdlib>
-#include <map>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/widget/Widget.h"
@@ -22,9 +22,9 @@ struct JsonValue {
     Type type;
     bool booleanValue;
     double numberValue;
-    std::string stringValue;
-    std::vector<JsonValue> items;
-    std::map<std::string, JsonValue> members;
+    java::String stringValue;
+    java::ArrayList<JsonValue> items;
+    java::TreeMap<java::String, JsonValue> members;
 
     JsonValue() : type(NUL), booleanValue(false), numberValue(0) {}
 
@@ -32,14 +32,13 @@ struct JsonValue {
     @return the member with the name, or null if this is not an object or
     it has no such member
     */
-    const JsonValue* get(const std::string& name) const
+    const JsonValue* get(const java::String& name) const
     {
         if ( type != OBJECT ) {
             return nullptr;
         }
-        std::map<std::string, JsonValue>::const_iterator member =
-            members.find(name);
-        return member != members.end() ? &member->second : nullptr;
+        const JsonValue* member = members.get(name);
+        return member != nullptr ? &(*member) : nullptr;
     }
 };
 
@@ -48,13 +47,13 @@ Recursive descent reader of a JSON document (RFC 8259).
 */
 class JsonReader {
 private:
-    const std::string& text;
+    const java::String& text;
     size_t position;
 
     void fail(const char* problem) const
     {
-        throw std::invalid_argument(std::string("dialogs.json: ") + problem +
-            " at offset " + std::to_string(position));
+        throw java::IllegalArgumentException(java::String("dialogs.json: ") + problem +
+            " at offset " + java::String::valueOf(position));
     }
 
     void skipBlanks()
@@ -79,21 +78,20 @@ private:
     void expect(char expected)
     {
         if ( !consume(expected) ) {
-            fail((std::string("expected '") + expected + "'").c_str());
+            fail((java::String("expected '") + expected + "'").c_str());
         }
     }
 
     bool consumeWord(const char* word)
     {
-        size_t length = std::char_traits<char>::length(word);
-        if ( text.compare(position, length, word) == 0 ) {
-            position += length;
+        if ( text.startsWith(word, (int)position) ) {
+            position += std::strlen(word);
             return true;
         }
         return false;
     }
 
-    static void appendUtf8(std::string& out, unsigned long code)
+    static void appendUtf8(java::String& out, unsigned long code)
     {
         if ( code < 0x80 ) {
             out += static_cast<char>(code);
@@ -120,7 +118,7 @@ private:
         if ( position + 4 > text.size() ) {
             fail("truncated unicode escape");
         }
-        std::string digits = text.substr(position, 4);
+        java::String digits = text.substr(position, 4);
         char* end = nullptr;
         unsigned long code = std::strtoul(digits.c_str(), &end, 16);
         if ( end != digits.c_str() + 4 ) {
@@ -130,10 +128,10 @@ private:
         return code;
     }
 
-    std::string readString()
+    java::String readString()
     {
         expect('"');
-        std::string out;
+        java::String out;
         while ( true ) {
             if ( position >= text.size() ) {
                 fail("unterminated string");
@@ -192,9 +190,9 @@ private:
             }
             do {
                 skipBlanks();
-                std::string name = readString();
+                java::String name = readString();
                 expect(':');
-                value.members[name] = readValue();
+                value.members.put(name, readValue());
             } while ( consume(',') );
             expect('}');
         }
@@ -205,7 +203,7 @@ private:
                 return value;
             }
             do {
-                value.items.push_back(readValue());
+                value.items.add(readValue());
             } while ( consume(',') );
             expect(']');
         }
@@ -237,7 +235,7 @@ private:
     }
 
 public:
-    explicit JsonReader(const std::string& text) : text(text), position(0) {}
+    explicit JsonReader(const java::String& text) : text(text), position(0) {}
 
     JsonValue readDocument()
     {
@@ -250,36 +248,36 @@ public:
     }
 };
 
-void invalid(const std::string& message)
+void invalid(const java::String& message)
 {
-    throw std::invalid_argument(message);
+    throw java::IllegalArgumentException(message);
 }
 
 /**
 @return the text of a non blank string member, or an empty string (null in
 Java)
 */
-std::string optional(const JsonValue& node, const char* field)
+java::String optional(const JsonValue& node, const char* field)
 {
     const JsonValue* value = node.get(field);
     if ( value == nullptr || value->type != JsonValue::STRING ||
-         value->stringValue.find_first_not_of(" \t\r\n") == std::string::npos ) {
+         value->stringValue.trim().isEmpty() ) {
         return "";
     }
     return value->stringValue;
 }
 
-std::string required(const JsonValue& node, const char* field,
-                     const std::string& path)
+java::String required(const JsonValue& node, const char* field,
+                     const java::String& path)
 {
-    std::string value = optional(node, field);
-    if ( value.empty() ) {
+    java::String value = optional(node, field);
+    if ( value.isEmpty() ) {
         invalid(path + ": missing " + field);
     }
     return value;
 }
 
-bool isOneOf(const std::string& kind, const char* const* kinds)
+bool isOneOf(const java::String& kind, const char* const* kinds)
 {
     for ( int i = 0; kinds[i] != nullptr; i++ ) {
         if ( kind == kinds[i] ) {
@@ -289,8 +287,8 @@ bool isOneOf(const std::string& kind, const char* const* kinds)
     return false;
 }
 
-WidgetDialogElement element(const JsonValue& node, const std::string& path,
-                            std::set<std::string>& ids)
+WidgetDialogElement element(const JsonValue& node, const java::String& path,
+                            java::TreeSet<java::String>& ids)
 {
     static const char* const KINDS[] = { "column", "row", "textInput",
         "button", "tree", "action", "fileChooser", "fileFilter", nullptr };
@@ -298,28 +296,28 @@ WidgetDialogElement element(const JsonValue& node, const std::string& path,
         "fileFilter", nullptr };
     static const char* const ACTION_KINDS[] = { "button", "action", nullptr };
 
-    std::string kind = required(node, "kind", path);
+    java::String kind = required(node, "kind", path);
     if ( !isOneOf(kind, KINDS) ) {
         invalid(path + ": unsupported kind " + kind);
     }
-    std::string id = optional(node, "id");
-    if ( !id.empty() && !ids.insert(id).second ) {
+    java::String id = optional(node, "id");
+    if ( !id.isEmpty() && !ids.add(id) ) {
         invalid(path + ": duplicate element id " + id);
     }
-    std::string binding = optional(node, "binding");
-    std::string action = optional(node, "action");
-    if ( isOneOf(kind, BOUND_KINDS) && binding.empty() ) {
+    java::String binding = optional(node, "binding");
+    java::String action = optional(node, "action");
+    if ( isOneOf(kind, BOUND_KINDS) && binding.isEmpty() ) {
         invalid(path + ": missing binding");
     }
-    if ( isOneOf(kind, ACTION_KINDS) && action.empty() ) {
+    if ( isOneOf(kind, ACTION_KINDS) && action.isEmpty() ) {
         invalid(path + ": missing action");
     }
-    std::vector<WidgetDialogElement> children;
+    java::ArrayList<WidgetDialogElement> children;
     const JsonValue* childNodes = node.get("children");
     if ( childNodes != nullptr && childNodes->type == JsonValue::ARRAY ) {
         for ( size_t i = 0; i < childNodes->items.size(); i++ ) {
-            children.push_back(element(childNodes->items[i],
-                path + ".children[" + std::to_string(i) + "]", ids));
+            children.add(element(childNodes->items[i],
+                path + ".children[" + java::String::valueOf(i) + "]", ids));
         }
     }
     return WidgetDialogElement(kind.c_str(), id.c_str(),
@@ -332,7 +330,7 @@ WidgetDialogElement element(const JsonValue& node, const std::string& path,
 void DialogPersistence::importDialogs(const java::String& source,
                                       Widget* widget)
 {
-    std::string text(source.c_str());
+    java::String text(source.c_str());
     JsonValue root = JsonReader(text).readDocument();
     const JsonValue* version = root.get("schemaVersion");
     if ( version == nullptr || version->type != JsonValue::NUMBER ||
@@ -344,26 +342,26 @@ void DialogPersistence::importDialogs(const java::String& source,
         invalid("dialogs.json: dialogs must be an array");
     }
 
-    std::set<std::string> ids;
+    java::TreeSet<java::String> ids;
     for ( size_t i = 0; i < dialogs->items.size(); i++ ) {
-        std::string path = "dialogs[" + std::to_string(i) + "]";
+        java::String path = "dialogs[" + java::String::valueOf(i) + "]";
         const JsonValue& node = dialogs->items[i];
-        std::string id = required(node, "id", path);
-        if ( !ids.insert(id).second ||
+        java::String id = required(node, "id", path);
+        if ( !ids.add(id) ||
              widget->getDialogById(id.c_str()) != nullptr ) {
             invalid(path + ": duplicate dialog id " + id);
         }
-        std::string titleKey = required(node, "titleKey", path);
+        java::String titleKey = required(node, "titleKey", path);
         const JsonValue* modal = node.get("modal");
         const JsonValue* content = node.get("content");
         if ( content == nullptr || content->type != JsonValue::ARRAY ) {
             invalid(path + ".content: expected array");
         }
-        std::set<std::string> elementIds;
-        std::vector<WidgetDialogElement> elements;
+        java::TreeSet<java::String> elementIds;
+        java::ArrayList<WidgetDialogElement> elements;
         for ( size_t j = 0; j < content->items.size(); j++ ) {
-            elements.push_back(element(content->items[j],
-                path + ".content[" + std::to_string(j) + "]", elementIds));
+            elements.add(element(content->items[j],
+                path + ".content[" + java::String::valueOf(j) + "]", elementIds));
         }
 
         WidgetDialog* dialog = new WidgetDialog();

@@ -1,7 +1,8 @@
 #ifndef __GTK4_GENERIC_EDITOR__
 #define __GTK4_GENERIC_EDITOR__
 
-#include <map>
+#include "java/lang/String.h"
+#include "java/util/TreeMap.h"
 
 #include <gtk/gtk.h>
 
@@ -20,7 +21,7 @@ class Gtk4GenericEditor : public GenericEditor {
 private:
     GtkWidget* container;
     GtkWidget* messageLabel;
-    std::map<GtkWidget*, const ControlSpecification*> fields;
+    java::TreeMap<GtkWidget*, const ControlSpecification*> fields;
 
     Gtk4GenericEditor(const Gtk4GenericEditor& other);
     Gtk4GenericEditor& operator=(const Gtk4GenericEditor& other);

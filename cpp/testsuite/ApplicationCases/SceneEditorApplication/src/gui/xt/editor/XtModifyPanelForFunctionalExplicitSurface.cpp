@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include "java/lang/NumberFormatException.h"
 #include "java/util/ArrayList.txx"
 #include "gui/xt/XtModifyPanelHost.h"
@@ -54,7 +55,7 @@ void XtModifyPanelForFunctionalExplicitSurface::notifyTargetBeginEdit(
         FunctionalExplicitSurfaceEditor::getPresets();
     presets.clear();
     for (long i = 0; i < presetNames.size(); ++i)
-        presets.push_back(presetNames.get(i).c_str());
+        presets.add(presetNames.get(i).c_str());
     widgets->createOptionButton(
         parentPanel, FunctionalExplicitSurfaceEditor::NO_PRESET, presets,
         fontSet, MARGIN, y, fullWidth, ROW_HEIGHT,
@@ -65,9 +66,9 @@ void XtModifyPanelForFunctionalExplicitSurface::notifyTargetBeginEdit(
     for (int i = 0; i < FunctionalExplicitSurfaceEditor::PARAMETER_COUNT; ++i) {
         FunctionalExplicitSurfaceEditor::Parameter parameter =
             static_cast<FunctionalExplicitSurfaceEditor::Parameter>(i);
-        const std::string label =
+        const java::String label =
             FunctionalExplicitSurfaceEditor::getLabel(parameter).c_str();
-        const std::string value = editor->getValue(parameter).c_str();
+        const java::String value = editor->getValue(parameter).c_str();
 
         if (parameter == FunctionalExplicitSurfaceEditor::FUNCTION) {
             // The function is long: its label goes above it
@@ -103,7 +104,7 @@ void XtModifyPanelForFunctionalExplicitSurface::refreshFields()
 }
 
 void XtModifyPanelForFunctionalExplicitSurface::presetSelected(
-    const std::string& preset)
+    const java::String& preset)
 {
     if (editor == nullptr) return;
     try {

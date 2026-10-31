@@ -1,9 +1,10 @@
 #ifndef __GTK4_TREE_VIEW__
 #define __GTK4_TREE_VIEW__
 
-#include <functional>
-#include <set>
-#include <vector>
+#include "java/lang/Runnable.h"
+#include "java/util/function/_LambdaHolder.h"
+#include "java/util/ArrayList.h"
+#include "java/util/TreeSet.h"
 
 #include <gtk/gtk.h>
 
@@ -26,14 +27,37 @@ the application.
 */
 class Gtk4TreeView {
 public:
-    typedef std::function<void()> Listener;
+    typedef java::Runnable Listener;
 
     /**
     Called for the right button, with the list widget and the position of
     the pointer in it.
     */
-    typedef std::function<void(GtkWidget* list, double x, double y)>
-        ContextMenuListener;
+    class ContextMenuListener :
+        public java::_Lambda<void, GtkWidget*, double, double> {
+      public:
+        ContextMenuListener() {}
+        ContextMenuListener(decltype(nullptr)) {}
+        ContextMenuListener(const ContextMenuListener& other) :
+            java::_Lambda<void, GtkWidget*, double, double>(
+                static_cast<const java::_Lambda<void, GtkWidget*, double,
+                    double>&>(other)) {}
+
+        template <class F>
+        ContextMenuListener(const F& function) :
+            java::_Lambda<void, GtkWidget*, double, double>(function) {}
+
+        ContextMenuListener& operator=(const ContextMenuListener& other)
+        {
+            java::_Lambda<void, GtkWidget*, double, double>::operator=(other);
+            return *this;
+        }
+
+        void accept(GtkWidget* list, double x, double y) const
+        {
+            this->invoke(list, x, y);
+        }
+    };
 
     Gtk4TreeView();
 
@@ -56,12 +80,12 @@ public:
     /**
     Selects the rows, without notifying the selection listener.
     */
-    void setSelection(const std::vector<const DialogTreeNode*>& nodes);
+    void setSelection(const java::ArrayList<const DialogTreeNode*>& nodes);
 
     /**
     @return the selected rows, in display order
     */
-    std::vector<const DialogTreeNode*> getSelection() const;
+    java::ArrayList<const DialogTreeNode*> getSelection() const;
 
     /**
     Selects only a row (or none, for null), as a click does: the selection
@@ -77,8 +101,8 @@ private:
     GtkWidget* widget;
     GtkWidget* list;
     const DialogTreeNode* root;
-    std::set<const DialogTreeNode*> expanded;
-    std::vector<GtkWidget*> rows;
+    java::TreeSet<const DialogTreeNode*> expanded;
+    java::ArrayList<GtkWidget*> rows;
     int anchor;
     bool updating;
     Listener selectionListener;

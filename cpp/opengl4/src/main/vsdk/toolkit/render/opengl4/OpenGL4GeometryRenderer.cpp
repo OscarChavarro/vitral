@@ -1,12 +1,12 @@
+#include "java/lang/String.h"
+#include "java/util/Collections.h"
+#include "java/util/TreeMap.txx"
+#include "java/util/TreeSet.txx"
 #include <glad/gl.h>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
-#include <map>
-#include <set>
-#include <string>
 #include <typeinfo>
-#include <vector>
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -57,23 +57,22 @@ const double INFINITE_PLANE_SIZE = 20.0;
 /// Cells along each side of the square shown for an infinite plane
 const int INFINITE_PLANE_TILES = 10;
 
-std::map<std::string, OpenGL4MeshRenderer::Mesh*> meshes;
-std::set<std::string> reportedUnsupported;
+java::TreeMap<java::String, OpenGL4MeshRenderer::Mesh*> meshes;
+java::TreeSet<java::String> reportedUnsupported;
 
 void releaseMeshes()
 {
-    std::map<std::string, OpenGL4MeshRenderer::Mesh*>::iterator i;
-    for ( i = meshes.begin(); i != meshes.end(); ++i ) {
-        OpenGL4MeshRenderer::release(i->second);
-        delete i->second;
+    for ( long i = 0; i < meshes.size(); i++ ) {
+        OpenGL4MeshRenderer::release(meshes.getValue(i));
+        delete meshes.getValue(i);
     }
     meshes.clear();
 }
 
-std::string format(const char* pattern, ...)
+java::String format(const char* pattern, ...)
     __attribute__((format(printf, 1, 2)));
 
-std::string format(const char* pattern, ...)
+java::String format(const char* pattern, ...)
 {
     char buffer[512];
     va_list args;
@@ -358,8 +357,8 @@ OpenGL4MeshRenderer::Mesh* buildBiCubicPatch(ParametricBiCubicPatch& patch)
 {
     int steps = patch.getApproximationSteps() > 1 ? patch.getApproximationSteps() : 1;
     int n = steps + 1;
-    std::vector<Vector3Dd> points((size_t)n * n);
-    std::vector<Vector3Dd> normals((size_t)n * n);
+    java::ArrayList<Vector3Dd> points = java::Collections::nCopies<Vector3Dd>((size_t)n * n, Vector3Dd());
+    java::ArrayList<Vector3Dd> normals = java::Collections::nCopies<Vector3Dd>((size_t)n * n, Vector3Dd());
 
     for ( int i = 0; i < n; i++ ) {
         double s = (double)i / steps;
@@ -491,7 +490,7 @@ if the geometry is not supported. Parametric geometries are identified by
 their parameters; triangle meshes by identity, as they are not edited while
 shown.
 */
-std::string keyOf(Geometry* geometry)
+java::String keyOf(Geometry* geometry)
 {
     if ( Arrow* a = dynamic_cast<Arrow*>(geometry) ) {
         return format("arrow/%.17g/%.17g/%.17g/%.17g", a->getBaseLength(),
@@ -547,7 +546,7 @@ std::string keyOf(Geometry* geometry)
     if ( QuadMesh* q = dynamic_cast<QuadMesh*>(geometry) ) {
         return format("quadmesh/%p", (void*)q);
     }
-    return std::string();
+    return java::String();
 }
 
 OpenGL4MeshRenderer::Mesh* buildMesh(Geometry* geometry)
@@ -576,14 +575,13 @@ OpenGL4MeshRenderer::Mesh* buildMesh(Geometry* geometry)
 
 OpenGL4MeshRenderer::Mesh* obtainMesh(Geometry* geometry)
 {
-    std::string key = keyOf(geometry);
-    if ( key.empty() ) {
+    java::String key = keyOf(geometry);
+    if ( key.isEmpty() ) {
         return nullptr;
     }
-    std::map<std::string, OpenGL4MeshRenderer::Mesh*>::iterator known =
-        meshes.find(key);
-    if ( known != meshes.end() ) {
-        return known->second;
+    OpenGL4MeshRenderer::Mesh** known = meshes.get(key);
+    if ( known != nullptr ) {
+        return (*known);
     }
     OpenGL4MeshRenderer::Mesh* mesh = buildMesh(geometry);
     if ( mesh == nullptr ) {
@@ -594,14 +592,14 @@ OpenGL4MeshRenderer::Mesh* obtainMesh(Geometry* geometry)
         // recreated on demand
         releaseMeshes();
     }
-    meshes[key] = mesh;
+    meshes.put(key, mesh);
     return mesh;
 }
 
 void reportUnsupported(Geometry* geometry)
 {
     const char* name = typeid(*geometry).name();
-    if ( reportedUnsupported.insert(name).second ) {
+    if ( reportedUnsupported.add(name) ) {
         fprintf(stderr, "OpenGL4GeometryRenderer: geometry not supported by "
                 "the GL4 pipeline yet: %s\n", name);
     }

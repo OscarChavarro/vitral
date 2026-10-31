@@ -407,7 +407,7 @@ void OpenGL4MeshRenderer::upload(Mesh* mesh)
     if ( mesh->uploaded ) {
         return;
     }
-    const std::vector<float>* arrays[5] = {
+    const java::ArrayList<float>* arrays[5] = {
         &mesh->positions, &mesh->normals, &mesh->uvs, &mesh->tangents,
         &mesh->biNormals
     };
@@ -420,7 +420,7 @@ void OpenGL4MeshRenderer::upload(Mesh* mesh)
         glBindBuffer(GL_ARRAY_BUFFER, mesh->vboIds[i]);
         glBufferData(GL_ARRAY_BUFFER,
                      (GLsizeiptr)(arrays[i]->size() * sizeof(float)),
-                     arrays[i]->empty() ? nullptr : &(*arrays[i])[0],
+                     arrays[i]->isEmpty() ? nullptr : &(*arrays[i])[0],
                      GL_STATIC_DRAW);
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(i, sizes[i], GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -434,7 +434,7 @@ void OpenGL4MeshRenderer::drawNormalOverlays(
     Mesh* mesh, const RendererConfiguration* quality,
     const Matrix4x4d& modelViewProjection)
 {
-    if ( mesh->positions.empty() || mesh->normals.empty() ) {
+    if ( mesh->positions.isEmpty() || mesh->normals.isEmpty() ) {
         return;
     }
     double size = mesh->characteristicSize > 1e-6 ? mesh->characteristicSize : 1e-6;

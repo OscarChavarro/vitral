@@ -1,12 +1,14 @@
+#include "java/lang/System.h"
 #include "vsdk/toolkit/processing/StopWatch.h"
-StopWatch::StopWatch() : running(false), elapsedSeconds(0.0)
+
+StopWatch::StopWatch() : running(false), startTime(0), elapsedSeconds(0.0)
 {
 }
 
 void StopWatch::start()
 {
     running = true;
-    startTime = std::chrono::steady_clock::now();
+    startTime = java::System::nanoTime();
 }
 
 void StopWatch::stop()
@@ -14,8 +16,8 @@ void StopWatch::stop()
     if ( !running ) {
         return;
     }
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    elapsedSeconds = std::chrono::duration_cast<std::chrono::duration<double> >(end - startTime).count();
+    long long end = java::System::nanoTime();
+    elapsedSeconds = (double)(end - startTime) / 1.0e9;
     running = false;
 }
 

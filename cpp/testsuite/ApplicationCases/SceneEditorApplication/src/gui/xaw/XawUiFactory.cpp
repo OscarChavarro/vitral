@@ -1,3 +1,5 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <cstdlib>
 
 #include "gui/xaw/XawFileDialog.h"
@@ -20,10 +22,10 @@ const char* XawUiFactory::getResourceFile()
 }
 
 bool XawUiFactory::showFileDialog(XtApplicationHost* host,
-                                  const std::string& title,
-                                  const std::string& folder,
-                                  const std::vector<FileSuffixFilter>& filters,
-                                  std::string& outPath)
+                                  const java::String& title,
+                                  const java::String& folder,
+                                  const java::ArrayList<FileSuffixFilter>& filters,
+                                  java::String& outPath)
 {
     return XawFileDialog::showDialog(host, title, folder, filters, outPath);
 }

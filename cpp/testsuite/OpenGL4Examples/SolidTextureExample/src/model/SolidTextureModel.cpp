@@ -1,4 +1,5 @@
-#include <algorithm>
+#include "java/util/Collections.txx"
+#include "java/lang/String.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -79,7 +80,7 @@ Vector3Dd SolidTextureModel::initialRayDirection()
 RayGizmo* SolidTextureModel::getRayGizmo() { return &rayGizmo; }
 InfinitePlaneGizmo* SolidTextureModel::getInfinitePlaneGizmo() { return &infinitePlaneGizmo; }
 java::ArrayList<Image*>& SolidTextureModel::getTexture2DStack() { return texture2DStack; }
-const std::vector<unsigned char>& SolidTextureModel::getSolidTextureVolumeRgb8() const { return solidTextureVolumeRgb8; }
+const java::ArrayList<unsigned char>& SolidTextureModel::getSolidTextureVolumeRgb8() const { return solidTextureVolumeRgb8; }
 long SolidTextureModel::getSolidTextureRevision() const { return solidTextureRevision; }
 int SolidTextureModel::getSolidTextureSize() const { return solidTextureSize; }
 SolidTextureExampleColorNames SolidTextureModel::getSelectedSolidTexture() const { return selectedSolidTexture; }
@@ -93,7 +94,7 @@ const java::String& SolidTextureModel::getTangibleServiceUrl() const { return ta
 
 void SolidTextureModel::setTangibleServiceUrl(const java::String& url)
 {
-    if ( !url.empty() ) tangibleServiceUrl = url;
+    if ( !url.isEmpty() ) tangibleServiceUrl = url;
 }
 
 void SolidTextureModel::advanceObjectRotationRadians(double deltaRadians)
@@ -148,8 +149,8 @@ void SolidTextureModel::clearTexture2DStack()
 void SolidTextureModel::rebuildTexture2DStack()
 {
     clearTexture2DStack();
-    int side = std::max(1, solidTextureSize);
-    solidTextureVolumeRgb8.assign((size_t)side * side * side * 3, 0);
+    int side = java::Math::max(1, solidTextureSize);
+    solidTextureVolumeRgb8 = java::Collections::nCopies<unsigned char>((long)side * side * side * 3, (unsigned char)0);
     for ( int i = 0; i < solidTextureSize; i++ ) {
         texture2DStack.add(generateTextureSlice(i));
     }
@@ -159,7 +160,7 @@ void SolidTextureModel::rebuildTexture2DStack()
 Image* SolidTextureModel::generateTextureSlice(int sliceIndex)
 {
     RGBImageUncompressed* image = new RGBImageUncompressed();
-    int side = std::max(1, solidTextureSize);
+    int side = java::Math::max(1, solidTextureSize);
     image->initNoFill(side, side);
     double z = unitCoordinate(sliceIndex, solidTextureSize);
     ControlledRGBAImageHDRUncompressed* imageMap = 0;
@@ -301,7 +302,7 @@ void SolidTextureModel::materialMapTexture(
 ControlledRGBAImageHDRUncompressed* SolidTextureModel::buildImageMapTexture()
 {
     ControlledRGBAImageHDRUncompressed* image = new ControlledRGBAImageHDRUncompressed();
-    int side = std::max(1, solidTextureSize);
+    int side = java::Math::max(1, solidTextureSize);
     image->allocate(side, side);
     image->setMapType(ImageToSolidTextureProjectionMethods::PLANAR_MAP);
     image->setInterpolationType(ImageToSolidTextureInterpolationTypes::BI_LINEAR);
@@ -320,7 +321,7 @@ ControlledRGBAImageHDRUncompressed* SolidTextureModel::buildImageMapTexture()
 ControlledRGBAImageHDRUncompressed* SolidTextureModel::buildMaterialMapTexture()
 {
     ControlledRGBAImageHDRUncompressed* image = new ControlledRGBAImageHDRUncompressed();
-    int side = std::max(1, solidTextureSize);
+    int side = java::Math::max(1, solidTextureSize);
     image->allocate(side, side);
     image->setMapType(ImageToSolidTextureProjectionMethods::PLANAR_MAP);
     image->setInterpolationType(ImageToSolidTextureInterpolationTypes::NO_INTERPOLATION);
@@ -337,7 +338,7 @@ ControlledRGBAImageHDRUncompressed* SolidTextureModel::buildMaterialMapTexture()
         table[i].a = toChannel8(1.0);
     }
     indexed->setColorTable(table);
-    int cell = std::max(1, side / 5);
+    int cell = java::Math::max(1, side / 5);
     for ( int y = 0; y < side; y++ )
         for ( int x = 0; x < side; x++ )
             indexed->setPixel(x, y, (unsigned char)(((x / cell) + (y / cell)) & 3));
@@ -405,7 +406,7 @@ unsigned char SolidTextureModel::channel16To8(double value)
 double SolidTextureModel::clamp01(double value)
 {
     if ( value < 0.0 ) return 0.0;
-    return std::min(value, 1.0);
+    return java::Math::min(value, 1.0);
 }
 
 void SolidTextureModel::putVolumeColor16As8(
@@ -458,8 +459,8 @@ void SolidTextureModel::configureInitialViewAndLightToScene()
     camera.setPosition(center.add(eyeDirection.multiply(viewDistance)));
     camera.setUpMaintainingOrthogonality(Vector3Dd(0, 0, 1));
     camera.setFocusedPositionMaintainingOrthogonality(center);
-    double nearPlane = std::max(0.01, viewDistance - (radius * 2.2));
-    double farPlane = std::max(nearPlane + 1.0, viewDistance + (radius * 4.0));
+    double nearPlane = java::Math::max(0.01, viewDistance - (radius * 2.2));
+    double farPlane = java::Math::max(nearPlane + 1.0, viewDistance + (radius * 4.0));
     camera.setNearPlaneDistance(nearPlane);
     camera.setFarPlaneDistance(farPlane);
     camera.updateVectors();

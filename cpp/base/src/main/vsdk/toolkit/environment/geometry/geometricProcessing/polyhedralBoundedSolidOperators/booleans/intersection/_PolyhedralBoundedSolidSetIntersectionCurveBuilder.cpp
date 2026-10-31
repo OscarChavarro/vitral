@@ -2,11 +2,13 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#include <algorithm>
+#include "java/util/Collections.h"
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/TreeMap.txx"
+#include "java/util/TreeSet.txx"
 #include <cfloat>
-#include <map>
-#include <set>
-#include <string>
 
 #include "java/lang/Double.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersectionCurveBuilder.h"
@@ -19,7 +21,7 @@
 
 typedef _PolyhedralBoundedSolidSetIntersectionCurveBuilder Builder;
 
-std::vector<Builder::IndexList> Builder::lastTraversalNeighborPositions;
+java::ArrayList<Builder::IndexList> Builder::lastTraversalNeighborPositions;
 
 namespace {
 
@@ -27,12 +29,12 @@ namespace {
 struct FacePairGroup {
     _PolyhedralBoundedSolidFace* faceA;
     _PolyhedralBoundedSolidFace* faceB;
-    std::vector<int> nodes;
+    java::ArrayList<int> nodes;
 };
 
-bool containsValue(const std::vector<int>& values, int value)
+bool containsValue(const java::ArrayList<int>& values, int value)
 {
-    return std::find(values.begin(), values.end(), value) != values.end();
+    return values.contains(value);
 }
 
 }
@@ -49,8 +51,8 @@ bool Builder::Report::isCleanlyClosed() const
     size_t coveredByCycles;
     size_t i;
 
-    if ( !openChains.empty() || !isolatedNodes.empty() ||
-         !pinchNodes.empty() || oddFacePairGroupCount > 0 ||
+    if ( !openChains.isEmpty() || !isolatedNodes.isEmpty() ||
+         !pinchNodes.isEmpty() || oddFacePairGroupCount > 0 ||
          degenerateDirectionGroupCount > 0 ) {
         return false;
     }
@@ -63,29 +65,29 @@ bool Builder::Report::isCleanlyClosed() const
 
 java::String Builder::Report::summarize() const
 {
-    std::string sb;
+    java::String sb;
     size_t i;
 
-    sb += "curves: nodes=" + std::to_string(nodeCount);
-    sb += " cycles=" + std::to_string(cycles.size()) + "[";
+    sb += "curves: nodes=" + java::String::valueOf(nodeCount);
+    sb += " cycles=" + java::String::valueOf(cycles.size()) + "[";
     for ( i = 0; i < cycles.size(); i++ ) {
         if ( i > 0 ) {
             sb += ",";
         }
-        sb += std::to_string(cycles[i].size());
+        sb += java::String::valueOf(cycles[i].size());
     }
-    sb += "] openChains=" + std::to_string(openChains.size()) + "[";
+    sb += "] openChains=" + java::String::valueOf(openChains.size()) + "[";
     for ( i = 0; i < openChains.size(); i++ ) {
         if ( i > 0 ) {
             sb += ",";
         }
-        sb += std::to_string(openChains[i].size());
+        sb += java::String::valueOf(openChains[i].size());
     }
-    sb += "] isolated=" + std::to_string(isolatedNodes.size());
-    sb += " pinch=" + std::to_string(pinchNodes.size());
-    sb += " oddGroups=" + std::to_string(oddFacePairGroupCount);
-    sb += " degenerateGroups=" + std::to_string(degenerateDirectionGroupCount);
-    sb += std::string(" cleanlyClosed=") + (isCleanlyClosed() ? "true" : "false");
+    sb += "] isolated=" + java::String::valueOf(isolatedNodes.size());
+    sb += " pinch=" + java::String::valueOf(pinchNodes.size());
+    sb += " oddGroups=" + java::String::valueOf(oddFacePairGroupCount);
+    sb += " degenerateGroups=" + java::String::valueOf(degenerateDirectionGroupCount);
+    sb += java::String(" cleanlyClosed=") + (isCleanlyClosed() ? "true" : "false");
     return java::String(sb.c_str());
 }
 
@@ -105,7 +107,7 @@ _PolyhedralBoundedSolidFace* Builder::halfEdgeFace(
 }
 
 void Builder::collectFaces(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
-    std::vector<_PolyhedralBoundedSolidFace*>& outFaces)
+    java::ArrayList<_PolyhedralBoundedSolidFace*>& outFaces)
 {
     _PolyhedralBoundedSolidFace* rightFace;
     _PolyhedralBoundedSolidFace* leftFace;
@@ -117,10 +119,10 @@ void Builder::collectFaces(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
     rightFace = halfEdgeFace(ne.e->rightHalf);
     leftFace = halfEdgeFace(ne.e->leftHalf);
     if ( rightFace != 0 ) {
-        outFaces.push_back(rightFace);
+        outFaces.add(rightFace);
     }
     if ( leftFace != 0 && leftFace != rightFace ) {
-        outFaces.push_back(leftFace);
+        outFaces.add(leftFace);
     }
 }
 
@@ -151,17 +153,17 @@ bool Builder::faceNormal(_PolyhedralBoundedSolidFace* face, Vector3Dd& outNormal
     return true;
 }
 
-void Builder::link(std::vector<IndexList>& neighbors, int i, int j)
+void Builder::link(java::ArrayList<IndexList>& neighbors, int i, int j)
 {
     if ( i == j ) {
         return;
     }
     // As Java `LinkedHashSet`: insertion ordered, without repetitions
     if ( !containsValue(neighbors[i], j) ) {
-        neighbors[i].push_back(j);
+        neighbors[i].add(j);
     }
     if ( !containsValue(neighbors[j], i) ) {
-        neighbors[j].push_back(i);
+        neighbors[j].add(i);
     }
 }
 
@@ -190,7 +192,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
     int k;
     int i;
 
-    n = (int)std::min(sonea.size(), soneb.size());
+    n = (int)java::Math::min(sonea.size(), soneb.size());
     if ( n == 0 ) {
         return report;
     }
@@ -199,10 +201,10 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
     // 1. Group nodes by (faceA, faceB) pair (insertion ordered, as Java
     //    `LinkedHashMap`).
     //-----------------------------------------------------------------
-    std::vector<FacePairGroup> groups;
-    std::map<long long, size_t> groupIndex;
-    std::vector<_PolyhedralBoundedSolidFace*> facesA;
-    std::vector<_PolyhedralBoundedSolidFace*> facesB;
+    java::ArrayList<FacePairGroup> groups;
+    java::TreeMap<long long, size_t> groupIndex;
+    java::ArrayList<_PolyhedralBoundedSolidFace*> facesA;
+    java::ArrayList<_PolyhedralBoundedSolidFace*> facesB;
 
     for ( k = 0; k < n; k++ ) {
         collectFaces(sonea[k], facesA);
@@ -213,21 +215,20 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
                 _PolyhedralBoundedSolidFace* fb = facesB[b];
                 long long key = (((long long)fa->id) << 32) ^
                     ((long long)fb->id & 0xffffffffLL);
-                std::map<long long, size_t>::iterator found =
-                    groupIndex.find(key);
+                size_t* found = groupIndex.get(key);
                 size_t index;
-                if ( found == groupIndex.end() ) {
+                if ( found == nullptr ) {
                     FacePairGroup group;
                     group.faceA = fa;
                     group.faceB = fb;
                     index = groups.size();
-                    groups.push_back(group);
-                    groupIndex[key] = index;
+                    groups.add(group);
+                    groupIndex.put(key, index);
                 }
                 else {
-                    index = found->second;
+                    index = (*found);
                 }
-                groups[index].nodes.push_back(k);
+                groups[index].nodes.add(k);
             }
         }
     }
@@ -235,7 +236,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
     //-----------------------------------------------------------------
     // 2. Derive curve adjacency from each group's chord structure.
     //-----------------------------------------------------------------
-    std::vector<IndexList> neighbors((size_t)n);
+    java::ArrayList<IndexList> neighbors = java::Collections::nCopies<IndexList>((size_t)n, IndexList());
 
     for ( size_t g = 0; g < groups.size(); g++ ) {
         FacePairGroup& group = groups[g];
@@ -265,8 +266,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
         }
 
         IndexList sorted = group.nodes;
-        std::stable_sort(sorted.begin(), sorted.end(),
-            [&sonea, &direction](int a, int b) {
+        sorted.sort([&sonea, &direction](int a, int b) {
                 Vector3Dd pa;
                 Vector3Dd pb;
                 if ( !nodePosition(sonea[a], pa) ||
@@ -296,23 +296,23 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
     //-----------------------------------------------------------------
     // 3. Classify nodes and extract chains (from terminals) and cycles.
     //-----------------------------------------------------------------
-    std::vector<bool> visited((size_t)n, false);
+    java::ArrayList<bool> visited = java::Collections::nCopies<bool>((size_t)n, false);
 
     for ( k = 0; k < n; k++ ) {
         size_t degree = neighbors[k].size();
         if ( degree == 0 ) {
-            report.isolatedNodes.push_back(k);
+            report.isolatedNodes.add(k);
             visited[k] = true;
         }
         else if ( degree > 2 ) {
-            report.pinchNodes.push_back(k);
+            report.pinchNodes.add(k);
         }
     }
 
     // Chains: corridors of degree-2 nodes hanging off terminal nodes
     // (degree 1 or degree > 2). Terminal-terminal direct links are
     // deduplicated with an edge-visited set.
-    std::set<long long> walkedTerminalLinks;
+    java::TreeSet<long long> walkedTerminalLinks;
     for ( k = 0; k < n; k++ ) {
         size_t degree = neighbors[k].size();
         if ( degree == 2 || degree == 0 ) {
@@ -322,14 +322,14 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
             int nb = neighbors[k][t];
             size_t nbDegree = neighbors[nb].size();
             if ( nbDegree != 2 ) {
-                long long a = std::min(k, nb);
-                long long b = std::max(k, nb);
+                long long a = java::Math::min(k, nb);
+                long long b = java::Math::max(k, nb);
                 long long linkKey = (a << 32) | b;
-                if ( walkedTerminalLinks.insert(linkKey).second ) {
+                if ( walkedTerminalLinks.add(linkKey) ) {
                     IndexList chain;
-                    chain.push_back(k);
-                    chain.push_back(nb);
-                    report.openChains.push_back(chain);
+                    chain.add(k);
+                    chain.add(nb);
+                    report.openChains.add(chain);
                 }
                 continue;
             }
@@ -337,12 +337,12 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
                 continue;
             }
             IndexList path;
-            path.push_back(k);
+            path.add(k);
             int prev = k;
             int cur = nb;
             while ( neighbors[cur].size() == 2 && !visited[cur] ) {
                 visited[cur] = true;
-                path.push_back(cur);
+                path.add(cur);
                 int next = -1;
                 for ( size_t c = 0; c < neighbors[cur].size(); c++ ) {
                     if ( neighbors[cur][c] != prev ) {
@@ -357,9 +357,9 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
                 cur = next;
             }
             if ( cur != prev && !containsValue(path, cur) ) {
-                path.push_back(cur);
+                path.add(cur);
             }
-            report.openChains.push_back(path);
+            report.openChains.add(path);
         }
     }
 
@@ -370,7 +370,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
             continue;
         }
         IndexList path;
-        path.push_back(k);
+        path.add(k);
         visited[k] = true;
         int prev = k;
         int cur = neighbors[k][0];
@@ -381,7 +381,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
                 break;
             }
             visited[cur] = true;
-            path.push_back(cur);
+            path.add(cur);
             int next = -1;
             for ( size_t c = 0; c < neighbors[cur].size(); c++ ) {
                 if ( neighbors[cur][c] != prev ) {
@@ -397,10 +397,10 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
             cur = next;
         }
         if ( closed ) {
-            report.cycles.push_back(path);
+            report.cycles.add(path);
         }
         else {
-            report.openChains.push_back(path);
+            report.openChains.add(path);
         }
     }
 
@@ -410,7 +410,7 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
 
 //= Traversal order =================================================
 
-bool Builder::computeTraversalOrder(const std::vector<IndexList>& cycles,
+bool Builder::computeTraversalOrder(const java::ArrayList<IndexList>& cycles,
     int nodeCount,
     IndexList& outPermutation)
 {
@@ -421,7 +421,7 @@ bool Builder::computeTraversalOrder(const std::vector<IndexList>& cycles,
     if ( nodeCount <= 0 ) {
         return false;
     }
-    std::vector<bool> seen((size_t)nodeCount, false);
+    java::ArrayList<bool> seen = java::Collections::nCopies<bool>((size_t)nodeCount, false);
     covered = 0;
     for ( i = 0; i < cycles.size(); i++ ) {
         const IndexList& cycle = cycles[i];
@@ -437,13 +437,12 @@ bool Builder::computeTraversalOrder(const std::vector<IndexList>& cycles,
         return false;
     }
 
-    std::vector<IndexList> ordered = cycles;
-    std::stable_sort(ordered.begin(), ordered.end(),
-        [](const IndexList& a, const IndexList& b) {
+    java::ArrayList<IndexList> ordered = cycles;
+    ordered.sort([](const IndexList& a, const IndexList& b) {
             return minOf(a) < minOf(b);
         });
 
-    outPermutation.assign((size_t)nodeCount, 0);
+    outPermutation = java::Collections::nCopies<int>(nodeCount, 0);
     int position = 0;
     for ( i = 0; i < ordered.size(); i++ ) {
         const IndexList& cycle = ordered[i];
@@ -462,7 +461,7 @@ bool Builder::computeTraversalOrder(const std::vector<IndexList>& cycles,
     return true;
 }
 
-bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
+bool Builder::orderAndOrientAlongCurves(const java::ArrayList<IndexList>& cycles,
     int nodeCount,
     NullEdgeList& sonea,
     NullEdgeList& soneb,
@@ -477,13 +476,12 @@ bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
         return false;
     }
 
-    std::vector<IndexList> ordered = cycles;
-    std::stable_sort(ordered.begin(), ordered.end(),
-        [](const IndexList& a, const IndexList& b) {
+    java::ArrayList<IndexList> ordered = cycles;
+    ordered.sort([](const IndexList& a, const IndexList& b) {
             return minOf(a) < minOf(b);
         });
 
-    std::vector<IndexList> directedCycles;
+    java::ArrayList<IndexList> directedCycles;
     for ( c = 0; c < ordered.size(); c++ ) {
         const IndexList& storedCycle = ordered[c];
         size_t len = storedCycle.size();
@@ -522,9 +520,8 @@ bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
         }
         IndexList directedCycle;
         if ( disagree > agree ) {
-            directedCycle.resize(len);
             for ( j = 0; j < len; j++ ) {
-                directedCycle[j] = storedCycle[(len - j) % len];
+                directedCycle.add(storedCycle[(len - j) % len]);
             }
         }
         else {
@@ -543,7 +540,7 @@ bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
         // later cycles start at the node geometrically closest to the
         // first cycle's start, so the interleaving below begins in phase.
         size_t startPos = 0;
-        if ( directedCycles.empty() ) {
+        if ( directedCycles.isEmpty() ) {
             for ( j = 1; j < len; j++ ) {
                 if ( directedCycle[j] < directedCycle[startPos] ) {
                     startPos = j;
@@ -566,11 +563,11 @@ bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
                 }
             }
         }
-        IndexList rotated(len);
+        IndexList rotated = java::Collections::nCopies<int>((long)len, 0);
         for ( j = 0; j < len; j++ ) {
             rotated[j] = directedCycle[(startPos + j) % len];
         }
-        directedCycles.push_back(rotated);
+        directedCycles.add(rotated);
     }
 
     // Interleave the cycles round-robin so parallel curves advance
@@ -578,7 +575,7 @@ bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
     // four star motifs: round-robin with phase-aligned starts is the
     // deterministic pacing that preserves every case the legacy emission
     // order handled.
-    outPermutation.assign((size_t)nodeCount, 0);
+    outPermutation = java::Collections::nCopies<int>(nodeCount, 0);
     int position = 0;
     size_t round = 0;
     while ( position < nodeCount ) {
@@ -593,11 +590,11 @@ bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
     }
 
     // Export curve-junction adjacency in processing-position space.
-    IndexList positionOf((size_t)nodeCount, 0);
+    IndexList positionOf = java::Collections::nCopies<int>(nodeCount, 0);
     for ( j = 0; j < (size_t)nodeCount; j++ ) {
         positionOf[outPermutation[j]] = (int)j;
     }
-    std::vector<IndexList> neighborPositions((size_t)nodeCount);
+    java::ArrayList<IndexList> neighborPositions = java::Collections::nCopies<IndexList>((size_t)nodeCount, IndexList());
     for ( c = 0; c < directedCycles.size(); c++ ) {
         const IndexList& cycle = directedCycles[c];
         size_t len = cycle.size();
@@ -606,8 +603,8 @@ bool Builder::orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
             int previousOriginal = cycle[(j + len - 1) % len];
             int nextOriginal = cycle[(j + 1) % len];
             IndexList partners;
-            partners.push_back(positionOf[previousOriginal]);
-            partners.push_back(positionOf[nextOriginal]);
+            partners.add(positionOf[previousOriginal]);
+            partners.add(positionOf[nextOriginal]);
             neighborPositions[positionOf[original]] = partners;
         }
     }

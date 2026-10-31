@@ -1,9 +1,8 @@
 #ifndef __XT_GENERIC_EDITOR__
 #define __XT_GENERIC_EDITOR__
 
-#include <string>
-#include <utility>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include <X11/Intrinsic.h>
 
@@ -29,8 +28,17 @@ private:
     int nextY;
     Widget messageLabel;
     /// Last message, kept to show it once the message label exists
-    std::string pendingMessage;
-    std::vector<std::pair<Widget, const ControlSpecification*> > fields;
+    java::String pendingMessage;
+    /** A text field and the control it edits */
+    class Field {
+      public:
+        Widget widget;
+        const ControlSpecification* specification;
+        Field() : widget(nullptr), specification(nullptr) {}
+        Field(Widget widget, const ControlSpecification* specification)
+            : widget(widget), specification(specification) {}
+    };
+    java::ArrayList<Field> fields;
 
     static void fieldActivated(Widget field, void* clientData);
 

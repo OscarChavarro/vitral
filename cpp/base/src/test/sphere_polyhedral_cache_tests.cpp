@@ -1,6 +1,5 @@
-#include <algorithm>
+#include "java/lang/Math.h"
 #include <cmath>
-#include <vector>
 #include <gtest/gtest.h>
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
@@ -17,8 +16,8 @@ TEST(SpherePolyhedralCacheTest, EveryFaceIsAnOutwardTriangleOnTheSphere) {
     // Assert
     ASSERT_NE(entry, nullptr);
     EXPECT_EQ(entry->getVertexCount(), 3 * (int)entry->getSolid()->getPolygonsList().size());
-    const std::vector<float>& p = entry->getPositions();
-    const std::vector<float>& n = entry->getNormals();
+    const java::ArrayList<float>& p = entry->getPositions();
+    const java::ArrayList<float>& n = entry->getNormals();
     for (int i = 0; i < entry->getVertexCount(); i++) {
         double length = std::sqrt(p[3*i]*p[3*i] + p[3*i+1]*p[3*i+1] + p[3*i+2]*p[3*i+2]);
 
@@ -46,12 +45,12 @@ TEST(SpherePolyhedralCacheTest, TextureCoordinatesOfATriangleDoNotJumpAcrossTheS
     // Arrange
     Sphere sphere(1.0);
     const SpherePolyhedralCache::Entry* entry = SpherePolyhedralCache::obtain(&sphere, 16, 8);
-    const std::vector<float>& uv = entry->getUvs();
+    const java::ArrayList<float>& uv = entry->getUvs();
 
     // Act / Assert
     for (int t = 0; t < entry->getVertexCount(); t += 3) {
-        float min = std::min(uv[2*t], std::min(uv[2*t+2], uv[2*t+4]));
-        float max = std::max(uv[2*t], std::max(uv[2*t+2], uv[2*t+4]));
+        float min = java::Math::min(uv[2*t], java::Math::min(uv[2*t+2], uv[2*t+4]));
+        float max = java::Math::max(uv[2*t], java::Math::max(uv[2*t+2], uv[2*t+4]));
 
         EXPECT_LE(max - min, 1.0f / 16 + 1e-5f);
     }

@@ -53,7 +53,7 @@ bool WebServiceServer::start() {
         pthread_t thread;
         if (pthread_create(&thread, NULL, &WebServiceServer::clientThreadEntry, threadArg) == 0) {
             pthread_mutex_lock(&clientThreadsMutex);
-            clientThreads.push_back(thread);
+            clientThreads.add(thread);
             pthread_mutex_unlock(&clientThreadsMutex);
         } else {
             delete threadArg;

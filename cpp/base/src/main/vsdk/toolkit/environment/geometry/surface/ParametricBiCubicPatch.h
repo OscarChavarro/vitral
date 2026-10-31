@@ -1,11 +1,11 @@
 #ifndef __PARAMETRIC_BI_CUBIC_PATCH__
 #define __PARAMETRIC_BI_CUBIC_PATCH__
 
-#include <memory>
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
 #include "vsdk/toolkit/environment/geometry/surface/_ParametricBiCubicPatchIntersector.h"
 class ParametricCurve;
 class Ray;
@@ -45,9 +45,9 @@ private:
     // Lazily built ray intersection structures, discarded each time the
     // patch matrices are rebuilt. Shared by the copies of the patch, as it
     // is immutable
-    mutable std::shared_ptr<const _ParametricBiCubicPatchIntersector> rayIntersector;
+    mutable SharedPointer<const _ParametricBiCubicPatchIntersector> rayIntersector;
 
-    std::shared_ptr<const _ParametricBiCubicPatchIntersector> getRayIntersector() const;
+    SharedPointer<const _ParametricBiCubicPatchIntersector> getRayIntersector() const;
     static void fillHitInformation(
         const _ParametricBiCubicPatchIntersector& intersector,
         const _ParametricBiCubicPatchIntersector::PatchHit& hit,

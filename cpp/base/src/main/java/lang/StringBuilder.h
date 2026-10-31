@@ -58,6 +58,15 @@ class StringBuilder {
     StringBuilder &
     append(long long value);
 
+    StringBuilder &
+    append(unsigned int value);
+
+    StringBuilder &
+    append(unsigned long value);
+
+    StringBuilder &
+    append(unsigned long long value);
+
     /// As Java, with the text of `Double.toString` (i.e. "1.0")
     StringBuilder &
     append(double value);

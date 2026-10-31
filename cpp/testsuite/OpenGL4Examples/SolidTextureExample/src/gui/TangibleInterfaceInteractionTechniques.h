@@ -1,7 +1,7 @@
 #ifndef __SOLID_TEXTURE_TANGIBLE_INTERFACE_INTERACTION_TECHNIQUES__
 #define __SOLID_TEXTURE_TANGIBLE_INTERFACE_INTERACTION_TECHNIQUES__
 
-#include <functional>
+#include "java/lang/Runnable.h"
 
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2InfinitePlaneGizmoMapper.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.h"
@@ -12,13 +12,13 @@ class SolidTextureModel;
 class TangibleInterfaceInteractionTechniques : public TangibleInterfaceListener {
 private:
     SolidTextureModel* model;
-    std::function<void()> repaintCallback;
+    java::Runnable repaintCallback;
     TangibleInterfaceEvent2RayGizmoMapper toRayGizmoMapper;
     TangibleInterfaceEvent2InfinitePlaneGizmoMapper toInfinitePlaneGizmoMapper;
 
 public:
     TangibleInterfaceInteractionTechniques(
-        SolidTextureModel* model, const std::function<void()>& repaintCallback);
+        SolidTextureModel* model, const java::Runnable& repaintCallback);
     virtual void tangibleInterfaceEventReceived(const TangibleInterfaceEvent& event);
 };
 

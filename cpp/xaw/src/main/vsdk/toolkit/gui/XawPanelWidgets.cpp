@@ -1,6 +1,6 @@
-#include <map>
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/TreeMap.txx"
 
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
@@ -22,9 +22,9 @@ struct TextFieldBinding {
     void* clientData;
 };
 
-std::map<Widget, TextFieldBinding>& textFieldBindings()
+java::TreeMap<Widget, TextFieldBinding>& textFieldBindings()
 {
-    static std::map<Widget, TextFieldBinding> bindings;
+    static java::TreeMap<Widget, TextFieldBinding> bindings;
     return bindings;
 }
 
@@ -33,10 +33,9 @@ const char* const NORMAL_BACKGROUND = "white";
 
 void activateAction(Widget w, XEvent*, String*, Cardinal*)
 {
-    std::map<Widget, TextFieldBinding>::iterator it =
-        textFieldBindings().find(w);
-    if (it != textFieldBindings().end() && it->second.activate != nullptr)
-        it->second.activate(w, it->second.clientData);
+    TextFieldBinding* it = textFieldBindings().get(w);
+    if (it != nullptr && (*it).activate != nullptr)
+        (*it).activate(w, (*it).clientData);
 }
 
 void focusAction(Widget w, XEvent*, String*, Cardinal*)
@@ -48,12 +47,12 @@ void focusAction(Widget w, XEvent*, String*, Cardinal*)
 
 void textFieldDestroyed(Widget w, XtPointer, XtPointer)
 {
-    textFieldBindings().erase(w);
+    textFieldBindings().remove(w);
 }
 
 void registerActions(XtAppContext appContext)
 {
-    static std::vector<XtAppContext> registered;
+    static java::ArrayList<XtAppContext> registered;
     for (size_t i = 0; i < registered.size(); ++i)
         if (registered[i] == appContext) return;
     static XtActionsRec actions[] = {
@@ -61,7 +60,7 @@ void registerActions(XtAppContext appContext)
         { const_cast<char*>("vitralTextFieldFocus"), focusAction }
     };
     XtAppAddActions(appContext, actions, XtNumber(actions));
-    registered.push_back(appContext);
+    registered.add(appContext);
 }
 
 /**
@@ -69,7 +68,7 @@ An option of an option button. Freed with its entry.
 */
 struct OptionBinding {
     Widget button;
-    std::string label;
+    java::String label;
     int index;
     XtPanelWidgets::OptionProc choose;
     void* clientData;
@@ -109,7 +108,7 @@ Widget XawPanelWidgets::createPanel(Widget parent, const char* name, int x,
         XtCreateWidget(name, compositeWidgetClass, parent, args, n);
 }
 
-Widget XawPanelWidgets::createLabel(Widget parent, const std::string& text,
+Widget XawPanelWidgets::createLabel(Widget parent, const java::String& text,
                                     XFontSet fontSet, Justify justify,
                                     int x, int y, int width, int height)
 {
@@ -131,7 +130,7 @@ Widget XawPanelWidgets::createLabel(Widget parent, const std::string& text,
                                  args, n);
 }
 
-void XawPanelWidgets::setLabel(Widget label, const std::string& text)
+void XawPanelWidgets::setLabel(Widget label, const java::String& text)
 {
     // Label asks its parent to resize to the new text: keep its geometry
     Dimension width = 0;
@@ -141,7 +140,7 @@ void XawPanelWidgets::setLabel(Widget label, const std::string& text)
                   XtNheight, height, nullptr);
 }
 
-Widget XawPanelWidgets::createTextField(Widget parent, const std::string& text,
+Widget XawPanelWidgets::createTextField(Widget parent, const java::String& text,
                                         XFontSet fontSet,
                                         int x, int y, int width, int height,
                                         ActivateProc activate,
@@ -169,19 +168,19 @@ Widget XawPanelWidgets::createTextField(Widget parent, const std::string& text,
         "<Key>KP_Enter: vitralTextFieldActivate()\n"
         "<Btn1Down>: vitralTextFieldFocus() select-start()"));
     TextFieldBinding binding = { activate, clientData };
-    textFieldBindings()[field] = binding;
+    textFieldBindings().put(field, binding);
     XtAddCallback(field, XtNdestroyCallback, textFieldDestroyed, nullptr);
     return field;
 }
 
-std::string XawPanelWidgets::getText(Widget field)
+java::String XawPanelWidgets::getText(Widget field)
 {
     String value = nullptr;
     XtVaGetValues(field, XtNstring, &value, nullptr);
-    return value != nullptr ? std::string(value) : std::string();
+    return value != nullptr ? java::String(value) : java::String();
 }
 
-void XawPanelWidgets::setText(Widget field, const std::string& text)
+void XawPanelWidgets::setText(Widget field, const java::String& text)
 {
     XtVaSetValues(field, XtNstring, text.c_str(), nullptr);
     setInvalid(field, false);
@@ -199,7 +198,7 @@ void XawPanelWidgets::setForeground(Widget widget, const char* colorName)
 }
 
 Widget XawPanelWidgets::createPushButton(Widget parent,
-                                         const std::string& label,
+                                         const java::String& label,
                                          XFontSet fontSet,
                                          int x, int y, int width, int height,
                                          ActivateProc activate,
@@ -222,12 +221,12 @@ Widget XawPanelWidgets::createPushButton(Widget parent,
 }
 
 Widget XawPanelWidgets::createOptionButton(
-    Widget parent, const std::string& placeholder,
-    const std::vector<std::string>& options, XFontSet fontSet,
+    Widget parent, const java::String& placeholder,
+    const java::ArrayList<java::String>& options, XFontSet fontSet,
     int x, int y, int width, int height, OptionProc choose, void* clientData)
 {
     // Menu buttons find their popup by name
-    const std::string menuName = XtWidgetSupport::uniqueName("vitralOptions");
+    const java::String menuName = XtWidgetSupport::uniqueName("vitralOptions");
     Arg args[10]; Cardinal n = 0;
     XtSetArg(args[n], XtNlabel, placeholder.c_str()); ++n;
     XtSetArg(args[n], XtNmenuName, menuName.c_str()); ++n;

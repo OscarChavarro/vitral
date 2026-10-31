@@ -1,6 +1,6 @@
+#include "java/lang/Math.h"
 #include "processing/StyledCalligraphic2DBuffer.h"
 #include "render/CairoPdfCalligraphic2DBufferRenderer.h"
-#include <algorithm>
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 void CairoPdfCalligraphic2DBufferRenderer::updateBounds(
@@ -29,10 +29,10 @@ void CairoPdfCalligraphic2DBufferRenderer::updateBounds(
                 initialized = true;
             }
             else {
-                minX = std::min(minX, xs[k]);
-                maxX = std::max(maxX, xs[k]);
-                minY = std::min(minY, ys[k]);
-                maxY = std::max(maxY, ys[k]);
+                minX = java::Math::min(minX, xs[k]);
+                maxX = java::Math::max(maxX, xs[k]);
+                minY = java::Math::min(minY, ys[k]);
+                maxY = java::Math::max(maxY, ys[k]);
             }
         }
 
@@ -129,7 +129,7 @@ void CairoPdfCalligraphic2DBufferRenderer::draw(cairo_t* cr, const Calligraphic2
 
     const double width = maxX - minX;
     const double height = maxY - minY;
-    const double reference = std::max(width, height);
+    const double reference = java::Math::max(width, height);
     if (reference <= 0.0) {
         cairo_set_line_width(cr, originalLineWidth);
         return;

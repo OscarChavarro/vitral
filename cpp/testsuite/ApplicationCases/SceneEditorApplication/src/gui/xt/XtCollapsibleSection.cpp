@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
@@ -7,7 +8,7 @@
 
 XtCollapsibleSection::XtCollapsibleSection(XtPanelWidgets* widgets,
                                            Widget parent,
-                                           const std::string& title,
+                                           const java::String& title,
                                            XFontSet fontSet, int y,
                                            int width, bool expanded)
     : widgets(widgets)

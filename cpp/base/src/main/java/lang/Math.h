@@ -38,6 +38,8 @@ class Math {
     static float max(float a, float b);
     static double min(double a, double b);
     static double max(double a, double b);
+    static long min(long a, long b);
+    static long max(long a, long b);
     static float sqrt(float a);
     static double sqrt(double a);
     static int getExponent(double a);
@@ -208,6 +210,16 @@ Math::min(double a, double b) {
 
 inline double
 Math::max(double a, double b) {
+    return a > b ? a : b;
+}
+
+inline long
+Math::min(long a, long b) {
+    return a < b ? a : b;
+}
+
+inline long
+Math::max(long a, long b) {
     return a > b ? a : b;
 }
 

@@ -11,7 +11,7 @@
 #ifndef __SIMPLE_TEST_GEOMETRY_LIBRARY__
 #define __SIMPLE_TEST_GEOMETRY_LIBRARY__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/processing/ProcessingElement.h"
 
@@ -96,35 +96,35 @@ public:
     called, without sector reclassification).
     @return two new solids, owned by the caller
     */
-    static std::vector<PolyhedralBoundedSolid*> createTestObjectPairMANT1986_2();
+    static java::ArrayList<PolyhedralBoundedSolid*> createTestObjectPairMANT1986_2();
 
     /**
     Test pair similar to figures [MANT1986].12. and [MANT1988].15.5, whose
     vertices touch in several different ways and with overlapping faces.
     @return two new solids, owned by the caller
     */
-    static std::vector<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_3();
+    static java::ArrayList<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_3();
 
     /**
     Test pair similar to figure [MANT1988].6.13: left and front view
     extrusions for profile set operations (section [MANT1988].6.4.2.).
     @return two new solids, owned by the caller
     */
-    static std::vector<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_6_13();
+    static java::ArrayList<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_6_13();
 
     /**
     Test pair similar to figure [MANT1988].15.1: view profiles difficult to
     intersect due to their overlapping faces.
     @return two new solids, owned by the caller
     */
-    static std::vector<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_15_1();
+    static java::ArrayList<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_15_1();
 
     /**
     Test pair similar to figures [MANT1988].15.2. and [MANT1988].15.3.
     @param situation -1: holed object, 0: limit case, 1: open object
     @return two new solids (block and wedge), owned by the caller
     */
-    static std::vector<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_15_2(
+    static java::ArrayList<PolyhedralBoundedSolid*> createTestObjectPairMANT1988_15_2(
         int situation);
 };
 

@@ -1,4 +1,5 @@
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <unistd.h>
 
 #include "java/io/File.h"
@@ -14,16 +15,16 @@
 
 namespace {
 
-std::string parentFolderOf(const std::string& path)
+java::String parentFolderOf(const java::String& path)
 {
     size_t separator = path.rfind('/');
-    if ( separator == std::string::npos ) {
+    if ( separator == -1 ) {
         return ".";
     }
     return separator == 0 ? "/" : path.substr(0, separator);
 }
 
-std::string currentFolder()
+java::String currentFolder()
 {
     char buffer[4096];
     return getcwd(buffer, sizeof(buffer)) != nullptr ? buffer : ".";
@@ -38,7 +39,7 @@ XtOpenGL4GuiEventExecutor::XtOpenGL4GuiEventExecutor(XtApplicationHost* parent)
 
 bool XtOpenGL4GuiEventExecutor::executeCommand(const java::String& command)
 {
-    std::string label(command.c_str());
+    java::String label(command.c_str());
     CommandResult result =
         parent->getSceneBridge()->executeCommand(label);
 
@@ -59,12 +60,12 @@ bool XtOpenGL4GuiEventExecutor::executeCommand(const java::String& command)
 Executes the commands that need Xt.
 @return false if the command failed
 */
-bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
+bool XtOpenGL4GuiEventExecutor::executeXtCommand(const java::String& label)
 {
     XtOpenGL4SceneBridge* bridge = parent->getSceneBridge();
     GuiEventExecutor* commands = bridge->getCommands();
     GuiState* guiState = bridge->getGuiState();
-    std::string path;
+    java::String path;
 
     //- FILE ----------------------------------------------------------
     if ( label == "IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT" ) {
@@ -75,7 +76,7 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
     }
     else if ( label == "IDC_IMPORT_OBJECTS_FROM_FILE" ) {
         // The filters of the scene.import dialog of etc/gui/dialogs.json
-        std::vector<FileSuffixFilter> filters =
+        java::ArrayList<FileSuffixFilter> filters =
             FileSuffixFilter::fromDialog(bridge->getDialogById("scene.import"));
 
         if ( parent->getUiFactory()->showFileDialog(parent, "Open",
@@ -99,7 +100,7 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
 
         if ( parent->getUiFactory()->showFileDialog(parent, "Save",
                  guiState->getWriteFolder().c_str(),
-                 std::vector<FileSuffixFilter>(), path) ) {
+                 java::ArrayList<FileSuffixFilter>(), path) ) {
             if ( !commands->exportObjects(java::File(path.c_str()), format) ) {
                 Logger::reportMessage("XtOpenGL4GuiEventExecutor",
                     Logger::WARNING, "execute",
@@ -112,8 +113,8 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
     //- RENDERING -----------------------------------------------------
     else if ( label == "Select palette for depthmap display" ||
               label == "IDC_RENDERING_SELECTPALETTEDEPTH" ) {
-        std::vector<FileSuffixFilter> filters;
-        filters.push_back(FileSuffixFilter("gpl", "gpl Gimp Palettes"));
+        java::ArrayList<FileSuffixFilter> filters;
+        filters.add(FileSuffixFilter("gpl", "gpl Gimp Palettes"));
         if ( parent->getUiFactory()->showFileDialog(parent, "Open",
                  currentFolder() + "/../../../../etc/palettes", filters,
                  path) ) {
@@ -137,7 +138,7 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
         // Swing look and feels: the widget set of the Xt GUI (and so its
         // look) is chosen when building the application
         parent->showStatusMessage(
-            std::string("Look and feel changes are not available: this Xt GUI "
+            java::String("Look and feel changes are not available: this Xt GUI "
                         "is built with ") +
             parent->getUiFactory()->getWidgetSet()->getName());
     }

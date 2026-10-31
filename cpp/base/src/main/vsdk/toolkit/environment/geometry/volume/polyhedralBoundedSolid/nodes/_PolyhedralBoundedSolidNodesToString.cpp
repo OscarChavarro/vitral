@@ -1,4 +1,4 @@
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
@@ -12,12 +12,12 @@
 
 java::String _PolyhedralBoundedSolidEdge::toString() const
 {
-    std::string msg = "Edge id " + std::to_string(id) + ". Half1: ";
+    java::String msg = "Edge id " + java::String::valueOf(id) + ". Half1: ";
     if ( leftHalf == nullptr ) {
         msg += "null. ";
     }
     else {
-        msg += "vertex " + std::to_string(leftHalf->startingVertex->id);
+        msg += "vertex " + java::String::valueOf(leftHalf->startingVertex->id);
     }
 
     msg += " / Half2: ";
@@ -26,31 +26,31 @@ java::String _PolyhedralBoundedSolidEdge::toString() const
         msg += "null. ";
     }
     else {
-        msg += "vertex " + std::to_string(rightHalf->startingVertex->id);
+        msg += "vertex " + java::String::valueOf(rightHalf->startingVertex->id);
     }
     return java::String(msg.c_str());
 }
 
 java::String _PolyhedralBoundedSolidFace::toString() const
 {
-    std::string msg = "Face id [" + std::to_string(id) + "], " +
-        std::to_string(boundariesList.size()) + " loops.";
+    java::String msg = "Face id [" + java::String::valueOf(id) + "], " +
+        java::String::valueOf(boundariesList.size()) + " loops.";
     return java::String(msg.c_str());
 }
 
 java::String _PolyhedralBoundedSolidHalfEdge::toString()
 {
-    std::string msg = "HalfEdge id " + std::to_string(id) + ". ";
+    java::String msg = "HalfEdge id " + java::String::valueOf(id) + ". ";
 
-    msg += "From vertex [" + std::to_string(startingVertex->id) + "] ";
-    msg += "to vertex [" + std::to_string(next()->startingVertex->id) + "]. ";
+    msg += "From vertex [" + java::String::valueOf(startingVertex->id) + "] ";
+    msg += "to vertex [" + java::String::valueOf(next()->startingVertex->id) + "]. ";
 
-    msg += "Parent face [" + std::to_string(parentLoop->parentFace->id) + "]. ";
+    msg += "Parent face [" + java::String::valueOf(parentLoop->parentFace->id) + "]. ";
     if ( parentEdge == nullptr ) {
         msg += "<without parent edge>. ";
     }
     else {
-        msg += "Parent edge " + std::to_string(parentEdge->id) + " ";
+        msg += "Parent edge " + java::String::valueOf(parentEdge->id) + " ";
         if ( this == parentEdge->leftHalf ) {
             msg += "(left)";
         }
@@ -62,27 +62,27 @@ java::String _PolyhedralBoundedSolidHalfEdge::toString()
         }
         msg += ". ";
     }
-    msg += "Next halfedge: " + std::to_string(next()->id) + ".";
+    msg += "Next halfedge: " + java::String::valueOf(next()->id) + ".";
     return java::String(msg.c_str());
 }
 
 java::String _PolyhedralBoundedSolidLoop::toString() const
 {
-    std::string msg = "Loop, parent face " + std::to_string(parentFace->id);
+    java::String msg = "Loop, parent face " + java::String::valueOf(parentFace->id);
     return java::String(msg.c_str());
 }
 
 java::String _PolyhedralBoundedSolidVertex::toString() const
 {
     java::String* p = position.toString();
-    std::string msg = "vertex id " + std::to_string(id) + ". Position " +
-        std::string(p->c_str()) + ". ";
+    java::String msg = "vertex id " + java::String::valueOf(id) + ". Position " +
+        java::String(p->c_str()) + ". ";
     delete p;
     if ( emanatingHalfEdge == nullptr ) {
         msg += "No associated half-edge.";
     }
     else {
-        msg += "H.E. " + std::to_string(emanatingHalfEdge->id);
+        msg += "H.E. " + java::String::valueOf(emanatingHalfEdge->id);
     }
     return java::String(msg.c_str());
 }

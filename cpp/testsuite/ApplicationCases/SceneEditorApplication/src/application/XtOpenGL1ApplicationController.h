@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_APPLICATION_CONTROLLER__
 #define __XT_OPENGL1_APPLICATION_CONTROLLER__
 
+#include "java/lang/IllegalArgumentException.h"
 #include "java/io/File.h"
 #include "java/lang/String.h"
 
@@ -64,7 +65,7 @@ public:
     @param x canvas x coordinate
     @param y canvas y coordinate
     @param button button number (1 = left, 2 = middle, 3 = right)
-    @throws std::invalid_argument for an unknown type (Java throws
+    @throws java::IllegalArgumentException for an unknown type (Java throws
     IllegalArgumentException)
     */
     virtual void injectMouseEvent(const java::String& type, int x, int y,
@@ -81,7 +82,7 @@ public:
     "num.", "numenter"
     @param shift true to press it with the SHIFT key down
     @param ctrl true to press it with the CTRL key down
-    @throws std::invalid_argument for an unknown key (Java throws
+    @throws java::IllegalArgumentException for an unknown key (Java throws
     IllegalArgumentException)
     */
     virtual void injectKeyEvent(const java::String& key, bool shift,

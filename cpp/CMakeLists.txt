@@ -53,12 +53,8 @@ endif()
 include(CTest)
 enable_testing()
 
-# Naming rules of attributes and accessors, shared by the three ports.
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)
-  add_test(NAME attribute_names
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/../scripts/checkAttributeNames.py --all
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
   # The Xt layer uses neither Athena nor Motif, and they never use each other
   add_test(NAME xt_layers
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/../scripts/checkXtLayers.py

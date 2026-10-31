@@ -1,8 +1,8 @@
 #ifndef __XT_UI_FACTORY__
 #define __XT_UI_FACTORY__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include "io/FileSuffixFilter.h"
 
@@ -44,10 +44,10 @@ public:
     @return true if the user approved a file (`APPROVE_OPTION`)
     */
     virtual bool showFileDialog(XtApplicationHost* host,
-                                const std::string& title,
-                                const std::string& folder,
-                                const std::vector<FileSuffixFilter>& filters,
-                                std::string& outPath) = 0;
+                                const java::String& title,
+                                const java::String& folder,
+                                const java::ArrayList<FileSuffixFilter>& filters,
+                                java::String& outPath) = 0;
 };
 
 /**

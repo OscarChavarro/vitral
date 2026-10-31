@@ -1,9 +1,9 @@
 #ifndef VITRAL_XLIB_FRAMEBUFFER_H
 #define VITRAL_XLIB_FRAMEBUFFER_H
 
+#include "java/util/TreeMap.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <map>
 #include <stdint.h>
 #include "vsdk/toolkit/gui/framebuffer/Framebuffer.h"
 
@@ -103,7 +103,7 @@ private:
     unsigned long foreground;
     int drawing;
     bool mapped;
-    std::map<uint32_t, unsigned long> allocated;
+    java::TreeMap<uint32_t, unsigned long> allocated;
     // The client side copy of the back buffer: valid when it matches the back buffer once the pending rectangle
     // of pixels written to it is sent.
     mutable XImage *mirror;

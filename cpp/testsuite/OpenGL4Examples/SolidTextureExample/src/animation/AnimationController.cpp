@@ -1,5 +1,7 @@
-#include <algorithm>
-#include <chrono>
+#include "java/lang/Math.h"
+#include "java/lang/Runnable.h"
+#include "java/lang/System.h"
+#include "java/lang/Thread.h"
 #include <cmath>
 
 #include "animation/AnimationController.h"
@@ -11,45 +13,54 @@ static const double ANGULAR_SPEED_RAD_PER_SECOND =
     FULL_ROTATION_RADIANS / ROTATION_PERIOD_SECONDS;
 static const double MAX_ELAPSED_SECONDS = 0.25;
 
-AnimationController::AnimationController() : running(false) {}
+AnimationController::AnimationController() : task(nullptr), worker(nullptr) {}
 AnimationController::~AnimationController() { stop(); }
 
 void AnimationController::start(
-    SolidTextureModel* model, const std::function<void()>& repaintCallback)
+    SolidTextureModel* model, const java::Runnable& repaintCallback)
 {
-    if ( running || model == 0 ) return;
-    running = true;
-    worker = std::thread([this, model, repaintCallback]() {
-        typedef std::chrono::steady_clock clock;
-        clock::time_point startT = clock::now();
-        clock::time_point lastT = startT;
-        clock::time_point lastGizmoT = startT;
-        while ( running ) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(16));
-            clock::time_point now = clock::now();
-            double elapsed = std::chrono::duration<double>(now - lastT).count();
+    if ( running.get() != 0 || model == 0 ) return;
+    running.set(1);
+    // A copy that the worker may run (the parameter is const)
+    java::Runnable repaint = repaintCallback;
+    task = new java::Runnable([this, model, repaint]() mutable {
+        long long startT = java::System::nanoTime();
+        long long lastT = startT;
+        long long lastGizmoT = startT;
+        while ( running.get() != 0 ) {
+            java::Thread::sleep(16);
+            long long now = java::System::nanoTime();
+            double elapsed = (double)(now - lastT) / 1.0e9;
             lastT = now;
             bool gizmoUpdated = false;
-            if ( std::chrono::duration<double>(now - lastGizmoT).count() >= 1.0 ) {
+            if ( (double)(now - lastGizmoT) / 1.0e9 >= 1.0 ) {
                 model->getRayGizmo()->update();
                 model->getInfinitePlaneGizmo()->update();
                 lastGizmoT = now;
                 gizmoUpdated = true;
             }
             if ( model->isAnimationEnabled() ) {
-                elapsed = std::max(0.0, std::min(elapsed, MAX_ELAPSED_SECONDS));
+                elapsed = java::Math::max(0.0, java::Math::min(elapsed, MAX_ELAPSED_SECONDS));
                 model->advanceObjectRotationRadians(ANGULAR_SPEED_RAD_PER_SECOND * elapsed);
-                if ( repaintCallback ) repaintCallback();
+                if ( repaint ) repaint.run();
             }
-            else if ( gizmoUpdated && repaintCallback ) {
-                repaintCallback();
+            else if ( gizmoUpdated && repaint ) {
+                repaint.run();
             }
         }
     });
+    worker = new java::Thread(task);
+    worker->start();
 }
 
 void AnimationController::stop()
 {
-    running = false;
-    if ( worker.joinable() ) worker.join();
+    running.set(0);
+    if ( worker != nullptr ) {
+        worker->join();
+        delete worker;
+        worker = nullptr;
+        delete task;
+        task = nullptr;
+    }
 }

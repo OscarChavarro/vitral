@@ -10,8 +10,6 @@
 #ifndef __PARAMETRIC_BI_CUBIC_PATCH_INTERSECTOR__
 #define __PARAMETRIC_BI_CUBIC_PATCH_INTERSECTOR__
 
-#include <memory>
-#include <vector>
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class Matrix4x4d;
@@ -120,7 +118,8 @@ private:
     /// (i, j) at index 3*(4*i + j). Index i follows the s (u) parameter and
     /// index j the t (v) parameter of `ParametricBiCubicPatch::evaluate`.
     double bezierNet[48];
-    std::unique_ptr<PatchNode> root;
+    /// Owned by this intersector
+    PatchNode* root;
     int subdivisionDepth;
 
     _ParametricBiCubicPatchIntersector(const _ParametricBiCubicPatchIntersector&);

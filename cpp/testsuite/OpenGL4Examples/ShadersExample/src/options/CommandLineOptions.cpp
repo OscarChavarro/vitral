@@ -1,3 +1,5 @@
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
 #include <cctype>
 #include <cstdlib>
 
@@ -90,7 +92,7 @@ static void applyFeatureSwitches(CommandLineOptions& o, const java::String& csv,
             o.hasWithBumpMap = true;
             o.withBumpMap = enabled;
         }
-        else if (!t.empty()) {
+        else if (!t.isEmpty()) {
             Logger::reportMessage("CommandLineOptions", Logger::ERROR, "applyFeatureSwitches", java::String("Unknown feature in --with/--without: ").concat(t).toCString());
             throw VSDKFatalException(java::String("Unknown feature in --with/--without: ").concat(t).toCString());
         }
@@ -145,7 +147,7 @@ CommandLineOptions CommandLineOptions::parse(int argc, char** argv)
         throw VSDKFatalException(java::String("Unknown option: ").concat(arg));
     }
 
-    if (o.offline && o.offlineOutputPath.empty()) {
+    if (o.offline && o.offlineOutputPath.isEmpty()) {
         Logger::reportMessage("CommandLineOptions", Logger::ERROR, "parse", "--offline requires an output file path");
         throw VSDKFatalException("--offline requires an output file path");
     }

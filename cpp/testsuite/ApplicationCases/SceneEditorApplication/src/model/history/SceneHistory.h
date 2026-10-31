@@ -1,7 +1,8 @@
 #ifndef __SCENE_HISTORY__
 #define __SCENE_HISTORY__
 
-#include <functional>
+#include "java/lang/Runnable.h"
+#include "java/util/function/Supplier.h"
 
 #include "java/lang/String.h"
 #include "model/history/UndoQueue.h"
@@ -22,7 +23,7 @@ single step.
 */
 class SceneHistory {
 private:
-    std::function<Scene*()> sceneSource;
+    java::Supplier<Scene*> sceneSource;
     UndoQueue queue;
     SceneSnapshot* before;
     int depth;
@@ -34,7 +35,7 @@ public:
     /**
     @param sceneSource gives the scene currently edited
     */
-    explicit SceneHistory(const std::function<Scene*()>& sceneSource);
+    explicit SceneHistory(const java::Supplier<Scene*>& sceneSource);
     virtual ~SceneHistory();
 
     /**
@@ -70,7 +71,7 @@ public:
     @return true if an operation was recorded
     */
     bool perform(const java::String& name,
-                 const std::function<void()>& action);
+                 const java::Runnable& action);
 
     /**
     @return the undone operation, or null if there was nothing to undo or an

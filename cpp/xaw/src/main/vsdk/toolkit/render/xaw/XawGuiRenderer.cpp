@@ -1,7 +1,7 @@
 // Before any other header that could include the Xt ones
+#include "java/lang/String.h"
 #include "vsdk/toolkit/gui/XawIntrinsics.h"
 
-#include <string>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/CommandListener.h"
@@ -53,7 +53,7 @@ void popupSubmenu(XtWidget entry, XtPointer clientData, XtPointer)
 XtWidget createPopupShell(XtWidget owner)
 {
     // Unique names: menu buttons find their popup by name
-    std::string name = XtWidgetSupport::uniqueName("vitralMenu");
+    java::String name = XtWidgetSupport::uniqueName("vitralMenu");
     XtWidgetSupport::ShellVisual shellVisual =
         XtWidgetSupport::shellVisualOf(owner);
     Arg args[4]; Cardinal n = 0;

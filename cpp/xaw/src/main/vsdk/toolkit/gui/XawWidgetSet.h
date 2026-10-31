@@ -1,6 +1,7 @@
 #ifndef __XAW_WIDGET_SET__
 #define __XAW_WIDGET_SET__
 
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/gui/XawPanelWidgets.h"
 #include "vsdk/toolkit/gui/XtWidgetSet.h"
 #include "vsdk/toolkit/render/xaw/XawGuiRenderer.h"
@@ -31,7 +32,7 @@ public:
     virtual void setWindowCloseHandler(Widget shell, NotifyProc close,
                                        void* clientData) override;
     virtual Widget createChoiceMenu(Widget owner,
-                                    const std::vector<MenuChoice>& items,
+                                    const java::ArrayList<MenuChoice>& items,
                                     XFontSet fontSet, ChoiceProc choose,
                                     void* clientData) override;
     virtual void popupChoiceMenu(Widget menu, int rootX, int rootY,

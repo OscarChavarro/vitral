@@ -1,7 +1,7 @@
 #ifndef __CSG_KURLANDER_BOWL_FIXTURE__
 #define __CSG_KURLANDER_BOWL_FIXTURE__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -37,11 +37,11 @@ public:
     */
     static PolyhedralBoundedSolid* createAllMotifsUnion();
 
-    static std::vector<PolyhedralBoundedSolid*> createBowlAndFirstStarOperands();
-    static std::vector<PolyhedralBoundedSolid*> createBowlAndFirstStarOperands(
+    static java::ArrayList<PolyhedralBoundedSolid*> createBowlAndFirstStarOperands();
+    static java::ArrayList<PolyhedralBoundedSolid*> createBowlAndFirstStarOperands(
         int motifIndex);
     static PolyhedralBoundedSolid* createSingleMotif(int motifIndex);
-    static std::vector<PolyhedralBoundedSolid*> createShellAndFirstMoonOperands();
+    static java::ArrayList<PolyhedralBoundedSolid*> createShellAndFirstMoonOperands();
 
     /**
     @return the complete Kurlander bowl
@@ -66,7 +66,7 @@ private:
     static PolyhedralBoundedSolid* createCylinder(double radius, double height,
         const Vector3Dd& translation);
     static PolyhedralBoundedSolid* createExtrudedPolygon(
-        const std::vector<Vector3Dd>& points, double thickness);
+        const java::ArrayList<Vector3Dd>& points, double thickness);
     static PolyhedralBoundedSolid* createStar();
     static PolyhedralBoundedSolid* createMoon();
     static PolyhedralBoundedSolid* placeStar(PolyhedralBoundedSolid* star,

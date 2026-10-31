@@ -1,10 +1,11 @@
+#include "java/lang/Exception.h"
+#include "java/lang/String.h"
 #include <cstdio>
 #include <cstdlib>
 
 #include "java/util/ArrayList.txx"
 #include "CommandOptionsProcessor.h"
 #include "ImageExporter.h"
-#include <exception>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
@@ -55,8 +56,8 @@ static void offlineExecution(const java::String& fileName,
         ReaderMitScene readerMitScene;
         readerMitScene.importEnvironment(fileName.c_str(), &scene);
     }
-    catch (const std::exception& e) {
-        fprintf(stderr, "Error reading %s: %s\n", fileName.c_str(), e.what());
+    catch (const java::Exception& e) {
+        fprintf(stderr, "Error reading %s: %s\n", fileName.c_str(), e.getMessage().c_str());
         fprintf(stderr, "There are scene samples on %s\n", SCENE_SAMPLES_PATH);
         std::exit(EXIT_CODE_READ_ERROR);
     }

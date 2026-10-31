@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL4_SCENE_EDITOR_APPLICATION__
 #define __XT_OPENGL4_SCENE_EDITOR_APPLICATION__
 
+#include "java/lang/IllegalArgumentException.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 
@@ -110,7 +111,7 @@ public:
     /**
     Runs an action of the scene selector (deleteSelected,
     toggleVisibility).
-    @throws std::invalid_argument for unknown actions
+    @throws java::IllegalArgumentException for unknown actions
     */
     virtual void selectorAction(const java::String& action) = 0;
 

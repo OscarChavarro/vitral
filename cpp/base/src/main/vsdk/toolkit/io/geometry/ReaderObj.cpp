@@ -52,7 +52,7 @@ static java::String dirnameOf(const java::String& path)
 
 static java::String joinPath(const java::String& a, const java::String& b)
 {
-    if (a.empty() || a == ".") return b;
+    if (a.isEmpty() || a == ".") return b;
     return a + "/" + b;
 }
 
@@ -85,9 +85,9 @@ static ReaderObjVertex readFaceVertex(const java::String& text)
         }
     }
 
-    if (parts.size() >= 1 && !parts[0].empty()) r.vertexPositionIndex = readIndexInteger(parts[0]);
-    if (parts.size() >= 2 && !parts[1].empty()) r.vertexTextureCoordinateIndex = readIndexInteger(parts[1]);
-    if (parts.size() >= 3 && !parts[2].empty()) r.vertexNormalIndex = readIndexInteger(parts[2]);
+    if (parts.size() >= 1 && !parts[0].isEmpty()) r.vertexPositionIndex = readIndexInteger(parts[0]);
+    if (parts.size() >= 2 && !parts[1].isEmpty()) r.vertexTextureCoordinateIndex = readIndexInteger(parts[1]);
+    if (parts.size() >= 3 && !parts[2].isEmpty()) r.vertexNormalIndex = readIndexInteger(parts[2]);
     if (parts.size() == 2 && text.size() > 0 && text[text.size() - 1] != '/') {
         r.vertexNormalIndex = r.vertexTextureCoordinateIndex;
         r.vertexTextureCoordinateIndex = -1;
@@ -172,7 +172,7 @@ static void readMaterials(
     char tagStr[256] = {0}, mtlFileStr[256] = {0};
     sscanf(mtllibLine.toCString(), "%255s %255s", tagStr, mtlFileStr);
     java::String mtlFile(mtlFileStr);
-    if (mtlFile.empty()) return;
+    if (mtlFile.isEmpty()) return;
 
     java::String mtlPath = joinPath(dirnameOf(objFile), mtlFile);
     FILE* in = fopen(mtlPath.c_str(), "r");

@@ -1,7 +1,7 @@
 #ifndef __OPEN_GL_4_SOLID_TEXTURE_RENDERER__
 #define __OPEN_GL_4_SOLID_TEXTURE_RENDERER__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 
@@ -38,15 +38,15 @@ private:
 
     void ensureBuffers();
     void ensureProgram();
-    void ensureSolidTexture(const std::vector<unsigned char>& volume,
+    void ensureSolidTexture(const java::ArrayList<unsigned char>& volume,
                             int size, long revision);
     void drawBody(SimpleBody* body, Camera* camera,
                   RendererConfiguration* quality);
     void drawMesh(RendererConfiguration* quality);
-    void uploadFrame(const std::vector<float>& positions,
-                     const std::vector<float>& normals);
-    bool buildFrame(TriangleMesh* mesh, std::vector<float>& positions,
-                    std::vector<float>& normals);
+    void uploadFrame(const java::ArrayList<float>& positions,
+                     const java::ArrayList<float>& normals);
+    bool buildFrame(TriangleMesh* mesh, java::ArrayList<float>& positions,
+                    java::ArrayList<float>& normals);
     void configureClippingPlane(InfinitePlane* clippingPlane);
 
     static unsigned int buildProgram(const java::String& shaderDirectory,
@@ -71,12 +71,12 @@ public:
 
     void draw(SimpleScene* scene, Camera* camera,
               const java::ArrayList<Light*>& lights,
-              const std::vector<unsigned char>& solidTextureVolumeRgb8,
+              const java::ArrayList<unsigned char>& solidTextureVolumeRgb8,
               int solidTextureSize, long solidTextureRevision,
               InfinitePlane* clippingPlane);
     void draw(SimpleScene* scene, Camera* camera,
               const java::ArrayList<Light*>& lights,
-              const std::vector<unsigned char>& solidTextureVolumeRgb8,
+              const java::ArrayList<unsigned char>& solidTextureVolumeRgb8,
               int solidTextureSize, long solidTextureRevision,
               InfinitePlane* clippingPlane, RendererConfiguration* quality);
     void dispose();

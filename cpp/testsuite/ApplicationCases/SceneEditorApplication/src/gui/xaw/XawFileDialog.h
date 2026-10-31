@@ -1,8 +1,8 @@
 #ifndef __XAW_FILE_DIALOG__
 #define __XAW_FILE_DIALOG__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include <X11/Intrinsic.h>
 
@@ -31,18 +31,18 @@ public:
     @param outPath the chosen file, when approved
     @return true if the user approved a file (`APPROVE_OPTION`)
     */
-    static bool showDialog(XtApplicationHost* host, const std::string& title,
-                           const std::string& folder,
-                           const std::vector<FileSuffixFilter>& filters,
-                           std::string& outPath);
+    static bool showDialog(XtApplicationHost* host, const java::String& title,
+                           const java::String& folder,
+                           const java::ArrayList<FileSuffixFilter>& filters,
+                           java::String& outPath);
 
 private:
     XtApplicationHost* host;
     XtPanelWidgets* widgets;
-    std::vector<FileSuffixFilter> filters;
-    std::string folder;
-    std::vector<std::string> entries;
-    std::vector<const char*> entryTexts;
+    java::ArrayList<FileSuffixFilter> filters;
+    java::String folder;
+    java::ArrayList<java::String> entries;
+    java::ArrayList<const char*> entryTexts;
     Widget shell;
     Widget folderLabel;
     Widget list;
@@ -51,10 +51,10 @@ private:
     bool approved;
 
     XawFileDialog(XtApplicationHost* host,
-                  const std::vector<FileSuffixFilter>& filters);
+                  const java::ArrayList<FileSuffixFilter>& filters);
     ~XawFileDialog();
-    void create(const std::string& title);
-    void showFolder(const std::string& newFolder);
+    void create(const java::String& title);
+    void showFolder(const java::String& newFolder);
     void close(bool approve);
 
     static void entrySelected(Widget, XtPointer clientData, XtPointer callData);

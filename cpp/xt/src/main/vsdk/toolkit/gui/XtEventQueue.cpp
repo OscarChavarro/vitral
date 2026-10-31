@@ -1,14 +1,15 @@
-#include <condition_variable>
+#include "java/lang/Exception.h"
+#include "java/lang/Runnable.h"
 #include <cstdio>
-#include <deque>
-#include <exception>
-#include <mutex>
-#include <thread>
+#include <pthread.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include <X11/Intrinsic.h>
 
+#include "java/util/ArrayDeque.h"
+#include "java/util/concurrent/locks/Condition.h"
+#include "java/util/concurrent/locks/ReentrantLock.h"
 #include "vsdk/toolkit/gui/XtEventQueue.h"
 
 namespace {
@@ -28,12 +29,13 @@ process exits.
 struct QueueState {
     XtAppContext appContext;
     int pipeFds[2];
-    std::thread::id dispatchThread;
-    std::mutex mutex;
-    std::condition_variable finished;
-    std::deque<Task> tasks;
+    pthread_t dispatchThread;
+    bool hasDispatchThread;
+    java::ReentrantLock mutex;
+    java::Condition finished;
+    java::ArrayDeque<Task> tasks;
 
-    QueueState() : appContext(nullptr)
+    QueueState() : appContext(nullptr), hasDispatchThread(false), finished(mutex)
     {
         pipeFds[0] = -1;
         pipeFds[1] = -1;
@@ -51,8 +53,8 @@ void runTask(java::Runnable* runnable)
     try {
         runnable->run();
     }
-    catch ( const std::exception& e ) {
-        fprintf(stderr, "XtEventQueue: task failed: %s\n", e.what());
+    catch ( const java::Exception& e ) {
+        fprintf(stderr, "XtEventQueue: task failed: %s\n", e.getMessage().c_str());
     }
 }
 
@@ -63,9 +65,9 @@ void finishTask(const Task& task)
     }
     if ( task.done != nullptr ) {
         QueueState* queue = state();
-        std::lock_guard<std::mutex> lock(queue->mutex);
+        java::ReentrantLockGuard lock(queue->mutex);
         *task.done = true;
-        queue->finished.notify_all();
+        queue->finished.signalAll();
     }
 }
 
@@ -89,12 +91,11 @@ void dispatchTasks(XtPointer, int* fd, XtInputId*)
     while ( true ) {
         Task task;
         {
-            std::lock_guard<std::mutex> lock(queue->mutex);
-            if ( queue->tasks.empty() ) {
+            java::ReentrantLockGuard lock(queue->mutex);
+            if ( queue->tasks.isEmpty() ) {
                 break;
             }
-            task = queue->tasks.front();
-            queue->tasks.pop_front();
+            task = queue->tasks.pollFirst();
         }
         if ( task.delayMillis > 0 ) {
             XtAppAddTimeOut(queue->appContext, task.delayMillis,
@@ -110,8 +111,8 @@ void post(const Task& task)
 {
     QueueState* queue = state();
     {
-        std::lock_guard<std::mutex> lock(queue->mutex);
-        queue->tasks.push_back(task);
+        java::ReentrantLockGuard lock(queue->mutex);
+        queue->tasks.addLast(task);
     }
     char wakeUp = 1;
     if ( write(queue->pipeFds[1], &wakeUp, 1) < 0 ) {
@@ -131,7 +132,8 @@ bool XtEventQueue::install(XtAppContext appContext)
     // The loop reads the pipe only when it has data: never blocks on it
     fcntl(queue->pipeFds[0], F_SETFL, O_NONBLOCK);
     queue->appContext = appContext;
-    queue->dispatchThread = std::this_thread::get_id();
+    queue->dispatchThread = pthread_self();
+    queue->hasDispatchThread = true;
     XtAppAddInput(appContext, queue->pipeFds[0],
                   reinterpret_cast<XtPointer>(XtInputReadMask),
                   &dispatchTasks, nullptr);
@@ -140,7 +142,9 @@ bool XtEventQueue::install(XtAppContext appContext)
 
 bool XtEventQueue::isDispatchThread()
 {
-    return std::this_thread::get_id() == state()->dispatchThread;
+    QueueState* queue = state();
+    return queue->hasDispatchThread &&
+        pthread_equal(pthread_self(), queue->dispatchThread) != 0;
 }
 
 void XtEventQueue::invokeAndWait(java::Runnable* task)
@@ -153,8 +157,10 @@ void XtEventQueue::invokeAndWait(java::Runnable* task)
     bool done = false;
     Task entry = { task, false, 0, &done };
     post(entry);
-    std::unique_lock<std::mutex> lock(queue->mutex);
-    queue->finished.wait(lock, [&done]() { return done; });
+    java::ReentrantLockGuard lock(queue->mutex);
+    while ( !done ) {
+        queue->finished.await();
+    }
 }
 
 void XtEventQueue::invokeLater(java::Runnable* task)

@@ -122,14 +122,10 @@ strtold(const char *text, char **end) {
     }
     unsigned long long mantissa = 0;
     int exponent = 0;
-    int digits = 0;
     bool any = false;
     for (; isdigit((unsigned char)*p); p++, any = true) {
         if (mantissa < (ULLONG_MAX - 9) / 10) {
             mantissa = mantissa * 10 + (unsigned)(*p - '0');
-            if (mantissa) {
-                digits++;
-            }
         } else {
             exponent++;
         }

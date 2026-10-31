@@ -1,3 +1,4 @@
+#include "java/lang/Math.h"
 #include <cmath>
 
 #include <java/lang/Math.h>
@@ -14,7 +15,7 @@
 #include "vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
-std::vector<std::pair<int, Light*> > OpenGL4LightRenderer::activeLights;
+java::ArrayList<OpenGL4LightRenderer::ActiveLight> OpenGL4LightRenderer::activeLights;
 double OpenGL4LightRenderer::scale = 1.0;
 
 void OpenGL4LightRenderer::activate(const Light* light)
@@ -23,31 +24,31 @@ void OpenGL4LightRenderer::activate(const Light* light)
         return;
     }
     for ( size_t i = 0; i < activeLights.size(); i++ ) {
-        if ( activeLights[i].first == light->getId() ) {
-            delete activeLights[i].second;
-            activeLights[i].second = light->copy();
+        if ( activeLights[i].id == light->getId() ) {
+            delete activeLights[i].light;
+            activeLights[i].light = light->copy();
             return;
         }
     }
-    activeLights.push_back(std::make_pair(light->getId(), light->copy()));
+    activeLights.add(ActiveLight(light->getId(), light->copy()));
 }
 
 void OpenGL4LightRenderer::deactivateAll()
 {
     for ( size_t i = 0; i < activeLights.size(); i++ ) {
-        delete activeLights[i].second;
+        delete activeLights[i].light;
     }
     activeLights.clear();
 }
 
 void OpenGL4LightRenderer::getActiveLights(java::ArrayList<Light*>& outLights)
 {
-    if ( activeLights.empty() ) {
+    if ( activeLights.isEmpty() ) {
         outLights.add(defaultLight());
         return;
     }
     for ( size_t i = 0; i < activeLights.size(); i++ ) {
-        outLights.add(activeLights[i].second->copy());
+        outLights.add(activeLights[i].light->copy());
     }
 }
 

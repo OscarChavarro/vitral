@@ -1,7 +1,7 @@
 #ifndef __THREAD__
 #define __THREAD__
 
-#include <thread>
+#include <pthread.h>
 
 #include "java/lang/Runnable.h"
 #include "java/lang/String.h"
@@ -9,7 +9,7 @@
 namespace java {
 
 /**
-Emulation of `java.lang.Thread` over `std::thread`: runs the `run` method of
+Emulation of `java.lang.Thread` over POSIX threads: runs the `run` method of
 its target in a new thread of execution, once `start` is called.
 
 As in Java, a started thread keeps running when the object is destroyed
@@ -20,7 +20,8 @@ class Thread {
   private:
     Runnable *target;
     java::String name;
-    std::thread thread;
+    pthread_t thread;
+    bool joinable;
 
     Thread(const Thread &other);
     Thread &operator=(const Thread &other);

@@ -1,7 +1,7 @@
 #ifndef VITRAL_FRAMEBUFFER_MENU_BAR_H
 #define VITRAL_FRAMEBUFFER_MENU_BAR_H
 
-#include <vector>
+#include "java/util/ArrayList.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferSnapshot.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferTheme.h"
@@ -71,7 +71,7 @@ private:
     class Popup {
     public:
         WidgetMenu *menu;
-        std::vector<Entry> entries;
+        java::ArrayList<Entry> entries;
         int x;
         int y;
         int width;
@@ -83,8 +83,8 @@ private:
     Framebuffer *surface;
     FramebufferTheme theme;
     WidgetMenu *menubar;
-    std::vector<Entry> bar;
-    std::vector<Popup *> popups;
+    java::ArrayList<Entry> bar;
+    java::ArrayList<Popup *> popups;
     int barX;
     int barY;
     int barWidth;

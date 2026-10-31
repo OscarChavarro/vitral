@@ -1,10 +1,11 @@
+#include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include <cairo-pdf.h>
 #include <cmath>
 
 #include <java/util/ArrayList.txx>
 #include "processing/IconGenerator.h"
 #include "render/CairoPdfPageRenderer.h"
-#include <vector>
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 CairoPdfPageRenderer::CairoPdfPageRenderer()
     : labelSizeMm(REFERENCE_LABEL_SIZE_MM),
@@ -61,7 +62,7 @@ void CairoPdfPageRenderer::renderPage(const char* outputPdf, java::ArrayList<Lab
     cairo_set_line_width(cr, mmToPt(strokeMm));
     long labelCount = labels ? labels->size() : 0;
     IconGenerator iconGenerator;
-    std::vector<Calligraphic2DBuffer*> icons(static_cast<size_t>(labelCount), nullptr);
+    java::ArrayList<Calligraphic2DBuffer*> icons = java::Collections::nCopies<Calligraphic2DBuffer*>(static_cast<size_t>(labelCount), nullptr);
     double totalMaxFontSizeMm = 0.0;
     int measurableLabelCount = 0;
 

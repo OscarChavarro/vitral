@@ -1,7 +1,7 @@
 #ifndef VITRAL_FRAMEBUFFER_DIALOG_FORM_H
 #define VITRAL_FRAMEBUFFER_DIALOG_FORM_H
 
-#include <map>
+#include "java/util/TreeMap.h"
 #include "java/util/ArrayList.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferDialog.h"
@@ -52,10 +52,10 @@ public:
 private:
     FramebufferDialog dialog;
     bool complete;
-    std::map<java::String, FramebufferTextField *> fields;
-    std::map<java::String, FramebufferList *> trees;
-    std::map<java::String, java::ArrayList<const DialogTreeNode *> > rows;
-    std::map<java::String, FramebufferButton *> buttons;
+    java::TreeMap<java::String, FramebufferTextField *> fields;
+    java::TreeMap<java::String, FramebufferList *> trees;
+    java::TreeMap<java::String, java::ArrayList<const DialogTreeNode *> > rows;
+    java::TreeMap<java::String, FramebufferButton *> buttons;
 
     void build(const Widget &context, const WidgetDialogElement &element);
     void flatten(const java::String &binding, const DialogTreeNode &node, int depth);

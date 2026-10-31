@@ -158,6 +158,21 @@ StringBuilder::append(long long value) {
 }
 
 StringBuilder &
+StringBuilder::append(unsigned int value) {
+    return append(String::valueOf(value));
+}
+
+StringBuilder &
+StringBuilder::append(unsigned long value) {
+    return append(String::valueOf(value));
+}
+
+StringBuilder &
+StringBuilder::append(unsigned long long value) {
+    return append(String::valueOf(value));
+}
+
+StringBuilder &
 StringBuilder::append(double value) {
     return append(Double::toString(value));
 }

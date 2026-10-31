@@ -1,3 +1,5 @@
+#include "java/lang/String.h"
+#include "java/util/function/Consumer.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -52,11 +54,11 @@ void TangibleInterfaceNetworkClient::removeListener(TangibleInterfaceListener* l
 
 void TangibleInterfaceNetworkClient::run()
 {
-    run(std::function<void(bool)>());
+    run(java::Consumer<bool>());
 }
 
 void TangibleInterfaceNetworkClient::run(
-    const std::function<void(bool)>& connectionListener)
+    const java::Consumer<bool>& connectionListener)
 {
     if ( threadStarted ) {
         return;
@@ -94,7 +96,7 @@ void TangibleInterfaceNetworkClient::connectAndListen()
     if ( webSocket == 0 ) {
         std::printf("Tangible interface server not found at %s\n", serviceUrl.c_str());
         if ( connectionListener ) {
-            connectionListener(false);
+            connectionListener.accept(false);
         }
         return;
     }
@@ -103,7 +105,7 @@ void TangibleInterfaceNetworkClient::connectAndListen()
         return;
     }
     if ( connectionListener ) {
-        connectionListener(true);
+        connectionListener.accept(true);
     }
 
     while ( !stopRequested ) {

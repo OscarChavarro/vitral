@@ -1,13 +1,13 @@
+#include "java/lang/String.h"
 #include <cctype>
-#include <string>
 
 #include "vsdk/toolkit/gui/dialog/components/DialogFileFilter.h"
 
 namespace {
-std::string lowerCase(const char* text)
+java::String lowerCase(const char* text)
 {
-    std::string result(text != nullptr ? text : "");
-    for ( size_t i = 0; i < result.size(); i++ ) {
+    java::String result(text != nullptr ? text : "");
+    for ( int i = 0; i < result.size(); i++ ) {
         result[i] = static_cast<char>(
             std::tolower(static_cast<unsigned char>(result[i])));
     }
@@ -26,9 +26,9 @@ bool DialogFileFilter::accepts(const java::String& path, bool directory) const
     if ( directory ) {
         return true;
     }
-    std::string name(path.c_str());
-    size_t dot = name.rfind('.');
-    return dot != std::string::npos && dot > 0 && dot < name.size() - 1 &&
+    java::String name(path.c_str());
+    int dot = name.rfind('.');
+    return dot != -1 && dot > 0 && dot < name.size() - 1 &&
         lowerCase(name.substr(dot + 1).c_str()) == suffix.c_str();
 }
 

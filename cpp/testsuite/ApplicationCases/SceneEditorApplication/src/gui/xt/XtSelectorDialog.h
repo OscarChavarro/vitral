@@ -1,7 +1,9 @@
 #ifndef __XT_SELECTOR_DIALOG__
 #define __XT_SELECTOR_DIALOG__
 
-#include <string>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include <X11/Intrinsic.h>
 
@@ -49,9 +51,9 @@ public:
     /**
     Runs an action of the definition: `deleteSelected` or
     `toggleVisibility`.
-    @throws std::invalid_argument for actions not in the definition
+    @throws java::IllegalArgumentException for actions not in the definition
     */
-    void performAction(const std::string& action);
+    void performAction(const java::String& action);
 
 private:
     XtApplicationHost* host;
@@ -64,7 +66,7 @@ private:
     void applyTreeSelection();
     void showPopup(int rootX, int rootY);
     void collectSelected(const DialogTreeNode* node,
-                         std::vector<const DialogTreeNode*>& selected);
+                         java::ArrayList<const DialogTreeNode*>& selected);
 
     static void popupChosen(int index, void* clientData);
 

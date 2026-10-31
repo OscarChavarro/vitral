@@ -1,3 +1,5 @@
+#include "java/lang/Exception.h"
+#include "java/lang/String.h"
 #include <cstdio>
 
 #include "java/util/ArrayList.txx"
@@ -299,10 +301,10 @@ void ParallelRaytracer::executeWithEncoder(
         try {
             futures[i].get();
         }
-        catch ( const std::exception& e ) {
+        catch ( const java::Exception& e ) {
             if ( !failed ) {
                 failed = true;
-                failure = java::String("Parallel raytracing failed: ").concat(e.what());
+                failure = java::String("Parallel raytracing failed: ").concat(e.getMessage().c_str());
             }
         }
     }

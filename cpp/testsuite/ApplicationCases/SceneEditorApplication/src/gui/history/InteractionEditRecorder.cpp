@@ -1,3 +1,5 @@
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
 #include "model/history/EditHistory.h"
 #include "gui/history/InteractionEditRecorder.h"
 
@@ -49,11 +51,12 @@ void InteractionEditRecorder::endAction(
 }
 
 void InteractionEditRecorder::record(const java::String& sceneOperationName,
-                                     const std::function<void()>& action)
+                                     const java::Runnable& action)
 {
     beginAction();
     try {
-        action();
+        java::Runnable task(action);
+        task.run();
     }
     catch ( ... ) {
         endAction(sceneOperationName, false);

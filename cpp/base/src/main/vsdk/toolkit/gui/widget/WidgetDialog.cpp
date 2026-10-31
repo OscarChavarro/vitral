@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/gui/widget/WidgetDialog.h"
@@ -28,14 +29,14 @@ void WidgetDialog::setModal(bool modal)
     this->modal = modal;
 }
 
-const std::vector<WidgetDialogElement>& WidgetDialog::getElements() const
+const java::ArrayList<WidgetDialogElement>& WidgetDialog::getElements() const
 {
     return elements;
 }
 
 void WidgetDialog::addElement(const WidgetDialogElement& element)
 {
-    elements.push_back(element);
+    elements.add(element);
 }
 
 const WidgetDialogElement* WidgetDialog::getElementByAction(

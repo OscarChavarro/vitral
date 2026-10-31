@@ -1,11 +1,10 @@
 #ifndef __STOP_WATCH__
 #define __STOP_WATCH__
 
-#include <chrono>
 class StopWatch {
 private:
     bool running;
-    std::chrono::steady_clock::time_point startTime;
+    long long startTime;
     double elapsedSeconds;
 
 public:

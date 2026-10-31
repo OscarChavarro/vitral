@@ -1,3 +1,4 @@
+#include "java/util/TreeMap.txx"
 #include <X11/Xatom.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -359,9 +360,9 @@ XlibFramebuffer::native(uint32_t color) {
     if (depthBits == 1) {
         return r * 3 + g * 4 + b * 2 >= 128 * 9 ? WhitePixel(display, screen) : BlackPixel(display, screen);
     }
-    std::map<uint32_t, unsigned long>::iterator known = allocated.find(color);
-    if (known != allocated.end()) {
-        return known->second;
+    unsigned long* known = allocated.get(color);
+    if (known != nullptr) {
+        return (*known);
     }
     XColor wanted;
     wanted.red = (unsigned short)(r * 257);
@@ -392,7 +393,7 @@ XlibFramebuffer::native(uint32_t color) {
             }
         }
     }
-    allocated[color] = value;
+    allocated.put(color, value);
     return value;
 }
 
@@ -408,9 +409,9 @@ XlibFramebuffer::rgbOf(unsigned long value) const {
         }
         return rgb;
     }
-    for (std::map<uint32_t, unsigned long>::const_iterator i = allocated.begin(); i != allocated.end(); ++i) {
-        if (i->second == value) {
-            return i->first;
+    for (long i = 0; i < allocated.size(); i++) {
+        if (allocated.getValue(i) == value) {
+            return allocated.getKey(i);
         }
     }
     XColor cell;

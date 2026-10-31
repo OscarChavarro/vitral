@@ -1,3 +1,4 @@
+#include "java/util/ArrayList.txx"
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
 #include <X11/Xaw/SimpleMenu.h>
@@ -160,7 +161,7 @@ void XawWidgetSet::setWindowCloseHandler(Widget shell, NotifyProc close,
 }
 
 Widget XawWidgetSet::createChoiceMenu(Widget owner,
-                                      const std::vector<MenuChoice>& items,
+                                      const java::ArrayList<MenuChoice>& items,
                                       XFontSet fontSet, ChoiceProc choose,
                                       void* clientData)
 {

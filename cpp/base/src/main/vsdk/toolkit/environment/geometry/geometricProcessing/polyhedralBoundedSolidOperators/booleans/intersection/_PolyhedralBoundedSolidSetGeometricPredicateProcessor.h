@@ -5,7 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_GEOMETRIC_PREDICATE_PROCESSOR__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_GEOMETRIC_PREDICATE_PROCESSOR__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -57,7 +57,7 @@ public:
     /**
     @return the trace, or null when it is disabled
     */
-    static const std::vector<SectoroverlapTraceEntry>* getSectoroverlapTrace();
+    static const java::ArrayList<SectoroverlapTraceEntry>* getSectoroverlapTrace();
 
     static int compareToZero(double value);
     static int pointInFace(_PolyhedralBoundedSolidFace* face, const Vector3Dd& point);
@@ -105,7 +105,7 @@ public:
     [MANT1988].15.4.
     */
     static void applyCoplanarRulesToVertexFaceNeighborhood(
-        std::vector<SectorOnFace>& nbr,
+        java::ArrayList<SectorOnFace>& nbr,
         _PolyhedralBoundedSolidFace* referenceFace,
         InfinitePlane* referencePlane,
         int BvsA, int op,
@@ -116,7 +116,7 @@ public:
         _PolyhedralBoundedSolidFace* referenceFace);
 
 private:
-    static std::vector<SectoroverlapTraceEntry>* sectoroverlapTrace;
+    static java::ArrayList<SectoroverlapTraceEntry>* sectoroverlapTrace;
     static int sectoroverlapCallCounter;
 
     static void recordSectoroverlapCall(const SectorOnVertex& na,

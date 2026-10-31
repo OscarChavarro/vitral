@@ -1,7 +1,7 @@
 #ifndef __OPEN_GL_4_VOXEL_VOLUME_RENDERER__
 #define __OPEN_GL_4_VOXEL_VOLUME_RENDERER__
 
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -55,7 +55,7 @@ public:
     @return a string that identifies the mesh of the volume with its current
     threshold
     */
-    static std::string meshKey(const VoxelVolume& volume);
+    static java::String meshKey(const VoxelVolume& volume);
 
     /**
     @param volume volume to tessellate

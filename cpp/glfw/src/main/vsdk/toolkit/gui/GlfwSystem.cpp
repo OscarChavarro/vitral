@@ -1,7 +1,8 @@
+#include "java/lang/Math.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "GlfwSystem.h"
-#include <algorithm>
 #include <cstdio>
-#include <vector>
 #include <GLFW/glfw3.h>
 #ifdef VITRAL_GLFW_WITH_FREETYPE
 #include <ft2build.h>
@@ -412,9 +413,9 @@ FT_Face labelFace()
 }
 
 /** Decodes an UTF-8 text into its code points (malformed bytes are kept). */
-std::vector<unsigned long> decodeUtf8(const char* text)
+java::ArrayList<unsigned long> decodeUtf8(const char* text)
 {
-    std::vector<unsigned long> codePoints;
+    java::ArrayList<unsigned long> codePoints;
     const unsigned char* p = reinterpret_cast<const unsigned char*>(text);
     while ( p != 0 && *p != 0 ) {
         unsigned long c = *p;
@@ -426,7 +427,7 @@ std::vector<unsigned long> decodeUtf8(const char* text)
         for ( ; extra > 0 && (*p & 0xC0) == 0x80; extra--, p++ ) {
             c = (c << 6) | (*p & 0x3F);
         }
-        codePoints.push_back(c);
+        codePoints.add(c);
     }
     return codePoints;
 }
@@ -445,9 +446,9 @@ RGBAImageUncompressed* GlfwSystem::calculateLabelImage(
 #ifdef VITRAL_GLFW_WITH_FREETYPE
     FT_Face face = labelFace();
     if ( face != 0 &&
-         FT_Set_Pixel_Sizes(face, 0, std::max(1, fontSize)) == 0 ) {
+         FT_Set_Pixel_Sizes(face, 0, java::Math::max(1, fontSize)) == 0 ) {
         const int margin = 2;
-        const std::vector<unsigned long> codePoints = decodeUtf8(text);
+        const java::ArrayList<unsigned long> codePoints = decodeUtf8(text);
         const int ascender = static_cast<int>((face->size->metrics.ascender + 63) >> 6);
         const int descender = static_cast<int>(-(face->size->metrics.descender >> 6));
 
@@ -458,9 +459,9 @@ RGBAImageUncompressed* GlfwSystem::calculateLabelImage(
                 textWidth += static_cast<int>((face->glyph->advance.x + 63) >> 6);
             }
         }
-        const int width = std::max(1, textWidth + 2 * margin);
-        const int height = std::max(1, ascender + descender + 2 * margin);
-        std::vector<unsigned char> alpha(width * height, 0);
+        const int width = java::Math::max(1, textWidth + 2 * margin);
+        const int height = java::Math::max(1, ascender + descender + 2 * margin);
+        java::ArrayList<unsigned char> alpha = java::Collections::nCopies<unsigned char>(width * height, 0);
 
         int penX = margin;
         const int baseline = margin + ascender;
@@ -478,13 +479,13 @@ RGBAImageUncompressed* GlfwSystem::calculateLabelImage(
                     if ( tx < 0 || tx >= width ) continue;
                     unsigned char a = bitmap.buffer[y * bitmap.pitch + x];
                     unsigned char& target = alpha[ty * width + tx];
-                    target = std::max(target, a);
+                    target = java::Math::max(target, a);
                 }
             }
             penX += static_cast<int>((glyph->advance.x + 63) >> 6);
         }
 
-        std::vector<char> rgba(width * height * 4);
+        java::ArrayList<char> rgba = java::Collections::nCopies<char>(width * height * 4, '\0');
         for ( int y = 0; y < height; y++ ) {
             for ( int x = 0; x < width; x++ ) {
                 const int out = ((height - 1 - y) * width + x) * 4;

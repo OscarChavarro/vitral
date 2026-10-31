@@ -1,9 +1,8 @@
 #ifndef __GTK4_LABEL_IMAGE_PROVIDER__
 #define __GTK4_LABEL_IMAGE_PROVIDER__
 
-#include <map>
-#include <string>
-#include <utility>
+#include "java/lang/String.h"
+#include "java/util/TreeMap.h"
 
 #include "vsdk/toolkit/render/opengl4/OpenGL4LabelImageProvider.h"
 
@@ -15,9 +14,33 @@ as the Xlib implementation but without any X11 dependency.
 */
 class Gtk4LabelImageProvider : public OpenGL4LabelImageProvider {
 private:
-    typedef std::pair<std::pair<std::string, int>, unsigned long> Key;
+    /** Key of a cached label: its text, font size and color */
+    class Key {
+      public:
+        java::String text;
+        int fontSize;
+        unsigned long rgb;
 
-    std::map<Key, RGBAImageUncompressed*> cache;
+        Key() : fontSize(0), rgb(0) {}
+        Key(const java::String& text, int fontSize, unsigned long rgb)
+            : text(text), fontSize(fontSize), rgb(rgb) {}
+
+        bool operator<(const Key& other) const
+        {
+            if ( text < other.text ) {
+                return true;
+            }
+            if ( other.text < text ) {
+                return false;
+            }
+            if ( fontSize != other.fontSize ) {
+                return fontSize < other.fontSize;
+            }
+            return rgb < other.rgb;
+        }
+    };
+
+    java::TreeMap<Key, RGBAImageUncompressed*> cache;
 
     Gtk4LabelImageProvider(const Gtk4LabelImageProvider& other);
     Gtk4LabelImageProvider& operator=(const Gtk4LabelImageProvider& other);

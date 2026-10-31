@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
 
@@ -239,7 +240,7 @@ unsigned int OpenGL4ArrowRenderer::buildProgram(const char* vsFile, const char* 
 {
     java::String vsSource = findShaderSource(vsFile);
     java::String fsSource = findShaderSource(fsFile);
-    if ( vsSource.empty() || fsSource.empty() ) {
+    if ( vsSource.isEmpty() || fsSource.isEmpty() ) {
         std::fprintf(stderr, "OpenGL4ArrowRenderer shader not found: %s / %s\n", vsFile, fsFile);
         return 0;
     }
@@ -316,7 +317,7 @@ java::String OpenGL4ArrowRenderer::findShaderSource(const java::String& shaderFi
     };
     for ( size_t i = 0; i < sizeof(candidates) / sizeof(candidates[0]); i++ ) {
         java::String src = readTextFile(java::String(candidates[i]) + shaderFileName);
-        if ( !src.empty() ) return src;
+        if ( !src.isEmpty() ) return src;
     }
     return java::String();
 }

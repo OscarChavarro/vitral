@@ -1,5 +1,8 @@
+#include "java/lang/RuntimeException.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/TreeMap.txx"
 #include <cctype>
-#include <stdexcept>
 
 #include "io/GuiJsonReader.h"
 
@@ -11,90 +14,90 @@ GuiNode GuiJsonReader::readMenuBar()
     return root;
 }
 
-std::vector<GuiNode> GuiJsonReader::readPopups()
+java::ArrayList<GuiNode> GuiJsonReader::readPopups()
 {
-    const size_t popups = text.find("\"popups\"");
-    if (popups == std::string::npos) return std::vector<GuiNode>();
-    position = text.find('[', popups);
-    if (position == std::string::npos) return std::vector<GuiNode>();
+    const int popups = text.indexOf("\"popups\"");
+    if (popups == -1) return java::ArrayList<GuiNode>();
+    position = text.indexOf('[', popups);
+    if (position == -1) return java::ArrayList<GuiNode>();
     return readNodes();
 }
 
-std::map<std::string, std::string> GuiJsonReader::readCommandLabels()
+java::TreeMap<java::String, java::String> GuiJsonReader::readCommandLabels()
 {
     return readCommandProperty("name");
 }
 
-std::map<std::string, std::string> GuiJsonReader::readCommandIcons()
+java::TreeMap<java::String, java::String> GuiJsonReader::readCommandIcons()
 {
     return readCommandProperty("icon");
 }
 
-std::map<std::string, std::string> GuiJsonReader::readCommandProperty(
-    const std::string& property)
+java::TreeMap<java::String, java::String> GuiJsonReader::readCommandProperty(
+    const java::String& property)
 {
-    const size_t commands = text.find("\"commands\"");
-    if (commands == std::string::npos) return std::map<std::string, std::string>();
-    position = text.find('[', commands);
-    if (position == std::string::npos) return std::map<std::string, std::string>();
+    const int commands = text.indexOf("\"commands\"");
+    if (commands == -1) return java::TreeMap<java::String, java::String>();
+    position = text.indexOf('[', commands);
+    if (position == -1) return java::TreeMap<java::String, java::String>();
     return readCommandArray(property);
 }
 
-std::map<std::string, std::string> GuiJsonReader::readMessages()
+java::TreeMap<java::String, java::String> GuiJsonReader::readMessages()
 {
-    const size_t messages = text.find("\"messages\"");
-    if (messages == std::string::npos) return std::map<std::string, std::string>();
-    position = text.find('{', messages);
-    if (position == std::string::npos) return std::map<std::string, std::string>();
+    const int messages = text.indexOf("\"messages\"");
+    if (messages == -1) return java::TreeMap<java::String, java::String>();
+    position = text.indexOf('{', messages);
+    if (position == -1) return java::TreeMap<java::String, java::String>();
     return readStringMap();
 }
 
-std::vector<std::string> GuiJsonReader::readButtonGroupCommands(
-    const std::string& name)
+java::ArrayList<java::String> GuiJsonReader::readButtonGroupCommands(
+    const java::String& name)
 {
     return readButtonGroup(name).commands;
 }
 
-std::vector<GuiCommand> GuiJsonReader::readCommands()
+java::ArrayList<GuiCommand> GuiJsonReader::readCommands()
 {
-    std::vector<GuiCommand> result;
-    const size_t commands = text.find("\"commands\"");
-    if (commands == std::string::npos) return result;
-    position = text.find('[', commands);
-    if (position == std::string::npos) return result;
+    java::ArrayList<GuiCommand> result;
+    const int commands = text.indexOf("\"commands\"");
+    if (commands == -1) return result;
+    position = text.indexOf('[', commands);
+    if (position == -1) return result;
     consume('[');
     while (!consume(']')) {
         GuiCommand command;
         consume('{');
         while (!consume('}')) {
-            const std::string key = stringValue(); consume(':');
+            const java::String key = stringValue(); consume(':');
             whitespace();
             if (key == "id") command.id = stringValue();
             else if (key == "help" && position < text.size() && text[position] == '[') command.help = readStrings();
-            else if (key == "help") command.help.push_back(stringValue());
-            else if (position < text.size() && text[position] == '\"') command.properties[key] = stringValue();
+            else if (key == "help") command.help.add(stringValue());
+            else if (position < text.size() && text[position] == '\"') command.properties.put(key, stringValue());
             else skipValue();
             consume(',');
         }
-        if (!command.id.empty()) result.push_back(command);
+        if (!command.id.isEmpty()) result.add(command);
         consume(',');
     }
     return result;
 }
 
-std::vector<GuiButtonGroup> GuiJsonReader::readButtonGroups()
+java::ArrayList<GuiButtonGroup> GuiJsonReader::readButtonGroups()
 {
-    std::vector<GuiButtonGroup> result;
-    const size_t groups = text.find("\"buttonGroups\"");
-    if (groups == std::string::npos) return result;
-    position = text.find('[', groups);
-    if (position == std::string::npos) return result;
+    java::ArrayList<GuiButtonGroup> result;
+    const int groups = text.indexOf("\"buttonGroups\"");
+    if (groups == -1) return result;
+    position = text.indexOf('[', groups);
+    if (position == -1) return result;
     consume('[');
     while (!consume(']')) {
         GuiButtonGroup group;
         consume('{');
         while (!consume('}')) {
-            const std::string key = stringValue(); consume(':');
+            const java::String key = stringValue(); consume(':');
             if (key == "name") group.name = stringValue();
             else if (key == "title") group.title = stringValue();
             else if (key == "direction") group.horizontal = stringValue() == "horizontal";
@@ -106,25 +109,25 @@ std::vector<GuiButtonGroup> GuiJsonReader::readButtonGroups()
             consume(',');
         }
         group.found = true;
-        result.push_back(group);
+        result.add(group);
         consume(',');
     }
     return result;
 }
 
-GuiButtonGroup GuiJsonReader::readButtonGroup(const std::string& name)
+GuiButtonGroup GuiJsonReader::readButtonGroup(const java::String& name)
 {
     GuiButtonGroup notFound;
-    const size_t groups = text.find("\"buttonGroups\"");
-    if (groups == std::string::npos) return notFound;
-    position = text.find('[', groups);
-    if (position == std::string::npos) return notFound;
+    const int groups = text.indexOf("\"buttonGroups\"");
+    if (groups == -1) return notFound;
+    position = text.indexOf('[', groups);
+    if (position == -1) return notFound;
     consume('[');
     while (!consume(']')) {
         GuiButtonGroup group;
         consume('{');
         while (!consume('}')) {
-            const std::string key = stringValue(); consume(':');
+            const java::String key = stringValue(); consume(':');
             if (key == "name") group.name = stringValue();
             else if (key == "title") group.title = stringValue();
             else if (key == "direction") group.horizontal = stringValue() == "horizontal";
@@ -147,8 +150,8 @@ GuiButtonGroup GuiJsonReader::readButtonGroup(const std::string& name)
 bool GuiJsonReader::booleanValue()
 {
     whitespace();
-    if (text.compare(position, 4, "true") == 0) { position += 4; return true; }
-    if (text.compare(position, 5, "false") == 0) { position += 5; return false; }
+    if (text.startsWith("true", position)) { position += 4; return true; }
+    if (text.startsWith("false", position)) { position += 5; return false; }
     skipValue();
     return false;
 }
@@ -165,11 +168,11 @@ bool GuiJsonReader::consume(char c)
     return false;
 }
 
-std::string GuiJsonReader::stringValue()
+java::String GuiJsonReader::stringValue()
 {
     whitespace();
-    if (position >= text.size() || text[position++] != '\"') throw std::runtime_error("Invalid GUI JSON string");
-    std::string result;
+    if (position >= text.size() || text[position++] != '\"') throw java::RuntimeException("Invalid GUI JSON string");
+    java::String result;
     while (position < text.size() && text[position] != '\"') {
         char c = text[position++];
         if (c == '\\' && position < text.size()) {
@@ -180,7 +183,7 @@ std::string GuiJsonReader::stringValue()
         }
         else result += c;
     }
-    if (position >= text.size()) throw std::runtime_error("Unterminated GUI JSON string");
+    if (position >= text.size()) throw java::RuntimeException("Unterminated GUI JSON string");
     ++position;
     return result;
 }
@@ -188,15 +191,15 @@ std::string GuiJsonReader::stringValue()
 void GuiJsonReader::skipValueStart()
 {
     whitespace();
-    if (!consume('{')) throw std::runtime_error("Invalid GUI JSON document");
+    if (!consume('{')) throw java::RuntimeException("Invalid GUI JSON document");
     while (position < text.size()) {
-        std::string key = stringValue();
+        java::String key = stringValue();
         consume(':');
         if (key == "menubar") return;
         skipValue();
         if (!consume(',')) break;
     }
-    throw std::runtime_error("GUI JSON has no menubar");
+    throw java::RuntimeException("GUI JSON has no menubar");
 }
 
 void GuiJsonReader::skipValue()
@@ -210,52 +213,52 @@ void GuiJsonReader::skipValue()
     while (position < text.size()) { whitespace(); if (text[position] == close) { ++position; return; } skipValue(); whitespace(); if (position < text.size() && text[position] == ',') ++position; }
 }
 
-std::vector<std::string> GuiJsonReader::readStrings()
+java::ArrayList<java::String> GuiJsonReader::readStrings()
 {
-    std::vector<std::string> result;
+    java::ArrayList<java::String> result;
     consume('[');
-    while (!consume(']')) { result.push_back(stringValue()); consume(','); }
+    while (!consume(']')) { result.add(stringValue()); consume(','); }
     return result;
 }
 
-std::vector<GuiNode> GuiJsonReader::readNodes()
+java::ArrayList<GuiNode> GuiJsonReader::readNodes()
 {
-    std::vector<GuiNode> result;
+    java::ArrayList<GuiNode> result;
     consume('[');
-    while (!consume(']')) { result.push_back(readNode()); consume(','); }
+    while (!consume(']')) { result.add(readNode()); consume(','); }
     return result;
 }
 
-std::map<std::string, std::string> GuiJsonReader::readCommandArray(
-    const std::string& property)
+java::TreeMap<java::String, java::String> GuiJsonReader::readCommandArray(
+    const java::String& property)
 {
-    std::map<std::string, std::string> result;
+    java::TreeMap<java::String, java::String> result;
     consume('[');
     while (!consume(']')) {
-        std::string id;
-        std::string value;
+        java::String id;
+        java::String value;
         bool found = false;
         consume('{');
         while (!consume('}')) {
-            const std::string key = stringValue(); consume(':');
+            const java::String key = stringValue(); consume(':');
             if (key == "id") id = stringValue();
             else if (key == property) { value = stringValue(); found = true; }
             else skipValue();
             consume(',');
         }
-        if (!id.empty() && found) result[id] = value;
+        if (!id.isEmpty() && found) result.put(id, value);
         consume(',');
     }
     return result;
 }
 
-std::map<std::string, std::string> GuiJsonReader::readStringMap()
+java::TreeMap<java::String, java::String> GuiJsonReader::readStringMap()
 {
-    std::map<std::string, std::string> result;
+    java::TreeMap<java::String, java::String> result;
     consume('{');
     while (!consume('}')) {
-        const std::string key = stringValue(); consume(':');
-        result[key] = stringValue();
+        const java::String key = stringValue(); consume(':');
+        result.put(key, stringValue());
         consume(',');
     }
     return result;
@@ -266,7 +269,7 @@ GuiNode GuiJsonReader::readNode()
     GuiNode node;
     consume('{');
     while (!consume('}')) {
-        std::string key = stringValue(); consume(':');
+        java::String key = stringValue(); consume(':');
         if (key == "type") node.type = stringValue();
         else if (key == "name") node.name = stringValue();
         else if (key == "modifiers") node.modifiers = readStrings();

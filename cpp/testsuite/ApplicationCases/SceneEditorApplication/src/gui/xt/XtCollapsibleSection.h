@@ -1,7 +1,7 @@
 #ifndef __XT_COLLAPSIBLE_SECTION__
 #define __XT_COLLAPSIBLE_SECTION__
 
-#include <string>
+#include "java/lang/String.h"
 
 #include <X11/Intrinsic.h>
 
@@ -44,7 +44,7 @@ public:
     @param expanded true if the section starts showing its content
     */
     XtCollapsibleSection(XtPanelWidgets* widgets, Widget parent,
-                         const std::string& title, XFontSet fontSet,
+                         const java::String& title, XFontSet fontSet,
                          int y, int width, bool expanded);
 
     /**
@@ -108,7 +108,7 @@ private:
     Widget container;
     Widget header;
     Widget content;
-    std::string title;
+    java::String title;
     int width;
     int contentHeight;
     bool expanded;

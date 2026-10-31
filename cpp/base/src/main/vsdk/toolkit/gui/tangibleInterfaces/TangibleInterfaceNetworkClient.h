@@ -1,7 +1,7 @@
 #ifndef __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 #define __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 
-#include <functional>
+#include "java/util/function/Consumer.h"
 #include <pthread.h>
 
 #include "java/lang/String.h"
@@ -19,7 +19,7 @@ private:
     bool threadStarted;
     bool stopRequested;
     java::net::WebSocket* webSocket;
-    std::function<void(bool)> connectionListener;
+    java::Consumer<bool> connectionListener;
 
     static void* threadEntry(void* arg);
     void connectAndListen();
@@ -44,7 +44,7 @@ public:
     @param connectionListener receives true once the client is ready to
     receive websocket messages, or false on failure
     */
-    void run(const std::function<void(bool)>& connectionListener);
+    void run(const java::Consumer<bool>& connectionListener);
     void disconnect();
 };
 

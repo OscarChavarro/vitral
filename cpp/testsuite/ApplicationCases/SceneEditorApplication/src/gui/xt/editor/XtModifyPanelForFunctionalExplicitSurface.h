@@ -1,8 +1,8 @@
 #ifndef __XT_MODIFY_PANEL_FOR_FUNCTIONAL_EXPLICIT_SURFACE__
 #define __XT_MODIFY_PANEL_FOR_FUNCTIONAL_EXPLICIT_SURFACE__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include "gui/xt/XtModifyPanel.h"
 #include "model/editor/FunctionalExplicitSurfaceEditor.h"
@@ -19,10 +19,10 @@ private:
     FunctionalExplicitSurfaceEditor* editor;
     Widget fields[FunctionalExplicitSurfaceEditor::PARAMETER_COUNT];
     /// Names of the options of the presets button
-    std::vector<std::string> presets;
+    java::ArrayList<java::String> presets;
 
     void refreshFields();
-    void presetSelected(const std::string& preset);
+    void presetSelected(const java::String& preset);
     void fieldActivated(Widget field);
 
     static void presetCallback(Widget, int index, void* clientData);

@@ -1,9 +1,10 @@
 #ifndef __GTK4_DIALOG_HOST__
 #define __GTK4_DIALOG_HOST__
 
-#include <functional>
-#include <map>
-#include <string>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
+#include "java/util/TreeMap.h"
+#include "java/util/function/Consumer.h"
 
 #include <gtk/gtk.h>
 
@@ -29,7 +30,7 @@ public:
     /**
     Called with the action of the button clicked.
     */
-    typedef std::function<void(const std::string& action)> ActionListener;
+    typedef java::Consumer<const java::String&> ActionListener;
 
     /**
     A dialog built from its definition: its window, its widgets (entries
@@ -44,23 +45,23 @@ public:
         /**
         @return the entry of a binding, or null
         */
-        GtkWidget* field(const std::string& binding) const;
+        GtkWidget* field(const java::String& binding) const;
 
         /**
         @return the button of an action, or null
         */
-        GtkWidget* action(const std::string& action) const;
+        GtkWidget* action(const java::String& action) const;
 
         /**
         @return the tree of a binding, or null
         */
-        Gtk4TreeView* tree(const std::string& binding) const;
+        Gtk4TreeView* tree(const java::String& binding) const;
 
         /**
         @return true if the definition has an element (a button or an
         `action` element) with the action
         */
-        bool hasAction(const std::string& action) const;
+        bool hasAction(const java::String& action) const;
         DialogSession* session();
 
         /**
@@ -83,9 +84,9 @@ public:
         const WidgetDialog* definition;
         DialogSession dialogSession;
         ActionListener onAction;
-        std::map<std::string, GtkWidget*> fields;
-        std::map<std::string, GtkWidget*> actions;
-        std::map<std::string, Gtk4TreeView*> trees;
+        java::TreeMap<java::String, GtkWidget*> fields;
+        java::TreeMap<java::String, GtkWidget*> actions;
+        java::TreeMap<java::String, Gtk4TreeView*> trees;
 
         Form(const WidgetDialog* definition, const ActionListener& onAction);
         ~Form();
@@ -106,7 +107,7 @@ public:
     form)
     @param onAction called with the action of each button clicked
     @return the form, owned by its window
-    @throws std::invalid_argument for elements that are not text inputs,
+    @throws java::IllegalArgumentException for elements that are not text inputs,
     trees, buttons, actions, rows or columns
     */
     static Form* form(GtkWindow* owner, Widget* messages,

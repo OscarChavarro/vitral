@@ -1,3 +1,5 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <cstdio>
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -15,7 +17,7 @@ void OpenGL4VoxelVolumeRenderer::draw(VoxelVolume* volume, Camera* camera,
         textureMap, normalMap, localTransform);
 }
 
-std::string OpenGL4VoxelVolumeRenderer::meshKey(const VoxelVolume& volume)
+java::String OpenGL4VoxelVolumeRenderer::meshKey(const VoxelVolume& volume)
 {
     char key[96];
     snprintf(key, sizeof(key), "voxelvolume/%p/%d", (const void*)&volume,

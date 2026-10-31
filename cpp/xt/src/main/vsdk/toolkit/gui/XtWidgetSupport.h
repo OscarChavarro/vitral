@@ -1,7 +1,6 @@
 #ifndef __XT_WIDGET_SUPPORT__
 #define __XT_WIDGET_SUPPORT__
 
-#include <string>
 
 #include <X11/Xlib.h>
 
@@ -96,7 +95,7 @@ public:
     @return the prefix followed by a number never returned before (i.e. for
     menus found by their name)
     */
-    static std::string uniqueName(const char* prefix);
+    static java::String uniqueName(const char* prefix);
 
 private:
     XtWidgetSupport();

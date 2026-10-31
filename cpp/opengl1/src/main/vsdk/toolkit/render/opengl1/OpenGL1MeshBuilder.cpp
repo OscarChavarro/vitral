@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include "java/util/Collections.txx"
 #include "vsdk/toolkit/render/opengl1/OpenGL1MeshBuilder.h"
 
 OpenGL1MeshBuilder::OpenGL1MeshBuilder(double characteristicSize)
@@ -125,9 +126,9 @@ OpenGL1MeshRenderer::Mesh* OpenGL1MeshBuilder::build()
     OpenGL1MeshRenderer::Mesh* mesh =
         new OpenGL1MeshRenderer::Mesh(characteristicSize);
 
-    mesh->positions.resize((size_t)count * 3);
-    mesh->normals.resize((size_t)count * 3);
-    mesh->uvs.resize((size_t)count * 2);
+    mesh->positions = java::Collections::nCopies<float>((long)count * 3, 0.0f);
+    mesh->normals = java::Collections::nCopies<float>((long)count * 3, 0.0f);
+    mesh->uvs = java::Collections::nCopies<float>((long)count * 2, 0.0f);
     for ( int i = 0; i < count; i++ ) {
         const float* v = &vertices[(size_t)i * VERTEX_SIZE];
         for ( int c = 0; c < 3; c++ ) {
@@ -151,7 +152,9 @@ void OpenGL1MeshBuilder::addVertex(const Vector3Dd& p, const Vector3Dd& n,
         (float)normal.x(), (float)normal.y(), (float)normal.z(),
         (float)u, (float)v
     };
-    vertices.insert(vertices.end(), vertex, vertex + VERTEX_SIZE);
+    for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+        vertices.add(vertex[c]);
+    }
 }
 
 /**
@@ -171,7 +174,9 @@ void OpenGL1MeshBuilder::addBackSides(int frontCount)
             for ( int c = 3; c < 6; c++ ) {
                 v[c] = -v[c];
             }
-            vertices.insert(vertices.end(), v, v + VERTEX_SIZE);
+            for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+                vertices.add(v[c]);
+            }
         }
     }
 }

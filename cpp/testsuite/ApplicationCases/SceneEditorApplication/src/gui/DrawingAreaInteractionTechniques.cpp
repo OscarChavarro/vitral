@@ -228,7 +228,7 @@ bool DrawingAreaInteractionTechniques::processTranslationEvent(
     translationGizmo->setCamera(viewport->getActiveCamera());
     translationGizmo->setTransformationMatrix(
         SceneSelectionEditor::createTranslationGizmoMatrix(centroid));
-    if ( technique(toViewportEvent(event, viewport)) ) {
+    if ( technique.test(toViewportEvent(event, viewport)) ) {
         selectionEditor->applyTranslationToSelectedObjects(centroid,
             translationGizmo->getPosition());
         listener->repaintRequested();
@@ -250,7 +250,7 @@ bool DrawingAreaInteractionTechniques::processRotationEvent(
     rotateGizmo->setCamera(viewport->getActiveCamera());
     rotateGizmo->setTransformationMatrix(
         SceneSelectionEditor::createRotationGizmoMatrix(body));
-    if ( technique(toViewportEvent(event, viewport)) ) {
+    if ( technique.test(toViewportEvent(event, viewport)) ) {
         listener->repaintRequested();
     }
     return true;
@@ -272,7 +272,7 @@ bool DrawingAreaInteractionTechniques::processScaleEvent(
     scaleGizmo->setTransformationMatrix(
         SceneSelectionEditor::createRotationGizmoMatrix(body));
     scaleGizmo->setScale(body->getScale());
-    if ( technique(toViewportEvent(event, viewport)) ) {
+    if ( technique.test(toViewportEvent(event, viewport)) ) {
         listener->repaintRequested();
     }
     return true;

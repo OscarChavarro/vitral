@@ -1,7 +1,7 @@
 #ifndef __XT_TANGIBLE_INTERFACE_DIALOG__
 #define __XT_TANGIBLE_INTERFACE_DIALOG__
 
-#include <string>
+#include "java/lang/String.h"
 
 #include <X11/Intrinsic.h>
 
@@ -49,12 +49,12 @@ public:
     /**
     @return text of the field of the service URL
     */
-    std::string getServiceUrl() const;
+    java::String getServiceUrl() const;
 
     /**
     @return text shown by the connect button
     */
-    std::string getConnectLabel() const;
+    java::String getConnectLabel() const;
 
     /**
     Acts as a click on a button of the form (automation service).
@@ -62,8 +62,8 @@ public:
     @param serviceUrl if not null, typed in the field before connecting
     @return false if the form is not shown or has no such button
     */
-    bool performAction(const std::string& action,
-                       const std::string* serviceUrl);
+    bool performAction(const java::String& action,
+                       const java::String* serviceUrl);
 
 private:
     XtApplicationHost* host;
@@ -72,7 +72,7 @@ private:
     long formSerial;
     Pixel connectBackground;
 
-    void actionPerformed(const std::string& action);
+    void actionPerformed(const java::String& action);
     void connectionFinished(long serial, long request, bool connected);
 
     XtTangibleInterfaceDialog(const XtTangibleInterfaceDialog& other);

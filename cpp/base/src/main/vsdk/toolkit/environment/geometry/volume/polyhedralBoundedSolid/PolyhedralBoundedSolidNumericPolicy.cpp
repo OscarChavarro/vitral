@@ -1,4 +1,4 @@
-#include <algorithm>
+#include "java/lang/Math.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -186,7 +186,7 @@ PolyhedralBoundedSolidNumericPolicy::ToleranceContext
 PolyhedralBoundedSolidNumericPolicy::forSolids(PolyhedralBoundedSolid* a,
                                                PolyhedralBoundedSolid* b)
 {
-    return fromScale(std::max(estimateSolidScale(a), estimateSolidScale(b)));
+    return fromScale(java::Math::max(estimateSolidScale(a), estimateSolidScale(b)));
 }
 
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext
@@ -260,7 +260,7 @@ int PolyhedralBoundedSolidNumericPolicy::testPointInside(
 bool PolyhedralBoundedSolidNumericPolicy::vectorsColinear(const Vector3Dd& a,
     const Vector3Dd& b, const ToleranceContext& context)
 {
-    double scale = std::max(1.0, std::max(a.length(), b.length()));
+    double scale = java::Math::max(1.0, java::Math::max(a.length(), b.length()));
     return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
 }
 
@@ -288,13 +288,13 @@ double PolyhedralBoundedSolidNumericPolicy::orientationTolerance2D(
     const Vector2Dd& a, const Vector2Dd& b, const Vector2Dd& c,
     const ToleranceContext& context)
 {
-    double lx = std::max(std::max(std::abs(a.x - b.x),
+    double lx = java::Math::max(java::Math::max(std::abs(a.x - b.x),
                                   std::abs(a.x - c.x)),
                          std::abs(b.x - c.x));
-    double ly = std::max(std::max(std::abs(a.y - b.y),
+    double ly = java::Math::max(java::Math::max(std::abs(a.y - b.y),
                                   std::abs(a.y - c.y)),
                          std::abs(b.y - c.y));
-    double span = std::max(1.0, std::max(lx, ly));
+    double span = java::Math::max(1.0, java::Math::max(lx, ly));
     return context.bigEpsilon() * span;
 }
 

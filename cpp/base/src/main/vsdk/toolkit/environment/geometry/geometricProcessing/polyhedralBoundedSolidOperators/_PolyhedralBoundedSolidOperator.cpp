@@ -1,7 +1,7 @@
+#include "java/lang/String.h"
 #include <cfloat>
 #include <cmath>
 #include <cstdio>
-#include <string>
 
 #include "java/lang/Boolean.h"
 #include "java/util/ArrayList.txx"
@@ -397,8 +397,8 @@ void _PolyhedralBoundedSolidOperator::traceRingMoveShadowDecision(
          l->boundaryStartHalfEdge->startingVertex == nullptr ||
          f1->getContainingPlane() == nullptr ) {
         printf("[LARINGMV] f1=%s f2=%s ring=untestable site=%s\n",
-            f1 == nullptr ? "?" : std::to_string(f1->id).c_str(),
-            f2 == nullptr ? "?" : std::to_string(f2->id).c_str(),
+            f1 == nullptr ? "?" : java::String::valueOf(f1->id).c_str(),
+            f2 == nullptr ? "?" : java::String::valueOf(f2->id).c_str(),
             site.c_str());
         return;
     }

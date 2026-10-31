@@ -1,5 +1,6 @@
-#include <stdexcept>
-#include <vector>
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/widget/Widget.h"
@@ -10,7 +11,7 @@
 
 namespace {
 
-std::string message(Widget* messages, const java::String& key)
+java::String message(Widget* messages, const java::String& key)
 {
     return messages != nullptr ? messages->getMessage(key).c_str() :
         key.c_str();
@@ -22,12 +23,12 @@ the Swing host): text inputs to the content, buttons to the bottom row.
 */
 void addElement(const WidgetDialogElement& element, GtkWidget* content,
                 GtkWidget* buttons, Widget* messages,
-                std::map<std::string, GtkWidget*>& fields,
-                std::map<std::string, GtkWidget*>& actions,
-                std::map<std::string, Gtk4TreeView*>& trees,
+                java::TreeMap<java::String, GtkWidget*>& fields,
+                java::TreeMap<java::String, GtkWidget*>& actions,
+                java::TreeMap<java::String, Gtk4TreeView*>& trees,
                 GtkWidget** firstField)
 {
-    std::string kind = element.getKind().c_str();
+    java::String kind = element.getKind().c_str();
     if ( kind == "textInput" ) {
         GtkWidget* label = gtk_label_new(
             message(messages, element.getLabelKey()).c_str());
@@ -40,7 +41,7 @@ void addElement(const WidgetDialogElement& element, GtkWidget* content,
         gtk_editable_set_width_chars(GTK_EDITABLE(field), 36);
         gtk_widget_set_name(field, element.getBinding().c_str());
         gtk_box_append(GTK_BOX(content), field);
-        fields[element.getBinding().c_str()] = field;
+        fields.put(element.getBinding().c_str(), field);
         if ( *firstField == nullptr ) {
             *firstField = field;
         }
@@ -49,7 +50,7 @@ void addElement(const WidgetDialogElement& element, GtkWidget* content,
         Gtk4TreeView* tree = new Gtk4TreeView();
         gtk_box_append(GTK_BOX(content), tree->getWidget());
         // Not focused when shown: a focused list selects its first row
-        trees[element.getBinding().c_str()] = tree;
+        trees.put(element.getBinding().c_str(), tree);
     }
     else if ( kind == "action" ) {
         // Offered by the application with keys or menus
@@ -59,17 +60,17 @@ void addElement(const WidgetDialogElement& element, GtkWidget* content,
             message(messages, element.getLabelKey()).c_str());
         gtk_widget_set_name(button, element.getAction().c_str());
         gtk_box_append(GTK_BOX(buttons), button);
-        actions[element.getAction().c_str()] = button;
+        actions.put(element.getAction().c_str(), button);
     }
     else if ( kind == "row" || kind == "column" ) {
-        const std::vector<WidgetDialogElement>& children = element.getChildren();
+        const java::ArrayList<WidgetDialogElement>& children = element.getChildren();
         for ( size_t i = 0; i < children.size(); i++ ) {
             addElement(children[i], content, buttons, messages, fields,
                        actions, trees, firstField);
         }
     }
     else {
-        throw std::invalid_argument("Unsupported form element: " + kind);
+        throw java::IllegalArgumentException("Unsupported form element: " + kind);
     }
 }
 
@@ -84,9 +85,8 @@ Gtk4DialogHost::Form::Form(const WidgetDialog* definition,
 
 Gtk4DialogHost::Form::~Form()
 {
-    for ( std::map<std::string, Gtk4TreeView*>::iterator tree = trees.begin();
-          tree != trees.end(); ++tree ) {
-        delete tree->second;
+    for (long tree = 0; tree < trees.size(); tree++) {
+        delete trees.getValue(tree);
     }
 }
 
@@ -120,7 +120,7 @@ Gtk4DialogHost::Form* Gtk4DialogHost::form(GtkWindow* owner, Widget* messages,
         message(messages, definition->getTitleKey()).c_str());
     gtk_window_set_transient_for(GTK_WINDOW(form->window), owner);
     gtk_window_set_modal(GTK_WINDOW(form->window), definition->isModal());
-    if ( form->trees.empty() ) {
+    if ( form->trees.isEmpty() ) {
         gtk_window_set_resizable(GTK_WINDOW(form->window), FALSE);
     }
     else {
@@ -139,10 +139,8 @@ Gtk4DialogHost::Form* Gtk4DialogHost::form(GtkWindow* owner, Widget* messages,
     gtk_box_append(GTK_BOX(root), buttons);
     gtk_window_set_child(GTK_WINDOW(form->window), root);
 
-    std::map<std::string, GtkWidget*>::iterator action;
-    for ( action = form->actions.begin(); action != form->actions.end();
-          ++action ) {
-        g_signal_connect(action->second, "clicked",
+    for ( long action = 0; action < form->actions.size(); action++ ) {
+        g_signal_connect(form->actions.getValue(action), "clicked",
                          G_CALLBACK(&Form::buttonClicked), form);
     }
     g_signal_connect(form->window, "destroy", G_CALLBACK(&Form::destroyed),
@@ -157,28 +155,25 @@ GtkWidget* Gtk4DialogHost::Form::dialog() const
     return window;
 }
 
-GtkWidget* Gtk4DialogHost::Form::field(const std::string& binding) const
+GtkWidget* Gtk4DialogHost::Form::field(const java::String& binding) const
 {
-    std::map<std::string, GtkWidget*>::const_iterator found =
-        fields.find(binding);
-    return found != fields.end() ? found->second : nullptr;
+    GtkWidget* const* found = fields.get(binding);
+    return found != nullptr ? (*found) : nullptr;
 }
 
-GtkWidget* Gtk4DialogHost::Form::action(const std::string& action) const
+GtkWidget* Gtk4DialogHost::Form::action(const java::String& action) const
 {
-    std::map<std::string, GtkWidget*>::const_iterator found =
-        actions.find(action);
-    return found != actions.end() ? found->second : nullptr;
+    GtkWidget* const* found = actions.get(action);
+    return found != nullptr ? (*found) : nullptr;
 }
 
-Gtk4TreeView* Gtk4DialogHost::Form::tree(const std::string& binding) const
+Gtk4TreeView* Gtk4DialogHost::Form::tree(const java::String& binding) const
 {
-    std::map<std::string, Gtk4TreeView*>::const_iterator found =
-        trees.find(binding);
-    return found != trees.end() ? found->second : nullptr;
+    Gtk4TreeView* const* found = trees.get(binding);
+    return found != nullptr ? (*found) : nullptr;
 }
 
-bool Gtk4DialogHost::Form::hasAction(const std::string& action) const
+bool Gtk4DialogHost::Form::hasAction(const java::String& action) const
 {
     return definition->getElementByAction(action.c_str()) != nullptr;
 }
@@ -208,9 +203,9 @@ void Gtk4DialogHost::Form::buttonClicked(GtkButton* button, gpointer data)
     Form* form = static_cast<Form*>(data);
     // The listener may close the form: nothing of it is used afterwards
     ActionListener listener = form->onAction;
-    std::string action = gtk_widget_get_name(GTK_WIDGET(button));
+    java::String action = gtk_widget_get_name(GTK_WIDGET(button));
     if ( listener ) {
-        listener(action);
+        listener.accept(action);
     }
 }
 

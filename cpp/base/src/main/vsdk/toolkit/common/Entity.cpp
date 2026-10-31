@@ -1,6 +1,6 @@
+#include "java/lang/String.h"
 #include <cctype>
 #include <cstdlib>
-#include <string>
 #include <typeinfo>
 #if defined(__GNUC__) || defined(__clang__)
 #include <cxxabi.h>
@@ -93,14 +93,14 @@ report malformed specifications when they parse them)
 java::String
 Entity::controlNameOf(const java::String &specification)
 {
-    std::string text(specification.c_str());
+    java::String text(specification.c_str());
     size_t begin = text.find(';');
-    if ( begin == std::string::npos ) {
+    if ( begin == -1 ) {
         return java::String();
     }
     begin++;
     size_t end = text.find(';', begin);
-    if ( end == std::string::npos ) {
+    if ( end == -1 ) {
         end = text.size();
     }
     while ( begin < end && std::isspace((unsigned char)text[begin]) ) {
@@ -205,7 +205,7 @@ java::String
 Entity::getClassSimpleName() const
 {
     const char *mangled = typeid(*this).name();
-    std::string name(mangled);
+    java::String name(mangled);
 #if defined(__GNUC__) || defined(__clang__)
     int status = 0;
     char *demangled = abi::__cxa_demangle(mangled, nullptr, nullptr, &status);
@@ -216,12 +216,12 @@ Entity::getClassSimpleName() const
 #else
     // MSVC names are "class Sphere"
     size_t space = name.rfind(' ');
-    if ( space != std::string::npos ) {
+    if ( space != -1 ) {
         name = name.substr(space + 1);
     }
 #endif
     size_t scope = name.rfind("::");
-    if ( scope != std::string::npos ) {
+    if ( scope != -1 ) {
         name = name.substr(scope + 2);
     }
     return java::String(name.c_str());

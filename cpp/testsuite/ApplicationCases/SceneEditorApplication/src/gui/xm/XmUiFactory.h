@@ -1,6 +1,8 @@
 #ifndef __XM_UI_FACTORY__
 #define __XM_UI_FACTORY__
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 #include "gui/xt/XtUiFactory.h"
 #include "vsdk/toolkit/gui/XmWidgetSet.h"
 
@@ -22,10 +24,10 @@ public:
     virtual const char* getResourceFile() override;
 
     virtual bool showFileDialog(XtApplicationHost* host,
-                                const std::string& title,
-                                const std::string& folder,
-                                const std::vector<FileSuffixFilter>& filters,
-                                std::string& outPath) override;
+                                const java::String& title,
+                                const java::String& folder,
+                                const java::ArrayList<FileSuffixFilter>& filters,
+                                java::String& outPath) override;
 };
 
 #endif

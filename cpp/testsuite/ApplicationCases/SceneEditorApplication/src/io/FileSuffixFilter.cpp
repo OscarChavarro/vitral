@@ -1,3 +1,5 @@
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <cctype>
 
 #include "vsdk/toolkit/gui/dialog/components/DialogFileFilter.h"
@@ -25,19 +27,19 @@ java::String FileSuffixFilter::getSuffix(const java::String& path)
     return suffix;
 }
 
-std::vector<FileSuffixFilter> FileSuffixFilter::fromDialog(
+java::ArrayList<FileSuffixFilter> FileSuffixFilter::fromDialog(
     const WidgetDialog* definition)
 {
-    std::vector<FileSuffixFilter> filters;
+    java::ArrayList<FileSuffixFilter> filters;
     if ( definition == nullptr ) {
         return filters;
     }
-    const std::vector<WidgetDialogElement>& elements = definition->getElements();
+    const java::ArrayList<WidgetDialogElement>& elements = definition->getElements();
     for ( int i = 0; i < (int)elements.size(); i++ ) {
         if ( !elements[i].getKind().equals("fileChooser") ) {
             continue;
         }
-        const std::vector<WidgetDialogElement>& children =
+        const java::ArrayList<WidgetDialogElement>& children =
             elements[i].getChildren();
         for ( int j = 0; j < (int)children.size(); j++ ) {
             if ( !children[j].getKind().equals("fileFilter") ) {
@@ -46,7 +48,7 @@ std::vector<FileSuffixFilter> FileSuffixFilter::fromDialog(
             // The label of a filter is its description, as in Java
             DialogFileFilter policy(children[j].getBinding(),
                                     children[j].getLabelKey());
-            filters.push_back(FileSuffixFilter(policy.getSuffix(),
+            filters.add(FileSuffixFilter(policy.getSuffix(),
                                                children[j].getLabelKey()));
         }
     }

@@ -1,3 +1,4 @@
+#include "java/lang/Double.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -14,7 +15,6 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
 #include "vsdk/toolkit/render/raytracing/DepthBufferEncoder.h"
-#include <limits>
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -191,7 +191,7 @@ ColorRgb SimpleRaytracer::followRayPath(const Ray& inRay,java::ArrayList<SimpleB
         return evaluateIlluminationModel(shadingInfo, -inRay.getDirection().x(), -inRay.getDirection().y(), -inRay.getDirection().z(), lights, bodies, cache, background, resolveMaterial(shadingInfo, objectData), renderContext, MAX_RECURSION_LEVEL, 0);
     }
     // No hit: the primary distance is read to export depth buffers
-    hitInfo->setHitDistance(std::numeric_limits<double>::infinity());
+    hitInfo->setHitDistance(java::Double::POSITIVE_INFINITY);
     return background->colorInDireccion(inRay.getDirection());
 }
 

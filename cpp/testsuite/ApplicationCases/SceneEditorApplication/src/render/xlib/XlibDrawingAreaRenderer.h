@@ -1,8 +1,8 @@
 #ifndef __XLIB_DRAWING_AREA_RENDERER__
 #define __XLIB_DRAWING_AREA_RENDERER__
 
+#include "java/util/function/Consumer.h"
 #include <X11/Xlib.h>
-#include <functional>
 
 class ApplicationModel;
 class DrawingAreaHost;
@@ -14,7 +14,7 @@ class XlibDrawingAreaRenderer {
     ApplicationModel* model;
     DrawingAreaHost* host;
     FrameCaptureService* frameCapture;
-    std::function<void(Viewport*)> selectedListener;
+    java::Consumer<Viewport*> selectedListener;
     Display* fontDisplay;
     XFontSet titleFont;
     int titleFontSize;
@@ -28,7 +28,7 @@ class XlibDrawingAreaRenderer {
 
 public:
     XlibDrawingAreaRenderer(ApplicationModel* model, DrawingAreaHost* host,
-                            const std::function<void(Viewport*)>& selected);
+                            const java::Consumer<Viewport*>& selected);
     ~XlibDrawingAreaRenderer();
     void display(Display* display, Window window, Visual* visual, int depth,
                  int width, int height);

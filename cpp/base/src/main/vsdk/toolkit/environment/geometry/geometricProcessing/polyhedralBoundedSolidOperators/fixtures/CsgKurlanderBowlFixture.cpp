@@ -1,6 +1,6 @@
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
-#include <string>
 
 #include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
@@ -97,7 +97,7 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createCylinder(double radius,
 }
 
 PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createExtrudedPolygon(
-    const std::vector<Vector3Dd>& points, double thickness)
+    const java::ArrayList<Vector3Dd>& points, double thickness)
 {
     int i;
     int n = (int)points.size();
@@ -122,12 +122,12 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createStar()
     double outerR = scale(2.0);
     double innerR = scale(0.77);
     double start = toRadians(-90.0);
-    std::vector<Vector3Dd> points;
+    java::ArrayList<Vector3Dd> points;
 
     for ( i = 0; i < n; i++ ) {
         double a = start + i * M_PI / 5.0;
         double r = (i % 2 == 0) ? outerR : innerR;
-        points.push_back(Vector3Dd(r * std::cos(a), r * std::sin(a), 0.0));
+        points.add(Vector3Dd(r * std::cos(a), r * std::sin(a), 0.0));
     }
 
     return createExtrudedPolygon(points, scale(5.5));
@@ -247,20 +247,20 @@ java::String CsgKurlanderBowlFixture::describeSingleMotif(int motifIndex)
     int normalizedIndex = normalizeSingleMotifIndex(motifIndex);
     int lastIndex = getSingleMotifCount() - 1;
     int typeIndex;
-    std::string text;
+    java::String text;
 
     if ( normalizedIndex < STAR_COUNT ) {
         typeIndex = normalizedIndex + 1;
-        text = "STAR " + std::to_string(typeIndex) + "/" +
-            std::to_string(STAR_COUNT) + " index " +
-            std::to_string(normalizedIndex) + "/" + std::to_string(lastIndex);
+        text = "STAR " + java::String::valueOf(typeIndex) + "/" +
+            java::String::valueOf(STAR_COUNT) + " index " +
+            java::String::valueOf(normalizedIndex) + "/" + java::String::valueOf(lastIndex);
         return text.c_str();
     }
 
     typeIndex = normalizedIndex - STAR_COUNT + 1;
-    text = "MOON " + std::to_string(typeIndex) + "/" +
-        std::to_string(MOON_COUNT) + " index " +
-        std::to_string(normalizedIndex) + "/" + std::to_string(lastIndex);
+    text = "MOON " + java::String::valueOf(typeIndex) + "/" +
+        java::String::valueOf(MOON_COUNT) + " index " +
+        java::String::valueOf(normalizedIndex) + "/" + java::String::valueOf(lastIndex);
     return text.c_str();
 }
 
@@ -285,7 +285,7 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createAllMotifsUnion()
     int motifCount = moonCount + starCount;
 
     printProgressMessage(("createAllMotifsUnion: building " +
-        std::to_string(motifCount) + " motifs").c_str());
+        java::String::valueOf(motifCount) + " motifs").c_str());
 
     PolyhedralBoundedSolid* result =
         placeMoon(createMoon(), getMoonZ(0), getMoonAzimuthDeg(0));
@@ -311,15 +311,15 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createAllMotifsUnion()
     return result;
 }
 
-std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands()
+java::ArrayList<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands()
 {
     return createBowlAndFirstStarOperands(0);
 }
 
-std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(
+java::ArrayList<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(
     int motifIndex)
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
     PolyhedralBoundedSolid* outer = createSphere(
         scale(10.0), Vector3Dd(0, 0, scale(10.0)));
     PolyhedralBoundedSolid* inner = createSphere(
@@ -330,8 +330,8 @@ std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirst
         createCylinder(scale(10.5), scale(16.5), Vector3Dd(0, 0, 0)),
         Modeler::INTERSECTION);
 
-    operands.push_back(bowl);
-    operands.push_back(createSingleMotif(motifIndex));
+    operands.add(bowl);
+    operands.add(createSingleMotif(motifIndex));
     return operands;
 }
 
@@ -390,16 +390,16 @@ double CsgKurlanderBowlFixture::getMotifAzimuthDeg(int motifTypeIndex,
     return base + offsets[positionIndex];
 }
 
-std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createShellAndFirstMoonOperands()
+java::ArrayList<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createShellAndFirstMoonOperands()
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
     PolyhedralBoundedSolid* outer = createSphere(
         scale(10.0), Vector3Dd(0, 0, scale(10.0)));
     PolyhedralBoundedSolid* inner = createSphere(
         scale(9.5), Vector3Dd(0, 0, scale(10.0)));
 
-    operands.push_back(booleanOp(outer, inner, Modeler::SUBTRACT));
-    operands.push_back(placeMoon(createMoon(), 4.0, -90.0));
+    operands.add(booleanOp(outer, inner, Modeler::SUBTRACT));
+    operands.add(placeMoon(createMoon(), 4.0, -90.0));
     return operands;
 }
 
@@ -455,10 +455,10 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::create()
 void CsgKurlanderBowlFixture::printMotifProgress(const char* motifType,
     int typeIndex, int typeCount, int motifIndex, int motifCount)
 {
-    printProgressMessage(("Processing " + std::string(motifType) + " " +
-        std::to_string(typeIndex) + "/" + std::to_string(typeCount) +
-        ", motif " + std::to_string(motifIndex) + "/" +
-        std::to_string(motifCount)).c_str());
+    printProgressMessage(("Processing " + java::String(motifType) + " " +
+        java::String::valueOf(typeIndex) + "/" + java::String::valueOf(typeCount) +
+        ", motif " + java::String::valueOf(motifIndex) + "/" +
+        java::String::valueOf(motifCount)).c_str());
 }
 
 void CsgKurlanderBowlFixture::printProgressMessage(const java::String& message)

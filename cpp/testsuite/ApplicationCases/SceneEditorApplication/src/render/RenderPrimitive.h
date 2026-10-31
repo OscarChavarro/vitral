@@ -1,12 +1,12 @@
 #ifndef __RENDER_PRIMITIVE__
 #define __RENDER_PRIMITIVE__
 
-#include <memory>
+#include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 
-class Geometry;
 
 /**
 One geometry to draw, with its transformation and material. Lists of
@@ -17,12 +17,12 @@ technologies by writing only that renderer.
 
 C++ port note: a primitive is a value; its geometry, which can be shared by
 several primitives (as garbage collected references in Java), is held by a
-`std::shared_ptr`. Geometries owned by someone else (i.e. a body) are given
+`SharedPointer`. Geometries owned by someone else (i.e. a body) are given
 with the non owning constructor.
 */
 class RenderPrimitive {
 private:
-    std::shared_ptr<Geometry> geometry;
+    SharedPointer<Geometry> geometry;
     Matrix4x4d transform;
     SimpleMaterial material;
 
@@ -34,7 +34,7 @@ public:
     @param transform transformation from geometry to world coordinates
     @param material material of the geometry
     */
-    RenderPrimitive(const std::shared_ptr<Geometry>& geometry,
+    RenderPrimitive(const SharedPointer<Geometry>& geometry,
                     const Matrix4x4d& transform,
                     const SimpleMaterial& material)
         : geometry(geometry), transform(transform), material(material) {}
@@ -50,7 +50,7 @@ public:
                                        const SimpleMaterial& material)
     {
         return RenderPrimitive(
-            std::shared_ptr<Geometry>(geometry, [](Geometry*) {}),
+            SharedPointer<Geometry>::notOwning(geometry),
             transform, material);
     }
 

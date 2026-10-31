@@ -1,3 +1,5 @@
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/dialog/components/DialogTreeNode.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferButton.h"
@@ -30,17 +32,17 @@ FramebufferDialogForm::build(const Widget &context, const WidgetDialogElement &e
         }
         FramebufferTextField *field = new FramebufferTextField("", 40);
         dialog.add(field);
-        fields[element.getBinding()] = field;
+        fields.put(element.getBinding(), field);
     } else if (kind.equals("tree")) {
         FramebufferList *list = new FramebufferList(36, 14, true);
         dialog.add(list);
-        trees[element.getBinding()] = list;
+        trees.put(element.getBinding(), list);
     } else if (kind.equals("button") || kind.equals("action")) {
         bool isCancel = element.getAction().equals("cancel") || element.getAction().equals("close");
         FramebufferButton *button = new FramebufferButton(context.getMessage(element.getLabelKey()),
                                                           element.getAction());
-        dialog.addButton(button, buttons.empty() && !isCancel, isCancel);
-        buttons[element.getAction()] = button;
+        dialog.addButton(button, buttons.isEmpty() && !isCancel, isCancel);
+        buttons.put(element.getAction(), button);
     } else {
         complete = false;
     }
@@ -48,27 +50,27 @@ FramebufferDialogForm::build(const Widget &context, const WidgetDialogElement &e
 
 FramebufferTextField *
 FramebufferDialogForm::field(const java::String &binding) const {
-    std::map<java::String, FramebufferTextField *>::const_iterator i = fields.find(binding);
-    return i == fields.end() ? nullptr : i->second;
+    FramebufferTextField * const* i = fields.get(binding);
+    return i == nullptr ? nullptr : (*i);
 }
 
 FramebufferList *
 FramebufferDialogForm::tree(const java::String &binding) const {
-    std::map<java::String, FramebufferList *>::const_iterator i = trees.find(binding);
-    return i == trees.end() ? nullptr : i->second;
+    FramebufferList * const* i = trees.get(binding);
+    return i == nullptr ? nullptr : (*i);
 }
 
 FramebufferButton *
 FramebufferDialogForm::button(const java::String &action) const {
-    std::map<java::String, FramebufferButton *>::const_iterator i = buttons.find(action);
-    return i == buttons.end() ? nullptr : i->second;
+    FramebufferButton * const* i = buttons.get(action);
+    return i == nullptr ? nullptr : (*i);
 }
 
 java::String
 FramebufferDialogForm::actionOf(const FramebufferControl *control) const {
-    for (std::map<java::String, FramebufferButton *>::const_iterator i = buttons.begin(); i != buttons.end(); ++i) {
-        if (i->second == control) {
-            return i->first;
+    for (long i = 0; i < buttons.size(); i++) {
+        if (buttons.getValue(i) == control) {
+            return buttons.getKey(i);
         }
     }
     return java::String("");
@@ -77,9 +79,11 @@ FramebufferDialogForm::actionOf(const FramebufferControl *control) const {
 void
 FramebufferDialogForm::flatten(const java::String &binding, const DialogTreeNode &node, int depth) {
     FramebufferList *list = tree(binding);
+    java::ArrayList<const DialogTreeNode *> &bindingRows =
+        rows.putIfAbsent(binding, java::ArrayList<const DialogTreeNode *>());
     for (const DialogTreeNode &child : node.getChildren()) {
-        rows[binding].add(&child);
-        list->add(child.getLabel(), depth, (long)rows[binding].size() - 1);
+        bindingRows.add(&child);
+        list->add(child.getLabel(), depth, (long)bindingRows.size() - 1);
         flatten(binding, child, depth + 1);
     }
 }
@@ -91,27 +95,27 @@ FramebufferDialogForm::setTree(const java::String &binding, const DialogTreeNode
         return;
     }
     list->clear();
-    rows[binding].clear();
+    rows.putIfAbsent(binding, java::ArrayList<const DialogTreeNode *>()).clear();
     flatten(binding, root, 0);
 }
 
 const DialogTreeNode *
 FramebufferDialogForm::node(const java::String &binding, int row) const {
-    std::map<java::String, java::ArrayList<const DialogTreeNode *> >::const_iterator i = rows.find(binding);
-    if (i == rows.end() || row < 0 || row >= (int)i->second.size()) {
+    const java::ArrayList<const DialogTreeNode *>* i = rows.get(binding);
+    if (i == nullptr || row < 0 || row >= (int)(*i).size()) {
         return nullptr;
     }
-    return i->second[row];
+    return (*i)[row];
 }
 
 int
 FramebufferDialogForm::rowOf(const java::String &binding, const DialogTreeNode *target) const {
-    std::map<java::String, java::ArrayList<const DialogTreeNode *> >::const_iterator i = rows.find(binding);
-    if (i == rows.end()) {
+    const java::ArrayList<const DialogTreeNode *>* i = rows.get(binding);
+    if (i == nullptr) {
         return -1;
     }
-    for (int row = 0; row < (int)i->second.size(); row++) {
-        if (i->second[row] == target) {
+    for (int row = 0; row < (int)(*i).size(); row++) {
+        if ((*i)[row] == target) {
             return row;
         }
     }

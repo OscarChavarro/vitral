@@ -1,8 +1,11 @@
 // Before any other header that could include the Xt ones
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/TreeMap.txx"
 #include "vsdk/toolkit/gui/XtIntrinsics.h"
 
-#include <algorithm>
-#include <stdexcept>
 
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
 #include "vsdk/toolkit/gui/XtWidgetSet.h"
@@ -23,7 +26,7 @@ const int BUTTON_HEIGHT = 28;
 const int BUTTON_GAP = 10;
 const int BUTTON_PADDING = 28;
 
-int textWidth(XFontSet fontSet, const std::string& text)
+int textWidth(XFontSet fontSet, const java::String& text)
 {
     if ( fontSet == nullptr ) {
         return static_cast<int>(text.size()) * 8;
@@ -36,19 +39,19 @@ int textWidth(XFontSet fontSet, const std::string& text)
 Splits a text in lines no wider than the given width, at blanks, as a
 wrapping label.
 */
-std::vector<std::string> wrapText(XFontSet fontSet, const std::string& text,
+java::ArrayList<java::String> wrapText(XFontSet fontSet, const java::String& text,
                                   int width)
 {
-    std::vector<std::string> lines;
-    std::string line;
+    java::ArrayList<java::String> lines;
+    java::String line;
     size_t start = 0;
     while ( start < text.size() ) {
         size_t end = text.find(' ', start);
-        if ( end == std::string::npos ) end = text.size();
-        std::string word = text.substr(start, end - start);
-        std::string candidate = line.empty() ? word : line + " " + word;
-        if ( !line.empty() && textWidth(fontSet, candidate) > width ) {
-            lines.push_back(line);
+        if ( end == -1 ) end = text.size();
+        java::String word = text.substr(start, end - start);
+        java::String candidate = line.isEmpty() ? word : line + " " + word;
+        if ( !line.isEmpty() && textWidth(fontSet, candidate) > width ) {
+            lines.add(line);
             line = word;
         }
         else {
@@ -56,7 +59,7 @@ std::vector<std::string> wrapText(XFontSet fontSet, const std::string& text,
         }
         start = end + 1;
     }
-    if ( !line.empty() ) lines.push_back(line);
+    if ( !line.isEmpty() ) lines.add(line);
     return lines;
 }
 
@@ -68,8 +71,8 @@ void ignoreActivation(XtWidget, void*)
 
 struct XtDialogHost::Form::Button {
     Form* form;
-    std::string action;
-    std::string label;
+    java::String action;
+    java::String label;
     XtWidget widget;
 };
 
@@ -86,9 +89,11 @@ XtDialogHost::Form::Form(XtWidgetSet* widgetSet, XFontSet fontSet,
 
 XtDialogHost::Form::~Form()
 {
-    for ( std::map<std::string, XtTreeView*>::iterator tree = trees.begin();
-          tree != trees.end(); ++tree ) {
-        delete tree->second;
+    for ( long i = 0; i < buttons.size(); i++ ) {
+        delete buttons[i];
+    }
+    for (long tree = 0; tree < trees.size(); tree++) {
+        delete trees.getValue(tree);
     }
     if ( shell != nullptr ) {
         XtDestroyWidget(shell);
@@ -101,112 +106,117 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
                                        const WidgetDialog* definition,
                                        const ActionListener& onAction)
 {
-    std::unique_ptr<Form> form(new Form(widgetSet, fontSet, shell, definition,
-                                        onAction));
-    XtPanelWidgets* widgets = widgetSet->getPanelWidgets();
-    std::string title = messages(definition->getTitleKey().c_str());
-    XtVaSetValues(shell, XtNtitle, title.c_str(), nullptr);
-    widgetSet->setWindowCloseHandler(shell, &Form::closeRequested, form.get());
+    Form* form = new Form(widgetSet, fontSet, shell, definition, onAction);
+    try {
+        XtPanelWidgets* widgets = widgetSet->getPanelWidgets();
+        java::String title = messages.apply(definition->getTitleKey().c_str());
+        XtVaSetValues(shell, XtNtitle, title.c_str(), nullptr);
+        widgetSet->setWindowCloseHandler(shell, &Form::closeRequested, form);
 
-    // The elements, in order: rows and columns only group them (as the
-    // Swing host does), and the buttons go to the bottom row
-    std::vector<const WidgetDialogElement*> pending;
-    for ( size_t i = definition->getElements().size(); i > 0; i-- ) {
-        pending.push_back(&definition->getElements()[i - 1]);
-    }
-    std::vector<const WidgetDialogElement*> inputs;
-    std::vector<const WidgetDialogElement*> buttons;
-    bool withTree = false;
-    while ( !pending.empty() ) {
-        const WidgetDialogElement* element = pending.back();
-        pending.pop_back();
-        std::string kind = element->getKind().c_str();
-        if ( kind == "textInput" || kind == "tree" ) {
-            inputs.push_back(element);
-            withTree = withTree || kind == "tree";
+        // The elements, in order: rows and columns only group them (as the
+        // Swing host does), and the buttons go to the bottom row
+        java::ArrayList<const WidgetDialogElement*> pending;
+        for ( size_t i = definition->getElements().size(); i > 0; i-- ) {
+            pending.add(&definition->getElements()[i - 1]);
         }
-        else if ( kind == "action" ) {
-            // Offered by the application with keys or menus
-        }
-        else if ( kind == "button" ) {
-            buttons.push_back(element);
-        }
-        else if ( kind == "row" || kind == "column" ) {
-            const std::vector<WidgetDialogElement>& children =
-                element->getChildren();
-            for ( size_t i = children.size(); i > 0; i-- ) {
-                pending.push_back(&children[i - 1]);
+        java::ArrayList<const WidgetDialogElement*> inputs;
+        java::ArrayList<const WidgetDialogElement*> buttons;
+        bool withTree = false;
+        while ( !pending.isEmpty() ) {
+            const WidgetDialogElement* element = pending[pending.size() - 1];
+            pending.remove(pending.size() - 1);
+            java::String kind = element->getKind().c_str();
+            if ( kind == "textInput" || kind == "tree" ) {
+                inputs.add(element);
+                withTree = withTree || kind == "tree";
+            }
+            else if ( kind == "action" ) {
+                // Offered by the application with keys or menus
+            }
+            else if ( kind == "button" ) {
+                buttons.add(element);
+            }
+            else if ( kind == "row" || kind == "column" ) {
+                const java::ArrayList<WidgetDialogElement>& children =
+                    element->getChildren();
+                for ( size_t i = children.size(); i > 0; i-- ) {
+                    pending.add(&children[i - 1]);
+                }
+            }
+            else {
+                throw java::IllegalArgumentException(
+                    "Unsupported form element: " + kind);
             }
         }
-        else {
-            throw std::invalid_argument(
-                "Unsupported form element: " + kind);
-        }
-    }
 
-    if ( withTree ) {
-        form->width = TREE_DIALOG_WIDTH;
-    }
-    std::vector<std::vector<std::string> > prompts;
-    int height = MARGIN;
-    for ( size_t i = 0; i < inputs.size(); i++ ) {
-        std::string labelKey = inputs[i]->getLabelKey().c_str();
-        prompts.push_back(labelKey.empty() ? std::vector<std::string>() :
-            wrapText(fontSet, messages(labelKey), form->width - 2 * MARGIN));
-        height += static_cast<int>(prompts[i].size()) * LINE_HEIGHT +
-            (prompts[i].empty() ? 0 : 6) +
-            (inputs[i]->getKind().equals("tree") ? TREE_HEIGHT : FIELD_HEIGHT) +
-            MARGIN;
-    }
-    form->buttonsY = height;
-    if ( !buttons.empty() ) {
-        height += BUTTON_HEIGHT + MARGIN;
-    }
+        if ( withTree ) {
+            form->width = TREE_DIALOG_WIDTH;
+        }
+        java::ArrayList<java::ArrayList<java::String> > prompts;
+        int height = MARGIN;
+        for ( size_t i = 0; i < inputs.size(); i++ ) {
+            java::String labelKey = inputs[i]->getLabelKey().c_str();
+            prompts.add(labelKey.isEmpty() ? java::ArrayList<java::String>() :
+                wrapText(fontSet, messages.apply(labelKey), form->width - 2 * MARGIN));
+            height += static_cast<int>(prompts[i].size()) * LINE_HEIGHT +
+                (prompts[i].isEmpty() ? 0 : 6) +
+                (inputs[i]->getKind().equals("tree") ? TREE_HEIGHT : FIELD_HEIGHT) +
+                MARGIN;
+        }
+        form->buttonsY = height;
+        if ( !buttons.isEmpty() ) {
+            height += BUTTON_HEIGHT + MARGIN;
+        }
 
-    XtWidget frame = widgets->createPanel(shell, "dialogFrame", 0, 0,
-                                          form->width, height, true);
-    int y = MARGIN;
-    for ( size_t i = 0; i < inputs.size(); i++ ) {
-        for ( size_t line = 0; line < prompts[i].size(); line++ ) {
-            widgets->createLabel(frame, prompts[i][line], fontSet,
-                                 XtPanelWidgets::LEFT, MARGIN, y,
-                                 form->width - 2 * MARGIN, LINE_HEIGHT);
-            y += LINE_HEIGHT;
-        }
-        if ( !prompts[i].empty() ) {
-            y += 6;
-        }
-        if ( inputs[i]->getKind().equals("tree") ) {
-            XtTreeView* tree = new XtTreeView(frame, fontSet, MARGIN, y,
-                form->width - 2 * MARGIN, TREE_HEIGHT);
-            form->trees[inputs[i]->getBinding().c_str()] = tree;
+        XtWidget frame = widgets->createPanel(shell, "dialogFrame", 0, 0,
+                                              form->width, height, true);
+        int y = MARGIN;
+        for ( size_t i = 0; i < inputs.size(); i++ ) {
+            for ( size_t line = 0; line < prompts[i].size(); line++ ) {
+                widgets->createLabel(frame, prompts[i][line], fontSet,
+                                     XtPanelWidgets::LEFT, MARGIN, y,
+                                     form->width - 2 * MARGIN, LINE_HEIGHT);
+                y += LINE_HEIGHT;
+            }
+            if ( !prompts[i].isEmpty() ) {
+                y += 6;
+            }
+            if ( inputs[i]->getKind().equals("tree") ) {
+                XtTreeView* tree = new XtTreeView(frame, fontSet, MARGIN, y,
+                    form->width - 2 * MARGIN, TREE_HEIGHT);
+                form->trees.put(inputs[i]->getBinding().c_str(), tree);
+                if ( form->firstField == nullptr ) {
+                    form->firstField = tree->getWidget();
+                }
+                y += TREE_HEIGHT + MARGIN;
+                continue;
+            }
+            XtWidget field = widgets->createTextField(frame, "", fontSet,
+                MARGIN, y, form->width - 2 * MARGIN, FIELD_HEIGHT,
+                ignoreActivation, nullptr);
+            form->fields.put(inputs[i]->getBinding().c_str(), field);
             if ( form->firstField == nullptr ) {
-                form->firstField = tree->getWidget();
+                form->firstField = field;
             }
-            y += TREE_HEIGHT + MARGIN;
-            continue;
+            y += FIELD_HEIGHT + MARGIN;
         }
-        XtWidget field = widgets->createTextField(frame, "", fontSet,
-            MARGIN, y, form->width - 2 * MARGIN, FIELD_HEIGHT,
-            ignoreActivation, nullptr);
-        form->fields[inputs[i]->getBinding().c_str()] = field;
-        if ( form->firstField == nullptr ) {
-            form->firstField = field;
+        for ( size_t i = 0; i < buttons.size(); i++ ) {
+            Form::Button* button = new Form::Button;
+            button->form = form;
+            button->action = buttons[i]->getAction().c_str();
+            button->label = messages.apply(buttons[i]->getLabelKey().c_str());
+            button->widget = widgets->createPushButton(frame, button->label,
+                fontSet, 0, form->buttonsY, 1, BUTTON_HEIGHT,
+                &Form::buttonPressed, button);
+            form->buttons.add(button);
         }
-        y += FIELD_HEIGHT + MARGIN;
+        form->layoutButtons();
     }
-    for ( size_t i = 0; i < buttons.size(); i++ ) {
-        std::unique_ptr<Form::Button> button(new Form::Button);
-        button->form = form.get();
-        button->action = buttons[i]->getAction().c_str();
-        button->label = messages(buttons[i]->getLabelKey().c_str());
-        button->widget = widgets->createPushButton(frame, button->label,
-            fontSet, 0, form->buttonsY, 1, BUTTON_HEIGHT,
-            &Form::buttonPressed, button.get());
-        form->buttons.push_back(std::move(button));
+    catch ( ... ) {
+        delete form;
+        throw;
     }
-    form->layoutButtons();
-    return form.release();
+    return form;
 }
 
 /**
@@ -215,13 +225,13 @@ Sizes the buttons to their texts and centers their row.
 void XtDialogHost::Form::layoutButtons()
 {
     int rowWidth = 0;
-    std::vector<int> widths;
+    java::ArrayList<int> widths;
     for ( size_t i = 0; i < buttons.size(); i++ ) {
-        widths.push_back(textWidth(fontSet, buttons[i]->label) +
+        widths.add(textWidth(fontSet, buttons[i]->label) +
                          BUTTON_PADDING);
         rowWidth += widths[i] + (i > 0 ? BUTTON_GAP : 0);
     }
-    int x = std::max(MARGIN, (width - rowWidth) / 2);
+    int x = java::Math::max(MARGIN, (width - rowWidth) / 2);
     for ( size_t i = 0; i < buttons.size(); i++ ) {
         XtVaSetValues(buttons[i]->widget, XtNx, x, XtNy, buttonsY,
                       XtNwidth, widths[i], XtNheight, BUTTON_HEIGHT, nullptr);
@@ -230,11 +240,11 @@ void XtDialogHost::Form::layoutButtons()
 }
 
 XtDialogHost::Form::Button* XtDialogHost::Form::findButton(
-    const std::string& action) const
+    const java::String& action) const
 {
     for ( size_t i = 0; i < buttons.size(); i++ ) {
         if ( buttons[i]->action == action ) {
-            return buttons[i].get();
+            return buttons[i];
         }
     }
     return nullptr;
@@ -245,27 +255,25 @@ XtWidget XtDialogHost::Form::dialog() const
     return shell;
 }
 
-XtWidget XtDialogHost::Form::field(const std::string& binding) const
+XtWidget XtDialogHost::Form::field(const java::String& binding) const
 {
-    std::map<std::string, XtWidget>::const_iterator found =
-        fields.find(binding);
-    return found != fields.end() ? found->second : nullptr;
+    XtWidget const* found = fields.get(binding);
+    return found != nullptr ? (*found) : nullptr;
 }
 
-XtWidget XtDialogHost::Form::action(const std::string& action) const
+XtWidget XtDialogHost::Form::action(const java::String& action) const
 {
     Button* button = findButton(action);
     return button != nullptr ? button->widget : nullptr;
 }
 
-XtTreeView* XtDialogHost::Form::tree(const std::string& binding) const
+XtTreeView* XtDialogHost::Form::tree(const java::String& binding) const
 {
-    std::map<std::string, XtTreeView*>::const_iterator found =
-        trees.find(binding);
-    return found != trees.end() ? found->second : nullptr;
+    XtTreeView* const* found = trees.get(binding);
+    return found != nullptr ? (*found) : nullptr;
 }
 
-bool XtDialogHost::Form::hasAction(const std::string& action) const
+bool XtDialogHost::Form::hasAction(const java::String& action) const
 {
     return definition->getElementByAction(action.c_str()) != nullptr;
 }
@@ -275,15 +283,15 @@ DialogSession* XtDialogHost::Form::session()
     return &dialogSession;
 }
 
-std::string XtDialogHost::Form::getText(const std::string& binding) const
+java::String XtDialogHost::Form::getText(const java::String& binding) const
 {
     XtWidget widget = field(binding);
     return widget != nullptr ?
-        widgetSet->getPanelWidgets()->getText(widget) : std::string();
+        widgetSet->getPanelWidgets()->getText(widget) : java::String();
 }
 
-void XtDialogHost::Form::setText(const std::string& binding,
-                                 const std::string& text)
+void XtDialogHost::Form::setText(const java::String& binding,
+                                 const java::String& text)
 {
     XtWidget widget = field(binding);
     if ( widget != nullptr ) {
@@ -291,14 +299,14 @@ void XtDialogHost::Form::setText(const std::string& binding,
     }
 }
 
-std::string XtDialogHost::Form::getActionLabel(const std::string& action) const
+java::String XtDialogHost::Form::getActionLabel(const java::String& action) const
 {
     Button* button = findButton(action);
-    return button != nullptr ? button->label : std::string();
+    return button != nullptr ? button->label : java::String();
 }
 
-void XtDialogHost::Form::setActionLabel(const std::string& action,
-                                        const std::string& label)
+void XtDialogHost::Form::setActionLabel(const java::String& action,
+                                        const java::String& label)
 {
     Button* button = findButton(action);
     if ( button == nullptr ) {
@@ -338,9 +346,9 @@ void XtDialogHost::Form::buttonPressed(XtWidget, void* clientData)
     Button* button = static_cast<Button*>(clientData);
     // The listener may close the form: nothing of it is used afterwards
     ActionListener listener = button->form->onAction;
-    std::string action = button->action;
+    java::String action = button->action;
     if ( listener ) {
-        listener(action);
+        listener.accept(action);
     }
 }
 

@@ -1,8 +1,8 @@
 #ifndef __RAY_GIZMO__
 #define __RAY_GIZMO__
 
+#include "java/util/function/Function.h"
 #include <ctime>
-#include <functional>
 #include <pthread.h>
 
 #include "java/util/ArrayList.h"
@@ -41,7 +41,7 @@ public:
         void clear();
     };
 
-    RayGizmo(std::function<Intersection*(const Ray&)> intersectionCallback, int maxNumOfReflections);
+    RayGizmo(java::Function<const Ray&, Intersection*> intersectionCallback, int maxNumOfReflections);
     ~RayGizmo();
 
     Vector3Dd getPosition() const;
@@ -88,7 +88,7 @@ private:
     Arrow* arrow;
     Sphere* dotSphere;
     SimpleBody* body;
-    std::function<Intersection*(const Ray&)> intersectionCallback;
+    java::Function<const Ray&, Intersection*> intersectionCallback;
     InputGizmo inputGizmo;
     int maxNumOfReflections;
     pthread_mutex_t pendingMutex;

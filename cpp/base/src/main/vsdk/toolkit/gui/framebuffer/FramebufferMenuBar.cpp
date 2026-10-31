@@ -131,14 +131,14 @@ FramebufferMenuBar::layout(Framebuffer &target, const FramebufferTheme &style, i
         entry.x = column;
         entry.y = row;
         column += entry.width;
-        bar.push_back(entry);
+        bar.add(entry);
     }
     // As Motif's help cascade, the last menu goes to the right end of the bar when its row has room.
     int last = (int)bar.size() - 1;
     if (last > 0 && bar[last].y == bar[last - 1].y) {
         bar[last].x = right - bar[last].width;
     }
-    barHeight = (bar.empty() ? height : bar.back().y + height - y) + m;
+    barHeight = (bar.isEmpty() ? height : bar[bar.size() - 1].y + height - y) + m;
     return barHeight;
 }
 
@@ -256,7 +256,7 @@ FramebufferMenuBar::openPopup(WidgetMenu *menu, int anchorX, int anchorY, int an
         acceleratorWidth = width > acceleratorWidth ? width : acceleratorWidth;
         cascades = cascades || entry.submenu;
         toggles = toggles || entry.checkable;
-        popup->entries.push_back(entry);
+        popup->entries.add(entry);
     }
 
     // The width of a column: the shadows, the check boxes, the labels, then the accelerators and cascade arrows.
@@ -306,7 +306,7 @@ FramebufferMenuBar::openPopup(WidgetMenu *menu, int anchorX, int anchorY, int an
         entry.x += popup->x + m;
         entry.y += popup->y + m;
     }
-    popups.push_back(popup);
+    popups.add(popup);
     surface->beginDrawing();
     popup->saved.capture(*surface, popup->x, popup->y, popup->width, popup->height);
     drawPopup(*popup);
@@ -321,8 +321,8 @@ FramebufferMenuBar::closeFrom(int level) {
     }
     surface->beginDrawing();
     while ((int)popups.size() > level) {
-        Popup *popup = popups.back();
-        popups.pop_back();
+        Popup *popup = popups[popups.size() - 1];
+        popups.remove(popups.size() - 1);
         popup->saved.restore();
         delete popup;
     }
@@ -476,7 +476,7 @@ FramebufferMenuBar::mnemonic(char key) {
     if (key >= 'A' && key <= 'Z') {
         key = (char)(key - 'A' + 'a');
     }
-    if (popups.empty()) {
+    if (popups.isEmpty()) {
         for (int i = 0; i < (int)bar.size(); i++) {
             char c = bar[i].mnemonic;
             if (c >= 'A' && c <= 'Z') {
@@ -507,7 +507,7 @@ FramebufferMenuBar::mnemonic(char key) {
 
 bool
 FramebufferMenuBar::keyPressed(const KeyEvent &event) {
-    if (!surface || (bar.empty() && popups.empty())) {
+    if (!surface || (bar.isEmpty() && popups.isEmpty())) {
         return false;
     }
     int key = event.keycode;
@@ -591,7 +591,7 @@ FramebufferMenuBar::locate(int x, int y, int &level, int &index) const {
 
 bool
 FramebufferMenuBar::mouseEvent(const FramebufferEvent &event) {
-    if (!surface || (bar.empty() && popups.empty())) {
+    if (!surface || (bar.isEmpty() && popups.isEmpty())) {
         return false;
     }
     int level;
@@ -603,7 +603,7 @@ FramebufferMenuBar::mouseEvent(const FramebufferEvent &event) {
             return active;
         }
         if (level == BAR_LEVEL) {
-            if (active && index == barArmed && !popups.empty()) {
+            if (active && index == barArmed && !popups.isEmpty()) {
                 deactivate();
             } else {
                 post(index, false);

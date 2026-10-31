@@ -1,3 +1,4 @@
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.h"
@@ -129,19 +130,19 @@ PolyhedralBoundedSolid* SimpleTestGeometryLibrary::createTestObjectAPPE1967_1()
     return unionAndRelease(abcd, efgh);
 }
 
-std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1986_2()
+java::ArrayList<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1986_2()
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
 
-    operands.push_back(translatedBox(1, 0.5, 0.6, 0.5, 0.25, 0.3));
-    operands.push_back(translatedBox(1, 0.5, 0.6,
+    operands.add(translatedBox(1, 0.5, 0.6, 0.5, 0.25, 0.3));
+    operands.add(translatedBox(1, 0.5, 0.6,
         0.5+0.24, 0.25-0.18, 0.3+0.42));
     return operands;
 }
 
-std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_3()
+java::ArrayList<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_3()
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
     PolyhedralBoundedSolid* a;
     PolyhedralBoundedSolid* b;
 
@@ -167,14 +168,14 @@ std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObject
         0.05 + 0.42/2.0 - 0.42/2.0,
         0.05 + 0.18/2.0 + 0.18 /*+ 0.0001*/);
 
-    operands.push_back(a);
-    operands.push_back(b);
+    operands.add(a);
+    operands.add(b);
     return operands;
 }
 
-std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_6_13()
+java::ArrayList<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_6_13()
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
     Matrix4x4d T;
 
     //-----------------------------------------------------------------
@@ -208,14 +209,14 @@ std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObject
     PolyhedralBoundedSolidModeler::translationalSweepExtrudeFacePlanar(
         frontView, frontView->findFace(1), T);
 
-    operands.push_back(leftView);
-    operands.push_back(frontView);
+    operands.add(leftView);
+    operands.add(frontView);
     return operands;
 }
 
-std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_15_1()
+java::ArrayList<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_15_1()
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
     Matrix4x4d T;
 
     //-----------------------------------------------------------------
@@ -248,15 +249,15 @@ std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObject
     PolyhedralBoundedSolidModeler::translationalSweepExtrudeFacePlanar(
         frontView, frontView->findFace(1), T);
 
-    operands.push_back(leftView);
-    operands.push_back(frontView);
+    operands.add(leftView);
+    operands.add(frontView);
     return operands;
 }
 
-std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_15_2(
+java::ArrayList<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObjectPairMANT1988_15_2(
     int situation)
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    java::ArrayList<PolyhedralBoundedSolid*> operands;
 
     //-----------------------------------------------------------------
     PolyhedralBoundedSolid* block = translatedBox(0.5, 1, 0.6,
@@ -292,7 +293,7 @@ std::vector<PolyhedralBoundedSolid*> SimpleTestGeometryLibrary::createTestObject
     PolyhedralBoundedSolidModeler::translationalSweepExtrudeFacePlanar(
         wedge, wedge->findFace(1), transformationMatrix);
 
-    operands.push_back(block);
-    operands.push_back(wedge);
+    operands.add(block);
+    operands.add(wedge);
     return operands;
 }

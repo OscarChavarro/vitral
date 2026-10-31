@@ -1,4 +1,6 @@
-#include <algorithm>
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include <cstdint>
 #include <cstring>
 
@@ -15,9 +17,8 @@ Gtk4LabelImageProvider::Gtk4LabelImageProvider()
 
 Gtk4LabelImageProvider::~Gtk4LabelImageProvider()
 {
-    std::map<Key, RGBAImageUncompressed*>::iterator i;
-    for ( i = cache.begin(); i != cache.end(); ++i ) {
-        delete i->second;
+    for ( long i = 0; i < cache.size(); i++ ) {
+        delete cache.getValue(i);
     }
 }
 
@@ -28,13 +29,13 @@ RGBAImageUncompressed* Gtk4LabelImageProvider::createLabelImage(
         (static_cast<unsigned long>(color.r() * 255.0) << 16) |
         (static_cast<unsigned long>(color.g() * 255.0) << 8) |
         static_cast<unsigned long>(color.b() * 255.0);
-    Key key(std::make_pair(std::string(text.c_str()), fontSize), rgb);
-    std::map<Key, RGBAImageUncompressed*>::iterator known = cache.find(key);
-    if ( known == cache.end() ) {
+    Key key(java::String(text.c_str()), fontSize, rgb);
+    RGBAImageUncompressed** known = cache.get(key);
+    if ( known == nullptr ) {
         PangoFontDescription* font = pango_font_description_new();
         pango_font_description_set_family(font, "Sans");
         pango_font_description_set_absolute_size(
-            font, std::max(1, fontSize) * PANGO_SCALE);
+            font, java::Math::max(1, fontSize) * PANGO_SCALE);
 
         cairo_surface_t* probeSurface =
             cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
@@ -46,8 +47,8 @@ RGBAImageUncompressed* Gtk4LabelImageProvider::createLabelImage(
         int textWidth = 0;
         int textHeight = 0;
         pango_layout_get_pixel_size(layout, &textWidth, &textHeight);
-        const int width = std::max(1, textWidth + 4);
-        const int height = std::max(1, textHeight + 4);
+        const int width = java::Math::max(1, textWidth + 4);
+        const int height = java::Math::max(1, textHeight + 4);
 
         g_object_unref(layout);
         cairo_destroy(probe);
@@ -93,10 +94,11 @@ RGBAImageUncompressed* Gtk4LabelImageProvider::createLabelImage(
         cairo_surface_destroy(surface);
         pango_font_description_free(font);
 
-        known = cache.insert(std::make_pair(key, image)).first;
+        cache.put(key, image);
+        known = cache.get(key);
     }
 
-    const RGBAImageUncompressed* prototype = known->second;
+    const RGBAImageUncompressed* prototype = (*known);
     RGBAImageUncompressed* label = new RGBAImageUncompressed();
     char* pixels = prototype->getRawImage();
     label->setRawImage(prototype->getXSize(), prototype->getYSize(), pixels);

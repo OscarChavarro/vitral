@@ -1,3 +1,6 @@
+#include "java/util/Collections.h"
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -19,29 +22,28 @@ typedef _PolyhedralBoundedSolidFallbackGeometry FallbackGeometry;
 //= Builder =========================================================
 
 CellFallback::AxisAlignedCellBooleanBuilder::AxisAlignedCellBooleanBuilder(
-    const std::vector<double>& inX,
-    const std::vector<double>& inY,
-    const std::vector<double>& inZ)
+    const java::ArrayList<double>& inX,
+    const java::ArrayList<double>& inY,
+    const java::ArrayList<double>& inZ)
     : solid(new PolyhedralBoundedSolid()), xCoordinates(inX),
       yCoordinates(inY), zCoordinates(inZ), nextVertexId(1), nextFaceId(1)
 {
 }
 
-std::string CellFallback::AxisAlignedCellBooleanBuilder::vertexKey(
+java::String CellFallback::AxisAlignedCellBooleanBuilder::vertexKey(
     int ix, int iy, int iz)
 {
-    return std::to_string(ix) + ":" + std::to_string(iy) + ":" +
-        std::to_string(iz);
+    return java::String::valueOf(ix) + ":" + java::String::valueOf(iy) + ":" +
+        java::String::valueOf(iz);
 }
 
 _PolyhedralBoundedSolidVertex* CellFallback::AxisAlignedCellBooleanBuilder::vertexAt(
     int ix, int iy, int iz)
 {
-    std::string key = vertexKey(ix, iy, iz);
-    std::map<std::string, _PolyhedralBoundedSolidVertex*>::iterator found =
-        vertices.find(key);
-    if ( found != vertices.end() ) {
-        return found->second;
+    java::String key = vertexKey(ix, iy, iz);
+    _PolyhedralBoundedSolidVertex** found = vertices.get(key);
+    if ( found != nullptr ) {
+        return (*found);
     }
 
     _PolyhedralBoundedSolidVertex* vertex = new _PolyhedralBoundedSolidVertex(
@@ -50,17 +52,17 @@ _PolyhedralBoundedSolidVertex* CellFallback::AxisAlignedCellBooleanBuilder::vert
     solid->getVerticesList().add(vertex);
     solid->setMaxVertexId(nextVertexId);
     nextVertexId++;
-    vertices[key] = vertex;
+    vertices.put(key, vertex);
     return vertex;
 }
 
-std::string CellFallback::AxisAlignedCellBooleanBuilder::edgeKey(
+java::String CellFallback::AxisAlignedCellBooleanBuilder::edgeKey(
     _PolyhedralBoundedSolidVertex* a, _PolyhedralBoundedSolidVertex* b)
 {
     if ( a->id < b->id ) {
-        return std::to_string(a->id) + ":" + std::to_string(b->id);
+        return java::String::valueOf(a->id) + ":" + java::String::valueOf(b->id);
     }
-    return std::to_string(b->id) + ":" + std::to_string(a->id);
+    return java::String::valueOf(b->id) + ":" + java::String::valueOf(a->id);
 }
 
 void CellFallback::AxisAlignedCellBooleanBuilder::attachEdge(
@@ -68,19 +70,18 @@ void CellFallback::AxisAlignedCellBooleanBuilder::attachEdge(
     _PolyhedralBoundedSolidVertex* a,
     _PolyhedralBoundedSolidVertex* b)
 {
-    std::string key = edgeKey(a, b);
+    java::String key = edgeKey(a, b);
     _PolyhedralBoundedSolidEdge* edge;
-    std::map<std::string, _PolyhedralBoundedSolidEdge*>::iterator found =
-        edges.find(key);
+    _PolyhedralBoundedSolidEdge** found = edges.get(key);
 
-    if ( found == edges.end() ) {
+    if ( found == nullptr ) {
         edge = new _PolyhedralBoundedSolidEdge();
         solid->getEdgesList().add(edge);
         edge->rightHalf = he;
-        edges[key] = edge;
+        edges.put(key, edge);
     }
     else {
-        edge = found->second;
+        edge = (*found);
         if ( edge->leftHalf == 0 ) {
             edge->leftHalf = he;
         }
@@ -167,7 +168,7 @@ bool CellFallback::isAxisAlignedSolid(PolyhedralBoundedSolid* solid)
 int CellFallback::classifyPointForAxisAlignedFallback(
     PolyhedralBoundedSolid* solid, const Vector3Dd& point)
 {
-    std::vector<double> distances;
+    java::ArrayList<double> distances;
     long int i;
     int hits;
     double eps;
@@ -210,7 +211,7 @@ int CellFallback::classifyPointForAxisAlignedFallback(
             }
         }
         if ( !duplicate ) {
-            distances.push_back(t);
+            distances.add(t);
             hits++;
         }
     }
@@ -276,7 +277,7 @@ Adds the boundary quads of the occupied cells of a `nx * ny * nz` grid
 (flattened as `(ix*ny + iy)*nz + iz`), in the Java emission order.
 */
 void CellFallback::addOccupiedCellQuads(AxisAlignedCellBooleanBuilder& builder,
-    const std::vector<bool>& occupied, int nx, int ny, int nz)
+    const java::ArrayList<bool>& occupied, int nx, int ny, int nz)
 {
     int ix;
     int iy;
@@ -327,11 +328,11 @@ PolyhedralBoundedSolid* CellFallback::buildAxisAlignedCellBooleanFallback(
         return 0;
     }
 
-    std::vector<double> xCoordinates =
+    java::ArrayList<double> xCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(inSolidA, 0);
-    std::vector<double> yCoordinates =
+    java::ArrayList<double> yCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(inSolidA, 1);
-    std::vector<double> zCoordinates =
+    java::ArrayList<double> zCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(inSolidA, 2);
     for ( i = 0; i < inSolidB->getVerticesList().size(); i++ ) {
         Vector3Dd p = inSolidB->getVerticesList().get(i)->position;
@@ -350,7 +351,7 @@ PolyhedralBoundedSolid* CellFallback::buildAxisAlignedCellBooleanFallback(
     int nx = (int)xCoordinates.size() - 1;
     int ny = (int)yCoordinates.size() - 1;
     int nz = (int)zCoordinates.size() - 1;
-    std::vector<bool> occupied((size_t)nx * ny * nz, false);
+    java::ArrayList<bool> occupied = java::Collections::nCopies<bool>((size_t)nx * ny * nz, false);
     for ( ix = 0; ix < nx; ix++ ) {
         for ( iy = 0; iy < ny; iy++ ) {
             for ( iz = 0; iz < nz; iz++ ) {
@@ -373,14 +374,14 @@ PolyhedralBoundedSolid* CellFallback::buildAxisAlignedCellBooleanFallback(
     return builder.result();
 }
 
-std::vector<double> CellFallback::uniformCoordinates(double min, double max,
+java::ArrayList<double> CellFallback::uniformCoordinates(double min, double max,
     int divisions)
 {
-    std::vector<double> coordinates;
+    java::ArrayList<double> coordinates;
     int i;
 
     for ( i = 0; i <= divisions; i++ ) {
-        coordinates.push_back(min + (max - min) * i / divisions);
+        coordinates.add(min + (max - min) * i / divisions);
     }
     return coordinates;
 }
@@ -415,11 +416,11 @@ PolyhedralBoundedSolid* CellFallback::buildUniformSampledCellBooleanFallback(
         delete[] boundsB;
     }
 
-    std::vector<double> xCoordinates = uniformCoordinates(bounds[0], bounds[3], divisions);
-    std::vector<double> yCoordinates = uniformCoordinates(bounds[1], bounds[4], divisions);
-    std::vector<double> zCoordinates = uniformCoordinates(bounds[2], bounds[5], divisions);
+    java::ArrayList<double> xCoordinates = uniformCoordinates(bounds[0], bounds[3], divisions);
+    java::ArrayList<double> yCoordinates = uniformCoordinates(bounds[1], bounds[4], divisions);
+    java::ArrayList<double> zCoordinates = uniformCoordinates(bounds[2], bounds[5], divisions);
     delete[] bounds;
-    std::vector<bool> occupied((size_t)divisions * divisions * divisions, false);
+    java::ArrayList<bool> occupied = java::Collections::nCopies<bool>((size_t)divisions * divisions * divisions, false);
     anyOccupied = false;
 
     for ( ix = 0; ix < divisions; ix++ ) {

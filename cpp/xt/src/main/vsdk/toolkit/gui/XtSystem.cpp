@@ -1,9 +1,9 @@
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
 #include <cstdio>
-#include <map>
-#include <utility>
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/gui/XtSystem.h"
@@ -191,19 +191,37 @@ KeyEvent XtSystem::xt2vsdkKeyEvent(KeySym keysym, KeySym base,
 
 namespace {
 
-std::map<std::pair<Display*, int>, XFontSet>& fontSets()
+/** Key of a font set: its display and pixel size */
+class FontSetKey {
+  public:
+    Display* display;
+    int pixelSize;
+
+    FontSetKey() : display(nullptr), pixelSize(0) {}
+    FontSetKey(Display* display, int pixelSize)
+        : display(display), pixelSize(pixelSize) {}
+
+    bool operator<(const FontSetKey& other) const
+    {
+        if ( display != other.display ) {
+            return display < other.display;
+        }
+        return pixelSize < other.pixelSize;
+    }
+};
+
+java::TreeMap<FontSetKey, XFontSet>& fontSets()
 {
-    static std::map<std::pair<Display*, int>, XFontSet> sets;
+    static java::TreeMap<FontSetKey, XFontSet> sets;
     return sets;
 }
 
 XFontSet getFontSet(Display* display, int pixelSize)
 {
-    std::pair<Display*, int> key(display, pixelSize);
-    std::map<std::pair<Display*, int>, XFontSet>::iterator known =
-        fontSets().find(key);
-    if ( known != fontSets().end() ) {
-        return known->second;
+    FontSetKey key(display, pixelSize);
+    XFontSet* known = fontSets().get(key);
+    if ( known != nullptr ) {
+        return (*known);
     }
 
     // XCreateFontSet needs a complete XLFD, including its character set.
@@ -229,7 +247,7 @@ XFontSet getFontSet(Display* display, int pixelSize)
             XFreeStringList(missingCharsets);
         }
     }
-    fontSets()[key] = fontSet;
+    fontSets().put(key, fontSet);
     return fontSet;
 }
 
@@ -295,17 +313,17 @@ RGBAImageUncompressed* XtSystem::calculateLabelImage(
 
 void XtSystem::releaseResources(Display* display)
 {
-    std::map<std::pair<Display*, int>, XFontSet>::iterator i =
-        fontSets().begin();
-    while ( i != fontSets().end() ) {
-        if ( i->first.first == display ) {
-            if ( i->second != nullptr ) {
-                XFreeFontSet(display, i->second);
+    long i = 0;
+    while ( i < fontSets().size() ) {
+        if ( fontSets().getKey(i).display == display ) {
+            if ( fontSets().getValue(i) != nullptr ) {
+                XFreeFontSet(display, fontSets().getValue(i));
             }
-            fontSets().erase(i++);
+            FontSetKey key = fontSets().getKey(i);
+            fontSets().remove(key);
         }
         else {
-            ++i;
+            i++;
         }
     }
 }

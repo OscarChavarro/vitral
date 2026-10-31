@@ -1,8 +1,8 @@
+#include "java/lang/Exception.h"
 #include "programs/vitralRaytracer/RaytracerRenderer.h"
 #include <math.h>
 #include <stdio.h>
 
-#include <exception>
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -54,8 +54,8 @@ RaytracerRenderer::render(const char *path, int width, int height, int parallel,
     try {
         ReaderMitScene reader;
         reader.importEnvironment(path, scene);
-    } catch (const std::exception &e) {
-        snprintf(error, errorSize, "cannot read %s: %s", path, e.what());
+    } catch (const java::Exception &e) {
+        snprintf(error, errorSize, "cannot read %s: %s", path, e.getMessage().c_str());
         delete scene;
         return 0;
     } catch (...) {

@@ -1,3 +1,5 @@
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
 #include <cctype>
 #include <cstdio>
 #include <cstring>
@@ -176,7 +178,7 @@ void JogHudRenderer::draw(
     int rightWidth = (int)line2Right.size() * CHAR_W;
     int rightX = java::Math::max(HUD_LEFT, hudWidth - rightWidth - HUD_LEFT);
     drawText(rightX, HUD_BASELINE_1, line2Right);
-    if (!lineCookMaterial.empty()) {
+    if (!lineCookMaterial.isEmpty()) {
         int materialWidth = (int)lineCookMaterial.size() * CHAR_W;
         int materialX = java::Math::max(HUD_LEFT, hudWidth - materialWidth - HUD_LEFT);
         drawText(materialX, HUD_BASELINE_2, lineCookMaterial);

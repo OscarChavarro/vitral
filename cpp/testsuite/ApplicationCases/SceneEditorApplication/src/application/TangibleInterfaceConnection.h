@@ -1,9 +1,10 @@
 #ifndef __TANGIBLE_INTERFACE_CONNECTION__
 #define __TANGIBLE_INTERFACE_CONNECTION__
 
-#include <functional>
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
+#include "java/util/function/Consumer.h"
 #include <pthread.h>
-#include <string>
 
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.h"
@@ -25,14 +26,14 @@ event loop, as the Java application repaints with `invokeLater`.
 */
 class TangibleInterfaceConnection : private TangibleInterfaceListener {
 private:
-    std::string serviceUrl;
+    java::String serviceUrl;
     TangibleInterfaceNetworkClient* client;
-    std::function<void()> eventArrived;
+    java::Runnable eventArrived;
     pthread_mutex_t pendingMutex;
     bool hasPendingEvent;
     TangibleInterfaceEvent pendingEvent;
 
-    void setServiceUrl(const std::string& serviceUrl);
+    void setServiceUrl(const java::String& serviceUrl);
     virtual void tangibleInterfaceEventReceived(
         const TangibleInterfaceEvent& event) override;
 
@@ -47,7 +48,7 @@ public:
     the GUI thread to call `applyPendingEvent`
     */
     explicit TangibleInterfaceConnection(
-        const std::function<void()>& eventArrived);
+        const java::Runnable& eventArrived);
     ~TangibleInterfaceConnection();
 
     /**
@@ -58,7 +59,7 @@ public:
     /**
     @return websocket URL of the service last used (or the default one)
     */
-    const std::string& getServiceUrl() const;
+    const java::String& getServiceUrl() const;
 
     /**
     Connects to a service, replacing the current connection.
@@ -66,8 +67,8 @@ public:
     @param connectionListener receives, in the thread of the network
     client, whether the connection succeeded
     */
-    void connect(const std::string& serviceUrl,
-                 const std::function<void(bool)>& connectionListener);
+    void connect(const java::String& serviceUrl,
+                 const java::Consumer<bool>& connectionListener);
 
     /**
     Moves the ray gizmo of the model to the pose of the last event received.

@@ -75,7 +75,7 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
         }
         java::String javaLine(lineBuf);
         javaLine = trimLine(javaLine);
-        if ( javaLine.empty() ) {
+        if ( javaLine.isEmpty() ) {
             continue;
         }
 

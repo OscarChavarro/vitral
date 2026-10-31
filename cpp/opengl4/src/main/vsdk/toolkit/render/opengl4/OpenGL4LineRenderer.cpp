@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
 
@@ -153,7 +154,7 @@ bool OpenGL4LineRenderer::initializeIfNeeded()
         readShaderFile("../etc/glslShaders/lineVertexShader.glsl");
     java::String fragmentSource =
         readShaderFile("../etc/glslShaders/linePixelShader.glsl");
-    if ( vertexSource.empty() || fragmentSource.empty() ) {
+    if ( vertexSource.isEmpty() || fragmentSource.isEmpty() ) {
         return false;
     }
 

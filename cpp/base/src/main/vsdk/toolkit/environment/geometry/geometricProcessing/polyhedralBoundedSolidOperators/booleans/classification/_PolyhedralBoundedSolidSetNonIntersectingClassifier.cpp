@@ -2,7 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#include <algorithm>
+#include "java/lang/Math.h"
+#include "java/util/Collections.h"
 #include <climits>
 #include <cmath>
 
@@ -93,7 +94,7 @@ Classifier::FacePlanes::FacePlanes(PolyhedralBoundedSolid* solid)
         return;
     }
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
-        planes.push_back(solid->getPolygonsList().get(i)->getContainingPlane());
+        planes.add(solid->getPolygonsList().get(i)->getContainingPlane());
     }
 }
 
@@ -300,9 +301,9 @@ PolyhedralBoundedSolid* Classifier::runPartialCoplanarFaceAreaCase(
         return 0;
     }
 
-    std::vector<Polygon> contactPolygons =
+    java::ArrayList<Polygon> contactPolygons =
         partialCoplanarFaceAreaOverlapPolygons(inSolidA, inSolidB);
-    if ( contactPolygons.empty() ) {
+    if ( contactPolygons.isEmpty() ) {
         return 0;
     }
 
@@ -377,7 +378,7 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
     for ( j = 0; j < 3; j++ ) {
         int hits = 0;
         bool ambiguous = false;
-        std::vector<double> distances;
+        java::ArrayList<double> distances;
         Ray ray(point, dirs[j]);
 
         for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
@@ -414,7 +415,7 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
                     }
                 }
                 if ( !duplicated ) {
-                    distances.push_back(t);
+                    distances.add(t);
                     hits++;
                 }
             }
@@ -439,26 +440,26 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
     return Geometry::LIMIT;
 }
 
-std::vector<double> Classifier::overlappingBounds(
+java::ArrayList<double> Classifier::overlappingBounds(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
     double* a = solidA->getMinMax();
     double* b = solidB->getMinMax();
-    std::vector<double> bounds(6);
+    java::ArrayList<double> bounds = java::Collections::nCopies<double>(6, 0.0);
 
-    bounds[0] = std::max(a[0], b[0]);
-    bounds[1] = std::max(a[1], b[1]);
-    bounds[2] = std::max(a[2], b[2]);
-    bounds[3] = std::min(a[3], b[3]);
-    bounds[4] = std::min(a[4], b[4]);
-    bounds[5] = std::min(a[5], b[5]);
+    bounds[0] = java::Math::max(a[0], b[0]);
+    bounds[1] = java::Math::max(a[1], b[1]);
+    bounds[2] = java::Math::max(a[2], b[2]);
+    bounds[3] = java::Math::min(a[3], b[3]);
+    bounds[4] = java::Math::min(a[4], b[4]);
+    bounds[5] = java::Math::min(a[5], b[5]);
     delete[] a;
     delete[] b;
     return bounds;
 }
 
-bool Classifier::hasPositiveOverlapVolume(const std::vector<double>& bounds)
+bool Classifier::hasPositiveOverlapVolume(const java::ArrayList<double>& bounds)
 {
     double eps = numericContext.bigEpsilon();
 
@@ -475,15 +476,15 @@ result is always exact; a negative result is inconclusive and the caller
 must still run the exhaustive grid.
 */
 bool Classifier::hasInteriorOverlapWitnessInAabb(
-    const std::vector<double>& bounds,
+    const java::ArrayList<double>& bounds,
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB,
     const FacePlanes& planesA,
     const FacePlanes& planesB)
 {
-    std::vector<double> sx = axisProbeCoordinates(bounds[0], bounds[3]);
-    std::vector<double> sy = axisProbeCoordinates(bounds[1], bounds[4]);
-    std::vector<double> sz = axisProbeCoordinates(bounds[2], bounds[5]);
+    java::ArrayList<double> sx = axisProbeCoordinates(bounds[0], bounds[3]);
+    java::ArrayList<double> sy = axisProbeCoordinates(bounds[1], bounds[4]);
+    java::ArrayList<double> sz = axisProbeCoordinates(bounds[2], bounds[5]);
     size_t i;
     size_t j;
     size_t k;
@@ -504,10 +505,10 @@ bool Classifier::hasInteriorOverlapWitnessInAabb(
     return false;
 }
 
-std::vector<double> Classifier::axisProbeCoordinates(double min, double max)
+java::ArrayList<double> Classifier::axisProbeCoordinates(double min, double max)
 {
     double span = max - min;
-    std::vector<double> coordinates(3);
+    java::ArrayList<double> coordinates = java::Collections::nCopies<double>(3, 0.0);
 
     coordinates[0] = min + span / 4.0;
     coordinates[1] = min + span / 2.0;
@@ -528,7 +529,7 @@ double Classifier::vertexCoordinate(_PolyhedralBoundedSolidVertex* vertex,
 }
 
 void Classifier::appendInteriorVertexCoordinates(
-    std::vector<double>& coords,
+    java::ArrayList<double>& coords,
     PolyhedralBoundedSolid* solid,
     int axis,
     double min,
@@ -544,13 +545,13 @@ void Classifier::appendInteriorVertexCoordinates(
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
         double c = vertexCoordinate(solid->getVerticesList().get(i), axis);
         if ( c > min + eps && c < max - eps ) {
-            coords.push_back(c);
+            coords.add(c);
         }
     }
 }
 
 void Classifier::appendUniqueInteriorSample(
-    std::vector<double>& samples,
+    java::ArrayList<double>& samples,
     double value,
     double min,
     double max,
@@ -567,7 +568,7 @@ void Classifier::appendUniqueInteriorSample(
             return;
         }
     }
-    samples.push_back(value);
+    samples.add(value);
 }
 
 namespace {
@@ -576,39 +577,38 @@ namespace {
 Emulates `Collections.sort` over a list of `Double`: stable natural order
 of `Double.compareTo`.
 */
-void sortAsJavaDoubles(std::vector<double>& values)
+void sortAsJavaDoubles(java::ArrayList<double>& values)
 {
-    std::stable_sort(values.begin(), values.end(),
-        [](double x, double y) { return java::Double::compare(x, y) < 0; });
+    values.sort([](double x, double y) { return java::Double::compare(x, y) < 0; });
 }
 
 }
 
-std::vector<double> Classifier::sampleCoordinates(double min, double max,
+java::ArrayList<double> Classifier::sampleCoordinates(double min, double max,
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB,
     int axis)
 {
-    std::vector<double> coords;
-    std::vector<double> samples;
-    std::vector<double> uniqueCoords;
+    java::ArrayList<double> coords;
+    java::ArrayList<double> samples;
+    java::ArrayList<double> uniqueCoords;
     double eps = numericContext.bigEpsilon();
     double center = (min + max) / 2.0;
     double quarter = min + (max - min) / 4.0;
     double threeQuarters = max - (max - min) / 4.0;
     size_t i;
 
-    coords.push_back(min);
-    coords.push_back(max);
+    coords.add(min);
+    coords.add(max);
     appendInteriorVertexCoordinates(coords, solidA, axis, min, max, eps);
     appendInteriorVertexCoordinates(coords, solidB, axis, min, max, eps);
     sortAsJavaDoubles(coords);
 
     for ( i = 0; i < coords.size(); i++ ) {
         double c = coords[i];
-        if ( uniqueCoords.empty() ||
+        if ( uniqueCoords.isEmpty() ||
              std::fabs(uniqueCoords[uniqueCoords.size()-1] - c) > eps ) {
-            uniqueCoords.push_back(c);
+            uniqueCoords.add(c);
         }
     }
 
@@ -626,8 +626,8 @@ std::vector<double> Classifier::sampleCoordinates(double min, double max,
     }
 
     sortAsJavaDoubles(samples);
-    if ( samples.empty() ) {
-        samples.push_back(center);
+    if ( samples.isEmpty() ) {
+        samples.add(center);
     }
     return samples;
 }
@@ -644,7 +644,7 @@ bool Classifier::hasConfirmedInteriorOverlap(
         return false;
     }
 
-    std::vector<double> bounds = overlappingBounds(solidA, solidB);
+    java::ArrayList<double> bounds = overlappingBounds(solidA, solidB);
     if ( !hasPositiveOverlapVolume(bounds) ) {
         return false;
     }
@@ -663,9 +663,9 @@ bool Classifier::hasConfirmedInteriorOverlap(
         return true;
     }
 
-    std::vector<double> xs = sampleCoordinates(bounds[0], bounds[3], solidA, solidB, 0);
-    std::vector<double> ys = sampleCoordinates(bounds[1], bounds[4], solidA, solidB, 1);
-    std::vector<double> zs = sampleCoordinates(bounds[2], bounds[5], solidA, solidB, 2);
+    java::ArrayList<double> xs = sampleCoordinates(bounds[0], bounds[3], solidA, solidB, 0);
+    java::ArrayList<double> ys = sampleCoordinates(bounds[1], bounds[4], solidA, solidB, 1);
+    java::ArrayList<double> zs = sampleCoordinates(bounds[2], bounds[5], solidA, solidB, 2);
 
     for ( i = 0; i < xs.size(); i++ ) {
         for ( j = 0; j < ys.size(); j++ ) {
@@ -831,11 +831,11 @@ bool Classifier::hasPartialCoplanarFaceAreaOverlap(
     return false;
 }
 
-std::vector<Classifier::Polygon> Classifier::partialCoplanarFaceAreaOverlapPolygons(
+java::ArrayList<Classifier::Polygon> Classifier::partialCoplanarFaceAreaOverlapPolygons(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
-    std::vector<Polygon> polygons;
+    java::ArrayList<Polygon> polygons;
     long int i;
     long int j;
 
@@ -851,7 +851,7 @@ std::vector<Classifier::Polygon> Classifier::partialCoplanarFaceAreaOverlapPolyg
                  partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
                 Polygon polygon = coplanarFaceIntersectionPolygon(faceA, faceB);
                 if ( polygon.size() >= 3 ) {
-                    polygons.push_back(polygon);
+                    polygons.add(polygon);
                 }
             }
         }
@@ -1043,7 +1043,7 @@ void Classifier::appendUniquePoint(Polygon& points, const Vector3Dd& point)
             return;
         }
     }
-    points.push_back(point);
+    points.add(point);
 }
 
 void Classifier::sortCoplanarPolygon(Polygon& points, const Vector3Dd& normal)
@@ -1072,8 +1072,7 @@ void Classifier::sortCoplanarPolygon(Polygon& points, const Vector3Dd& normal)
     v = n.crossProduct(u).normalized();
 
     // As Java `Collections.sort`, a stable sort by angle around the center
-    std::stable_sort(points.begin(), points.end(),
-        [&center, &u, &v](const Vector3Dd& p1, const Vector3Dd& p2) {
+    points.sort([&center, &u, &v](const Vector3Dd& p1, const Vector3Dd& p2) {
             Vector3Dd d1 = p1.subtract(center);
             Vector3Dd d2 = p2.subtract(center);
             double a1 = std::atan2(d1.dotProduct(v), d1.dotProduct(u));
@@ -1265,11 +1264,11 @@ bool Classifier::segmentsCrossProperly2D(const Vector2Dd& a1,
     double tolerance = PolyhedralBoundedSolidNumericPolicy
         ::orientationTolerance2D(a1, a2, b1, numericContext);
 
-    tolerance = std::max(tolerance, PolyhedralBoundedSolidNumericPolicy
+    tolerance = java::Math::max(tolerance, PolyhedralBoundedSolidNumericPolicy
         ::orientationTolerance2D(a1, a2, b2, numericContext));
-    tolerance = std::max(tolerance, PolyhedralBoundedSolidNumericPolicy
+    tolerance = java::Math::max(tolerance, PolyhedralBoundedSolidNumericPolicy
         ::orientationTolerance2D(b1, b2, a1, numericContext));
-    tolerance = std::max(tolerance, PolyhedralBoundedSolidNumericPolicy
+    tolerance = java::Math::max(tolerance, PolyhedralBoundedSolidNumericPolicy
         ::orientationTolerance2D(b1, b2, a2, numericContext));
 
     return ((o1 > tolerance && o2 < -tolerance) ||

@@ -1,7 +1,7 @@
+#include "java/lang/Double.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.h"
@@ -273,7 +273,7 @@ void classifyContourHierarchy(java::ArrayList<ContourData> &contours)
     for (size_t i = 0; i < contours.size(); i++) {
         ContourData &contour = contours[i];
         const IndexedVertex &probe = contour.vertices[0];
-        double bestContainerArea = std::numeric_limits<double>::infinity();
+        double bestContainerArea = java::Double::POSITIVE_INFINITY;
 
         for (size_t j = 0; j < contours.size(); j++) {
             if (i == j) {
@@ -454,7 +454,7 @@ int findVisibleBridgeVertex(const java::ArrayList<IndexedVertex> &polygon,
 {
     const IndexedVertex &holeVertex = hole[holeVertexIndex];
     int bestPolygonVertexIndex = -1;
-    double bestDistanceSquared = std::numeric_limits<double>::infinity();
+    double bestDistanceSquared = java::Double::POSITIVE_INFINITY;
 
     for (size_t polygonVertexIndex = 0;
          polygonVertexIndex < polygon.size(); polygonVertexIndex++) {

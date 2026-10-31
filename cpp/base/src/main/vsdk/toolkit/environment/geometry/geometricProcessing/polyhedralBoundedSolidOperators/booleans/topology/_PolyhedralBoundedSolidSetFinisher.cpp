@@ -2,9 +2,10 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
+#include "java/util/Collections.h"
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
-#include <string>
 
 #include "java/lang/Boolean.h"
 #include "java/util/ArrayList.txx"
@@ -30,9 +31,9 @@ namespace {
 const char* const TRACE_PIPELINE_SUMMARY_PROPERTY =
     "vsdk.setop.tracePipelineSummary";
 
-std::string str(int value)
+java::String str(int value)
 {
-    return std::to_string(value);
+    return java::String::valueOf(value);
 }
 
 }
@@ -148,7 +149,7 @@ bool Finisher::hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face
 
 java::String Finisher::integrationRingSummary(_PolyhedralBoundedSolidFace* face)
 {
-    std::string text;
+    java::String text;
 
     if ( face == 0 ) {
         return "null";
@@ -179,7 +180,7 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
 
     lastLegacyFallbackCount = 0;
 
-    std::vector<bool> usedB(sonfb.size(), false);
+    java::ArrayList<bool> usedB = java::Collections::nCopies<bool>(sonfb.size(), false);
 
     for ( i = 0; i < sonfa.size(); i++ ) {
         _PolyhedralBoundedSolidFace* faceA = sonfa[i];
@@ -220,15 +221,15 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
                         integrationRingSummary(faceA) + " B " +
                         integrationRingSummary(faceB));
                 }
-                matchedA.push_back(faceA);
-                matchedB.push_back(faceB);
+                matchedA.add(faceA);
+                matchedB.add(faceB);
                 usedB[j] = true;
                 break;
             }
         }
     }
 
-    if ( matchedA.empty() && !sonfa.empty() && sonfa.size() == sonfb.size() ) {
+    if ( matchedA.isEmpty() && !sonfa.isEmpty() && sonfa.size() == sonfb.size() ) {
         // Section 9.1 instrumentation: legacy ordering fallback - no
         // pairIndex matches found. Count it so tests can assert it stays 0.
         lastLegacyFallbackCount++;
@@ -565,11 +566,11 @@ void Finisher::finish(PolyhedralBoundedSolid* inSolidA,
     for ( i = 0; i < oldsize; i++ ) {
         f = PolyhedralBoundedSolidEulerOperators::lmfkrh(inSolidA,
             sonfa[i]->boundariesList.get(1), inSolidA->getMaxFaceId()+1);
-        sonfa.push_back(f);
+        sonfa.add(f);
 
         f = PolyhedralBoundedSolidEulerOperators::lmfkrh(inSolidB,
             sonfb[i]->boundariesList.get(1), inSolidB->getMaxFaceId()+1);
-        sonfb.push_back(f);
+        sonfb.add(f);
     }
 
     if ( op == SUBTRACT ) {

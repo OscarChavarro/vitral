@@ -1,5 +1,6 @@
-#include <map>
-#include <string>
+#include "java/lang/Runnable.h"
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -22,11 +23,11 @@
 namespace {
 
 template <class T>
-std::vector<Entity*> entities(java::ArrayList<T*>& list)
+java::ArrayList<Entity*> entities(java::ArrayList<T*>& list)
 {
-    std::vector<Entity*> result;
+    java::ArrayList<Entity*> result;
     for ( long i = 0; i < list.size(); i++ ) {
-        result.push_back(list.get(i));
+        result.add(list.get(i));
     }
     return result;
 }
@@ -44,16 +45,28 @@ int indexOf(java::ArrayList<T*>& list, const Entity* element)
 
 bool isBlank(const java::String& text)
 {
-    return std::string(text.c_str()).find_first_not_of(" \t\r\n") ==
-        std::string::npos;
+    return java::String(text.c_str()).trim().isEmpty();
 }
 
 }
 
 SceneHierarchyPresenter::SceneHierarchyPresenter(
-    ApplicationModel* model, const std::function<void()>& repaint)
+    ApplicationModel* model, const java::Runnable& repaint)
     : model(model), repaint(repaint)
 {
+}
+
+SceneHierarchyPresenter::~SceneHierarchyPresenter()
+{
+    clearEntries();
+}
+
+void SceneHierarchyPresenter::clearEntries()
+{
+    for ( long i = 0; i < entries.size(); i++ ) {
+        delete entries[i];
+    }
+    entries.clear();
 }
 
 java::String SceneHierarchyPresenter::text(const char* key,
@@ -69,7 +82,7 @@ java::String SceneHierarchyPresenter::text(const char* key,
 DialogTreeNode SceneHierarchyPresenter::hierarchy()
 {
     Scene* scene = model->getScene();
-    entries.clear();
+    clearEntries();
     DialogTreeNode root("Scene", nullptr);
     addEntries(root.add(DialogTreeNode(text("IDM_SELECTOR_LIGHTS", "Lights"),
                                        nullptr)),
@@ -84,10 +97,10 @@ DialogTreeNode SceneHierarchyPresenter::hierarchy()
 }
 
 void SceneHierarchyPresenter::addEntries(DialogTreeNode& parent, Kind kind,
-                                         const std::vector<Entity*>& elements)
+                                         const java::ArrayList<Entity*>& elements)
 {
     Scene* scene = model->getScene();
-    std::map<std::string, int> unnamed;
+    java::TreeMap<java::String, int> unnamed;
     for ( size_t i = 0; i < elements.size(); i++ ) {
         Entity* element = elements[i];
         java::String name;
@@ -101,19 +114,19 @@ void SceneHierarchyPresenter::addEntries(DialogTreeNode& parent, Kind kind,
         if ( isBlank(name) ) {
             Geometry* geometry = kind == BODY ?
                 static_cast<SimpleBody*>(element)->getGeometry() : nullptr;
-            std::string type = geometry != nullptr ?
+            java::String type = geometry != nullptr ?
                 geometry->getClassSimpleName().c_str() :
                 element->getClassSimpleName().c_str();
-            label = (type + " " + std::to_string(++unnamed[type])).c_str();
+            label = (type + " " + java::String::valueOf(++unnamed.putIfAbsent(type, int()))).c_str();
         }
         if ( kind == BODY && scene->isHidden(static_cast<SimpleBody*>(element)) ) {
             label = label + " (" + text("IDM_SELECTOR_HIDDEN", "hidden") + ")";
         }
-        Entry entry;
-        entry.kind = kind;
-        entry.element = element;
-        entries.push_back(entry);
-        parent.add(DialogTreeNode(label, &entries.back()));
+        Entry* entry = new Entry;
+        entry->kind = kind;
+        entry->element = element;
+        entries.add(entry);
+        parent.add(DialogTreeNode(label, entry));
     }
 }
 
@@ -124,8 +137,8 @@ const SceneHierarchyPresenter::Entry* SceneHierarchyPresenter::entryOf(
         return nullptr;
     }
     for ( size_t i = 0; i < entries.size(); i++ ) {
-        if ( &entries[i] == node->getIdentity() ) {
-            return &entries[i];
+        if ( entries[i] == node->getIdentity() ) {
+            return entries[i];
         }
     }
     return nullptr;
@@ -161,12 +174,12 @@ bool SceneHierarchyPresenter::isSelected(const DialogTreeNode* node) const
 }
 
 void SceneHierarchyPresenter::select(
-    const std::vector<const DialogTreeNode*>& nodes)
+    const java::ArrayList<const DialogTreeNode*>& nodes)
 {
     Scene* scene = model->getScene();
-    std::vector<bool> beforeB = SceneSelectionOperation::capture(scene->selectedThings);
-    std::vector<bool> beforeL = SceneSelectionOperation::capture(scene->selectedLights);
-    std::vector<bool> beforeG =
+    java::ArrayList<bool> beforeB = SceneSelectionOperation::capture(scene->selectedThings);
+    java::ArrayList<bool> beforeL = SceneSelectionOperation::capture(scene->selectedLights);
+    java::ArrayList<bool> beforeG =
         SceneSelectionOperation::capture(scene->selectedDebugThingGroups);
     scene->selectedThings->unselectAll();
     scene->selectedLights->unselectAll();
@@ -192,9 +205,9 @@ void SceneHierarchyPresenter::select(
             break;
         }
     }
-    std::vector<bool> afterB = SceneSelectionOperation::capture(scene->selectedThings);
-    std::vector<bool> afterL = SceneSelectionOperation::capture(scene->selectedLights);
-    std::vector<bool> afterG =
+    java::ArrayList<bool> afterB = SceneSelectionOperation::capture(scene->selectedThings);
+    java::ArrayList<bool> afterL = SceneSelectionOperation::capture(scene->selectedLights);
+    java::ArrayList<bool> afterG =
         SceneSelectionOperation::capture(scene->selectedDebugThingGroups);
     if ( !SceneSelectionOperation::isSame(beforeB, afterB) ||
          !SceneSelectionOperation::isSame(beforeL, afterL) ||
@@ -204,7 +217,7 @@ void SceneHierarchyPresenter::select(
                 text("IDM_SELECTOR_SELECTION", "Select scene elements"), scene,
                 beforeB, beforeL, beforeG, afterB, afterL, afterG));
     }
-    if ( repaint ) repaint();
+    if ( repaint ) repaint.run();
 }
 
 void SceneHierarchyPresenter::deleteSelected()
@@ -218,24 +231,24 @@ void SceneHierarchyPresenter::deleteSelected()
     model->getEditHistory()->getSceneHistory()->perform(
         text("IDM_SELECTOR_DELETE", "Delete selected"),
         [scene]() { SceneSelectionEditor(scene).deleteSelected(); });
-    if ( repaint ) repaint();
+    if ( repaint ) repaint.run();
 }
 
-std::vector<SimpleBody*> SceneHierarchyPresenter::selectedBodies(
-    const std::vector<const DialogTreeNode*>& nodes) const
+java::ArrayList<SimpleBody*> SceneHierarchyPresenter::selectedBodies(
+    const java::ArrayList<const DialogTreeNode*>& nodes) const
 {
-    std::vector<SimpleBody*> result;
+    java::ArrayList<SimpleBody*> result;
     for ( size_t i = 0; i < nodes.size(); i++ ) {
         const Entry* entry = entryOf(nodes[i]);
         if ( entry != nullptr && entry->kind == BODY ) {
-            result.push_back(static_cast<SimpleBody*>(entry->element));
+            result.add(static_cast<SimpleBody*>(entry->element));
         }
     }
     return result;
 }
 
 bool SceneHierarchyPresenter::anyHidden(
-    const std::vector<SimpleBody*>& bodies) const
+    const java::ArrayList<SimpleBody*>& bodies) const
 {
     for ( size_t i = 0; i < bodies.size(); i++ ) {
         if ( model->getScene()->isHidden(bodies[i]) ) {
@@ -245,11 +258,11 @@ bool SceneHierarchyPresenter::anyHidden(
     return false;
 }
 
-void SceneHierarchyPresenter::setHidden(const std::vector<SimpleBody*>& bodies,
+void SceneHierarchyPresenter::setHidden(const java::ArrayList<SimpleBody*>& bodies,
                                         bool hidden)
 {
     for ( size_t i = 0; i < bodies.size(); i++ ) {
         model->getScene()->setHidden(bodies[i], hidden);
     }
-    if ( repaint ) repaint();
+    if ( repaint ) repaint.run();
 }

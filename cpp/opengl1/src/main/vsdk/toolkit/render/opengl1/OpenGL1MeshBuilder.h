@@ -1,7 +1,7 @@
 #ifndef __OPEN_GL_1_MESH_BUILDER__
 #define __OPEN_GL_1_MESH_BUILDER__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1MeshRenderer.h"
@@ -62,7 +62,7 @@ public:
 private:
     /// x y z, nx ny nz, u v of each vertex
     static const int VERTEX_SIZE = 8;
-    std::vector<float> vertices;
+    java::ArrayList<float> vertices;
     double characteristicSize;
     bool doubleSided;
 

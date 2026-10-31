@@ -1,9 +1,8 @@
+#include "java/lang/IllegalArgumentException.h"
+#include "java/lang/String.h"
+#include "java/util/TreeMap.txx"
 #include <cstdio>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
-#include <map>
-#include <vector>
+#include "java/nio/file/Files.h"
 
 #include "java/io/File.h"
 #include "java/util/ArrayList.txx"
@@ -40,7 +39,7 @@ WidgetMenu* buildMenu(Widget* context, const GuiNode& definition,
             continue;
         }
         WidgetMenuItem* item = new WidgetMenuItem(context);
-        if ( !child.name.empty() ) {
+        if ( !child.name.isEmpty() ) {
             item->setName(child.name.c_str());
         }
         for ( size_t j = 0; j < child.modifiers.size(); j++ ) {
@@ -55,25 +54,25 @@ WidgetMenu* buildMenu(Widget* context, const GuiNode& definition,
 @return the image of a file of the definition, or null if it can not be
 read (reporting it, as Java)
 */
-java::File imageFile(const std::string& globalDataPath,
-                     const std::string& filename)
+java::File imageFile(const java::String& globalDataPath,
+                     const java::String& filename)
 {
     return java::File((globalDataPath + "/" + filename).c_str());
 }
 
-void reportUnreadable(const std::string& filename)
+void reportUnreadable(const java::String& filename)
 {
     fprintf(stderr, "Warning: could not read the image file \"%s\".\n",
             filename.c_str());
 }
 
-RGBAImageUncompressed* loadIcon(const std::string& globalDataPath,
+RGBAImageUncompressed* loadIcon(const java::String& globalDataPath,
                                 const GuiCommand& command, const char* field)
 {
     if ( !command.has(field) ) {
         return nullptr;
     }
-    std::string filename = command.get(field);
+    java::String filename = command.get(field);
     java::File file = imageFile(globalDataPath, filename);
     RGBAImageUncompressed* image =
         file.canRead() ? ImagePersistence::importRGBA(file) : nullptr;
@@ -83,13 +82,13 @@ RGBAImageUncompressed* loadIcon(const std::string& globalDataPath,
     return image;
 }
 
-RGBImageUncompressed* loadMask(const std::string& globalDataPath,
+RGBImageUncompressed* loadMask(const java::String& globalDataPath,
                                const GuiCommand& command, const char* field)
 {
     if ( !command.has(field) ) {
         return nullptr;
     }
-    std::string filename = command.get(field);
+    java::String filename = command.get(field);
     java::File file = imageFile(globalDataPath, filename);
     RGBImageUncompressed* image =
         file.canRead() ? ImagePersistence::importRGB(file) : nullptr;
@@ -99,10 +98,10 @@ RGBImageUncompressed* loadMask(const std::string& globalDataPath,
     return image;
 }
 
-void importCommands(Widget* context, const std::string& json,
-                    const std::string& globalDataPath)
+void importCommands(Widget* context, const java::String& json,
+                    const java::String& globalDataPath)
 {
-    const std::vector<GuiCommand> commands = GuiJsonReader(json).readCommands();
+    const java::ArrayList<GuiCommand> commands = GuiJsonReader(json).readCommands();
     for ( size_t i = 0; i < commands.size(); i++ ) {
         const GuiCommand& definition = commands[i];
         WidgetCommand* command = new WidgetCommand();
@@ -127,9 +126,9 @@ void importCommands(Widget* context, const std::string& json,
     }
 }
 
-void importButtonGroups(Widget* context, const std::string& json)
+void importButtonGroups(Widget* context, const java::String& json)
 {
-    const std::vector<GuiButtonGroup> groups =
+    const java::ArrayList<GuiButtonGroup> groups =
         GuiJsonReader(json).readButtonGroups();
     for ( size_t i = 0; i < groups.size(); i++ ) {
         WidgetButtonGroup* group = new WidgetButtonGroup(context);
@@ -148,8 +147,8 @@ void importButtonGroups(Widget* context, const std::string& json)
 
 }
 
-Widget* GuiI18nContextBuilder::build(const std::string& json,
-                                     const std::string& globalDataPath)
+Widget* GuiI18nContextBuilder::build(const java::String& json,
+                                     const java::String& globalDataPath)
 {
     Widget* context = new Widget();
 
@@ -157,36 +156,34 @@ Widget* GuiI18nContextBuilder::build(const std::string& json,
     context->setMenubar(buildMenu(context, GuiJsonReader(json).readMenuBar(),
                                   true));
 
-    const std::vector<GuiNode> popups = GuiJsonReader(json).readPopups();
+    const java::ArrayList<GuiNode> popups = GuiJsonReader(json).readPopups();
     for ( size_t i = 0; i < popups.size(); i++ ) {
         context->addPopupMenu(buildMenu(context, popups[i], true));
     }
 
     importButtonGroups(context, json);
 
-    const std::map<std::string, std::string> messages =
+    const java::TreeMap<java::String, java::String> messages =
         GuiJsonReader(json).readMessages();
-    std::map<std::string, std::string>::const_iterator message;
-    for ( message = messages.begin(); message != messages.end(); ++message ) {
-        context->addMessage(message->first.c_str(), message->second.c_str());
+    for ( long message = 0; message < messages.size(); message++ ) {
+        context->addMessage(messages.getKey(message).c_str(),
+                            messages.getValue(message).c_str());
     }
 
     // The dialogs, shared by every language and port
-    std::string dialogsPath = globalDataPath + "/etc/gui/dialogs.json";
-    std::ifstream dialogs(dialogsPath.c_str());
-    if ( !dialogs ) {
+    java::String dialogsPath = globalDataPath + "/etc/gui/dialogs.json";
+    java::String dialogsJson;
+    if ( !java::Files::readString(dialogsPath, dialogsJson) ) {
         delete context;
         throw VSDKFatalException(
             ("Could not open dialog definitions: " + dialogsPath).c_str());
     }
-    std::stringstream dialogsJson;
-    dialogsJson << dialogs.rdbuf();
     try {
-        DialogPersistence::importDialogs(dialogsJson.str().c_str(), context);
+        DialogPersistence::importDialogs(dialogsJson.c_str(), context);
     }
-    catch ( const std::invalid_argument& e ) {
+    catch ( const java::IllegalArgumentException& e ) {
         delete context;
-        throw VSDKFatalException(e.what());
+        throw VSDKFatalException(e.getMessage().c_str());
     }
     return context;
 }

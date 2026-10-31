@@ -1,4 +1,6 @@
-#include <algorithm>
+#include "java/util/TreeSet.txx"
+#include "java/lang/Math.h"
+#include "java/util/ArrayList.txx"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/dialog/components/DialogTreeNode.h"
@@ -64,9 +66,9 @@ void Gtk4TreeView::setRoot(const DialogTreeNode* root)
     anchor = -1;
     if ( root != nullptr ) {
         // As the Java selector, the children of the root start expanded
-        expanded.insert(root);
+        expanded.add(root);
         for ( size_t i = 0; i < root->getChildren().size(); i++ ) {
-            expanded.insert(&root->getChildren()[i]);
+            expanded.add(&root->getChildren()[i]);
         }
     }
     buildRows();
@@ -75,7 +77,7 @@ void Gtk4TreeView::setRoot(const DialogTreeNode* root)
 void Gtk4TreeView::buildRows()
 {
     updating = true;
-    std::vector<const DialogTreeNode*> selected = getSelection();
+    java::ArrayList<const DialogTreeNode*> selected = getSelection();
     GtkWidget* child = gtk_widget_get_first_child(list);
     while ( child != nullptr ) {
         GtkWidget* next = gtk_widget_get_next_sibling(child);
@@ -105,18 +107,18 @@ void Gtk4TreeView::buildRows()
 
 void Gtk4TreeView::addRows(const DialogTreeNode* node, int depth)
 {
-    const std::vector<DialogTreeNode>& children = node->getChildren();
+    const java::ArrayList<DialogTreeNode>& children = node->getChildren();
     for ( size_t i = 0; i < children.size(); i++ ) {
         const DialogTreeNode* childNode = &children[i];
         GtkWidget* box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
         gtk_widget_set_margin_start(box, depth * INDENT);
         // Expansion triangle (down when expanded), or a space of its size
         GtkWidget* toggle = gtk_label_new(
-            childNode->getChildren().empty() ? "" :
-            expanded.count(childNode) > 0 ? "\xe2\x96\xbc" : "\xe2\x96\xb6");
+            childNode->getChildren().isEmpty() ? "" :
+            expanded.contains(childNode) ? "\xe2\x96\xbc" : "\xe2\x96\xb6");
         gtk_widget_set_size_request(toggle, INDENT, -1);
         gtk_widget_add_css_class(toggle, "dim-label");
-        if ( !childNode->getChildren().empty() ) {
+        if ( !childNode->getChildren().isEmpty() ) {
             // A click over it expands or collapses (see primaryPressed)
             g_object_set_data(G_OBJECT(toggle), NODE_KEY,
                               const_cast<DialogTreeNode*>(childNode));
@@ -134,8 +136,8 @@ void Gtk4TreeView::addRows(const DialogTreeNode* node, int depth)
         g_object_set_data(G_OBJECT(row), NODE_KEY,
                           const_cast<DialogTreeNode*>(childNode));
         gtk_list_box_append(GTK_LIST_BOX(list), row);
-        rows.push_back(row);
-        if ( expanded.count(childNode) > 0 ) {
+        rows.add(row);
+        if ( expanded.contains(childNode) ) {
             addRows(childNode, depth + 1);
         }
     }
@@ -147,7 +149,7 @@ const DialogTreeNode* Gtk4TreeView::nodeOf(GtkListBoxRow* row)
         g_object_get_data(G_OBJECT(row), NODE_KEY)) : nullptr;
 }
 
-void Gtk4TreeView::setSelection(const std::vector<const DialogTreeNode*>& nodes)
+void Gtk4TreeView::setSelection(const java::ArrayList<const DialogTreeNode*>& nodes)
 {
     updating = true;
     gtk_list_box_unselect_all(GTK_LIST_BOX(list));
@@ -163,12 +165,12 @@ void Gtk4TreeView::setSelection(const std::vector<const DialogTreeNode*>& nodes)
     updating = false;
 }
 
-std::vector<const DialogTreeNode*> Gtk4TreeView::getSelection() const
+java::ArrayList<const DialogTreeNode*> Gtk4TreeView::getSelection() const
 {
-    std::vector<const DialogTreeNode*> result;
+    java::ArrayList<const DialogTreeNode*> result;
     for ( size_t i = 0; i < rows.size(); i++ ) {
         if ( gtk_list_box_row_is_selected(GTK_LIST_BOX_ROW(rows[i])) ) {
-            result.push_back(nodeOf(GTK_LIST_BOX_ROW(rows[i])));
+            result.add(nodeOf(GTK_LIST_BOX_ROW(rows[i])));
         }
     }
     return result;
@@ -176,9 +178,9 @@ std::vector<const DialogTreeNode*> Gtk4TreeView::getSelection() const
 
 void Gtk4TreeView::selectOnly(const DialogTreeNode* node)
 {
-    std::vector<const DialogTreeNode*> nodes;
+    java::ArrayList<const DialogTreeNode*> nodes;
     if ( node != nullptr ) {
-        nodes.push_back(node);
+        nodes.add(node);
     }
     setSelection(nodes);
     anchor = -1;
@@ -200,7 +202,7 @@ void Gtk4TreeView::selectRows(int from, int to, bool keep)
     if ( !keep ) {
         gtk_list_box_unselect_all(GTK_LIST_BOX(list));
     }
-    for ( int i = std::min(from, to); i <= std::max(from, to); i++ ) {
+    for ( int i = java::Math::min(from, to); i <= java::Math::max(from, to); i++ ) {
         gtk_list_box_select_row(GTK_LIST_BOX(list), GTK_LIST_BOX_ROW(rows[i]));
     }
     updating = false;
@@ -209,11 +211,11 @@ void Gtk4TreeView::selectRows(int from, int to, bool keep)
 
 void Gtk4TreeView::toggleExpansion(const DialogTreeNode* node)
 {
-    if ( expanded.count(node) > 0 ) expanded.erase(node);
-    else expanded.insert(node);
-    std::vector<const DialogTreeNode*> before = getSelection();
+    if ( expanded.contains(node) ) expanded.remove(node);
+    else expanded.add(node);
+    java::ArrayList<const DialogTreeNode*> before = getSelection();
     buildRows();
-    if ( before != getSelection() ) {
+    if ( !before.equals(getSelection()) ) {
         notifySelection();
     }
 }
@@ -237,7 +239,7 @@ void Gtk4TreeView::notifySelection()
 {
     if ( selectionListener ) {
         Listener listener = selectionListener;
-        listener();
+        listener.run();
     }
 }
 
@@ -301,15 +303,15 @@ gboolean Gtk4TreeView::keyPressed(GtkEventControllerKey*, guint keyval, guint,
          keyval == GDK_KEY_BackSpace ) {
         if ( self->deleteListener ) {
             Listener listener = self->deleteListener;
-            listener();
+            listener.run();
         }
         return TRUE;
     }
     if ( (keyval == GDK_KEY_Up || keyval == GDK_KEY_Down) &&
-         !self->rows.empty() ) {
+         !self->rows.isEmpty() ) {
         int last = static_cast<int>(self->rows.size()) - 1;
-        int next = keyval == GDK_KEY_Up ? std::max(0, self->anchor - 1) :
-            std::min(last, self->anchor + 1);
+        int next = keyval == GDK_KEY_Up ? java::Math::max(0, self->anchor - 1) :
+            java::Math::min(last, self->anchor + 1);
         self->anchor = next;
         self->selectRows(next, next, false);
         return TRUE;
@@ -331,6 +333,6 @@ void Gtk4TreeView::secondaryPressed(GtkGestureClick* gesture, gint, gdouble x,
     }
     if ( self->contextMenuListener ) {
         ContextMenuListener listener = self->contextMenuListener;
-        listener(self->list, x, y);
+        listener.accept(self->list, x, y);
     }
 }

@@ -1,4 +1,5 @@
 // Before any other header that could include the Xt ones
+#include "java/lang/String.h"
 #include "vsdk/toolkit/gui/XmIntrinsics.h"
 
 #include <cstdio>
@@ -37,20 +38,20 @@ void XmWidgetSupport::requireMotifShell(XtWidget shell)
     }
 }
 
-XmString XmWidgetSupport::createString(const std::string& text)
+XmString XmWidgetSupport::createString(const java::String& text)
 {
     return XmStringCreateLocalized(const_cast<char*>(text.c_str()));
 }
 
-std::string XmWidgetSupport::toText(XmString string)
+java::String XmWidgetSupport::toText(XmString string)
 {
     if ( string == nullptr ) {
-        return std::string();
+        return java::String();
     }
     char* text = static_cast<char*>(XmStringUnparse(
         string, nullptr, XmCHARSET_TEXT, XmCHARSET_TEXT, nullptr, 0,
         XmOUTPUT_ALL));
-    std::string result = text != nullptr ? text : "";
+    java::String result = text != nullptr ? text : "";
     XtFree(text);
     return result;
 }
@@ -73,7 +74,7 @@ XmRenderTable XmWidgetSupport::createRenderTable(XtWidget widget,
     return table;
 }
 
-void XmWidgetSupport::setLabelString(XtWidget widget, const std::string& text)
+void XmWidgetSupport::setLabelString(XtWidget widget, const java::String& text)
 {
     XmString string = createString(text);
     XtVaSetValues(widget, XmNlabelString, string, nullptr);
@@ -107,7 +108,7 @@ XtWidget XmWidgetSupport::createPopupMenu(XtWidget owner, const char* name)
 }
 
 XtWidget XmWidgetSupport::createMenuItem(XtWidget menu,
-                                         const std::string& text,
+                                         const java::String& text,
                                          XFontSet fontSet)
 {
     XmString label = createString(text);

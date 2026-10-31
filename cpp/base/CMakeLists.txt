@@ -96,6 +96,7 @@ set(VITRAL_BASE_SOURCES
     src/main/java/io/Reader.cpp
     src/main/java/io/InputStreamReader.cpp
     src/main/java/io/FileReader.cpp
+    src/main/java/nio/file/Files.cpp
     src/main/java/io/StreamTokenizer.cpp
     src/main/java/net/ServerSocket.cpp
     src/main/java/net/SocketInputStream.cpp
