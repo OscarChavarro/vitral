@@ -9,9 +9,9 @@ readline and libc, so they run on a text console of a Linux host and look and be
 | `vga` | `vitral_vga` | this directory's `CMakeLists.txt` |
 | `vitral_rasterizer` | `vitral_rasterizer` | this directory's `CMakeLists.txt` |
 | `vitral_raytracer` | `vitral_raytracer` | this directory's `CMakeLists.txt` |
-| `sceneEditor` | `sceneEditor` | not built here yet (see [sceneEditor](#sceneeditor)) |
+| `sceneEditor` | `sceneEditor` | `sceneEditor/CMakeLists.txt`, its own project (see [sceneEditor](#sceneeditor)) |
 
-`vga/`, `vitralRasterizer/` and `vitralRaytracer/` are copies of the kernel's `src/main/programs/` sources and may
+`vga/`, `vitralRasterizer/`, `vitralRaytracer/` and `sceneEditor/` are copies of the kernel's `src/main/programs/` sources and may
 differ from them. The shared helpers (`lib/dithering`, `lib/mouseCursor`, `lib/vgaModes`) are compiled from the
 kernel tree.
 
@@ -73,28 +73,21 @@ portable source directory. The option `VITRAL_BUILD_VGA_EXAMPLES=OFF` skips this
 
 ### sceneEditor
 
-`sceneEditor` (`x86_64_smp_kernel/src/main/programs/sceneEditor`) is not part of this directory's `CMakeLists.txt`.
-It will move to `../ApplicationCases`. Until then, build it out of tree with a small CMake project that has these
-pieces:
+`sceneEditor/` is a separate CMake project. Its `SceneEditor.cpp` is a small main: it picks the graphics mode and hands
+the screen to `FramebufferSceneEditor`, which is compiled from `../ApplicationCases/SceneEditorApplication` together
+with the classes of its `x11_framebuffer` variant. The project also compiles the svgalib backend of the framebuffer
+GUI (`cpp/svgalib`), `lib/vgaModes` and `lib/mouseCursor` from the kernel tree, and `cpp/base` through
+`add_subdirectory` (with JPEG and PNG on). It links `-lvga -lvgagl` and readline. `SceneEditorProgram.*` is the
+kernel's entry point and is not compiled here.
 
-- **The base library**: `add_subdirectory(cpp/base)`, configured with `WITH_JPEG=ON`. `cpp/base` always writes
-  `libvitral_base.so` into `cpp/base/build`, the same file the main build uses, so its options must match those of
-  `cpp/scripts/compile.sh`.
-- **The program**: the sources below, compiled into one executable:
-  - `x86_64_smp_kernel/src/main/programs/sceneEditor/SceneEditor.cpp`
-  - `x86_64_smp_kernel/src/main/lib/vgaModes/VgaModes.cpp`
-  - `x86_64_smp_kernel/src/main/lib/mouseCursor/MouseCursor.cpp`
-  - `svgalib/src/main/vsdk/toolkit/gui/framebuffer/svgalib/SvgalibFramebuffer.cpp`
-  - `svgalib/src/main/vsdk/toolkit/gui/framebuffer/svgalib/SvgalibInput.cpp`
-- **Base sources missing from `cpp/base/CMakeLists.txt`**, added to the executable as well:
-  - `base/src/main/vsdk/toolkit/gui/framebuffer/*.cpp` (6 files)
-  - `base/src/main/jackson/databind/JsonNode.cpp`
-  - `base/src/main/jackson/databind/ObjectMapper.cpp`
-- **Include directories**: `x86_64_smp_kernel/src/main` and `svgalib/src/main`. Do not add the kernel's
-  `src/main/lib/svgalib` or `src/main/lib/readline/include`, which are the kernel's stand-ins for the system headers.
-- **Compile definition**: `SCENE_EDITOR_GUI_DIR="<checkout>/etc/gui"`, the directory with `english.json` and
-  `spanish.json`.
-- **Libraries**: `vitral_base`, `libvga` and `libreadline`.
+```sh
+cd cpp/testsuite/VGAExamples/sceneEditor
+cmake -S . -B build-cmake -DCMAKE_BUILD_TYPE=Release
+cmake --build build-cmake -j"$(nproc)"      # build/sceneEditor and build/libvitral_base.so
+```
+
+`run.sh` does both steps and then runs `sudo build/sceneEditor "$@"`. The program changes to the folder of
+`SceneEditorApplication` before it starts, so that the application finds `etc` at `../../../../etc`.
 
 ## Run
 
@@ -105,7 +98,7 @@ the host's console (for example tty1). They do not work over SSH or inside X.
 sudo ./vitral_vga [MODE]
 sudo ./vitral_rasterizer [MODE]
 sudo ./vitral_raytracer [SCENE.ray] [MODE]
-sudo ./sceneEditor [english | spanish | FILE.json] [MODE]
+sudo ./sceneEditor [english | spanish] [MODE]
 ```
 
 - **`MODE`** is an svgalib mode such as `G640x480x16`. Without it, each program picks a default or offers a menu.
