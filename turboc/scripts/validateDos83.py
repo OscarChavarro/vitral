@@ -5,12 +5,11 @@ from pathlib import Path
 import re
 
 
-def validate(root):
+def validate(root, selections=("BASE", "DOS", "TESTSUIT/OFFLEXAM/RAYOFFEX")):
     errors = []
     seen = {}
     count = 0
     longest = 0
-    selections = ("BASE", "DOS", "TESTSUIT/OFFLEXAM/RAYOFFEX")
     for selection in selections:
         directory = root / selection
         if not directory.is_dir():
@@ -40,4 +39,10 @@ def validate(root):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
-    validate(parser.parse_args().root)
+    parser.add_argument("selections", nargs="*",
+                        help="Mapped folders to check (default: BASE DOS TESTSUIT/OFFLEXAM/RAYOFFEX)")
+    arguments = parser.parse_args()
+    if arguments.selections:
+        validate(arguments.root, tuple(arguments.selections))
+    else:
+        validate(arguments.root)

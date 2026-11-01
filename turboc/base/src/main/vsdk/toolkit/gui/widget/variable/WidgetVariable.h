@@ -45,16 +45,12 @@ public:
         this->initialvalue = initialvalue;
     }
 
-    virtual String toString() const
-    {
-        String msg = "";
-        msg = msg + "VARIABLE:\n"
-            + "     TYPE: " + getType() + "\n"
-            + "     NAME: " + getName() + "\n"
-            + "     INITIAL_VALUE: " + getInitialvalue() + "\n"
-            + "     VALID_RANGE: " + getValidRange() + "\n";
-        return msg;
-    }
+    /**
+    C++ port note: defined in WidgetVariable.cpp; as an inline header member,
+    Turbo C++ 3.0 dies with a GP fault on every unit that also instantiates
+    an ArrayList (Widget.cpp).
+    */
+    virtual String toString() const;
 
     /**
     Each variable has a type. Examples: "Integer", "Double", "String",

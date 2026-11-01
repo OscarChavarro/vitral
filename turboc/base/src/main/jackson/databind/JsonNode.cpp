@@ -3,6 +3,29 @@
 #include "java/util/ArrayList.txx"
 #include "jackson/databind/JsonNode.h"
 
+/**
+turboc port note: grows by 4 elements, not by the default chunk of 100, as
+each JSON array would take 100 nodes at once and the GUI files (166 arrays in
+english.json) do not fit in the 640 KB of real mode.
+*/
+class JsonNodeArrayStorage : public ArrayList<JsonNode> {
+public:
+    JsonNodeArrayStorage() : ArrayList<JsonNode>(4) {}
+    JsonNodeArrayStorage(const JsonNodeArrayStorage& other) : ArrayList<JsonNode>(other) {}
+};
+
+/**
+turboc port note: the storages declare their copy constructors, as the ones
+that Turbo C++ 3.0 synthesizes leave the copies empty. Objects start with 4
+buckets, not 16 (most have up to 4 keys, and the map rehashes as it grows), to
+fit the GUI files in real mode.
+*/
+class JsonNodeObjectStorage : public HashMap<String, JsonNode> {
+public:
+    JsonNodeObjectStorage() : HashMap<String, JsonNode>(4) {}
+    JsonNodeObjectStorage(const JsonNodeObjectStorage& other) : HashMap<String, JsonNode>(other) {}
+};
+
 JsonNode::JsonNode()
     : type_(NULL_VALUE)
     , boolValue_(FALSE)

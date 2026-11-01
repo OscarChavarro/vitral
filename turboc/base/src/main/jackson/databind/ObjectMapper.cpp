@@ -4,45 +4,83 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "jackson/databind/ObjectMapper.h"
 
+/**
+turboc port note: the members are defined out of the class body, as Turbo
+C++ 3.0 copies the JsonNode returned by an inline member bitwise, without its
+copy constructor (parseObject returned an empty object).
+*/
 class JsonParser {
 public:
-explicit JsonParser(const char* text) : text_(text), pos_(0) {}
+explicit JsonParser(const char* text);
 
-JsonNode parse() {
+JsonNode parse();
+
+private:
+const char* text_;
+// turboc port note: long, not int as in the cpp port: a 16 bit int overflows
+// past 32767 characters, and the GUI files (english.json) are longer.
+long pos_;
+
+void skipWs();
+
+BOOLEAN startsWith(const char* token) const;
+
+JsonNode parseValue();
+
+JsonNode parseObject();
+
+JsonNode parseArray();
+
+String parseString();
+
+double parseNumber();
+};
+
+JsonParser::JsonParser(const char* text) : text_(text), pos_(0) {}
+
+JsonNode
+JsonParser::parse() {
     skipWs();
     JsonNode value = parseValue();
     skipWs();
     return value;
 }
 
-private:
-const char* text_;
-int pos_;
-
-void skipWs() {
+void
+JsonParser::skipWs() {
     while (text_[pos_] != '\0' && isspace(((unsigned char)(text_[pos_])))) pos_++;
 }
 
-BOOLEAN startsWith(const char* token) const {
+BOOLEAN
+JsonParser::startsWith(const char* token) const {
     for (int i = 0; token[i] != '\0'; ++i) {
         if (text_[pos_ + i] != token[i]) return FALSE;
     }
     return TRUE;
 }
 
-JsonNode parseValue() {
+JsonNode
+JsonParser::parseValue() {
     skipWs();
     char c = text_[pos_];
-    if (c == '{') return parseObject();
-    if (c == '[') return parseArray();
-    if (c == '"') return JsonNode::newString(parseString());
+    // turboc port note: objects, arrays and texts go through named locals,
+    // not returned as the temporaries of the cpp port (return parseObject(),
+    // newString(parseString())), which Turbo C++ 3.0 loses or destroys twice
+    if (c == '{') { JsonNode object = parseObject(); return object; }
+    if (c == '[') { JsonNode array = parseArray(); return array; }
+    if (c == '"') {
+        String text = parseString();
+        JsonNode node = JsonNode::newString(text);
+        return node;
+    }
     if (c == 't' && startsWith("true")) { pos_ += 4; return JsonNode::newBoolean(TRUE); }
     if (c == 'f' && startsWith("false")) { pos_ += 5; return JsonNode::newBoolean(FALSE); }
     if (c == 'n' && startsWith("null")) { pos_ += 4; return JsonNode::newNull(); }
     return JsonNode::newNumber(parseNumber());
 }
 
-JsonNode parseObject() {
+JsonNode
+JsonParser::parseObject() {
     JsonNode obj = JsonNode::newObject();
     pos_++; // {
     skipWs();
@@ -61,7 +99,8 @@ JsonNode parseObject() {
     return obj;
 }
 
-JsonNode parseArray() {
+JsonNode
+JsonParser::parseArray() {
     JsonNode arr = JsonNode::newArray();
     pos_++; // [
     skipWs();
@@ -76,7 +115,8 @@ JsonNode parseArray() {
     return arr;
 }
 
-String parseString() {
+String
+JsonParser::parseString() {
     if (text_[pos_] != '"') return String("");
     pos_++; // "
     char buffer[4096];
@@ -100,17 +140,19 @@ String parseString() {
     return String(buffer);
 }
 
-double parseNumber() {
+double
+JsonParser::parseNumber() {
+    const char* start = text_ + pos_;
     char* end = NULL;
-    double value = strtod(text_ + pos_, &end);
-    if (end == text_ + pos_) return 0.0;
-    pos_ += ((int)(end - (text_ + pos_)));
+    double value = strtod(start, &end);
+    if ((const char*)end == start) return 0.0;
+    pos_ += ((long)((const char*)end - start));
     return value;
 }
-};
 
 JsonNode ObjectMapper::readTree(const String& content) const {
 JsonParser parser(content.c_str());
-return parser.parse();
+JsonNode root = parser.parse();
+return root;
 }
 

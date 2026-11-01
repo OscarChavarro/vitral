@@ -6,6 +6,15 @@
 #include "java/util/ArrayList.h"
 #include "java/util/HashMap.h"
 
+class JsonNodeArrayStorage;
+class JsonNodeObjectStorage;
+
+/**
+turboc port note: the array and object storages are classes defined in
+JsonNode.cpp, after JsonNode is complete, as Turbo C++ 3.0 and gcc 2.7.2
+instantiate a container of JsonNode where it is named (a recursive container
+of an incomplete type).
+*/
 class JsonNode {
 public:
 enum Type { NULL_VALUE, BOOLEAN_VALUE, NUMBER, STRING, ARRAY, OBJECT };
@@ -43,8 +52,8 @@ void add(const JsonNode& value);
 void put(const String& key, const JsonNode& value);
 
 private:
-typedef ArrayList<JsonNode> ArrayStorage;
-typedef HashMap<String, JsonNode> ObjectStorage;
+typedef JsonNodeArrayStorage ArrayStorage;
+typedef JsonNodeObjectStorage ObjectStorage;
 
 Type type_;
 BOOLEAN boolValue_;

@@ -1,6 +1,7 @@
 #ifndef __WIDGET_MENU_ELEMENT__
 #define __WIDGET_MENU_ELEMENT__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/widget/WidgetElement.h"
 
 class WidgetMenuElement : public WidgetElement {
@@ -38,6 +39,11 @@ public:
     virtual ~WidgetMenuElement() {}
 
     virtual String toString(int level) const = 0;
+
+    /**
+    @return true for a `WidgetMenu`, false for a `WidgetMenuItem`
+    */
+    virtual BOOLEAN isMenu() const { return FALSE; }
 };
 
 #endif

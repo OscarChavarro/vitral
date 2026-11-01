@@ -28,6 +28,7 @@ public:
     void addChild(WidgetMenuElement* i);
     virtual String toString(int level) const;
     virtual String toString() const;
+    virtual BOOLEAN isMenu() const { return TRUE; }
     const String& getName() const;
     char getMnemonic() const;
     const String& getAccelerator() const;

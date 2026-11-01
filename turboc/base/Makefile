@@ -37,6 +37,8 @@ SOURCES = \
     src/main/vsdk/toolkit/numericalAnalysis/polynomial/CubicSolver.cpp \
     src/main/vsdk/toolkit/numericalAnalysis/polynomial/QuadraticSolver.cpp \
     src/main/vsdk/toolkit/numericalAnalysis/polynomial/QuarticSolver.cpp \
+    src/main/jackson/databind/JsonNode.cpp \
+    src/main/jackson/databind/ObjectMapper.cpp \
     src/main/java/lang/Object.cpp \
     src/main/java/lang/Math.cpp \
     src/main/java/lang/IntegralConstants.cpp \
@@ -73,6 +75,12 @@ SOURCES = \
     src/main/java/util/concurrent/Executors.cpp \
     src/main/vsdk/toolkit/gui/KeyEvent.cpp \
     src/main/vsdk/toolkit/gui/MouseEvent.cpp \
+    src/main/vsdk/toolkit/gui/framebuffer/Framebuffer.cpp \
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferTheme.cpp \
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferPainter.cpp \
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferSnapshot.cpp \
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferMenuBar.cpp \
+    src/main/vsdk/toolkit/gui/framebuffer/FramebufferMenuReader.cpp \
     src/main/vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.cpp \
     src/main/vsdk/toolkit/gui/gizmo/InfinitePlaneGizmo.cpp \
     src/main/vsdk/toolkit/gui/gizmo/RayGizmo.cpp \

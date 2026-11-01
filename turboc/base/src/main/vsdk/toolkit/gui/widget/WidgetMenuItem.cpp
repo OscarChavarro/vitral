@@ -3,7 +3,8 @@
 
 WidgetMenuItem::WidgetMenuItem(Widget* c)
     : name(""), hasName(FALSE), commandName(""), hasCommandName(FALSE),
-      isSeparatorFlag(FALSE), mnemonic(0), accelerator("")
+      isSeparatorFlag(FALSE), isGrayedFlag(FALSE), isCheckableFlag(FALSE),
+      isCheckedFlag(FALSE), mnemonic(0), accelerator("")
 {
     context = c;
 }
@@ -11,6 +12,21 @@ WidgetMenuItem::WidgetMenuItem(Widget* c)
 BOOLEAN WidgetMenuItem::isSeparator() const
 {
     return isSeparatorFlag;
+}
+
+BOOLEAN WidgetMenuItem::isGrayed() const
+{
+    return isGrayedFlag;
+}
+
+BOOLEAN WidgetMenuItem::isCheckable() const
+{
+    return isCheckableFlag;
+}
+
+BOOLEAN WidgetMenuItem::isChecked() const
+{
+    return isCheckedFlag;
 }
 
 void WidgetMenuItem::setName(const String& n)
@@ -42,10 +58,14 @@ void WidgetMenuItem::setCommandName(const String& a)
 void WidgetMenuItem::addModifier(const String& m)
 {
     if ( m.equals("CHECKED") ) {
+        isCheckableFlag = TRUE;
+        isCheckedFlag = TRUE;
     }
     else if ( m.equals("GRAYED") ) {
+        isGrayedFlag = TRUE;
     }
     else if ( m.equals("UNCHEKED") ) {
+        isCheckableFlag = TRUE;
     }
     else if ( m.equals("SEPARATOR") ) {
         isSeparatorFlag = TRUE;

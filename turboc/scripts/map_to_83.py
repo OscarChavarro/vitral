@@ -13,6 +13,8 @@
 #      and of each offline example (<example>/<EXAMPLE>.MAK).  BASE.BAT
 #      compiles the base objects and BASELINK.BAT archives the existing
 #      objects; keeping them separate makes the DOS linker retryable.
+#      BASE86.BAT and BASELK86.BAT do the same for the real mode (8086)
+#      backend, in BUILD86.
 # map_from_83.py does the inverse. The parts of the port that are not in the
 # tables (i.e. the X11, OpenGL and svgalib ones) are not changed.
 import argparse
@@ -468,7 +470,7 @@ def base_library_groups(sources, nodes):
     environment/geometry package so TLIB does not exhaust conventional memory
     while producing one archive.
     """
-    names = ["BASECOMM", "BASELANG", "BASEIO", "BASEGUI", "BASEMEDI", "BASEREND",
+    names = ["BASECOMM", "BASELANG", "BASEIO", "BASEGUI", "BASEWIDG", "BASEMEDI", "BASEREND",
              "BASEENVS", "BASEENVM", "BASEENG1", "BASEENG2", "BASEENG3", "BASEENG4",
              "BASEENG5", "BASEENG6", "BASEENG7"]
     groups = {name: [] for name in names}
@@ -501,6 +503,10 @@ def base_library_groups(sources, nodes):
             name = "BASEREND"
         elif source.startswith("src/main/vsdk/toolkit/media/"):
             name = "BASEMEDI"
+        elif source.startswith(("src/main/vsdk/toolkit/gui/framebuffer/", "src/main/vsdk/toolkit/gui/widget/")):
+            # The framebuffer GUI and the widget model: out of BASEGUI, which
+            # TLIB can no longer build in conventional memory with them
+            name = "BASEWIDG"
         elif source.startswith("src/main/vsdk/toolkit/gui/"):
             name = "BASEGUI"
         elif source.startswith(("src/main/java/", "src/main/javax/", "src/main/org/")):
@@ -511,46 +517,58 @@ def base_library_groups(sources, nodes):
     return [(name, groups[name]) for name in names if groups[name]]
 
 
-def base_batchfile(sources, nodes) -> bytes:
+def base_batchfile(sources, nodes, real_mode: bool = False) -> bytes:
     """Compile base objects without trying to build the library.
 
     BMAKE 3.0 faults in the Windows 3.11 DOS session, hence direct TCC calls.
     BASELINK.BAT is generated separately so archiving can be retried without a
-    full recompilation.
+    full recompilation.  real_mode gives BASE86.BAT: the objects of the real
+    mode (8086, XMS) backend, with the floating point emulator, in BUILD86,
+    so that they do not replace the protected 286 ones of BUILDTC.
     """
     objects = base_objects(sources, nodes)
-    lines = ["@echo off", "if not exist BUILD md BUILD", "if not exist BUILDTC md BUILDTC", ""]
+    folder = "BUILD86" if real_mode else "BUILDTC"
+    lines = ["@echo off", "if not exist BUILD\\NUL md BUILD", f"if not exist {folder}\\NUL md {folder}", ""]
     total = len(objects)
     for number, (source, obj) in enumerate(zip(sources, objects), 1):
         dos_source = dos_path(nodes["base/" + source][len(nodes["base"]) + 1:])
+        obj = obj.replace("BUILDTC\\", folder + "\\", 1)
         lines += [f"echo [{number}/{total}] Compiling " + dos_source,
                   "echo -c > TC.RSP",
                   "echo -ml >> TC.RSP",
-                  "echo -f87 >> TC.RSP",
+                  "echo -f >> TC.RSP" if real_mode else "echo -f87 >> TC.RSP",
                   "echo -O1 >> TC.RSP",
                   "echo -d >> TC.RSP",
                   "echo -v- >> TC.RSP",
                   "echo -w-inl >> TC.RSP",
                   "echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP",
-                  "echo -DTURBO_C_286_ENABLED >> TC.RSP",
+                  ("echo -DTURBO_C_8086_REAL_MODE_ENABLED >> TC.RSP" if real_mode
+                   else "echo -DTURBO_C_286_ENABLED >> TC.RSP"),
                   "echo -IC:\\TURBOC\\INCLUDE >> TC.RSP",
                   "echo -I..\\DOS\\SRC\\MAIN >> TC.RSP",
                   "echo -I..\\DOS\\SRC\\MAIN\\V\\KERNEL\\286 >> TC.RSP",
                   "echo -ISRC;SRC\\MAIN >> TC.RSP",
                   "echo -o" + obj + " >> TC.RSP",
                   "echo " + dos_source + " >> TC.RSP",
+                  # TCC 3.0 ends with errorlevel 0 when it dies with a GP
+                  # fault, so a missing object is also a failure
+                  "if exist " + obj + " del " + obj,
                   "tcc @TC.RSP > TC.LOG",
-                  "if errorlevel 1 goto error", ""]
+                  "if errorlevel 1 goto error",
+                  "if not exist " + obj + " goto error", ""]
     lines += ["echo Base objects compiled successfully.", "goto end",
               ":error", "type TC.LOG", "echo Build failed. See the compiler output above.",
               ":end", ""]
     return make_text(lines)
 
 
-def base_link_batchfile(sources, nodes) -> bytes:
-    """Archive base objects into multiple TLIB-sized thematic libraries."""
+def base_link_batchfile(sources, nodes, real_mode: bool = False) -> bytes:
+    """Archive base objects into multiple TLIB-sized thematic libraries.
+    real_mode gives BASELK86.BAT, which archives the objects of BUILD86 into
+    libraries of the same names in BUILD86."""
     library_groups = base_library_groups(sources, nodes)
-    lines = ["@echo off", "if not exist BUILD md BUILD", ""]
+    folder = "BUILD86" if real_mode else "BUILD"
+    lines = ["@echo off", f"if not exist {folder} md {folder}", ""]
     # TLIB 3.02 in the DOS guest consumes only the first member from an
     # @response file.  Keep each direct command below DOS's 127-character
     # limit and add one module at a time instead.  Its normal dictionary
@@ -559,13 +577,15 @@ def base_link_batchfile(sources, nodes) -> bytes:
     # while emitting only a harmless warning, so detect actual "Error:"
     # diagnostics in its log rather than using ERRORLEVEL directly.
     for library_index, (library, objects) in enumerate(library_groups):
-        lines += [f"del BUILD\\{library}.LIB > NUL"]
+        lines += [f"del {folder}\\{library}.LIB > NUL"]
         for object_index, obj in enumerate(objects):
+            if real_mode:
+                obj = obj.replace("BUILDTC\\", "BUILD86\\", 1)
             # COMMAND.COM recognizes only the first eight characters of a
             # label.  Keep labels short and unique across every library.
             next_label = f"L{library_index:02d}{object_index:03d}"
             lines += [f"echo {library}.LIB Adding " + obj,
-                      f"tlib BUILD\\{library}.LIB /C /E /P64 +" + obj + " > TLIB.LOG",
+                      f"tlib {folder}\\{library}.LIB /C /E /P64 +" + obj + " > TLIB.LOG",
                       "find \"Error:\" TLIB.LOG > NUL",
                       f"if errorlevel 1 goto {next_label}",
                       "type TLIB.LOG",
@@ -602,7 +622,11 @@ def generated_files(project_root: Path, mappings, base_sources):
     files = [(NAMES_DIR + "/" + NAMES_HEADER, names_header_text(mappings)),
              ("base/BASE.MAK", base_makefile([s for s in base_sources if s not in TC_EXCLUDED_SOURCES], nodes)),
              ("base/BASE.BAT", base_batchfile([s for s in base_sources if s not in TC_EXCLUDED_SOURCES], nodes)),
-             ("base/BASELINK.BAT", base_link_batchfile([s for s in base_sources if s not in TC_EXCLUDED_SOURCES], nodes))]
+             ("base/BASELINK.BAT", base_link_batchfile([s for s in base_sources if s not in TC_EXCLUDED_SOURCES], nodes)),
+             ("base/BASE86.BAT", base_batchfile([s for s in base_sources if s not in TC_EXCLUDED_SOURCES], nodes,
+                                                True)),
+             ("base/BASELK86.BAT", base_link_batchfile([s for s in base_sources if s not in TC_EXCLUDED_SOURCES],
+                                                       nodes, True))]
     examples = sorted({src.split("/")[2] for src, _dst in mappings
                        if src.startswith(OFFLINE_EXAMPLES + "/") and src.count("/") == 4
                        and src.split("/")[3] == "src"})

@@ -11,6 +11,9 @@ private:
     String commandName;
     BOOLEAN hasCommandName;
     BOOLEAN isSeparatorFlag;
+    BOOLEAN isGrayedFlag;
+    BOOLEAN isCheckableFlag;
+    BOOLEAN isCheckedFlag;
     char mnemonic;
     String accelerator;
 
@@ -22,6 +25,9 @@ public:
     virtual ~WidgetMenuItem() {}
 
     BOOLEAN isSeparator() const;
+    BOOLEAN isGrayed() const;
+    BOOLEAN isCheckable() const;
+    BOOLEAN isChecked() const;
     void setName(const String& n);
     String getName() const;
     String getCommandName() const;
