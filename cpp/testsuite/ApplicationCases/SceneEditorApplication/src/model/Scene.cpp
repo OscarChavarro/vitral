@@ -343,6 +343,17 @@ void Scene::importMitScene(const java::File& file)
     // Do not replace `scene`: OpenGL renderers own a reference to this
     // instance for their complete lifetime.  Transfer the imported elements
     // instead, carefully detaching them from the temporary owner.
+    // The backgrounds of this editor that activateSelectedBackground put in
+    // the list are owned here, not by `scene`: take them out first.
+    java::ArrayList<Background*>& current = scene->getBackgrounds();
+    for ( long i = current.size() - 1; i >= 0; i-- ) {
+        Background* background = current.get(i);
+        if ( background == simpleBackground ||
+             background == cubemapBackground ||
+             background == fixedBackground ) {
+            current.remove(i);
+        }
+    }
     scene->clearOwnedElements();
     java::ArrayList<SimpleBody*>& bodies = imported.getSimpleBodies();
     java::ArrayList<Light*>& lights = imported.getLights();
@@ -358,7 +369,9 @@ void Scene::importMitScene(const java::File& file)
     hiddenBodies.clear();
 
     activeCamera = scene->getActiveCamera();
+    delete cubemapBackground;
     cubemapBackground = nullptr;
+    delete fixedBackground;
     fixedBackground = nullptr;
     importedMitScene = true;
     importedSceneBackground = scene->getBackgrounds().size() > 0;

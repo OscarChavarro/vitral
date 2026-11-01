@@ -116,11 +116,14 @@ set(LOOP_ROOT_DIR "${CMAKE_SOURCE_DIR}/loopKernelRootFileSystem" CACHE PATH "Con
 # The front end of httpd (a single page application) is copied to /www in the image: httpd reads it with fopen().
 set(HTTPD_FRONTEND_DIR "${CMAKE_SOURCE_DIR}/src/main/programs/httpd/frontend")
 set(VITRAL_ETC_DIR "${CMAKE_SOURCE_DIR}/../../etc")
+# The folder sceneEditor runs from, placed as in the repository so that ../../../../etc is the etc copied here.
+set(SCENE_EDITOR_APPLICATION_SUBDIR "cpp/testsuite/ApplicationCases/SceneEditorApplication")
 file(GLOB_RECURSE LOOP_ROOT_FILES CONFIGURE_DEPENDS "${LOOP_ROOT_DIR}/*" "${HTTPD_FRONTEND_DIR}/*")
 file(GLOB_RECURSE VITRAL_ETC_FILES CONFIGURE_DEPENDS "${VITRAL_ETC_DIR}/*")
 add_custom_command(OUTPUT loop.img
   COMMAND ${CMAKE_COMMAND} -E make_directory "${LOOP_ROOT_DIR}/etc"
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${VITRAL_ETC_DIR}" "${LOOP_ROOT_DIR}/etc"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${LOOP_ROOT_DIR}/${SCENE_EDITOR_APPLICATION_SUBDIR}"
   COMMAND ${CMAKE_SOURCE_DIR}/scripts/makeFatImage.sh ${LOOP_ROOT_DIR} ${CMAKE_BINARY_DIR}/loop.img ${HTTPD_FRONTEND_DIR}:www
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/makeFatImage.sh ${LOOP_ROOT_FILES} ${VITRAL_ETC_FILES} VERBATIM)
 add_custom_target(loopImage DEPENDS loop.img)
@@ -225,18 +228,69 @@ target_include_directories(objsVga SYSTEM PRIVATE ${LIB_INCLUDES})
 target_include_directories(objsVga PRIVATE src/main/lib/svgalib src/main/lib/readline/include
                            ${CMAKE_SOURCE_DIR}/src/main ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main)
 
-# sceneEditor: the Scene Editor's menus on the framebuffer GUI of the base library, drawn and driven by its svgalib
-# backend (VITRAL_SVGALIB_DIR). Compiled like vga; only its main is renamed.
+# sceneEditor: the Scene Editor of Vitral (FramebufferSceneEditor and the classes of its x11_framebuffer variant,
+# compiled from where they live in SCENE_EDITOR_APPLICATION_SOURCE_DIR) on the svgalib backend of the framebuffer GUI
+# (VITRAL_SVGALIB_DIR). Compiled like vga; only its main is renamed. The application reads ../../../../etc, so it runs
+# from SCENE_EDITOR_APPLICATION_DIR, a folder of the root file system image placed as it is in the repository.
 set(VITRAL_SVGALIB_DIR "${CMAKE_SOURCE_DIR}/../svgalib" CACHE PATH "Vitral C++ svgalib backends")
-set(SCENE_EDITOR_GUI_DIR "/media/ramdisk/etc/gui" CACHE STRING "Directory of the Scene Editor's GUI definitions")
+set(SCENE_EDITOR_APPLICATION_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../testsuite/ApplicationCases/SceneEditorApplication"
+    CACHE PATH "Vitral C++ Scene Editor application")
+set(SCENE_EDITOR_APPLICATION_DIR "/media/ramdisk/${SCENE_EDITOR_APPLICATION_SUBDIR}" CACHE STRING
+    "Folder the Scene Editor runs from: etc must be at ../../../../etc")
+set(SCENE_EDITOR_APPLICATION_SOURCES
+    application/framebuffer/FramebufferSceneEditor.cpp
+    render/framebuffer/FramebufferDrawingAreaRenderer.cpp
+    application/commands/GeometryCreationCommandsExecutor.cpp
+    application/commands/GuiEventExecutor.cpp
+    gui/DrawingAreaInteractionTechniques.cpp
+    gui/PointerCursor.cpp
+    gui/SelectedBodyMapToggles.cpp
+    gui/history/InteractionEditRecorder.cpp
+    gui/history/UndoRedoInteractionTechnique.cpp
+    io/FileSuffixFilter.cpp
+    io/GuiI18nContextBuilder.cpp
+    io/GuiJsonReader.cpp
+    model/ApplicationModel.cpp
+    model/DrawingArea.cpp
+    model/GuiState.cpp
+    model/ProjectedViewsDebugPlan.cpp
+    model/Scene.cpp
+    model/SceneLightFactory.cpp
+    model/dialog/SceneHierarchyPresenter.cpp
+    model/editor/FunctionalExplicitSurfaceEditor.cpp
+    model/history/BodyTransformState.cpp
+    model/history/CameraState.cpp
+    model/history/CompositeOperation.cpp
+    model/history/LightTransformState.cpp
+    model/history/SceneElementKind.cpp
+    model/history/SceneHistory.cpp
+    model/history/SceneMembershipOperation.cpp
+    model/history/SceneSelectionOperation.cpp
+    model/history/SceneSnapshot.cpp
+    model/history/SceneTransformationOperation.cpp
+    model/history/UndoQueue.cpp
+    model/history/ViewportHistory.cpp
+    model/history/ViewportState.cpp
+    model/history/ViewportStateOperation.cpp
+    model/selection/LightPicker.cpp
+    model/selection/ScenePicker.cpp
+    model/selection/SceneSelectionEditor.cpp
+    model/selection/SelectionSet.cpp
+    render/DrawingAreaGizmoPresenter.cpp
+    render/FrameCaptureService.cpp
+    render/ProjectedViewsDebugger.cpp)
+list(TRANSFORM SCENE_EDITOR_APPLICATION_SOURCES PREPEND "${SCENE_EDITOR_APPLICATION_SOURCE_DIR}/src/")
 add_library(objsSceneEditor OBJECT src/main/programs/sceneEditor/SceneEditor.cpp
             ${VITRAL_SVGALIB_DIR}/src/main/vsdk/toolkit/gui/framebuffer/svgalib/SvgalibFramebuffer.cpp
             ${VITRAL_SVGALIB_DIR}/src/main/vsdk/toolkit/gui/framebuffer/svgalib/SvgalibInput.cpp
+            ${SCENE_EDITOR_APPLICATION_SOURCES}
 )
 target_compile_options(objsSceneEditor PRIVATE ${LIB_FLAGS})
-target_compile_definitions(objsSceneEditor PRIVATE VITRAL_WITH_POSIX_THREADS main=sceneEditorMain
-                           "SCENE_EDITOR_GUI_DIR=\"${SCENE_EDITOR_GUI_DIR}\"")
+set_source_files_properties(src/main/programs/sceneEditor/SceneEditor.cpp PROPERTIES
+  COMPILE_DEFINITIONS "main=sceneEditorMain;SCENE_EDITOR_APPLICATION_DIR=\"${SCENE_EDITOR_APPLICATION_DIR}\"")
+target_compile_definitions(objsSceneEditor PRIVATE VITRAL_WITH_POSIX_THREADS)
 target_include_directories(objsSceneEditor SYSTEM PRIVATE ${LIB_INCLUDES})
+target_include_directories(objsSceneEditor BEFORE PRIVATE ${SCENE_EDITOR_APPLICATION_SOURCE_DIR}/src)
 target_include_directories(objsSceneEditor PRIVATE src/main/lib/svgalib src/main/lib/readline/include
                            ${CMAKE_SOURCE_DIR}/src/main ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main
                            ${VITRAL_SVGALIB_DIR}/src/main)

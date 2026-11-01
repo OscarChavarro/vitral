@@ -19,6 +19,8 @@ FramebufferDialogForm::FramebufferDialogForm(const Widget &context, const Widget
     }
 }
 
+FramebufferDialogForm::~FramebufferDialogForm() {}
+
 void
 FramebufferDialogForm::build(const Widget &context, const WidgetDialogElement &element) {
     const java::String &kind = element.getKind();

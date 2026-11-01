@@ -288,7 +288,7 @@ void buildCache(
     java::ArrayList<HiddenLineQuerySolid>& solids,
     SimpleBody* body,
     PolyhedralBoundedSolid* solid,
-    java::ArrayList<AppelEdgeCache>& cache,
+    java::ArrayList<AppelEdgeCache*>& cache,
     java::ArrayList<AppelEdgeCache*>& contourCache,
     const Camera* camera,
     bool ownsSolid)
@@ -330,8 +330,10 @@ void buildCache(
         bool f1 = isFaceVisibleFromCameraTransformed(face1, body, camera) >= 0;
         bool f2 = isFaceVisibleFromCameraTransformed(face2, body, camera) >= 0;
 
-        cache.add(AppelEdgeCache());
-        AppelEdgeCache& materialLine = cache[cache.size() - 1];
+        // On the heap, as the references of the Java version: contourCache
+        // keeps pointers to them while cache grows.
+        cache.add(new AppelEdgeCache());
+        AppelEdgeCache& materialLine = *cache[cache.size() - 1];
         materialLine.setStart(startPosition);
         materialLine.setEnd(endPosition);
         materialLine.direction = endPosition.subtract(startPosition);
@@ -545,7 +547,7 @@ void HiddenLineRenderer::executeAppelAlgorithm(
     }
 
     java::ArrayList<HiddenLineQuerySolid> querySolids;
-    java::ArrayList<AppelEdgeCache> cache;
+    java::ArrayList<AppelEdgeCache*> cache;
     java::ArrayList<AppelEdgeCache*> contourCache;
 
     for (long int i = 0; i < inSimpleBodyArray.size(); ++i) {
@@ -581,7 +583,7 @@ void HiddenLineRenderer::executeAppelAlgorithm(
     }
 
     for (long int i = 0; i < cache.size(); ++i) {
-        AppelEdgeCache& edge = cache[i];
+        AppelEdgeCache& edge = *cache[i];
         switch (edge.edgeType) {
           case AppelEdgeCache::HIDDEN_LINE:
           case AppelEdgeCache::CONTOUR_LINE:
@@ -603,5 +605,8 @@ void HiddenLineRenderer::executeAppelAlgorithm(
             delete querySolids[i].solid;
             querySolids[i].solid = 0;
         }
+    }
+    for (long int i = 0; i < cache.size(); ++i) {
+        delete cache[i];
     }
 }

@@ -81,9 +81,14 @@ export, palettes, the raytraced image, messages and the scene selector
 (`h`). The application
 class (`src/application/framebuffer/FramebufferSceneEditor`) only uses the
 framebuffer interfaces; only its `main` knows Xlib, so the same class can
-run on the svgalib and future BGI backends. Not available yet in this
-variant: the tangible interface client, the MCP service and the editors of
-the modify panel of the other variants.
+run on the svgalib and future BGI backends. The `sceneEditor` program of
+the minimal kernel (`cpp/x86_64_smp_kernel`) compiles these sources (all
+but the Xlib `main`) with its own svgalib `main` and runs the whole editor,
+including the parallel raytracer. It runs from
+`/media/ramdisk/cpp/testsuite/ApplicationCases/SceneEditorApplication` in
+its root image, so `../../../../etc` reaches the `etc` copied into the
+image. Not available yet in this variant: the tangible interface client,
+the MCP service and the editors of the modify panel of the other variants.
 
 To configure and build every variant without running it:
 

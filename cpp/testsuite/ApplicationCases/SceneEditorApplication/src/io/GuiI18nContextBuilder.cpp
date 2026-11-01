@@ -27,7 +27,7 @@ WidgetMenu* buildMenu(Widget* context, const GuiNode& definition,
     WidgetMenu* menu = new WidgetMenu(context);
     menu->setName(definition.name.c_str());
 
-    for ( size_t i = 0; i < definition.children.size(); i++ ) {
+    for ( long i = 0; i < definition.children.size(); i++ ) {
         const GuiNode& child = definition.children[i];
         if ( child.type == "menu" ) {
             WidgetMenu* childMenu =
@@ -42,7 +42,7 @@ WidgetMenu* buildMenu(Widget* context, const GuiNode& definition,
         if ( !child.name.isEmpty() ) {
             item->setName(child.name.c_str());
         }
-        for ( size_t j = 0; j < child.modifiers.size(); j++ ) {
+        for ( long j = 0; j < child.modifiers.size(); j++ ) {
             item->addModifier(child.modifiers[j].c_str());
         }
         menu->addChild(item);
@@ -102,13 +102,13 @@ void importCommands(Widget* context, const java::String& json,
                     const java::String& globalDataPath)
 {
     const java::ArrayList<GuiCommand> commands = GuiJsonReader(json).readCommands();
-    for ( size_t i = 0; i < commands.size(); i++ ) {
+    for ( long i = 0; i < commands.size(); i++ ) {
         const GuiCommand& definition = commands[i];
         WidgetCommand* command = new WidgetCommand();
         command->setId(definition.id.c_str());
         command->setName(definition.get("name").c_str());
         command->setBrief(definition.get("brief").c_str());
-        for ( size_t j = 0; j < definition.help.size(); j++ ) {
+        for ( long j = 0; j < definition.help.size(); j++ ) {
             command->appendToHelp(definition.help[j].c_str());
         }
 
@@ -130,7 +130,7 @@ void importButtonGroups(Widget* context, const java::String& json)
 {
     const java::ArrayList<GuiButtonGroup> groups =
         GuiJsonReader(json).readButtonGroups();
-    for ( size_t i = 0; i < groups.size(); i++ ) {
+    for ( long i = 0; i < groups.size(); i++ ) {
         WidgetButtonGroup* group = new WidgetButtonGroup(context);
         group->setName(groups[i].name.c_str());
         group->setShowIcons(groups[i].showIcons);
@@ -138,7 +138,7 @@ void importButtonGroups(Widget* context, const java::String& json)
         group->setTitle(groups[i].showTitle);
         group->setDirection(groups[i].horizontal ?
             WidgetButtonGroup::HORIZONTAL : WidgetButtonGroup::VERTICAL);
-        for ( size_t j = 0; j < groups[i].commands.size(); j++ ) {
+        for ( long j = 0; j < groups[i].commands.size(); j++ ) {
             group->addCommandByName(groups[i].commands[j].c_str());
         }
         context->addButtonGroup(group);
@@ -157,7 +157,7 @@ Widget* GuiI18nContextBuilder::build(const java::String& json,
                                   true));
 
     const java::ArrayList<GuiNode> popups = GuiJsonReader(json).readPopups();
-    for ( size_t i = 0; i < popups.size(); i++ ) {
+    for ( long i = 0; i < popups.size(); i++ ) {
         context->addPopupMenu(buildMenu(context, popups[i], true));
     }
 

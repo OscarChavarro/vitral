@@ -15,8 +15,6 @@ Ray::Ray(const Vector3Dd& origin, const Vector3Dd& direction)
 Ray::Ray(const Vector3Dd& origin, const Vector3Dd& direction, double t)
     : origin(origin), direction(normalizeDirection(direction)), t(t) {}
 
-Ray::Ray(const Ray& b) : origin(b.origin), direction(b.direction), t(b.t) {}
-
 Ray Ray::copyOf(const Ray& other)
 {
     return other;

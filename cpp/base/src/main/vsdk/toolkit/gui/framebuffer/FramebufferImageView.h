@@ -11,8 +11,8 @@ class FramebufferImageView : public FramebufferControl {
 public:
     FramebufferImageView(int width, int height, const uint32_t *rgb);
 
-    int preferredWidth(const Framebuffer &surface) const override { return imageWidth + 4; }
-    int preferredHeight(const Framebuffer &surface) const override { return imageHeight + 4; }
+    int preferredWidth(const Framebuffer &/*surface*/) const override { return imageWidth + 4; }
+    int preferredHeight(const Framebuffer &/*surface*/) const override { return imageHeight + 4; }
     bool isStretchable() const override { return true; }
     void draw(Framebuffer &surface, const FramebufferTheme &theme, bool focused) override;
 

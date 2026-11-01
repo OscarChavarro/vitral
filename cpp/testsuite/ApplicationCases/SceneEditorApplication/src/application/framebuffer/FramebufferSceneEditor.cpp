@@ -1,3 +1,4 @@
+#include "java/util/TreeMap.txx"
 #include "java/lang/String.h"
 #include "application/framebuffer/FramebufferSceneEditor.h"
 

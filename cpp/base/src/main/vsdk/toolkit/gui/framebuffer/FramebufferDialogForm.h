@@ -25,6 +25,8 @@ class WidgetDialogElement;
 class FramebufferDialogForm {
 public:
     FramebufferDialogForm(const Widget &context, const WidgetDialog &definition);
+    // Out of line: the maps are instantiated by the translation unit that includes TreeMap.txx.
+    ~FramebufferDialogForm();
     FramebufferDialogForm(const FramebufferDialogForm &) = delete;
     FramebufferDialogForm &operator=(const FramebufferDialogForm &) = delete;
 

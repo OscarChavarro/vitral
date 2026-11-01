@@ -22,6 +22,7 @@ public:
 
     Camera();
     Camera(const Camera& other);
+    Camera& operator=(const Camera& other) = default;
 
     Matrix4x4d getNormalizingTransformation() const;
     long getModificationVersion() const;

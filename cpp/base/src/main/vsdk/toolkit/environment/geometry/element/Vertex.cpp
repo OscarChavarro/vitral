@@ -28,10 +28,6 @@ Vertex::Vertex(const Vector3Dd& position, const Vector3Dd& normal, const Vector3
     : position(position), normal(normal), binormal(binormal), tangent(tangent),
       u(0.0), v(0.0), incidentTriangles(nullptr) {}
 
-Vertex::Vertex(const Vertex& vertex)
-    : position(vertex.position), normal(vertex.normal), binormal(vertex.binormal), tangent(vertex.tangent),
-      u(vertex.u), v(vertex.v), incidentTriangles(vertex.incidentTriangles) {}
-
 Vector3Dd Vertex::getPosition() const { return position; }
 Vector3Dd Vertex::getNormal() const { return normal; }
 Vector3Dd Vertex::getBinormal() const { return binormal; }

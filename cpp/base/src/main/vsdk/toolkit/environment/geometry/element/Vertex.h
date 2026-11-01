@@ -43,7 +43,6 @@ public:
     Vertex(const Vector3Dd& position, const Vector3Dd& normal);
     Vertex(const Vector3Dd& position, const Vector3Dd& normal, double u, double v);
     Vertex(const Vector3Dd& position, const Vector3Dd& normal, const Vector3Dd& binormal, const Vector3Dd& tangent);
-    Vertex(const Vertex& vertex);
 
     Vector3Dd getPosition() const;
     Vector3Dd getNormal() const;

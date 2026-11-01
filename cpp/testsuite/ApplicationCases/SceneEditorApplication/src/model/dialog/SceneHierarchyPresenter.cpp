@@ -101,7 +101,7 @@ void SceneHierarchyPresenter::addEntries(DialogTreeNode& parent, Kind kind,
 {
     Scene* scene = model->getScene();
     java::TreeMap<java::String, int> unnamed;
-    for ( size_t i = 0; i < elements.size(); i++ ) {
+    for ( long i = 0; i < elements.size(); i++ ) {
         Entity* element = elements[i];
         java::String name;
         switch ( kind ) {
@@ -136,7 +136,7 @@ const SceneHierarchyPresenter::Entry* SceneHierarchyPresenter::entryOf(
     if ( node == nullptr ) {
         return nullptr;
     }
-    for ( size_t i = 0; i < entries.size(); i++ ) {
+    for ( long i = 0; i < entries.size(); i++ ) {
         if ( entries[i] == node->getIdentity() ) {
             return entries[i];
         }
@@ -184,7 +184,7 @@ void SceneHierarchyPresenter::select(
     scene->selectedThings->unselectAll();
     scene->selectedLights->unselectAll();
     scene->selectedDebugThingGroups->unselectAll();
-    for ( size_t i = 0; i < nodes.size(); i++ ) {
+    for ( long i = 0; i < nodes.size(); i++ ) {
         const Entry* entry = entryOf(nodes[i]);
         if ( entry == nullptr ) continue;
         int index;
@@ -238,7 +238,7 @@ java::ArrayList<SimpleBody*> SceneHierarchyPresenter::selectedBodies(
     const java::ArrayList<const DialogTreeNode*>& nodes) const
 {
     java::ArrayList<SimpleBody*> result;
-    for ( size_t i = 0; i < nodes.size(); i++ ) {
+    for ( long i = 0; i < nodes.size(); i++ ) {
         const Entry* entry = entryOf(nodes[i]);
         if ( entry != nullptr && entry->kind == BODY ) {
             result.add(static_cast<SimpleBody*>(entry->element));
@@ -250,7 +250,7 @@ java::ArrayList<SimpleBody*> SceneHierarchyPresenter::selectedBodies(
 bool SceneHierarchyPresenter::anyHidden(
     const java::ArrayList<SimpleBody*>& bodies) const
 {
-    for ( size_t i = 0; i < bodies.size(); i++ ) {
+    for ( long i = 0; i < bodies.size(); i++ ) {
         if ( model->getScene()->isHidden(bodies[i]) ) {
             return true;
         }
@@ -261,7 +261,7 @@ bool SceneHierarchyPresenter::anyHidden(
 void SceneHierarchyPresenter::setHidden(const java::ArrayList<SimpleBody*>& bodies,
                                         bool hidden)
 {
-    for ( size_t i = 0; i < bodies.size(); i++ ) {
+    for ( long i = 0; i < bodies.size(); i++ ) {
         model->getScene()->setHidden(bodies[i], hidden);
     }
     if ( repaint ) repaint.run();
