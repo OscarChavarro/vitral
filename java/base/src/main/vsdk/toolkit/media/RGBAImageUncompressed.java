@@ -8,14 +8,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import vsdk.toolkit.io.PersistenceElement;
 
-import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.logging.Logger;
 
 /**
 Current class is an specific low level implementation of an uncompressed
-32 bits per pixel RGBA image over a byte array (ordered in a sequential array
-of RGBA bytes, row by row from upper left pixel, and left to right on each
-row).
+32 bits per pixel RGBA image over a direct buffer of RGBA bytes.
+
+Pixel coordinates have their origin on the upper left corner: `getPixel(x, 0)`
+is on the top row. In memory, rows are ordered from the bottom one to the top
+one, and from left to right on each row, which is the order OpenGL expects, so
+the raw buffer can be given to it as it is.
 
 Note that this class implements two version of vector access operations:
 one simple basic one, and one optimized for using Java's "Direct Buffers".
@@ -264,13 +265,25 @@ public class RGBAImageUncompressed extends Image
         return ySize;
     }
     
+    /**
+    Returns a copy of the pixels, in the order described in the class header.
+    To avoid the copy, or to modify the image, use `getRawImageDirectBuffer`.
+    @return a new array of `getRawImageSizeInBytes` bytes
+    */
     public byte[] getRawImage()
     {
+        byte[] copy = new byte[getRawImageSizeInBytes()];
+        data.duplicate().rewind().get(copy);
+        return copy;
+    }
 
-        if ( !data.hasArray() ) {
-            Logger.reportMessage(this, VSDK.FATAL_ERROR, "getRawImage", "cannot return raw bytes for a direct buffer optimized image, use getRawImageDirectBuffer instead.");
-        }
-        return data.array();
+    /**
+    Size of the pixels alone. `getSizeInBytes` also counts the object itself.
+    @return the size of the raw buffer
+    */
+    public int getRawImageSizeInBytes()
+    {
+        return xSize*ySize*4;
     }
 
     public ByteBuffer getRawImageDirectBuffer()
@@ -279,12 +292,24 @@ public class RGBAImageUncompressed extends Image
         return data;
     }
 
+    /**
+    Replaces the image with a copy of the given pixels, which must be in the
+    order described in the class header.
+    @param xSize image width
+    @param ySize image height
+    @param data xSize*ySize*4 bytes
+    */
     public void setRawImage(int xSize, int ySize, byte[] data)
     {
-        this.xSize = xSize;
-        this.ySize = ySize;
-
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", "NOT IMPLEMENTED! CHECK VSDK CODE!");
+        if ( data.length != xSize*ySize*4 ) {
+            throw new IllegalArgumentException("Expected " + xSize*ySize*4 +
+                " bytes for a " + xSize + "x" + ySize + " RGBA image, but got " +
+                data.length);
+        }
+        initNoFill(xSize, ySize);
+        this.data.rewind();
+        this.data.put(data);
+        this.data.rewind();
     }
     
     /** 

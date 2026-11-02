@@ -23,9 +23,12 @@ import vsdk.toolkit.common.logging.Logger;
 
 /**
 Current class is an specific low level implementation of an uncompressed
-24 bits per pixel RGB image over a byte array (ordered in a sequential array
-of RGB bytes, row by row from upper left pixel, and left to right on each
-row).
+24 bits per pixel RGB image over a direct buffer of RGB bytes.
+
+Pixel coordinates have their origin on the upper left corner: `getPixel(x, 0)`
+is on the top row. In memory, rows are ordered from the bottom one to the top
+one, and from left to right on each row, which is the order OpenGL expects, so
+the raw buffer can be given to it as it is.
 
 Note that this class implements two version of vector access operations:
 one simple basic one, and one optimized for using Java's "Direct Buffers".
@@ -342,6 +345,11 @@ public class RGBImageUncompressed extends Image
         return ySize;
     }
 
+    /**
+    Returns a copy of the pixels, in the order described in the class header.
+    To avoid the copy, or to modify the image, use `getRawImageDirectBuffer`.
+    @return a new array of `getRawImageSizeInBytes` bytes
+    */
     public byte[] getRawImage()
     {
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
@@ -349,12 +357,20 @@ public class RGBImageUncompressed extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-        if ( !data.hasArray() ) {
-            Logger.reportMessage(this, VSDK.FATAL_ERROR, "getRawImage", "cannot return raw bytes for a direct buffer optimized image, use getRawImageDirectBuffer instead.");
-        }
-        return data.array();
+        byte[] copy = new byte[getRawImageSizeInBytes()];
+        data.duplicate().rewind().get(copy);
+        return copy;
 //#endif
 
+    }
+
+    /**
+    Size of the pixels alone. `getSizeInBytes` also counts the object itself.
+    @return the size of the raw buffer
+    */
+    public int getRawImageSizeInBytes()
+    {
+        return xSize*ySize*BYTES_PER_PIXEL;
     }
 
     public ByteBuffer getRawImageDirectBuffer()
@@ -371,19 +387,33 @@ public class RGBImageUncompressed extends Image
 
     }
 
+    /**
+    Replaces the image with a copy of the given pixels, which must be in the
+    order described in the class header.
+    @param xSize image width
+    @param ySize image height
+    @param data xSize*ySize*3 bytes
+    */
     public void setRawImage(int xSize, int ySize, byte[] data)
     {
-        this.xSize = xSize;
-        this.ySize = ySize;
-        this.rowStride = xSize * BYTES_PER_PIXEL;
+        if ( data.length != xSize*ySize*BYTES_PER_PIXEL ) {
+            throw new IllegalArgumentException("Expected " +
+                xSize*ySize*BYTES_PER_PIXEL + " bytes for a " + xSize + "x" +
+                ySize + " RGB image, but got " + data.length);
+        }
 
 //#ifndef WITH_JAVA_DIRECT_BUFFERS
+//        this.xSize = xSize;
+//        this.ySize = ySize;
+//        this.rowStride = xSize * BYTES_PER_PIXEL;
 //        this.data = data;
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-            Logger.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", 
-                "NOT IMPLEMENTED! CHECK VSDK CODE!");
+        initNoFill(xSize, ySize);
+        this.data.rewind();
+        this.data.put(data);
+        this.data.rewind();
 //#endif
 
     }
