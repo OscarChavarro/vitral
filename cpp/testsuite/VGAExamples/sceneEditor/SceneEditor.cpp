@@ -13,18 +13,44 @@
 #include "programs/sceneEditor/SceneEditor.h"
 
 static const int SUPPORTED_DEPTHS[] = {4, 8, 16, 24};
-// Direct colour first: the raytraced views need more colours than a palette has.
-static const int PREFERRED_MODES[] = {G1024x768x64K, G800x600x64K, G1024x768x16M, G800x600x16M, G640x480x64K,
-                                      G640x480x16M, G1024x768x256, G800x600x256, G640x480x256, G640x480x16};
+// Only used without direct colour modes: the raytraced views need more colours than a palette has.
+static const int PALETTE_MODES[] = {G1024x768x256, G800x600x256, G640x480x256, G640x480x16};
 static const char *const DEFAULT_LANGUAGE = "english";
 
 SceneEditor::SceneEditor() : modes(false) {
     modes.keepDepths(SUPPORTED_DEPTHS, (int)(sizeof(SUPPORTED_DEPTHS) / sizeof(SUPPORTED_DEPTHS[0])));
 }
 
+// The available 16 or 24 bits per pixel mode with the most pixels; at the same size, the one with more colours.
+int
+SceneEditor::largestDirectColourMode() const {
+    int best = -1;
+    int bestBits = 0;
+    unsigned bestArea = 0;
+    for (int i = 0; i < modes.count(); i++) {
+        int mode = modes.at(i);
+        int bits = VgaModes::bitsPerPixel(mode);
+        const vga_modeinfo *info = vga_getmodeinfo(mode);
+        if ((bits != 16 && bits != 24) || !info) {
+            continue;
+        }
+        unsigned area = (unsigned)info->width * (unsigned)info->height;
+        if (area > bestArea || (area == bestArea && bits > bestBits)) {
+            best = mode;
+            bestBits = bits;
+            bestArea = area;
+        }
+    }
+    return best;
+}
+
 int
 SceneEditor::initialMode() const {
-    for (int mode : PREFERRED_MODES) {
+    int directColour = largestDirectColourMode();
+    if (directColour >= 0) {
+        return directColour;
+    }
+    for (int mode : PALETTE_MODES) {
         if (modes.indexOf(mode) >= 0) {
             return mode;
         }
@@ -38,6 +64,8 @@ SceneEditor::usage() const {
     printf("LANGUAGE: a GUI definition of etc/gui (english, spanish...)\n");
     printf("MODE: one of the graphics modes with 4, 8, 16 or 24 bits per pixel:\n");
     modes.print("Modes");
+    int fallback = initialMode();
+    printf("\nDefault mode: %s\n", fallback >= 0 ? VgaModes::name(fallback) : "none");
 }
 
 bool

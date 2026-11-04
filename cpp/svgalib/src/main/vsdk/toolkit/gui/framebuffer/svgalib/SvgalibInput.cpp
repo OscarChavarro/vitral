@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <vga.h>
 #include <vgamouse.h>
@@ -5,12 +7,44 @@
 #include "vsdk/toolkit/gui/framebuffer/svgalib/SvgalibInput.h"
 
 static constexpr int ESCAPE = 27;
+static constexpr int NUMBER_TEXT_SIZE = 16;
 
 // The svgalib buttons in the order of Vitral's BUTTON1 to BUTTON3.
 static const int SVGALIB_BUTTONS[3] = {MOUSE_LEFTBUTTON, MOUSE_MIDDLEBUTTON, MOUSE_RIGHTBUTTON};
 
+// The Linux mousedev driver scales absolute pointers, like the ones of a virtual machine, to this screen size.
+static const char *const MOUSEDEV_WIDTH_FILE = "/sys/module/mousedev/parameters/xres";
+static const char *const MOUSEDEV_HEIGHT_FILE = "/sys/module/mousedev/parameters/yres";
+
+static int
+readNumber(const char *path) {
+    FILE *file = fopen(path, "r");
+    if (!file) {
+        return -1;
+    }
+    char text[NUMBER_TEXT_SIZE];
+    int number = fgets(text, sizeof(text), file) ? atoi(text) : -1;
+    fclose(file);
+    return number;
+}
+
+static void
+writeNumber(const char *path, int number) {
+    FILE *file = fopen(path, "w");
+    if (file) {
+        fprintf(file, "%d\n", number);
+        fclose(file);
+    }
+}
+
+static int
+clampTo(int value, int last) {
+    return value < 0 ? 0 : value > last ? last : value;
+}
+
 SvgalibInput::SvgalibInput()
-    : connected(false), attached(false), surface(nullptr), buttons(0), lastX(-1), lastY(-1), queued(0) {}
+    : connected(false), attached(false), surface(nullptr), buttons(0), lastX(-1), lastY(-1), savedScaleWidth(-1),
+      savedScaleHeight(-1), queued(0) {}
 
 SvgalibInput::~SvgalibInput() {
     close();
@@ -47,13 +81,44 @@ SvgalibInput::attach(SvgalibFramebuffer &target) {
     mouse_setscale(1);
     mouse_setxrange(0, width - 1);
     mouse_setyrange(0, height - 1);
-    mouse_setposition(width / 2, height / 2);
+    int startX = width / 2;
+    int startY = height / 2;
+    fitAbsolutePointer(width, height, startX, startY);
+    mouse_setposition(startX, startY);
     buttons = mouse_getbutton();
-    lastX = width / 2;
-    lastY = height / 2;
+    lastX = startX;
+    lastY = startY;
     cursor.moveTo(lastX, lastY);
     target.setPointer(&cursor);
     cursor.show();
+}
+
+// Makes a whole movement of an absolute pointer cover the screen. mousedev reports the first position as a movement
+// from the center of the scale it had when vga_init() opened the mouse, with its vertical axis going up: starting from
+// that point instead of the center of the screen leaves the drawn pointer exactly under the real one.
+void
+SvgalibInput::fitAbsolutePointer(int width, int height, int &startX, int &startY) {
+    int scaleWidth = readNumber(MOUSEDEV_WIDTH_FILE);
+    int scaleHeight = readNumber(MOUSEDEV_HEIGHT_FILE);
+    if (scaleWidth <= 0 || scaleHeight <= 0) {
+        return;
+    }
+    savedScaleWidth = scaleWidth;
+    savedScaleHeight = scaleHeight;
+    writeNumber(MOUSEDEV_WIDTH_FILE, width);
+    writeNumber(MOUSEDEV_HEIGHT_FILE, height);
+    startX = clampTo(scaleWidth / 2, width - 1);
+    startY = clampTo(height - scaleHeight / 2, height - 1);
+}
+
+void
+SvgalibInput::restoreAbsolutePointer() {
+    if (savedScaleWidth > 0) {
+        writeNumber(MOUSEDEV_WIDTH_FILE, savedScaleWidth);
+        writeNumber(MOUSEDEV_HEIGHT_FILE, savedScaleHeight);
+        savedScaleWidth = -1;
+        savedScaleHeight = -1;
+    }
 }
 
 void
@@ -65,6 +130,7 @@ SvgalibInput::detach() {
     surface->setPointer(nullptr);
     surface = nullptr;
     attached = false;
+    restoreAbsolutePointer();
 }
 
 void

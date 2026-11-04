@@ -44,14 +44,14 @@ public final class DialogPersistence {
     private static WidgetDialog.Element element(JsonNode node, String path, Set<String> ids) {
         String kind = required(node, "kind", path);
         if (!Set.of("column", "row", "textInput", "button", "tree", "action",
-                    "fileChooser", "fileFilter").contains(kind))
+                    "fileChooser", "fileFilter", "slider", "label", "checkbox").contains(kind))
             throw new IllegalArgumentException(path + ": unsupported kind " + kind);
         String id = optional(node, "id");
         if (id != null && !ids.add(id))
             throw new IllegalArgumentException(path + ": duplicate element id " + id);
         String binding = optional(node, "binding");
         String action = optional(node, "action");
-        if (Set.of("textInput", "tree", "fileFilter").contains(kind) && binding == null)
+        if (Set.of("textInput", "tree", "fileFilter", "slider", "label", "checkbox").contains(kind) && binding == null)
             throw new IllegalArgumentException(path + ": missing binding");
         if (Set.of("button", "action").contains(kind) && action == null)
             throw new IllegalArgumentException(path + ": missing action");

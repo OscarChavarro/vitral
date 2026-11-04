@@ -19,9 +19,10 @@ public:
     // Uses the mouse that vga_init() opened when mouse support was requested before it.
     void open();
     void close();
-    // Fits the mouse to a newly attached framebuffer, centers the pointer and shows it.
+    // Fits the mouse to a newly attached framebuffer, also the scale of the absolute pointers of Linux, places the
+    // pointer and shows it.
     void attach(SvgalibFramebuffer &surface);
-    // Removes the pointer before the mode changes.
+    // Removes the pointer before the mode changes, and puts that scale back.
     void detach();
 
     bool waitEvent(FramebufferEvent &event) override;
@@ -37,9 +38,13 @@ private:
     int buttons;
     int lastX;
     int lastY;
+    int savedScaleWidth;
+    int savedScaleHeight;
     FramebufferEvent queue[QUEUE_SIZE];
     int queued;
 
+    void fitAbsolutePointer(int width, int height, int &startX, int &startY);
+    void restoreAbsolutePointer();
     bool readKey(KeyEvent &event);
     void readMouse();
     void push(const FramebufferEvent &event);

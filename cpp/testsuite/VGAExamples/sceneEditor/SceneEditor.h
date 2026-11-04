@@ -20,6 +20,7 @@ private:
 
     SceneEditor();
     int run(int argc, char *argv[]);
+    int largestDirectColourMode() const;
     int initialMode() const;
     void usage() const;
     static bool isKnownLanguage(const char *language);
