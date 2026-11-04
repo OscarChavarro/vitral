@@ -577,7 +577,7 @@ class RotateGizmoTest
         // Assert
         assertThat(faceOn).hasSize(1);
         assertThat(faceOn.get(0)).hasSize(2 * (RotateGizmo.RING_SEGMENTS + 1));
-        for ( java.util.ArrayList<Vector3Dd[]> arcs : new java.util.ArrayList[] {faceOn, edgeOn} ) {
+        for ( java.util.ArrayList<Vector3Dd[]> arcs : java.util.List.of(faceOn, edgeOn) ) {
             for ( Vector3Dd[] strip : arcs ) {
                 for ( Vector3Dd v : strip ) {
                     assertThat(Double.isNaN(v.x()) || Double.isNaN(v.y()) || Double.isNaN(v.z())).isFalse();

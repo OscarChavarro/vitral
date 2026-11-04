@@ -40,7 +40,7 @@ public:
     void addText(int tab, const java::String &text);
 
     void selectTab(int tab);
-    int getSelectedTab() const { return selected; }
+    int getSelectedTab() const { return selectedTab; }
 
     // A width that holds a page of the given number of characters and its scroll bar.
     static int preferredWidth(const Framebuffer &surface, const FramebufferTheme &theme, int columns);
@@ -100,7 +100,7 @@ private:
     int pageHeight;
     int contentHeight;
     int barWidth;
-    int selected;
+    int selectedTab;
     int pressed;
     bool armed;
     int hovered;
@@ -120,7 +120,7 @@ private:
     void drawBar();
     int tabAt(int x, int y) const;
     int entryAt(int x, int y) const;
-    Tab *page() const { return selected >= 0 && selected < (int)tabs.size() ? tabs[selected] : nullptr; }
+    Tab *page() const { return selectedTab >= 0 && selectedTab < (int)tabs.size() ? tabs[selectedTab] : nullptr; }
 };
 
 #endif

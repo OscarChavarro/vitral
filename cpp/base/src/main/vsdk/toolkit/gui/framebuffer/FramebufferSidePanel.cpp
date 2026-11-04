@@ -10,7 +10,7 @@ static constexpr int WHEEL_BUTTONS = 2;
 FramebufferSidePanel::FramebufferSidePanel()
     : tabs(8), surface(nullptr), theme(FramebufferTheme::monochrome()), panelX(0), panelY(0), panelWidth(0),
       panelHeight(0), pageX(0), pageY(0), pageWidth(0), pageHeight(0), contentHeight(0), barWidth(16),
-      selected(-1), pressed(-1), armed(false), hovered(-1), chosen(-1), tabChanged(false), dragOffset(-1) {}
+      selectedTab(-1), pressed(-1), armed(false), hovered(-1), chosen(-1), tabChanged(false), dragOffset(-1) {}
 
 FramebufferSidePanel::~FramebufferSidePanel() {
     clear();
@@ -23,7 +23,7 @@ FramebufferSidePanel::clear() {
         delete tabs[i];
     }
     tabs.clear();
-    selected = pressed = hovered = -1;
+    selectedTab = pressed = hovered = -1;
     armed = false;
     chosen = -1;
     dragOffset = -1;
@@ -35,8 +35,8 @@ FramebufferSidePanel::addTab(const java::String &label) {
     Tab *tab = new Tab();
     tab->label = label;
     tabs.add(tab);
-    if (selected < 0) {
-        selected = 0;
+    if (selectedTab < 0) {
+        selectedTab = 0;
     }
     return (int)tabs.size() - 1;
 }
@@ -51,7 +51,7 @@ FramebufferSidePanel::clearPage(int tab) {
         delete entries[i];
     }
     entries.clear();
-    if (tab == selected) {
+    if (tab == selectedTab) {
         pressed = hovered = -1;
         armed = false;
     }
@@ -94,10 +94,10 @@ FramebufferSidePanel::addText(int tab, const java::String &text) {
 
 void
 FramebufferSidePanel::selectTab(int tab) {
-    if (tab < 0 || tab >= (int)tabs.size() || tab == selected) {
+    if (tab < 0 || tab >= (int)tabs.size() || tab == selectedTab) {
         return;
     }
-    selected = tab;
+    selectedTab = tab;
     pressed = hovered = -1;
     armed = false;
     dragOffset = -1;
@@ -268,7 +268,7 @@ void
 FramebufferSidePanel::drawTab(int index) {
     const Tab *tab = tabs[index];
     FramebufferPainter painter(*surface, theme);
-    bool current = index == selected;
+    bool current = index == selectedTab;
     surface->beginDrawing();
     surface->fillRectangle(tab->x, tab->y, tab->width, tab->height, current ? theme.armedFace : theme.face);
     painter.bevel(tab->x, tab->y, tab->width, tab->height, !current, false);
@@ -452,7 +452,7 @@ FramebufferSidePanel::mouseEvent(const FramebufferEvent &event) {
         }
         int clickedTab = tabAt(px, py);
         if (clickedTab >= 0) {
-            if (clickedTab != selected) {
+            if (clickedTab != selectedTab) {
                 selectTab(clickedTab);
                 tabChanged = true;
                 draw();

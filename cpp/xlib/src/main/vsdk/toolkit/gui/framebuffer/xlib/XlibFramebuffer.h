@@ -89,7 +89,7 @@ private:
     unsigned long greenMask;
     unsigned long blueMask;
     Pixmap back;
-    GC gc;
+    GC graphicsContext;
     XFontStruct *font;
     char fontName[64];
     int advance;

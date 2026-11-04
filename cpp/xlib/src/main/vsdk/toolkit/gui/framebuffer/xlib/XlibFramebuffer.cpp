@@ -10,7 +10,7 @@ const char *const XlibFramebuffer::DEFAULT_FONTS[] = {"10x20", "9x15", "8x13", "
 
 XlibFramebuffer::XlibFramebuffer()
     : display(nullptr), screen(0), window(0), visual(nullptr), colormap(0), depth(0), depthBits(0), trueColor(false),
-      redMask(0), greenMask(0), blueMask(0), back(0), gc(nullptr), font(nullptr), fontName{}, advance(8),
+      redMask(0), greenMask(0), blueMask(0), back(0), graphicsContext(nullptr), font(nullptr), fontName{}, advance(8),
       lineHeight(16), surfaceWidth(0), surfaceHeight(0), clipLeft(0), clipTop(0), clipRight(0), clipBottom(0),
       foreground(0), drawing(0), mapped(false), mirror(nullptr), mirrorValid(false), pendingLeft(0), pendingTop(0),
       pendingRight(0), pendingBottom(0), damageLeft(0), damageTop(0), damageRight(0), damageBottom(0) {}
@@ -179,9 +179,9 @@ XlibFramebuffer::open(const char *displayName, const char *geometry, const char 
                         PropModeReplace, (const unsigned char *)states, 2);
     }
 
-    gc = XCreateGC(display, window, 0, nullptr);
-    XSetFont(display, gc, font->fid);
-    XSetGraphicsExposures(display, gc, False);
+    graphicsContext = XCreateGC(display, window, 0, nullptr);
+    XSetFont(display, graphicsContext, font->fid);
+    XSetGraphicsExposures(display, graphicsContext, False);
     createBackBuffer(w, h);
     XMapWindow(display, window);
     XFlush(display);
@@ -215,9 +215,9 @@ XlibFramebuffer::close() {
         XFreePixmap(display, back);
         back = 0;
     }
-    if (gc) {
-        XFreeGC(display, gc);
-        gc = nullptr;
+    if (graphicsContext) {
+        XFreeGC(display, graphicsContext);
+        graphicsContext = nullptr;
     }
     if (font) {
         XFreeFont(display, font);
@@ -237,14 +237,14 @@ void
 XlibFramebuffer::createBackBuffer(int w, int h) {
     Pixmap old = back;
     back = XCreatePixmap(display, window, (unsigned)w, (unsigned)h, (unsigned)depth);
-    XSetClipMask(display, gc, None);
-    XSetForeground(display, gc, BlackPixel(display, screen));
+    XSetClipMask(display, graphicsContext, None);
+    XSetForeground(display, graphicsContext, BlackPixel(display, screen));
     foreground = BlackPixel(display, screen);
-    XFillRectangle(display, back, gc, 0, 0, (unsigned)w, (unsigned)h);
+    XFillRectangle(display, back, graphicsContext, 0, 0, (unsigned)w, (unsigned)h);
     if (old) {
         int copyWidth = w < surfaceWidth ? w : surfaceWidth;
         int copyHeight = h < surfaceHeight ? h : surfaceHeight;
-        XCopyArea(display, old, back, gc, 0, 0, (unsigned)copyWidth, (unsigned)copyHeight, 0, 0);
+        XCopyArea(display, old, back, graphicsContext, 0, 0, (unsigned)copyWidth, (unsigned)copyHeight, 0, 0);
         XFreePixmap(display, old);
     }
     if (mirror) {
@@ -309,8 +309,8 @@ XlibFramebuffer::flush() {
     int right = damageRight > surfaceWidth ? surfaceWidth : damageRight;
     int bottom = damageBottom > surfaceHeight ? surfaceHeight : damageBottom;
     if (right > left && bottom > top) {
-        XSetClipMask(display, gc, None);
-        XCopyArea(display, back, window, gc, left, top, (unsigned)(right - left), (unsigned)(bottom - top), left,
+        XSetClipMask(display, graphicsContext, None);
+        XCopyArea(display, back, window, graphicsContext, left, top, (unsigned)(right - left), (unsigned)(bottom - top), left,
                   top);
         setClip(clipLeft, clipTop, clipRight - clipLeft, clipBottom - clipTop);
     }
@@ -425,7 +425,7 @@ XlibFramebuffer::setForeground(uint32_t color) {
     unsigned long value = native(color);
     if (value != foreground) {
         foreground = value;
-        XSetForeground(display, gc, value);
+        XSetForeground(display, graphicsContext, value);
     }
 }
 
@@ -443,8 +443,8 @@ XlibFramebuffer::sendPending() {
         pendingRight = pendingLeft = 0;
         return;
     }
-    XSetClipMask(display, gc, None);
-    XPutImage(display, back, gc, mirror, pendingLeft, pendingTop, pendingLeft, pendingTop,
+    XSetClipMask(display, graphicsContext, None);
+    XPutImage(display, back, graphicsContext, mirror, pendingLeft, pendingTop, pendingLeft, pendingTop,
               (unsigned)(pendingRight - pendingLeft), (unsigned)(pendingBottom - pendingTop));
     setClip(clipLeft, clipTop, clipRight - clipLeft, clipBottom - clipTop);
     damage(pendingLeft, pendingTop, pendingRight - pendingLeft, pendingBottom - pendingTop);
@@ -483,7 +483,7 @@ XlibFramebuffer::setClip(int x, int y, int w, int h) {
     rectangle.y = (short)clipTop;
     rectangle.width = (unsigned short)(clipRight > clipLeft ? clipRight - clipLeft : 0);
     rectangle.height = (unsigned short)(clipBottom > clipTop ? clipBottom - clipTop : 0);
-    XSetClipRectangles(display, gc, 0, 0, &rectangle, 1, YXBanded);
+    XSetClipRectangles(display, graphicsContext, 0, 0, &rectangle, 1, YXBanded);
 }
 
 void
@@ -498,7 +498,7 @@ XlibFramebuffer::pixel(int x, int y, uint32_t color) {
     }
     beforeDrawing();
     setForeground(color);
-    XDrawPoint(display, back, gc, x, y);
+    XDrawPoint(display, back, graphicsContext, x, y);
     damage(x, y, 1, 1);
 }
 
@@ -533,7 +533,7 @@ void
 XlibFramebuffer::line(int x0, int y0, int x1, int y1, uint32_t color) {
     beforeDrawing();
     setForeground(color);
-    XDrawLine(display, back, gc, x0, y0, x1, y1);
+    XDrawLine(display, back, graphicsContext, x0, y0, x1, y1);
     int left = x0 < x1 ? x0 : x1;
     int top = y0 < y1 ? y0 : y1;
     damage(left, top, (x0 < x1 ? x1 - x0 : x0 - x1) + 1, (y0 < y1 ? y1 - y0 : y0 - y1) + 1);
@@ -546,7 +546,7 @@ XlibFramebuffer::fillRectangle(int x, int y, int w, int h, uint32_t color) {
     }
     beforeDrawing();
     setForeground(color);
-    XFillRectangle(display, back, gc, x, y, (unsigned)w, (unsigned)h);
+    XFillRectangle(display, back, graphicsContext, x, y, (unsigned)w, (unsigned)h);
     damage(x, y, w, h);
 }
 
@@ -557,7 +557,7 @@ XlibFramebuffer::rectangle(int x, int y, int w, int h, uint32_t color) {
     }
     beforeDrawing();
     setForeground(color);
-    XDrawRectangle(display, back, gc, x, y, (unsigned)(w - 1), (unsigned)(h - 1));
+    XDrawRectangle(display, back, graphicsContext, x, y, (unsigned)(w - 1), (unsigned)(h - 1));
     damage(x, y, w, h);
 }
 
@@ -584,10 +584,10 @@ XlibFramebuffer::fillPolygon(const int *xy, int count, uint32_t color) {
     beforeDrawing();
     setForeground(color);
     if (count >= 3) {
-        XFillPolygon(display, back, gc, vertices, count, Complex, CoordModeOrigin);
+        XFillPolygon(display, back, graphicsContext, vertices, count, Complex, CoordModeOrigin);
     }
     // X fills leave out the right and bottom edges; the contract includes them.
-    XDrawLines(display, back, gc, vertices, count + 1, CoordModeOrigin);
+    XDrawLines(display, back, graphicsContext, vertices, count + 1, CoordModeOrigin);
     if (vertices != points) {
         delete[] vertices;
     }
@@ -621,7 +621,7 @@ XlibFramebuffer::putImage(int x, int y, int w, int h, const uint32_t *rgb) {
         }
     }
     beforeDrawing();
-    XPutImage(display, back, gc, image, 0, 0, x, y, (unsigned)w, (unsigned)h);
+    XPutImage(display, back, graphicsContext, image, 0, 0, x, y, (unsigned)w, (unsigned)h);
     XDestroyImage(image);
     damage(x, y, w, h);
 }
@@ -698,6 +698,6 @@ XlibFramebuffer::text(int x, int y, const char *text, uint32_t color) {
     }
     beforeDrawing();
     setForeground(color);
-    XDrawString(display, back, gc, x, y + font->ascent, buffer, count);
+    XDrawString(display, back, graphicsContext, x, y + font->ascent, buffer, count);
     damage(x, y, count * advance, lineHeight);
 }
