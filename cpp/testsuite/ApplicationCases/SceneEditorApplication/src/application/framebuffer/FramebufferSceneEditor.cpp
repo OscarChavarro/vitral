@@ -513,15 +513,19 @@ void FramebufferSceneEditor::drawStatus()
 
 /**
 Draws the viewports if a repaint is pending, unless a menu is posted over
-them (it would be overwritten): then the repaint waits until it closes.
+them (it would be overwritten): then the repaint waits until it closes. A
+requested viewport menu is posted after that: it does not need a repaint,
+because it saves the area it covers and puts it back when it closes.
 */
 void FramebufferSceneEditor::drawViewports()
 {
-    if ( !repaintPending || menuBar.isActive() ) {
+    if ( menuBar.isActive() ) {
         return;
     }
-    repaintPending = false;
-    renderer->display(surface, areaX, areaY, areaWidth, areaHeight);
+    if ( repaintPending ) {
+        repaintPending = false;
+        renderer->display(surface, areaX, areaY, areaWidth, areaHeight);
+    }
     if ( popupPending ) {
         popupPending = false;
         postViewportMenu();
@@ -530,6 +534,10 @@ void FramebufferSceneEditor::drawViewports()
 
 void FramebufferSceneEditor::showStatus(const java::String& text)
 {
+    // The hover over buttons repeats the same text with every movement.
+    if ( text.equals(status) ) {
+        return;
+    }
     status = text;
     drawStatus();
 }
@@ -620,6 +628,10 @@ int FramebufferSceneEditor::run()
     FramebufferEvent event;
     while ( running && input.waitEvent(event) ) {
         handle(event);
+        // Quitting does not draw the pending repaint.
+        if ( !running ) {
+            break;
+        }
         if ( !menuBar.isActive() ) {
             viewportMenuPosted = false;
             updateModifyPage(false);
@@ -638,7 +650,13 @@ void FramebufferSceneEditor::handle(const FramebufferEvent& event)
         redrawAll();
         return;
       case FramebufferEvent::Type::KeyPressed:
-        if ( !fullScreen && menuBar.keyPressed(event.key) ) {
+        // Escape quits at once in this application, also with a menu posted.
+        if ( menuBar.isActive() && event.key.keycode == KeyEvent::KEY_ESC ) {
+            running = false;
+            return;
+        }
+        if ( (menuBar.isActive() || !fullScreen) &&
+             menuBar.keyPressed(event.key) ) {
             chosen(menuBar.takeChosen());
             return;
         }
@@ -1070,7 +1088,8 @@ void FramebufferSceneEditor::fullScreenGuiToggleRequested()
 
 /**
 The title of a viewport was clicked: its menu is posted under the pointer
-once the viewports are drawn again.
+when the event ends. The viewports are drawn again only if its command
+changes them.
 */
 void FramebufferSceneEditor::projectionLocationMenuRequested(
     Viewport* viewport, int x, int y)
@@ -1080,7 +1099,6 @@ void FramebufferSceneEditor::projectionLocationMenuRequested(
     popupX = areaX + drawingArea->scaleXToCanvas(x);
     popupY = areaY + drawingArea->scaleYToCanvas(y);
     popupPending = true;
-    repaintPending = true;
 }
 
 //= FramebufferDialogListener =============================================

@@ -15,6 +15,7 @@ public:
     volatile uint8_t *frameBuffer() const override { return frame; }
     uint32_t bytesPerLine() const override { return pitch; }
     void writePixel(unsigned x, unsigned y, unsigned sourceBytesPerPixel, uint32_t color) override;
+    void writeSpan(unsigned x, unsigned y, unsigned bytesPerPixel, const uint8_t *pixels, unsigned count) override;
 
 private:
     static constexpr uint16_t INDEX_PORT = 0x1CE;

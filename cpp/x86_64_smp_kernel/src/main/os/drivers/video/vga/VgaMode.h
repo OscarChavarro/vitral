@@ -91,6 +91,7 @@ public:
 
     static void blit(Id id, const uint8_t *pixels);
     static void plot(Id id, int x, int y, uint32_t color);
+    static void plotSpan(Id id, int x, int y, const uint8_t *pixels, int count);
 
     static bool available(Id id);
 

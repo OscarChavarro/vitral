@@ -1,29 +1,40 @@
 #ifndef VITRAL_SVGALIB_FRAMEBUFFER_H
 #define VITRAL_SVGALIB_FRAMEBUFFER_H
 
+#include <stddef.h>
 #include <stdint.h>
+#include "lib/mouseCursor/MouseCursor.h"
 #include "vsdk/toolkit/gui/framebuffer/Framebuffer.h"
 
-class MouseCursor;
-
-// Framebuffer on the current svgalib graphics mode, drawn with vga_setcolor() and vga_drawpixel() and with the VGA
-// text font of vga_gettextfont(). Palette modes get exact colors in palette entries allocated on first use: indexes
-// 1 to 14 in 16 colour modes (0 and 15 stay black and white) and 16 to 255 in 256 colour modes (the 16 standard
-// colours stay); when the entries run out the nearest known colour is used. 2 colour modes show black and white.
+// Framebuffer on the current svgalib graphics mode, with the VGA text font of vga_gettextfont(). Everything is drawn on
+// a back buffer in memory, which also answers the reads of native pixels: the damaged area reaches the screen with
+// vga_drawscansegment() when the outermost endDrawing() ends, as a whole, so neither a partial frame nor a read of
+// video memory ever happens. The mouse pointer is not part of the back buffer: it is composed over the rows that go to
+// the screen, so saved areas never contain it and moving it only sends the rows it touches.
+// Palette modes get exact colors in palette entries allocated on first use: indexes 1 to 14 in 16 colour modes (0 and
+// 15 stay black and white) and 16 to 255 in 256 colour modes (the 16 standard colours stay); when the entries run out
+// the nearest known colour is used. 2 colour modes show black and white.
 class SvgalibFramebuffer : public Framebuffer {
 public:
     static constexpr int FONT_GLYPHS = 256;
     static constexpr int FONT_SLOT = 32;
-    static constexpr int SPAN_PIXELS = 256;
 
     SvgalibFramebuffer();
-    // Describes the mode set by the last vga_setmode() and starts a new palette allocation. Returns false for text
-    // modes and for depths other than 1, 4, 8, 16 and 24 bits per pixel.
+    ~SvgalibFramebuffer() override;
+    SvgalibFramebuffer(const SvgalibFramebuffer &) = delete;
+    SvgalibFramebuffer &operator=(const SvgalibFramebuffer &) = delete;
+    // Describes the mode set by the last vga_setmode(), starts a new palette allocation and a black back buffer.
+    // Returns false for text modes, for depths other than 1, 4, 8, 16 and 24 bits per pixel and without memory for the
+    // buffer.
     bool attach();
     // The value that vga_setcolor() takes for a 0xRRGGBB colour.
     uint32_t native(uint32_t color);
-    // A pointer hidden while drawing, or null.
-    void setPointer(MouseCursor *cursor);
+    // The mouse pointer, with its hot spot at a surface position.
+    void showPointer(int x, int y, const MouseCursor::Shape &shape = MouseCursor::ARROW);
+    void movePointer(int x, int y);
+    void hidePointer();
+    // Sends the damaged area to the screen.
+    void flush();
 
     int width() const override { return screenWidth; }
     int height() const override { return screenHeight; }
@@ -58,12 +69,32 @@ private:
     uint32_t palette[256];
     int nextEntry;
     int lastEntry;
-    MouseCursor *pointer;
     int drawing;
+    int pixelBytes;
+    size_t stride;
+    unsigned char *back;
+    // One row: what goes to the screen when the pointer is over it.
+    unsigned char *composed;
+    int damageLeft;
+    int damageTop;
+    int damageRight;
+    int damageBottom;
+    const MouseCursor::Shape *pointerShape;
+    bool pointerVisible;
+    int pointerLeft;
+    int pointerTop;
+    uint32_t pointerFill;
+    uint32_t pointerOutline;
 
     bool usable(int entry) const { return entry < nextEntry || entry > lastEntry; }
     bool inside(int x, int y) const { return x >= clipLeft && y >= clipTop && x < clipRight && y < clipBottom; }
+    unsigned char *at(int x, int y) const { return back + (size_t)y * stride + (size_t)x * (size_t)pixelBytes; }
+    void store(unsigned char *target, uint32_t value) const;
+    void damage(int x, int y, int width, int height);
+    void present(int left, int top, int right, int bottom);
+    void presentPointerArea(int left, int top);
     void span(int x0, int x1, int y, uint32_t value);
+    void releaseBuffers();
     void loadFont();
     static uint32_t distance(uint32_t a, uint32_t b);
     static unsigned decode(const char *&text);

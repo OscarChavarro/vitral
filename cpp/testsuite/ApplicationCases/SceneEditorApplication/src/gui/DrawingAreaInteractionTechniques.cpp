@@ -320,6 +320,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
     }
     // Everything the gesture changes, up to its release, is one operation
     editRecorder->beginGesture(sceneOperationName(mode));
+    bool alreadySelected = viewportSet->isSelected(mouseView);
     viewportSetTechniques->processMousePressedEvent(
         drawingArea->toSurfaceEvent(event));
     activateViewport(mouseView);
@@ -327,7 +328,9 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
         drawingArea->toSurfaceEvent(event));
     if ( viewportTitleGesture ) {
         requestCursorForPointer(event, PointerCursor::VIEWPORT_TITLE);
-        listener->repaintRequested();
+        if ( !alreadySelected ) {
+            listener->repaintRequested();
+        }
         return;
     }
 
@@ -435,6 +438,8 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     Viewport* mouseView = getInteractionViewportAtPointer(event);
     bool confinedGesture = isTranslationGestureConfined();
     InteractionMode mode = drawingArea->getInteractionMode();
+    bool alreadySelected = mouseView == nullptr ||
+        viewportSet->isSelected(mouseView);
 
     if ( mouseView != nullptr && !confinedGesture ) {
         viewportSetTechniques->processMouseReleasedEvent(
@@ -446,7 +451,9 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
         viewportTitleClickConsumed = true;
         updateModeCursor(event);
         editRecorder->endGesture();
-        listener->repaintRequested();
+        if ( !alreadySelected ) {
+            listener->repaintRequested();
+        }
         return;
     }
 

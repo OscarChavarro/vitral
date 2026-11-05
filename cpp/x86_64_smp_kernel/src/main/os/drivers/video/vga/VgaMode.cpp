@@ -468,6 +468,22 @@ VgaMode::blit(Id id, const uint8_t *px) {
 }
 
 void
+VgaMode::plotSpan(Id id, int x, int y, const uint8_t *pixels, int count) {
+    const Info &m = info(id);
+    if (m.layout == Layout::Linear || m.layout == Layout::FramebufferText) {
+        Svga::span(x, y, m.bytes, pixels, count);
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        uint32_t color = 0;
+        for (unsigned b = 0; b < m.bytes; b++) {
+            color |= (uint32_t)pixels[(unsigned)i * m.bytes + b] << (8 * b);
+        }
+        plot(id, x + i, y, color);
+    }
+}
+
+void
 VgaMode::plot(Id id, int x, int y, uint32_t color) {
     const Info &m = info(id);
     volatile uint8_t *vram = (volatile uint8_t *)VRAM;

@@ -1,14 +1,13 @@
 #ifndef VITRAL_SVGALIB_INPUT_H
 #define VITRAL_SVGALIB_INPUT_H
 
-#include "lib/mouseCursor/MouseCursor.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferEvent.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferInput.h"
 
 class SvgalibFramebuffer;
 
 // Keyboard (the terminal bytes of vga_getkey(), with ANSI escape sequences) and svgalib mouse input, translated to
-// Vitral key and mouse events. The mouse pointer is drawn with MouseCursor.
+// Vitral key and mouse events. The mouse pointer is drawn by the SvgalibFramebuffer.
 class SvgalibInput : public FramebufferInput {
 public:
     SvgalibInput();
@@ -34,7 +33,6 @@ private:
     bool connected;
     bool attached;
     SvgalibFramebuffer *surface;
-    MouseCursor cursor;
     int buttons;
     int lastX;
     int lastY;

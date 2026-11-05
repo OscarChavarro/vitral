@@ -1,5 +1,6 @@
+#include <new>
+#include <string.h>
 #include <vga.h>
-#include "lib/mouseCursor/MouseCursor.h"
 #include "vsdk/toolkit/gui/framebuffer/svgalib/SvgalibFramebuffer.h"
 
 // Code page 437 glyphs for U+00A0 to U+00FF; letters it lacks fall back to the letter without its accent.
@@ -22,8 +23,22 @@ static const uint32_t EGA_COLORS[16] = {
 
 SvgalibFramebuffer::SvgalibFramebuffer()
     : screenWidth(0), screenHeight(0), depth(0), clipLeft(0), clipTop(0), clipRight(0), clipBottom(0), font{},
-      glyphRows(0), advance(8), bold(false), palette{}, nextEntry(0), lastEntry(-1), pointer(nullptr),
-      drawing(0) {}
+      glyphRows(0), advance(8), bold(false), palette{}, nextEntry(0), lastEntry(-1), drawing(0), pixelBytes(1),
+      stride(0), back(nullptr), composed(nullptr), damageLeft(0), damageTop(0), damageRight(0), damageBottom(0),
+      pointerShape(&MouseCursor::ARROW), pointerVisible(false), pointerLeft(0), pointerTop(0), pointerFill(0),
+      pointerOutline(0) {}
+
+SvgalibFramebuffer::~SvgalibFramebuffer() {
+    releaseBuffers();
+}
+
+void
+SvgalibFramebuffer::releaseBuffers() {
+    delete[] back;
+    delete[] composed;
+    back = nullptr;
+    composed = nullptr;
+}
 
 bool
 SvgalibFramebuffer::attach() {
@@ -55,8 +70,21 @@ SvgalibFramebuffer::attach() {
     if (depth == 0) {
         return false;
     }
+    releaseBuffers();
     screenWidth = info->width;
     screenHeight = info->height;
+    pixelBytes = depth == 24 ? 3 : depth == 16 ? 2 : 1;
+    stride = (size_t)screenWidth * (size_t)pixelBytes;
+    back = new (std::nothrow) unsigned char[stride * (size_t)screenHeight];
+    composed = new (std::nothrow) unsigned char[stride];
+    if (!back || !composed) {
+        releaseBuffers();
+        return false;
+    }
+    memset(back, 0, stride * (size_t)screenHeight);
+    drawing = 0;
+    damageLeft = damageTop = damageRight = damageBottom = 0;
+    pointerVisible = false;
     resetClip();
     for (int i = 0; i < 256; i++) {
         palette[i] = i < 16 ? EGA_COLORS[i] : 0;
@@ -83,11 +111,6 @@ SvgalibFramebuffer::loadFont() {
     if (glyphRows == 0) {
         glyphRows = 16;
     }
-}
-
-void
-SvgalibFramebuffer::setPointer(MouseCursor *cursor) {
-    pointer = cursor;
 }
 
 uint32_t
@@ -152,15 +175,124 @@ SvgalibFramebuffer::resetClip() {
 
 void
 SvgalibFramebuffer::beginDrawing() {
-    if (drawing++ == 0 && pointer) {
-        pointer->hide();
-    }
+    drawing++;
 }
 
 void
 SvgalibFramebuffer::endDrawing() {
-    if (drawing > 0 && --drawing == 0 && pointer) {
-        pointer->show();
+    if (drawing > 0 && --drawing == 0) {
+        flush();
+    }
+}
+
+void
+SvgalibFramebuffer::damage(int x, int y, int w, int h) {
+    if (w <= 0 || h <= 0) {
+        return;
+    }
+    if (damageRight <= damageLeft || damageBottom <= damageTop) {
+        damageLeft = x;
+        damageTop = y;
+        damageRight = x + w;
+        damageBottom = y + h;
+        return;
+    }
+    damageLeft = x < damageLeft ? x : damageLeft;
+    damageTop = y < damageTop ? y : damageTop;
+    damageRight = x + w > damageRight ? x + w : damageRight;
+    damageBottom = y + h > damageBottom ? y + h : damageBottom;
+}
+
+void
+SvgalibFramebuffer::flush() {
+    present(damageLeft, damageTop, damageRight, damageBottom);
+    damageLeft = damageTop = damageRight = damageBottom = 0;
+}
+
+// Sends an area of the back buffer to the screen, row by row, with the pointer over the rows it touches.
+void
+SvgalibFramebuffer::present(int left, int top, int right, int bottom) {
+    if (!back) {
+        return;
+    }
+    left = left < 0 ? 0 : left;
+    top = top < 0 ? 0 : top;
+    right = right > screenWidth ? screenWidth : right;
+    bottom = bottom > screenHeight ? screenHeight : bottom;
+    if (left >= right || top >= bottom) {
+        return;
+    }
+    int count = right - left;
+    bool crossesPointer =
+        pointerVisible && left < pointerLeft + pointerShape->width && right > pointerLeft;
+    for (int y = top; y < bottom; y++) {
+        unsigned char *row = at(left, y);
+        if (crossesPointer && y >= pointerTop && y < pointerTop + pointerShape->height) {
+            memcpy(composed, row, (size_t)count * (size_t)pixelBytes);
+            const char *cells = pointerShape->rows[y - pointerTop];
+            for (int column = 0; column < pointerShape->width; column++) {
+                int x = pointerLeft + column;
+                if (cells[column] != ' ' && x >= left && x < right) {
+                    store(composed + (size_t)(x - left) * (size_t)pixelBytes,
+                          cells[column] == '#' ? pointerOutline : pointerFill);
+                }
+            }
+            row = composed;
+        }
+        vga_drawscansegment(row, left, y, count * pixelBytes);
+    }
+}
+
+void
+SvgalibFramebuffer::presentPointerArea(int left, int top) {
+    present(left, top, left + pointerShape->width, top + pointerShape->height);
+}
+
+void
+SvgalibFramebuffer::showPointer(int x, int y, const MouseCursor::Shape &shape) {
+    pointerShape = &shape;
+    pointerFill = native(0xFFFFFF);
+    pointerOutline = native(0x000000);
+    pointerLeft = x - shape.hotX;
+    pointerTop = y - shape.hotY;
+    pointerVisible = true;
+    presentPointerArea(pointerLeft, pointerTop);
+}
+
+void
+SvgalibFramebuffer::hidePointer() {
+    if (pointerVisible) {
+        pointerVisible = false;
+        presentPointerArea(pointerLeft, pointerTop);
+    }
+}
+
+// The rows of the old and the new position go out once, so that the pointer neither blinks nor leaves a trail.
+void
+SvgalibFramebuffer::movePointer(int x, int y) {
+    int oldLeft = pointerLeft;
+    int oldTop = pointerTop;
+    pointerLeft = x - pointerShape->hotX;
+    pointerTop = y - pointerShape->hotY;
+    if (!pointerVisible || (oldLeft == pointerLeft && oldTop == pointerTop)) {
+        return;
+    }
+    int w = pointerShape->width;
+    int h = pointerShape->height;
+    if (oldLeft < pointerLeft + w && pointerLeft < oldLeft + w && oldTop < pointerTop + h && pointerTop < oldTop + h) {
+        present(oldLeft < pointerLeft ? oldLeft : pointerLeft, oldTop < pointerTop ? oldTop : pointerTop,
+                (oldLeft > pointerLeft ? oldLeft : pointerLeft) + w, (oldTop > pointerTop ? oldTop : pointerTop) + h);
+    } else {
+        presentPointerArea(oldLeft, oldTop);
+        presentPointerArea(pointerLeft, pointerTop);
+    }
+}
+
+// Writes a native value at its place, least significant byte first as vga_drawscansegment() takes it.
+void
+SvgalibFramebuffer::store(unsigned char *target, uint32_t value) const {
+    for (int b = 0; b < pixelBytes; b++) {
+        target[b] = (unsigned char)(value >> (8 * b));
     }
 }
 
@@ -169,13 +301,21 @@ SvgalibFramebuffer::pixel(int x, int y, uint32_t color) {
     if (!inside(x, y)) {
         return;
     }
-    vga_setcolor((int)native(color));
-    vga_drawpixel(x, y);
+    store(at(x, y), native(color));
+    damage(x, y, 1, 1);
 }
 
 uint32_t
 SvgalibFramebuffer::nativePixel(int x, int y) const {
-    return (uint32_t)vga_getpixel(x, y);
+    if (x < 0 || y < 0 || x >= screenWidth || y >= screenHeight) {
+        return 0;
+    }
+    const unsigned char *source = at(x, y);
+    uint32_t value = 0;
+    for (int b = 0; b < pixelBytes; b++) {
+        value |= (uint32_t)source[b] << (8 * b);
+    }
+    return value;
 }
 
 void
@@ -183,11 +323,11 @@ SvgalibFramebuffer::putNativePixel(int x, int y, uint32_t value) {
     if (x < 0 || y < 0 || x >= screenWidth || y >= screenHeight) {
         return;
     }
-    vga_setcolor((int)value);
-    vga_drawpixel(x, y);
+    store(at(x, y), value);
+    damage(x, y, 1, 1);
 }
 
-// A clipped horizontal run of a native colour, drawn with vga_drawscansegment() a chunk at a time.
+// A clipped horizontal run of a native colour.
 void
 SvgalibFramebuffer::span(int x0, int x1, int y, uint32_t value) {
     if (y < clipTop || y >= clipBottom) {
@@ -203,18 +343,16 @@ SvgalibFramebuffer::span(int x0, int x1, int y, uint32_t value) {
     if (x0 > x1) {
         return;
     }
-    int bytes = depth == 24 ? 3 : depth == 16 ? 2 : 1;
-    unsigned char run[SPAN_PIXELS * 3];
-    int chunk = x1 - x0 + 1 < SPAN_PIXELS ? x1 - x0 + 1 : SPAN_PIXELS;
-    for (int i = 0; i < chunk; i++) {
-        for (int b = 0; b < bytes; b++) {
-            run[i * bytes + b] = (unsigned char)(value >> (8 * b));
+    unsigned char *target = at(x0, y);
+    if (pixelBytes == 1) {
+        memset(target, (int)value, (size_t)(x1 - x0 + 1));
+    } else {
+        for (int x = x0; x <= x1; x++) {
+            store(target, value);
+            target += pixelBytes;
         }
     }
-    for (int x = x0; x <= x1; x += chunk) {
-        int count = x1 - x + 1 < chunk ? x1 - x + 1 : chunk;
-        vga_drawscansegment(run, x, y, count * bytes);
-    }
+    damage(x0, y, x1 - x0 + 1, 1);
 }
 
 void
@@ -224,15 +362,15 @@ SvgalibFramebuffer::line(int x0, int y0, int x1, int y1, uint32_t color) {
         span(x0, x1, y0, value);
         return;
     }
-    vga_setcolor((int)value);
     int dx = x1 >= x0 ? x1 - x0 : x0 - x1;
     int dy = y1 >= y0 ? y1 - y0 : y0 - y1;
+    damage(x0 < x1 ? x0 : x1, y0 < y1 ? y0 : y1, dx + 1, dy + 1);
     int sx = x0 < x1 ? 1 : -1;
     int sy = y0 < y1 ? 1 : -1;
     int error = dx - dy;
     for (;;) {
         if (inside(x0, y0)) {
-            vga_drawpixel(x0, y0);
+            store(at(x0, y0), value);
         }
         if (x0 == x1 && y0 == y1) {
             break;
@@ -319,7 +457,7 @@ SvgalibFramebuffer::textWidth(const char *text, int byteCount) const {
 
 void
 SvgalibFramebuffer::text(int x, int y, const char *text, uint32_t color) {
-    vga_setcolor((int)native(color));
+    uint32_t value = native(color);
     while (*text) {
         const unsigned char *rows = font + glyph(decode(text)) * FONT_SLOT;
         for (int row = 0; row < glyphRows; row++) {
@@ -330,10 +468,11 @@ SvgalibFramebuffer::text(int x, int y, const char *text, uint32_t color) {
             }
             for (int column = 0; column < 9; column++) {
                 if ((bits & (0x100u >> column)) && inside(x + column, y + row)) {
-                    vga_drawpixel(x + column, y + row);
+                    store(at(x + column, y + row), value);
                 }
             }
         }
+        damage(x, y, 9, glyphRows);
         x += advance;
     }
 }

@@ -214,15 +214,8 @@ VirtualConsole::putSpan(unsigned console, int x, int y, const uint8_t *pixels, i
         return;
     }
     Memory::copy(s.pixels + ((size_t)y * info.width + x) * bytes, pixels, (size_t)count * bytes);
-    if (console != activeIndex) {
-        return;
-    }
-    for (int i = 0; i < count; i++) {
-        uint32_t color = 0;
-        for (unsigned b = 0; b < bytes; b++) {
-            color |= (uint32_t)pixels[(size_t)i * bytes + b] << (8 * b);
-        }
-        VgaMode::plot(s.mode, x + i, y, color);
+    if (console == activeIndex) {
+        VgaMode::plotSpan(s.mode, x, y, pixels, count);
     }
 }
 

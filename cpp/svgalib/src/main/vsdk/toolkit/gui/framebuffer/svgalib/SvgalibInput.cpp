@@ -76,7 +76,6 @@ SvgalibInput::attach(SvgalibFramebuffer &target) {
     }
     int width = target.width();
     int height = target.height();
-    cursor.useGraphics(width, height, (int)target.native(0xFFFFFF), (int)target.native(0x000000));
     mouse_update();
     mouse_setscale(1);
     mouse_setxrange(0, width - 1);
@@ -88,9 +87,7 @@ SvgalibInput::attach(SvgalibFramebuffer &target) {
     buttons = mouse_getbutton();
     lastX = startX;
     lastY = startY;
-    cursor.moveTo(lastX, lastY);
-    target.setPointer(&cursor);
-    cursor.show();
+    target.showPointer(lastX, lastY);
 }
 
 // Makes a whole movement of an absolute pointer cover the screen. mousedev reports the first position as a movement
@@ -126,8 +123,7 @@ SvgalibInput::detach() {
     if (!attached) {
         return;
     }
-    cursor.hide();
-    surface->setPointer(nullptr);
+    surface->hidePointer();
     surface = nullptr;
     attached = false;
     restoreAbsolutePointer();
@@ -169,7 +165,7 @@ SvgalibInput::readMouse() {
     if (x != lastX || y != lastY) {
         lastX = x;
         lastY = y;
-        cursor.moveTo(x, y);
+        surface->movePointer(x, y);
         event.type = FramebufferEvent::Type::MouseMoved;
         event.mouse.setModifiers(modifiers);
         push(event);
@@ -332,6 +328,9 @@ SvgalibInput::waitEvent(FramebufferEvent &event) {
         if (readKey(event.key)) {
             event.type = FramebufferEvent::Type::KeyPressed;
             return true;
+        }
+        if (attached) {
+            surface->flush();
         }
         int events = vga_waitevent(VGA_KEYEVENT | (connected ? VGA_MOUSEEVENT : 0), nullptr, nullptr, nullptr,
                                    nullptr);

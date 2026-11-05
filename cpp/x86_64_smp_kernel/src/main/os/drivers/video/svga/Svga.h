@@ -23,6 +23,7 @@ public:
 
     static void blit(const uint8_t *pixels, unsigned width, unsigned height, unsigned bytesPerPixel);
     static void plot(int x, int y, unsigned bytesPerPixel, uint32_t color);
+    static void span(int x, int y, unsigned bytesPerPixel, const uint8_t *pixels, int count);
 
 private:
     static SvgaDriver *driver;

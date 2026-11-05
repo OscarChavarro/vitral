@@ -68,3 +68,11 @@ Svga::plot(int x, int y, unsigned bytesPerPixel, uint32_t color) {
     }
     driver->writePixel((unsigned)x, (unsigned)y, bytesPerPixel, color);
 }
+
+void
+Svga::span(int x, int y, unsigned bytesPerPixel, const uint8_t *pixels, int count) {
+    if (!on) {
+        return;
+    }
+    driver->writeSpan((unsigned)x, (unsigned)y, bytesPerPixel, pixels, (unsigned)count);
+}

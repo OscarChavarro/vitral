@@ -106,7 +106,7 @@ sudo ./sceneEditor [english | spanish] [MODE]
 - **`vitral_raytracer`** defaults to `etc/geometry/mitscenes/balls.ray`, set by the CMake variable
   `VITRAL_RAYTRACER_DEFAULT_SCENE`.
 - **`sceneEditor`** shows the Scene Editor's menu bar. Use the mouse, or F10, the arrows, Enter and Escape.
-  `r` and `R` step through the graphics modes, and Escape quits when no menu is open.
+  `r` and `R` step through the graphics modes, and Escape quits, also with a menu open.
 
 Every program restores text mode when it exits. If a crash leaves the console in graphics mode, run
 `/usr/local/bin/textmode` or `restoretextmode`, or switch to another VT and back.

@@ -2,6 +2,7 @@
 #include "kernel/Paging.h"
 #include "lib/vitralKernel/Ports.h"
 #include "kernel/KernelLog.h"
+#include "lib/vitralKernel/Memory.h"
 
 uint16_t
 BochsVbe::read(uint16_t reg) {
@@ -104,4 +105,10 @@ BochsVbe::writePixel(unsigned x, unsigned y, unsigned sourceBytesPerPixel, uint3
     for (unsigned i = 0; i < sourceBytesPerPixel; i++) {
         dst[i] = (uint8_t)(color >> (8 * i));
     }
+}
+
+void
+BochsVbe::writeSpan(unsigned x, unsigned y, unsigned bytesPerPixel, const uint8_t *pixels, unsigned count) {
+    Memory::copy((void *)(frame + (uint64_t)y * pitch + (uint64_t)x * bytesPerPixel), pixels,
+                 (size_t)count * bytesPerPixel);
 }
