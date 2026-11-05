@@ -73,6 +73,9 @@ Cpu::hasLongMode() { return feature(0x80000001, false, 29); }
 bool
 Cpu::hasGigabytePages() { return feature(0x80000001, false, 26); }
 
+bool
+Cpu::hasPat() { return feature(1, false, 16); }
+
 uint32_t
 Cpu::apicId() {
     if (maxLeaf() >= 0xB) {

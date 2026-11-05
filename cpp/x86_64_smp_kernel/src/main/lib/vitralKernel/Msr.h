@@ -5,6 +5,7 @@
 class Msr {
 public:
     static constexpr uint32_t APIC_BASE = 0x1B;
+    static constexpr uint32_t PAT = 0x277;
     static constexpr uint32_t EFER = 0xC0000080;
 
     static uint64_t read(uint32_t msr) {

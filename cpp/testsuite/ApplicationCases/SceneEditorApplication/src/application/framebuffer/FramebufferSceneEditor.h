@@ -46,7 +46,8 @@ image, messages and the scene selector (`h`), built from its definition in
 `etc/gui/dialogs.json`. Clicking the title of a viewport posts its menu of
 projections and render modes. The drawing area takes the keys and the mouse
 as in every other port (`DrawingAreaInteractionTechniques`), except F10,
-which posts the menus as in Motif. Escape quits, also with a menu posted.
+which posts the menus as in Motif. Escape closes the posted menu; without
+one, it quits.
 
 Moving the pointer and using a menu do not draw the viewports again: menus
 save the area they cover and put it back when they close, and the viewports

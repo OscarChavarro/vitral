@@ -1,6 +1,7 @@
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "drivers/video/vga/VgaText.h"
 #include "kernel/KernelHeap.h"
+#include "lib/vitralKernel/Cpu.h"
 #include "lib/vitralKernel/Memory.h"
 
 VirtualConsole::Screen VirtualConsole::screens[VirtualConsole::COUNT];
@@ -15,6 +16,7 @@ VirtualConsole::Locked::Locked() : flags(0), held(!panicking) {
     }
 }
 VirtualConsole::Locked::~Locked() {
+    Cpu::flushWrites();
     if (held) {
         lock.unlock(flags);
     }
@@ -35,6 +37,7 @@ VirtualConsole::init() {
         s.esc = Esc::None;
         s.mode = VgaMode::Id::Text80x25;
         s.pixels = nullptr;
+        s.overlayRows = nullptr;
     }
     Screen &boot = screens[0];
     for (int y = 0; y < ROWS; y++) {
@@ -76,8 +79,27 @@ VirtualConsole::show(unsigned console) {
     } else {
         VgaMode::loadPalette(s.mode, s.palette);
         VgaMode::blit(s.mode, s.pixels);
+        paintOverlay(s);
     }
     VgaMode::display();
+}
+
+void
+VirtualConsole::paintOverlay(const Screen &s) {
+    if (!s.overlayRows) {
+        return;
+    }
+    const VgaMode::Info &info = VgaMode::info(s.mode);
+    for (int row = 0; row < s.overlayHeight; row++) {
+        int y = s.overlayTop + row;
+        for (int column = 0; column < s.overlayWidth; column++) {
+            int x = s.overlayLeft + column;
+            char c = s.overlayRows[row][column];
+            if (c != ' ' && x >= 0 && y >= 0 && x < info.width && y < info.height) {
+                VgaMode::plot(s.mode, x, y, c == '#' ? s.overlayOutline : s.overlayFill);
+            }
+        }
+    }
 }
 
 void
@@ -110,6 +132,7 @@ VirtualConsole::setMode(unsigned console, VgaMode::Id mode) {
     Locked guard;
     console = resolve(console);
     Screen &s = screens[console];
+    s.overlayRows = nullptr;
     if (info.layout == VgaMode::Layout::Text) {
         if (s.mode != mode) {
             leaveGraphics(console);
@@ -189,8 +212,24 @@ VirtualConsole::putPixel(unsigned console, int x, int y, uint32_t color) {
     }
 }
 
+bool
+VirtualConsole::clipSpan(const VgaMode::Info &info, int &x, int y, const uint8_t *&pixels, int &count) {
+    if (y < 0 || y >= info.height || x >= info.width) {
+        return false;
+    }
+    if (x < 0) {
+        pixels += (size_t)-x * info.pixelBytes();
+        count += x;
+        x = 0;
+    }
+    if (count > info.width - x) {
+        count = info.width - x;
+    }
+    return count > 0;
+}
+
 void
-VirtualConsole::putSpan(unsigned console, int x, int y, const uint8_t *pixels, int count) {
+VirtualConsole::putSpan(unsigned console, int x, int y, const uint8_t *pixels, int length) {
     Locked guard;
     console = resolve(console);
     Screen &s = screens[console];
@@ -199,24 +238,65 @@ VirtualConsole::putSpan(unsigned console, int x, int y, const uint8_t *pixels, i
     }
     const VgaMode::Info &info = VgaMode::info(s.mode);
     unsigned bytes = info.pixelBytes();
-    if (y < 0 || y >= info.height || x >= info.width) {
-        return;
-    }
-    if (x < 0) {
-        pixels += (size_t)-x * bytes;
-        count += x;
-        x = 0;
-    }
-    if (count > info.width - x) {
-        count = info.width - x;
-    }
-    if (count <= 0) {
+    int count = length / (int)bytes;
+    if (!clipSpan(info, x, y, pixels, count)) {
         return;
     }
     Memory::copy(s.pixels + ((size_t)y * info.width + x) * bytes, pixels, (size_t)count * bytes);
     if (console == activeIndex) {
         VgaMode::plotSpan(s.mode, x, y, pixels, count);
     }
+}
+
+uint8_t *
+VirtualConsole::pixels(unsigned console) {
+    Locked guard;
+    return screens[resolve(console)].pixels;
+}
+
+// One lock per row, so that interrupts are not kept waiting for a whole screen.
+void
+VirtualConsole::presentArea(unsigned console, int left, int top, int right, int bottom) {
+    for (int y = top < 0 ? 0 : top; y < bottom; y++) {
+        Locked guard;
+        unsigned index = resolve(console);
+        const Screen &s = screens[index];
+        if (!s.pixels || index != activeIndex) {
+            return;
+        }
+        const VgaMode::Info &info = VgaMode::info(s.mode);
+        int x = left;
+        int count = (right < info.width ? right : info.width) - left;
+        const uint8_t *row = s.pixels + ((size_t)y * info.width + left) * info.pixelBytes();
+        if (!clipSpan(info, x, y, row, count)) {
+            return;
+        }
+        VgaMode::plotSpan(s.mode, x, y, row, count);
+    }
+}
+
+void
+VirtualConsole::overlaySpan(unsigned console, int x, int y, const uint8_t *pixels, int count) {
+    Locked guard;
+    console = resolve(console);
+    const Screen &s = screens[console];
+    if (s.pixels && console == activeIndex && clipSpan(VgaMode::info(s.mode), x, y, pixels, count)) {
+        VgaMode::plotSpan(s.mode, x, y, pixels, count);
+    }
+}
+
+void
+VirtualConsole::setOverlay(unsigned console, int left, int top, int width, int height, const char *const *rows,
+                           uint32_t fill, uint32_t outline) {
+    Locked guard;
+    Screen &s = screens[resolve(console)];
+    s.overlayRows = rows;
+    s.overlayLeft = left;
+    s.overlayTop = top;
+    s.overlayWidth = width;
+    s.overlayHeight = height;
+    s.overlayFill = fill;
+    s.overlayOutline = outline;
 }
 
 uint32_t

@@ -650,11 +650,6 @@ void FramebufferSceneEditor::handle(const FramebufferEvent& event)
         redrawAll();
         return;
       case FramebufferEvent::Type::KeyPressed:
-        // Escape quits at once in this application, also with a menu posted.
-        if ( menuBar.isActive() && event.key.keycode == KeyEvent::KEY_ESC ) {
-            running = false;
-            return;
-        }
         if ( (menuBar.isActive() || !fullScreen) &&
              menuBar.keyPressed(event.key) ) {
             chosen(menuBar.takeChosen());

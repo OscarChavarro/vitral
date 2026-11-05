@@ -142,6 +142,20 @@ vga_setmousesupport(int s);
 struct fd_set;
 struct timeval;
 
+// Only in this kernel, where programs share the memory of the kernel (the Linux svgalib lacks them). The pixels of the
+// console, one or more bytes each and row after row: what is drawn on them reaches the screen with vga_presentarea(),
+// without another copy. The pointer changes with vga_setmode(), and is null in text mode.
+unsigned char *
+vga_getscreenpixels();
+void
+vga_presentarea(int left, int top, int right, int bottom);
+// count pixels on the screen only: the console's pixels stay as they are.
+void
+vga_drawoverlaysegment(const unsigned char *colors, int x, int y, int count);
+// What a console switch paints over the console's pixels: see VirtualConsole::setOverlay(). Null rows for nothing.
+void
+vga_setoverlay(int left, int top, int width, int height, const char *const *rows, unsigned fill, unsigned outline);
+
 #define VGA_MOUSEEVENT 1
 #define VGA_KEYEVENT 2
 

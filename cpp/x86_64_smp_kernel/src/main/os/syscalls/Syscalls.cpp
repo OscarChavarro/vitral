@@ -9,6 +9,7 @@
 #include "kernel/WallClock.h"
 #include "net/Net.h"
 #include "net/Tcp.h"
+#include "lib/vitralKernel/InterruptsOff.h"
 #include "lib/vitralKernel/Memory.h"
 #include "lib/vitralKernel/String.h"
 #include "fs/PollEvent.h"
@@ -81,7 +82,46 @@ Syscalls::cpuLoad(CpuLoadInfo *out, unsigned max) { return (unsigned)call(SYS_CP
 #define ARG(p) ((uint64_t)(uintptr_t)(p))
 
 int64_t
-Syscalls::clockGetTime(int clock, TimeSpec *out) { return call(SYS_CLOCK_GETTIME, (uint64_t)(int64_t)clock, ARG(out)); }
+Syscalls::clockGetTime(int clock, TimeSpec *out) {
+    if (!out) {
+        return -Err::FAULT;
+    }
+    if (clock != CLOCK_WALL && clock != CLOCK_UPTIME) {
+        return -Err::INVAL;
+    }
+    InterruptsOff guard;
+    uint64_t ns = clock == CLOCK_WALL ? WallClock::nanoseconds() : Clock::nanoseconds();
+    out->seconds = (int64_t)(ns / 1000000000ull);
+    out->nanoseconds = (int64_t)(ns % 1000000000ull);
+    return 0;
+}
+
+uint32_t
+Syscalls::getpid() { return Scheduler::current()->pid(); }
+
+uint32_t
+Syscalls::getppid() { return Scheduler::current()->ppid(); }
+
+unsigned
+Syscalls::console() { return Scheduler::currentConsole(); }
+
+int64_t
+Syscalls::time() {
+    InterruptsOff guard;
+    return WallClock::seconds();
+}
+
+uint64_t
+Syscalls::uptime(int64_t *startedAt) {
+    InterruptsOff guard;
+    if (startedAt) {
+        *startedAt = WallClock::startSeconds();
+    }
+    return WallClock::uptimeSeconds();
+}
+
+uint64_t
+Syscalls::uptimeMs() { return Clock::uptimeMs(); }
 
 int64_t
 Syscalls::open(const char *path, int flags) { return call(SYS_OPEN, ARG(path), (uint64_t)(int64_t)flags); }

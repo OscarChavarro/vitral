@@ -121,10 +121,11 @@ private:
     bool processRotationInputGizmoKeyPressedEvent(const KeyEvent& event);
     bool processScaleInputGizmoKeyPressedEvent(const KeyEvent& event);
     bool processTranslationInputGizmoKeyPressedEvent(const KeyEvent& event);
-    void processModeKeyPressedEvent(InteractionMode mode,
+    // These return true when the key changed something on the screen
+    bool processModeKeyPressedEvent(InteractionMode mode,
                                     const KeyEvent& event);
-    void processGlobalKeyPressedEvent(const KeyEvent& event);
-    void processCharacterKeyPressedEvent(const KeyEvent& event);
+    bool processGlobalKeyPressedEvent(const KeyEvent& event);
+    bool processCharacterKeyPressedEvent(const KeyEvent& event);
     void switchMode(InteractionMode mode, const java::String& message);
     void printBodyNames();
     static bool isControlLetterChord(const KeyEvent& event);

@@ -2,7 +2,7 @@
 
 Vitral Kernel is a small, preemptive SMP kernel for x86, written primarily in C++. The same kernel and programs run in x86_64 long mode or i386 protected mode. It runs parallel workloads, including Vitral's ray tracer, to compare their operating-system overhead with conventional operating systems.
 
-All processes run in ring 0 in one address space. Programs are compiled into the image, and system calls use `int 0x80` with a C++ ABI. There is no process isolation, executable loader, `fork`, users, permissions or signal delivery; a program fault can bring down the kernel. The x86_64 build uses an identity-mapped address space; i386 runs without paging.
+All processes run in ring 0 in one address space. Programs are compiled into the image. System calls that can block use `int 0x80` with a C++ ABI, because only its frame lets the scheduler switch processes; the others (console, process ids, time) and the video functions are plain calls. There is no process isolation, executable loader, `fork`, users, permissions or signal delivery; a program fault can bring down the kernel. The x86_64 build uses an identity-mapped address space, with the frame buffer marked write-combining when the CPU has PAT; i386 runs without paging, so its frame buffer stays uncached.
 
 ## Build and run
 

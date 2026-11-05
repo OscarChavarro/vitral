@@ -29,6 +29,15 @@ public:
     static bool hasSse41();
     static bool hasLongMode();
     static bool hasGigabytePages();
+    static bool hasPat();
+
+    // Sends out what the CPU holds of its writes to write-combining memory. The i386 build never maps any, and may run
+    // on CPUs without this instruction.
+    static void flushWrites() {
+#if defined(__x86_64__)
+        asm volatile("sfence" : : : "memory");
+#endif
+    }
 
     static uint32_t apicId();
     static bool topology(unsigned &smtBits, unsigned &coreBits);

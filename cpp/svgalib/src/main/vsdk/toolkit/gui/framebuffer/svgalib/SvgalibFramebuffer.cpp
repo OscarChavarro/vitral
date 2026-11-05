@@ -34,7 +34,9 @@ SvgalibFramebuffer::~SvgalibFramebuffer() {
 
 void
 SvgalibFramebuffer::releaseBuffers() {
+#ifndef VITRAL_KERNEL_VIDEO
     delete[] back;
+#endif
     delete[] composed;
     back = nullptr;
     composed = nullptr;
@@ -75,7 +77,11 @@ SvgalibFramebuffer::attach() {
     screenHeight = info->height;
     pixelBytes = depth == 24 ? 3 : depth == 16 ? 2 : 1;
     stride = (size_t)screenWidth * (size_t)pixelBytes;
+#ifdef VITRAL_KERNEL_VIDEO
+    back = vga_getscreenpixels();
+#else
     back = new (std::nothrow) unsigned char[stride * (size_t)screenHeight];
+#endif
     composed = new (std::nothrow) unsigned char[stride];
     if (!back || !composed) {
         releaseBuffers();
@@ -209,7 +215,19 @@ SvgalibFramebuffer::flush() {
     damageLeft = damageTop = damageRight = damageBottom = 0;
 }
 
-// Sends an area of the back buffer to the screen, row by row, with the pointer over the rows it touches.
+// Rows of the back buffer without the pointer.
+void
+SvgalibFramebuffer::sendRows(int left, int top, int right, int bottom) {
+#ifdef VITRAL_KERNEL_VIDEO
+    vga_presentarea(left, top, right, bottom);
+#else
+    for (int y = top; y < bottom; y++) {
+        vga_drawscansegment(at(left, y), left, y, (right - left) * pixelBytes);
+    }
+#endif
+}
+
+// Sends an area of the back buffer to the screen, with the pointer over the rows it touches.
 void
 SvgalibFramebuffer::present(int left, int top, int right, int bottom) {
     if (!back) {
@@ -222,30 +240,47 @@ SvgalibFramebuffer::present(int left, int top, int right, int bottom) {
     if (left >= right || top >= bottom) {
         return;
     }
-    int count = right - left;
-    bool crossesPointer =
-        pointerVisible && left < pointerLeft + pointerShape->width && right > pointerLeft;
-    for (int y = top; y < bottom; y++) {
-        unsigned char *row = at(left, y);
-        if (crossesPointer && y >= pointerTop && y < pointerTop + pointerShape->height) {
-            memcpy(composed, row, (size_t)count * (size_t)pixelBytes);
-            const char *cells = pointerShape->rows[y - pointerTop];
-            for (int column = 0; column < pointerShape->width; column++) {
-                int x = pointerLeft + column;
-                if (cells[column] != ' ' && x >= left && x < right) {
-                    store(composed + (size_t)(x - left) * (size_t)pixelBytes,
-                          cells[column] == '#' ? pointerOutline : pointerFill);
-                }
-            }
-            row = composed;
-        }
-        vga_drawscansegment(row, left, y, count * pixelBytes);
+    int pointerBottom = pointerTop + pointerShape->height;
+    if (!pointerVisible || left >= pointerLeft + pointerShape->width || right <= pointerLeft || top >= pointerBottom ||
+        bottom <= pointerTop) {
+        sendRows(left, top, right, bottom);
+        return;
     }
+    int first = top > pointerTop ? top : pointerTop;
+    int last = bottom < pointerBottom ? bottom : pointerBottom;
+    sendRows(left, top, right, first);
+    int count = right - left;
+    for (int y = first; y < last; y++) {
+        memcpy(composed, at(left, y), (size_t)count * (size_t)pixelBytes);
+        const char *cells = pointerShape->rows[y - pointerTop];
+        for (int column = 0; column < pointerShape->width; column++) {
+            int x = pointerLeft + column;
+            if (cells[column] != ' ' && x >= left && x < right) {
+                store(composed + (size_t)(x - left) * (size_t)pixelBytes,
+                      cells[column] == '#' ? pointerOutline : pointerFill);
+            }
+        }
+#ifdef VITRAL_KERNEL_VIDEO
+        vga_drawoverlaysegment(composed, left, y, count);
+#else
+        vga_drawscansegment(composed, left, y, count * pixelBytes);
+#endif
+    }
+    sendRows(left, last, right, bottom);
 }
 
 void
 SvgalibFramebuffer::presentPointerArea(int left, int top) {
     present(left, top, left + pointerShape->width, top + pointerShape->height);
+}
+
+// The kernel paints the pointer again when the console comes back to the screen.
+void
+SvgalibFramebuffer::publishPointer() {
+#ifdef VITRAL_KERNEL_VIDEO
+    vga_setoverlay(pointerLeft, pointerTop, pointerShape->width, pointerShape->height,
+                   pointerVisible ? pointerShape->rows : nullptr, pointerFill, pointerOutline);
+#endif
 }
 
 void
@@ -256,6 +291,7 @@ SvgalibFramebuffer::showPointer(int x, int y, const MouseCursor::Shape &shape) {
     pointerLeft = x - shape.hotX;
     pointerTop = y - shape.hotY;
     pointerVisible = true;
+    publishPointer();
     presentPointerArea(pointerLeft, pointerTop);
 }
 
@@ -263,6 +299,7 @@ void
 SvgalibFramebuffer::hidePointer() {
     if (pointerVisible) {
         pointerVisible = false;
+        publishPointer();
         presentPointerArea(pointerLeft, pointerTop);
     }
 }
@@ -277,6 +314,7 @@ SvgalibFramebuffer::movePointer(int x, int y) {
     if (!pointerVisible || (oldLeft == pointerLeft && oldTop == pointerTop)) {
         return;
     }
+    publishPointer();
     int w = pointerShape->width;
     int h = pointerShape->height;
     if (oldLeft < pointerLeft + w && pointerLeft < oldLeft + w && oldTop < pointerTop + h && pointerTop < oldTop + h) {
@@ -325,6 +363,32 @@ SvgalibFramebuffer::putNativePixel(int x, int y, uint32_t value) {
     }
     store(at(x, y), value);
     damage(x, y, 1, 1);
+}
+
+void
+SvgalibFramebuffer::readNativeArea(int x, int y, int w, int h, uint32_t *values) const {
+    for (int row = 0; row < h; row++) {
+        const unsigned char *source = at(x, y + row);
+        for (int column = 0; column < w; column++) {
+            uint32_t value = 0;
+            for (int b = 0; b < pixelBytes; b++) {
+                value |= (uint32_t)*source++ << (8 * b);
+            }
+            *values++ = value;
+        }
+    }
+}
+
+void
+SvgalibFramebuffer::writeNativeArea(int x, int y, int w, int h, const uint32_t *values) {
+    for (int row = 0; row < h; row++) {
+        unsigned char *target = at(x, y + row);
+        for (int column = 0; column < w; column++) {
+            store(target, *values++);
+            target += pixelBytes;
+        }
+    }
+    damage(x, y, w, h);
 }
 
 // A clipped horizontal run of a native colour.

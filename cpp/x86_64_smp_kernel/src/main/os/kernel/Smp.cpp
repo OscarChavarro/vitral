@@ -169,6 +169,7 @@ Smp::startProcessors() {
 
 void
 Smp::apMain() {
+    Paging::initCpu();
     Gdt::load();
     Interrupts::load();
     Fpu::enable();

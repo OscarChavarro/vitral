@@ -8,6 +8,14 @@
 class Paging {
 public:
     static void init(const BootInfo &info);
+    // Makes the write-combining memory type selectable on this CPU. Each CPU has its own PAT register.
+    static void initCpu();
+    // Marks a frame buffer as write-combining, so that the CPU groups its writes into bursts. Only before the other CPUs
+    // start, because it does not tell them to drop their translations. False where it cannot: then it stays uncached,
+    // which works the same but slower.
+    static bool mapWriteCombining(uint64_t base, uint64_t bytes);
+    // The CPUs where initCpu() read back the expected PAT.
+    static unsigned writeCombiningCpus() { return patCpus; }
     static uint64_t root() { return rootAddress; }
     static uint64_t mappedBytes() { return mappedEnd; }
     static uint64_t tableFrames() { return tables; }
@@ -25,6 +33,7 @@ private:
     static uint64_t rootAddress;
     static uint64_t mappedEnd;
     static uint64_t tables;
+    static unsigned patCpus;
 
     static uint64_t *newTable(uint64_t below);
     static bool isMemory(const BootInfo &info, uint64_t start, uint64_t end);

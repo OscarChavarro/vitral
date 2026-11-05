@@ -2,6 +2,7 @@
 #include "drivers/video/bochsVBE/BochsVbe.h"
 #include "drivers/video/bootFramebuffer/BootFramebuffer.h"
 #include "kernel/KernelLog.h"
+#include "kernel/Paging.h"
 #include "kernel/PhysicalMemory.h"
 #include <stddef.h>
 
@@ -22,6 +23,10 @@ Svga::init() {
         kprintf("Video: SVGA disabled, %u MB of RAM (needs %u MB): VGA modes only\n", (uint32_t)ramMb, MIN_RAM_MB);
         delete driver;
         driver = nullptr;
+    }
+    if (driver) {
+        bool combining = Paging::mapWriteCombining((uint64_t)(uintptr_t)driver->frameBuffer(), driver->videoMemoryBytes());
+        kprintf("Video: frame buffer memory type: %s\n", combining ? "write-combining" : "uncached");
     }
 }
 
@@ -50,14 +55,7 @@ Svga::blit(const uint8_t *pixels, unsigned width, unsigned height, unsigned byte
     }
     unsigned row = width * bytesPerPixel;
     for (unsigned y = 0; y < height; y++) {
-        const uint8_t *src = pixels + (size_t)y * row;
-        for (unsigned x = 0; x < width; x++) {
-            uint32_t color = 0;
-            for (unsigned i = 0; i < bytesPerPixel; i++) {
-                color |= (uint32_t)src[x * bytesPerPixel + i] << (8 * i);
-            }
-            driver->writePixel(x, y, bytesPerPixel, color);
-        }
+        driver->writeSpan(0, y, bytesPerPixel, pixels + (size_t)y * row, width);
     }
 }
 

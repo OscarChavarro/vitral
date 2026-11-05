@@ -54,6 +54,9 @@ if(SVGALIB_KERNEL_MODES)
   add_compile_definitions(SVGALIB_KERNEL_MODES)
 endif()
 
+# Lets the framebuffer of the applications draw on the pixels of its console (vga_getscreenpixels()).
+add_compile_definitions(VITRAL_KERNEL_VIDEO)
+
 # Stage 2 of the x86_64 boot path checks the CPU and enters long mode from 32-bit protected mode: those sources are
 # compiled for 32 bits (objs32) and linked into boot.elf. The i386 boot path jumps straight into the kernel.
 set(SOURCES_32BIT src/main/os/kernel/Main32.cpp src/main/os/drivers/video/vga/VgaText.cpp src/main/lib/vitralKernel/Printf32.cpp

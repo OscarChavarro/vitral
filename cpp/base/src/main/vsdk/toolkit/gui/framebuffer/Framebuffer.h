@@ -26,6 +26,9 @@ public:
     // Native pixel values preserve palette indexes when saving and restoring an area. They ignore the clip rectangle.
     virtual uint32_t nativePixel(int x, int y) const = 0;
     virtual void putNativePixel(int x, int y, uint32_t value) = 0;
+    // The same for an area inside the surface, as width * height values row after row. By default, pixel by pixel.
+    virtual void readNativeArea(int x, int y, int width, int height, uint32_t *values) const;
+    virtual void writeNativeArea(int x, int y, int width, int height, const uint32_t *values);
     virtual void line(int x0, int y0, int x1, int y1, uint32_t color) = 0;
     virtual void fillRectangle(int x, int y, int width, int height, uint32_t color) = 0;
     virtual void rectangle(int x, int y, int width, int height, uint32_t color) = 0;

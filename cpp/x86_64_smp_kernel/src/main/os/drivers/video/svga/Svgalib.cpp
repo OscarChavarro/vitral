@@ -401,10 +401,26 @@ vga_drawpixel(int x, int y) {
 // As svgalib: length is in bytes, one per pixel in 2, 16 and 256 colour modes and the pixel size in the others.
 int
 vga_drawscansegment(unsigned char *colors, int x, int y, int length) {
-    unsigned console = Syscalls::console();
-    unsigned bytes = VgaMode::info(VirtualConsole::mode(console)).pixelBytes();
-    VirtualConsole::putSpan(console, x, y, colors, length / (int)bytes);
+    VirtualConsole::putSpan(Syscalls::console(), x, y, colors, length);
     return 0;
+}
+
+void
+vga_setoverlay(int left, int top, int width, int height, const char *const *rows, unsigned fill, unsigned outline) {
+    VirtualConsole::setOverlay(Syscalls::console(), left, top, width, height, rows, fill, outline);
+}
+
+unsigned char *
+vga_getscreenpixels() { return VirtualConsole::pixels(Syscalls::console()); }
+
+void
+vga_presentarea(int left, int top, int right, int bottom) {
+    VirtualConsole::presentArea(Syscalls::console(), left, top, right, bottom);
+}
+
+void
+vga_drawoverlaysegment(const unsigned char *colors, int x, int y, int count) {
+    VirtualConsole::overlaySpan(Syscalls::console(), x, y, colors, count);
 }
 
 int

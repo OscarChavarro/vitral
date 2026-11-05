@@ -9,6 +9,7 @@
 #include "kernel/Smp.h"
 #include "lib/vitralKernel/Memory.h"
 #include "lib/vitralKernel/String.h"
+#include "lib/vitralKernel/InterruptsOff.h"
 #include "lib/vitralKernel/LockGuard.h"
 #include "kernel/ArgList.h"
 
@@ -40,11 +41,14 @@ Scheduler::init(unsigned count) {
 }
 
 Process *
-Scheduler::current() { return cpus[cpuIndex()].current; }
+Scheduler::current() {
+    InterruptsOff guard;
+    return cpus[cpuIndex()].current;
+}
 
 unsigned
 Scheduler::currentConsole() {
-    return cpuTotal ? cpus[cpuIndex()].current->console() : 0;
+    return cpuTotal ? current()->console() : 0;
 }
 
 int

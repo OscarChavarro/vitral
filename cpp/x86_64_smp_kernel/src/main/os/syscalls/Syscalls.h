@@ -98,16 +98,18 @@ public:
         uint8_t online;
     };
 
+    // The trap, for what can block: only its frame lets the scheduler switch to another process. What cannot block is a
+    // plain call to the kernel below, because every program runs in ring 0.
     static int64_t call(uint64_t number, uint64_t a = 0, uint64_t b = 0, uint64_t c = 0, uint64_t d = 0);
     static void yield() { call(SYS_SCHED_YIELD); }
     static void sleep(uint32_t milliseconds);
-    static uint32_t getpid() { return (uint32_t)call(SYS_GETPID); }
-    static uint32_t getppid() { return (uint32_t)call(SYS_GETPPID); }
+    static uint32_t getpid();
+    static uint32_t getppid();
     [[noreturn]] static void exit(int code);
     static int64_t exec(const char *name, const ArgList &args);
     static unsigned listProcesses(ProcessInfo *out, unsigned max);
     static unsigned cpuLoad(CpuLoadInfo *out, unsigned max);
-    static unsigned console() { return (unsigned)call(SYS_GETCONSOLE); }
+    static unsigned console();
     static int64_t consoleOf(uint32_t pid) { return call(SYS_GETCONSOLE, pid); }
     static void switchConsole(unsigned console) { call(SYS_SWITCH_CONSOLE, console); }
     static int64_t spawn(const char *name, const ArgList &args);
@@ -118,9 +120,9 @@ public:
     static int futexWait(int *address, int expected, uint32_t timeoutMs);
     static int futexWake(int *address, int count);
     static int64_t clockGetTime(int clock, TimeSpec *out);
-    static int64_t time() { return call(SYS_TIME, 0); }
-    static uint64_t uptime(int64_t *startedAt = nullptr) { return (uint64_t)call(SYS_UPTIME, (uint64_t)startedAt); }
-    static uint64_t uptimeMs() { return (uint64_t)call(SYS_UPTIME_MS); }
+    static int64_t time();
+    static uint64_t uptime(int64_t *startedAt = nullptr);
+    static uint64_t uptimeMs();
 
     static int64_t open(const char *path, int flags);
     static int64_t close(int fd);

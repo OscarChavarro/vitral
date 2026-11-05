@@ -2,12 +2,25 @@
 #include "kernel/Panic.h"
 #include "kernel/PhysicalMemory.h"
 #include "lib/vitralKernel/Cpu.h"
+#include "lib/vitralKernel/InterruptsOff.h"
 #include "lib/vitralKernel/Memory.h"
+#include "lib/vitralKernel/Msr.h"
 #include "boot/E820Entry.h"
+
+// From entry 7 to entry 0: UC, UC-, WC, WB, UC, UC-, WC, WB. At power-on, entries 1 and 5 are WT.
+static constexpr uint64_t PAT_WITH_WRITE_COMBINING = 0x0007010600070106ull;
+static constexpr uint64_t CR0_CACHE_DISABLE = 1ull << 30;
+static constexpr uint64_t PAGE = 4096;
+
+static void
+reloadRoot() {
+    asm volatile("movq %0, %%cr3" : : "r"(Paging::root()) : "memory");
+}
 
 uint64_t Paging::rootAddress = 0;
 uint64_t Paging::mappedEnd = 0;
 uint64_t Paging::tables = 0;
+unsigned Paging::patCpus = 0;
 
 uint64_t *
 Paging::newTable(uint64_t below) {
@@ -71,5 +84,68 @@ Paging::init(const BootInfo &info) {
             }
         }
     }
-    asm volatile("movq %0, %%cr3" : : "r"(rootAddress) : "memory");
+    reloadRoot();
+    initCpu();
+}
+
+// Intel SDM vol. 3, "Memory Type Changes": the caches stay off and empty while the PAT changes. The result is the
+// power-on table, but for entry 1 (the write-through bit alone), which nothing else uses.
+void
+Paging::initCpu() {
+    if (!Cpu::hasPat()) {
+        return;
+    }
+    InterruptsOff guard;
+    uint64_t control;
+    asm volatile("movq %%cr0, %0" : "=r"(control));
+    asm volatile("movq %0, %%cr0; wbinvd" : : "r"(control | CR0_CACHE_DISABLE) : "memory");
+    reloadRoot();
+    Msr::write(Msr::PAT, PAT_WITH_WRITE_COMBINING);
+    asm volatile("wbinvd" : : : "memory");
+    reloadRoot();
+    asm volatile("movq %0, %%cr0" : : "r"(control) : "memory");
+    if (Msr::read(Msr::PAT) == PAT_WITH_WRITE_COMBINING) {
+        __atomic_add_fetch(&patCpus, 1, __ATOMIC_RELAXED);
+    }
+}
+
+// The entries of 2 MB areas the buffer covers change in place; one it covers in part becomes 4 KB pages, so that what
+// shares the area with the buffer keeps its memory type.
+bool
+Paging::mapWriteCombining(uint64_t base, uint64_t bytes) {
+    uint64_t end = (base + bytes + PAGE - 1) & ~(PAGE - 1);
+    if (bytes == 0 || patCpus == 0 || end > mappedEnd) {
+        return false;
+    }
+    bool done = true;
+    uint64_t *pml4 = (uint64_t *)rootAddress;
+    for (uint64_t address = base & ~(PAGE - 1); address < end && done;) {
+        uint64_t *pdpt = (uint64_t *)(pml4[address >> 39 & 511] & ~0xFFFull);
+        uint64_t &directory = pdpt[address >> 30 & 511];
+        if (directory & HUGE) {
+            done = false;
+            break;
+        }
+        uint64_t &entry = ((uint64_t *)(directory & ~0xFFFull))[address >> 21 & 511];
+        uint64_t area = address & ~(MB2 - 1);
+        if ((entry & HUGE) && address == area && end >= area + MB2) {
+            entry = (entry & ~CACHE_DISABLE) | WRITE_THROUGH;
+            address = area + MB2;
+            continue;
+        }
+        if (entry & HUGE) {
+            uint64_t *pages = newTable(PhysicalMemory::ANY);
+            for (uint64_t p = 0; p < 512; p++) {
+                pages[p] = (area + p * PAGE) | PRESENT | WRITABLE | (entry & UNCACHED);
+            }
+            entry = (uint64_t)pages | PRESENT | WRITABLE;
+        }
+        uint64_t *pages = (uint64_t *)(entry & ~0xFFFull);
+        for (; address < end && address < area + MB2; address += PAGE) {
+            uint64_t &page = pages[address >> 12 & 511];
+            page = (page & ~CACHE_DISABLE) | WRITE_THROUGH;
+        }
+    }
+    reloadRoot();
+    return done;
 }

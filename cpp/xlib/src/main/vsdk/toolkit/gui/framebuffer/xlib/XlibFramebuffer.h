@@ -16,7 +16,7 @@
 // window never shows a half drawn menu and exposures are repaired without the application.
 //
 // Native pixel values are X pixel values. They are read from, and written to, a client side copy of the back buffer
-// (one XGetImage() per snapshot instead of one round trip per pixel), which is sent back with XPutImage() before
+// (one XGetImage() per use instead of one round trip per pixel), which is sent back with XPutImage() before
 // the next drawing operation.
 //
 // Colors: TrueColor and DirectColor visuals get exact colors from their masks; other visuals with more than one
@@ -66,6 +66,8 @@ public:
     void pixel(int x, int y, uint32_t color) override;
     uint32_t nativePixel(int x, int y) const override;
     void putNativePixel(int x, int y, uint32_t value) override;
+    void readNativeArea(int x, int y, int width, int height, uint32_t *values) const override;
+    void writeNativeArea(int x, int y, int width, int height, const uint32_t *values) override;
     void line(int x0, int y0, int x1, int y1, uint32_t color) override;
     void fillRectangle(int x, int y, int width, int height, uint32_t color) override;
     void rectangle(int x, int y, int width, int height, uint32_t color) override;

@@ -27,8 +27,20 @@ public:
     static int columns(unsigned console);
     static int rows(unsigned console);
     static void putPixel(unsigned console, int x, int y, uint32_t color);
-    // count pixels of a row from (x, y), packed as the mode stores them (pixel bytes each, least significant first).
-    static void putSpan(unsigned console, int x, int y, const uint8_t *pixels, int count);
+    // length bytes of a row from (x, y), packed as the mode stores them (pixel bytes each, least significant first).
+    static void putSpan(unsigned console, int x, int y, const uint8_t *pixels, int length);
+    // What the console shows, row after row and packed in the same way, which also brings it back after a console switch.
+    // A program can draw on it directly and then send the area it changed with presentArea(), which costs nothing while
+    // the console is not on the screen. Null in text mode, and setMode() replaces it.
+    static uint8_t *pixels(unsigned console);
+    static void presentArea(unsigned console, int left, int top, int right, int bottom);
+    // Goes to the screen over the console's pixels and leaves them as they are: for a mouse pointer.
+    static void overlaySpan(unsigned console, int x, int y, const uint8_t *pixels, int count);
+    // The pointer that a console switch paints again over the console's pixels, as overlaySpan() drew it: rows of width
+    // cells, ' ' transparent, '#' the outline colour and any other the fill colour. Null rows for none. The rows are not
+    // copied, so they must stay valid, and setMode() forgets them.
+    static void setOverlay(unsigned console, int left, int top, int width, int height, const char *const *rows,
+                           uint32_t fill, uint32_t outline);
     static uint32_t getPixel(unsigned console, int x, int y);
     static void clearPixels(unsigned console, uint32_t color);
     static void setPalette(unsigned console, unsigned first, unsigned count, const uint8_t *rgb);
@@ -61,6 +73,13 @@ private:
         VgaMode::Id mode;
         uint8_t palette[VgaMode::PALETTE_BYTES];
         uint8_t *pixels;
+        const char *const *overlayRows;
+        int overlayLeft;
+        int overlayTop;
+        int overlayWidth;
+        int overlayHeight;
+        uint32_t overlayFill;
+        uint32_t overlayOutline;
     };
 
     class Locked {
@@ -93,7 +112,9 @@ private:
     static bool framebufferText(const Screen &screen) {
         return VgaMode::info(screen.mode).layout == VgaMode::Layout::FramebufferText;
     }
+    static bool clipSpan(const VgaMode::Info &info, int &x, int y, const uint8_t *&pixels, int &count);
     static void show(unsigned console);
+    static void paintOverlay(const Screen &s);
     static void leaveGraphics(unsigned console);
     static void paintAll();
     static void paintCell(const Screen &s, int x, int y);

@@ -35,11 +35,7 @@ FramebufferSnapshot::capture(Framebuffer &target, int x, int y, int w, int h) {
         return false;
     }
     surface = &target;
-    for (int row = 0; row < height; row++) {
-        for (int column = 0; column < width; column++) {
-            pixels[(size_t)row * width + column] = target.nativePixel(left + column, top + row);
-        }
-    }
+    target.readNativeArea(left, top, width, height, pixels);
     return true;
 }
 
@@ -48,11 +44,7 @@ FramebufferSnapshot::restore() {
     if (!surface) {
         return;
     }
-    for (int row = 0; row < height; row++) {
-        for (int column = 0; column < width; column++) {
-            surface->putNativePixel(left + column, top + row, pixels[(size_t)row * width + column]);
-        }
-    }
+    surface->writeNativeArea(left, top, width, height, pixels);
     discard();
 }
 

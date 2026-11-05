@@ -323,6 +323,8 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
     bool alreadySelected = viewportSet->isSelected(mouseView);
     viewportSetTechniques->processMousePressedEvent(
         drawingArea->toSurfaceEvent(event));
+    // A press only changes the camera when it drags, unless a handler says so
+    bool changed = !alreadySelected;
     activateViewport(mouseView);
     viewportTitleGesture = viewportSetTechniques->isPointerOverTitle(
         drawingArea->toSurfaceEvent(event));
@@ -362,8 +364,10 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
     //-----------------------------------------------------------------
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraMousePressedEvent(event) ) {
+        changed = true;
     }
     else if ( mode != InteractionMode::CAMERA ) {
+        changed = true;
         bool composite = (m & MouseEvent::CTRL_DOWN_MASK) != 0;
         MouseEvent viewportEvent = toViewportEvent(event, mouseView);
         Vector3Dd centroid;
@@ -427,7 +431,9 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
         // The selection may have changed what the pointer can do
         updateModeCursor(event);
     }
-    listener->repaintRequested();
+    if ( changed ) {
+        listener->repaintRequested();
+    }
 }
 
 void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
@@ -722,22 +728,27 @@ void DrawingAreaInteractionTechniques::processEditionKeyPressedEvent(
         return;
     }
 
+    bool changed;
+
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraKeyPressedEvent(event) ) {
+        changed = true;
     }
     else {
-        processModeKeyPressedEvent(mode, event);
+        changed = processModeKeyPressedEvent(mode, event);
     }
 
-    processGlobalKeyPressedEvent(event);
+    changed |= processGlobalKeyPressedEvent(event);
 
     // Viewport set commands (selection, layout, per-viewport display)
-    viewportSetTechniques->processKeyPressedEvent(event);
+    changed |= viewportSetTechniques->processKeyPressedEvent(event);
 
-    processCharacterKeyPressedEvent(event);
+    changed |= processCharacterKeyPressedEvent(event);
 
     listener->cursorRequested(getModeCursor());
-    listener->repaintRequested();
+    if ( changed ) {
+        listener->repaintRequested();
+    }
 }
 
 bool DrawingAreaInteractionTechniques::processInputGizmoKeyPressedEvent(
@@ -820,12 +831,13 @@ bool DrawingAreaInteractionTechniques::processTranslationInputGizmoKeyPressedEve
     return true;
 }
 
-void DrawingAreaInteractionTechniques::processModeKeyPressedEvent(
+bool DrawingAreaInteractionTechniques::processModeKeyPressedEvent(
     InteractionMode mode, const KeyEvent& event)
 {
     // Keys with a meaning that depends on the interaction mode.
     SimpleBody* body;
     Vector3Dd centroid;
+    bool changed = false;
 
     switch ( mode ) {
       case InteractionMode::SELECT:
@@ -834,11 +846,13 @@ void DrawingAreaInteractionTechniques::processModeKeyPressedEvent(
                 cancelInputGizmoEditing();
                 selectionEditor->selectPrevious();
                 reportObjectSelection();
+                changed = true;
             }
             else if ( event.keycode == KeyEvent::KEY_RIGHT ) {
                 cancelInputGizmoEditing();
                 selectionEditor->selectNext();
                 reportObjectSelection();
+                changed = true;
             }
         }
         break;
@@ -849,6 +863,7 @@ void DrawingAreaInteractionTechniques::processModeKeyPressedEvent(
             if ( interactionTechniques->processTranslationKeyPressedEvent(event) ) {
                 selectionEditor->applyTranslationToSelectedObjects(centroid,
                     translationGizmo->getPosition());
+                changed = true;
             }
         }
         break;
@@ -859,6 +874,7 @@ void DrawingAreaInteractionTechniques::processModeKeyPressedEvent(
                 SceneSelectionEditor::createRotationGizmoMatrix(body));
             if ( interactionTechniques->processRotateKeyPressedEvent(event) ) {
                 applyRotationGizmoToBody(body);
+                changed = true;
             }
         }
         break;
@@ -870,23 +886,27 @@ void DrawingAreaInteractionTechniques::processModeKeyPressedEvent(
             scaleGizmo->setScale(body->getScale());
             if ( interactionTechniques->processScaleKeyPressedEvent(event) ) {
                 body->setScale(scaleGizmo->getScale());
+                changed = true;
             }
         }
         break;
       default:
         break;
     }
+    return changed;
 }
 
-void DrawingAreaInteractionTechniques::processGlobalKeyPressedEvent(
+bool DrawingAreaInteractionTechniques::processGlobalKeyPressedEvent(
     const KeyEvent& event)
 {
     // Keys with the same meaning in every interaction mode.
     int apparentSize;
+    bool changed = true;
 
     switch ( event.keycode ) {
       case KeyEvent::KEY_ESC:
         listener->closeRequested();
+        changed = false;
         break;
       case KeyEvent::KEY_EQUALS:
         apparentSize = translationGizmo->getBaseApparentSizeInPixels();
@@ -908,20 +928,23 @@ void DrawingAreaInteractionTechniques::processGlobalKeyPressedEvent(
         listener->raytracingRequested();
         break;
       default:
+        changed = false;
         break;
     }
 
     if ( interactionTechniques->processQualityKeyPressedEvent(event) ) {
         java::System::out.println(qualitySelection->toString().c_str());
+        changed = true;
     }
+    return changed;
 }
 
-void DrawingAreaInteractionTechniques::processCharacterKeyPressedEvent(
+bool DrawingAreaInteractionTechniques::processCharacterKeyPressedEvent(
     const KeyEvent& event)
 {
     // Keys with a character (letters, digits and symbols).
     if ( event.unicodeId == KeyEvent::KEY_NONE ) {
-        return;
+        return false;
     }
 
     SimpleBody* body;
@@ -931,43 +954,46 @@ void DrawingAreaInteractionTechniques::processCharacterKeyPressedEvent(
         body = selectionEditor->getFirstSelectedBody();
         if ( body != nullptr ) {
             mapToggles->toggleTexture(body);
+            return true;
         }
-        break;
+        return false;
       case 'B':
         body = selectionEditor->getFirstSelectedBody();
         if ( body != nullptr ) {
             mapToggles->toggleNormalMap(body);
+            return true;
         }
-        break;
+        return false;
       case 'h':
         listener->selectorDialogRequested();
         printBodyNames();
-        break;
+        return true;
       case 'c':
         switchMode(InteractionMode::CAMERA,
             "Camera mode interaction - drag mouse with different buttons over the scene to change current camera.");
-        break;
+        return true;
       case 'q':
         switchMode(InteractionMode::SELECT,
             "Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.");
-        break;
+        return true;
       case 'w':
         // Alt+w (maximize viewport) is a viewport set command
         if ( (event.modifierMask & KeyEvent::MASK_ALT) == 0 ) {
             switchMode(InteractionMode::TRANSLATE,
                 "Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
+            return true;
         }
-        break;
+        return false;
       case 'e':
         switchMode(InteractionMode::ROTATE,
             "Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.");
-        break;
+        return true;
       case 'r':
         switchMode(InteractionMode::SCALE,
             "Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.");
-        break;
+        return true;
       default:
-        break;
+        return false;
     }
 }
 

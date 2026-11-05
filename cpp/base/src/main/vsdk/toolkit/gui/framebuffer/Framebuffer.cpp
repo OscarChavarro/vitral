@@ -1,6 +1,24 @@
 #include <new>
 #include "vsdk/toolkit/gui/framebuffer/Framebuffer.h"
 
+void
+Framebuffer::readNativeArea(int x, int y, int w, int h, uint32_t *values) const {
+    for (int row = 0; row < h; row++) {
+        for (int column = 0; column < w; column++) {
+            *values++ = nativePixel(x + column, y + row);
+        }
+    }
+}
+
+void
+Framebuffer::writeNativeArea(int x, int y, int w, int h, const uint32_t *values) {
+    for (int row = 0; row < h; row++) {
+        for (int column = 0; column < w; column++) {
+            putNativePixel(x + column, y + row, *values++);
+        }
+    }
+}
+
 // Scanline fill: for every row the crossings of the edges at the row's center, sorted, are paired into spans. The
 // edges themselves are then drawn, so that thin and horizontal parts are not lost.
 void

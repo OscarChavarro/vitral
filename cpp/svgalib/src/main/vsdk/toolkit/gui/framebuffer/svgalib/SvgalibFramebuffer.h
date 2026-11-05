@@ -9,7 +9,8 @@
 // Framebuffer on the current svgalib graphics mode, with the VGA text font of vga_gettextfont(). Everything is drawn on
 // a back buffer in memory, which also answers the reads of native pixels: the damaged area reaches the screen with
 // vga_drawscansegment() when the outermost endDrawing() ends, as a whole, so neither a partial frame nor a read of
-// video memory ever happens. The mouse pointer is not part of the back buffer: it is composed over the rows that go to
+// video memory ever happens. In the kernel of this repository the back buffer is the console's own copy of the screen,
+// so that nothing is copied twice, and the area goes out with vga_presentarea(). The mouse pointer is not part of the back buffer: it is composed over the rows that go to
 // the screen, so saved areas never contain it and moving it only sends the rows it touches.
 // Palette modes get exact colors in palette entries allocated on first use: indexes 1 to 14 in 16 colour modes (0 and
 // 15 stay black and white) and 16 to 255 in 256 colour modes (the 16 standard colours stay); when the entries run out
@@ -47,6 +48,8 @@ public:
     void pixel(int x, int y, uint32_t color) override;
     uint32_t nativePixel(int x, int y) const override;
     void putNativePixel(int x, int y, uint32_t value) override;
+    void readNativeArea(int x, int y, int width, int height, uint32_t *values) const override;
+    void writeNativeArea(int x, int y, int width, int height, const uint32_t *values) override;
     void line(int x0, int y0, int x1, int y1, uint32_t color) override;
     void fillRectangle(int x, int y, int width, int height, uint32_t color) override;
     void rectangle(int x, int y, int width, int height, uint32_t color) override;
@@ -91,8 +94,10 @@ private:
     unsigned char *at(int x, int y) const { return back + (size_t)y * stride + (size_t)x * (size_t)pixelBytes; }
     void store(unsigned char *target, uint32_t value) const;
     void damage(int x, int y, int width, int height);
+    void sendRows(int left, int top, int right, int bottom);
     void present(int left, int top, int right, int bottom);
     void presentPointerArea(int left, int top);
+    void publishPointer();
     void span(int x0, int x1, int y, uint32_t value);
     void releaseBuffers();
     void loadFont();

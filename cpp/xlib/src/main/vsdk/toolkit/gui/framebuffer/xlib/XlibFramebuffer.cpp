@@ -529,6 +529,55 @@ XlibFramebuffer::putNativePixel(int x, int y, uint32_t value) {
     pendingBottom = y + 1 > pendingBottom ? y + 1 : pendingBottom;
 }
 
+// Without a valid mirror, one round trip for this area only: a popup does not read the whole window.
+void
+XlibFramebuffer::readNativeArea(int x, int y, int w, int h, uint32_t *values) const {
+    if (mirrorValid) {
+        Framebuffer::readNativeArea(x, y, w, h, values);
+        return;
+    }
+    XImage *area = display ? XGetImage(display, back, x, y, (unsigned)w, (unsigned)h, AllPlanes, ZPixmap) : nullptr;
+    if (!area) {
+        Framebuffer::readNativeArea(x, y, w, h, values);
+        return;
+    }
+    for (int row = 0; row < h; row++) {
+        for (int column = 0; column < w; column++) {
+            *values++ = (uint32_t)XGetPixel(area, column, row);
+        }
+    }
+    XDestroyImage(area);
+}
+
+void
+XlibFramebuffer::writeNativeArea(int x, int y, int w, int h, const uint32_t *values) {
+    if (mirrorValid || !display) {
+        Framebuffer::writeNativeArea(x, y, w, h, values);
+        return;
+    }
+    XImage *area = XCreateImage(display, visual, (unsigned)depth, ZPixmap, 0, nullptr, (unsigned)w, (unsigned)h,
+                                BitmapPad(display), 0);
+    char *data = area ? (char *)malloc((size_t)area->bytes_per_line * (size_t)h) : nullptr;
+    if (!data) {
+        if (area) {
+            XDestroyImage(area);
+        }
+        Framebuffer::writeNativeArea(x, y, w, h, values);
+        return;
+    }
+    area->data = data;
+    for (int row = 0; row < h; row++) {
+        for (int column = 0; column < w; column++) {
+            XPutPixel(area, column, row, *values++);
+        }
+    }
+    XSetClipMask(display, graphicsContext, None);
+    XPutImage(display, back, graphicsContext, area, 0, 0, x, y, (unsigned)w, (unsigned)h);
+    setClip(clipLeft, clipTop, clipRight - clipLeft, clipBottom - clipTop);
+    XDestroyImage(area);
+    damage(x, y, w, h);
+}
+
 void
 XlibFramebuffer::line(int x0, int y0, int x1, int y1, uint32_t color) {
     beforeDrawing();
