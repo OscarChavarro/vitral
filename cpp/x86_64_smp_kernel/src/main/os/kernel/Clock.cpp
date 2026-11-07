@@ -3,6 +3,7 @@
 #include "kernel/Panic.h"
 #include "kernel/Pic.h"
 #include "kernel/Scheduler.h"
+#include "drivers/usb/Usb.h"
 #include "net/Net.h"
 #include "net/Tcp.h"
 #include "lib/vitralKernel/Ports.h"
@@ -58,6 +59,7 @@ Clock::onTick(TrapFrame *frame) {
     if (tickCount > 19) {
         Tcp::timer();
         Net::timer();
+        Usb::timer();
     }
     return (Scheduler::isRunning() && !Scheduler::usesLapicTimers()) ? Scheduler::tick(frame) : frame;
 }

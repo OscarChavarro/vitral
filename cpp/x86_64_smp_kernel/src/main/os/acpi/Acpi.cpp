@@ -119,3 +119,24 @@ Acpi::processorApicIds(uint32_t *ids, unsigned max, unsigned &count) {
     }
     return true;
 }
+
+bool
+Acpi::resetRegister(uint16_t &port, uint8_t &value) {
+    const uint8_t *rsdp = findRsdp();
+    if (!rsdp) {
+        return false;
+    }
+    const uint8_t *fadt = findTable(rsdp, "FACP");
+    if (!fadt || rd32(fadt + 4) <= FADT_RESET_VALUE || !(rd32(fadt + FADT_FLAGS) & FADT_RESET_REG_SUP)) {
+        return false;
+    }
+    const uint8_t *gas = fadt + FADT_RESET_REG;
+    uint32_t addressHigh = rd32(gas + 8);
+    uint32_t address = rd32(gas + 4);
+    if (gas[0] != GAS_SYSTEM_IO || addressHigh != 0 || address == 0 || address > 0xFFFF) {
+        return false;
+    }
+    port = (uint16_t)address;
+    value = fadt[FADT_RESET_VALUE];
+    return true;
+}

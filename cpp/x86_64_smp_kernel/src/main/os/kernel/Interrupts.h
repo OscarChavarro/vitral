@@ -20,6 +20,10 @@ public:
     static void load();
     static bool registerHandler(unsigned vector, Handler handler);
     static void unregisterHandler(unsigned vector);
+    // PCI devices may share a PIC line with each other and with the device that registerHandler() gave the vector to.
+    // Each shared handler checks its own device and returns the frame unchanged; all of them run on every interrupt
+    // of the line, after the registered handler.
+    static bool addSharedIrqHandler(unsigned irq, Handler handler);
 
     static void enable() { asm volatile("sti" : : : "memory"); }
     static void disable() { asm volatile("cli" : : : "memory"); }
@@ -36,8 +40,12 @@ private:
         uintptr_t base;
     } __attribute__((packed));
 
+    static constexpr unsigned PIC_LINES = 16;
+    static constexpr unsigned SHARED_PER_LINE = 4;
+
     static IdtGate idt[VECTORS];
     static Handler handlers[VECTORS];
+    static Handler sharedHandlers[PIC_LINES][SHARED_PER_LINE];
 };
 
 #endif

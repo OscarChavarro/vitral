@@ -1,14 +1,15 @@
-/* Flat i386 kernel image, linked at 1 MB: the same layout as linker64.ld without the Multiboot2 header. Starts with
-   the KernelHeader (boot/i386/entry32kernel.S). The real mode loader copies the file there; .bss is not in the file
-   and is cleared by _start32. */
+/* Flat i386 kernel image, linked at 1 MB: the same layout as linker64.ld. Starts with the KernelHeader
+   (boot/i386/entry32kernel.S) and the Multiboot2 header (boot/i386/multiboot2_32.S). The real mode loader or a
+   Multiboot2 loader copies the file there; .bss is not in the file and is cleared by _start32. */
 ENTRY(_start32)
 SECTIONS
 {
     . = 0x100000;
     __image_start = .;
-    .header : { KEEP(*(.header)) }
+    .header : { KEEP(*(.header)) KEEP(*(.multiboot2)) }  /* KernelHeader first, then the Multiboot2 header */
     .text : {
         KEEP(*(.entry32))
+        KEEP(*(.multiboot_entry))
         *(.text .text.*)
     }
     .rodata : { *(.rodata .rodata.*) }
@@ -40,6 +41,7 @@ SECTIONS
         __loop_image_end = .;
     }
     __image_end = .;
+    __kernel_entry = _start32;
     __image_size = __image_end - __image_start;
     __bss32_start = .;
     .bss : { *(.bss .bss.*) *(COMMON) }

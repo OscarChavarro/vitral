@@ -123,6 +123,7 @@ public:
     static int64_t time();
     static uint64_t uptime(int64_t *startedAt = nullptr);
     static uint64_t uptimeMs();
+    [[noreturn]] static void reboot();
 
     static int64_t open(const char *path, int flags);
     static int64_t close(int fd);

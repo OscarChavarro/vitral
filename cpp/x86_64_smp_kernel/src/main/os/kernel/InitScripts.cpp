@@ -1,4 +1,5 @@
 #include "kernel/InitScripts.h"
+#include "drivers/char/uart/Uart.h"
 #include "kernel/KernelLog.h"
 #include "net/NetDevice.h"
 #include "syscalls/Syscalls.h"
@@ -6,6 +7,7 @@
 #include "kernel/ArgList.h"
 
 const InitScripts::Step InitScripts::script[] = {
+    {Need::Serial, nullptr, Mode::Background, "serialShell"},
     {Need::Interface, "eth0", Mode::Run, "ifconfig eth0 192.168.1.199 netmask 255.255.255.0 up"},
     {Need::Interface, "eth0", Mode::WaitLink, "eth0"},
     {Need::Nic, nullptr, Mode::Background, "httpd"},
@@ -32,6 +34,7 @@ bool
 InitScripts::satisfied(const Step &step) {
     switch (step.need) {
     case Need::Nothing: return true;
+    case Need::Serial: return Uart::ready();
     case Need::Interface: return NetDevices::find(step.interfaceName) != nullptr;
     case Need::Nic:
         if (hasNic()) {

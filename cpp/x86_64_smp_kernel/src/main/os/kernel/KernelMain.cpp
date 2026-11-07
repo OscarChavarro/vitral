@@ -1,4 +1,5 @@
 #include "drivers/block/BlockDevice.h"
+#include "drivers/char/uart/SerialDevice.h"
 #include "drivers/char/uart/Uart.h"
 #include "drivers/hid/MouseDevice.h"
 #include "drivers/hid/psmouse/PsMouse.h"
@@ -30,15 +31,18 @@
 #include "net/Net.h"
 #include "lib/vitralKernel/DateTime.h"
 #include "drivers/block/BlockDevices.h"
+#include "drivers/usb/Usb.h"
 
 // Entered from the image's entry code (boot/entry64.S or boot/i386/entry32kernel.S) once .bss is clear. The same code
 // runs in both builds: what depends on the CPU mode is behind Gdt, Interrupts, Fpu, Paging and TrapFrame.
 [[noreturn]] void
 kernelMain() {
+    // COM1 first and the screen right after, so that the first kprintf already reaches both.
+    bool serial = Uart::initCom1();
     VirtualConsole::init();
     Fpu::enable();
-    Uart::initCom1();
     kprintf(sizeof(void *) == 8 ? "LONG MODE 64-BIT\n" : "PROTECTED MODE 32-BIT (i386 kernel)\n");
+    kprintf(serial ? "Serial console: COM1 at %u baud, 8N1\n" : "Serial console: no UART at COM1\n", Uart::BAUD);
     WallClock::recordStart();
     Smp::detect();
     Smp::report();
@@ -58,8 +62,11 @@ kernelMain() {
     Interrupts::init();
     Pic::init();
     Clock::init();
+    // Takes the USB controllers from the BIOS, which ends its PS/2 emulation, before the PS/2 devices are probed.
+    Usb::takeOver();
     Keyboard::init();
     MouseDevice::init();
+    SerialDevice::init();
     PsMouse::init();
     Svga::init();
     if (Svga::supportsFramebufferText()) {
@@ -74,6 +81,11 @@ kernelMain() {
     kprintf("Timer running: %u ticks, %u ms since boot\n", (uint32_t)Clock::ticks(),
              (uint32_t)Clock::uptimeMs());
     kprintf("Idle operation: %s\n", Idle::name());
+    Usb::start();
+    kprintf("Input: PS/2 keyboard %s, PS/2 mouse %s, %u USB keyboard%s, %u USB %s\n",
+            Keyboard::ps2Present() ? "present" : "absent", PsMouse::present() ? "present" : "absent",
+            Usb::keyboardCount(), Usb::keyboardCount() == 1 ? "" : "s", Usb::mouseCount(),
+            Usb::mouseCount() == 1 ? "mouse" : "mice");
     WallClock::init();
     DateTime now;
     Calendar::fromUnix(WallClock::seconds(), now);
@@ -90,7 +102,7 @@ kernelMain() {
     }
     Scheduler::init(Smp::logicalCount());
     Syscalls::init();
-    Kernel::startInit("init");
+    Usb::startMonitor(Kernel::startInit("init"));
     if (Smp::isSmp()) {
         Smp::startProcessors();
         Scheduler::useLapicTimers();

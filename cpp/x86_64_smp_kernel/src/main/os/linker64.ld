@@ -40,6 +40,7 @@ SECTIONS
         __loop_image_end = .;
     }
     __image_end = .;
+    __kernel_entry = _start64;
     __image_size = __image_end - __image_start;
     __bss64_start = .;
     .bss : { *(.bss .bss.*) *(COMMON) }

@@ -62,16 +62,20 @@ add_compile_definitions(VITRAL_KERNEL_VIDEO)
 set(SOURCES_32BIT src/main/os/kernel/Main32.cpp src/main/os/drivers/video/vga/VgaText.cpp src/main/lib/vitralKernel/Printf32.cpp
                   src/main/lib/vitralKernel/Cpu.cpp src/main/os/paging/Pae.cpp)
 # The kernel and its built-in programs, for the CPU mode of BM_ARCH.
-set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/LocalApic.cpp src/main/os/kernel/Idle.cpp src/main/os/kernel/Smp.cpp
+set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/Multiboot2.cpp src/main/os/kernel/LocalApic.cpp src/main/os/kernel/Idle.cpp src/main/os/kernel/Smp.cpp
                   src/main/os/acpi/Acpi.cpp src/main/os/kernel/Interrupts.cpp src/main/os/kernel/Pic.cpp src/main/os/kernel/Clock.cpp
-                  src/main/os/kernel/Panic.cpp src/main/os/kernel/Consoles.cpp src/main/os/drivers/video/virtualConsole/VirtualConsole.cpp
+                  src/main/os/kernel/Panic.cpp src/main/os/kernel/Reboot.cpp src/main/os/kernel/Consoles.cpp src/main/os/drivers/video/virtualConsole/VirtualConsole.cpp
                   src/main/os/drivers/keyboard/Keyboard.cpp
                   src/main/os/drivers/char/CharDevice.cpp src/main/os/drivers/char/CharDevices.cpp src/main/os/drivers/hid/MouseDevice.cpp src/main/os/drivers/hid/psmouse/PsMouse.cpp
-                  src/main/os/drivers/char/uart/Uart.cpp
+                  src/main/os/drivers/char/uart/Uart.cpp src/main/os/drivers/char/uart/SerialDevice.cpp
+                  src/main/programs/serialShell/SerialShell.cpp
+                  src/main/os/drivers/usb/Usb.cpp src/main/os/drivers/usb/UsbDevice.cpp src/main/os/drivers/usb/UsbHub.cpp
+                  src/main/os/drivers/usb/uhci/Uhci.cpp src/main/os/drivers/usb/ehci/Ehci.cpp
+                  src/main/os/drivers/hid/usbKeyboard/UsbKeyboard.cpp src/main/os/drivers/hid/usbMouse/UsbMouse.cpp
                   src/main/os/kernel/ProgramRegistry.cpp src/main/os/kernel/ArgList.cpp src/main/os/kernel/Process.cpp
                   src/main/os/kernel/Scheduler.cpp src/main/os/kernel/Kernel.cpp src/main/os/kernel/InitScripts.cpp src/main/os/kernel/KernelLog.cpp
                   src/main/os/syscalls/Syscalls.cpp src/main/os/drivers/rtc/Rtc.cpp src/main/os/kernel/WallClock.cpp src/main/lib/vitralKernel/Calendar.cpp
-                  src/main/programs/date/DateCommand.cpp src/main/programs/uptime/UptimeCommand.cpp
+                  src/main/programs/date/DateCommand.cpp src/main/programs/uptime/UptimeCommand.cpp src/main/programs/reboot/RebootCommand.cpp
                   src/main/os/drivers/block/BlockDevice.cpp src/main/os/drivers/block/BlockDevices.cpp src/main/os/drivers/block/LoopDevice.cpp
                   src/main/os/drivers/block/loop_image.S src/main/os/fs/RootFs.cpp
                   src/main/os/fs/DevFs.cpp src/main/os/fs/Fat.cpp src/main/os/fs/Vfs.cpp
@@ -97,11 +101,11 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/LocalApi
                   src/main/os/drivers/video/vga/VgaText.cpp src/main/lib/vitralKernel/Printf64.cpp src/main/lib/vitralKernel/Cpu.cpp)
 # What depends on the CPU mode: entry code, interrupt stubs, GDT and IDT gates, FPU state, paging, the first frame of a
 # process, the system call instruction and the start-up code of the other processors.
-set(SOURCES_ARCH_x86_64 src/main/os/boot/entry64.S src/main/os/boot/multiboot2.S src/main/os/kernel/x86_64/Multiboot2.cpp
+set(SOURCES_ARCH_x86_64 src/main/os/boot/entry64.S src/main/os/boot/multiboot2.S
                         src/main/os/boot/ap_trampoline.S src/main/os/kernel/x86_64/interrupt_stubs.S src/main/os/kernel/x86_64/Gdt.cpp
                         src/main/os/kernel/x86_64/Fpu.cpp src/main/os/kernel/x86_64/Paging.cpp src/main/os/kernel/x86_64/ProcessFrame.cpp
                         src/main/os/kernel/x86_64/PanicRegisters.cpp src/main/os/syscalls/x86_64/SyscallsTrap.cpp)
-set(SOURCES_ARCH_i386 src/main/os/boot/i386/entry32kernel.S src/main/os/boot/i386/ap_trampoline.S
+set(SOURCES_ARCH_i386 src/main/os/boot/i386/entry32kernel.S src/main/os/boot/i386/multiboot2_32.S src/main/os/boot/i386/ap_trampoline.S
                       src/main/os/kernel/i386/interrupt_stubs.S src/main/os/kernel/i386/Gdt.cpp src/main/os/kernel/i386/Fpu.cpp
                       src/main/os/kernel/i386/Paging.cpp src/main/os/kernel/i386/ProcessFrame.cpp
                       src/main/os/kernel/i386/PanicRegisters.cpp src/main/os/kernel/i386/LongDivision.cpp

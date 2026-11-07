@@ -5,7 +5,7 @@
 #include "kernel/ArgList.h"
 #include "kernel/ProgramRegistry.h"
 
-void
+Process *
 Kernel::startInit(const char *name) {
     const Program *program = ProgramRegistry::find(name);
     if (!program) {
@@ -16,4 +16,5 @@ Kernel::startInit(const char *name) {
     if (!init || init->pid() != 1) {
         Panic::halt("cannot create init (PID 1)");
     }
+    return init;
 }

@@ -58,6 +58,32 @@ Pci::find(uint16_t vendor, uint16_t device, Location &found) {
 }
 
 bool
+Pci::findClass(uint8_t baseClass, uint8_t subClass, bool first, Location &from) {
+    unsigned start = first ? 0 : ((unsigned)from.bus << 8 | (unsigned)from.device << 3 | from.function) + 1;
+    for (unsigned key = start; key < 256 * 32 * 8; key++) {
+        Location at = {(uint8_t)(key >> 8), (uint8_t)(key >> 3 & 31), (uint8_t)(key & 7)};
+        if (at.function == 0 && read16(at, VENDOR_ID) == 0xFFFF) {
+            key += 7;
+            continue;
+        }
+        if (at.function != 0) {
+            Location zero = {at.bus, at.device, 0};
+            if (!(read32(zero, HEADER_TYPE & 0xFC) >> 16 & 0x80)) {
+                continue;
+            }
+        }
+        if (read16(at, VENDOR_ID) == 0xFFFF) {
+            continue;
+        }
+        if (read8(at, CLASS_CODE) == baseClass && read8(at, SUBCLASS) == subClass) {
+            from = at;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
 Pci::memoryBar(const Location &at, unsigned index, uint64_t &address, uint64_t &size) {
     if (index > 5) {
         return false;

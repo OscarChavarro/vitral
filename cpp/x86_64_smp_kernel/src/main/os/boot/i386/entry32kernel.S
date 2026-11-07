@@ -7,7 +7,9 @@
     .long _start32
     .long __kernel_end
 
-/* Entry: clears .bss, sets the boot stack and enters C++ through the mangled name of kernelMain(). */
+/* Entry: clears .bss, sets the boot stack and enters C++ through the mangled name of kernelMain(). Started by the BIOS
+   boot path (boot/i386/pm32kernel.S) with BootInfo already in place, or by a Multiboot2 loader
+   (boot/i386/multiboot2_32.S), in which case multiboot_info is set and the BootInfo is built here. */
     .section .entry32, "ax"
     .globl _start32
 _start32:
@@ -19,7 +21,13 @@ _start32:
     rep stosb
     movl $0x80000, %esp
     xorl %ebp, %ebp
-    calll _Z10kernelMainv       /* kernelMain() */
+    movl multiboot_info, %eax
+    testl %eax, %eax
+    jz 2f
+    pushl %eax
+    calll _ZN10Multiboot212fillBootInfoEj   /* Multiboot2::fillBootInfo(uint32_t) */
+    addl $4, %esp
+2:  calll _Z10kernelMainv       /* kernelMain() */
 1:  cli
     hlt
     jmp 1b

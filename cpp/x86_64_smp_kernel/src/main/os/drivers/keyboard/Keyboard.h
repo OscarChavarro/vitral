@@ -16,6 +16,10 @@ public:
     static constexpr int KEY_F1 = 0x110;
 
     static void init();
+    // Feeds one byte of a PS/2 set 1 scancode (0xE0 prefixes included), as the PS/2 keyboard sends them; for keyboards
+    // on other buses. Interrupt context, as the PS/2 interrupt handler.
+    static void injectScancode(uint8_t scancode);
+    static bool ps2Present() { return ps2Found; }
     static int read();
     static bool pending();
     static constexpr uint8_t MOD_SHIFT = 1;
@@ -32,8 +36,10 @@ private:
     static bool alt;
     static bool ctrl;
     static bool extended;
+    static bool ps2Found;
 
     static void push(unsigned console, uint16_t key);
+    static bool probePs2();
     static TrapFrame *onIrq(TrapFrame *frame);
 };
 

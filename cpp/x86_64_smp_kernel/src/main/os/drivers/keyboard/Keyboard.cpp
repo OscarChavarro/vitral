@@ -3,6 +3,7 @@
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "kernel/Consoles.h"
 #include "kernel/Interrupts.h"
+#include "kernel/KernelLog.h"
 #include "kernel/Panic.h"
 #include "kernel/Pic.h"
 #include "kernel/Scheduler.h"
@@ -15,6 +16,14 @@ bool Keyboard::shift = false;
 bool Keyboard::alt = false;
 bool Keyboard::ctrl = false;
 bool Keyboard::extended = false;
+bool Keyboard::ps2Found = false;
+
+static constexpr uint16_t PS2_DATA = 0x60;
+static constexpr uint16_t PS2_STATUS = 0x64;
+static constexpr uint8_t PS2_OUTPUT_FULL = 0x01;
+static constexpr uint8_t PS2_INPUT_FULL = 0x02;
+static constexpr uint8_t PS2_AUX = 0x20;
+static constexpr unsigned PS2_TRIES = 100000;
 
 static const char PLAIN[0x3A] = {
     0, 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', '\t',
@@ -29,13 +38,59 @@ static const char SHIFTED[0x3A] = {
     'B', 'N', 'M', '<', '>', '?', 0, '*', 0, ' ',
 };
 
+// Asks the keyboard for its identity (0xF2): an AT keyboard acknowledges with 0xFA and an MF2 one then sends two ID
+// bytes. Runs with the keyboard interrupt masked. Without a controller, the status port reads 0xFF and nothing
+// answers; with a controller and no keyboard, the command times out.
+bool
+Keyboard::probePs2() {
+    if (Ports::inb(PS2_STATUS) == 0xFF) {
+        return false;
+    }
+    for (unsigned i = 0; i < 64 && (Ports::inb(PS2_STATUS) & PS2_OUTPUT_FULL); i++) {
+        Ports::inb(PS2_DATA);
+    }
+    unsigned waited = 0;
+    while (waited < PS2_TRIES && (Ports::inb(PS2_STATUS) & PS2_INPUT_FULL)) {
+        waited++;
+    }
+    if (waited == PS2_TRIES) {
+        return false;
+    }
+    Ports::outb(PS2_DATA, 0xF2);
+    uint8_t answer[3];
+    unsigned received = 0;
+    for (unsigned i = 0; i < PS2_TRIES && received < 3; i++) {
+        uint8_t status = Ports::inb(PS2_STATUS);
+        if ((status & PS2_OUTPUT_FULL) && !(status & PS2_AUX)) {
+            answer[received++] = Ports::inb(PS2_DATA);
+            i = 0;
+            if (answer[0] != 0xFA) {
+                break;
+            }
+        } else if (status & PS2_OUTPUT_FULL) {
+            Ports::inb(PS2_DATA);
+        }
+    }
+    if (received == 0 || answer[0] != 0xFA) {
+        kprintf("PS/2 keyboard: not found\n");
+        return false;
+    }
+    if (received == 3) {
+        kprintf("PS/2 keyboard: found, ID %02x%02x, IRQ 1\n", (uint32_t)answer[1], (uint32_t)answer[2]);
+    } else {
+        kprintf("PS/2 keyboard: found (AT, no ID), IRQ 1\n");
+    }
+    return true;
+}
+
 void
 Keyboard::init() {
     for (unsigned c = 0; c < 12; c++) {
         head[c] = tail[c] = 0;
     }
-    while (Ports::inb(0x64) & 1) {
-        Ports::inb(0x60);
+    ps2Found = probePs2();
+    for (unsigned i = 0; i < 64 && (Ports::inb(PS2_STATUS) & PS2_OUTPUT_FULL); i++) {
+        Ports::inb(PS2_DATA);
     }
     if (!Interrupts::registerHandler(Interrupts::IRQ_BASE + 1, onIrq)) {
         Panic::halt("keyboard vector already taken");
@@ -87,8 +142,16 @@ Keyboard::onIrq(TrapFrame *frame) {
         }
         return frame;
     }
-    uint8_t sc = Ports::inb(0x60);
-    if (sc == 0xE0) { extended = true; return frame; }
+    injectScancode(Ports::inb(0x60));
+    return frame;
+}
+
+void
+Keyboard::injectScancode(uint8_t sc) {
+    if (sc == 0xE0) {
+        extended = true;
+        return;
+    }
     bool isExtended = extended;
     extended = false;
     bool release = sc & 0x80;
@@ -96,18 +159,18 @@ Keyboard::onIrq(TrapFrame *frame) {
 
     if (sc == 0x38) {
         alt = !release;
-        return frame;
+        return;
     }
     if (sc == 0x1D) {
         ctrl = !release;
-        return frame;
+        return;
     }
     if (sc == 0x2A || sc == 0x36) {
         shift = !release;
-        return frame;
+        return;
     }
     if (release) {
-        return frame;
+        return;
     }
 
     int function = -1;
@@ -120,13 +183,13 @@ Keyboard::onIrq(TrapFrame *frame) {
     }
     if (alt && function >= 0) {
         Consoles::switchTo((unsigned)function);
-        return frame;
+        return;
     }
 
     unsigned console = VirtualConsole::active();
     if (function >= 0) {
         push(console, (uint16_t)(KEY_F1 + function));
-        return frame;
+        return;
     }
     if (isExtended) {
         switch (sc) {
@@ -136,6 +199,8 @@ Keyboard::onIrq(TrapFrame *frame) {
         case 0x4D: push(console, KEY_RIGHT); break;
         case 0x49: push(console, KEY_PAGE_UP); break;
         case 0x51: push(console, KEY_PAGE_DOWN); break;
+        case 0x1C: push(console, KEY_ENTER); break;
+        case 0x35: push(console, '/'); break;
         }
     } else if (sc < sizeof(PLAIN)) {
         char c = shift ? SHIFTED[sc] : PLAIN[sc];
@@ -147,5 +212,4 @@ Keyboard::onIrq(TrapFrame *frame) {
             push(console, (uint8_t)c);
         }
     }
-    return frame;
 }

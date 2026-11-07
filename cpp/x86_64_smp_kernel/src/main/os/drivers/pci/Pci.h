@@ -15,6 +15,8 @@ public:
     static constexpr uint8_t DEVICE_ID = 0x02;
     static constexpr uint8_t COMMAND = 0x04;
     static constexpr uint8_t STATUS = 0x06;
+    static constexpr uint8_t PROGRAMMING_INTERFACE = 0x09;
+    static constexpr uint8_t SUBCLASS = 0x0A;
     static constexpr uint8_t CLASS_CODE = 0x0B;
     static constexpr uint8_t HEADER_TYPE = 0x0E;
     static constexpr uint8_t BAR0 = 0x10;
@@ -31,6 +33,8 @@ public:
     static void write16(const Location &at, uint8_t offset, uint16_t value);
 
     static bool find(uint16_t vendor, uint16_t device, Location &found);
+    // The function after `from` (or the first one when `first` is true) with this class and subclass.
+    static bool findClass(uint8_t baseClass, uint8_t subClass, bool first, Location &from);
 
     static bool memoryBar(const Location &at, unsigned index, uint64_t &address, uint64_t &size);
     static bool enableMsi(const Location &at, uint8_t vector, uint32_t apicId);

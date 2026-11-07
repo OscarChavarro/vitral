@@ -5,6 +5,7 @@
 #include "kernel/Consoles.h"
 #include "kernel/Interrupts.h"
 #include "kernel/Panic.h"
+#include "kernel/Reboot.h"
 #include "kernel/Scheduler.h"
 #include "kernel/WallClock.h"
 #include "net/Net.h"
@@ -122,6 +123,9 @@ Syscalls::uptime(int64_t *startedAt) {
 
 uint64_t
 Syscalls::uptimeMs() { return Clock::uptimeMs(); }
+
+void
+Syscalls::reboot() { Reboot::restart(); }
 
 int64_t
 Syscalls::open(const char *path, int flags) { return call(SYS_OPEN, ARG(path), (uint64_t)(int64_t)flags); }

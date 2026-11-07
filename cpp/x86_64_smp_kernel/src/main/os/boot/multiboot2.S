@@ -7,7 +7,7 @@
    The loader enters mb2_entry in 32-bit protected mode, paging off, A20 on, EAX = 0x36D76289 and
    EBX = physical address of the Multiboot2 information. mb2_entry checks that the CPU has long mode,
    builds a 4 GB identity map, switches to long mode and continues at _start64 (entry64.S), which then
-   converts the loader's memory map into the BootInfo the kernel uses (kernel/multiboot2.cpp). */
+   converts the loader's memory map into the BootInfo the kernel uses (kernel/Multiboot2.cpp). */
 #define MB2_MAGIC 0xE85250D6
 
     .section .multiboot2, "a"

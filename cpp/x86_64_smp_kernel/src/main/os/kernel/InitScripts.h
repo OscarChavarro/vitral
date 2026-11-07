@@ -8,9 +8,9 @@ public:
 
 private:
     enum class Mode { Run, Background, WaitLink };
-    // What must exist for a step to run: nothing, the interface named in the step, or a network card (any interface
-    // but the loopback, that is, ifconfig shows something besides lo).
-    enum class Need { Nothing, Interface, Nic };
+    // What must exist for a step to run: nothing, the interface named in the step, a network card (any interface
+    // but the loopback, that is, ifconfig shows something besides lo), or COM1.
+    enum class Need { Nothing, Interface, Nic, Serial };
     class Step {
     public:
         Need need;

@@ -5,7 +5,8 @@
 
 extern const char imageSizeSymbol[] asm("__image_size");
 extern const char kernelEndSymbol[] asm("__kernel_end");
-extern const char entrySymbol[] asm("_start64");
+// _start64 or _start32, named by the linker script.
+extern const char entrySymbol[] asm("__kernel_entry");
 
 void
 Multiboot2::fillBootInfo(uint32_t info) {

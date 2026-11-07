@@ -474,10 +474,12 @@ VgaMode::plotSpan(Id id, int x, int y, const uint8_t *pixels, int count) {
         Svga::span(x, y, m.bytes, pixels, count);
         return;
     }
+    // The VGA modes store one byte per pixel (pixelBytes()); their table entries have no byte count.
+    unsigned bytes = m.pixelBytes();
     for (int i = 0; i < count; i++) {
         uint32_t color = 0;
-        for (unsigned b = 0; b < m.bytes; b++) {
-            color |= (uint32_t)pixels[(unsigned)i * m.bytes + b] << (8 * b);
+        for (unsigned b = 0; b < bytes; b++) {
+            color |= (uint32_t)pixels[(unsigned)i * bytes + b] << (8 * b);
         }
         plot(id, x + i, y, color);
     }
