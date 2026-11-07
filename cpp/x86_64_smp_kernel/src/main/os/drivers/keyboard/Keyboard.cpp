@@ -109,8 +109,11 @@ Keyboard::push(unsigned console, uint16_t key) {
 }
 
 int
-Keyboard::read() {
-    unsigned console = Scheduler::currentConsole();
+Keyboard::read() { return read(Scheduler::currentConsole()); }
+
+int
+Keyboard::read(unsigned console) {
+    console %= 12;
     if (tail[console] == head[console]) {
         return -1;
     }
@@ -199,6 +202,10 @@ Keyboard::injectScancode(uint8_t sc) {
         case 0x4D: push(console, KEY_RIGHT); break;
         case 0x49: push(console, KEY_PAGE_UP); break;
         case 0x51: push(console, KEY_PAGE_DOWN); break;
+        case 0x47: push(console, KEY_HOME); break;
+        case 0x4F: push(console, KEY_END); break;
+        case 0x52: push(console, KEY_INSERT); break;
+        case 0x53: push(console, KEY_DELETE); break;
         case 0x1C: push(console, KEY_ENTER); break;
         case 0x35: push(console, '/'); break;
         }

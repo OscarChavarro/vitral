@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include "format_engine.h"
 #include "drivers/tty/Tty.h"
-#include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "fs/Err.h"
 #include "kernel/Scheduler.h"
 #include "lib/vitralKernel/Memory.h"
@@ -18,14 +17,10 @@ FILE *stdin = &standardStreams[0];
 FILE *stdout = &standardStreams[1];
 FILE *stderr = &standardStreams[2];
 
+// stdout and stderr: the process's terminal.
 class ConsoleSink : public PrintSink {
 public:
-    void put(const char *text, size_t count) override {
-        unsigned console = Syscalls::console();
-        for (size_t i = 0; i < count; i++) {
-            VirtualConsole::putc(console, text[i]);
-        }
-    }
+    void put(const char *text, size_t count) override { Tty::current()->write(text, count); }
 };
 
 class BufferSink : public PrintSink {
@@ -177,7 +172,8 @@ fputc(int c, FILE *stream) {
         errno = EBADF;
         return EOF;
     }
-    VirtualConsole::putc(Syscalls::console(), (char)c);
+    char byte = (char)c;
+    Tty::current()->write(&byte, 1);
     return (unsigned char)c;
 }
 
@@ -195,9 +191,7 @@ fputs(const char *text, FILE *stream) {
         errno = EBADF;
         return EOF;
     }
-    for (; *text; text++) {
-        VirtualConsole::putc(Syscalls::console(), *text);
-    }
+    Tty::current()->write(text, strlen(text));
     return 0;
 }
 
@@ -227,11 +221,7 @@ fwrite(const void *buffer, size_t size, size_t count, FILE *stream) {
         errno = EBADF;
         return 0;
     }
-    const char *bytes = (const char *)buffer;
-    unsigned console = Syscalls::console();
-    for (size_t i = 0; i < size * count; i++) {
-        VirtualConsole::putc(console, bytes[i]);
-    }
+    Tty::current()->write(buffer, size * count);
     return count;
 }
 
@@ -260,7 +250,7 @@ fgetc(FILE *stream) {
         return EOF;
     }
     uint8_t byte;
-    if (Tty::read(&byte, 1) == 1) {
+    if (Tty::current()->readWaiting(&byte, 1) == 1) {
         return byte;
     }
     stream->eof = 1;

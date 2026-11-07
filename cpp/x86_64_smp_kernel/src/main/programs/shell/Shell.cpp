@@ -1,6 +1,7 @@
 #include "programs/shell/Shell.h"
-#include "drivers/video/virtualConsole/VirtualConsole.h"
+#include "drivers/tty/Tty.h"
 #include "kernel/Process.h"
+#include "lib/terminfo/Terminfo.h"
 #include "lib/vitralKernel/Format.h"
 #include "lib/vitralKernel/Memory.h"
 #include "lib/vitralKernel/String.h"
@@ -19,8 +20,8 @@ Shell::stateName(uint8_t state) {
 }
 
 Shell::Shell()
-    : console(Syscalls::console()), pid(Syscalls::getpid()), list(new Syscalls::ProcessInfo[MAX_ROWS]),
-      input(new Readline(console)) {
+    : terminal(*Syscalls::terminal()), pid(Syscalls::getpid()), list(new Syscalls::ProcessInfo[MAX_ROWS]),
+      input(new Readline(terminal)) {
     line[0] = 0;
     input->setCompletions(&commands);
 }
@@ -42,15 +43,11 @@ Shell::main(const ArgList &) {
 }
 
 void
-Shell::print(const char *s) {
-    for (; *s; s++) {
-        VirtualConsole::putc(console, *s);
-    }
-}
+Shell::print(const char *s) { Syscalls::write(STDOUT, s, String::length(s)); }
 
 void
 Shell::printWith(const char *format, const char *arg) {
-    char text[VirtualConsole::COLS + 1];
+    char text[LINE_SIZE];
     Format::print(text, sizeof(text), format, arg);
     print(text);
 }
@@ -58,12 +55,12 @@ Shell::printWith(const char *format, const char *arg) {
 void
 Shell::ps() {
     unsigned count = Syscalls::listProcesses(list, MAX_ROWS);
-    print("  PID  PPID NAME             STATE   CON\n");
+    print("  PID  PPID NAME             STATE   CON TTY\n");
     for (unsigned i = 0; i < count; i++) {
         const Syscalls::ProcessInfo &p = list[i];
-        char text[VirtualConsole::COLS + 1];
-        Format::print(text, sizeof(text), "%5u %5u %-16s %-6s %3u\n", p.pid, p.ppid, p.name,
-                      stateName(p.state), (unsigned)p.console);
+        char text[LINE_SIZE];
+        Format::print(text, sizeof(text), "%5u %5u %-16s %-6s %3u %s\n", p.pid, p.ppid, p.name,
+                      stateName(p.state), (unsigned)p.console, p.terminal);
         print(text);
     }
 }
@@ -76,16 +73,22 @@ Shell::ls() {
     }
 }
 
+// Afterwards the terminal is as the shell left it: its mode (a program that ends in raw mode would leave the shell
+// without echo), the cursor shown, the attributes off and the prompt at the start of a line.
 void
 Shell::runProgram(const char *name, const ArgList &args) {
+    Tty::Mode mode;
+    terminal.getMode(mode);
     int64_t child = Syscalls::run(name, args);
     if (child == -Syscalls::ERR_NOENT) { printWith("%s: command not found\n", name); return; }
     if (child < 0) { print("cannot start the process\n"); return; }
     int status = 0;
     Syscalls::waitpid(child, &status);
-    VirtualConsole::showCursor(console, true);
-    VirtualConsole::setAttr(console, NORMAL);
-    if (VirtualConsole::cursorX(console) != 0) {
+    terminal.setMode(mode, false);
+    const Terminfo &info = Terminfo::find(terminal.type());
+    print(info.get(Terminfo::Cap::CursorNormal));
+    print(info.get(Terminfo::Cap::Normal));
+    if (terminal.column() != 0) {
         print("\n");
     }
 }

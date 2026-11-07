@@ -16,7 +16,10 @@ class Uart {
 
     static bool initCom1();
     static bool ready() { return enabled; }
+    // '\n' goes out as CR LF, as the kernel log needs.
     static void write(const char *text, size_t length);
+    // Every byte as it is: for a terminal, whose line discipline already did the output processing.
+    static void writeRaw(const char *text, size_t length);
     // For a kernel panic: does not take the lock, which the interrupted code may hold.
     static void writeUnlocked(const char *text, size_t length);
     // Received bytes; also after a slow line released the output.
@@ -74,7 +77,7 @@ class Uart {
     static bool present();
     static void startRound();
     static bool waitForTransmitter();
-    static void send(const char *text, size_t length);
+    static void send(const char *text, size_t length, bool crlf);
     static void drainReceiver();
     static TrapFrame *onIrq(TrapFrame *frame);
 };

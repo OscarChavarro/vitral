@@ -1,16 +1,49 @@
 #include "programs/dmesg/DmesgCommand.h"
-#include "drivers/keyboard/Keyboard.h"
-#include "drivers/video/virtualConsole/VirtualConsole.h"
+#include "drivers/tty/Tty.h"
+#include "fs/PollEvent.h"
+#include "fs/PollRecord.h"
 #include "kernel/KernelLog.h"
-#include "lib/vitralKernel/Memory.h"
+#include "lib/terminfo/Terminfo.h"
 #include "lib/vitralKernel/Printf.h"
 #include "syscalls/Syscalls.h"
 #include "lib/vitralKernel/String.h"
 #include "kernel/ArgList.h"
 
+static constexpr int DMESG_STDIN = 0;
+static constexpr int DMESG_STDOUT = 1;
+
 unsigned
-DmesgCommand::rowsOf(size_t length) {
-    return length <= VirtualConsole::COLS ? 1 : (unsigned)((length + VirtualConsole::COLS - 1) / VirtualConsole::COLS);
+DmesgCommand::rowsOf(size_t length, unsigned columns) {
+    return length <= columns ? 1 : (unsigned)((length + columns - 1) / columns);
+}
+
+void
+DmesgCommand::print(const char *text) { Syscalls::write(DMESG_STDOUT, text, String::length(text)); }
+
+// One key, read in raw mode: Enter, Escape or a byte. What else an escape sequence sends is discarded.
+int
+DmesgCommand::waitKey() {
+    Tty::Mode saved;
+    Syscalls::ioctl(DMESG_STDIN, Tty::GET_MODE, &saved);
+    Tty::Mode raw = saved;
+    raw.localFlags &= ~(Tty::CANONICAL | Tty::ECHO_INPUT);
+    raw.inputFlags &= ~Tty::CR_TO_NL;
+    raw.controlChars[Tty::CC_MIN] = 1;
+    raw.controlChars[Tty::CC_TIME] = 0;
+    Syscalls::ioctl(DMESG_STDIN, Tty::SET_MODE, &raw);
+    uint8_t c = 0;
+    for (;;) {
+        PollRecord record = {DMESG_STDIN, PollEvent::IN, 0};
+        Syscalls::poll(&record, 1, -1);
+        if (Syscalls::read(DMESG_STDIN, &c, 1) == 1) {
+            break;
+        }
+    }
+    if (c == 27) {
+        Syscalls::sleep(ESCAPE_WAIT_MS);
+    }
+    Syscalls::ioctl(DMESG_STDIN, Tty::SET_MODE_FLUSH, &saved);
+    return c == '\r' || c == '\n' ? KEY_ENTER : c;
 }
 
 int
@@ -53,9 +86,19 @@ DmesgCommand::main(const ArgList &args) {
         }
     }
 
-    unsigned console = Syscalls::console();
+    Tty::WindowSize size;
+    Syscalls::ioctl(DMESG_STDOUT, Tty::GET_WINDOW_SIZE, &size);
+    unsigned columns = size.columns ? size.columns : 80;
+    unsigned screenRows = size.rows > 2 ? size.rows : 24;
+    const Terminfo &terminal = Terminfo::find(Syscalls::terminal()->type());
+    char standout[32];
+    char normal[32];
+    char clearLine[32];
+    terminal.format(Terminfo::Cap::StandoutOn, standout, sizeof(standout));
+    terminal.format(Terminfo::Cap::Normal, normal, sizeof(normal));
+    terminal.format(Terminfo::Cap::ClearToEnd, clearLine, sizeof(clearLine));
     unsigned rows = 0;
-    const unsigned page = VirtualConsole::ROWS - 1;
+    const unsigned page = screenRows - 1;
     bool paging = lastLines == 0 || lastLines >= page;
     bool quit = false;
     unsigned step = page;
@@ -64,26 +107,24 @@ DmesgCommand::main(const ArgList &args) {
         while (end < length && text[end] != '\n') {
             end++;
         }
-        unsigned lineRows = rowsOf(end - i);
+        unsigned lineRows = rowsOf(end - i, columns);
         if (paging && rows + lineRows > step) {
-            VirtualConsole::writeAt(console, 0, VirtualConsole::ROWS - 1, "-- More (space: page, Enter: line, q: quit) --", PROMPT);
-            int key;
-            while ((key = Keyboard::read()) < 0) {
-                Syscalls::sleep(20);
-            }
-            VirtualConsole::writeAt(console, 0, VirtualConsole::ROWS - 1, "                                              ", NORMAL);
-            if (key == 'q' || key == 'Q' || key == Keyboard::KEY_ESC) {
+            print(standout);
+            print("-- More (space: page, Enter: line, q: quit) --");
+            print(normal);
+            int key = waitKey();
+            print("\r");
+            print(clearLine);
+            if (key == 'q' || key == 'Q' || key == KEY_ESC) {
                 quit = true;
                 break;
             }
-            step = key == Keyboard::KEY_ENTER ? 1 : page;
+            step = key == KEY_ENTER ? 1 : page;
             rows = 0;
         }
-        for (size_t j = i; j < end; j++) {
-            VirtualConsole::putc(console, text[j]);
-        }
-        if ((end - i) % VirtualConsole::COLS != 0 || end == i) {
-            VirtualConsole::putc(console, '\n');
+        Syscalls::write(DMESG_STDOUT, text + i, end - i);
+        if ((end - i) % columns != 0 || end == i) {
+            print("\n");
         }
         rows += lineRows;
         i = end + 1;

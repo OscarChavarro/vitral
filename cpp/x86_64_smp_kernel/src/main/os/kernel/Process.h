@@ -10,6 +10,7 @@
 #include "fs/OpenFile.h"
 
 class OpenFile;
+class Tty;
 
 class Process {
 public:
@@ -25,7 +26,7 @@ public:
     static constexpr uint32_t WAIT_ANY = 0xFFFFFFFFu;
 
     Process(uint32_t pid, uint32_t ppid, const Program &program, const ArgList &args,
-            const CpuMask &affinity, unsigned console, bool ownsConsole, char *stack);
+            const CpuMask &affinity, unsigned console, bool ownsConsole, Tty *terminal, char *stack);
     Process(uint32_t pid, Process *creator, void (*entry)(void *), void *argument, char *stack, size_t stackSize,
             const CpuMask &affinity);
     static char *allocateStack(size_t size);
@@ -41,6 +42,9 @@ public:
     const char *stateName() const;
     unsigned console() const { return consoleValue; }
     bool ownsConsole() const { return ownsConsoleValue; }
+    // Its standard input, output and error. The console is still where its graphics and keyboard are (svgalib), and
+    // the terminal is that console's unless the process was started on another one, such as /dev/ttyS0.
+    Tty *terminal() const { return terminalValue; }
     int cpu() const { return cpuValue; }
     uint64_t ticks() const { return cpuTicks; }
     int *errorNumber() { return &errorValue; }
@@ -71,6 +75,7 @@ private:
     uint32_t ppidValue;
     unsigned consoleValue;
     bool ownsConsoleValue;
+    Tty *terminalValue;
     char nameBuffer[NAME_LENGTH];
     State stateValue;
     int cpuValue;

@@ -16,7 +16,6 @@
 #include <dirent.h>
 #include "syscalls/Syscalls.h"
 #include "drivers/tty/Tty.h"
-#include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "fs/OpenFlag.h"
 #include "fs/Whence.h"
 #include "fs/PollRecord.h"
@@ -40,8 +39,9 @@ isFile(int descriptor) { return descriptor >= 3; }
 
 ssize_t
 read(int descriptor, void *buffer, size_t count) {
-    if (descriptor == 0) {
-        return (ssize_t)Tty::read((uint8_t *)buffer, count);
+    // The terminal waits here, in the caller, as VMIN and VTIME say: Syscalls::read() would return at once.
+    if (descriptor >= 0 && descriptor <= 2) {
+        return (ssize_t)Tty::current()->readWaiting((uint8_t *)buffer, count);
     }
     if (isFile(descriptor)) {
         int64_t n = Syscalls::read(descriptor, buffer, count);
@@ -53,13 +53,8 @@ read(int descriptor, void *buffer, size_t count) {
 
 ssize_t
 write(int descriptor, const void *buffer, size_t count) {
-    if (descriptor == 1 || descriptor == 2) {
-        const char *bytes = (const char *)buffer;
-        unsigned console = Syscalls::console();
-        for (size_t i = 0; i < count; i++) {
-            VirtualConsole::putc(console, bytes[i]);
-        }
-        return (ssize_t)count;
+    if (descriptor >= 0 && descriptor <= 2) {
+        return (ssize_t)Tty::current()->write(buffer, count);
     }
     if (isFile(descriptor)) {
         int64_t n = Syscalls::write(descriptor, buffer, count);
@@ -100,8 +95,19 @@ access(const char *path, int) {
     int64_t r = Syscalls::stat(path, &st);
     return r < 0 ? failWith(r) : 0;
 }
+// 0, 1 and 2 are the process's terminal; another descriptor is one when it answers TCGETS.
 int
-isatty(int descriptor) { return descriptor >= 0 && descriptor <= 2; }
+isatty(int descriptor) {
+    if (descriptor >= 0 && descriptor <= 2) {
+        return 1;
+    }
+    Tty::Mode mode;
+    if (descriptor < 0 || Syscalls::ioctl(descriptor, Tty::GET_MODE, &mode) < 0) {
+        errno = descriptor < 0 ? EBADF : ENOTTY;
+        return 0;
+    }
+    return 1;
+}
 int
 pipe(int[2]) { return unsupported(); }
 int
@@ -191,7 +197,7 @@ stat(const char *path, struct stat *out) {
 int
 fstat(int descriptor, struct stat *out) {
     FileStat st;
-    if (!isFile(descriptor)) {
+    if (descriptor < 0) {
         errno = EBADF;
         return -1;
     }
@@ -273,11 +279,12 @@ rewinddir(DIR *dir) {
     dir->used = dir->position = 0;
 }
 static short
-pollConsole(int descriptor, short events) {
-    if (descriptor == 0) {
-        return Tty::readable() ? (short)(events & POLLIN) : 0;
+pollConsole(short events) {
+    short ready = (short)(events & POLLOUT);
+    if ((events & POLLIN) && Tty::current()->readable()) {
+        ready |= POLLIN;
     }
-    return (short)(events & POLLOUT);
+    return ready;
 }
 
 int
@@ -299,7 +306,7 @@ poll(pollfd *descriptors, nfds_t count, int timeout) {
                 }
                 p.revents = record.revents;
             } else {
-                p.revents = pollConsole(p.fd, p.events);
+                p.revents = pollConsole(p.events);
             }
             if (p.revents) {
                 ready++;

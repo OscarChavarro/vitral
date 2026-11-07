@@ -3,7 +3,8 @@
 #include "programs/uptime/UptimeCommand.h"
 #include "programs/top/Top.h"
 #include "programs/shell/Shell.h"
-#include "programs/serialShell/SerialShell.h"
+#include "programs/chvt/ChvtCommand.h"
+#include "programs/mode/ModeCommand.h"
 #include "programs/vga/VgaProgram.h"
 #include "programs/sceneEditor/SceneEditorProgram.h"
 #include "programs/vitralRasterizer/VitralRasterizerProgram.h"
@@ -19,7 +20,6 @@ static const Program programsMainFunctionsIndex[] __attribute__((section(".progr
     {"uptime", &UptimeCommand::main, false},
     {"top", &Top::main, false},
     {"shell", &Shell::main},
-    {"serialShell", &SerialShell::main, false},
     {"vga", &VgaProgram::main},
     {"sceneEditor", &SceneEditorProgram::main},
     {"vitral_rasterizer", &VitralRasterizerProgram::main},
@@ -28,5 +28,7 @@ static const Program programsMainFunctionsIndex[] __attribute__((section(".progr
     {"httpd", &Httpd::main, false},
     {"init", &Init::main, false},
     {"dmesg", &DmesgCommand::main, false},
-    {"reboot", &RebootCommand::main}
+    {"reboot", &RebootCommand::main},
+    {"mode", &ModeCommand::main, false},
+    {"chvt", &ChvtCommand::main, false}
 };

@@ -1,6 +1,8 @@
 #include "kernel/Idle.h"
 #include "lib/vitralKernel/Cpu.h"
-#include "lib/vitralKernel/Printf.h"
+#include "drivers/video/virtualConsole/VirtualConsole.h"
+#include "kernel/Scheduler.h"
+#include "lib/vitralKernel/Format.h"
 
 Idle::Mode
 Idle::mode() {
@@ -54,6 +56,8 @@ Idle::run() { loop(mode(), true); }
 
 void
 Idle::stop() {
-    printf64("Kernel halted using %s.\n", name());
+    char line[64];
+    Format::print(line, sizeof(line), "Kernel halted using %s.\n", name());
+    VirtualConsole::print(Scheduler::currentConsole(), line);
     loop(mode(), false);
 }

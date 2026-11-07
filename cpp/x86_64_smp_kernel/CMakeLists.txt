@@ -67,8 +67,8 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/Multiboo
                   src/main/os/kernel/Panic.cpp src/main/os/kernel/Reboot.cpp src/main/os/kernel/Consoles.cpp src/main/os/drivers/video/virtualConsole/VirtualConsole.cpp
                   src/main/os/drivers/keyboard/Keyboard.cpp
                   src/main/os/drivers/char/CharDevice.cpp src/main/os/drivers/char/CharDevices.cpp src/main/os/drivers/hid/MouseDevice.cpp src/main/os/drivers/hid/psmouse/PsMouse.cpp
-                  src/main/os/drivers/char/uart/Uart.cpp src/main/os/drivers/char/uart/SerialDevice.cpp
-                  src/main/programs/serialShell/SerialShell.cpp
+                  src/main/os/drivers/char/uart/Uart.cpp src/main/os/drivers/char/uart/SerialTty.cpp
+                  src/main/programs/mode/ModeCommand.cpp src/main/programs/chvt/ChvtCommand.cpp
                   src/main/os/drivers/usb/Usb.cpp src/main/os/drivers/usb/UsbDevice.cpp src/main/os/drivers/usb/UsbHub.cpp
                   src/main/os/drivers/usb/uhci/Uhci.cpp src/main/os/drivers/usb/ehci/Ehci.cpp
                   src/main/os/drivers/hid/usbKeyboard/UsbKeyboard.cpp src/main/os/drivers/hid/usbMouse/UsbMouse.cpp
@@ -83,7 +83,9 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/Multiboo
                   src/main/programs/vitralRasterizer/VitralRasterizerProgram.cpp src/main/programs/vitralRaytracer/VitralRaytracerProgram.cpp
                   src/main/programs/sceneEditor/SceneEditorProgram.cpp
                   src/main/os/drivers/video/svga/Svgalib.cpp src/main/os/drivers/video/svga/SvgalibMouseContext.cpp
-                  src/main/os/drivers/tty/Tty.cpp src/main/lib/readline/Readline.cpp
+                  src/main/os/drivers/tty/Tty.cpp src/main/os/drivers/tty/VirtualConsoleTty.cpp
+                  src/main/os/drivers/tty/ControllingTty.cpp src/main/lib/readline/Readline.cpp
+                  src/main/lib/terminfo/Terminfo.cpp
                   src/main/os/drivers/video/vga/VgaMode.cpp
                   src/main/os/net/Net.cpp src/main/os/net/NetDevice.cpp
                   src/main/os/net/NetDevices.cpp src/main/os/net/Ethernet.cpp

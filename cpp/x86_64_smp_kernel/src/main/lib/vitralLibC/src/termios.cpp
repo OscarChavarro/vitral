@@ -1,7 +1,12 @@
 #include <termios.h>
 #include <errno.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include "drivers/tty/Tty.h"
+#include "fs/Err.h"
+#include "syscalls/Syscalls.h"
 
 static_assert(NCCS == Tty::CONTROL_CHARS, "termios c_cc");
 static_assert(VERASE == Tty::CC_ERASE && VKILL == Tty::CC_KILL && VEOF == Tty::CC_EOF, "termios c_cc");
@@ -20,22 +25,19 @@ static_assert(NOFLSH == Tty::NO_FLUSH && ECHOCTL == Tty::ECHO_CONTROL && ECHOKE 
               "termios c_lflag");
 static_assert(IEXTEN == Tty::EXTENDED_INPUT, "termios c_lflag");
 
-static bool
-isTerminal(int descriptor) {
-    if (!isatty(descriptor)) {
-        errno = descriptor >= 0 ? ENOTTY : EBADF;
-        return false;
-    }
-    return true;
+static_assert(TCGETS == Tty::GET_MODE && TCSETS == Tty::SET_MODE && TCSETSW == Tty::SET_MODE_DRAIN, "ioctl");
+static_assert(TCSETSF == Tty::SET_MODE_FLUSH && TCFLSH == Tty::FLUSH, "ioctl");
+static_assert(TIOCGWINSZ == Tty::GET_WINDOW_SIZE && TIOCSWINSZ == Tty::SET_WINDOW_SIZE, "ioctl");
+static_assert(sizeof(winsize) == sizeof(Tty::WindowSize), "struct winsize");
+
+static int
+failWithTerminal(int64_t result) {
+    errno = result == -Err::BADF ? EBADF : result == -Err::FAULT ? EFAULT : ENOTTY;
+    return -1;
 }
 
-int
-tcgetattr(int descriptor, struct termios *mode) {
-    if (!isTerminal(descriptor)) {
-        return -1;
-    }
-    Tty::Mode m;
-    Tty::getMode(m);
+static void
+toTermios(const Tty::Mode &m, struct termios *mode) {
     mode->c_iflag = m.inputFlags;
     mode->c_oflag = m.outputFlags;
     mode->c_cflag = m.controlFlags;
@@ -46,19 +48,10 @@ tcgetattr(int descriptor, struct termios *mode) {
     }
     mode->c_ispeed = 0;
     mode->c_ospeed = 0;
-    return 0;
 }
 
-int
-tcsetattr(int descriptor, int action, const struct termios *mode) {
-    if (!isTerminal(descriptor)) {
-        return -1;
-    }
-    if (action != TCSANOW && action != TCSADRAIN && action != TCSAFLUSH) {
-        errno = EINVAL;
-        return -1;
-    }
-    Tty::Mode m;
+static void
+fromTermios(const struct termios *mode, Tty::Mode &m) {
     m.inputFlags = mode->c_iflag;
     m.outputFlags = mode->c_oflag;
     m.controlFlags = mode->c_cflag;
@@ -66,23 +59,68 @@ tcsetattr(int descriptor, int action, const struct termios *mode) {
     for (int i = 0; i < NCCS; i++) {
         m.controlChars[i] = mode->c_cc[i];
     }
-    Tty::setMode(m, action == TCSAFLUSH);
+}
+
+int
+tcgetattr(int descriptor, struct termios *mode) {
+    Tty::Mode m;
+    int64_t r = Syscalls::ioctl(descriptor, Tty::GET_MODE, &m);
+    if (r < 0) {
+        return failWithTerminal(r);
+    }
+    toTermios(m, mode);
     return 0;
 }
 
 int
-tcflush(int descriptor, int queue) {
-    if (!isTerminal(descriptor)) {
+tcsetattr(int descriptor, int action, const struct termios *mode) {
+    if (action != TCSANOW && action != TCSADRAIN && action != TCSAFLUSH) {
+        errno = EINVAL;
         return -1;
     }
+    Tty::Mode m;
+    fromTermios(mode, m);
+    uint64_t request = action == TCSAFLUSH ? Tty::SET_MODE_FLUSH : action == TCSADRAIN ? Tty::SET_MODE_DRAIN
+                                                                                       : Tty::SET_MODE;
+    int64_t r = Syscalls::ioctl(descriptor, request, &m);
+    return r < 0 ? failWithTerminal(r) : 0;
+}
+
+int
+tcflush(int descriptor, int queue) {
     if (queue != TCIFLUSH && queue != TCOFLUSH && queue != TCIOFLUSH) {
         errno = EINVAL;
         return -1;
     }
-    if (queue != TCOFLUSH) {
-        Tty::flush();
+    int64_t r = Syscalls::ioctl(descriptor, Tty::FLUSH, (void *)(uintptr_t)queue);
+    return r < 0 ? failWithTerminal(r) : 0;
+}
+
+// The terminal requests, with struct termios translated to the kernel's Mode; any other request goes to the device.
+int
+ioctl(int descriptor, unsigned long request, ...) {
+    va_list arguments;
+    va_start(arguments, request);
+    void *argument = va_arg(arguments, void *);
+    va_end(arguments);
+    switch (request) {
+    case TCGETS:
+        return tcgetattr(descriptor, (struct termios *)argument);
+    case TCSETS:
+        return tcsetattr(descriptor, TCSANOW, (const struct termios *)argument);
+    case TCSETSW:
+        return tcsetattr(descriptor, TCSADRAIN, (const struct termios *)argument);
+    case TCSETSF:
+        return tcsetattr(descriptor, TCSAFLUSH, (const struct termios *)argument);
+    default: {
+        int64_t r = Syscalls::ioctl(descriptor, request, argument);
+        if (r < 0) {
+            errno = (int)-r;
+            return -1;
+        }
+        return (int)r;
     }
-    return 0;
+    }
 }
 
 void

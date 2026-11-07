@@ -1,144 +1,192 @@
 #include "drivers/tty/Tty.h"
-#include "drivers/keyboard/Keyboard.h"
-#include "drivers/video/virtualConsole/VirtualConsole.h"
+#include "drivers/tty/VirtualConsoleTty.h"
+#include "kernel/Scheduler.h"
+#include "lib/vitralKernel/LockGuard.h"
 #include "syscalls/Syscalls.h"
 
-Tty::Terminal Tty::terminals[VirtualConsole::COUNT];
+Tty::Tty(const char *deviceDirectory, const char *deviceName, uint16_t rows, uint16_t columns)
+    : CharDevice(deviceDirectory, deviceName), length(0), ready(0), endOfFile(false), outputColumn(0),
+      outputEscape(OutputEscape::None) {
+    defaults(mode);
+    size.rows = rows;
+    size.columns = columns;
+    size.xPixels = 0;
+    size.yPixels = 0;
+}
 
-// What a Linux console sends for the keys Keyboard reports as codes above 0xFF. Control and Shift with a letter, which
-// the Linux console sends as the control byte of Control alone, use xterm's modifyOtherKeys form, CSI 27;6;code~, so
-// programs can tell Ctrl-R from Ctrl-r. buffer holds that sequence.
-static const char *
-sequenceOf(int key, char (&buffer)[12]) {
-    int letter = key - Keyboard::KEY_CTRL_SHIFT_A;
-    if (letter >= 0 && letter < Keyboard::LETTERS) {
-        static const char PREFIX[] = "\033[27;6;";
-        unsigned n = 0;
-        for (const char *p = PREFIX; *p; p++) {
-            buffer[n++] = *p;
-        }
-        unsigned code = (unsigned)('A' + letter);
-        buffer[n++] = (char)('0' + code / 10);
-        buffer[n++] = (char)('0' + code % 10);
-        buffer[n++] = '~';
-        buffer[n] = 0;
-        return buffer;
-    }
-    switch (key) {
-    case Keyboard::KEY_UP: return "\033[A";
-    case Keyboard::KEY_DOWN: return "\033[B";
-    case Keyboard::KEY_RIGHT: return "\033[C";
-    case Keyboard::KEY_LEFT: return "\033[D";
-    case Keyboard::KEY_PAGE_UP: return "\033[5~";
-    case Keyboard::KEY_PAGE_DOWN: return "\033[6~";
-    }
-    static const char *const FUNCTION_KEYS[] = {
-        "\033[[A", "\033[[B", "\033[[C", "\033[[D", "\033[[E", "\033[17~",
-        "\033[18~", "\033[19~", "\033[20~", "\033[21~", "\033[23~", "\033[24~",
-    };
-    int function = key - Keyboard::KEY_F1;
-    if (function >= 0 && function < (int)(sizeof(FUNCTION_KEYS) / sizeof(FUNCTION_KEYS[0]))) {
-        return FUNCTION_KEYS[function];
-    }
-    return "";
+Tty *
+Tty::current() {
+    Process *self = Scheduler::cpuCount() ? Scheduler::current() : nullptr;
+    Tty *terminal = self ? self->terminal() : nullptr;
+    return terminal ? terminal : VirtualConsoleTty::of(Scheduler::currentConsole());
 }
 
 void
-Tty::defaults(Mode &mode) {
+Tty::defaults(Mode &m) {
     static const uint8_t CONTROL_DEFAULTS[CONTROL_CHARS] = {
         3, 0x1C, 0x7F, 0x15, 4, 0, 1, 0, 0x11, 0x13, 0x1A, 0, 0x12, 0x0F, 0x17, 0x16, 0,
     };
-    mode.inputFlags = CR_TO_NL | OUTPUT_FLOW_CONTROL;
-    mode.outputFlags = POST_PROCESS | NL_TO_CRNL;
-    mode.controlFlags = DEFAULT_CONTROL;
-    mode.localFlags = SIGNALS | CANONICAL | ECHO_INPUT | ECHO_ERASE | ECHO_KILL | ECHO_CONTROL | ECHO_KILL_ERASE |
-                      EXTENDED_INPUT;
+    m.inputFlags = CR_TO_NL | OUTPUT_FLOW_CONTROL;
+    m.outputFlags = POST_PROCESS | NL_TO_CRNL;
+    m.controlFlags = DEFAULT_CONTROL;
+    m.localFlags = SIGNALS | CANONICAL | ECHO_INPUT | ECHO_ERASE | ECHO_KILL | ECHO_CONTROL | ECHO_KILL_ERASE |
+                   EXTENDED_INPUT;
     for (unsigned i = 0; i < CONTROL_CHARS; i++) {
-        mode.controlChars[i] = CONTROL_DEFAULTS[i];
+        m.controlChars[i] = CONTROL_DEFAULTS[i];
     }
-}
-
-Tty::Terminal &
-Tty::mine(unsigned &console) {
-    console = Syscalls::console() % VirtualConsole::COUNT;
-    Terminal &t = terminals[console];
-    if (!t.configured) {
-        defaults(t.mode);
-        t.length = 0;
-        t.ready = 0;
-        t.endOfFile = false;
-        t.configured = true;
-    }
-    return t;
 }
 
 void
 Tty::getMode(Mode &out) {
-    unsigned console;
-    out = mine(console).mode;
+    LockGuard guard(lock);
+    out = mode;
 }
 
 void
-Tty::setMode(const Mode &mode, bool flushInput) {
-    unsigned console;
-    Terminal &t = mine(console);
-    t.mode = mode;
+Tty::setMode(const Mode &m, bool flushInput) {
     if (flushInput) {
         flush();
-    } else if (!(mode.localFlags & CANONICAL)) {
-        t.ready = t.length;
+    }
+    LockGuard guard(lock);
+    mode = m;
+    if (!(m.localFlags & CANONICAL)) {
+        ready = length;
     }
 }
 
 void
 Tty::flush() {
-    unsigned console;
-    Terminal &t = mine(console);
-    while (Keyboard::read() >= 0) {
+    uint8_t discarded[64];
+    while (fetch(discarded, sizeof(discarded)) > 0) {
     }
-    t.length = 0;
-    t.ready = 0;
-    t.endOfFile = false;
+    LockGuard guard(lock);
+    length = 0;
+    ready = 0;
+    endOfFile = false;
 }
 
 void
-Tty::store(Terminal &t, uint8_t c) {
-    bool canonical = t.mode.localFlags & CANONICAL;
-    if (t.length < INPUT_SIZE - (canonical && c != '\n' ? 1 : 0)) {
-        t.input[t.length++] = c;
+Tty::windowSize(WindowSize &out) {
+    LockGuard guard(lock);
+    out = size;
+}
+
+// Keeps outputColumn: printable characters advance it, CR and NL return it to 0, and escape sequences do not count.
+void
+Tty::track(char c) {
+    uint8_t byte = (uint8_t)c;
+    if (outputEscape == OutputEscape::Started) {
+        outputEscape = (c == '[' || c == '(' || c == ')') ? OutputEscape::Sequence : OutputEscape::None;
+        return;
+    }
+    if (outputEscape == OutputEscape::Sequence) {
+        if ((byte >= 0x40 && byte <= 0x7E) && c != '[') {
+            outputEscape = OutputEscape::None;
+        }
+        return;
+    }
+    if (c == 27) {
+        outputEscape = OutputEscape::Started;
+    } else if (c == '\r' || c == '\n') {
+        outputColumn = 0;
+    } else if (c == '\b') {
+        outputColumn = outputColumn ? outputColumn - 1 : 0;
+    } else if (c == '\t') {
+        outputColumn = (outputColumn + 8) & ~7u;
+    } else if (byte >= 32 && byte != 0x7F) {
+        outputColumn++;
+    }
+    unsigned columns = size.columns ? size.columns : 80;
+    if (outputColumn >= columns) {
+        outputColumn = 0;
+    }
+}
+
+// With the lock held: output processing (OPOST) and the device.
+void
+Tty::emit(const char *bytes, size_t count) {
+    bool crnl = (mode.outputFlags & POST_PROCESS) && (mode.outputFlags & NL_TO_CRNL);
+    char out[OUTPUT_CHUNK * 2];
+    size_t n = 0;
+    for (size_t i = 0; i < count; i++) {
+        if (n + 2 > sizeof(out)) {
+            transmit(out, n);
+            n = 0;
+        }
+        if (bytes[i] == '\n' && crnl) {
+            out[n++] = '\r';
+            track('\r');
+        }
+        out[n++] = bytes[i];
+        track(bytes[i]);
+    }
+    if (n) {
+        transmit(out, n);
+    }
+}
+
+int64_t
+Tty::write(const void *buffer, size_t count) {
+    const char *bytes = (const char *)buffer;
+    for (size_t done = 0; done < count; done += OUTPUT_CHUNK) {
+        LockGuard guard(lock);
+        emit(bytes + done, count - done < OUTPUT_CHUNK ? count - done : OUTPUT_CHUNK);
+    }
+    return (int64_t)count;
+}
+
+void
+Tty::print(const char *text) {
+    size_t n = 0;
+    while (text[n]) {
+        n++;
+    }
+    write(text, n);
+}
+
+unsigned
+Tty::column() {
+    LockGuard guard(lock);
+    return outputColumn;
+}
+
+void
+Tty::store(uint8_t c) {
+    bool canonical = mode.localFlags & CANONICAL;
+    if (length < INPUT_SIZE - (canonical && c != '\n' ? 1 : 0)) {
+        input[length++] = c;
     }
 }
 
 void
-Tty::echo(const Terminal &t, unsigned console, uint8_t c) {
-    if ((t.mode.localFlags & ECHO_CONTROL) && control(c)) {
-        VirtualConsole::putc(console, '^');
-        VirtualConsole::putc(console, (char)(c ^ 0x40));
+Tty::echo(uint8_t c) {
+    if ((mode.localFlags & ECHO_CONTROL) && control(c)) {
+        char shown[2] = {'^', (char)(c ^ 0x40)};
+        emit(shown, 2);
         return;
     }
-    VirtualConsole::putc(console, (char)c);
+    char byte = (char)c;
+    emit(&byte, 1);
 }
 
 void
-Tty::eraseLast(Terminal &t, unsigned console) {
-    if (t.length <= t.ready) {
+Tty::eraseLast() {
+    if (length <= ready) {
         return;
     }
-    uint8_t c = t.input[--t.length];
-    if ((t.mode.localFlags & (ECHO_INPUT | ECHO_ERASE)) != (ECHO_INPUT | ECHO_ERASE)) {
+    uint8_t c = input[--length];
+    if ((mode.localFlags & (ECHO_INPUT | ECHO_ERASE)) != (ECHO_INPUT | ECHO_ERASE)) {
         return;
     }
-    int columns = (t.mode.localFlags & ECHO_CONTROL) && control(c) ? 2 : 1;
+    int columns = (mode.localFlags & ECHO_CONTROL) && control(c) ? 2 : 1;
     for (int i = 0; i < columns; i++) {
-        VirtualConsole::putc(console, '\b');
-        VirtualConsole::putc(console, ' ');
-        VirtualConsole::putc(console, '\b');
+        emit("\b \b", 3);
     }
 }
 
 void
-Tty::receive(Terminal &t, unsigned console, uint8_t c) {
-    const Mode &m = t.mode;
+Tty::receive(uint8_t c) {
+    const Mode &m = mode;
     if (c == '\r') {
         if (m.inputFlags & IGNORE_CR) {
             return;
@@ -154,127 +202,199 @@ Tty::receive(Terminal &t, unsigned console, uint8_t c) {
     }
     bool echoOn = m.localFlags & ECHO_INPUT;
     if (!(m.localFlags & CANONICAL)) {
-        store(t, c);
-        t.ready = t.length;
+        store(c);
+        ready = length;
         if (echoOn) {
-            echo(t, console, c);
+            echo(c);
         }
         return;
     }
-    if (c == m.controlChars[CC_ERASE] && c) {
-        eraseLast(t, console);
+    // A serial terminal may send Backspace as BS rather than DEL: both erase.
+    if ((c == m.controlChars[CC_ERASE] && c) || c == '\b') {
+        eraseLast();
         return;
     }
     if (c == m.controlChars[CC_KILL] && c) {
-        while (t.length > t.ready) {
-            eraseLast(t, console);
+        while (length > ready) {
+            eraseLast();
         }
         return;
     }
     if (c == m.controlChars[CC_EOF] && c) {
-        if (t.length == t.ready) {
-            t.endOfFile = true;
+        if (length == ready) {
+            endOfFile = true;
         }
-        t.ready = t.length;
+        ready = length;
         return;
     }
     bool endsLine = c == '\n' || (c == m.controlChars[CC_EOL] && c) || (c == m.controlChars[CC_EOL2] && c);
-    store(t, c);
+    store(c);
     if (echoOn || (c == '\n' && (m.localFlags & ECHO_NL))) {
-        echo(t, console, c);
+        echo(c);
     }
     if (endsLine) {
-        t.ready = t.length;
+        ready = length;
     }
 }
 
+// With the lock held.
 void
-Tty::pull(Terminal &t, unsigned console) {
-    int key;
-    while ((key = Keyboard::read()) >= 0) {
-        if (key == '\n') {
-            receive(t, console, '\r');
-        } else if (key == '\b') {
-            receive(t, console, 0x7F);
-        } else if (key < 0x100) {
-            receive(t, console, (uint8_t)key);
-        } else {
-            char buffer[12];
-            for (const char *s = sequenceOf(key, buffer); *s; s++) {
-                receive(t, console, (uint8_t)*s);
-            }
+Tty::pull() {
+    uint8_t bytes[32];
+    size_t got;
+    while ((got = fetch(bytes, sizeof(bytes))) > 0) {
+        for (size_t i = 0; i < got; i++) {
+            receive(bytes[i]);
         }
     }
 }
 
+bool
+Tty::readyLocked() const {
+    if (mode.localFlags & CANONICAL) {
+        return ready > 0 || endOfFile;
+    }
+    return ready > 0;
+}
+
 size_t
-Tty::take(Terminal &t, uint8_t *buffer, size_t count) {
-    size_t n = count < t.ready ? count : t.ready;
+Tty::take(uint8_t *buffer, size_t count) {
+    size_t n = count < ready ? count : ready;
     for (size_t i = 0; i < n; i++) {
-        buffer[i] = t.input[i];
+        buffer[i] = input[i];
     }
-    for (size_t i = n; i < t.length; i++) {
-        t.input[i - n] = t.input[i];
+    for (size_t i = n; i < length; i++) {
+        input[i - n] = input[i];
     }
-    t.length -= (unsigned)n;
-    t.ready -= (unsigned)n;
+    length -= (unsigned)n;
+    ready -= (unsigned)n;
     return n;
 }
 
 bool
 Tty::readable() {
-    unsigned console;
-    Terminal &t = mine(console);
-    pull(t, console);
-    if (t.mode.localFlags & CANONICAL) {
-        return t.ready > 0 || t.endOfFile;
+    LockGuard guard(lock);
+    pull();
+    return readyLocked();
+}
+
+int64_t
+Tty::read(void *buffer, size_t count) {
+    if (count == 0) {
+        return 0;
     }
-    unsigned least = t.mode.controlChars[CC_TIME] ? 1 : t.mode.controlChars[CC_MIN];
-    return t.ready >= (least ? least : 1);
+    LockGuard guard(lock);
+    pull();
+    if (ready > 0) {
+        return (int64_t)take((uint8_t *)buffer, count);
+    }
+    if ((mode.localFlags & CANONICAL) && endOfFile) {
+        endOfFile = false;
+        return 0;
+    }
+    if (!(mode.localFlags & CANONICAL) && mode.controlChars[CC_MIN] == 0 && mode.controlChars[CC_TIME] == 0) {
+        return 0;
+    }
+    return -Err::AGAIN;
+}
+
+bool
+Tty::waitReadable(int timeoutMs) {
+    uint64_t start = Syscalls::uptimeMs();
+    while (!readable()) {
+        if (timeoutMs >= 0 && Syscalls::uptimeMs() - start >= (uint64_t)timeoutMs) {
+            return false;
+        }
+        Syscalls::sleep(POLL_MS);
+    }
+    return true;
 }
 
 size_t
-Tty::read(uint8_t *buffer, size_t count) {
-    unsigned console;
-    Terminal &t = mine(console);
+Tty::readWaiting(uint8_t *buffer, size_t count) {
     if (count == 0) {
         return 0;
     }
     uint64_t start = Syscalls::uptimeMs();
     unsigned seen = 0;
     for (;;) {
-        pull(t, console);
-        if (t.mode.localFlags & CANONICAL) {
-            if (t.ready > 0) {
-                return take(t, buffer, count);
-            }
-            if (t.endOfFile) {
-                t.endOfFile = false;
-                return 0;
-            }
-        } else {
-            unsigned least = t.mode.controlChars[CC_MIN];
-            uint64_t time = t.mode.controlChars[CC_TIME] * 100ull;
-            if (least > count) {
-                least = (unsigned)count;
-            }
-            if (t.ready != seen) {
-                seen = t.ready;
-                if (least > 0) {
-                    start = Syscalls::uptimeMs();
+        {
+            LockGuard guard(lock);
+            pull();
+            if (mode.localFlags & CANONICAL) {
+                if (ready > 0) {
+                    return take(buffer, count);
                 }
-            }
-            if (least > 0 ? t.ready >= least : t.ready > 0) {
-                return take(t, buffer, count);
-            }
-            if (least == 0 && time == 0) {
-                return 0;
-            }
-            bool timing = time > 0 && (least == 0 || seen > 0);
-            if (timing && Syscalls::uptimeMs() - start >= time) {
-                return take(t, buffer, count);
+                if (endOfFile) {
+                    endOfFile = false;
+                    return 0;
+                }
+            } else {
+                unsigned least = mode.controlChars[CC_MIN];
+                uint64_t time = mode.controlChars[CC_TIME] * 100ull;
+                if (least > count) {
+                    least = (unsigned)count;
+                }
+                if (ready != seen) {
+                    seen = ready;
+                    if (least > 0) {
+                        start = Syscalls::uptimeMs();
+                    }
+                }
+                if (least > 0 ? ready >= least : ready > 0) {
+                    return take(buffer, count);
+                }
+                if (least == 0 && time == 0) {
+                    return 0;
+                }
+                bool timing = time > 0 && (least == 0 || seen > 0);
+                if (timing && Syscalls::uptimeMs() - start >= time) {
+                    return take(buffer, count);
+                }
             }
         }
         Syscalls::sleep(POLL_MS);
+    }
+}
+
+int64_t
+Tty::ioctl(uint64_t request, void *argument) {
+    switch (request) {
+    case GET_MODE:
+        if (!argument) {
+            return -Err::FAULT;
+        }
+        getMode(*(Mode *)argument);
+        return 0;
+    case SET_MODE:
+    case SET_MODE_DRAIN:
+    case SET_MODE_FLUSH:
+        if (!argument) {
+            return -Err::FAULT;
+        }
+        setMode(*(const Mode *)argument, request == SET_MODE_FLUSH);
+        return 0;
+    case FLUSH:
+        // TCIFLUSH (0) and TCIOFLUSH (2) discard the input; output is never queued.
+        if ((uintptr_t)argument != 1) {
+            flush();
+        }
+        return 0;
+    case GET_WINDOW_SIZE:
+        if (!argument) {
+            return -Err::FAULT;
+        }
+        windowSize(*(WindowSize *)argument);
+        return 0;
+    case SET_WINDOW_SIZE: {
+        if (!argument) {
+            return -Err::FAULT;
+        }
+        LockGuard guard(lock);
+        size = *(const WindowSize *)argument;
+        return 0;
+    }
+    default:
+        return -Err::NOTTY;
     }
 }

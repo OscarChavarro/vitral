@@ -83,13 +83,14 @@ Uart::waitForTransmitter() {
 }
 
 void
-Uart::send(const char *text, size_t length) {
+Uart::send(const char *text, size_t length, bool crlf) {
     rounds = 0;
     allowedRounds = SPARE_ROUNDS + (unsigned)(length / CHARACTERS_PER_ROUND);
     startRound();
     for (size_t i = 0; i < length; i++) {
-        bool sent = text[i] != '\n' || waitForTransmitter();
-        if (sent && text[i] == '\n') {
+        bool newline = crlf && text[i] == '\n';
+        bool sent = !newline || waitForTransmitter();
+        if (sent && newline) {
             Ports::outb(COM1 + DATA, '\r');
         }
         if (!sent || !waitForTransmitter()) {
@@ -107,14 +108,25 @@ Uart::write(const char *text, size_t length) {
     }
     LockGuard guard(lock);
     if (enabled) {
-        send(text, length);
+        send(text, length, true);
+    }
+}
+
+void
+Uart::writeRaw(const char *text, size_t length) {
+    if (!enabled) {
+        return;
+    }
+    LockGuard guard(lock);
+    if (enabled) {
+        send(text, length, false);
     }
 }
 
 void
 Uart::writeUnlocked(const char *text, size_t length) {
     if (enabled) {
-        send(text, length);
+        send(text, length, true);
     }
 }
 

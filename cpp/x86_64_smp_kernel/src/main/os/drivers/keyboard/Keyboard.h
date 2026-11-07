@@ -13,6 +13,10 @@ public:
     static constexpr int KEY_RIGHT = 0x103;
     static constexpr int KEY_PAGE_UP = 0x104;
     static constexpr int KEY_PAGE_DOWN = 0x105;
+    static constexpr int KEY_HOME = 0x106;
+    static constexpr int KEY_END = 0x107;
+    static constexpr int KEY_INSERT = 0x108;
+    static constexpr int KEY_DELETE = 0x109;
     static constexpr int KEY_F1 = 0x110;
     // Control and Shift with a letter, from A to Z: a terminal sends them as xterm's modifyOtherKeys sequence, since
     // their control byte would be the same one of Control alone.
@@ -24,7 +28,10 @@ public:
     // on other buses. Interrupt context, as the PS/2 interrupt handler.
     static void injectScancode(uint8_t scancode);
     static bool ps2Present() { return ps2Found; }
+    // The next key of the calling process's console, or -1.
     static int read();
+    // The next key of a console, or -1: for its terminal.
+    static int read(unsigned console);
     static bool pending();
     static constexpr uint8_t MOD_SHIFT = 1;
     static constexpr uint8_t MOD_CTRL = 4;

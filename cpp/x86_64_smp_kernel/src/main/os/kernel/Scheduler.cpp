@@ -2,6 +2,8 @@
 #include "fs/Err.h"
 #include "kernel/Clock.h"
 #include "kernel/Consoles.h"
+#include "drivers/tty/Tty.h"
+#include "drivers/tty/VirtualConsoleTty.h"
 #include "kernel/Idle.h"
 #include "kernel/Interrupts.h"
 #include "kernel/LocalApic.h"
@@ -228,7 +230,7 @@ Scheduler::dequeue(CpuState &cpu) {
 
 Process *
 Scheduler::spawn(const Program &program, const ArgList &args, uint32_t ppid,
-                 const CpuMask &affinity, int inheritConsole, bool waitable) {
+                 const CpuMask &affinity, int inheritConsole, bool waitable, Tty *terminal) {
     LockGuard guard(lock);
     unsigned slot = 0;
     while (slot < MAX_PROCESSES && table[slot]) {
@@ -248,7 +250,11 @@ Scheduler::spawn(const Program &program, const ArgList &args, uint32_t ppid,
         }
         return nullptr;
     }
-    Process *p = new Process(nextPid++, ppid, program, args, affinity, (unsigned)console, inheritConsole < 0, stack);
+    if (!terminal) {
+        terminal = VirtualConsoleTty::of((unsigned)console);
+    }
+    Process *p = new Process(nextPid++, ppid, program, args, affinity, (unsigned)console, inheritConsole < 0, terminal,
+                             stack);
     p->waitable = waitable;
     table[slot] = p;
     enqueue(p);
@@ -583,6 +589,7 @@ Scheduler::snapshot(Syscalls::ProcessInfo *out, unsigned max) {
         info.state = (uint8_t)p->stateValue;
         info.cpu = p->cpuValue;
         info.console = (uint8_t)p->consoleValue;
+        String::copy(info.terminal, p->terminalValue ? p->terminalValue->name() : "?", sizeof(info.terminal));
         info.ticks = lapicTimers ? p->cpuTicks / TICKS_PER_PIT_TICK : p->cpuTicks;
         info.affinity = p->affinityMask.low64();
     }

@@ -4,6 +4,8 @@
 #include "fs/Err.h"
 #include <stddef.h>
 
+class Tty;
+
 class CharDevice {
 public:
     static constexpr unsigned NAME_LENGTH = 16;
@@ -17,6 +19,9 @@ public:
     virtual int64_t read(void *buffer, size_t count) = 0;
     virtual int64_t write(const void *, size_t) { return -Err::INVAL; }
     virtual bool readable() = 0;
+    virtual int64_t ioctl(uint64_t, void *) { return -Err::NOTTY; }
+    // The terminal this device is, for what needs one (a process's standard input and output), or null.
+    virtual Tty *asTty() { return nullptr; }
 
 protected:
     CharDevice(const char *deviceDirectory, const char *deviceName);

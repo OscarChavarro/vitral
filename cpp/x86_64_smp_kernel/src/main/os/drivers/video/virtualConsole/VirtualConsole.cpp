@@ -35,6 +35,10 @@ VirtualConsole::init() {
         s.cursorVisible = true;
         s.pointerX = s.pointerY = -1;
         s.esc = Esc::None;
+        s.escCount = 0;
+        s.escPrivate = false;
+        s.reversed = false;
+        s.savedX = s.savedY = 0;
         s.mode = VgaMode::Id::Text80x25;
         s.pixels = nullptr;
         s.overlayRows = nullptr;
@@ -492,69 +496,257 @@ VirtualConsole::scroll(unsigned console) {
     }
 }
 
+// In framebuffer text mode the cursor is drawn into its cell, so the cell it leaves must be drawn again.
+void
+VirtualConsole::cursorMoved(unsigned console, int oldX, int oldY) {
+    Screen &s = screens[console];
+    if (!visible(console)) {
+        return;
+    }
+    if (framebufferText(s) && (oldX != s.cx || oldY != s.cy) && oldX >= 0 && oldX < columns(s) && oldY >= 0 &&
+        oldY < rows(s)) {
+        paintCell(s, oldX, oldY);
+    }
+    paintCursor(s);
+}
+
+void
+VirtualConsole::paintRow(unsigned console, int y) {
+    Screen &s = screens[console];
+    if (!visible(console)) {
+        return;
+    }
+    for (int x = 0; x < columns(s); x++) {
+        paintCell(s, x, y);
+    }
+}
+
+// Blanks columns [from, to) of a row with the current attributes.
+void
+VirtualConsole::eraseCells(Screen &s, int y, int from, int to) {
+    for (int x = from; x < to; x++) {
+        cell(s, x, y) = (uint16_t)(s.attr << 8) | ' ';
+    }
+}
+
+// Select Graphic Rendition, as the Linux console does it on a 16 colour text screen: ANSI colour n is VGA colour
+// ANSI_TO_VGA[n], bold is the bright foreground, and reverse video swaps foreground and background.
+void
+VirtualConsole::rendition(Screen &s) {
+    static const uint8_t ANSI_TO_VGA[8] = {0, 4, 2, 6, 1, 5, 3, 7};
+    for (int i = 0; i < s.escCount || i == 0; i++) {
+        int p = i < s.escCount ? s.escParams[i] : 0;
+        if (p < 0) {
+            p = 0;
+        }
+        bool reversed = s.reversed;
+        if (reversed) {
+            s.attr = (uint8_t)((s.attr & 0x88) | (s.attr & 0x07) << 4 | (s.attr >> 4 & 0x07));
+            s.reversed = false;
+        }
+        if (p == 0) {
+            s.attr = 0x07;
+            reversed = false;
+        } else if (p == 1) {
+            s.attr |= 0x08;
+        } else if (p == 2 || p == 22) {
+            s.attr &= (uint8_t)~0x08;
+        } else if (p == 7) {
+            reversed = true;
+        } else if (p == 27) {
+            reversed = false;
+        } else if (p >= 30 && p <= 37) {
+            s.attr = (uint8_t)((s.attr & 0xF8) | ANSI_TO_VGA[p - 30]);
+        } else if (p == 39) {
+            s.attr = (uint8_t)((s.attr & 0xF8) | 0x07);
+        } else if (p >= 40 && p <= 47) {
+            s.attr = (uint8_t)((s.attr & 0x8F) | ANSI_TO_VGA[p - 40] << 4);
+        } else if (p == 49) {
+            s.attr &= 0x8F;
+        } else if (p >= 90 && p <= 97) {
+            s.attr = (uint8_t)((s.attr & 0xF0) | 0x08 | ANSI_TO_VGA[p - 90]);
+        } else if (p >= 100 && p <= 107) {
+            s.attr = (uint8_t)((s.attr & 0x8F) | ANSI_TO_VGA[p - 100] << 4);
+        }
+        if (reversed) {
+            s.attr = (uint8_t)((s.attr & 0x88) | (s.attr & 0x07) << 4 | (s.attr >> 4 & 0x07));
+            s.reversed = true;
+        }
+    }
+}
+
+// The control sequences of the "linux" terminfo entry and of a VT220 that a text console can show: cursor motion
+// (CUU CUD CUF CUB CNL CPL CHA HPA VPA CUP HVP), erasing (ED EL ECH), inserting and deleting (ICH DCH IL DL),
+// attributes (SGR), cursor save and restore, and the cursor's visibility (DECTCEM). The rest is ignored.
 void
 VirtualConsole::csi(unsigned console, char final) {
     Screen &s = screens[console];
-    int p0 = s.escParams[0];
-    int p1 = s.escParams[1];
-    if ((final == 'H' || final == 'f') && !s.escPrivate) {
-        int row = p0 > 0 ? p0 : 1;
-        int column = p1 > 0 ? p1 : 1;
-        s.cy = row > rows(s) ? rows(s) - 1 : row - 1;
-        s.cx = column > columns(s) ? columns(s) - 1 : column - 1;
-    } else if (final == 'J' && p0 == 2) {
-        for (uint16_t &c : s.cells) {
-            c = (uint16_t)(s.attr << 8) | ' ';
+    int width = columns(s);
+    int height = rows(s);
+    int p0 = s.escCount > 0 ? s.escParams[0] : -1;
+    int p1 = s.escCount > 1 ? s.escParams[1] : -1;
+    int n = p0 > 0 ? p0 : 1;
+    int oldX = s.cx;
+    int oldY = s.cy;
+    if (s.escPrivate) {
+        if ((final == 'h' || final == 'l') && p0 == 25) {
+            s.cursorVisible = final == 'h';
+        }
+        cursorMoved(console, oldX, oldY);
+        return;
+    }
+    auto clampX = [&](int x) { return x < 0 ? 0 : x >= width ? width - 1 : x; };
+    auto clampY = [&](int y) { return y < 0 ? 0 : y >= height ? height - 1 : y; };
+    switch (final) {
+    case 'A': s.cy = clampY(s.cy - n); break;
+    case 'B': case 'e': s.cy = clampY(s.cy + n); break;
+    case 'C': case 'a': s.cx = clampX(s.cx + n); break;
+    case 'D': s.cx = clampX(s.cx - n); break;
+    case 'E': s.cy = clampY(s.cy + n); s.cx = 0; break;
+    case 'F': s.cy = clampY(s.cy - n); s.cx = 0; break;
+    case 'G': case '`': s.cx = clampX(n - 1); break;
+    case 'd': s.cy = clampY(n - 1); break;
+    case 'H': case 'f':
+        s.cy = clampY((p0 > 0 ? p0 : 1) - 1);
+        s.cx = clampX((p1 > 0 ? p1 : 1) - 1);
+        break;
+    case 'J': {
+        int mode = p0 < 0 ? 0 : p0;
+        int first = mode == 0 ? s.cy + 1 : 0;
+        int last = mode == 1 ? s.cy - 1 : height - 1;
+        if (mode == 0) {
+            eraseCells(s, s.cy, s.cx, width);
+        } else if (mode == 1) {
+            eraseCells(s, s.cy, 0, s.cx + 1);
+        }
+        for (int y = mode >= 2 ? 0 : first; y <= (mode >= 2 ? height - 1 : last); y++) {
+            eraseCells(s, y, 0, width);
         }
         if (visible(console)) {
             paintAll();
         }
-    } else if (final == 'm') {
-        for (int i = 0; i <= s.escIndex && i < 2; i++) {
-            int p = s.escParams[i];
-            if (p <= 0) {
-                s.attr = 0x07;
-            } else if (p == 1) {
-                s.attr |= 0x08;
-            } else if (p == 7) {
-                s.attr = (uint8_t)((s.attr & 0x88) | (s.attr & 0x07) << 4 | (s.attr >> 4 & 0x07));
+        break;
+    }
+    case 'K': {
+        int mode = p0 < 0 ? 0 : p0;
+        eraseCells(s, s.cy, mode == 0 ? s.cx : 0, mode == 1 ? s.cx + 1 : width);
+        paintRow(console, s.cy);
+        break;
+    }
+    case 'X':
+        eraseCells(s, s.cy, s.cx, s.cx + n < width ? s.cx + n : width);
+        paintRow(console, s.cy);
+        break;
+    case 'P':
+        for (int x = s.cx; x < width; x++) {
+            cell(s, x, s.cy) = x + n < width ? cell(s, x + n, s.cy) : (uint16_t)((s.attr << 8) | ' ');
+        }
+        paintRow(console, s.cy);
+        break;
+    case '@':
+        for (int x = width - 1; x >= s.cx; x--) {
+            cell(s, x, s.cy) = x - n >= s.cx ? cell(s, x - n, s.cy) : (uint16_t)((s.attr << 8) | ' ');
+        }
+        paintRow(console, s.cy);
+        break;
+    case 'L':
+    case 'M':
+        for (int i = 0; i < n; i++) {
+            if (final == 'L') {
+                for (int y = height - 1; y > s.cy; y--) {
+                    for (int x = 0; x < width; x++) {
+                        cell(s, x, y) = cell(s, x, y - 1);
+                    }
+                }
+                eraseCells(s, s.cy, 0, width);
+            } else {
+                for (int y = s.cy; y < height - 1; y++) {
+                    for (int x = 0; x < width; x++) {
+                        cell(s, x, y) = cell(s, x, y + 1);
+                    }
+                }
+                eraseCells(s, height - 1, 0, width);
             }
         }
-    } else if ((final == 'h' || final == 'l') && s.escPrivate && p0 == 25) {
-        s.cursorVisible = final == 'h';
+        s.cx = 0;
+        if (visible(console)) {
+            paintAll();
+        }
+        break;
+    case 'm': rendition(s); break;
+    case 's': s.savedX = s.cx; s.savedY = s.cy; break;
+    case 'u': s.cx = clampX(s.savedX); s.cy = clampY(s.savedY); break;
+    default: break;
     }
-    if (visible(console)) {
-        paintCursor(s);
-    }
+    cursorMoved(console, oldX, oldY);
 }
 
 void
 VirtualConsole::escape(unsigned console, char c) {
     Screen &s = screens[console];
+    if (s.esc == Esc::Charset) {
+        s.esc = Esc::None;
+        return;
+    }
     if (s.esc == Esc::Started) {
+        s.esc = Esc::None;
+        int oldX = s.cx;
+        int oldY = s.cy;
         if (c == '[') {
             s.esc = Esc::Csi;
-            s.escParams[0] = s.escParams[1] = -1;
-            s.escIndex = 0;
+            s.escCount = 0;
             s.escPrivate = false;
-        } else {
-            s.esc = Esc::None;
+        } else if (c == '(' || c == ')' || c == '#' || c == '%') {
+            s.esc = Esc::Charset;
+        } else if (c == '7') {
+            s.savedX = s.cx;
+            s.savedY = s.cy;
+        } else if (c == '8') {
+            s.cx = s.savedX < columns(s) ? s.savedX : columns(s) - 1;
+            s.cy = s.savedY < rows(s) ? s.savedY : rows(s) - 1;
+        } else if (c == 'M') {
+            s.cy = s.cy > 0 ? s.cy - 1 : 0;
+        } else if (c == 'c') {
+            s.attr = 0x07;
+            s.reversed = false;
+            s.cursorVisible = true;
+            for (int y = 0; y < rows(s); y++) {
+                eraseCells(s, y, 0, columns(s));
+            }
+            s.cx = s.cy = 0;
+            if (visible(console)) {
+                paintAll();
+            }
         }
-    } else if (c >= '0' && c <= '9') {
-        int &p = s.escParams[s.escIndex];
+        cursorMoved(console, oldX, oldY);
+        return;
+    }
+    if (c >= '0' && c <= '9') {
+        if (s.escCount == 0) {
+            s.escCount = 1;
+            s.escParams[0] = -1;
+        }
+        int &p = s.escParams[s.escCount - 1];
         p = (p < 0 ? 0 : p) * 10 + (c - '0');
         if (p > 9999) {
             p = 9999;
         }
     } else if (c == ';') {
-        if (s.escIndex < 1) {
-            s.escIndex++;
+        if (s.escCount == 0) {
+            s.escCount = 1;
+            s.escParams[0] = -1;
         }
-    } else if (c == '?') {
+        if (s.escCount < ESC_PARAMS) {
+            s.escParams[s.escCount++] = -1;
+        }
+    } else if (c == '?' || c == '>' || c == '=') {
         s.escPrivate = true;
-    } else if (c >= 0x40 && c <= 0x7E) {
+    } else if ((uint8_t)c >= 0x40 && (uint8_t)c <= 0x7E) {
         s.esc = Esc::None;
         csi(console, c);
+    } else if ((uint8_t)c >= 0x80 || c == 27) {
+        // Not a sequence after all; other control characters inside one are ignored.
+        s.esc = Esc::None;
     }
 }
 
@@ -565,6 +757,12 @@ VirtualConsole::putc(unsigned console, char c) {
     Screen &s = screens[console];
     if (s.esc != Esc::None) { escape(console, c); return; }
     if (c == 27) { s.esc = Esc::Started; return; }
+    // Bell, the shift-in and shift-out of sgr0 and DEL show nothing.
+    if (c == 0 || c == 7 || c == 14 || c == 15 || c == 0x7F) {
+        return;
+    }
+    int oldX = s.cx;
+    int oldY = s.cy;
     if (c == '\n') { s.cx = 0; s.cy++; }
     else if (c == '\r') { s.cx = 0; }
     else if (c == '\t') { s.cx = (s.cx + 8) & ~7; }
@@ -583,8 +781,13 @@ VirtualConsole::putc(unsigned console, char c) {
     if (s.cy >= rows(s)) {
         scroll(console);
     }
-    if (visible(console)) {
-        paintCursor(s);
+    cursorMoved(console, oldX, oldY);
+}
+
+void
+VirtualConsole::print(unsigned console, const char *text) {
+    for (; *text; text++) {
+        putc(console, *text);
     }
 }
 
@@ -611,6 +814,7 @@ void
 VirtualConsole::setAttr(unsigned console, uint8_t attr) {
     Locked guard;
     screens[resolve(console)].attr = attr;
+    screens[resolve(console)].reversed = false;
 }
 
 void
@@ -667,11 +871,11 @@ VirtualConsole::setCursor(unsigned console, int x, int y) {
     Locked guard;
     console = resolve(console);
     Screen &s = screens[console];
+    int oldX = s.cx;
+    int oldY = s.cy;
     s.cx = x;
     s.cy = y;
-    if (visible(console)) {
-        paintCursor(s);
-    }
+    cursorMoved(console, oldX, oldY);
 }
 
 void
@@ -680,6 +884,9 @@ VirtualConsole::showCursor(unsigned console, bool visibleFlag) {
     console = resolve(console);
     Screen &s = screens[console];
     s.cursorVisible = visibleFlag;
+    if (visible(console) && framebufferText(s) && s.cx >= 0 && s.cx < columns(s) && s.cy >= 0 && s.cy < rows(s)) {
+        paintCell(s, s.cx, s.cy);
+    }
     if (visible(console)) {
         paintCursor(s);
     }

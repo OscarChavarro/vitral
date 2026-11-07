@@ -167,7 +167,7 @@ describeByName(int mode, vga_modeinfo &out) {
 static void
 saveTermios(unsigned console) {
     Tty::Mode &text = textTermios[console];
-    Tty::getMode(text);
+    Tty::current()->getMode(text);
     Tty::Mode &graph = graphTermios[console];
     graph = text;
     graph.inputFlags &= ~(Tty::BREAK_INTERRUPT | Tty::MARK_PARITY | Tty::PARITY_CHECK | Tty::UPPER_TO_LOWER |
@@ -219,7 +219,7 @@ vga_setmode(int mode) {
         const VgaMode::Info &info = VgaMode::info(id);
         SvgalibMouse::fitToMode(info.width, info.height);
     }
-    Tty::setMode(mode == TEXT ? textTermios[console] : graphTermios[console], false);
+    Tty::current()->setMode(mode == TEXT ? textTermios[console] : graphTermios[console], false);
     return 0;
 }
 
@@ -442,7 +442,7 @@ vga_setpalvec(int start, int num, int *pal) {
 int
 vga_getkey() {
     uint8_t c;
-    if (!Tty::readable() || Tty::read(&c, 1) != 1) {
+    if (Tty::current()->read(&c, 1) != 1) {
         return 0;
     }
     return (char)c;

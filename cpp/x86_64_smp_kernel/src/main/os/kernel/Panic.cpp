@@ -1,8 +1,8 @@
 #include "kernel/Panic.h"
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "kernel/Idle.h"
+#include "kernel/Scheduler.h"
 #include "drivers/char/uart/Uart.h"
-#include "lib/vitralKernel/Printf.h"
 #include "lib/vitralKernel/PrintfImpl.h"
 
 static const char *const EXCEPTION_NAMES[32] = {
@@ -36,7 +36,7 @@ Panic::print(const char *fmt, ...) {
     PrintfImpl::format<PanicLineOut>(fmt, ap);
     va_end(ap);
     PanicLineOut::line[PanicLineOut::length] = 0;
-    printf64("%s", PanicLineOut::line);
+    VirtualConsole::print(Scheduler::currentConsole(), PanicLineOut::line);
     Uart::writeUnlocked(PanicLineOut::line, PanicLineOut::length);
 }
 

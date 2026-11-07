@@ -1,8 +1,10 @@
 #include "kernel/Process.h"
+#include "drivers/tty/Tty.h"
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "fs/Vfs.h"
 #include "kernel/KernelHeap.h"
 #include "kernel/Scheduler.h"
+#include "lib/vitralKernel/Format.h"
 #include "lib/vitralKernel/Memory.h"
 #include "syscalls/Syscalls.h"
 #include "lib/vitralKernel/String.h"
@@ -14,7 +16,8 @@ char *Process::pooledStacks[Process::STACK_POOL];
 size_t Process::pooledSizes[Process::STACK_POOL];
 
 Process::Process()
-    : pidValue(0), ppidValue(0), consoleValue(0), ownsConsoleValue(true), stateValue(State::Ready), cpuValue(-1), program(nullptr),
+    : pidValue(0), ppidValue(0), consoleValue(0), ownsConsoleValue(true), terminalValue(nullptr),
+      stateValue(State::Ready), cpuValue(-1), program(nullptr),
       stack(nullptr), stackSize(STACK_SIZE), threadEntry(nullptr), threadArgument(nullptr), threadData(nullptr),
       waitAddress(nullptr), frame(nullptr), wakeNs(0), cpuTicks(0), waitNext(nullptr), errorValue(0), exitCodeValue(0), waitable(false),
       exited(false), waitingFor(0), waitStatus(nullptr), resources(nullptr),
@@ -39,10 +42,12 @@ Process::allocateStack(size_t size) {
 }
 
 Process::Process(uint32_t pid, uint32_t ppid, const Program &prog, const ArgList &a,
-                 const CpuMask &affinity, unsigned console, bool ownsConsole, char *stackMemory) : Process() {
+                 const CpuMask &affinity, unsigned console, bool ownsConsole, Tty *terminal, char *stackMemory)
+    : Process() {
     pidValue = pid;
     consoleValue = console;
     ownsConsoleValue = ownsConsole;
+    terminalValue = terminal;
     ppidValue = ppid;
     affinityMask = affinity;
     stack = stackMemory;
@@ -62,6 +67,7 @@ Process::Process(uint32_t pid, Process *creator, void (*entry)(void *), void *ar
     ppidValue = creator->pidValue;
     consoleValue = creator->consoleValue;
     ownsConsoleValue = false;
+    terminalValue = creator->terminalValue;
     affinityMask = affinity;
     stackSize = size;
     stack = stackMemory;
@@ -153,6 +159,13 @@ Process::start() {
     }
     if (self->ownsConsoleValue) {
         VirtualConsole::clear(self->console(), 0x07);
+        if (self->terminalValue && self->terminalValue->console() != (int)self->console()) {
+            char line[VirtualConsole::COLS + 1];
+            Format::print(line, sizeof(line), "KERNEL: %s (PID %u) runs on /dev/%s; this console shows its graphics",
+                          self->nameBuffer, self->pidValue, self->terminalValue->name());
+            VirtualConsole::writeAt(self->console(), 0, 0, line, 0x07);
+            VirtualConsole::setCursor(self->console(), 0, 1);
+        }
     }
     int code = self->program->main(self->args);
     Syscalls::exit(code);

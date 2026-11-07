@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include "syscalls/Syscalls.h"
+#include "drivers/tty/Tty.h"
 
 int
 abs(int value) { return value < 0 ? -value : value; }
@@ -276,8 +277,14 @@ abort() {
 
 int
 atexit(void (*)()) { return 0; }
+// There is no environment, but TERM is the terminfo name of the calling process's terminal.
 char *
-getenv(const char *) { return nullptr; }
+getenv(const char *name) {
+    if (name && strcmp(name, "TERM") == 0) {
+        return (char *)Tty::current()->type();
+    }
+    return nullptr;
+}
 int
 setenv(const char *, const char *, int) { return -1; }
 int

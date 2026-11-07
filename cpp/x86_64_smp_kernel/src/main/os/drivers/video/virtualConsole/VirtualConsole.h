@@ -18,6 +18,9 @@ public:
     static void takeOver();
 
     static void putc(unsigned console, char c);
+    // putc() for each character of a C string: for the kernel's own messages, which go to the screen whatever
+    // terminal the process has.
+    static void print(unsigned console, const char *text);
     static void clear(unsigned console, uint8_t attr);
     static void setAttr(unsigned console, uint8_t attr);
 
@@ -55,7 +58,8 @@ public:
     static void setPointer(unsigned console, int x, int y);
 
 private:
-    enum class Esc : uint8_t { None, Started, Csi };
+    enum class Esc : uint8_t { None, Started, Csi, Charset };
+    static constexpr int ESC_PARAMS = 8;
 
     class Screen {
     public:
@@ -67,9 +71,12 @@ private:
         int pointerX;
         int pointerY;
         Esc esc;
-        int escParams[2];
-        uint8_t escIndex;
+        int escParams[ESC_PARAMS];
+        uint8_t escCount;
         bool escPrivate;
+        bool reversed;
+        int savedX;
+        int savedY;
         VgaMode::Id mode;
         uint8_t palette[VgaMode::PALETTE_BYTES];
         uint8_t *pixels;
@@ -123,6 +130,10 @@ private:
     static void scroll(unsigned console);
     static void escape(unsigned console, char c);
     static void csi(unsigned console, char final);
+    static void rendition(Screen &s);
+    static void eraseCells(Screen &s, int y, int from, int to);
+    static void paintRow(unsigned console, int y);
+    static void cursorMoved(unsigned console, int oldX, int oldY);
 };
 
 #endif

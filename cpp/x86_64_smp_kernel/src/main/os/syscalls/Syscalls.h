@@ -10,6 +10,8 @@
 #include "net/NetConfig.h"
 #include "kernel/ArgList.h"
 
+class Tty;
+
 class Syscalls {
 public:
     static constexpr uint64_t SYS_SCHED_YIELD = 24;
@@ -87,6 +89,7 @@ public:
         uint8_t state;
         int32_t cpu;
         uint8_t console;
+        char terminal[16];
         uint64_t ticks;
         uint64_t affinity;
     };
@@ -112,8 +115,11 @@ public:
     static unsigned console();
     static int64_t consoleOf(uint32_t pid) { return call(SYS_GETCONSOLE, pid); }
     static void switchConsole(unsigned console) { call(SYS_SWITCH_CONSOLE, console); }
-    static int64_t spawn(const char *name, const ArgList &args);
-    static int64_t run(const char *name, const ArgList &args);
+    // Starts a program on a console of its own; run() starts it on the caller's console and lets the caller wait for
+    // it. Its terminal (standard input, output and error) is that console's for spawn() and the caller's for run(),
+    // unless terminal is the descriptor of another one, such as an open /dev/ttyS0 (-Err::NOTTY if it is not one).
+    static int64_t spawn(const char *name, const ArgList &args, int terminal = -1);
+    static int64_t run(const char *name, const ArgList &args, int terminal = -1);
     static int64_t waitpid(int64_t pid, int *status, int options = 0);
     static int exitCode(int status) { return (status >> 8) & 0xFF; }
     static int64_t createThread(void (*entry)(void *), void *argument, size_t stackSize);
@@ -125,6 +131,9 @@ public:
     static uint64_t uptimeMs();
     [[noreturn]] static void reboot();
 
+    // Descriptors 0, 1 and 2 are the process's terminal. Reading, writing and ioctl() on them are plain calls, since
+    // a terminal does not block: read() returns -Err::AGAIN when there is nothing yet, and poll() waits.
+    static Tty *terminal();
     static int64_t open(const char *path, int flags);
     static int64_t close(int fd);
     static int64_t read(int fd, void *buffer, size_t count);
@@ -163,6 +172,8 @@ public:
 
 private:
     static int64_t fileCall(TrapFrame *frame);
+    static int64_t terminalCall(Tty *terminal, uint64_t number, const TrapFrame *frame);
+    static Tty *terminalOf(int fd, int64_t &error);
     static int64_t tcpWait(uint64_t number, int64_t socket, void *buffer, size_t size, uint32_t timeoutMs);
 };
 

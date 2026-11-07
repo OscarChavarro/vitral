@@ -1,4 +1,5 @@
 #include "fs/Vfs.h"
+#include "drivers/char/CharDevice.h"
 #include "drivers/block/BlockDevice.h"
 #include "fs/DevFs.h"
 #include "fs/Fat.h"
@@ -316,6 +317,13 @@ Vfs::close(OpenFile *file) {
 
 int64_t
 Vfs::read(OpenFile *file, void *buffer, size_t count) {
+    // A character device has its own locking, and a terminal may take a while (a serial line): not under vfsLock.
+    if (file->inode.charDevice) {
+        if ((file->flags & OpenFlag::ACCESS_MASK) == OpenFlag::WRONLY) {
+            return -Err::BADF;
+        }
+        return file->inode.charDevice->read(buffer, count);
+    }
     LockGuard guard(vfsLock);
     if ((file->flags & OpenFlag::ACCESS_MASK) == OpenFlag::WRONLY) {
         return -Err::BADF;
@@ -332,6 +340,12 @@ Vfs::read(OpenFile *file, void *buffer, size_t count) {
 
 int64_t
 Vfs::write(OpenFile *file, const void *buffer, size_t count) {
+    if (file->inode.charDevice) {
+        if ((file->flags & OpenFlag::ACCESS_MASK) == OpenFlag::RDONLY) {
+            return -Err::BADF;
+        }
+        return file->inode.charDevice->write(buffer, count);
+    }
     LockGuard guard(vfsLock);
     if ((file->flags & OpenFlag::ACCESS_MASK) == OpenFlag::RDONLY) {
         return -Err::BADF;
@@ -429,12 +443,18 @@ Vfs::sync(OpenFile *file) {
 
 int
 Vfs::poll(OpenFile *file, int events) {
+    if (file->inode.charDevice) {
+        return file->inode.fs->poll(file->inode, events);
+    }
     LockGuard guard(vfsLock);
     return file->inode.fs->poll(file->inode, events);
 }
 
 int64_t
 Vfs::ioctl(OpenFile *file, uint64_t request, void *argument) {
+    if (file->inode.charDevice) {
+        return file->inode.charDevice->ioctl(request, argument);
+    }
     LockGuard guard(vfsLock);
     BlockDevice *device = file->inode.device;
     if (file->inode.mode != FileType::BLOCK_DEVICE || !device) {

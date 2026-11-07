@@ -4,6 +4,7 @@
 
 uint32_t Consoles::owner[Consoles::COUNT];
 bool Consoles::retained[Consoles::COUNT];
+unsigned Consoles::previousIndex = 0;
 SpinLock Consoles::lock;
 
 int
@@ -76,6 +77,9 @@ Consoles::switchTo(unsigned console) {
         LockGuard guard(lock);
         if (owner[console] == 0 && !retained[console]) {
             showEmptyMessage(console);
+        }
+        if (console != VirtualConsole::active()) {
+            previousIndex = VirtualConsole::active();
         }
     }
     VirtualConsole::switchTo(console);

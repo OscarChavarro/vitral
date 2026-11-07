@@ -4,7 +4,7 @@
 
 class CharDevices {
 public:
-    static constexpr unsigned MAX = 8;
+    static constexpr unsigned MAX = 24;
 
     static bool add(CharDevice *device);
     static unsigned count();

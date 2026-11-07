@@ -1,11 +1,12 @@
 #include "kernel/KernelLog.h"
 #include "kernel/Clock.h"
 #include "lib/vitralKernel/Format.h"
-#include "lib/vitralKernel/Printf.h"
 #include "lib/vitralKernel/PrintfImpl.h"
 #include "lib/vitralKernel/LockGuard.h"
 #include "kernel/KlogOut.h"
 #include "drivers/char/uart/Uart.h"
+#include "drivers/video/virtualConsole/VirtualConsole.h"
+#include "kernel/Scheduler.h"
 
 char KernelLog::data[KernelLog::SIZE];
 size_t KernelLog::head = 0;
@@ -117,7 +118,7 @@ kprintf(const char *fmt, ...) {
         KernelLog::append("\n", 1);
     }
 
-    printf64("%s", message);
+    VirtualConsole::print(Scheduler::currentConsole(), message);
     bool serial = Uart::ready();
     Uart::write(stamp, stampLength);
     Uart::write(message, length);

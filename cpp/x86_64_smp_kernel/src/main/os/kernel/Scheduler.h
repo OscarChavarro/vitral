@@ -13,7 +13,8 @@ public:
 
     static void init(unsigned cpus);
     static Process *spawn(const Program &program, const ArgList &args, uint32_t ppid,
-                          const CpuMask &affinity, int inheritConsole = -1, bool waitable = false);
+                          const CpuMask &affinity, int inheritConsole = -1, bool waitable = false,
+                          Tty *terminal = nullptr);
     static Process *spawnThread(void (*entry)(void *), void *argument, size_t stackSize, Process *creator,
                                 const CpuMask &affinity);
     [[noreturn]] static void start();

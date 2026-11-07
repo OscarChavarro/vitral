@@ -10,7 +10,8 @@ public:
 
 private:
     static constexpr unsigned MAX_ROWS = 256;
-    static constexpr uint8_t NORMAL = 0x07;
+    static constexpr unsigned LINE_SIZE = 128;
+    static constexpr int STDOUT = 1;
     static constexpr const char *PROMPT = "> ";
 
     class Commands : public Readline::Completions {
@@ -33,7 +34,7 @@ private:
     void runProgram(const char *name, const ArgList &args);
     static const char *stateName(uint8_t state);
 
-    unsigned console;
+    Tty &terminal;
     uint32_t pid;
     Syscalls::ProcessInfo *list;
     Readline *input;

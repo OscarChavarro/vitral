@@ -1,9 +1,11 @@
 #include "drivers/block/BlockDevice.h"
-#include "drivers/char/uart/SerialDevice.h"
+#include "drivers/char/uart/SerialTty.h"
 #include "drivers/char/uart/Uart.h"
 #include "drivers/hid/MouseDevice.h"
 #include "drivers/hid/psmouse/PsMouse.h"
 #include "drivers/keyboard/Keyboard.h"
+#include "drivers/tty/ControllingTty.h"
+#include "drivers/tty/VirtualConsoleTty.h"
 #include "drivers/video/svga/Svga.h"
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "fs/Vfs.h"
@@ -65,8 +67,10 @@ kernelMain() {
     // Takes the USB controllers from the BIOS, which ends its PS/2 emulation, before the PS/2 devices are probed.
     Usb::takeOver();
     Keyboard::init();
+    VirtualConsoleTty::init();
+    ControllingTty::init();
     MouseDevice::init();
-    SerialDevice::init();
+    SerialTty::init();
     PsMouse::init();
     Svga::init();
     if (Svga::supportsFramebufferText()) {

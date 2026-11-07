@@ -1,5 +1,8 @@
 #include "syscalls/Syscalls.h"
 #include "fs/Err.h"
+#include "drivers/char/CharDevice.h"
+#include "drivers/tty/Tty.h"
+#include "fs/FileType.h"
 #include "fs/Vfs.h"
 #include "kernel/Clock.h"
 #include "kernel/Consoles.h"
@@ -48,13 +51,13 @@ Syscalls::exec(const char *name, const ArgList &args) {
 }
 
 int64_t
-Syscalls::spawn(const char *name, const ArgList &args) {
-    return call(SYS_SPAWN, (uint64_t)(uintptr_t)name, (uint64_t)(uintptr_t)&args);
+Syscalls::spawn(const char *name, const ArgList &args, int terminal) {
+    return call(SYS_SPAWN, (uint64_t)(uintptr_t)name, (uint64_t)(uintptr_t)&args, (uint64_t)(int64_t)terminal);
 }
 
 int64_t
-Syscalls::run(const char *name, const ArgList &args) {
-    return call(SYS_RUN, (uint64_t)(uintptr_t)name, (uint64_t)(uintptr_t)&args);
+Syscalls::run(const char *name, const ArgList &args, int terminal) {
+    return call(SYS_RUN, (uint64_t)(uintptr_t)name, (uint64_t)(uintptr_t)&args, (uint64_t)(int64_t)terminal);
 }
 
 int64_t
@@ -127,14 +130,30 @@ Syscalls::uptimeMs() { return Clock::uptimeMs(); }
 void
 Syscalls::reboot() { Reboot::restart(); }
 
+Tty *
+Syscalls::terminal() { return Tty::current(); }
+
+static bool
+isTerminalDescriptor(int fd) { return fd >= 0 && fd < (int)Process::FIRST_FILE; }
+
 int64_t
 Syscalls::open(const char *path, int flags) { return call(SYS_OPEN, ARG(path), (uint64_t)(int64_t)flags); }
 int64_t
 Syscalls::close(int fd) { return call(SYS_CLOSE, (uint64_t)(int64_t)fd); }
 int64_t
-Syscalls::read(int fd, void *buffer, size_t count) { return call(SYS_READ, (uint64_t)(int64_t)fd, ARG(buffer), count); }
+Syscalls::read(int fd, void *buffer, size_t count) {
+    if (isTerminalDescriptor(fd)) {
+        return buffer || !count ? Tty::current()->read(buffer, count) : -Err::FAULT;
+    }
+    return call(SYS_READ, (uint64_t)(int64_t)fd, ARG(buffer), count);
+}
 int64_t
-Syscalls::write(int fd, const void *buffer, size_t count) { return call(SYS_WRITE, (uint64_t)(int64_t)fd, ARG(buffer), count); }
+Syscalls::write(int fd, const void *buffer, size_t count) {
+    if (isTerminalDescriptor(fd)) {
+        return buffer || !count ? Tty::current()->write(buffer, count) : -Err::FAULT;
+    }
+    return call(SYS_WRITE, (uint64_t)(int64_t)fd, ARG(buffer), count);
+}
 int64_t
 Syscalls::pread(int fd, void *buffer, size_t count, uint64_t offset) {
     return call(SYS_PREAD, (uint64_t)(int64_t)fd, ARG(buffer), count, offset);
@@ -152,7 +171,12 @@ Syscalls::ftruncate(int fd, uint64_t size) { return call(SYS_FTRUNCATE, (uint64_
 int64_t
 Syscalls::fsync(int fd) { return call(SYS_FSYNC, (uint64_t)(int64_t)fd); }
 int64_t
-Syscalls::ioctl(int fd, uint64_t request, void *argument) { return call(SYS_IOCTL, (uint64_t)(int64_t)fd, request, ARG(argument)); }
+Syscalls::ioctl(int fd, uint64_t request, void *argument) {
+    if (isTerminalDescriptor(fd)) {
+        return Tty::current()->ioctl(request, argument);
+    }
+    return call(SYS_IOCTL, (uint64_t)(int64_t)fd, request, ARG(argument));
+}
 int64_t
 Syscalls::poll(PollRecord *records, unsigned count, int timeoutMs) {
     uint64_t start = uptimeMs();
@@ -319,9 +343,19 @@ Syscalls::handle(TrapFrame *f) {
             f->setResult((uint64_t)-ERR_NOENT);
             return f;
         }
-        Process *child = Scheduler::spawn(
-            *program, *args, Scheduler::current()->pid(), CpuMask::all(),
-            f->number() == SYS_RUN ? (int)Scheduler::current()->console() : -1, f->number() == SYS_RUN);
+        Process *self = Scheduler::current();
+        bool run = f->number() == SYS_RUN;
+        Tty *terminal = run ? self->terminal() : nullptr;
+        if ((int64_t)arg2 >= 0) {
+            int64_t error = 0;
+            terminal = terminalOf((int)(int64_t)arg2, error);
+            if (!terminal) {
+                f->setResult((uint64_t)error);
+                return f;
+            }
+        }
+        Process *child = Scheduler::spawn(*program, *args, self->pid(), CpuMask::all(),
+                                          run ? (int)self->console() : -1, run, terminal);
         f->setResult(child ? child->pid() : (uint64_t)-ERR_AGAIN);
         return f;
     }
@@ -407,6 +441,55 @@ Syscalls::handle(TrapFrame *f) {
     }
 }
 
+// The terminal behind a descriptor: the process's own one for 0, 1 and 2, otherwise an open terminal device.
+Tty *
+Syscalls::terminalOf(int fd, int64_t &error) {
+    Process *self = Scheduler::current();
+    if (isTerminalDescriptor(fd)) {
+        return self->terminal();
+    }
+    OpenFile *file = self->file(fd);
+    if (!file) {
+        error = -Err::BADF;
+        return nullptr;
+    }
+    Tty *terminal = file->inode.charDevice ? file->inode.charDevice->asTty() : nullptr;
+    if (!terminal) {
+        error = -Err::NOTTY;
+    }
+    return terminal;
+}
+
+// Descriptors 0, 1 and 2 through the trap: the plain calls above are the usual way.
+int64_t
+Syscalls::terminalCall(Tty *terminal, uint64_t number, const TrapFrame *f) {
+    const uint64_t arg1 = f->argument(1);
+    const uint64_t arg2 = f->argument(2);
+    switch (number) {
+    case SYS_READ:
+        return arg1 || !arg2 ? terminal->read((void *)arg1, arg2) : -Err::FAULT;
+    case SYS_WRITE:
+        return arg1 || !arg2 ? terminal->write((const void *)arg1, arg2) : -Err::FAULT;
+    case SYS_IOCTL:
+        return terminal->ioctl(arg1, (void *)arg2);
+    case SYS_FSTAT: {
+        if (!arg1) {
+            return -Err::FAULT;
+        }
+        FileStat &st = *(FileStat *)arg1;
+        st = FileStat();
+        st.mode = FileType::CHAR_DEVICE;
+        return 0;
+    }
+    case SYS_FSYNC: case SYS_FDATASYNC:
+        return 0;
+    case SYS_LSEEK: case SYS_PREAD: case SYS_PWRITE:
+        return -Err::SPIPE;
+    default:
+        return -Err::INVAL;
+    }
+}
+
 int64_t
 Syscalls::fileCall(TrapFrame *f) {
     const uint64_t arg0 = f->argument(0);
@@ -418,6 +501,9 @@ Syscalls::fileCall(TrapFrame *f) {
     switch (f->number()) {
     case SYS_READ: case SYS_WRITE: case SYS_PREAD: case SYS_PWRITE: case SYS_LSEEK: case SYS_IOCTL:
     case SYS_FSTAT: case SYS_FSYNC: case SYS_FDATASYNC: case SYS_FTRUNCATE: case SYS_GETDENTS:
+        if (isTerminalDescriptor((int)arg0) && self->terminal()) {
+            return terminalCall(self->terminal(), f->number(), f);
+        }
         file = self->file((int)arg0);
         if (!file) {
             return -Err::BADF;
@@ -435,9 +521,18 @@ Syscalls::fileCall(TrapFrame *f) {
         int64_t ready = 0;
         for (uint64_t i = 0; i < arg1; i++) {
             OpenFile *polled = records[i].fd >= 0 ? self->file(records[i].fd) : nullptr;
-            records[i].revents = records[i].fd < 0 ? 0
-                                 : polled          ? (int16_t)Vfs::poll(polled, records[i].events)
-                                                   : PollEvent::NVAL;
+            Tty *terminal = isTerminalDescriptor(records[i].fd) ? self->terminal() : nullptr;
+            if (terminal) {
+                int events = records[i].events & PollEvent::OUT;
+                if ((records[i].events & PollEvent::IN) && terminal->readable()) {
+                    events |= PollEvent::IN;
+                }
+                records[i].revents = (int16_t)events;
+            } else {
+                records[i].revents = records[i].fd < 0 ? 0
+                                     : polled          ? (int16_t)Vfs::poll(polled, records[i].events)
+                                                       : PollEvent::NVAL;
+            }
             if (records[i].revents) {
                 ready++;
             }
@@ -461,6 +556,9 @@ Syscalls::fileCall(TrapFrame *f) {
         return fd;
     }
     case SYS_CLOSE: {
+        if (isTerminalDescriptor((int)arg0)) {
+            return 0;
+        }
         OpenFile *taken = self->takeFile((int)arg0);
         if (!taken) {
             return -Err::BADF;
