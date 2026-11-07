@@ -106,6 +106,8 @@ private:
     static void gc(uint8_t index, uint8_t value);
     static void loadPalette16();
     static void restoreFont(unsigned glyphRows);
+    static void beginFontAccess();
+    static void endFontAccess();
 };
 
 #endif

@@ -14,6 +14,10 @@ public:
     static constexpr int KEY_PAGE_UP = 0x104;
     static constexpr int KEY_PAGE_DOWN = 0x105;
     static constexpr int KEY_F1 = 0x110;
+    // Control and Shift with a letter, from A to Z: a terminal sends them as xterm's modifyOtherKeys sequence, since
+    // their control byte would be the same one of Control alone.
+    static constexpr int KEY_CTRL_SHIFT_A = 0x120;
+    static constexpr int LETTERS = 26;
 
     static void init();
     // Feeds one byte of a PS/2 set 1 scancode (0xE0 prefixes included), as the PS/2 keyboard sends them; for keyboards

@@ -47,6 +47,7 @@ private:
     void readMouse();
     void push(const FramebufferEvent &event);
     static int keyFor(int c);
+    static void modifiedKey(int modifiers, int code, KeyEvent &event);
     static int buttonMask(int button);
 };
 

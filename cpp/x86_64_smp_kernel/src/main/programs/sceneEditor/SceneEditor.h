@@ -9,19 +9,32 @@
 // the svgalib backend of the framebuffer GUI, full screen in one graphics mode with 4, 8, 16 or 24 bits per pixel.
 // The application finds the etc folder of Vitral at ../../../../etc, as in the repository: it runs from
 // SCENE_EDITOR_APPLICATION_DIR, a folder of the root file system image placed like its sources are.
-class SceneEditor {
+// The editor reads its events through this object, which takes Ctrl-R and Ctrl-r as the vitral_rasterizer takes R and
+// r: the next or the previous graphics mode. It reports the change as a Resized event with a message that the editor
+// shows in its status line.
+class SceneEditor : public FramebufferInput {
 public:
     static int start(int argc, char *argv[]);
 
+    bool waitEvent(FramebufferEvent &event) override;
+    bool hasPointer() const override { return input.hasPointer(); }
+    bool warpPointer(int x, int y) override { return input.warpPointer(x, y); }
+
 private:
+    static constexpr int MESSAGE_SIZE = 96;
+
     VgaModes modes;
     SvgalibFramebuffer surface;
     SvgalibInput input;
+    char message[MESSAGE_SIZE];
 
     SceneEditor();
     int run(int argc, char *argv[]);
     int initialMode() const;
     void usage() const;
+    bool changeMode(int step);
+    bool show(int mode);
+    static bool isModeKey(const KeyEvent &key);
     static bool isKnownLanguage(const char *language);
 };
 

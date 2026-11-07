@@ -254,21 +254,50 @@ VgaMode::loadPalette(Id id, const uint8_t *rgb) {
     }
 }
 
+// Maps plane 2 (the character generator) linearly at 0xA0000. The sequencer memory mode must disable odd/even
+// addressing too: real adapters (e.g. NVIDIA) honor SR4 on reads, so programming only the graphics controller
+// returns rows interleaved with plane 3. The sequencer is changed under synchronous reset, as Linux vgacon does.
+void
+VgaMode::beginFontAccess() {
+    seq(0, 0x01);
+    seq(2, 0x04);
+    seq(4, 0x07);
+    seq(0, 0x03);
+    gc(4, 0x02);
+    gc(5, 0x00);
+    gc(6, 0x04);
+}
+
+void
+VgaMode::endFontAccess() {
+    seq(0, 0x01);
+    seq(2, 0x03);
+    seq(4, 0x02);
+    seq(0, 0x03);
+    gc(4, 0x00);
+    gc(5, 0x10);
+    gc(6, 0x0E);
+}
+
 void
 VgaMode::saveFont() {
     if (fontSaved) {
         return;
     }
-    gc(4, 2);
-    gc(5, 0);
-    gc(6, 4);
+    // The character height of the text mode in use: CRTC Maximum Scan Line, bits 0 to 4, plus one. The rows of a
+    // 32 byte slot below it are not part of the glyph: QEMU leaves them clear, but real adapters (a GeForce 7600) keep
+    // other data there, which programs that measure the font by its last non-empty row would draw as glyph rows.
+    Ports::outb(CRTC, 0x09);
+    unsigned height = (Ports::inb(CRTC + 1) & 0x1Fu) + 1;
+    if (height < 8) {
+        height = 16;
+    }
+    beginFontAccess();
     volatile const uint8_t *vram = (volatile const uint8_t *)VRAM;
     for (unsigned i = 0; i < FONT_BYTES; i++) {
-        fontCopy[i] = vram[i];
+        fontCopy[i] = i % FONT_SLOT < height ? vram[i] : 0;
     }
-    gc(4, 0);
-    gc(5, 0x10);
-    gc(6, 0x0E);
+    endFontAccess();
     fontSaved = true;
 }
 
@@ -312,11 +341,7 @@ VgaMode::restoreFont(unsigned glyphRows) {
     if (!fontSaved) {
         return;
     }
-    seq(2, 0x04);
-    seq(4, 0x07);
-    gc(4, 2);
-    gc(5, 0);
-    gc(6, 4);
+    beginFontAccess();
     volatile uint8_t *vram = (volatile uint8_t *)VRAM;
     for (unsigned glyph = 0; glyph < FONT_GLYPHS; glyph++) {
         for (unsigned row = 0; row < FONT_SLOT; row++) {
@@ -324,11 +349,7 @@ VgaMode::restoreFont(unsigned glyphRows) {
             vram[glyph * FONT_SLOT + row] = row < glyphRows ? fontCopy[glyph * FONT_SLOT + source] : 0;
         }
     }
-    seq(2, 0x03);
-    seq(4, 0x02);
-    gc(4, 0);
-    gc(5, 0x10);
-    gc(6, 0x0E);
+    endFontAccess();
 }
 
 bool

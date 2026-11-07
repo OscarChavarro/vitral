@@ -207,6 +207,8 @@ Keyboard::injectScancode(uint8_t sc) {
         if (ctrl) {
             if (c >= 'a' && c <= 'z') {
                 push(console, (uint8_t)(c - 'a' + 1));
+            } else if (c >= 'A' && c <= 'Z') {
+                push(console, (uint16_t)(KEY_CTRL_SHIFT_A + (c - 'A')));
             }
         } else if (c) {
             push(console, (uint8_t)c);

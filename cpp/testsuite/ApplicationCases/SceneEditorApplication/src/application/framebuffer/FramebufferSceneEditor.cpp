@@ -644,6 +644,15 @@ int FramebufferSceneEditor::run()
 void FramebufferSceneEditor::handle(const FramebufferEvent& event)
 {
     bool fullScreen = model->getGuiState()->isFullScreenGuiMode();
+    if ( event.message != nullptr ) {
+        if ( event.type == FramebufferEvent::Type::Resized ) {
+            // redrawAll() draws it on the new surface.
+            status = java::String(event.message);
+        }
+        else {
+            showStatus(java::String(event.message));
+        }
+    }
     switch ( event.type ) {
       case FramebufferEvent::Type::Resized:
         layout();

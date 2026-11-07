@@ -5,9 +5,25 @@
 
 Tty::Terminal Tty::terminals[VirtualConsole::COUNT];
 
-// What a Linux console sends for the keys Keyboard reports as codes above 0xFF.
+// What a Linux console sends for the keys Keyboard reports as codes above 0xFF. Control and Shift with a letter, which
+// the Linux console sends as the control byte of Control alone, use xterm's modifyOtherKeys form, CSI 27;6;code~, so
+// programs can tell Ctrl-R from Ctrl-r. buffer holds that sequence.
 static const char *
-sequenceOf(int key) {
+sequenceOf(int key, char (&buffer)[12]) {
+    int letter = key - Keyboard::KEY_CTRL_SHIFT_A;
+    if (letter >= 0 && letter < Keyboard::LETTERS) {
+        static const char PREFIX[] = "\033[27;6;";
+        unsigned n = 0;
+        for (const char *p = PREFIX; *p; p++) {
+            buffer[n++] = *p;
+        }
+        unsigned code = (unsigned)('A' + letter);
+        buffer[n++] = (char)('0' + code / 10);
+        buffer[n++] = (char)('0' + code % 10);
+        buffer[n++] = '~';
+        buffer[n] = 0;
+        return buffer;
+    }
     switch (key) {
     case Keyboard::KEY_UP: return "\033[A";
     case Keyboard::KEY_DOWN: return "\033[B";
@@ -183,7 +199,8 @@ Tty::pull(Terminal &t, unsigned console) {
         } else if (key < 0x100) {
             receive(t, console, (uint8_t)key);
         } else {
-            for (const char *s = sequenceOf(key); *s; s++) {
+            char buffer[12];
+            for (const char *s = sequenceOf(key, buffer); *s; s++) {
                 receive(t, console, (uint8_t)*s);
             }
         }

@@ -8,6 +8,7 @@
 
 static constexpr int ESCAPE = 27;
 static constexpr int NUMBER_TEXT_SIZE = 16;
+static constexpr int MODIFY_OTHER_KEYS = 27;
 
 // The svgalib buttons in the order of Vitral's BUTTON1 to BUTTON3.
 static const int SVGALIB_BUTTONS[3] = {MOUSE_LEFTBUTTON, MOUSE_MIDDLEBUTTON, MOUSE_RIGHTBUTTON};
@@ -222,9 +223,22 @@ SvgalibInput::keyFor(int c) {
     }
 }
 
+// xterm's modifyOtherKeys form of a key with modifiers: CSI 27;modifiers;code~, where modifiers is 1 plus 1 for Shift,
+// 2 for Alt and 4 for Control, and code is the character of the key (Control and Shift with R: CSI 27;6;82~).
+void
+SvgalibInput::modifiedKey(int modifiers, int code, KeyEvent &event) {
+    int bits = modifiers - 1;
+    event.keycode = keyFor(code);
+    event.modifierMask = ((bits & 1) ? KeyEvent::MASK_SHIFT : 0) | ((bits & 2) ? KeyEvent::MASK_ALT : 0) |
+                         ((bits & 4) ? KeyEvent::MASK_CTRL : 0);
+    if ((bits & 4) == 0 && code > 0 && code < 0x80) {
+        event.unicodeId = (char)code;
+    }
+}
+
 // One key from the terminal: a byte, Control plus a letter, Alt plus a key (Escape then the key), or an escape
 // sequence: CSI A to D for the arrows, H and F for Home and End, CSI [ A to E for F1 to F5 (Linux console) and
-// CSI number ~ for the editing and function keys.
+// CSI number ~ for the editing and function keys, and CSI 27;modifiers;code~ for keys with modifiers.
 bool
 SvgalibInput::readKey(KeyEvent &event) {
     int c = vga_getkey();
@@ -291,14 +305,27 @@ SvgalibInput::readKey(KeyEvent &event) {
     default:
         break;
     }
-    int number = 0;
-    while (code >= '0' && code <= '9') {
-        number = number * 10 + (code - '0');
+    int numbers[3] = {0, 0, 0};
+    int count = 0;
+    while (count < 3) {
+        while (code >= '0' && code <= '9') {
+            numbers[count] = numbers[count] * 10 + (code - '0');
+            code = vga_getkey() & 0xFF;
+        }
+        count++;
+        if (code != ';') {
+            break;
+        }
         code = vga_getkey() & 0xFF;
     }
     if (code != '~') {
         return true;
     }
+    if (count == 3 && numbers[0] == MODIFY_OTHER_KEYS) {
+        modifiedKey(numbers[1], numbers[2], event);
+        return true;
+    }
+    int number = numbers[0];
     static const int TILDE_KEYS[][2] = {
         {1, KeyEvent::KEY_HOME},    {2, KeyEvent::KEY_INSERT},  {3, KeyEvent::KEY_DELETE}, {4, KeyEvent::KEY_END},
         {5, KeyEvent::KEY_PAGEUP},  {6, KeyEvent::KEY_PAGEDOWN}, {7, KeyEvent::KEY_HOME},  {8, KeyEvent::KEY_END},

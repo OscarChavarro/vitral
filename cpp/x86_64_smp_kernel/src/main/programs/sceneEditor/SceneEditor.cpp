@@ -17,7 +17,7 @@ static const int PREFERRED_MODES[] = {G1024x768x64K, G800x600x64K, G1024x768x16M
                                       G640x480x16M, G1024x768x256, G800x600x256, G640x480x256, G640x480x16};
 static const char *const DEFAULT_LANGUAGE = "english";
 
-SceneEditor::SceneEditor() : modes(false) {
+SceneEditor::SceneEditor() : modes(false), message() {
     modes.keepDepths(SUPPORTED_DEPTHS, (int)(sizeof(SUPPORTED_DEPTHS) / sizeof(SUPPORTED_DEPTHS[0])));
 }
 
@@ -93,12 +93,74 @@ SceneEditor::run(int argc, char *argv[]) {
     input.attach(surface);
     int status;
     {
-        FramebufferSceneEditor editor(surface, input, language);
+        FramebufferSceneEditor editor(surface, *this, language);
         status = editor.run();
     }
     input.close();
     modes.leave();
     return status;
+}
+
+bool
+SceneEditor::isModeKey(const KeyEvent &key) {
+    int others = KeyEvent::MASK_ALT | KeyEvent::MASK_LALT | KeyEvent::MASK_RALT | KeyEvent::MASK_ALTGR;
+    return (key.modifierMask & KeyEvent::MASK_CTRL) != 0 && (key.modifierMask & others) == 0 &&
+           (key.keycode == KeyEvent::KEY_r || key.keycode == KeyEvent::KEY_R);
+}
+
+bool
+SceneEditor::waitEvent(FramebufferEvent &event) {
+    if (!input.waitEvent(event)) {
+        return false;
+    }
+    event.message = nullptr;
+    if (event.type != FramebufferEvent::Type::KeyPressed || !isModeKey(event.key)) {
+        return true;
+    }
+    // As in vitral_rasterizer: R goes to the next mode of the list, r to the previous one.
+    if (!changeMode(event.key.keycode == KeyEvent::KEY_R ? 1 : -1)) {
+        return false;
+    }
+    event = FramebufferEvent();
+    event.type = FramebufferEvent::Type::Resized;
+    event.message = message;
+    return true;
+}
+
+// The pointer leaves the old mode before the surface describes the new one; if the new mode cannot be used, the
+// previous one comes back. Returns false when neither can be shown.
+bool
+SceneEditor::changeMode(int step) {
+    int previous = modes.current();
+    int at = modes.indexOf(previous);
+    int count = modes.count();
+    int next = at < 0 || count == 0 ? -1 : modes.at(((at + step) % count + count) % count);
+    if (next < 0 || next == previous) {
+        snprintf(message, sizeof(message), "No other graphics mode than %s", VgaModes::name(previous));
+        return true;
+    }
+    input.detach();
+    if (show(next)) {
+        const VgaModes::Screen &screen = modes.screen();
+        snprintf(message, sizeof(message), "Resolution %dx%d, %d bits per pixel (%s)", screen.width, screen.height,
+                 screen.bitsPerPixel, VgaModes::name(screen.mode));
+        return true;
+    }
+    if (!show(previous)) {
+        return false;
+    }
+    snprintf(message, sizeof(message), "Mode %s not available, staying at %s", VgaModes::name(next),
+             VgaModes::name(previous));
+    return true;
+}
+
+bool
+SceneEditor::show(int mode) {
+    if ((modes.current() != mode && !modes.enter(mode)) || !surface.attach()) {
+        return false;
+    }
+    input.attach(surface);
+    return true;
 }
 
 int
