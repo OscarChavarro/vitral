@@ -93,7 +93,7 @@ Rtl8169::allocateRings() {
         return false;
     }
     for (unsigned i = 0; i < RX_COUNT; i++) {
-        rxRing[i].options1 = DESC_OWN | (i == RX_COUNT - 1 ? DESC_END : 0);
+        rxRing[i].options1 = DESC_OWN | (i == RX_COUNT - 1 ? DESC_END : 0) | (uint32_t)BUFFER_SIZE;
         rxRing[i].options2 = 0;
         rxRing[i].address = (uint64_t)(rxBuffers + i * BUFFER_SIZE);
     }
@@ -110,26 +110,68 @@ Rtl8169::start() {
     rxNext = 0;
     txNext = 0;
     for (unsigned i = 0; i < RX_COUNT; i++) {
-        rxRing[i].options1 = DESC_OWN | (i == RX_COUNT - 1 ? DESC_END : 0);
+        rxRing[i].options1 = DESC_OWN | (i == RX_COUNT - 1 ? DESC_END : 0) | (uint32_t)BUFFER_SIZE;
     }
     for (unsigned i = 0; i < TX_COUNT; i++) {
         txRing[i].options1 = i == TX_COUNT - 1 ? DESC_END : 0;
     }
-    uint64_t rxAddress = (uint64_t)rxRing;
-    uint64_t txAddress = (uint64_t)txRing;
-    write32(RX_DESC_LOW, (uint32_t)rxAddress);
-    write32(RX_DESC_HIGH, (uint32_t)(rxAddress >> 32));
-    write32(TX_DESC_LOW, (uint32_t)txAddress);
+    asm volatile("" : : : "memory");
+
+    // Same order as rtl_hw_start_8169() in Linux r8169.
+    bool early = isEarlyChip();
+    uint32_t txConfig = TX_DMA_BURST_1024 | TX_INTERFRAME_GAP;
+    write8(CONFIG_9346, CONFIG_9346_UNLOCK);
+    if (early) {
+        write8(CHIP_COMMAND, COMMAND_RX_ENABLE | COMMAND_TX_ENABLE);
+    }
+    write32(RX_CONFIG, RX_FIFO_NO_THRESHOLD | RX_DMA_BURST_UNLIMITED);
+    write8(EARLY_TX_THRESHOLD, NO_EARLY_TX);
+    write16(RX_MAX_SIZE, (uint16_t)BUFFER_SIZE);
+    if (early) {
+        write32(TX_CONFIG, txConfig);
+    }
+    write16(C_PLUS_COMMAND, (uint16_t)(read16(C_PLUS_COMMAND) | C_PLUS_PCI_MULTIPLE_RW));
+    write16(INTERRUPT_MITIGATE, 0);
+    uint64_t rxAddress = (uint64_t)(uintptr_t)rxRing;
+    uint64_t txAddress = (uint64_t)(uintptr_t)txRing;
     write32(TX_DESC_HIGH, (uint32_t)(txAddress >> 32));
-    write32(TX_CONFIG, TX_DMA_BURST_1024 | TX_INTERFRAME_GAP);
-    write32(RX_CONFIG, RX_ACCEPT_PHYSICAL | RX_ACCEPT_MULTICAST | RX_ACCEPT_BROADCAST | RX_DMA_BURST_UNLIMITED |
-                           RX_BUFFER_8K);
+    write32(TX_DESC_LOW, (uint32_t)txAddress);
+    write32(RX_DESC_HIGH, (uint32_t)(rxAddress >> 32));
+    write32(RX_DESC_LOW, (uint32_t)rxAddress);
+    if (!early) {
+        write8(CHIP_COMMAND, COMMAND_RX_ENABLE | COMMAND_TX_ENABLE);
+        write32(TX_CONFIG, txConfig);
+    }
+    write8(CONFIG_9346, CONFIG_9346_LOCK);
+    (void)read16(INTERRUPT_MASK);
+    write32(RX_MISSED, 0);
+    write32(MULTICAST0, 0xffffffffu);
+    write32(MULTICAST4, 0xffffffffu);
+    write32(RX_CONFIG, read32(RX_CONFIG) | RX_ACCEPT_PHYSICAL | RX_ACCEPT_MULTICAST | RX_ACCEPT_BROADCAST);
+    write16(MULTI_INTERRUPT, (uint16_t)(read16(MULTI_INTERRUPT) & 0xf000));
+
     write16(INTERRUPT_STATUS, 0xffff);
-    write8(CHIP_COMMAND, COMMAND_RX_ENABLE | COMMAND_TX_ENABLE);
     write16(INTERRUPT_MASK, INTERRUPT_RX_OK | INTERRUPT_RX_ERROR | INTERRUPT_RX_OVERFLOW |
                               INTERRUPT_RX_FIFO_OVERFLOW | INTERRUPT_TX_ERROR);
     Pic::unmask(irq);
+    logRegisters("started");
     return 0;
+}
+
+bool
+Rtl8169::isEarlyChip() const {
+    uint32_t xid = read32(TX_CONFIG) & TX_CONFIG_XID_MASK;
+    return xid == 0x00000000u || xid == 0x00800000u || xid == 0x04000000u || xid == 0x10000000u;
+}
+
+void
+Rtl8169::logRegisters(const char *when) const {
+    kprintf("rtl8169: %s: XID %08x%s, command %02x, rx config %08x, tx config %08x, C+ %04x, rx max %u, "
+            "mask %04x, status %04x, phy %02x, rx ring %08x, tx ring %08x\n",
+            when, read32(TX_CONFIG) & TX_CONFIG_XID_MASK, isEarlyChip() ? " (early 8169)" : "",
+            (uint32_t)read8(CHIP_COMMAND), read32(RX_CONFIG), read32(TX_CONFIG), (uint32_t)read16(C_PLUS_COMMAND),
+            (uint32_t)read16(RX_MAX_SIZE), (uint32_t)read16(INTERRUPT_MASK), (uint32_t)read16(INTERRUPT_STATUS),
+            (uint32_t)read8(PHY_STATUS), read32(RX_DESC_LOW), read32(TX_DESC_LOW));
 }
 
 void
@@ -193,7 +235,7 @@ Rtl8169::drainReceiveRing() {
         } else {
             countRxError();
         }
-        descriptor.options1 = DESC_OWN | (rxNext == RX_COUNT - 1 ? DESC_END : 0);
+        descriptor.options1 = DESC_OWN | (rxNext == RX_COUNT - 1 ? DESC_END : 0) | (uint32_t)BUFFER_SIZE;
         rxNext = (rxNext + 1) % RX_COUNT;
     }
 }
@@ -201,7 +243,7 @@ Rtl8169::drainReceiveRing() {
 void
 Rtl8169::handleInterrupt() {
     uint16_t causes = read16(INTERRUPT_STATUS);
-    if (!causes) {
+    if (!causes || causes == 0xffff) {
         return;
     }
     write16(INTERRUPT_STATUS, causes);

@@ -15,6 +15,7 @@
 //                   the next text mode returns the screen to the console it showed before
 //   console [N]     shows or switches the virtual console on the screen
 //   reboot          runs the reboot program
+//   net             lists the network interfaces with their addresses and packet counters
 //   ps, dmesg, uptime, help
 class SerialShell {
 public:
@@ -52,6 +53,7 @@ private:
     void ps();
     void dmesg();
     void uptime();
+    void net();
     void reboot();
 
     static void modeName(VgaMode::Id id, char *out, size_t size);

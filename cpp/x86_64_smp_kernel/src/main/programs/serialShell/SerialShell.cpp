@@ -4,6 +4,8 @@
 #include "fs/PollEvent.h"
 #include "fs/PollRecord.h"
 #include "kernel/KernelLog.h"
+#include "net/NetFlag.h"
+#include "net/NetInterfaceInfo.h"
 #include "lib/vitralKernel/Format.h"
 #include "lib/vitralKernel/String.h"
 
@@ -119,6 +121,8 @@ SerialShell::execute() {
         dmesg();
     } else if (String::equals(command, "uptime")) {
         uptime();
+    } else if (String::equals(command, "net")) {
+        net();
     } else if (String::equals(command, "reboot")) {
         reboot();
     } else {
@@ -136,6 +140,7 @@ SerialShell::help() {
           "ps              processes\n"
           "dmesg           kernel log\n"
           "uptime          time since boot\n"
+          "net             network interfaces, addresses and packet counters\n"
           "reboot          restart the machine\n");
 }
 
@@ -352,6 +357,28 @@ SerialShell::uptime() {
     Format::print(text, sizeof(text), "up %u:%02u:%02u\n", (uint32_t)(seconds / 3600), (uint32_t)(seconds / 60 % 60),
                   (uint32_t)(seconds % 60));
     print(text);
+}
+
+void
+SerialShell::net() {
+    NetInterfaceInfo info;
+    for (unsigned i = 0; Syscalls::netInterface(i, &info) == 0; i++) {
+        char text[160];
+        Format::print(text, sizeof(text),
+                      "%-6s %-8s %02x:%02x:%02x:%02x:%02x:%02x %u.%u.%u.%u/%u.%u.%u.%u %s%s\n", info.name,
+                      info.driver, (uint32_t)info.mac[0], (uint32_t)info.mac[1], (uint32_t)info.mac[2],
+                      (uint32_t)info.mac[3], (uint32_t)info.mac[4], (uint32_t)info.mac[5], (uint32_t)info.address[0],
+                      (uint32_t)info.address[1], (uint32_t)info.address[2], (uint32_t)info.address[3],
+                      (uint32_t)info.netmask[0], (uint32_t)info.netmask[1], (uint32_t)info.netmask[2],
+                      (uint32_t)info.netmask[3], (info.flags & NetFlag::UP) ? "UP" : "DOWN",
+                      (info.flags & NetFlag::RUNNING) ? " RUNNING" : "");
+        print(text);
+        Format::print(text, sizeof(text),
+                      "       rx %u packets, %u errors, %u dropped; tx %u packets, %u errors, %u dropped\n",
+                      (uint32_t)info.rxPackets, (uint32_t)info.rxErrors, (uint32_t)info.rxDropped,
+                      (uint32_t)info.txPackets, (uint32_t)info.txErrors, (uint32_t)info.txDropped);
+        print(text);
+    }
 }
 
 // The reboot program: its own messages go to the console this shell runs on, so the terminal is told here.

@@ -19,6 +19,8 @@ protected:
 
 private:
     static constexpr uint32_t MAC0 = 0x00;
+    static constexpr uint32_t MULTICAST0 = 0x08;
+    static constexpr uint32_t MULTICAST4 = 0x0c;
     static constexpr uint32_t TX_DESC_LOW = 0x20;
     static constexpr uint32_t TX_DESC_HIGH = 0x24;
     static constexpr uint32_t CHIP_COMMAND = 0x37;
@@ -27,10 +29,16 @@ private:
     static constexpr uint32_t INTERRUPT_STATUS = 0x3e;
     static constexpr uint32_t TX_CONFIG = 0x40;
     static constexpr uint32_t RX_CONFIG = 0x44;
+    static constexpr uint32_t RX_MISSED = 0x4c;
     static constexpr uint32_t CONFIG_9346 = 0x50;
+    static constexpr uint32_t MULTI_INTERRUPT = 0x5c;
     static constexpr uint32_t PHY_STATUS = 0x6c;
     static constexpr uint32_t RX_DESC_LOW = 0xe4;
+    static constexpr uint32_t RX_MAX_SIZE = 0xda;
+    static constexpr uint32_t C_PLUS_COMMAND = 0xe0;
+    static constexpr uint32_t INTERRUPT_MITIGATE = 0xe2;
     static constexpr uint32_t RX_DESC_HIGH = 0xe8;
+    static constexpr uint32_t EARLY_TX_THRESHOLD = 0xec;
     static constexpr uint8_t COMMAND_RX_ENABLE = 0x08;
     static constexpr uint8_t COMMAND_TX_ENABLE = 0x04;
     static constexpr uint8_t COMMAND_RESET = 0x10;
@@ -38,6 +46,11 @@ private:
     static constexpr uint8_t CONFIG_9346_LOCK = 0x00;
     static constexpr uint8_t PHY_LINK_UP = 0x02;
     static constexpr uint8_t TX_POLL_NORMAL = 0x40;
+    static constexpr uint8_t NO_EARLY_TX = 0x3f;
+    static constexpr uint16_t C_PLUS_PCI_MULTIPLE_RW = 1u << 3;
+    // TX_CONFIG bits that identify the chip (Linux r8169 calls them the XID). RTL8169, 8169s and 8169sb/8110sb
+    // (XID 0x00000000, 0x00800000, 0x04000000 and 0x10000000) ignore TX_CONFIG until the transmitter is enabled.
+    static constexpr uint32_t TX_CONFIG_XID_MASK = 0xfc800000u;
     static constexpr uint16_t INTERRUPT_RX_OK = 0x0001;
     static constexpr uint16_t INTERRUPT_RX_ERROR = 0x0002;
     static constexpr uint16_t INTERRUPT_TX_ERROR = 0x0008;
@@ -48,14 +61,14 @@ private:
     static constexpr uint32_t RX_ACCEPT_MULTICAST = 1u << 2;
     static constexpr uint32_t RX_ACCEPT_BROADCAST = 1u << 3;
     static constexpr uint32_t RX_DMA_BURST_UNLIMITED = 7u << 8;
-    static constexpr uint32_t RX_BUFFER_8K = 0u << 11;
+    static constexpr uint32_t RX_FIFO_NO_THRESHOLD = 7u << 13;
     static constexpr uint32_t TX_DMA_BURST_1024 = 6u << 8;
     static constexpr uint32_t TX_INTERFRAME_GAP = 3u << 24;
     static constexpr uint32_t DESC_OWN = 1u << 31;
     static constexpr uint32_t DESC_END = 1u << 30;
     static constexpr uint32_t DESC_FIRST = 1u << 29;
     static constexpr uint32_t DESC_LAST = 1u << 28;
-    static constexpr uint32_t DESC_RX_ERROR = 1u << 20;
+    static constexpr uint32_t DESC_RX_ERROR = 1u << 21;
     static constexpr uint32_t DESC_LENGTH = 0x3fffu;
     static constexpr unsigned RX_COUNT = 64;
     static constexpr unsigned TX_COUNT = 64;
@@ -74,6 +87,8 @@ private:
 
     static TrapFrame *onIrq(TrapFrame *frame);
     bool reset();
+    bool isEarlyChip() const;
+    void logRegisters(const char *when) const;
     bool allocateRings();
     void drainReceiveRing();
     void handleInterrupt();
