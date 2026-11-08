@@ -13,8 +13,11 @@ public:
     static constexpr unsigned MAX_SOCKETS = 64;
     static constexpr unsigned BACKLOG = 16;
     static constexpr size_t RX_BUFFER = 8192;
-    static constexpr size_t TX_BUFFER = 16384;
-    static constexpr uint32_t MAX_FLIGHT = 8192;
+    static constexpr size_t TX_BUFFER = 65536;
+    // Unacknowledged data, in full segments: an even number, so that a receiver that acknowledges every second
+    // segment (Linux, Windows) does it without its delayed ACK timer, and fewer than the transmit descriptors of the
+    // network drivers (32 or more), which drop what does not fit.
+    static constexpr uint32_t MAX_FLIGHT_SEGMENTS = 16;
     static constexpr unsigned MAX_RETRIES = 8;
     static constexpr uint64_t TIME_WAIT_MS = 10000;
 

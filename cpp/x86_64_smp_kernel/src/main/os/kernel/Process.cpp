@@ -2,6 +2,7 @@
 #include "drivers/tty/Tty.h"
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "fs/Vfs.h"
+#include "kernel/Consoles.h"
 #include "kernel/KernelHeap.h"
 #include "kernel/Scheduler.h"
 #include "lib/vitralKernel/Format.h"
@@ -29,6 +30,36 @@ Process::Process()
     Fpu::initialize(fpu);
 }
 
+void
+Process::showConsole() {
+    if (!terminalValue || terminalValue->console() == (int)consoleValue) {
+        return;
+    }
+    unsigned shown = VirtualConsole::active();
+    if (shown == consoleValue) {
+        return;
+    }
+    {
+        LockGuard guard(resources->lock);
+        if (resources->screenReturn < 0) {
+            resources->screenReturn = (int)shown;
+        }
+    }
+    Consoles::switchTo(consoleValue);
+}
+
+void
+Process::returnScreen() {
+    if (threadEntry || resources->screenReturn < 0) {
+        return;
+    }
+    unsigned back = (unsigned)resources->screenReturn;
+    resources->screenReturn = -1;
+    if (VirtualConsole::active() == consoleValue) {
+        Consoles::switchTo(back);
+    }
+}
+
 char *
 Process::allocateStack(size_t size) {
     for (unsigned i = 0; i < STACK_POOL; i++) {
@@ -53,6 +84,7 @@ Process::Process(uint32_t pid, uint32_t ppid, const Program &prog, const ArgList
     stack = stackMemory;
     resources = new Resources();
     resources->references = 1;
+    resources->screenReturn = -1;
     for (OpenFile *&f : resources->files) {
         f = nullptr;
     }

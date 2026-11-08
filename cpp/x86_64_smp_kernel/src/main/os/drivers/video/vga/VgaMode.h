@@ -92,6 +92,10 @@ public:
     static void blit(Id id, const uint8_t *pixels);
     static void plot(Id id, int x, int y, uint32_t color);
     static void plotSpan(Id id, int x, int y, const uint8_t *pixels, int count);
+    // A rectangle of one colour, and a copy of a rectangle of the screen onto another (they may overlap), drawn by the
+    // SVGA driver's primitives. False when the mode or the primitives cannot: the caller then draws the pixels.
+    static bool fill(Id id, int x, int y, int width, int height, uint32_t color);
+    static bool copy(Id id, int fromX, int fromY, int toX, int toY, int width, int height);
 
     static bool available(Id id);
 

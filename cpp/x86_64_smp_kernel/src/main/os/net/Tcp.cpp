@@ -369,7 +369,8 @@ Tcp::transmit(Socket &s) {
         s.state != State::LastAck && s.state != State::Closing) {
         return;
     }
-    uint32_t flightLimit = s.sndWnd < MAX_FLIGHT ? s.sndWnd : MAX_FLIGHT;
+    uint32_t maxFlight = MAX_FLIGHT_SEGMENTS * s.mss;
+    uint32_t flightLimit = s.sndWnd < maxFlight ? s.sndWnd : maxFlight;
     for (;;) {
         uint32_t inFlight = s.sndNxt - s.sndUna;
         uint32_t dataInFlight = inFlight - (s.finSent && !before(s.sndNxt, s.finSeq + 1) ? 1 : 0);
@@ -385,7 +386,9 @@ Tcp::transmit(Socket &s) {
         if (n > room) {
             n = room;
         }
-        if (n == 0) {
+        // No segment shorter than the data allows while others are unacknowledged (RFC 1122, 4.2.3.4, sender silly
+        // window avoidance): the next acknowledgment makes room for a full one.
+        if (n == 0 || (n < unsent && n < s.mss && inFlight > 0)) {
             break;
         }
         uint8_t chunk[1500];
@@ -557,6 +560,9 @@ Tcp::newConnection(NetDevice &device, const Ipv4Header &ip, const TcpHeader &tcp
     }
     uint16_t ours = (uint16_t)(device.mtu() - Ipv4::HEADER_SIZE - sizeof(TcpHeader));
     s.mss = peerMss < ours ? peerMss : ours;
+    if (s.mss < 64) {
+        s.mss = 536;
+    }
     isnCounter += 64000;
     s.iss = (uint32_t)(Clock::nanoseconds() / 4000) + isnCounter;
     s.irs = tcp.sequence.get();

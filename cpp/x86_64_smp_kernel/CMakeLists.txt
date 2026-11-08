@@ -98,7 +98,9 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/Multiboo
                   src/main/programs/init/Init.cpp src/main/programs/dmesg/DmesgCommand.cpp src/main/programs/ProgramsMainFunctionsIndex.cpp
                   src/main/os/drivers/pci/Pci.cpp src/main/os/drivers/video/svga/Svga.cpp src/main/os/drivers/video/bochsVBE/BochsVbe.cpp
                   src/main/os/drivers/video/bootFramebuffer/BootFramebuffer.cpp
-                  src/main/os/drivers/video/nvidiaNv4x/NvidiaNv4x.cpp src/main/os/drivers/video/nvidiaNv4x/Nv4xPll.cpp
+                  src/main/os/drivers/video/nvidiaPreTesla/NvidiaPreTesla.cpp src/main/os/drivers/video/nvidiaPreTesla/NvidiaNv04.cpp
+                  src/main/os/drivers/video/nvidiaPreTesla/NvidiaNv4x.cpp src/main/os/drivers/video/nvidiaPreTesla/NvidiaPll.cpp
+                  src/main/os/drivers/video/nvidiaPreTesla2d/NvidiaPreTesla2d.cpp src/main/programs/nvidia/NvidiaCommand.cpp
                   src/main/os/drivers/video/edid/Edid.cpp src/main/os/drivers/video/edid/DisplayTiming.cpp
                   src/main/os/kernel/PhysicalMemory.cpp src/main/os/kernel/KernelHeap.cpp src/main/lib/vitralKernel/Memory.cpp
                   src/main/lib/vitralKernel/Format.cpp

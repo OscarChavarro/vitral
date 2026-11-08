@@ -5,6 +5,7 @@
 #include "programs/httpd/Feeds.h"
 #include "programs/httpd/StaticFile.h"
 #include "programs/httpd/WebSocket.h"
+#include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "lib/vitralKernel/Format.h"
 #include "lib/vitralKernel/Memory.h"
 #include "lib/vitralKernel/String.h"
@@ -267,6 +268,8 @@ Httpd::handle(int64_t socket, char *request, char *headers) {
         upgrade(socket, target + 4, headers);
     } else if (String::equals(target, "/api/system")) {
         serveSystem(socket);
+    } else if (String::equals(target, "/framebuffer")) {
+        serveFramebuffer(socket);
     } else {
         serveFile(socket, target);
     }
@@ -391,4 +394,43 @@ Httpd::serveSystem(int64_t socket) {
     page.add("]}");
     sendHead(socket, 200, "OK", "application/json", page.length(), nullptr);
     Syscalls::tcpSend(socket, page.text(), page.length());
+}
+
+// GET /framebuffer: what the screen shows, as a binary PPM (P6) image, from the pixels of the console on the screen
+// (VirtualConsole::pictureRow), not from video memory: the CPU reads uncached video memory slowly. A console that
+// changes size meanwhile ends the image early.
+void
+Httpd::serveFramebuffer(int64_t socket) {
+    static constexpr size_t CHUNK_BYTES = 64 * 1024;
+    unsigned console = VirtualConsole::active();
+    unsigned width = 0;
+    unsigned height = 0;
+    if (!VirtualConsole::pictureSize(console, width, height) || width == 0 || height == 0) {
+        respond(socket, 503, "Service Unavailable",
+                "<!DOCTYPE html><title>503</title><h1>503 The screen has no picture</h1>");
+        return;
+    }
+    char header[32];
+    Format::print(header, sizeof(header), "P6\n%u %u\n255\n", width, height);
+    size_t headerLength = String::length(header);
+    size_t rowBytes = (size_t)width * 3;
+    char extra[96];
+    Format::print(extra, sizeof(extra), "Content-Disposition: inline; filename=\"console%u.ppm\"\r\n", console);
+    sendHead(socket, 200, "OK", "image/x-portable-pixmap", headerLength + rowBytes * height, extra);
+    if (Syscalls::tcpSend(socket, header, headerLength) < 0) {
+        return;
+    }
+    unsigned rowsPerChunk = rowBytes < CHUNK_BYTES ? (unsigned)(CHUNK_BYTES / rowBytes) : 1;
+    uint8_t *chunk = new uint8_t[rowBytes * rowsPerChunk];
+    for (unsigned y = 0; y < height;) {
+        unsigned n = 0;
+        while (n < rowsPerChunk && y < height && VirtualConsole::pictureRow(console, y, width, chunk + n * rowBytes)) {
+            n++;
+            y++;
+        }
+        if (n == 0 || Syscalls::tcpSend(socket, chunk, n * rowBytes) < 0) {
+            break;
+        }
+    }
+    delete[] chunk;
 }

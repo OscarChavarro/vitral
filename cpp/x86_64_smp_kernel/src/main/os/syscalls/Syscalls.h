@@ -8,6 +8,7 @@
 #include "fs/MountInfo.h"
 #include "net/NetInterfaceInfo.h"
 #include "net/NetConfig.h"
+#include "drivers/video/nvidiaPreTesla/NvidiaInfo.h"
 #include "kernel/ArgList.h"
 
 class Tty;
@@ -44,6 +45,8 @@ public:
     static constexpr uint64_t SYS_TCP_PEER = 0x1012;
     static constexpr uint64_t SYS_UPTIME = 0x1013;
     static constexpr uint64_t SYS_CPU_LOAD = 0x1014;
+    static constexpr uint64_t SYS_NVIDIA = 0x1015;
+    static constexpr uint64_t SYS_SHOW_CONSOLE = 0x1016;
     static constexpr uint64_t SYS_READ = 0;
     static constexpr uint64_t SYS_WRITE = 1;
     static constexpr uint64_t SYS_OPEN = 2;
@@ -115,6 +118,8 @@ public:
     static unsigned console();
     static int64_t consoleOf(uint32_t pid) { return call(SYS_GETCONSOLE, pid); }
     static void switchConsole(unsigned console) { call(SYS_SWITCH_CONSOLE, console); }
+    // Process::showConsole(): the caller's console on the screen while it runs, if its terminal is elsewhere.
+    static void showConsole() { call(SYS_SHOW_CONSOLE); }
     // Starts a program on a console of its own; run() starts it on the caller's console and lets the caller wait for
     // it. Its terminal (standard input, output and error) is that console's for spawn() and the caller's for run(),
     // unless terminal is the descriptor of another one, such as an open /dev/ttyS0 (-Err::NOTTY if it is not one).
@@ -159,6 +164,9 @@ public:
 
     static int64_t netInterface(unsigned index, NetInterfaceInfo *out);
     static int64_t netConfigure(const NetConfig *config);
+    // An NvidiaInfo operation on the pre-Tesla NVIDIA card: its description, the 2D acceleration on or off, the 2D
+    // engine's self test (out may be null for the acceleration). 0, or -Err::NODEV without such a card.
+    static int64_t nvidia(uint32_t operation, NvidiaInfo *out = nullptr);
 
     static int64_t tcpListen(uint16_t port);
     static int64_t tcpAccept(int64_t listener, uint32_t timeoutMs = 0);

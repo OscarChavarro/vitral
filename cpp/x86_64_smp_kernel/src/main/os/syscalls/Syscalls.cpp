@@ -13,6 +13,7 @@
 #include "kernel/WallClock.h"
 #include "net/Net.h"
 #include "net/Tcp.h"
+#include "drivers/video/nvidiaPreTesla/NvidiaPreTesla.h"
 #include "lib/vitralKernel/InterruptsOff.h"
 #include "lib/vitralKernel/Memory.h"
 #include "lib/vitralKernel/String.h"
@@ -219,6 +220,8 @@ int64_t
 Syscalls::netInterface(unsigned index, NetInterfaceInfo *out) { return call(SYS_NET_INTERFACE, index, ARG(out)); }
 int64_t
 Syscalls::netConfigure(const NetConfig *config) { return call(SYS_NET_CONFIGURE, ARG(config)); }
+int64_t
+Syscalls::nvidia(uint32_t operation, NvidiaInfo *out) { return call(SYS_NVIDIA, operation, ARG(out)); }
 
 int64_t
 Syscalls::tcpWait(uint64_t number, int64_t socket, void *buffer, size_t size, uint32_t timeoutMs) {
@@ -334,6 +337,10 @@ Syscalls::handle(TrapFrame *f) {
         Consoles::switchTo((unsigned)arg0);
         f->setResult(0);
         return f;
+    case SYS_SHOW_CONSOLE:
+        Scheduler::current()->showConsole();
+        f->setResult(0);
+        return f;
     case SYS_SPAWN:
     case SYS_RUN: {
         const char *name = (const char *)arg0;
@@ -399,6 +406,9 @@ Syscalls::handle(TrapFrame *f) {
         return f;
     case SYS_NET_INTERFACE:
         f->setResult(arg1 ? (uint64_t)Net::describe((unsigned)arg0, *(NetInterfaceInfo *)arg1) : (uint64_t)-Err::FAULT);
+        return f;
+    case SYS_NVIDIA:
+        f->setResult((uint64_t)NvidiaPreTesla::control((uint32_t)arg0, (NvidiaInfo *)arg1));
         return f;
     case SYS_NET_CONFIGURE:
         f->setResult(arg0 ? (uint64_t)Net::configure(*(const NetConfig *)arg0) : (uint64_t)-Err::FAULT);

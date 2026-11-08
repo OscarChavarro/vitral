@@ -3,6 +3,7 @@
 #include "drivers/tty/Tty.h"
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "syscalls/Syscalls.h"
+#include <stdarg.h>
 
 static const class {
 public:
@@ -90,6 +91,7 @@ static constexpr int SVGALIB_VERSION = 0x1925;
 static constexpr int MODE_NAME_LENGTH = 20;
 
 static uint32_t currentColor[VirtualConsole::COUNT];
+static uint32_t accelColor[VirtualConsole::COUNT];
 // Like svgalib, one buffer that every vga_getmodeinfo() call overwrites (one per console: per-process state).
 static vga_modeinfo modeInfos[VirtualConsole::COUNT];
 
@@ -211,6 +213,9 @@ vga_setmode(int mode) {
     VgaMode::Id id;
     if (!lookup(mode, id) || !VgaMode::available(id)) {
         return -1;
+    }
+    if (mode != TEXT) {
+        Syscalls::showConsole();
     }
     if (!VirtualConsole::setMode(Syscalls::console(), id)) {
         return -1;
@@ -403,6 +408,67 @@ int
 vga_drawscansegment(unsigned char *colors, int x, int y, int length) {
     VirtualConsole::putSpan(Syscalls::console(), x, y, colors, length);
     return 0;
+}
+
+static constexpr unsigned SVGALIB_ACCEL_FLAGS = ACCELFLAG_FILLBOX | ACCELFLAG_SCREENCOPY | ACCELFLAG_SETFGCOLOR |
+                                               ACCELFLAG_SYNC;
+
+int
+vga_ext_set(unsigned what, ...) {
+    if (what != VGA_EXT_AVAILABLE) {
+        return 0;
+    }
+    va_list arguments;
+    va_start(arguments, what);
+    int which = va_arg(arguments, int);
+    va_end(arguments);
+    switch (which) {
+    case VGA_AVAIL_SET:
+        return 1 << VGA_EXT_AVAILABLE;
+    case VGA_AVAIL_ACCEL:
+        return vga_getcurrentmode() == TEXT ? 0 : (int)SVGALIB_ACCEL_FLAGS;
+    default:
+        return 0;
+    }
+}
+
+int
+vga_accel(unsigned operation, ...) {
+    unsigned console = Syscalls::console();
+    va_list arguments;
+    va_start(arguments, operation);
+    int result = 0;
+    switch (operation) {
+    case ACCEL_FILLBOX: {
+        int x = va_arg(arguments, int);
+        int y = va_arg(arguments, int);
+        int width = va_arg(arguments, int);
+        int height = va_arg(arguments, int);
+        VirtualConsole::fillRect(console, x, y, width, height, accelColor[console % VirtualConsole::COUNT]);
+        break;
+    }
+    case ACCEL_SCREENCOPY: {
+        int fromX = va_arg(arguments, int);
+        int fromY = va_arg(arguments, int);
+        int toX = va_arg(arguments, int);
+        int toY = va_arg(arguments, int);
+        int width = va_arg(arguments, int);
+        int height = va_arg(arguments, int);
+        VirtualConsole::copyRect(console, fromX, fromY, toX, toY, width, height);
+        break;
+    }
+    case ACCEL_SETFGCOLOR:
+        accelColor[console % VirtualConsole::COUNT] = (uint32_t)va_arg(arguments, int);
+        break;
+    case ACCEL_SYNC:
+        VirtualConsole::sync(console);
+        break;
+    default:
+        result = -1;
+        break;
+    }
+    va_end(arguments);
+    return result;
 }
 
 void

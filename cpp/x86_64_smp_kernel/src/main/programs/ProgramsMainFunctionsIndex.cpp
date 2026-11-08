@@ -14,6 +14,7 @@
 #include "programs/init/Init.h"
 #include "programs/dmesg/DmesgCommand.h"
 #include "programs/reboot/RebootCommand.h"
+#include "programs/nvidia/NvidiaCommand.h"
 
 static const Program programsMainFunctionsIndex[] __attribute__((section(".programs"), used)) = {
     {"date", &DateCommand::main, false},
@@ -30,5 +31,6 @@ static const Program programsMainFunctionsIndex[] __attribute__((section(".progr
     {"dmesg", &DmesgCommand::main, false},
     {"reboot", &RebootCommand::main},
     {"mode", &ModeCommand::main, false},
-    {"chvt", &ChvtCommand::main, false}
+    {"chvt", &ChvtCommand::main, false},
+    {"nvidia", &NvidiaCommand::main, false}
 };

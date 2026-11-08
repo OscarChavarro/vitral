@@ -3,6 +3,7 @@
 //   /ws/system  0x01 system, 0x02 process info (new processes), 0x03 process state (every update)
 //   /ws/cpu     0x20 load of each core in percent (255 = offline), every 500 ms
 //   /ws/log     0x10 log text, only what is new
+// and GET /framebuffer returns what the screen shows (the console on it) as a binary PPM (P6) image.
 const STATES = ["READY", "RUN", "SLEEP", "ZOMBIE", "WAIT"];   // Process::State (Ready, Running, Sleeping, Zombie, Blocked)
 const processes = new Map();   // pid -> {pid, ppid, name, console, state, cpu, percent}
 const system = {cpus: null, idle: "", uptimeSeconds: 0};
@@ -165,6 +166,112 @@ function drawLoad() {
     g.stroke();
   }
 }
+
+// ---- Screen: GET /framebuffer, drawn on a canvas of the image's size while it downloads ----
+const framebuffer = {
+  button: document.getElementById("show-framebuffer"),
+  status: document.getElementById("framebuffer-status"),
+  picture: document.getElementById("framebuffer-picture"),
+  loading: false,
+};
+
+// The PPM header: "P6", width, height and maximum value, separated by white space (and # comments up to the end of a
+// line), then a single white space character before the pixels. Null while bytes does not hold all of it yet.
+function parsePpmHeader(bytes) {
+  const space = c => c === 0x20 || c === 0x09 || c === 0x0a || c === 0x0d;
+  const fields = [];
+  let i = 0;
+  while (fields.length < 4) {
+    while (i < bytes.length && (space(bytes[i]) || bytes[i] === 0x23)) {
+      if (bytes[i] === 0x23) while (i < bytes.length && bytes[i] !== 0x0a) i++;
+      else i++;
+    }
+    const start = i;
+    while (i < bytes.length && !space(bytes[i]) && bytes[i] !== 0x23) i++;
+    if (i >= bytes.length) return null;   // the field may continue in the next chunk
+    fields.push(String.fromCharCode(...bytes.subarray(start, i)));
+  }
+  if (fields[0] !== "P6") throw new Error("not a binary PPM image");
+  const [width, height, maximum] = fields.slice(1).map(Number);
+  if (!(width > 0 && height > 0 && maximum > 0 && maximum < 256)) throw new Error("unsupported PPM size or depth");
+  return {width, height, maximum, offset: i + 1};
+}
+
+async function showFramebuffer() {
+  if (framebuffer.loading) return;
+  framebuffer.loading = true;
+  framebuffer.button.disabled = true;
+  framebuffer.status.textContent = "requesting…";
+  let header = null, pending = new Uint8Array(0), canvas = null, g = null, image = null;
+  let position = 0, drawnRows = 0, frame = 0, received = 0, total = 0, name = "";
+  const started = performance.now();
+  // The rows completed since the last frame go to the canvas, at most once per animation frame.
+  const draw = () => {
+    frame = 0;
+    const rows = Math.min(Math.floor(position / 3 / header.width), header.height);
+    if (rows > drawnRows) g.putImageData(image, 0, 0, 0, drawnRows, header.width, rows - drawnRows);
+    drawnRows = rows;
+  };
+  const report = () => {
+    const mb = n => (n / 1048576).toFixed(1);
+    const percent = total ? ` ${Math.floor(100 * received / total)}%` : "";
+    const rate = received / Math.max((performance.now() - started) / 1000, 0.001) / 1024;
+    framebuffer.status.textContent = `${name}${header ? `${header.width}x${header.height} · ` : ""}` +
+      `${mb(received)} of ${total ? mb(total) : "?"} MB${percent} · ${rate.toFixed(0)} KB/s`;
+  };
+  try {
+    const response = await fetch("/framebuffer", {cache: "no-store"});
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    total = Number(response.headers.get("Content-Length")) || 0;
+    const disposition = /filename="?([^".]+)/.exec(response.headers.get("Content-Disposition") || "");
+    name = disposition ? `${disposition[1]} · ` : "";
+    const reader = response.body.getReader();
+    for (;;) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      received += value.length;
+      let bytes = value;
+      if (!header) {
+        const joined = new Uint8Array(pending.length + value.length);
+        joined.set(pending);
+        joined.set(value, pending.length);
+        header = parsePpmHeader(joined);
+        if (!header) {
+          if (joined.length > 1024) throw new Error("no PPM header");
+          pending = joined;
+          continue;
+        }
+        bytes = joined.subarray(header.offset);
+        canvas = document.createElement("canvas");
+        canvas.width = header.width;
+        canvas.height = header.height;
+        canvas.title = `${name}${header.width}x${header.height}`;
+        g = canvas.getContext("2d");
+        image = g.createImageData(header.width, header.height);
+        framebuffer.picture.replaceChildren(canvas);
+      }
+      const data = image.data, end = header.width * header.height * 3, scale = 255 / header.maximum;
+      for (let i = 0; i < bytes.length && position < end; i++, position++) {
+        const pixel = (position / 3) | 0, channel = position - pixel * 3;
+        data[pixel * 4 + channel] = header.maximum === 255 ? bytes[i] : Math.round(bytes[i] * scale);
+        if (channel === 2) data[pixel * 4 + 3] = 255;
+      }
+      if (!frame) frame = requestAnimationFrame(draw);
+      report();
+    }
+    if (frame) cancelAnimationFrame(frame);
+    if (header) draw();
+    report();
+    if (!header || position < header.width * header.height * 3) framebuffer.status.textContent += " · incomplete";
+  } catch (error) {
+    framebuffer.status.textContent = `Cannot show the framebuffer: ${error.message}`;
+  } finally {
+    framebuffer.loading = false;
+    framebuffer.button.disabled = false;
+  }
+}
+
+framebuffer.button.addEventListener("click", showFramebuffer);
 
 // ---- Connection: three WebSockets, and what to show when the kernel goes quiet ----
 // If nothing arrives on any of them for OFFLINE_AFTER_MS, the data sections are hidden and only a message is shown; every

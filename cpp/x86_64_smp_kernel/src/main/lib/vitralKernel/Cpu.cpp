@@ -75,6 +75,8 @@ Cpu::hasGigabytePages() { return feature(0x80000001, false, 26); }
 
 bool
 Cpu::hasPat() { return feature(1, false, 16); }
+bool
+Cpu::hasMtrr() { return feature(1, false, 12); }
 
 uint32_t
 Cpu::apicId() {

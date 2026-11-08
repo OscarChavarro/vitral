@@ -506,6 +506,21 @@ VgaMode::plotSpan(Id id, int x, int y, const uint8_t *pixels, int count) {
     }
 }
 
+bool
+VgaMode::fill(Id id, int x, int y, int width, int height, uint32_t color) {
+    const Info &m = info(id);
+    if (m.layout != Layout::Linear) {
+        return false;
+    }
+    Svga::fill(x, y, width, height, m.bytes, color);
+    return true;
+}
+
+bool
+VgaMode::copy(Id id, int fromX, int fromY, int toX, int toY, int width, int height) {
+    return info(id).layout == Layout::Linear && Svga::copy(fromX, fromY, toX, toY, width, height);
+}
+
 void
 VgaMode::plot(Id id, int x, int y, uint32_t color) {
     const Info &m = info(id);

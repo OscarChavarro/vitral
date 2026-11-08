@@ -8,13 +8,14 @@
 class Paging {
 public:
     static void init(const BootInfo &info);
-    // Makes the write-combining memory type selectable on this CPU. Each CPU has its own PAT register.
+    // Makes the write-combining memory type selectable on this CPU: its PAT on x86_64, the MTRR pair
+    // mapWriteCombining() chose on i386 (each CPU has its own registers).
     static void initCpu();
     // Marks a frame buffer as write-combining, so that the CPU groups its writes into bursts. Only before the other CPUs
     // start, because it does not tell them to drop their translations. False where it cannot: then it stays uncached,
-    // which works the same but slower.
+    // which works the same but slower. The i386 build, with paging off, programs a variable MTRR instead.
     static bool mapWriteCombining(uint64_t base, uint64_t bytes);
-    // The CPUs where initCpu() read back the expected PAT.
+    // The CPUs where initCpu() read back the expected PAT (x86_64) or MTRR pair (i386).
     static unsigned writeCombiningCpus() { return patCpus; }
     static uint64_t root() { return rootAddress; }
     static uint64_t mappedBytes() { return mappedEnd; }

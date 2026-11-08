@@ -14,6 +14,8 @@ section.wide { margin-top: 1rem; }
 canvas { max-width: 100%; border: 1px solid var(--line); }
 #legend { list-style: none; padding: 0; margin: .5rem 0 0; display: flex; flex-wrap: wrap; gap: .25rem 1rem; font-size: .8rem; font-variant-numeric: tabular-nums; }
 #legend i { display: inline-block; width: .8rem; height: .3rem; margin-right: .3rem; vertical-align: middle; }
+#framebuffer canvas { display: block; height: auto; image-rendering: pixelated; }
+#framebuffer-status { font-size: .85rem; color: var(--dim); font-variant-numeric: tabular-nums; }
 pre { max-height: 24rem; overflow: auto; background: var(--head); padding: .5rem; font-size: .8rem; }
 #offline { display: none; margin: 2rem 0; padding: 1rem 1.25rem; border: 1px solid #c33; border-radius: .5rem; color: #c33; font-weight: 600; }
 body.offline #offline { display: block; }

@@ -547,6 +547,7 @@ Scheduler::exit(TrapFrame *frame, int code) {
     if (!parentAlive) {
         p->waitable = false;
     }
+    p->returnScreen();
     if (p->ownsConsoleValue && code != 0) {
         Consoles::retire(p->consoleValue, p->nameBuffer, code);
     } else if (p->ownsConsoleValue) {

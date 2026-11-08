@@ -1,36 +1,37 @@
-#include "drivers/video/nvidiaNv4x/Nv4xPll.h"
+#include "drivers/video/nvidiaPreTesla/NvidiaPll.h"
 
-static const Nv4xPll::Limits G73_VPLL = {
+static const NvidiaPll::Limits G73_VPLL = {
     100000, 300000, 500000, 1000000, 2000, 27000, 25000, 75000, 8, 255, 1, 255, 8, 50, 1, 255, 7, 0,
 };
 
 static uint32_t
-nv4xRead8(const volatile uint8_t *rom, size_t at) {
+nvPllRead8(const volatile uint8_t *rom, size_t at) {
     return rom[at];
 }
 
 static uint32_t
-nv4xRead16(const volatile uint8_t *rom, size_t at) {
+nvPllRead16(const volatile uint8_t *rom, size_t at) {
     return (uint32_t)rom[at] | (uint32_t)rom[at + 1] << 8;
 }
 
 static uint32_t
-nv4xRead32(const volatile uint8_t *rom, size_t at) {
-    return nv4xRead16(rom, at) | nv4xRead16(rom, at + 2) << 16;
+nvPllRead32(const volatile uint8_t *rom, size_t at) {
+    return nvPllRead16(rom, at) | nvPllRead16(rom, at + 2) << 16;
 }
 
 static uint32_t
-nv4xDistance(uint32_t a, uint32_t b) {
+nvPllDistance(uint32_t a, uint32_t b) {
     return a > b ? a - b : b - a;
 }
 
-const Nv4xPll::Limits &
-Nv4xPll::fallback() {
+const NvidiaPll::Limits &
+NvidiaPll::fallback() {
     return G73_VPLL;
 }
 
 bool
-Nv4xPll::fromVideoBios(const volatile uint8_t *rom, size_t bytes, Limits &limits, uint8_t &chipVersion) {
+NvidiaPll::fromVideoBios(const volatile uint8_t *rom, size_t bytes, Limits &limits, uint8_t &chipVersion,
+                         uint32_t &biosVersion) {
     if (bytes < 512 || rom[0] != 0x55 || rom[1] != 0xAA) {
         return false;
     }
@@ -52,78 +53,80 @@ Nv4xPll::fromVideoBios(const volatile uint8_t *rom, size_t bytes, Limits &limits
     if (bit == 0) {
         return false;
     }
-    unsigned headerBytes = nv4xRead8(rom, bit + 8);
-    unsigned entryBytes = nv4xRead8(rom, bit + 9);
-    unsigned entries = nv4xRead8(rom, bit + 10);
+    unsigned headerBytes = nvPllRead8(rom, bit + 8);
+    unsigned entryBytes = nvPllRead8(rom, bit + 9);
+    unsigned entries = nvPllRead8(rom, bit + 10);
     size_t table = 0;
     chipVersion = 0;
+    biosVersion = 0;
     for (unsigned i = 0; i < entries; i++) {
         size_t entry = bit + headerBytes + (size_t)i * entryBytes;
         if (entry + 6 > bytes) {
             break;
         }
-        uint32_t id = nv4xRead8(rom, entry);
-        uint32_t version = nv4xRead8(rom, entry + 1);
-        uint32_t length = nv4xRead16(rom, entry + 2);
-        size_t offset = nv4xRead16(rom, entry + 4);
+        uint32_t id = nvPllRead8(rom, entry);
+        uint32_t version = nvPllRead8(rom, entry + 1);
+        uint32_t length = nvPllRead16(rom, entry + 2);
+        size_t offset = nvPllRead16(rom, entry + 4);
         if (offset + length > bytes) {
             continue;
         }
         if (id == 'i' && length >= 4) {
-            chipVersion = (uint8_t)nv4xRead8(rom, offset + 2);
+            chipVersion = (uint8_t)nvPllRead8(rom, offset + 2);
+            biosVersion = nvPllRead32(rom, offset);
         } else if (id == 'C' && version == 1 && length >= 10) {
-            table = nv4xRead16(rom, offset + 8);
+            table = nvPllRead16(rom, offset + 8);
         } else if (id == 'C' && version == 2 && length >= 4) {
-            table = nv4xRead32(rom, offset);
+            table = nvPllRead32(rom, offset);
         }
     }
     if (table == 0 || table + 4 > bytes) {
         return false;
     }
     // Versions 0x20 and 0x21 of the PLL limits table: entries keyed by register, the first being the default.
-    uint32_t version = nv4xRead8(rom, table);
-    uint32_t header = nv4xRead8(rom, table + 1);
-    uint32_t length = nv4xRead8(rom, table + 2);
-    uint32_t count = nv4xRead8(rom, table + 3);
+    uint32_t version = nvPllRead8(rom, table);
+    uint32_t header = nvPllRead8(rom, table + 1);
+    uint32_t length = nvPllRead8(rom, table + 2);
+    uint32_t count = nvPllRead8(rom, table + 3);
     if ((version != 0x20 && version != 0x21) || length < 0x1F || count == 0) {
         return false;
     }
     size_t data = table + header;
     for (uint32_t i = 0; i < count; i++) {
         size_t entry = table + header + (size_t)i * length;
-        if (entry + length <= bytes && nv4xRead32(rom, entry) == 0x680508) {
+        if (entry + length <= bytes && nvPllRead32(rom, entry) == 0x680508) {
             data = entry;
         }
     }
     if (data + length > bytes) {
         return false;
     }
-    limits.vco1MinKhz = nv4xRead16(rom, data + 4) * 1000;
-    limits.vco1MaxKhz = nv4xRead16(rom, data + 6) * 1000;
-    limits.vco2MinKhz = nv4xRead16(rom, data + 8) * 1000;
-    limits.vco2MaxKhz = nv4xRead16(rom, data + 10) * 1000;
-    limits.input1MinKhz = nv4xRead16(rom, data + 12) * 1000;
-    limits.input2MinKhz = nv4xRead16(rom, data + 14) * 1000;
-    limits.input1MaxKhz = nv4xRead16(rom, data + 16) * 1000;
-    limits.input2MaxKhz = nv4xRead16(rom, data + 18) * 1000;
-    limits.n1Min = (uint8_t)nv4xRead8(rom, data + 20);
-    limits.n1Max = (uint8_t)nv4xRead8(rom, data + 21);
-    limits.m1Min = (uint8_t)nv4xRead8(rom, data + 22);
-    limits.m1Max = (uint8_t)nv4xRead8(rom, data + 23);
-    limits.n2Min = (uint8_t)nv4xRead8(rom, data + 24);
-    limits.n2Max = (uint8_t)nv4xRead8(rom, data + 25);
-    limits.m2Min = (uint8_t)nv4xRead8(rom, data + 26);
-    limits.m2Max = (uint8_t)nv4xRead8(rom, data + 27);
-    limits.log2PMax = (uint8_t)nv4xRead8(rom, data + 29);
+    limits.vco1MinKhz = nvPllRead16(rom, data + 4) * 1000;
+    limits.vco1MaxKhz = nvPllRead16(rom, data + 6) * 1000;
+    limits.vco2MinKhz = nvPllRead16(rom, data + 8) * 1000;
+    limits.vco2MaxKhz = nvPllRead16(rom, data + 10) * 1000;
+    limits.input1MinKhz = nvPllRead16(rom, data + 12) * 1000;
+    limits.input2MinKhz = nvPllRead16(rom, data + 14) * 1000;
+    limits.input1MaxKhz = nvPllRead16(rom, data + 16) * 1000;
+    limits.input2MaxKhz = nvPllRead16(rom, data + 18) * 1000;
+    limits.n1Min = (uint8_t)nvPllRead8(rom, data + 20);
+    limits.n1Max = (uint8_t)nvPllRead8(rom, data + 21);
+    limits.m1Min = (uint8_t)nvPllRead8(rom, data + 22);
+    limits.m1Max = (uint8_t)nvPllRead8(rom, data + 23);
+    limits.n2Min = (uint8_t)nvPllRead8(rom, data + 24);
+    limits.n2Max = (uint8_t)nvPllRead8(rom, data + 25);
+    limits.m2Min = (uint8_t)nvPllRead8(rom, data + 26);
+    limits.m2Max = (uint8_t)nvPllRead8(rom, data + 27);
+    limits.log2PMax = (uint8_t)nvPllRead8(rom, data + 29);
     if (chipVersion < 0x60 && limits.log2PMax > 6) {
         limits.log2PMax = 6;
     }
-    limits.referenceKhz = length > 0x22 ? nv4xRead32(rom, data + 31) : 0;
+    limits.referenceKhz = length > 0x22 ? nvPllRead32(rom, data + 31) : 0;
     return limits.vco1MaxKhz != 0 && limits.m1Min != 0 && limits.n1Min <= limits.n1Max;
 }
 
 bool
-Nv4xPll::calculate(const Limits &limits, uint32_t referenceKhz, uint8_t chipVersion, uint32_t khz, bool twoStages,
+NvidiaPll::calculate(const Limits &limits, uint32_t referenceKhz, uint8_t chipVersion, uint32_t khz, bool twoStages,
                    Coefficients &out) {
     uint32_t crystal = limits.referenceKhz ? limits.referenceKhz : referenceKhz;
     if (crystal == 0 || khz == 0) {
@@ -136,7 +139,7 @@ Nv4xPll::calculate(const Limits &limits, uint32_t referenceKhz, uint8_t chipVers
 }
 
 bool
-Nv4xPll::single(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uint32_t khz, Coefficients &out) {
+NvidiaPll::single(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uint32_t khz, Coefficients &out) {
     uint32_t minVco = limits.vco1MinKhz;
     uint32_t maxVco = limits.vco1MaxKhz;
     unsigned maxM = limits.m1Max;
@@ -186,7 +189,7 @@ Nv4xPll::single(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uin
                 break;
             }
             uint32_t calculated = ((n * crystal + p / 2) / p + m / 2) / m;
-            uint32_t delta = nv4xDistance(calculated, khz);
+            uint32_t delta = nvPllDistance(calculated, khz);
             if (delta < bestDelta) {
                 bestDelta = delta;
                 found = true;
@@ -207,7 +210,7 @@ Nv4xPll::single(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uin
 }
 
 bool
-Nv4xPll::dual(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uint32_t khz, Coefficients &out) {
+NvidiaPll::dual(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uint32_t khz, Coefficients &out) {
     uint32_t maxVco2 = limits.vco2MaxKhz;
     bool fixedGain2 = limits.m2Min == limits.m2Max && limits.n2Min == limits.n2Max;
     uint32_t vco2 = (maxVco2 - maxVco2 / 200) / 2;
@@ -264,7 +267,7 @@ Nv4xPll::dual(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uint3
                     }
                 }
                 uint32_t calculated = clock2 >> log2P;
-                uint32_t delta = nv4xDistance(calculated, khz);
+                uint32_t delta = nvPllDistance(calculated, khz);
                 if (delta < bestDelta) {
                     bestDelta = delta;
                     found = true;
@@ -279,6 +282,43 @@ Nv4xPll::dual(const Limits &limits, uint32_t crystal, uint8_t chipVersion, uint3
                         return true;
                     }
                 }
+            }
+        }
+    }
+    return found;
+}
+
+bool
+NvidiaPll::calculateNv04(uint32_t crystalKhz, uint32_t khz, Coefficients &out) {
+    if (crystalKhz == 0 || khz == 0) {
+        return false;
+    }
+    unsigned lowM = crystalKhz == 13500 ? 7 : 8;
+    unsigned highM = crystalKhz == 13500 ? 13 : 14;
+    uint32_t bestDelta = 0xFFFFFFFFu;
+    bool found = false;
+    for (unsigned log2P = 0; log2P <= 4; log2P++) {
+        uint32_t vco = khz << log2P;
+        if (vco < 128000 || vco > 350000) {
+            continue;
+        }
+        for (unsigned m = lowM; m <= highM; m++) {
+            uint32_t n = vco * m / crystalKhz;
+            if (n == 0 || n > 255) {
+                continue;
+            }
+            uint32_t calculated = (crystalKhz * n / m) >> log2P;
+            uint32_t delta = nvPllDistance(calculated, khz);
+            if (delta < bestDelta) {
+                bestDelta = delta;
+                found = true;
+                out.n1 = (uint8_t)n;
+                out.m1 = (uint8_t)m;
+                out.n2 = 1;
+                out.m2 = 1;
+                out.log2P = (uint8_t)log2P;
+                out.twoStages = false;
+                out.khz = calculated;
             }
         }
     }

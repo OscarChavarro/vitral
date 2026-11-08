@@ -1,5 +1,6 @@
 #include "drivers/video/virtualConsole/VirtualConsole.h"
 #include "drivers/video/vga/VgaText.h"
+#include "drivers/video/svga/Svga.h"
 #include "kernel/KernelHeap.h"
 #include "lib/vitralKernel/Cpu.h"
 #include "lib/vitralKernel/Memory.h"
@@ -9,6 +10,8 @@ unsigned VirtualConsole::activeIndex = 0;
 VgaMode::Id VirtualConsole::hardwareMode = VgaMode::Id::Text80x25;
 bool VirtualConsole::panicking = false;
 SpinLock VirtualConsole::lock;
+int VirtualConsole::pendingConsole = -1;
+int VirtualConsole::pendingRow = 0;
 
 VirtualConsole::Locked::Locked() : flags(0), held(!panicking) {
     if (held) {
@@ -18,6 +21,39 @@ VirtualConsole::Locked::Locked() : flags(0), held(!panicking) {
 VirtualConsole::Locked::~Locked() {
     Cpu::flushWrites();
     if (held) {
+        lock.unlock(flags);
+        if (__atomic_load_n(&pendingConsole, __ATOMIC_ACQUIRE) >= 0) {
+            copyPending();
+        }
+    }
+}
+
+// Stops when the console is no longer on the screen or changes mode: show() then starts again from the top.
+void
+VirtualConsole::copyPending() {
+    while (__atomic_load_n(&pendingConsole, __ATOMIC_ACQUIRE) >= 0) {
+        uint64_t flags = lock.lock();
+        int console = pendingConsole;
+        if (console >= 0) {
+            const Screen &s = screens[console];
+            const VgaMode::Info &info = VgaMode::info(s.mode);
+            if ((unsigned)console != activeIndex || !s.pixels || info.layout != VgaMode::Layout::Linear) {
+                __atomic_store_n(&pendingConsole, -1, __ATOMIC_RELEASE);
+            } else {
+                size_t rowBytes = (size_t)info.width * info.pixelBytes();
+                int band = rowBytes < PENDING_BAND_BYTES ? (int)(PENDING_BAND_BYTES / rowBytes) : 1;
+                if (band > info.height - pendingRow) {
+                    band = info.height - pendingRow;
+                }
+                presentRows(s, 0, pendingRow, info.width, band);
+                pendingRow += band;
+                if (pendingRow >= info.height) {
+                    paintOverlay(s);
+                    __atomic_store_n(&pendingConsole, -1, __ATOMIC_RELEASE);
+                }
+            }
+        }
+        Cpu::flushWrites();
         lock.unlock(flags);
     }
 }
@@ -80,6 +116,10 @@ VirtualConsole::show(unsigned console) {
         paintAll();
     } else if (framebufferText(s)) {
         paintAll();
+    } else if (VgaMode::info(s.mode).layout == VgaMode::Layout::Linear && !panicking) {
+        VgaMode::loadPalette(s.mode, s.palette);
+        pendingRow = 0;
+        __atomic_store_n(&pendingConsole, (int)console, __ATOMIC_RELEASE);
     } else {
         VgaMode::loadPalette(s.mode, s.palette);
         VgaMode::blit(s.mode, s.pixels);
@@ -364,6 +404,118 @@ VirtualConsole::clearPixels(unsigned console, uint32_t color) {
 }
 
 void
+VirtualConsole::presentRows(const Screen &s, int left, int top, int width, int height) {
+    const VgaMode::Info &info = VgaMode::info(s.mode);
+    for (int y = top; y < top + height; y++) {
+        VgaMode::plotSpan(s.mode, left, y, s.pixels + ((size_t)y * info.width + left) * info.pixelBytes(), width);
+    }
+}
+
+void
+VirtualConsole::fillRect(unsigned console, int x, int y, int width, int height, uint32_t color) {
+    Locked guard;
+    console = resolve(console);
+    Screen &s = screens[console];
+    if (!s.pixels) {
+        return;
+    }
+    const VgaMode::Info &info = VgaMode::info(s.mode);
+    if (x < 0) {
+        width += x;
+        x = 0;
+    }
+    if (y < 0) {
+        height += y;
+        y = 0;
+    }
+    if (width > info.width - x) {
+        width = info.width - x;
+    }
+    if (height > info.height - y) {
+        height = info.height - y;
+    }
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    unsigned bytes = info.pixelBytes();
+    for (int row = y; row < y + height; row++) {
+        uint8_t *pixel = s.pixels + ((size_t)row * info.width + x) * bytes;
+        if (bytes == 1) {
+            Memory::set(pixel, (uint8_t)color, (size_t)width);
+            continue;
+        }
+        for (int column = 0; column < width; column++) {
+            for (unsigned i = 0; i < bytes; i++) {
+                *pixel++ = (uint8_t)(color >> (8 * i));
+            }
+        }
+    }
+    if (console == activeIndex && !VgaMode::fill(s.mode, x, y, width, height, color)) {
+        presentRows(s, x, y, width, height);
+    }
+}
+
+void
+VirtualConsole::copyRect(unsigned console, int fromX, int fromY, int toX, int toY, int width, int height) {
+    Locked guard;
+    console = resolve(console);
+    Screen &s = screens[console];
+    if (!s.pixels) {
+        return;
+    }
+    const VgaMode::Info &info = VgaMode::info(s.mode);
+    // Both rectangles inside the mode: what is cut from one is cut from the other.
+    if (fromX < 0) {
+        toX -= fromX;
+        width += fromX;
+        fromX = 0;
+    }
+    if (toX < 0) {
+        fromX -= toX;
+        width += toX;
+        toX = 0;
+    }
+    if (fromY < 0) {
+        toY -= fromY;
+        height += fromY;
+        fromY = 0;
+    }
+    if (toY < 0) {
+        fromY -= toY;
+        height += toY;
+        toY = 0;
+    }
+    int right = fromX > toX ? fromX : toX;
+    int bottom = fromY > toY ? fromY : toY;
+    if (width > info.width - right) {
+        width = info.width - right;
+    }
+    if (height > info.height - bottom) {
+        height = info.height - bottom;
+    }
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    unsigned bytes = info.pixelBytes();
+    size_t rowBytes = (size_t)width * bytes;
+    // Rows from the far end of the overlap first; Memory::move takes care of the overlap within a row.
+    bool upwards = toY > fromY;
+    for (int i = 0; i < height; i++) {
+        int row = upwards ? height - 1 - i : i;
+        Memory::move(s.pixels + ((size_t)(toY + row) * info.width + toX) * bytes,
+                     s.pixels + ((size_t)(fromY + row) * info.width + fromX) * bytes, rowBytes);
+    }
+    if (console == activeIndex && !VgaMode::copy(s.mode, fromX, fromY, toX, toY, width, height)) {
+        presentRows(s, toX, toY, width, height);
+    }
+}
+
+void
+VirtualConsole::sync(unsigned) {
+    Svga::sync();
+}
+
+void
 VirtualConsole::paintCursor(const Screen &s) {
     if (framebufferText(s)) {
         if (s.cx >= 0 && s.cx < columns(s) && s.cy >= 0 && s.cy < rows(s)) {
@@ -391,14 +543,19 @@ VirtualConsole::paintCell(const Screen &s, int x, int y) {
     VgaText::putAt(x, y, (char)(c & 0xFF), attr);
 }
 
+// The 16 colours of a text attribute, as 0xRRGGBB.
+static const uint32_t TEXT_COLORS[16] = {
+    0x00000000, 0x000000AA, 0x0000AA00, 0x0000AAAA,
+    0x00AA0000, 0x00AA00AA, 0x00AA5500, 0x00AAAAAA,
+    0x00555555, 0x005555FF, 0x0055FF55, 0x0055FFFF,
+    0x00FF5555, 0x00FF55FF, 0x00FFFF55, 0x00FFFFFF,
+};
+static constexpr unsigned PICTURE_GLYPH_WIDTH = 8;
+static constexpr unsigned PICTURE_GLYPH_HEIGHT = 16;
+
 void
 VirtualConsole::paintFramebufferCell(const Screen &s, int x, int y) {
-    static const uint32_t COLORS[16] = {
-        0x00000000, 0x000000AA, 0x0000AA00, 0x0000AAAA,
-        0x00AA0000, 0x00AA00AA, 0x00AA5500, 0x00AAAAAA,
-        0x00555555, 0x005555FF, 0x0055FF55, 0x0055FFFF,
-        0x00FF5555, 0x00FF55FF, 0x00FFFF55, 0x00FFFFFF,
-    };
+    const uint32_t *COLORS = TEXT_COLORS;
     uint16_t c = cell(s, x, y);
     uint8_t attr = (uint8_t)(c >> 8);
     if (x == s.pointerX && y == s.pointerY) {
@@ -902,4 +1059,102 @@ int
 VirtualConsole::cursorY(unsigned console) {
     Locked guard;
     return screens[resolve(console)].cy;
+}
+
+bool
+VirtualConsole::pictureSizeOf(const Screen &s, unsigned &width, unsigned &height) {
+    if (VgaMode::isConsoleText(s.mode)) {
+        width = (unsigned)columns(s) * PICTURE_GLYPH_WIDTH;
+        height = (unsigned)rows(s) * PICTURE_GLYPH_HEIGHT;
+        return true;
+    }
+    if (!s.pixels) {
+        return false;
+    }
+    const VgaMode::Info &info = VgaMode::info(s.mode);
+    width = info.width;
+    height = info.height;
+    return true;
+}
+
+bool
+VirtualConsole::pictureSize(unsigned console, unsigned &width, unsigned &height) {
+    Locked guard;
+    return pictureSizeOf(screens[resolve(console)], width, height);
+}
+
+bool
+VirtualConsole::pictureRow(unsigned console, unsigned y, unsigned width, uint8_t *rgb) {
+    Locked guard;
+    const Screen &s = screens[resolve(console)];
+    unsigned currentWidth;
+    unsigned currentHeight;
+    if (!pictureSizeOf(s, currentWidth, currentHeight) || currentWidth != width || y >= currentHeight) {
+        return false;
+    }
+    if (VgaMode::isConsoleText(s.mode)) {
+        pictureTextRow(s, y, rgb);
+    } else {
+        pictureGraphicsRow(s, y, width, rgb);
+    }
+    return true;
+}
+
+// The cursor shows as paintFramebufferCell() draws it, its cell in inverted colours.
+void
+VirtualConsole::pictureTextRow(const Screen &s, unsigned y, uint8_t *rgb) {
+    int row = (int)(y / PICTURE_GLYPH_HEIGHT);
+    unsigned glyphRow = y % PICTURE_GLYPH_HEIGHT;
+    int count = columns(s);
+    for (int x = 0; x < count; x++) {
+        uint16_t c = cell(s, x, row);
+        uint8_t attr = (uint8_t)(c >> 8);
+        if (s.cursorVisible && x == s.cx && row == s.cy) {
+            attr ^= 0x77;
+        }
+        uint8_t bits = VgaMode::fontRow((uint8_t)c, glyphRow);
+        for (unsigned column = 0; column < PICTURE_GLYPH_WIDTH; column++) {
+            uint32_t color = TEXT_COLORS[bits & (0x80 >> column) ? attr & 0x0F : attr >> 4 & 0x0F];
+            *rgb++ = (uint8_t)(color >> 16);
+            *rgb++ = (uint8_t)(color >> 8);
+            *rgb++ = (uint8_t)color;
+        }
+    }
+}
+
+// The pixels are stored as the mode has them: palette indices (6-bit DAC values), 15 or 16-bit colours, or blue,
+// green and red bytes.
+void
+VirtualConsole::pictureGraphicsRow(const Screen &s, unsigned y, unsigned width, uint8_t *rgb) {
+    const VgaMode::Info &info = VgaMode::info(s.mode);
+    unsigned bytes = info.pixelBytes();
+    const uint8_t *p = s.pixels + (size_t)y * width * bytes;
+    for (unsigned x = 0; x < width; x++, p += bytes) {
+        unsigned r;
+        unsigned g;
+        unsigned b;
+        if (bytes == 1) {
+            const uint8_t *entry = s.palette + (unsigned)p[0] * 3;
+            r = (entry[0] & 0x3Fu) * 255 / 63;
+            g = (entry[1] & 0x3Fu) * 255 / 63;
+            b = (entry[2] & 0x3Fu) * 255 / 63;
+        } else if (bytes == 2 && info.colors == 32768) {
+            unsigned v = (unsigned)p[0] | (unsigned)p[1] << 8;
+            r = (v >> 10 & 31) * 255 / 31;
+            g = (v >> 5 & 31) * 255 / 31;
+            b = (v & 31) * 255 / 31;
+        } else if (bytes == 2) {
+            unsigned v = (unsigned)p[0] | (unsigned)p[1] << 8;
+            r = (v >> 11 & 31) * 255 / 31;
+            g = (v >> 5 & 63) * 255 / 63;
+            b = (v & 31) * 255 / 31;
+        } else {
+            r = p[2];
+            g = p[1];
+            b = p[0];
+        }
+        *rgb++ = (uint8_t)r;
+        *rgb++ = (uint8_t)g;
+        *rgb++ = (uint8_t)b;
+    }
 }

@@ -1,5 +1,6 @@
 #ifndef __VIRTUAL_CONSOLE__
 #define __VIRTUAL_CONSOLE__
+#include <stddef.h>
 #include <stdint.h>
 #include "drivers/video/vga/VgaMode.h"
 #include "lib/vitralKernel/SpinLock.h"
@@ -46,7 +47,19 @@ public:
                            uint32_t fill, uint32_t outline);
     static uint32_t getPixel(unsigned console, int x, int y);
     static void clearPixels(unsigned console, uint32_t color);
+    // A rectangle of one colour, and a copy of a rectangle onto another one that may overlap it, clipped to the mode:
+    // the console's pixels change, and the screen through the SVGA driver's primitives (its 2D engine when
+    // acceleration is selected) or, when they cannot, from those pixels.
+    static void fillRect(unsigned console, int x, int y, int width, int height, uint32_t color);
+    static void copyRect(unsigned console, int fromX, int fromY, int toX, int toY, int width, int height);
+    // Returns once what the console's primitives drew is on the screen.
+    static void sync(unsigned console);
     static void setPalette(unsigned console, unsigned first, unsigned count, const uint8_t *rgb);
+    // A picture of what a console shows, for screenshots: its size in pixels (text drawn with the 8x16 font, without
+    // the mouse pointer), and then its rows one at a time as 8-bit red, green and blue. False when the console has no
+    // pixels, or for a row once the console has changed to another size.
+    static bool pictureSize(unsigned console, unsigned &width, unsigned &height);
+    static bool pictureRow(unsigned console, unsigned y, unsigned width, uint8_t *rgb);
 
     static void putAt(unsigned console, int x, int y, char c, uint8_t attr);
     static void writeAt(unsigned console, int x, int y, const char *s, uint8_t attr);
@@ -98,8 +111,16 @@ private:
         bool held;
     };
 
+    // A linear (SVGA) frame buffer is too large to copy with the lock held, which keeps interrupts waiting: show()
+    // leaves the copy of the console's pixels to the screen pending, and copyPending() makes it once the lock is
+    // released (~Locked), a band of rows per lock. Whatever else draws meanwhile comes from the same pixels.
+    static constexpr size_t PENDING_BAND_BYTES = 32 * 1024;
+
     static Screen screens[COUNT];
     static unsigned activeIndex;
+    // The console whose pixels show() has still to copy to the screen, or -1, and the first row not copied yet.
+    static int pendingConsole;
+    static int pendingRow;
     static VgaMode::Id hardwareMode;
     static bool panicking;
     static SpinLock lock;
@@ -121,11 +142,15 @@ private:
     }
     static bool clipSpan(const VgaMode::Info &info, int &x, int y, const uint8_t *&pixels, int &count);
     static void show(unsigned console);
+    static void copyPending();
     static void paintOverlay(const Screen &s);
     static void leaveGraphics(unsigned console);
     static void paintAll();
     static void paintCell(const Screen &s, int x, int y);
     static void paintFramebufferCell(const Screen &s, int x, int y);
+    static bool pictureSizeOf(const Screen &s, unsigned &width, unsigned &height);
+    static void pictureTextRow(const Screen &s, unsigned y, uint8_t *rgb);
+    static void pictureGraphicsRow(const Screen &s, unsigned y, unsigned width, uint8_t *rgb);
     static void paintCursor(const Screen &s);
     static void scroll(unsigned console);
     static void escape(unsigned console, char c);
@@ -133,6 +158,7 @@ private:
     static void rendition(Screen &s);
     static void eraseCells(Screen &s, int y, int from, int to);
     static void paintRow(unsigned console, int y);
+    static void presentRows(const Screen &s, int left, int top, int width, int height);
     static void cursorMoved(unsigned console, int oldX, int oldY);
 };
 

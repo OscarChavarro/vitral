@@ -111,6 +111,6 @@ kernelMain() {
         Smp::startProcessors();
         Scheduler::useLapicTimers();
     }
-    kprintf("Paging: write-combining PAT on %u CPUs\n", Paging::writeCombiningCpus());
+    kprintf("Paging: write-combining on %u CPUs\n", Paging::writeCombiningCpus());
     Scheduler::start();
 }

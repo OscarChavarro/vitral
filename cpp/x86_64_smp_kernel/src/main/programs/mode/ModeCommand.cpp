@@ -161,17 +161,15 @@ ModeCommand::drawTestPattern(unsigned console, VgaMode::Id id) {
             bar[b] = rgb;
         }
     }
-    uint32_t frame = bar[7];
-    uint8_t *row = new uint8_t[width * bytes];
-    for (unsigned y = 0; y < height; y++) {
-        bool edge = y < 2 || y + 2 >= height;
-        for (unsigned x = 0; x < width; x++) {
-            uint32_t color = (edge || x < 2 || x + 2 >= width) ? frame : bar[x * 8 / width];
-            for (unsigned i = 0; i < bytes; i++) {
-                row[x * bytes + i] = (uint8_t)(color >> (8 * i));
-            }
-        }
-        VirtualConsole::putSpan(console, 0, (int)y, row, (int)(width * bytes));
+    // Rectangles, which the SVGA driver's 2D engine draws when the `nvidia` program has selected it.
+    for (unsigned b = 0; b < 8; b++) {
+        unsigned left = (b * width + 7) / 8;
+        unsigned right = ((b + 1) * width + 7) / 8;
+        VirtualConsole::fillRect(console, (int)left, 0, (int)(right - left), (int)height, bar[b]);
     }
-    delete[] row;
+    uint32_t frame = bar[7];
+    VirtualConsole::fillRect(console, 0, 0, (int)width, 2, frame);
+    VirtualConsole::fillRect(console, 0, (int)height - 2, (int)width, 2, frame);
+    VirtualConsole::fillRect(console, 0, 0, 2, (int)height, frame);
+    VirtualConsole::fillRect(console, (int)width - 2, 0, 2, (int)height, frame);
 }

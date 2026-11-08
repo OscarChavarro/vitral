@@ -139,6 +139,52 @@ vga_getmousetype();
 void
 vga_setmousesupport(int s);
 
+// svgalib's extension and acceleration calls. This kernel offers solid fills and screen to screen copies in every
+// graphics mode: done by the 2D engine when the SVGA driver has one and the `nvidia` program selects it, by the CPU
+// otherwise.
+#define VGA_EXT_AVAILABLE 0
+#define VGA_EXT_SET 1
+#define VGA_EXT_CLEAR 2
+#define VGA_EXT_RESET 3
+#define VGA_AVAIL_SET 0
+#define VGA_AVAIL_ACCEL 1
+#define VGA_AVAIL_FLAGS 2
+
+#define ACCEL_FILLBOX 1
+#define ACCEL_SCREENCOPY 2
+#define ACCEL_PUTIMAGE 3
+#define ACCEL_DRAWLINE 4
+#define ACCEL_SETFGCOLOR 5
+#define ACCEL_SETBGCOLOR 6
+#define ACCEL_SETTRANSPARENCY 7
+#define ACCEL_SETRASTEROP 8
+#define ACCEL_PUTBITMAP 9
+#define ACCEL_SCREENCOPYBITMAP 10
+#define ACCEL_DRAWHLINELIST 11
+#define ACCEL_SETMODE 12
+#define ACCEL_SYNC 13
+
+#define ACCELFLAG_FILLBOX 0x1
+#define ACCELFLAG_SCREENCOPY 0x2
+#define ACCELFLAG_PUTIMAGE 0x4
+#define ACCELFLAG_DRAWLINE 0x8
+#define ACCELFLAG_SETFGCOLOR 0x10
+#define ACCELFLAG_SETBGCOLOR 0x20
+#define ACCELFLAG_SETTRANSPARENCY 0x40
+#define ACCELFLAG_SETRASTEROP 0x80
+#define ACCELFLAG_PUTBITMAP 0x100
+#define ACCELFLAG_SCREENCOPYBITMAP 0x200
+#define ACCELFLAG_DRAWHLINELIST 0x400
+#define ACCELFLAG_SETMODE 0x800
+#define ACCELFLAG_SYNC 0x1000
+
+int
+vga_ext_set(unsigned what, ...);
+// ACCEL_FILLBOX x, y, width, height in the ACCEL_SETFGCOLOR colour; ACCEL_SCREENCOPY fromX, fromY, toX, toY, width,
+// height; ACCEL_SETFGCOLOR colour; ACCEL_SYNC. 0, or -1 for an operation it lacks.
+int
+vga_accel(unsigned operation, ...);
+
 struct fd_set;
 struct timeval;
 

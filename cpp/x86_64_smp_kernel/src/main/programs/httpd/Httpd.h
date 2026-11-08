@@ -23,6 +23,7 @@ private:
     static void respond(int64_t socket, int status, const char *reason, const char *body, const char *extra = nullptr);
     static void serveFile(int64_t socket, const char *target);
     static void serveSystem(int64_t socket);
+    static void serveFramebuffer(int64_t socket);
     static void upgrade(int64_t socket, const char *topic, char *headers);
     static bool header(const char *headers, const char *name, char *out, size_t size);
     static bool containsWord(const char *text, const char *word);

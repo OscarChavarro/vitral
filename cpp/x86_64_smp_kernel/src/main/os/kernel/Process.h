@@ -45,6 +45,10 @@ public:
     // Its standard input, output and error. The console is still where its graphics and keyboard are (svgalib), and
     // the terminal is that console's unless the process was started on another one, such as /dev/ttyS0.
     Tty *terminal() const { return terminalValue; }
+    // When its terminal is not its console's (it was started on another one, such as /dev/ttyS0), its console is not
+    // necessarily on the screen: this puts it there, for graphics, until the process (with its threads) exits, and
+    // then the screen shows again the console it showed before. Nothing when the terminal is the console's.
+    void showConsole();
     int cpu() const { return cpuValue; }
     uint64_t ticks() const { return cpuTicks; }
     int *errorNumber() { return &errorValue; }
@@ -67,6 +71,8 @@ private:
     Process();
     void setProgram(const Program &program, const ArgList &args);
     void releaseStack();
+    // On exit: gives the screen back if showConsole() took it and nothing has changed it since.
+    void returnScreen();
     // Builds the first TrapFrame of the process, which resumes in start() (kernel/<arch>/ProcessFrame.cpp).
     void prepareFrame();
     [[noreturn]] static void start();
@@ -87,6 +93,8 @@ private:
         OpenFile *files[MAX_FILES];
         char cwd[CWD_LENGTH];
         unsigned references;
+        // The console showConsole() took the screen from, or -1.
+        int screenReturn;
         SpinLock lock;
     };
     static constexpr unsigned STACK_POOL = 32;
