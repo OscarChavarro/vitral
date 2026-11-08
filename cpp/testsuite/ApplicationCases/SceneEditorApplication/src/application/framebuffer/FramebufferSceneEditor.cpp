@@ -62,7 +62,7 @@ const char* const SELECTOR_DIALOG = "scene.selector";
 const char* const SELECTOR_TREE = "sceneHierarchy";
 const char* const IMPORT_DIALOG = "scene.import";
 // Characters in a line of the side panel.
-const int SIDE_PANEL_COLUMNS = 32;
+const int SIDE_PANEL_COLUMNS = 22;
 
 java::String parentFolderOf(const java::String& path)
 {

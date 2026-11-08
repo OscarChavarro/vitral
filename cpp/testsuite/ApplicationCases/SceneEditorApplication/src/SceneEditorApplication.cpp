@@ -455,7 +455,7 @@ private:
     static const int MENU_BAR_HEIGHT = 28;
     static const int SIDE_TAB_HEIGHT = 28;
     static const int SIDE_TAB_WIDTH = 64;
-    static const int SIDE_PANEL_WIDTH = 320;
+    static const int SIDE_PANEL_WIDTH = 232;
     static const int STATUS_BAR_HEIGHT = 24;
 
     /**

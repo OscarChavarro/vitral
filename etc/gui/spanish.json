@@ -753,83 +753,83 @@
     },
     {
       "id": "IDC_CREATE_SPHERE",
-      "name": "Crear Esfera"
+      "name": "Esfera"
     },
     {
       "id": "IDC_CREATE_TORUS",
-      "name": "Crear toroide"
+      "name": "Toroide"
     },
     {
       "id": "IDC_CREATE_PLANE",
-      "name": "Crear Plano"
+      "name": "Plano"
     },
     {
       "id": "IDC_CREATE_CONE",
-      "name": "Crear Cono"
+      "name": "Cono"
     },
     {
       "id": "IDC_CREATE_CYLINDER",
-      "name": "Crear Cilindro"
+      "name": "Cilindro"
     },
     {
       "id": "IDC_CREATE_CUBE",
-      "name": "Crear Cubo"
+      "name": "Cubo"
     },
     {
       "id": "IDC_CREATE_BOX",
-      "name": "Crear Caja"
+      "name": "Caja"
     },
     {
       "id": "IDC_CREATE_ARROW",
-      "name": "Crear Flecha"
+      "name": "Flecha"
     },
     {
       "id": "IDC_CREATE_VOLUME",
-      "name": "Crear volumen (voxels)"
+      "name": "Volumen (voxels)"
     },
     {
       "id": "IDC_CREATE_SPHERE_HARMONIC",
-      "name": "Depurar Armonico Esferico de Voxels"
+      "name": "Armonico voxel"
     },
     {
       "id": "IDC_CREATE_PROJECTED_VIEWS",
-      "name": "Depurar Vistas de Objeto Projectadas"
+      "name": "Vistas proyectadas"
     },
     {
       "id": "IDC_CREATE_BREP",
-      "name": "Crear solido (BREP)"
+      "name": "Solido (BREP)"
     },
     {
       "id": "IDC_IMPORT_OBJECTS_FROM_FILE",
-      "name": "Importar objetos desde archivo"
+      "name": "Importar archivo"
     },
     {
       "id": "IDC_EXPORT_OBJECTS_TO_OBJ",
-      "name": "Exportar objetos a archivo obj"
+      "name": "Exportar a obj"
     },
     {
       "id": "IDC_EXPORT_OBJECTS_TO_GTS",
-      "name": "Exportar objetos a archivo GTS"
+      "name": "Exportar a GTS"
     },
     {
       "id": "IDC_EXPORT_OBJECTS_TO_VTK",
-      "name": "Exportar objetos a archivo VTK"
+      "name": "Exportar a VTK"
     },
     {
       "id": "IDC_CREATE_PARAMETRICCUBICCURVE",
-      "name": "Crear Curva"
+      "name": "Curva parametrica"
     },
     {
       "id": "IDC_CREATE_FUNCTIONALEXPLICITSURFACE",
-      "name": "Crear superficie funcional explicita"
+      "name": "Superficie explicita"
     },
     {
       "id": "IDC_CREATE_PARAMETRICBICUBICPATCH",
-      "name": "Crear Parche"
+      "name": "Parche bicubico"
     },
     {
       "id": "IDC_CREATE_OMNILIGHT",
-      "name": "Crear Luz"
+      "name": "Luz"
     },
     {
       "id": "IDC_CUSTOMIZE_LAF_MOTIF",
@@ -853,27 +853,27 @@
     },
     {
       "id": "IDC_OTHERS_TOGGLE_TEST_CORRIDOR",
-      "name": "Activar/desactivar corredor"
+      "name": "Alternar corredor"
     },
     {
       "id": "IDC_OTHERS_TOGGLE_GRID",
-      "name": "Activar/desactivar grilla"
+      "name": "Alternar grilla"
     },
     {
       "id": "IDC_OTHERS_PRINT_SCENE_ON_CONSOLE",
-      "name": "Imprimir en consola reporte de escena"
+      "name": "Imprimir escena"
     },
     {
       "id": "IDC_RENDERING_SELECTPALETTEDEPTH",
-      "name": "Seleccionar la paleta de color para el mapa de profundidad (ZBuffer)"
+      "name": "Paleta de profundidad"
     },
     {
       "id": "IDC_RENDERING_OBTAINZBUFFERDEPTHMAP",
-      "name": "Obtener mapa de profundidad (ZBuffer)"
+      "name": "Mapa de profundidad"
     },
     {
       "id": "IDC_RENDERING_OBTAINZBUFFERIMAGE",
-      "name": "Obtener imagen (ZBuffer)"
+      "name": "Imagen ZBuffer"
     },
     {
       "id": "IDC_RENDERING_OBTAINCONTOURNS",
@@ -881,7 +881,7 @@
     },
     {
       "id": "IDC_RENDERING_RAYTRACING",
-      "name": "Visualizar usando trazado de rayos (Raytracing)"
+      "name": "Trazado de rayos"
     },
     {
       "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_PERSPECTIVE",
@@ -1049,8 +1049,8 @@
     "IDM_CREATION_OTHER_SECTION": "Otros elementos",
     "IDM_CREATE_VOLUME_NO_SELECTION": "ERROR: seleccione el objeto a voxelizar antes de crear un volumen",
     "IDM_CREATE_VOLUME_EMPTY": "ERROR: la voxelización del objeto seleccionado está vacía (su geometría no tiene prueba de contención)",
-    "IDM_OTHERS_TAB": "Elementos de escena",
-    "IDM_GUI_TAB": "Control de GUI",
+    "IDM_OTHERS_TAB": "Escena",
+    "IDM_GUI_TAB": "GUI",
     "IDM_RENDER_TAB": "Visualización",
     "IDM_MODIFY_TAB": "Modifición",
     "IDM_PENDING_ZBUFFER_COLOR_IMAGE": "En espera del cálculo de la imagen de color correspondiente a la matriz de profundidad (ZBuffer) ...",

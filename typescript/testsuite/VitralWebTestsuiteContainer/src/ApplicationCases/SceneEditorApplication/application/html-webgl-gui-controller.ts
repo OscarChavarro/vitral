@@ -189,9 +189,9 @@ export class HtmlWebGLGuiController {
     mainWindowWidget.appendChild(this.model.getStatusBarPanel()!);
     this.root.appendChild(mainWindowWidget);
 
-    // Java gives the panel the last 320 pixels of the screen
-    splitPane.setMinimumWidths(160, 320);
-    splitPane.setRightWidth(320);
+    // Java gives the panel the last 232 pixels of the screen
+    splitPane.setMinimumWidths(160, 232);
+    splitPane.setRightWidth(232);
 
     this.webglController.requestFocusInWindow();
 

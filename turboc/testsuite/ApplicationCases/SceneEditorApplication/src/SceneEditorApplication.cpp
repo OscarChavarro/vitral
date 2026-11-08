@@ -484,7 +484,7 @@ private:
         MENU_BAR_HEIGHT = 28,
         SIDE_TAB_HEIGHT = 28,
         SIDE_TAB_WIDTH = 64,
-        SIDE_PANEL_WIDTH = 320,
+        SIDE_PANEL_WIDTH = 232,
         STATUS_BAR_HEIGHT = 24
     };
 

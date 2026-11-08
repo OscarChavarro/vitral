@@ -76,7 +76,7 @@ static GLADapiproc gtk4GetProcAddress(const char* name)
 /// (`-tangibleServer <url>`), taken out of its command line by `main`
 static java::ArrayList<char*> editorArguments;
 
-static const int INITIAL_SIDE_PANEL_WIDTH = 260;
+static const int INITIAL_SIDE_PANEL_WIDTH = 232;
 static const int MIN_SIDE_PANEL_WIDTH = 220;
 
 static void clearGtkBox(GtkWidget* box)

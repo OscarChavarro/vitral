@@ -213,7 +213,7 @@ public class AwtJogl4GuiController
         left.add(canvas, BorderLayout.CENTER);
         Component right = createPanel();
         Dimension minLeft = new Dimension(160, 120);
-        Dimension minRight = new Dimension(320, 120);
+        Dimension minRight = new Dimension(232, 120);
         JPanel iconsAndWorkAreasPanel;
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, right);
@@ -239,7 +239,7 @@ public class AwtJogl4GuiController
         mainWindowWidget.add(model.getStatusBarPanel(), BorderLayout.SOUTH);
         mainWindowWidget.setJMenuBar(menuBar);
 
-        int panelWidth = d.width - 320;
+        int panelWidth = d.width - 232;
         splitPane.setDividerLocation(panelWidth);
 
         mainWindowWidget.setPreferredSize(d);
