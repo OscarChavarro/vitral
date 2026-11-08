@@ -12,6 +12,7 @@ class Svga {
 public:
     static constexpr uint32_t MIN_RAM_MB = 128;
     static void init();
+    static void startDefaultAcceleration();
     static bool present() { return driver != nullptr; }
     static const char *name() { return driver ? driver->name() : "none"; }
     static uint32_t videoMemoryBytes() { return driver ? driver->videoMemoryBytes() : 0; }

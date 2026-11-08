@@ -15,6 +15,7 @@ const SvgaPrimitives Svga::FRAMEBUFFER = {
 };
 const SvgaPrimitives *Svga::primitives = &Svga::FRAMEBUFFER;
 SpinLock Svga::lock;
+static bool nvidiaDefaultAcceleration = false;
 
 void
 Svga::init() {
@@ -24,6 +25,7 @@ Svga::init() {
     driver = BochsVbe::probe();
     if (!driver) {
         driver = NvidiaPreTesla::probe();
+        nvidiaDefaultAcceleration = driver != nullptr;
     }
     if (!driver) {
         driver = BootFramebuffer::probe();
@@ -38,6 +40,13 @@ Svga::init() {
         uint64_t frame = (uint64_t)(uintptr_t)driver->frameBuffer();
         bool combining = Paging::mapWriteCombining(frame, driver->videoMemoryBytes());
         kprintf("Video: frame buffer memory type: %s\n", combining ? "write-combining" : "uncached");
+    }
+}
+
+void
+Svga::startDefaultAcceleration() {
+    if (driver && nvidiaDefaultAcceleration && !setAccelerated(true)) {
+        kprintf("Video: NVIDIA 2D acceleration unavailable, drawing with the CPU\n");
     }
 }
 
