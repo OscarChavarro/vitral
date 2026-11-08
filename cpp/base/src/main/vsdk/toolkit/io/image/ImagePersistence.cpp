@@ -791,7 +791,11 @@ bool ImagePersistence::exportJPEG(const java::File& fd, Image* img, int quality)
 }
 
 bool ImagePersistence::exportPNG(const java::File& fd, Image* img) {
-#ifndef VITRAL_WITH_PNG
+#if defined(VITRAL_PNG_READ_ONLY)
+    (void)fd;
+    (void)img;
+    return false;
+#elif !defined(VITRAL_WITH_PNG)
     fprintf(stderr, "ERROR: ImagePersistence: PNG support not compiled in.\n");
     fprintf(stderr, "       Recompile with -DWITH_PNG=ON to enable PNG support.\n");
     return false;

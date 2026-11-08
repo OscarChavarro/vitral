@@ -152,9 +152,9 @@ set(LIB_FLAGS ${ARCH_FLAGS} ${ARCH_LIB_FLAGS} -mno-mmx -std=c++11 -fexceptions -
 set(LIB_INCLUDES ${CMAKE_SOURCE_DIR}/src/main/lib/vitralStdC++/include ${CMAKE_SOURCE_DIR}/src/main/lib/vitralLibC/include)
 file(GLOB SOURCES_LIBC CONFIGURE_DEPENDS src/main/lib/vitralLibC/src/*.cpp)
 file(GLOB SOURCES_STDCXX CONFIGURE_DEPENDS src/main/lib/vitralStdC++/src/*.cpp)
-add_library(objsLib OBJECT ${SOURCES_LIBC} ${SOURCES_STDCXX})
+add_library(objsLib OBJECT ${SOURCES_LIBC} ${SOURCES_STDCXX} src/main/lib/libpng/PngDecoder.cpp)
 target_compile_options(objsLib PRIVATE ${LIB_FLAGS})
-target_include_directories(objsLib SYSTEM PRIVATE ${LIB_INCLUDES})
+target_include_directories(objsLib SYSTEM PRIVATE ${LIB_INCLUDES} src/main/lib/libpng)
 
 # ---- code written against a standard C API (svgalib, GNU readline, libc): the readline compat library, svgalib's
 # mouse (it reads /dev/input/mice through the libc), the mouse pointer library (svgalib + libc only), the video mode
@@ -318,8 +318,8 @@ if(EXISTS "${VITRAL_BASE_DIR}/src/main")
   list(FILTER SOURCES_BASE EXCLUDE REGEX "/src/main/(vsdk/toolkit/io/wrapper/(FileUncompressWrapper|Matrix2x2Printer|PipeInputStream|PipeOutputStream|Vector3DPrinter)\\.cpp|vsdk/toolkit/io/geometry/Freetype2FontReader\\.cpp|java/util/regex/)")
   add_library(objsBase OBJECT ${SOURCES_BASE})
   target_compile_options(objsBase PRIVATE ${LIB_FLAGS} -w)
-  target_compile_definitions(objsBase PRIVATE VITRAL_WITH_POSIX_THREADS)
-  target_include_directories(objsBase SYSTEM PRIVATE ${LIB_INCLUDES})
+  target_compile_definitions(objsBase PRIVATE VITRAL_WITH_POSIX_THREADS VITRAL_WITH_PNG VITRAL_PNG_READ_ONLY)
+  target_include_directories(objsBase SYSTEM PRIVATE ${LIB_INCLUDES} src/main/lib/libpng)
   target_include_directories(objsBase PRIVATE ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main)
   set(BASE_OBJECTS $<TARGET_OBJECTS:objsBase>)
 else()
