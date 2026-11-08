@@ -132,13 +132,17 @@ set(VITRAL_ETC_DIR "${CMAKE_SOURCE_DIR}/../../etc")
 # The folder sceneEditor runs from, placed as in the repository so that ../../../../etc is the etc copied here.
 set(SCENE_EDITOR_APPLICATION_SUBDIR "cpp/testsuite/ApplicationCases/SceneEditorApplication")
 file(GLOB_RECURSE LOOP_ROOT_FILES CONFIGURE_DEPENDS "${LOOP_ROOT_DIR}/*" "${HTTPD_FRONTEND_DIR}/*")
-file(GLOB_RECURSE VITRAL_ETC_FILES CONFIGURE_DEPENDS "${VITRAL_ETC_DIR}/*")
+file(GLOB_RECURSE VITRAL_ETC_FILES CONFIGURE_DEPENDS
+  "${VITRAL_ETC_DIR}/gui/*" "${VITRAL_ETC_DIR}/geometry/mitscenes/*.ray"
+  "${VITRAL_ETC_DIR}/icons/*" "${VITRAL_ETC_DIR}/cubemaps/dorise1/*")
+list(APPEND VITRAL_ETC_FILES "${VITRAL_ETC_DIR}/palettes/Cranes.gpl" "${VITRAL_ETC_DIR}/geometry/cow.obj"
+  "${VITRAL_ETC_DIR}/geometry/cow.mtl" "${VITRAL_ETC_DIR}/textures/miniearth.png"
+  "${VITRAL_ETC_DIR}/bumpmaps/earth.bw")
 add_custom_command(OUTPUT loop.img
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${LOOP_ROOT_DIR}/etc"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory "${VITRAL_ETC_DIR}" "${LOOP_ROOT_DIR}/etc"
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${LOOP_ROOT_DIR}/${SCENE_EDITOR_APPLICATION_SUBDIR}"
+  COMMAND ${CMAKE_SOURCE_DIR}/scripts/prepareLoopRoot.sh ${LOOP_ROOT_DIR} ${VITRAL_ETC_DIR} ${SCENE_EDITOR_APPLICATION_SUBDIR}
   COMMAND ${CMAKE_SOURCE_DIR}/scripts/makeFatImage.sh ${LOOP_ROOT_DIR} ${CMAKE_BINARY_DIR}/loop.img ${HTTPD_FRONTEND_DIR}:www
-  DEPENDS ${CMAKE_SOURCE_DIR}/scripts/makeFatImage.sh ${LOOP_ROOT_FILES} ${VITRAL_ETC_FILES} VERBATIM)
+  DEPENDS ${CMAKE_SOURCE_DIR}/scripts/makeFatImage.sh ${CMAKE_SOURCE_DIR}/scripts/prepareLoopRoot.sh
+          ${LOOP_ROOT_FILES} ${VITRAL_ETC_FILES} VERBATIM)
 add_custom_target(loopImage DEPENDS loop.img)
 add_dependencies(objsKernel loopImage)
 set_source_files_properties(src/main/os/drivers/block/loop_image.S PROPERTIES

@@ -1444,6 +1444,8 @@
     }
   ],
   "messages": {
+    "IDM_VIEW_MENU": "View",
+    "IDM_RESOLUTION": "&Resolution",
     "IDM_EXIT": "Close application",
     "IDM_CREATION_TAB": "Creation",
     "IDM_CREATION_GEOMETRY_SECTION": "Geometry elements",

@@ -254,6 +254,7 @@ bool FramebufferSceneEditor::loadGuiDefinition(const java::String& language)
     model->setI18nContext(GuiI18nContextBuilder::build(
         json, GuiState::APPLICATION_DATA_FOLDER));
     model->getGuiState()->setLanguageGuiFile(path);
+    input.extendMenu(*model->getI18nContext());
     menuBar.setMenu(model->getI18nContext()->getMenubar());
     buildToolBar();
     buildSidePanel();
@@ -782,6 +783,15 @@ void FramebufferSceneEditor::chosen(WidgetMenuItem* item)
 
 void FramebufferSceneEditor::executeCommand(const java::String& command)
 {
+    const char* modeMessage = nullptr;
+    if ( input.executeMenuCommand(command.c_str(), modeMessage) ) {
+        if ( modeMessage != nullptr ) {
+            status = java::String(modeMessage);
+        }
+        layout();
+        redrawAll();
+        return;
+    }
     CommandResult result = executor->execute(command);
     if ( result == CommandResult::NOT_HANDLED && !executeGuiCommand(command) ) {
         showStatus(java::String("Not available in the framebuffer GUI: ") + command);

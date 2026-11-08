@@ -1043,6 +1043,8 @@
     }
   ],
   "messages": {
+    "IDM_VIEW_MENU": "Ver",
+    "IDM_RESOLUTION": "&Resolución",
     "IDM_EXIT": "Cierra la aplicación",
     "IDM_CREATION_TAB": "Creación",
     "IDM_CREATION_GEOMETRY_SECTION": "Elementos geométricos",

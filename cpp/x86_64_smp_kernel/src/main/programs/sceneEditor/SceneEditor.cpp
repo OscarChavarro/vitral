@@ -10,6 +10,9 @@
 #include "java/util/ArrayList.txx"
 #include "model/GuiState.h"
 #include "programs/sceneEditor/SceneEditor.h"
+#include "vsdk/toolkit/gui/widget/Widget.h"
+#include "vsdk/toolkit/gui/widget/WidgetMenu.h"
+#include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
 
 static const int SUPPORTED_DEPTHS[] = {4, 8, 16, 24};
 // Direct colour first: the raytraced views need more colours than a palette has.
@@ -139,6 +142,16 @@ SceneEditor::changeMode(int step) {
         snprintf(message, sizeof(message), "No other graphics mode than %s", VgaModes::name(previous));
         return true;
     }
+    return selectMode(next);
+}
+
+bool
+SceneEditor::selectMode(int next) {
+    int previous = modes.current();
+    if (next == previous) {
+        snprintf(message, sizeof(message), "Already using %s", VgaModes::name(previous));
+        return true;
+    }
     input.detach();
     if (show(next)) {
         const VgaModes::Screen &screen = modes.screen();
@@ -151,6 +164,45 @@ SceneEditor::changeMode(int step) {
     }
     snprintf(message, sizeof(message), "Mode %s not available, staying at %s", VgaModes::name(next),
              VgaModes::name(previous));
+    return true;
+}
+
+void
+SceneEditor::extendMenu(Widget &widget) {
+    if (!widget.getMenubar() || modes.count() == 0) {
+        return;
+    }
+    WidgetMenu *menu = new WidgetMenu(&widget);
+    menu->setName(widget.getMessage("IDM_RESOLUTION"));
+    for (int i = 0; i < modes.count(); i++) {
+        const char *name = VgaModes::name(modes.at(i));
+        WidgetMenuItem *item = new WidgetMenuItem(&widget);
+        item->setName(name);
+        item->setCommandName(java::String("IDC_RESOLUTION_") + name);
+        menu->addChild(item);
+    }
+    WidgetMenu *parent = widget.getMenubar();
+    for (int i = 0; i < parent->getChildren().size(); i++) {
+        WidgetMenuElement *entry = parent->getChildren().get(i);
+        if (entry->isMenu() && static_cast<WidgetMenu *>(entry)->getName().equals(widget.getMessage("IDM_VIEW_MENU"))) {
+            parent = static_cast<WidgetMenu *>(entry);
+            break;
+        }
+    }
+    parent->addChild(menu);
+}
+
+bool
+SceneEditor::executeMenuCommand(const char *command, const char *&status) {
+    static const char prefix[] = "IDC_RESOLUTION_";
+    if (strncmp(command, prefix, sizeof(prefix) - 1) != 0) {
+        return false;
+    }
+    int mode = VgaModes::lookup(command + sizeof(prefix) - 1);
+    if (modes.indexOf(mode) >= 0 && !selectMode(mode)) {
+        snprintf(message, sizeof(message), "Unable to restore graphics mode");
+    }
+    status = message;
     return true;
 }
 

@@ -67,6 +67,15 @@ FramebufferMenuReader::read(const String &json, Widget &widget)
     if ( !type || !type->asText().equals("menu") ) {
         return FALSE;
     }
+    const JsonNode *messages = root.get(String("messages"));
+    const JsonNode *resolution = messages ? messages->get(String("IDM_RESOLUTION")) : NULL;
+    if ( resolution && resolution->isString() ) {
+        widget.addMessage(String("IDM_RESOLUTION"), resolution->asText());
+    }
+    const JsonNode *view = messages ? messages->get(String("IDM_VIEW_MENU")) : NULL;
+    if ( view && view->isString() ) {
+        widget.addMessage(String("IDM_VIEW_MENU"), view->asText());
+    }
     widget.setMenubar((WidgetMenu *)readMenuElement(*bar, widget));
     return widget.getMenubar() != NULL;
 }

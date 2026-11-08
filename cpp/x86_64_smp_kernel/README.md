@@ -4,6 +4,12 @@ Vitral Kernel is a small, preemptive SMP kernel for x86, written primarily in C+
 
 All processes run in ring 0 in one address space. Programs are compiled into the image. System calls that can block use `int 0x80` with a C++ ABI, because only its frame lets the scheduler switch processes; the others (console, process ids, time) and the video functions are plain calls. There is no process isolation, executable loader, `fork`, users, permissions or signal delivery; a program fault can bring down the kernel. The x86_64 build uses an identity-mapped address space, with the frame buffer marked write-combining when the CPU has PAT; i386 runs without paging, so its frame buffer stays uncached.
 
+## SceneEditorApplication on real hardware
+
+![SceneEditorApplication running on the Vitral Kernel](minimalisticKernel.png)
+
+SceneEditorApplication running on the minimalistic kernel on a real 32-bit machine with an AMD Athlon XP 2000+ and an Nvidia GeForce 7600 GS GPU. The screenshot uses a 256-color mode with a custom palette and Floyd–Steinberg dithering.
+
 ## Build and run
 
 The build requires CMake, LLVM (`clang`, `clang++`, `ld.lld`, `llvm-objcopy`), mtools and the Vitral base library at `../base`. QEMU is needed to run the images. GRUB and xorriso are also required for the GRUB image. On macOS:
@@ -38,7 +44,7 @@ cmake --build build --parallel
 
 The BIOS bootloader loads the kernel after checking the CPU and collecting the memory map. Both images can also boot through Multiboot2: the x86_64 one uses a GRUB framebuffer when available, and the i386 one asks GRUB for the EGA text console, so it starts in VGA text mode. For GRUB, `kernel32.bin` is loaded with `multiboot2` and `set gfxpayload=text` inside the `menuentry`. The kernel provides memory allocation, per-CPU round-robin scheduling, affinity, threads and futexes. CPU load is measured per core from cumulative busy and idle TSC cycles.
 
-The VFS provides an in-memory root and `/dev`. An embedded FAT image is available at `/dev/loop0` and mounted at `/media/ramdisk`; its contents come from `loopKernelRootFileSystem/`, Vitral's `etc` data and the HTTP frontend. Drivers include VGA, Bochs VBE, PS/2 keyboard and mouse, USB (UHCI host controllers, EHCI controllers routed to their UHCI companions, hubs, and HID keyboards and mice in boot protocol, with hot plugging), COM1, RTC and network devices. The kernel log goes to the screen and to COM1 at 115200 baud, 8N1.
+The VFS provides an in-memory root and `/dev`. An embedded FAT image is available at `/dev/loop0` and mounted at `/media/ramdisk`. The build populates the generated `loopKernelRootFileSystem/etc` with the GUI definitions and icons, the startup palette, the `.ray` examples and their assets, and `cow.obj` with its material; it also adds the HTTP frontend to the image. The generated `etc` directory is replaced when its selected contents change, so keep custom files elsewhere in `loopKernelRootFileSystem`. Drivers include VGA, Bochs VBE, PS/2 keyboard and mouse, USB (UHCI host controllers, EHCI controllers routed to their UHCI companions, hubs, and HID keyboards and mice in boot protocol, with hot plugging), COM1, RTC and network devices. The kernel log goes to the screen and to COM1 at 115200 baud, 8N1.
 
 Every process has a terminal as its standard input, output and error. The virtual consoles are `/dev/tty1` to `/dev/tty12` (Alt-F1 to Alt-F12, terminal type `linux`), COM1 is `/dev/ttyS0` (type `vt220`, 80x24) and `/dev/tty` is the caller's own. A terminal is a line discipline over a driver that only moves bytes, with Linux's termios flags, canonical and raw modes, `TIOCGWINSZ` and `getenv("TERM")`; a network terminal for a future `telnetd` only needs another driver. The `terminfo` library describes the `linux`, `vt220`, `vt100` and `xterm` terminals, and the line editor uses it, so the shell edits lines the same way on any of them. Unlike Linux, a process started from a serial terminal still gets a virtual console of its own for its graphics and keyboard, so svgalib programs run from COM1 draw on the screen (`chvt` shows that console) and read their keys from the serial line. The network stack provides Ethernet, ARP, IPv4, ICMP and server-side TCP.
 

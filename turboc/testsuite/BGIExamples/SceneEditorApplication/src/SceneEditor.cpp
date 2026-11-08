@@ -6,6 +6,7 @@
 #include "vsdk/toolkit/gui/framebuffer/FramebufferEvent.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferMenuReader.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
+#include "vsdk/toolkit/gui/widget/WidgetMenu.h"
 #include "SceneEditor.h"
 
 // The folder of the GUI definitions: etc/gui of the repository, from the folder of this example.
@@ -67,6 +68,25 @@ SceneEditor::loadGui(const char *path)
         printf("sceneEditor: no menu bar in %s\n", path);
         return FALSE;
     }
+    WidgetMenu *resolution = new WidgetMenu(&widget);
+    resolution->setName(widget.getMessage("IDM_RESOLUTION"));
+    int i;
+    for ( i = 0; i < modes.count(); i++ ) {
+        const char *name = BgiModes::name(modes.at(i));
+        WidgetMenuItem *item = new WidgetMenuItem(&widget);
+        item->setName(name);
+        item->setCommandName(String("IDC_RESOLUTION_") + name);
+        resolution->addChild(item);
+    }
+    WidgetMenu *parent = widget.getMenubar();
+    for ( i = 0; i < parent->getChildren().size(); i++ ) {
+        WidgetMenuElement *entry = parent->getChildren().get(i);
+        if ( entry->isMenu() && ((WidgetMenu *)entry)->getName().equals(widget.getMessage("IDM_VIEW_MENU")) ) {
+            parent = (WidgetMenu *)entry;
+            break;
+        }
+    }
+    parent->addChild(resolution);
     menuBar.setMenu(widget.getMenubar());
     return TRUE;
 }
@@ -152,6 +172,21 @@ void
 SceneEditor::report(WidgetMenuItem *item)
 {
     if ( !item ) {
+        return;
+    }
+    String command = item->getCommandName();
+    const char *prefix = "IDC_RESOLUTION_";
+    if ( strncmp(command.c_str(), prefix, strlen(prefix)) == 0 ) {
+        int next = BgiModes::lookup(command.c_str() + strlen(prefix));
+        if ( modes.indexOf(next) >= 0 && next != modes.current() ) {
+            int previous = modes.current();
+            input.detach();
+            if ( !modes.enter(next) || !show() ) {
+                snprintf(choice, STATUS_LENGTH, "Could not change the graphics mode");
+                modes.enter(previous);
+                show();
+            }
+        }
         return;
     }
     snprintf(choice, STATUS_LENGTH, "Chosen: %s [%s], not executed", item->getName().c_str(),

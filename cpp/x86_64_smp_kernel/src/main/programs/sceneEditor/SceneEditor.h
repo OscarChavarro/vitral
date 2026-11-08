@@ -17,6 +17,8 @@ public:
     static int start(int argc, char *argv[]);
 
     bool waitEvent(FramebufferEvent &event) override;
+    void extendMenu(Widget &widget) override;
+    bool executeMenuCommand(const char *command, const char *&status) override;
     bool hasPointer() const override { return input.hasPointer(); }
     bool warpPointer(int x, int y) override { return input.warpPointer(x, y); }
 
@@ -33,6 +35,7 @@ private:
     int initialMode() const;
     void usage() const;
     bool changeMode(int step);
+    bool selectMode(int mode);
     bool show(int mode);
     static bool isModeKey(const KeyEvent &key);
     static bool isKnownLanguage(const char *language);

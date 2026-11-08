@@ -116,7 +116,7 @@ FramebufferDrawingAreaRenderer::FramebufferDrawingAreaRenderer(
     ApplicationModel* m, DrawingAreaHost* h,
     const java::Consumer<Viewport*>& selected)
     : model(m), host(h), frameCapture(new FrameCaptureService(m, h)),
-      ditheringMode(0), selectedListener(selected)
+      ditheringMode(4), selectedListener(selected)
 {
 }
 
@@ -132,6 +132,9 @@ const char* FramebufferDrawingAreaRenderer::nextDitheringMode(int bitsPerPixel)
         return ditheringMode ? "Dithering: ordered RGB565" : "Dithering: off";
     }
     if ( bitsPerPixel <= 8 ) {
+        if ( bitsPerPixel < 8 && ditheringMode >= 3 ) {
+            ditheringMode = 2;
+        }
         ditheringMode = (ditheringMode + 1) % (bitsPerPixel == 8 ? 5 : 3);
         static const char* names[] = {"Dithering: nearest", "Dithering: ordered",
             "Dithering: Floyd-Steinberg", "Dithering: ordered, optimized palette",
