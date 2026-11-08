@@ -24,4 +24,9 @@ private:
 int
 kprintf(const char *fmt, ...);
 
+// Like kprintf, but only into the kernel log and the serial line, not onto the screen: for code that runs with the
+// VirtualConsole lock held (mode setting from VirtualConsole::show), where kprintf would deadlock.
+int
+klogf(const char *fmt, ...);
+
 #endif

@@ -1,6 +1,7 @@
 #include "drivers/video/svga/Svga.h"
 #include "drivers/video/bochsVBE/BochsVbe.h"
 #include "drivers/video/bootFramebuffer/BootFramebuffer.h"
+#include "drivers/video/nvidiaNv4x/NvidiaNv4x.h"
 #include "kernel/KernelLog.h"
 #include "kernel/Paging.h"
 #include "kernel/PhysicalMemory.h"
@@ -15,6 +16,9 @@ Svga::init() {
         return;
     }
     driver = BochsVbe::probe();
+    if (!driver) {
+        driver = NvidiaNv4x::probe();
+    }
     if (!driver) {
         driver = BootFramebuffer::probe();
     }

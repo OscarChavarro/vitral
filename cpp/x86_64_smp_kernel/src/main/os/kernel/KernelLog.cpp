@@ -86,18 +86,16 @@ KernelLog::clear() {
 
 static SpinLock formatLock;
 
-int
-kprintf(const char *fmt, ...) {
+// Formats a message into the log and the serial line, and onto the current console when toScreen is set.
+static int
+kernelLogWrite(bool toScreen, const char *fmt, va_list ap) {
     char message[KernelLog::MESSAGE_MAX];
     int count;
     {
         LockGuard guard(formatLock);
         KlogOut::dst = message;
         KlogOut::room = sizeof(message);
-        va_list ap;
-        va_start(ap, fmt);
         count = PrintfImpl::format<KlogOut>(fmt, ap);
-        va_end(ap);
         *KlogOut::dst = 0;
     }
     size_t length = 0;
@@ -118,7 +116,9 @@ kprintf(const char *fmt, ...) {
         KernelLog::append("\n", 1);
     }
 
-    VirtualConsole::print(Scheduler::currentConsole(), message);
+    if (toScreen) {
+        VirtualConsole::print(Scheduler::currentConsole(), message);
+    }
     bool serial = Uart::ready();
     Uart::write(stamp, stampLength);
     Uart::write(message, length);
@@ -126,7 +126,25 @@ kprintf(const char *fmt, ...) {
         Uart::write("\n", 1);
     }
     if (serial && !Uart::ready()) {
-        kprintf("COM1: much slower than %u baud, serial log released\n", Uart::BAUD);
+        klogf("COM1: much slower than %u baud, serial log released\n", Uart::BAUD);
     }
+    return count;
+}
+
+int
+kprintf(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int count = kernelLogWrite(true, fmt, ap);
+    va_end(ap);
+    return count;
+}
+
+int
+klogf(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int count = kernelLogWrite(false, fmt, ap);
+    va_end(ap);
     return count;
 }

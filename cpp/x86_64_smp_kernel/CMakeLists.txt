@@ -98,6 +98,8 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/Multiboo
                   src/main/programs/init/Init.cpp src/main/programs/dmesg/DmesgCommand.cpp src/main/programs/ProgramsMainFunctionsIndex.cpp
                   src/main/os/drivers/pci/Pci.cpp src/main/os/drivers/video/svga/Svga.cpp src/main/os/drivers/video/bochsVBE/BochsVbe.cpp
                   src/main/os/drivers/video/bootFramebuffer/BootFramebuffer.cpp
+                  src/main/os/drivers/video/nvidiaNv4x/NvidiaNv4x.cpp src/main/os/drivers/video/nvidiaNv4x/Nv4xPll.cpp
+                  src/main/os/drivers/video/edid/Edid.cpp src/main/os/drivers/video/edid/DisplayTiming.cpp
                   src/main/os/kernel/PhysicalMemory.cpp src/main/os/kernel/KernelHeap.cpp src/main/lib/vitralKernel/Memory.cpp
                   src/main/lib/vitralKernel/Format.cpp
                   src/main/os/drivers/video/vga/VgaText.cpp src/main/lib/vitralKernel/Printf64.cpp src/main/lib/vitralKernel/Cpu.cpp)
