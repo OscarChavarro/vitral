@@ -30,6 +30,7 @@ private:
     ApplicationModel* model;
     DrawingAreaHost* host;
     FrameCaptureService* frameCapture;
+    int ditheringMode;
     java::Consumer<Viewport*> selectedListener;
 
     void drawLines(Framebuffer& surface, const Calligraphic2DBuffer& lines,
@@ -60,6 +61,7 @@ public:
     Draws the viewport set on a rectangle of the surface.
     */
     void display(Framebuffer& surface, int x, int y, int width, int height);
+    const char* nextDitheringMode(int bitsPerPixel);
 
     /**
     @return the packed 0xRRGGBB value of a color

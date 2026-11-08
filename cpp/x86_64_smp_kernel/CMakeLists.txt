@@ -162,7 +162,7 @@ target_include_directories(objsLib SYSTEM PRIVATE ${LIB_INCLUDES} src/main/lib/l
 # headers and the compat headers that stand for <vga.h>, <vgamouse.h> and <readline/*.h>.
 add_library(objsPortable OBJECT src/main/lib/readline/GnuReadline.cpp src/main/lib/svgalib/VgaLine.cpp
             src/main/lib/svgalib/SvgalibMouse.cpp src/main/lib/mouseCursor/MouseCursor.cpp
-            src/main/lib/vgaModes/VgaModes.cpp src/main/lib/dithering/Dithering.cpp
+            src/main/lib/vgaModes/VgaModes.cpp
             src/main/programs/httpd/StaticFile.cpp)
 target_compile_options(objsPortable PRIVATE ${ARCH_FLAGS} -nostdinc++)
 target_include_directories(objsPortable SYSTEM PRIVATE ${LIB_INCLUDES})

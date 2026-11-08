@@ -69,6 +69,9 @@ RaytracerHud::ditheringName(const Shown *shown, RaytracerColorMode colorMode) {
     if (!shown->dithered) {
         return "NONE";
     }
+    if (shown->dithered == 2) {
+        return "ORDERED";
+    }
     switch (RaytracerPalette::methodOf(colorMode)) {
     case Dithering::Method::Nearest: return "STD";
     case Dithering::Method::Ordered: return "ORDERED";

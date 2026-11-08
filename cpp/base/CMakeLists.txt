@@ -52,6 +52,7 @@ message(STATUS "  POSIX Threads: ${WITH_POSIX_THREADS}")
 
 # Source files for the base library
 set(VITRAL_BASE_SOURCES
+    src/main/vsdk/toolkit/render/dithering/Dithering.cpp
     src/main/vsdk/toolkit/common/VSDK.cpp
     src/main/vsdk/toolkit/common/Entity.cpp
     src/main/vsdk/toolkit/common/EntityControlAccessor.cpp

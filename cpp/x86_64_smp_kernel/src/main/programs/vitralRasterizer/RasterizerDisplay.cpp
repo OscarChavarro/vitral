@@ -49,6 +49,10 @@ RasterizerDisplay::showExample(int which, int width, int height, const Dithering
             }
         }
         if (standard->count > 256) {
+            if (standard->count == 65536 && colorMode != ColorMode::NEAREST) {
+                Dithering::orderedRgb565(rgb, (unsigned)width, (unsigned)height);
+                shown->dithered = 2;
+            }
             drawTrueColor(rgb, width, height);
             free(rgb);
             free(indices);

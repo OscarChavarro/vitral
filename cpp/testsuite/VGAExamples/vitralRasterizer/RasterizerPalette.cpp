@@ -56,6 +56,9 @@ RasterizerPalette::methodOf(ColorMode colorMode) {
 
 ColorMode
 RasterizerPalette::nextColorMode(ColorMode colorMode, const Dithering::Palette *standard) {
+    if (standard->count == 65536) {
+        return colorMode == ColorMode::NEAREST ? ColorMode::ORDERED_DITHERED_STANDARD_PALETTE : ColorMode::NEAREST;
+    }
     do {
         colorMode = static_cast<ColorMode>((static_cast<int>(colorMode) + 1) % static_cast<int>(ColorMode::COLOR_MODES));
     } while (usesOptimizedPalette(colorMode) && standard->count != 256);

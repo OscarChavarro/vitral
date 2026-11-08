@@ -5,7 +5,7 @@
 #error "VITRAL_RAYTRACER_DEFAULT_SCENE (scene shown when none is given) is defined by CMake"
 #endif
 
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include "lib/vgaModes/VgaModes.h"
 #include "programs/vitralRaytracer/Frame.h"
 #include "programs/vitralRaytracer/RaytracerColorMode.h"

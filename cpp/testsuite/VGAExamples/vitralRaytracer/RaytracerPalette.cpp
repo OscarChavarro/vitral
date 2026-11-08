@@ -57,6 +57,9 @@ RaytracerPalette::methodOf(RaytracerColorMode colorMode) {
 
 RaytracerColorMode
 RaytracerPalette::nextColorMode(RaytracerColorMode colorMode, const Dithering::Palette *standard) {
+    if (standard->count == 65536) {
+        return colorMode == NEAREST ? ORDERED_DITHERED_STANDARD_PALETTE : NEAREST;
+    }
     do {
         colorMode = (RaytracerColorMode)((colorMode + 1) % COLOR_MODES);
     } while (usesOptimizedPalette(colorMode) && standard->count != 256);

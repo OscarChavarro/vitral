@@ -1,3 +1,5 @@
+#include "vsdk/toolkit/render/dithering/Dithering.h"
+#include <stdlib.h>
 #include "java/lang/String.h"
 #include "java/util/function/Consumer.h"
 #include "render/framebuffer/FramebufferDrawingAreaRenderer.h"
@@ -114,13 +116,30 @@ FramebufferDrawingAreaRenderer::FramebufferDrawingAreaRenderer(
     ApplicationModel* m, DrawingAreaHost* h,
     const java::Consumer<Viewport*>& selected)
     : model(m), host(h), frameCapture(new FrameCaptureService(m, h)),
-      selectedListener(selected)
+      ditheringMode(0), selectedListener(selected)
 {
 }
 
 FramebufferDrawingAreaRenderer::~FramebufferDrawingAreaRenderer()
 {
     delete frameCapture;
+}
+
+const char* FramebufferDrawingAreaRenderer::nextDitheringMode(int bitsPerPixel)
+{
+    if ( bitsPerPixel == 16 ) {
+        ditheringMode = ditheringMode == 0 ? 1 : 0;
+        return ditheringMode ? "Dithering: ordered RGB565" : "Dithering: off";
+    }
+    if ( bitsPerPixel <= 8 ) {
+        ditheringMode = (ditheringMode + 1) % (bitsPerPixel == 8 ? 5 : 3);
+        static const char* names[] = {"Dithering: nearest", "Dithering: ordered",
+            "Dithering: Floyd-Steinberg", "Dithering: ordered, optimized palette",
+            "Dithering: Floyd-Steinberg, optimized palette"};
+        return names[ditheringMode];
+    }
+    ditheringMode = 0;
+    return "Dithering: unavailable at this color depth";
 }
 
 uint32_t FramebufferDrawingAreaRenderer::packed(const ColorRgb& color)
@@ -238,6 +257,78 @@ void FramebufferDrawingAreaRenderer::drawView(Framebuffer& surface,
                         static_cast<uint32_t>(static_cast<unsigned char>(p.g)) << 8 |
                         static_cast<unsigned char>(p.b));
                 }
+            }
+            int depth = surface.bitsPerPixel();
+            size_t count = (size_t)width * (size_t)height;
+            uint8_t* rgb = (depth <= 8 || (depth == 16 && ditheringMode != 0))
+                ? (uint8_t*)malloc(count * 3) : nullptr;
+            if ( rgb != nullptr ) {
+                for ( size_t i = 0; i < count; i++ ) {
+                    uint32_t color = pixels.data()[i];
+                    rgb[i * 3] = (uint8_t)(color >> 16);
+                    rgb[i * 3 + 1] = (uint8_t)(color >> 8);
+                    rgb[i * 3 + 2] = (uint8_t)color;
+                }
+                if ( depth == 16 ) {
+                    Dithering::orderedRgb565(rgb, (unsigned)width, (unsigned)height);
+                }
+                else {
+                    Dithering::Palette palette;
+                    palette.count = depth == 8 ? 256 : depth == 4 ? 16 : 2;
+                    for ( unsigned i = 0; i < palette.count; i++ ) {
+                        if ( palette.count == 256 && i < 216 ) {
+                            palette.rgb[i * 3] = (int)(i / 36 * 63 / 5);
+                            palette.rgb[i * 3 + 1] = (int)(i / 6 % 6 * 63 / 5);
+                            palette.rgb[i * 3 + 2] = (int)(i % 6 * 63 / 5);
+                        }
+                        else if ( palette.count == 256 ) {
+                            palette.rgb[i * 3] = palette.rgb[i * 3 + 1] = palette.rgb[i * 3 + 2] =
+                                (int)((i - 216) * 63 / 39);
+                        }
+                        else if ( palette.count == 16 ) {
+                            int r = i & 4 ? 42 : 0;
+                            int g = i & 2 ? 42 : 0;
+                            int b = i & 1 ? 42 : 0;
+                            if ( i == 6 ) { g = 21; }
+                            if ( i >= 8 ) {
+                                r = r ? 63 : 21;
+                                g = g ? 63 : 21;
+                                b = b ? 63 : 21;
+                            }
+                            palette.rgb[i * 3] = r;
+                            palette.rgb[i * 3 + 1] = g;
+                            palette.rgb[i * 3 + 2] = b;
+                        }
+                        else {
+                            palette.rgb[i * 3] = palette.rgb[i * 3 + 1] = palette.rgb[i * 3 + 2] = i ? 63 : 0;
+                        }
+                    }
+                    if ( depth == 8 && ditheringMode >= 3 ) {
+                        Dithering::Palette optimized;
+                        if ( Dithering::optimizePalette(rgb, (unsigned)width, (unsigned)height, 256, &optimized) ) {
+                            palette = optimized;
+                        }
+                    }
+                    uint8_t* indices = (uint8_t*)malloc(count);
+                    Dithering::Method method = ditheringMode == 0 ? Dithering::Method::Nearest :
+                        (ditheringMode == 1 || ditheringMode == 3) ? Dithering::Method::Ordered :
+                        Dithering::Method::FloydSteinberg;
+                    if ( indices && Dithering::convert(method, rgb, (unsigned)width, (unsigned)height,
+                                                       palette, indices) ) {
+                        for ( size_t i = 0; i < count; i++ ) {
+                            for ( unsigned c = 0; c < 3; c++ ) {
+                                int value = palette.rgb[indices[i] * 3 + c];
+                                rgb[i * 3 + c] = (uint8_t)((value << 2) | (value >> 4));
+                            }
+                        }
+                    }
+                    free(indices);
+                }
+                for ( size_t i = 0; i < count; i++ ) {
+                    pixels.data()[i] = (uint32_t)rgb[i * 3] << 16 |
+                        (uint32_t)rgb[i * 3 + 1] << 8 | rgb[i * 3 + 2];
+                }
+                free(rgb);
             }
             surface.putImage(x, y, width, height, pixels.data());
         }

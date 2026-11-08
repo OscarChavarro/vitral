@@ -3,6 +3,7 @@
 #include "programs/vitralRaytracer/RaytracerPalette.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <vga.h>
 
@@ -83,7 +84,20 @@ RaytracerDisplay::showImage(const uint8_t *rgb, int width, int height, int text,
     if (standard->count > 256) {
         timespec started;
         clock_gettime(CLOCK_MONOTONIC, &started);
-        drawTrueColor(rgb, width, height);
+        uint8_t *converted = nullptr;
+        const uint8_t *pixels = rgb;
+        if (standard->count == 65536 && colorMode != NEAREST) {
+            size_t bytes = (size_t)width * (size_t)height * 3;
+            converted = (uint8_t *)malloc(bytes);
+            if (converted) {
+                memcpy(converted, rgb, bytes);
+                Dithering::orderedRgb565(converted, (unsigned)width, (unsigned)height);
+                pixels = converted;
+                shown->dithered = 2;
+            }
+        }
+        drawTrueColor(pixels, width, height);
+        free(converted);
         timespec finished;
         clock_gettime(CLOCK_MONOTONIC, &finished);
         *vgaSeconds = elapsedSeconds(started, finished);

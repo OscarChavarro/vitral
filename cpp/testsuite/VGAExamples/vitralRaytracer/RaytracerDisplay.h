@@ -1,7 +1,7 @@
 #ifndef __RAYTRACER_DISPLAY__
 #define __RAYTRACER_DISPLAY__
 #include <stdint.h>
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include "programs/vitralRaytracer/RaytracerColorMode.h"
 #include "programs/vitralRaytracer/Shown.h"
 

@@ -1,7 +1,7 @@
 #ifndef __RASTERIZER_SHOWN__
 #define __RASTERIZER_SHOWN__
 
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 
 class RasterizerShown {
   public:

@@ -14,6 +14,8 @@ public:
 
     enum class Method { Nearest, Ordered, FloydSteinberg };
 
+    static void orderedRgb565(uint8_t *rgb, unsigned width, unsigned height);
+
     static bool optimizePalette(const uint8_t *rgb, unsigned width, unsigned height, unsigned colors, Palette *out);
 
     static bool convert(Method method, const uint8_t *rgb, unsigned width, unsigned height, const Palette &palette,

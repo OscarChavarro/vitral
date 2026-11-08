@@ -1,6 +1,6 @@
 #ifndef __SHOWN__
 #define __SHOWN__
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 
 class Shown {
 public:

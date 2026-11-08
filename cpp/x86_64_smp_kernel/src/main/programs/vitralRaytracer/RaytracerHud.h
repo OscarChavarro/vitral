@@ -1,6 +1,6 @@
 #ifndef __RAYTRACER_HUD__
 #define __RAYTRACER_HUD__
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include "programs/vitralRaytracer/RaytracerColorMode.h"
 #include "programs/vitralRaytracer/RaytracerConstant.h"
 #include "programs/vitralRaytracer/Shown.h"

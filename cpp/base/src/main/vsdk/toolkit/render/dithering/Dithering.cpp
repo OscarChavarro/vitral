@@ -1,8 +1,8 @@
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include <stdlib.h>
 #include <string.h>
-#include "lib/dithering/CutEntry.h"
-#include "lib/dithering/CutBox.h"
+#include "vsdk/toolkit/render/dithering/CutEntry.h"
+#include "vsdk/toolkit/render/dithering/CutBox.h"
 
 class Dithering::Finder {
 public:
@@ -71,6 +71,28 @@ Dithering::bayer(unsigned x, unsigned y) {
         v = (v << 2) | (((y >> bit) & 1) << 1) | ((mixed >> bit) & 1);
     }
     return (int)v;
+}
+
+void
+Dithering::orderedRgb565(uint8_t *rgb, unsigned width, unsigned height) {
+    if (!rgb) {
+        return;
+    }
+    for (unsigned y = 0; y < height; y++) {
+        for (unsigned x = 0; x < width; x++) {
+            uint8_t *pixel = rgb + ((size_t)y * width + x) * 3;
+            unsigned threshold = (unsigned)bayer(x % BAYER_SIZE, y % BAYER_SIZE);
+            for (unsigned c = 0; c < 3; c++) {
+                unsigned levels = c == 1 ? 63 : 31;
+                unsigned scaled = pixel[c] * levels;
+                unsigned value = scaled / 255;
+                if ((scaled % 255) * 64 > threshold * 255 && value < levels) {
+                    value++;
+                }
+                pixel[c] = (uint8_t)((value * 255 + levels - 1) / levels);
+            }
+        }
+    }
 }
 
 unsigned

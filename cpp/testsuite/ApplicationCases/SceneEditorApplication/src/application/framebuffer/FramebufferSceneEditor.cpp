@@ -664,6 +664,12 @@ void FramebufferSceneEditor::handle(const FramebufferEvent& event)
             chosen(menuBar.takeChosen());
             return;
         }
+        if ( !menuBar.isActive() && event.key.keycode == KeyEvent::KEY_SPACE && event.key.modifierMask == 0 ) {
+            showStatus(java::String(renderer->nextDitheringMode(surface.bitsPerPixel())));
+            repaintPending = true;
+            drawViewports();
+            return;
+        }
         techniques->processKeyPressedEvent(event.key);
         return;
       case FramebufferEvent::Type::KeyReleased:
