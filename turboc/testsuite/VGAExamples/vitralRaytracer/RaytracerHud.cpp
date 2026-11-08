@@ -70,8 +70,8 @@ RaytracerHud::ditheringName(const Shown *shown, RaytracerColorMode colorMode) {
         return "NONE";
     }
     switch (RaytracerPalette::methodOf(colorMode)) {
-    case Dithering::Method::Nearest: return "STD";
-    case Dithering::Method::Ordered: return "ORDERED";
+    case Dithering::Nearest: return "STD";
+    case Dithering::Ordered: return "ORDERED";
     default: return "F-S";
     }
 }

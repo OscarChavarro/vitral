@@ -10,10 +10,9 @@ if(NOT UNIX OR APPLE)
 endif()
 
 set(VITRAL_VGA_PORTABLE_SOURCE_DIR "" CACHE PATH
-    "Path to the src directory containing lib/dithering, lib/mouseCursor and lib/vgaModes")
+    "Path to the src directory containing lib/mouseCursor and lib/vgaModes")
 
-if(NOT EXISTS "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/dithering/Dithering.cpp"
-   OR NOT EXISTS "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/mouseCursor/MouseCursor.cpp"
+if(NOT EXISTS "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/mouseCursor/MouseCursor.cpp"
    OR NOT EXISTS "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/vgaModes/VgaModes.cpp")
     message(STATUS "VGAExamples disabled: set VITRAL_VGA_PORTABLE_SOURCE_DIR to the portable source tree")
     return()
@@ -46,12 +45,12 @@ foreach(VITRAL_VGA_PROGRAM vga vitralRasterizer vitralRaytracer)
 endforeach()
 
 add_library(vitral_vga_support STATIC
-    "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/dithering/Dithering.cpp"
     "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/mouseCursor/MouseCursor.cpp"
     "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/vgaModes/VgaModes.cpp"
 )
 target_include_directories(vitral_vga_support PUBLIC
     "${VITRAL_VGA_PORTABLE_SOURCE_DIR}"
+    "${CMAKE_CURRENT_LIST_DIR}/../../base/src/main"
     "${VITRAL_VGA_GENERATED_INCLUDE_DIR}"
     "${SVGALIB_INCLUDE_DIR}"
     "${SVGALIB_MOUSE_INCLUDE_DIR}"

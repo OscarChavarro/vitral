@@ -47,10 +47,10 @@ RasterizerPalette::usesOptimizedPalette(ColorMode::Value colorMode) {
 Dithering::Method
 RasterizerPalette::methodOf(ColorMode::Value colorMode) {
     switch (colorMode) {
-    case ColorMode::NEAREST: return Dithering::Method::Nearest;
+    case ColorMode::NEAREST: return Dithering::Nearest;
     case ColorMode::ORDERED_DITHERED_STANDARD_PALETTE:
-    case ColorMode::ORDERED_DITHERED_OPTIMIZED_PALETTE: return Dithering::Method::Ordered;
-    default: return Dithering::Method::FloydSteinberg;
+    case ColorMode::ORDERED_DITHERED_OPTIMIZED_PALETTE: return Dithering::Ordered;
+    default: return Dithering::FloydSteinberg;
     }
 }
 

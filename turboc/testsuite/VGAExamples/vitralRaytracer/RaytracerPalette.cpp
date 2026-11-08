@@ -48,10 +48,10 @@ RaytracerPalette::usesOptimizedPalette(RaytracerColorMode colorMode) {
 Dithering::Method
 RaytracerPalette::methodOf(RaytracerColorMode colorMode) {
     switch (colorMode) {
-    case NEAREST: return Dithering::Method::Nearest;
+    case NEAREST: return Dithering::Nearest;
     case ORDERED_DITHERED_STANDARD_PALETTE:
-    case ORDERED_DITHERED_OPTIMIZED_PALETTE: return Dithering::Method::Ordered;
-    default: return Dithering::Method::FloydSteinberg;
+    case ORDERED_DITHERED_OPTIMIZED_PALETTE: return Dithering::Ordered;
+    default: return Dithering::FloydSteinberg;
     }
 }
 

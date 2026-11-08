@@ -1,7 +1,7 @@
 #ifndef __RASTERIZER_PALETTE__
 #define __RASTERIZER_PALETTE__
 
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include "ColorMode.h"
 
 class RasterizerPalette {

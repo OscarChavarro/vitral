@@ -6,7 +6,7 @@
 #endif
 
 #include "vsdk/toolkit/common/VSDK.h"
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include "lib/vgaModes/VgaModes.h"
 #include "programs/vitralRaytracer/Frame.h"
 #include "programs/vitralRaytracer/RaytracerColorMode.h"

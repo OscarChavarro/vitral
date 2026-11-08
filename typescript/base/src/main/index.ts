@@ -442,3 +442,5 @@ export { WriterVtk } from "./vsdk/toolkit/io/geometry/WriterVtk.js";
 export { EnvironmentPersistence } from "./vsdk/toolkit/io/geometry/EnvironmentPersistence.js";
 export { ObjectGraphTransfer, type TransferableClass } from "./java/concurrent/ObjectGraphTransfer.js";
 export { decodeSimpleSceneSnapshot, encodeSimpleSceneSnapshot } from "./vsdk/toolkit/render/raytracing/SimpleSceneSnapshotTransfer.js";
+
+export { Dithering, DitheringMethod, DitheringPalette } from "./vsdk/toolkit/render/dithering/Dithering.js";

@@ -756,6 +756,8 @@ base/src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.cpp,BASE/SRC/MAI
 base/src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h,BASE/SRC/MAIN/V/T/RENDER/HIDDLINE/HIDLINRE.H,HiddenLineRenderer.h,HIDLINRE.H
 base/src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.cpp,BASE/SRC/MAIN/V/T/RENDER/HIDDLINE/WIREREND.CPP,WireframeRenderer.cpp,WIREREND.CPP
 base/src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.h,BASE/SRC/MAIN/V/T/RENDER/HIDDLINE/WIREREND.H,WireframeRenderer.h,WIREREND.H
+base/src/main/vsdk/toolkit/render/dithering/Dithering.cpp,BASE/SRC/MAIN/V/T/RENDER/DITHERIN/DITHERIN.CPP,Dithering.cpp,DITHERIN.CPP
+base/src/main/vsdk/toolkit/render/dithering/Dithering.h,BASE/SRC/MAIN/V/T/RENDER/DITHERIN/DITHERIN.H,Dithering.h,DITHERIN.H
 base/src/main/vsdk/toolkit/render/raster/Rasterizer2D.cpp,BASE/SRC/MAIN/V/T/RENDER/RASTER/RASTER2D.CPP,Rasterizer2D.cpp,RASTER2D.CPP
 base/src/main/vsdk/toolkit/render/raster/Rasterizer2D.h,BASE/SRC/MAIN/V/T/RENDER/RASTER/RASTER2D.H,Rasterizer2D.h,RASTER2D.H
 base/src/main/vsdk/toolkit/render/raytracing/DepthBufferEncoder.cpp,BASE/SRC/MAIN/V/T/RENDER/RAYTRACI/DEPBUFEN.CPP,DepthBufferEncoder.cpp,DEPBUFEN.CPP

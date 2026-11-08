@@ -1,7 +1,7 @@
 #ifndef __RAYTRACER_PALETTE__
 #define __RAYTRACER_PALETTE__
 
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include "programs/vitralRaytracer/RaytracerColorMode.h"
 
 class RaytracerPalette {

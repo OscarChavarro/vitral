@@ -1,6 +1,6 @@
 #ifndef __FRAME__
 #define __FRAME__
-#include "lib/dithering/Dithering.h"
+#include "vsdk/toolkit/render/dithering/Dithering.h"
 #include "programs/vitralRaytracer/SceneList.h"
 
 class Frame {
