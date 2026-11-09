@@ -82,13 +82,14 @@ public class Jogl4RGBImageUncompressedRenderer extends Jogl4Renderer {
         gl.glTexImage2D(
             GL4.GL_TEXTURE_2D,
             0,
-            GL4.GL_RGB8,
+            img instanceof vsdk.toolkit.media.NormalMapTexture ? GL4.GL_RGB32F : GL4.GL_RGB8,
             img.getXSize(),
             img.getYSize(),
             0,
             GL4.GL_RGB,
-            GL4.GL_UNSIGNED_BYTE,
-            img.getRawImageDirectBuffer());
+            img instanceof vsdk.toolkit.media.NormalMapTexture ? GL4.GL_FLOAT : GL4.GL_UNSIGNED_BYTE,
+            img instanceof vsdk.toolkit.media.NormalMapTexture normalTexture
+                ? normalTexture.getFloatSamples() : img.getRawImageDirectBuffer());
         gl.glGenerateMipmap(GL4.GL_TEXTURE_2D);
 
         gl.glTexParameteri(

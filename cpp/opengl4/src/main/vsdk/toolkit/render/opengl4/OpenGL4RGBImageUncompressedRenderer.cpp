@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/media/NormalMapTexture.h"
 #include <cstdio>
 
 #include "java/util/ArrayList.h"
@@ -107,16 +108,17 @@ GLuint OpenGL4RGBImageUncompressedRenderer::upload(RGBImageUncompressed* img) {
     glBindTexture(GL_TEXTURE_2D, textureId);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    NormalMapTexture* normalTexture = dynamic_cast<NormalMapTexture*>(img);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGB8,
+        normalTexture ? GL_RGB32F : GL_RGB8,
         img->getXSize(),
         img->getYSize(),
         0,
         GL_RGB,
-        GL_UNSIGNED_BYTE,
-        img->getRawImage());
+        normalTexture ? GL_FLOAT : GL_UNSIGNED_BYTE,
+        normalTexture ? static_cast<const void*>(normalTexture->getFloatSamples()) : static_cast<const void*>(img->getRawImage()));
 
     glGenerateMipmap(GL_TEXTURE_2D);
 

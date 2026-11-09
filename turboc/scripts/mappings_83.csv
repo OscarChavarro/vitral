@@ -679,6 +679,7 @@ base/src/main/vsdk/toolkit/media/MediaEntity.cpp,BASE/SRC/MAIN/V/T/MEDIA/MEDIENT
 base/src/main/vsdk/toolkit/media/MediaEntity.h,BASE/SRC/MAIN/V/T/MEDIA/MEDIENTI.H,MediaEntity.h,MEDIENTI.H
 base/src/main/vsdk/toolkit/media/NormalMap.cpp,BASE/SRC/MAIN/V/T/MEDIA/NORMAMAP.CPP,NormalMap.cpp,NORMAMAP.CPP
 base/src/main/vsdk/toolkit/media/NormalMap.h,BASE/SRC/MAIN/V/T/MEDIA/NORMAMAP.H,NormalMap.h,NORMAMAP.H
+base/src/main/vsdk/toolkit/media/NormalMapTexture.h,BASE/SRC/MAIN/V/T/MEDIA/NORMTXTR.H,NormalMapTexture.h,NORMTXTR.H
 base/src/main/vsdk/toolkit/media/PrimitiveCountShapeDescriptor.cpp,BASE/SRC/MAIN/V/T/MEDIA/PRCOSHDE.CPP,PrimitiveCountShapeDescriptor.cpp,PRCOSHDE.CPP
 base/src/main/vsdk/toolkit/media/PrimitiveCountShapeDescriptor.h,BASE/SRC/MAIN/V/T/MEDIA/PRCOSHDE.H,PrimitiveCountShapeDescriptor.h,PRCOSHDE.H
 base/src/main/vsdk/toolkit/media/RGBAColorPalette.cpp,BASE/SRC/MAIN/V/T/MEDIA/RGBCOLPA.CPP,RGBAColorPalette.cpp,RGBCOLPA.CPP

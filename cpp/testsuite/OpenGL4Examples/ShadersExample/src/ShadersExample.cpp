@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/media/NormalMapTexture.h"
 #include "java/lang/Runnable.h"
 #include "java/lang/RuntimeException.h"
 #include "java/util/concurrent/atomic/AtomicLong.h"
@@ -467,7 +468,7 @@ public:
         bumpCandidates.add("../etc/bumpmaps/earth.bw");
         bumpNormalMap = loadBumpNormalMapByCandidates(bumpCandidates);
         if (bumpNormalMap != 0) {
-            bumpMap = bumpNormalMap->exportToRgbImage();
+            bumpMap = new NormalMapTexture(*bumpNormalMap);
         }
         if (textureMap == 0) {
             std::fprintf(stderr, "ShadersExample: textureMap not loaded\n");

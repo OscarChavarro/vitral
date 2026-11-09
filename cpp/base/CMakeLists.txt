@@ -431,6 +431,7 @@ if(VITRAL_BUILD_TESTS)
   FetchContent_MakeAvailable(googletest)
 
   add_executable(vitral_base_tests
+    src/test/normal_map_texture_tests.cpp
     src/test/vector_tests.cpp
     src/test/quaternion_tests.cpp
     src/test/matrix_nxm_tests.cpp

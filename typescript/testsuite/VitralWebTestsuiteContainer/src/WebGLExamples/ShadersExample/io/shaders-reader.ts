@@ -1,3 +1,4 @@
+import { NormalMapTexture } from "@vitral/base";
 import {
   IndexedColorImageUncompressed,
   NormalMap,
@@ -55,7 +56,7 @@ export class ShadersReader {
     bumpNormalMap.importBumpMap(bumpMapFile, ShadersReader.DEFAULT_BUMP_SCALE);
     // Keep GLSL and CPU raytracer aligned: both consume the same
     // precomputed normal field extracted from the bump map.
-    const bumpMapHeightRgb: RGBImageUncompressed = bumpNormalMap.exportToRgbImage();
+    const bumpMapHeightRgb: RGBImageUncompressed = new NormalMapTexture(bumpNormalMap);
 
     const microFacetCsvText: string = await ShadersReader.readText(microFacetCsvUrl);
 

@@ -195,7 +195,8 @@ public abstract class LightingShader extends Shader {
         }
 
         Vector3Dd baseNormal = surfaceNormal.normalized();
-        Vector3Dd surfaceTangentU = info.tangent.normalized();
+        Vector3Dd surfaceTangentU = info.tangent.subtract(
+            baseNormal.multiply(baseNormal.dotProduct(info.tangent))).normalized();
         Vector3Dd surfaceTangentV = baseNormal.crossProduct(surfaceTangentU).normalized();
         Vector3Dd nCrossPv = baseNormal.crossProduct(surfaceTangentV);
         Vector3Dd nCrossPu = baseNormal.crossProduct(surfaceTangentU);

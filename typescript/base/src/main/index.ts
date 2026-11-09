@@ -450,3 +450,5 @@ export { ObjectGraphTransfer, type TransferableClass } from "./java/concurrent/O
 export { decodeSimpleSceneSnapshot, encodeSimpleSceneSnapshot } from "./vsdk/toolkit/render/raytracing/SimpleSceneSnapshotTransfer.js";
 
 export { Dithering, DitheringMethod, DitheringPalette } from "./vsdk/toolkit/render/dithering/Dithering.js";
+
+export { NormalMapTexture } from "./vsdk/toolkit/media/NormalMapTexture.js";

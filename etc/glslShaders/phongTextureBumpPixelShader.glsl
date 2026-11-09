@@ -29,7 +29,7 @@ void main()
     // using Fu/Fv reconstructed from the normal-map field exactly as in the
     // Java CPU path (NormalMap.importBumpMap + LightingShader).
     vec3 Nn = normalize(N);
-    vec3 Pu = normalize(T);
+    vec3 Pu = normalize(T - Nn * dot(Nn, T));
     vec3 Pv = normalize(cross(Nn, Pu));
 
     vec3 normalVariation = texture(sNormalMap, uvTextureCoordinate).xyz * 2.0 - 1.0;
@@ -50,13 +50,17 @@ void main()
 
     for ( int i = 0; i < numberOfLights; i++ ) {
         vec3 L = normalize(lightPositionsGlobal[i] - PGlobal);
+        // The CPU shadow ray rejects illumination through the original surface.
+        if ( dot(Nn, L) <= 0.0 || dot(perturbedNormal, L) <= 0.0 ) {
+            continue;
+        }
         vec3 R = reflect(-L, perturbedNormal);
         diffuseTerm += lightColorsGlobal[i] * diffuseColor * max(dot(perturbedNormal, L), 0.0);
         specularTerm += lightColorsGlobal[i] * specularColor *
                         pow(max(dot(R, viewDir), 0.0), phongExponent);
     }
 
-    // Match CPU raytracer: texture modulates diffuse term only.
+    // Texture modulates diffuse term only
     vec3 texturedDiffuseTerm = diffuseTerm;
     if ( withTexture > 0 ) {
         texturedDiffuseTerm *= texture(sTexture, uvTextureCoordinate).xyz;

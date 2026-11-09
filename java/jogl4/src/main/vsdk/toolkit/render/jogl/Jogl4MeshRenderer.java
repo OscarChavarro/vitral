@@ -525,6 +525,9 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
         if ( normalMapId > 0 ) {
             gl.glActiveTexture(GL.GL_TEXTURE1);
             gl.glBindTexture(GL.GL_TEXTURE_2D, normalMapId);
+            // CPU normal sampling uses bilinear level zero, without mipmaps.
+            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+            gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
             gl.glActiveTexture(GL.GL_TEXTURE0);
         }
     }

@@ -236,7 +236,7 @@ export class CookTorranceShader extends Shader {
         }
 
         const baseNormal: Vector3Dd = surfaceNormal.normalized();
-        const surfaceTangentU: Vector3Dd = info.tangent.normalized();
+        const surfaceTangentU: Vector3Dd = info.tangent.subtract(baseNormal.multiply(baseNormal.dotProduct(info.tangent))).normalized();
         const surfaceTangentV: Vector3Dd = baseNormal.crossProduct(surfaceTangentU).normalized();
         const nCrossPv: Vector3Dd = baseNormal.crossProduct(surfaceTangentV);
         const nCrossPu: Vector3Dd = baseNormal.crossProduct(surfaceTangentU);

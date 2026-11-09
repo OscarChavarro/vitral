@@ -23,8 +23,8 @@ void main()
     vec4 transformed = modelViewLocal * PObject;
     PGlobal = transformed.xyz;
     N = normalize((modelViewITLocal * vec4(NObject, 0.0)).xyz);
-    T = normalize((modelViewITLocal * vec4(TObject, 0.0)).xyz);
-    B = normalize((modelViewITLocal * vec4(BObject, 0.0)).xyz);
+    T = normalize((modelViewLocal * vec4(TObject, 0.0)).xyz);
+    B = normalize((modelViewLocal * vec4(BObject, 0.0)).xyz);
     V = normalize(cameraPositionGlobal - PGlobal);
 
     uvTextureCoordinate = uvVertexTextureCoordinate;

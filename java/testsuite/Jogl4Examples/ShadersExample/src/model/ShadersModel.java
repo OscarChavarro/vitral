@@ -105,7 +105,7 @@ public class ShadersModel
             bumpNormalMap.importBumpMap(bump, DEFAULT_BUMP_SCALE);
             // Keep GLSL and CPU raytracer aligned: both consume the same
             // precomputed normal field extracted from the bump map.
-            bumpMapHeightRgb = bumpNormalMap.exportToRgbImage();
+            bumpMapHeightRgb = new vsdk.toolkit.media.NormalMapTexture(bumpNormalMap);
         }
         catch (Exception e) {
             throw new IllegalStateException("Failed loading textures for ShadersExample", e);

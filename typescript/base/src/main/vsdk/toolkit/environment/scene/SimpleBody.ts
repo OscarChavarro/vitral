@@ -1,3 +1,4 @@
+import { NormalMapTexture } from "../../media/NormalMapTexture.js";
 import type { RayCrossingQuery } from "../geometry/element/RayCrossingQuery.js";
 import type { RayCrossingSink } from "../geometry/element/RayCrossingSink.js";
 import { RayCrossingSupport } from "../geometry/element/RayCrossingSupport.js";
@@ -210,9 +211,7 @@ export class SimpleBody extends Entity {
     */
     public setNormalMap(inNormalMap: NormalMap | null): void {
         this.normalMap = inNormalMap;
-        if (this.normalMap !== null) {
-            this.normalMapRgb = this.normalMap.exportToRgbImage();
-        }
+        this.normalMapRgb = this.normalMap !== null ? new NormalMapTexture(this.normalMap) : null;
         this.markModified();
     }
 

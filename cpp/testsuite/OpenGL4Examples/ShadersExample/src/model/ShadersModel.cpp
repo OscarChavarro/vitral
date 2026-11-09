@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/media/NormalMapTexture.h"
 #include "java/lang/Math.h"
 #include "java/lang/String.h"
 #include <cmath>
@@ -81,7 +82,7 @@ ShadersModel::ShadersModel()
         IndexedColorImageUncompressed* bump = ImagePersistence::importIndexedColor(bumpFile);
         bumpNormalMap = new NormalMap();
         bumpNormalMap->importBumpMap(bump, Vector3Dd(1.0, 1.0, 1.0));
-        bumpMapHeightRgb = bumpNormalMap->exportToRgbImage();
+        bumpMapHeightRgb = new NormalMapTexture(*bumpNormalMap);
         delete bump;
     }
     catch (...) {

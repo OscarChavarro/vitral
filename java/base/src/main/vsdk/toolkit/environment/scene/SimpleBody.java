@@ -240,9 +240,7 @@ public class SimpleBody extends Entity {
     public void setNormalMap(NormalMap in)
     {
         normalMap = in;
-        if ( normalMap != null ) {
-            normalMapRgb = normalMap.exportToRgbImage();
-        }
+        normalMapRgb = normalMap != null ? new vsdk.toolkit.media.NormalMapTexture(normalMap) : null;
         markModified();
     }
 

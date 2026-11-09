@@ -1,4 +1,4 @@
-import { RGBImageUncompressed } from "@vitral/base";
+import { RGBImageUncompressed, NormalMapTexture } from "@vitral/base";
 import { WebGLImageRenderer } from "./WebGLImageRenderer.js";
 
 /**
@@ -78,21 +78,25 @@ export class WebGLRGBImageUncompressedRenderer {
         gl.bindTexture(gl.TEXTURE_2D, texture);
 
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        // WebGL 2 requires OES_texture_float_linear to filter RGB32F.
+        // RGB16F retains linear filtering on contexts without the extension.
+        const normalFormat = img instanceof NormalMapTexture && gl.getExtension("OES_texture_float_linear")
+            ? gl.RGB32F : gl.RGB16F;
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
-            gl.RGB8,
+            img instanceof NormalMapTexture ? normalFormat : gl.RGB8,
             img.getXSize(),
             img.getYSize(),
             0,
             gl.RGB,
-            gl.UNSIGNED_BYTE,
-            img.getRawImageDirectBuffer(),
+            img instanceof NormalMapTexture ? gl.FLOAT : gl.UNSIGNED_BYTE,
+            img instanceof NormalMapTexture ? img.samples : img.getRawImageDirectBuffer(),
         );
-        gl.generateMipmap(gl.TEXTURE_2D);
+        if (!(img instanceof NormalMapTexture)) gl.generateMipmap(gl.TEXTURE_2D);
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, WebGLImageRenderer.magFilterParam(gl));
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, WebGLImageRenderer.minFilterParam(gl));
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, img instanceof NormalMapTexture ? gl.LINEAR : WebGLImageRenderer.magFilterParam(gl));
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, img instanceof NormalMapTexture ? gl.LINEAR : WebGLImageRenderer.minFilterParam(gl));
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
