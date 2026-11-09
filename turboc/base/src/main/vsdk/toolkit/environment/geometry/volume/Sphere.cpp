@@ -323,3 +323,36 @@ Sphere::getClass() const
 {
     return &CLASS;
 }
+
+int Sphere::intersectionRoots(const Vector3Dd& p, const Vector3Dd& d, double radius,
+    const RayCrossingQuery& query, double& nearT, double& farT)
+{
+    double lengthSquared = d.dotProduct(d);
+    if (!(lengthSquared > 0.0) || query.minT > query.maxT) return 0;
+    double length = sqrt(lengthSquared), closest = -p.dotProduct(d) / length;
+    double ocSquared = p.dotProduct(p), radiusSquared = radius * radius;
+    if (!(ocSquared < radiusSquared) && closest < query.minimumExteriorApproach) return 0;
+    double chordSquared = radiusSquared - ocSquared + closest * closest;
+    if (chordSquared < query.minimumChordSquared) return 0;
+    double half = sqrt(chordSquared);
+    nearT = (closest - half) / length; farT = (closest + half) / length;
+    BOOLEAN n = nearT >= query.minT && nearT <= query.maxT;
+    BOOLEAN f = farT >= query.minT && farT <= query.maxT;
+    if (!n && !f) return 0;
+    if (!n) nearT = farT;
+    if (!f) farT = nearT;
+    return nearT == farT ? 1 : 2;
+}
+RayCrossingSupport::Value Sphere::emitRayCrossings(const Ray& ray, const RayCrossingQuery& query, RayCrossingSink& sink) const
+{
+    double nearT, farT;
+    int count = intersectionRoots(ray.getOrigin(), ray.getDirection(), radius, query, nearT, farT);
+    for (int i = 0; i < count; ++i) {
+        double t = i == 0 ? nearT : farT;
+        Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(t));
+        double orientation = point.dotProduct(ray.getDirection());
+        RayCrossing::Kind kind = orientation < 0 ? RayCrossingKind::Entering : orientation > 0 ? RayCrossingKind::Leaving : RayCrossingKind::Tangent;
+        sink.crossing(RayCrossing(t, this, kind));
+    }
+    return RayCrossingSupport::Supported;
+}

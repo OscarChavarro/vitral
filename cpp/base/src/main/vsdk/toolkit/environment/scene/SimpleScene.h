@@ -36,7 +36,9 @@ public:
     void addLight(Light* l);
 
     java::ArrayList<SimpleBody*>& getSimpleBodies();
+    const java::ArrayList<SimpleBody*>& getSimpleBodies() const { return simpleBodies; }
     java::ArrayList<Light*>& getLights();
+    const java::ArrayList<Light*>& getLights() const { return lights; }
     java::ArrayList<Background*>& getBackgrounds();
     java::ArrayList<Camera*>& getCameras();
 
@@ -48,8 +50,8 @@ public:
     Background* getActiveBackground() const;
     Camera* getActiveCamera() const;
 
-    SimpleSceneSnapshot* exportToSimpleSceneSnapshot();
-    SimpleSceneSnapshot* exportToSimpleSceneSnapshot(int viewportXSize, int viewportYSize);
+    virtual SimpleSceneSnapshot* exportToSimpleSceneSnapshot();
+    virtual SimpleSceneSnapshot* exportToSimpleSceneSnapshot(int viewportXSize, int viewportYSize);
     SimpleSceneSnapshot* exportToSimpleSceneSnapshot(CameraSnapshot* cameraSnapshot, Background* background);
 };
 

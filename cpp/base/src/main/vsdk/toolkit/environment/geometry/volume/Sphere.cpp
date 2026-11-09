@@ -306,3 +306,21 @@ Vector3Dd Sphere::sphereBinormal(double theta, double phi) {
         std::cos(phi) * std::cos(theta) * std::cos(theta) +
         std::cos(phi) * std::sin(theta) * std::sin(theta));
 }
+
+RayCrossingSupport Sphere::emitRayCrossings(const Ray& ray,
+    const RayCrossingQuery& query, RayCrossingSink& sink) const
+{
+    double nearT, farT;
+    const int count = intersectionRoots(ray.getOrigin(), ray.getDirection(),
+        radius, query, nearT, farT);
+    auto emit = [&](double t) {
+        const Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(t));
+        const double orientation = point.dotProduct(ray.getDirection());
+        const RayCrossing::Kind kind = orientation < 0 ? RayCrossing::Kind::Entering
+            : orientation > 0 ? RayCrossing::Kind::Leaving : RayCrossing::Kind::Tangent;
+        sink.crossing(RayCrossing(t, this, kind));
+    };
+    if (count > 0) emit(nearT);
+    if (count > 1) emit(farT);
+    return RayCrossingSupport::Supported;
+}

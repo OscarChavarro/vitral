@@ -132,6 +132,7 @@ void SimpleBody::setRotationInverse(const Matrix4x4d& ri)
 }
 
 SimpleMaterial* SimpleBody::getMaterial() const { return material; }
+Material* SimpleBody::getSurfaceMaterial() const { return material; }
 void SimpleBody::setMaterial(SimpleMaterial* m)
 {
     if ( material != m && material != 0 && ownsMaterial ) {

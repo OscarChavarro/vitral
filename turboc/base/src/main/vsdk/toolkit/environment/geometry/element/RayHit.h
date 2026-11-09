@@ -11,15 +11,17 @@ class NormalMap;
 /**
 RayHit describes the result of a ray/geometry intersection.
 */
+#include "vsdk/toolkit/environment/geometry/element/SurfaceDetail.h"
+
 class RayHit {
 public:
     enum {
-        DETAIL_NONE = 0,
-        DETAIL_POINT = 1 << 0,
-        DETAIL_NORMAL = 1 << 1,
-        DETAIL_UV = 1 << 2,
-        DETAIL_TANGENT = 1 << 3,
-        DETAIL_ALL = DETAIL_POINT | DETAIL_NORMAL | DETAIL_UV | DETAIL_TANGENT
+        DETAIL_NONE = SurfaceDetail::NONE,
+        DETAIL_POINT = SurfaceDetail::POINT,
+        DETAIL_NORMAL = SurfaceDetail::NORMAL,
+        DETAIL_UV = SurfaceDetail::UV,
+        DETAIL_TANGENT = SurfaceDetail::TANGENT,
+        DETAIL_ALL = SurfaceDetail::ALL
     };
 
     Vector3Dd point; // Intersection point coordinates

@@ -10,6 +10,10 @@ import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSink;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSupport;
+
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.processing.Containment;
 
@@ -26,6 +30,8 @@ supplied by all geometries in order to be managed uniformly by every
 geometric algorithm, including but not limited to rendering operations.<P>
 */
 public abstract class Geometry extends Entity {
+    public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query, RayCrossingSink sink) { return RayCrossingSupport.Unsupported; }
+
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20150218L;
     public static final int INSIDE = Containment.INSIDE.value();

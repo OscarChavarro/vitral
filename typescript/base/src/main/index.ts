@@ -256,6 +256,12 @@ export { ParametricCurve } from "./vsdk/toolkit/environment/geometry/curve/Param
 export { Intersection } from "./vsdk/toolkit/environment/geometry/element/Intersection.js";
 export { Ray } from "./vsdk/toolkit/environment/geometry/element/Ray.js";
 export { RayHit } from "./vsdk/toolkit/environment/geometry/element/RayHit.js";
+export { RayCrossing } from "./vsdk/toolkit/environment/geometry/element/RayCrossing.js";
+export { RayCrossingKind } from "./vsdk/toolkit/environment/geometry/element/RayCrossingKind.js";
+export { RayCrossingQuery } from "./vsdk/toolkit/environment/geometry/element/RayCrossingQuery.js";
+export { type RayCrossingSink } from "./vsdk/toolkit/environment/geometry/element/RayCrossingSink.js";
+export { RayCrossingSupport } from "./vsdk/toolkit/environment/geometry/element/RayCrossingSupport.js";
+export { SurfaceDetail } from "./vsdk/toolkit/environment/geometry/element/SurfaceDetail.js";
 export { Triangle } from "./vsdk/toolkit/environment/geometry/element/Triangle.js";
 export { Vertex } from "./vsdk/toolkit/environment/geometry/element/Vertex.js";
 export { Vertex2D } from "./vsdk/toolkit/environment/geometry/element/Vertex2D.js";

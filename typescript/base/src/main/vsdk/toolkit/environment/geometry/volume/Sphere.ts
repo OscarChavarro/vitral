@@ -1,3 +1,8 @@
+import { RayCrossing } from "../element/RayCrossing.js";
+import { RayCrossingKind } from "../element/RayCrossingKind.js";
+import { RayCrossingSupport } from "../element/RayCrossingSupport.js";
+import type { RayCrossingQuery } from "../element/RayCrossingQuery.js";
+import type { RayCrossingSink } from "../element/RayCrossingSink.js";
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
@@ -12,6 +17,31 @@ import { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBound
 import { Solid } from "./Solid.js";
 
 export class Sphere extends Solid {
+    public static intersectionRoots(p: Vector3Dd, d: Vector3Dd, radius: number, query: RayCrossingQuery): number[] {
+        const lengthSquared = d.dotProduct(d);
+        if (!(lengthSquared > 0) || query.minT > query.maxT) return [];
+        const length = Math.sqrt(lengthSquared), closest = -p.dotProduct(d) / length;
+        const ocSquared = p.dotProduct(p), radiusSquared = radius * radius;
+        if (!(ocSquared < radiusSquared) && closest < query.minimumExteriorApproach) return [];
+        const chordSquared = radiusSquared - ocSquared + closest * closest;
+        if (chordSquared < query.minimumChordSquared) return [];
+        const half = Math.sqrt(chordSquared);
+        let near = (closest - half) / length, far = (closest + half) / length;
+        const n = near >= query.minT && near <= query.maxT, f = far >= query.minT && far <= query.maxT;
+        if (!n && !f) return [];
+        if (!n) near = far;
+        if (!f) far = near;
+        return near === far ? [near] : [near, far];
+    }
+    public override emitRayCrossings(ray: Ray, query: RayCrossingQuery, sink: RayCrossingSink): RayCrossingSupport {
+        const p = ray.getOrigin(), d = ray.getDirection();
+        for (const t of Sphere.intersectionRoots(p, d, this.radius, query)) {
+            const orientation = p.add(d.multiply(t)).dotProduct(d);
+            sink.crossing(new RayCrossing(t, this, orientation < 0 ? RayCrossingKind.Entering : orientation > 0 ? RayCrossingKind.Leaving : RayCrossingKind.Tangent));
+        }
+        return RayCrossingSupport.Supported;
+    }
+
     private radius: number;
     private radiusSquared: number;
 

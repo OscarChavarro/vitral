@@ -10,10 +10,42 @@ import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayCrossing;
+import vsdk.toolkit.environment.geometry.element.RayCrossingKind;
+import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSink;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSupport;
+
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 public class Sphere extends Solid {
+    // The returned array contains zero, one or two ordered affine parameters.
+    public static double[] intersectionRoots(Vector3Dd p, Vector3Dd d, double radius, RayCrossingQuery query) {
+        double lengthSquared = d.dotProduct(d);
+        if (!(lengthSquared > 0) || query.minT > query.maxT) return new double[0];
+        double length = Math.sqrt(lengthSquared);
+        double closest = -p.dotProduct(d) / length;
+        double ocSquared = p.dotProduct(p), radiusSquared = radius * radius;
+        if (!(ocSquared < radiusSquared) && closest < query.minimumExteriorApproach) return new double[0];
+        double chordSquared = radiusSquared - ocSquared + closest * closest;
+        if (chordSquared < query.minimumChordSquared) return new double[0];
+        double half = Math.sqrt(chordSquared), near = (closest - half) / length, far = (closest + half) / length;
+        boolean n = near >= query.minT && near <= query.maxT, f = far >= query.minT && far <= query.maxT;
+        if (!n && !f) return new double[0];
+        if (!n) near = far;
+        if (!f) far = near;
+        return near == far ? new double[]{near} : new double[]{near, far};
+    }
+    @Override public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query, RayCrossingSink sink) {
+        Vector3Dd p = ray.getOrigin(), d = ray.getDirection();
+        for (double t : intersectionRoots(p, d, radius, query)) {
+            double orientation = p.add(d.multiply(t)).dotProduct(d);
+            sink.crossing(new RayCrossing(t, this, orientation < 0 ? RayCrossingKind.Entering : orientation > 0 ? RayCrossingKind.Leaving : RayCrossingKind.Tangent));
+        }
+        return RayCrossingSupport.Supported;
+    }
+
     @Serial private static final long serialVersionUID = 20060502L;
 
     private double radius;

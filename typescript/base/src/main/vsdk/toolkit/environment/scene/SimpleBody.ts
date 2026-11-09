@@ -1,3 +1,6 @@
+import type { RayCrossingQuery } from "../geometry/element/RayCrossingQuery.js";
+import type { RayCrossingSink } from "../geometry/element/RayCrossingSink.js";
+import { RayCrossingSupport } from "../geometry/element/RayCrossingSupport.js";
 import { Double } from "../../../../java/lang/Double.js";
 import { Entity } from "../../common/Entity.js";
 import { VSDK } from "../../common/VSDK.js";
@@ -22,8 +25,10 @@ state and visual attributes.
 `SimpleBody` is responsible for moving rays between world and object space.
 */
 export class SimpleBody extends Entity {
+    public emitRayCrossings(_ray: Ray, _query: RayCrossingQuery, _sink: RayCrossingSink): RayCrossingSupport { return RayCrossingSupport.Unsupported; }
+
     //- Model (1/6): body form ----------------------------------------
-    private geometry: Geometry | null;
+    protected geometry: Geometry | null;
 
     //- Model (2/6): body geometric transformations -------------------
     private position!: Vector3Dd;
@@ -76,7 +81,7 @@ export class SimpleBody extends Entity {
         return this.modificationVersion;
     }
 
-    private markModified(): void {
+    protected markModified(): void {
         this.modificationVersion++;
     }
 
@@ -156,6 +161,9 @@ export class SimpleBody extends Entity {
     /**
     @returns default material used by this body
     */
+    public supportsDecomposedPlacement(): boolean { return true; }
+    public getSurfaceMaterial(): SimpleMaterial | null { return this.material; }
+
     public getMaterial(): SimpleMaterial | null {
         return this.material;
     }

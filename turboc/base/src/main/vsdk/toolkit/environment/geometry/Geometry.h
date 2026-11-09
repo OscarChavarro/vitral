@@ -5,6 +5,10 @@
 #include "vsdk/toolkit/common/Entity.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/processing/Containment.h"
+
+#include "vsdk/toolkit/environment/geometry/element/RayCrossingQuery.h"
+#include "vsdk/toolkit/environment/geometry/element/RayCrossingSink.h"
+#include "vsdk/toolkit/environment/geometry/element/RayCrossingSupport.h"
 class Ray;
 class RayHit;
 
@@ -19,6 +23,7 @@ public:
         OUTSIDE = ((int)(Containment::OUTSIDE))
     };
 
+    virtual RayCrossingSupport::Value emitRayCrossings(const Ray&, const RayCrossingQuery&, RayCrossingSink&) const { return RayCrossingSupport::Unsupported; }
     virtual ~Geometry() {}
 
     virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) = 0;

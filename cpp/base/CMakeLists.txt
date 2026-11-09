@@ -8,7 +8,10 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
+option(VITRAL_BASE_ISOLATED_OUTPUT "Keep base artifacts inside the caller's build tree" OFF)
+if(NOT VITRAL_BASE_ISOLATED_OUTPUT)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
+endif()
 
 # Optional image format support
 option(WITH_JPEG "Enable JPEG image format support" OFF)
@@ -52,6 +55,9 @@ message(STATUS "  POSIX Threads: ${WITH_POSIX_THREADS}")
 
 # Source files for the base library
 set(VITRAL_BASE_SOURCES
+    src/main/vsdk/toolkit/environment/geometry/element/RayCrossingQuery.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayCrossing.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayCrossingSink.cpp
     src/main/vsdk/toolkit/render/dithering/Dithering.cpp
     src/main/vsdk/toolkit/common/VSDK.cpp
     src/main/vsdk/toolkit/common/Entity.cpp
@@ -436,6 +442,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/dialog_persistence_tests.cpp
     src/test/java_emulation_tests.cpp
     src/test/image_persistence_tests.cpp
+    src/test/ray_crossing_tests.cpp
     src/test/sphere_polyhedral_cache_tests.cpp
     src/test/box_cone_containment_tests.cpp
     src/test/voxel_volume_tests.cpp

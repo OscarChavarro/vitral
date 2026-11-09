@@ -493,3 +493,5 @@ void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const
     outData->normalMap = normalMap;
     outData->setRay(worldRay.withT(worldT));
 }
+
+Material* SimpleBody::getSurfaceMaterial() const { return material; }

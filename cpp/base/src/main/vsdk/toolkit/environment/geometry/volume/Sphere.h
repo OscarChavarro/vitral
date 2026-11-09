@@ -1,6 +1,7 @@
 #ifndef __SPHERE__
 #define __SPHERE__
 
+#include <cmath>
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Ray;
 class RayHit;
@@ -21,6 +22,13 @@ private:
 
 public:
     explicit Sphere(double r);
+    RayCrossingSupport emitRayCrossings(const Ray& ray,
+        const RayCrossingQuery& query, RayCrossingSink& sink) const override;
+
+    // Returns zero, one or two roots in increasing order without allocation.
+    static int intersectionRoots(const Vector3Dd& origin, const Vector3Dd& direction,
+        double radius, const RayCrossingQuery& query, double& nearT, double& farT);
+
     virtual ~Sphere() {}
 
     Ray* doIntersectionFirstHit(const Ray& inoutRay);
@@ -41,5 +49,30 @@ public:
     Vector3Dd sphereTangent(double theta, double phi);
     Vector3Dd sphereBinormal(double theta, double phi);
 };
+
+inline int Sphere::intersectionRoots(const Vector3Dd& p, const Vector3Dd& d,
+    double radius, const RayCrossingQuery& query, double& nearT, double& farT)
+{
+    const double lengthSquared = d.dotProduct(d);
+    if (!(lengthSquared > 0.0) || query.minT > query.maxT) return 0;
+    const double directionLength = std::sqrt(lengthSquared);
+    const Vector3Dd unitDirection = d.multiply(1.0 / directionLength);
+    const double radiusSquared = radius * radius;
+    const double ocSquared = p.dotProduct(p);
+    const bool inside = ocSquared < radiusSquared;
+    const double closest = -p.dotProduct(unitDirection);
+    if (!inside && closest < query.minimumExteriorApproach) return 0;
+    const double chordSquared = radiusSquared - ocSquared + closest * closest;
+    if (chordSquared < query.minimumChordSquared) return 0;
+    const double halfChord = std::sqrt(chordSquared);
+    farT = (closest + halfChord) / directionLength;
+    nearT = (closest - halfChord) / directionLength;
+    const bool nearValid = nearT >= query.minT && nearT <= query.maxT;
+    const bool farValid = farT >= query.minT && farT <= query.maxT;
+    if (!nearValid && !farValid) return 0;
+    if (!nearValid) nearT = farT;
+    if (!farValid) farT = nearT;
+    return nearT == farT ? 1 : 2;
+}
 
 #endif

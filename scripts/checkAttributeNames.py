@@ -74,7 +74,7 @@ NOTATION_EXEMPTIONS = {
     # Plane equation a*x + b*y + c*z + d = 0.
     "InfinitePlane:a", "InfinitePlane:b", "InfinitePlane:c", "InfinitePlane:d",
     # Ray parameter: point = origin + t * direction (getT / withT API).
-    "Ray:t", "Intersection:t",
+    "Ray:t", "Intersection:t", "RayCrossing:t",
     "_ParametricBiCubicPatchIntersector:t", "VoxelVolume:t",
     # Diffuse/specular weights Kd, Ks: also the columns of the material
     # files and the shader uniforms (cookKd, cookKs).
@@ -165,6 +165,8 @@ ACCESSOR_EXEMPTIONS = {
     "InfinitePlaneGizmo:getPlane", "InfinitePlaneGizmo:getPoint", "InfinitePlaneGizmo:getNormal",
     "WidgetDialog:getChildren", "ZBuffer:getZBuffer", "ImagePersistenceTarga:getTexture",
     "StopWatch:getElapsedRealTime",
+    # A polymorphic Material view of the existing SimpleMaterial.
+    "SimpleBody:getSurfaceMaterial",
     # AWT ActionEvent API: getID() returns the event id.
     "HtmlActionListener:getID",
     # Testsuites: interface accessors, derived values and legacy servlet code.

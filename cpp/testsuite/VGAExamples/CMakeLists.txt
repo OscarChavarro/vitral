@@ -49,8 +49,8 @@ add_library(vitral_vga_support STATIC
     "${VITRAL_VGA_PORTABLE_SOURCE_DIR}/lib/vgaModes/VgaModes.cpp"
 )
 target_include_directories(vitral_vga_support PUBLIC
-    "${VITRAL_VGA_PORTABLE_SOURCE_DIR}"
     "${VITRAL_VGA_GENERATED_INCLUDE_DIR}"
+    "${VITRAL_VGA_PORTABLE_SOURCE_DIR}"
     "${SVGALIB_INCLUDE_DIR}"
     "${SVGALIB_MOUSE_INCLUDE_DIR}"
     "${READLINE_INCLUDE_DIR}"

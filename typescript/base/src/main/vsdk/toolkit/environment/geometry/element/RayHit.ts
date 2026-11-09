@@ -1,3 +1,4 @@
+import { SurfaceDetail } from "./SurfaceDetail.js";
 import { FundamentalEntity } from "../../../common/FundamentalEntity.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import type { Image } from "../../../media/Image.js";
@@ -6,12 +7,12 @@ import type { SimpleMaterial } from "../../material/SimpleMaterial.js";
 import { Ray } from "./Ray.js";
 import type { GeometryRayHit } from "../Geometry.js";
 export class RayHit extends FundamentalEntity implements GeometryRayHit {
-    public static readonly DETAIL_NONE = 0;
-    public static readonly DETAIL_POINT = 1;
-    public static readonly DETAIL_NORMAL = 2;
-    public static readonly DETAIL_UV = 4;
-    public static readonly DETAIL_TANGENT = 8;
-    public static readonly DETAIL_ALL = 15;
+    public static readonly DETAIL_NONE = SurfaceDetail.NONE;
+    public static readonly DETAIL_POINT = SurfaceDetail.POINT;
+    public static readonly DETAIL_NORMAL = SurfaceDetail.NORMAL;
+    public static readonly DETAIL_UV = SurfaceDetail.UV;
+    public static readonly DETAIL_TANGENT = SurfaceDetail.TANGENT;
+    public static readonly DETAIL_ALL = SurfaceDetail.ALL;
     public point = new Vector3Dd();
     public normal = new Vector3Dd();
     public tangent = new Vector3Dd();

@@ -11,6 +11,10 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Quaterniond;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSink;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSupport;
+
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
@@ -28,10 +32,12 @@ state and visual attributes.
 `SimpleBody` is responsible for moving rays between world and object space.
 */
 public class SimpleBody extends Entity {
+    public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query, RayCrossingSink sink) { return RayCrossingSupport.Unsupported; }
+
     @Serial private static final long serialVersionUID = 20060502L;
 
     //- Model (1/6): body form ----------------------------------------
-    private Geometry geometry;
+    protected Geometry geometry;
 
     //- Model (2/6): body geometric transformations -------------------
     private Vector3Dd position;
@@ -86,7 +92,7 @@ public class SimpleBody extends Entity {
         return modificationVersion.get();
     }
 
-    private void markModified()
+    protected void markModified()
     {
         modificationVersion.incrementAndGet();
     }
@@ -178,6 +184,9 @@ public class SimpleBody extends Entity {
     /**
     @return default material used by this body
     */
+    public boolean supportsDecomposedPlacement() { return true; }
+    public vsdk.toolkit.environment.material.Material getSurfaceMaterial() { return material; }
+
     public SimpleMaterial getMaterial()
     {
         return material;

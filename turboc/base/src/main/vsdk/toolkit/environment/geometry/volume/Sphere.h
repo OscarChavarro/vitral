@@ -30,6 +30,8 @@ public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
+    virtual RayCrossingSupport::Value emitRayCrossings(const Ray&, const RayCrossingQuery&, RayCrossingSink&) const;
+    static int intersectionRoots(const Vector3Dd&, const Vector3Dd&, double, const RayCrossingQuery&, double&, double&);
     explicit Sphere(double r);
     virtual ~Sphere() {}
 

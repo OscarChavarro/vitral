@@ -3,6 +3,7 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/SurfaceDetail.h"
 class SimpleMaterial;
 class Image;
 class NormalMap;
@@ -12,12 +13,12 @@ RayHit describes the result of a ray/geometry intersection.
 */
 class RayHit {
 public:
-    static const int DETAIL_NONE = 0;
-    static const int DETAIL_POINT = 1 << 0;
-    static const int DETAIL_NORMAL = 1 << 1;
-    static const int DETAIL_UV = 1 << 2;
-    static const int DETAIL_TANGENT = 1 << 3;
-    static const int DETAIL_ALL = DETAIL_POINT | DETAIL_NORMAL | DETAIL_UV | DETAIL_TANGENT;
+    static const int DETAIL_NONE = SurfaceDetail::NONE;
+    static const int DETAIL_POINT = SurfaceDetail::POINT;
+    static const int DETAIL_NORMAL = SurfaceDetail::NORMAL;
+    static const int DETAIL_UV = SurfaceDetail::UV;
+    static const int DETAIL_TANGENT = SurfaceDetail::TANGENT;
+    static const int DETAIL_ALL = SurfaceDetail::ALL;
 
     Vector3Dd point; // Intersection point coordinates
     Vector3Dd normal; // Surface normal at intersection point

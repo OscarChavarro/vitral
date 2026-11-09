@@ -39,7 +39,9 @@ public:
     void addLight(Light* l);
 
     ArrayList<SimpleBody*>& getSimpleBodies();
+    const ArrayList<SimpleBody*>& getSimpleBodies() const { return simpleBodies; }
     ArrayList<Light*>& getLights();
+    const ArrayList<Light*>& getLights() const { return lights; }
     ArrayList<Background*>& getBackgrounds();
     ArrayList<Camera*>& getCameras();
 
@@ -51,8 +53,8 @@ public:
     Background* getActiveBackground() const;
     Camera* getActiveCamera() const;
 
-    SimpleSceneSnapshot* exportToSimpleSceneSnapshot();
-    SimpleSceneSnapshot* exportToSimpleSceneSnapshot(int viewportXSize, int viewportYSize);
+    virtual SimpleSceneSnapshot* exportToSimpleSceneSnapshot();
+    virtual SimpleSceneSnapshot* exportToSimpleSceneSnapshot(int viewportXSize, int viewportYSize);
     SimpleSceneSnapshot* exportToSimpleSceneSnapshot(CameraSnapshot* cameraSnapshot, Background* background);
 };
 

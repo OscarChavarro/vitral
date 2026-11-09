@@ -1,3 +1,7 @@
+import type { Ray } from "./element/Ray.js";
+import type { RayCrossingQuery } from "./element/RayCrossingQuery.js";
+import type { RayCrossingSink } from "./element/RayCrossingSink.js";
+import { RayCrossingSupport } from "./element/RayCrossingSupport.js";
 import { Entity } from "../../common/Entity.js";
 import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 import { Containment } from "../../processing/Containment.js";
@@ -14,6 +18,8 @@ export abstract class Geometry<
     public static readonly INSIDE = Containment.INSIDE;
     public static readonly LIMIT = Containment.LIMIT;
     public static readonly OUTSIDE = Containment.OUTSIDE;
+
+    public emitRayCrossings(_ray: Ray, _query: RayCrossingQuery, _sink: RayCrossingSink): RayCrossingSupport { return RayCrossingSupport.Unsupported; }
 
     /** Updates the supplied hit record when this geometry has a first ray hit. */
     public abstract doIntersectionFirstHit(inRay: TRay, outHit: THit): boolean;

@@ -1,3 +1,5 @@
+#ifndef VSDK_MEMORY_POOL_TXX
+#define VSDK_MEMORY_POOL_TXX
 #include <stddef.h>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/memoryManagement/MemoryPool.h"
@@ -178,3 +180,5 @@ MemoryPool<T>::expand(int numberOfElements) {
     initialized = TRUE;
     return TRUE;
 }
+
+#endif

@@ -16,13 +16,13 @@ public class RayHit extends FundamentalEntity {
     @Serial
     private static final long serialVersionUID = 20260420L;
 
-    public static final int DETAIL_NONE = 0;
-    public static final int DETAIL_POINT = 1 << 0;
-    public static final int DETAIL_NORMAL = 1 << 1;
-    public static final int DETAIL_UV = 1 << 2;
-    public static final int DETAIL_TANGENT = 1 << 3;
+    public static final int DETAIL_NONE = SurfaceDetail.NONE;
+    public static final int DETAIL_POINT = SurfaceDetail.POINT;
+    public static final int DETAIL_NORMAL = SurfaceDetail.NORMAL;
+    public static final int DETAIL_UV = SurfaceDetail.UV;
+    public static final int DETAIL_TANGENT = SurfaceDetail.TANGENT;
     public static final int DETAIL_ALL =
-        DETAIL_POINT | DETAIL_NORMAL | DETAIL_UV | DETAIL_TANGENT;
+        SurfaceDetail.ALL;
 
     private static final Vector3Dd ZERO_VECTOR = new Vector3Dd();
 
