@@ -1,0 +1,14 @@
+# General quadric coefficients: xx yy zz xy xz yz x y z constant
+viewport 640 480
+eye 3 -6 3
+up 0 0 1
+lookat 0 0 0.5
+fov 45
+background 0.08 0.12 0.2
+surface 0.7 0.72 0.75 0.2 0.8 0.2 20 0 0 1
+sphere 0 0 -1001 1000
+surface 0.9 0.35 0.15 0.2 0.8 0.7 35 0.05 0 1
+quadric 1 1 0 0 0 0 0 0 -1 0
+light 0.35 0.35 0.35 ambient
+light 0.9 0.9 0.9 point 4 -3 6
+light 0.4 0.4 0.4 point -4 1 4

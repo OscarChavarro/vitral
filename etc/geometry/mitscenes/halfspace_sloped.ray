@@ -1,0 +1,14 @@
+# box min-x min-y min-z max-x max-y max-z; halfspace ax + by + cz + d <= 0
+viewport 640 480
+eye 3 -6 3
+up 0 0 1
+lookat 0 0 0.5
+fov 45
+background 0.08 0.12 0.2
+surface 0.7 0.72 0.75 0.2 0.8 0.2 20 0 0 1
+halfspace -0.15 0 1 0
+surface 0.9 0.35 0.15 0.2 0.8 0.7 35 0.05 0 1
+box -0.6 -0.5 0.1 0.6 0.5 1.2
+light 0.35 0.35 0.35 ambient
+light 0.9 0.9 0.9 point 4 -3 6
+light 0.4 0.4 0.4 point -4 1 4

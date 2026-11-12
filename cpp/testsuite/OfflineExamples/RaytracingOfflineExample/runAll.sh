@@ -9,7 +9,19 @@ if [[ ! -x "./build/RaytracingOfflineExample" ]]; then
   cmake --build build --target RaytracingOfflineExample
 fi
 
-if [[ $# -gt 0 ]]; then
+# Si se indica una escena/salida concreta (o --help), delegar en una sola ejecución.
+# Flags de renderizado como --parallel o --nosave se reenvían a cada escena del lote.
+single_run=false
+for arg in "$@"; do
+  case "${arg}" in
+    --scene|-s|--output|-o|--help|-h) single_run=true ;;
+    nosave) ;;
+    -*) ;;
+    *) single_run=true ;;
+  esac
+done
+
+if [[ "${single_run}" == true ]]; then
   ./build/RaytracingOfflineExample "$@"
 else
   scene_dir="../../../../etc/geometry/mitscenes"
@@ -28,6 +40,6 @@ else
     output_file="${output_dir}/${base_name}.ppm"
 
     echo "Rendering ${scene_file} -> ${output_file}"
-    ./build/RaytracingOfflineExample --scene "${scene_file}" --output "${output_file}"
+    ./build/RaytracingOfflineExample "$@" --scene "${scene_file}" --output "${output_file}"
   done
 fi
