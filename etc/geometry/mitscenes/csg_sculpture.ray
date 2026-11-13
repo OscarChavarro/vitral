@@ -1,0 +1,26 @@
+# CSG blocks: csg union|intersection|difference [roth|pov] ... end
+# Classic sculpture: (box intersection sphere) minus three axis cylinders
+viewport 640 480
+eye 3 -6 3
+up 0 0 1
+lookat 0 0 0.6
+fov 45
+background 0.08 0.12 0.2
+surface 0.7 0.72 0.75 0.2 0.8 0.2 20 0 0 1
+halfspace 0 0 1 0
+csg difference roth
+surface 0.85 0.3 0.15 0.2 0.8 0.6 40 0.05 0 1
+csg intersection
+box -0.75 -0.75 0.05 0.75 0.75 1.55
+sphere 0 0 0.8 1.0
+end
+surface 0.2 0.55 0.9 0.2 0.8 0.6 40 0.05 0 1
+csg union
+quadric 0 1 1 0 0 0 0 0 -1.6 0.4
+quadric 1 0 1 0 0 0 0 0 -1.6 0.4
+quadric 1 1 0 0 0 0 0 0 0 -0.2025
+end
+end
+light 0.35 0.35 0.35 ambient
+light 0.9 0.9 0.9 point 4 -3 6
+light 0.4 0.4 0.4 point -4 1 4

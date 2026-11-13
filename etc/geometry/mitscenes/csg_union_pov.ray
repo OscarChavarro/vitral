@@ -1,0 +1,18 @@
+# Union of two overlapping spheres with the POV crossing membership evaluator;
+# for opaque first hits it matches the Roth evaluator pixel for pixel
+viewport 640 480
+eye 3 -6 3
+up 0 0 1
+lookat 0 0 0.6
+fov 45
+background 0.08 0.12 0.2
+surface 0.7 0.72 0.75 0.2 0.8 0.2 20 0 0 1
+halfspace 0 0 1 0
+surface 0.4 0.8 0.5 0.2 0.6 0.6 60 0.05 0 1
+csg union pov
+sphere -0.45 0 0.8 0.75
+sphere 0.45 0 0.8 0.75
+end
+light 0.35 0.35 0.35 ambient
+light 0.9 0.9 0.9 point 4 -3 6
+light 0.4 0.4 0.4 point -4 1 4
