@@ -30,6 +30,7 @@ private:
         Camera* activeCamera,
         const Matrix4x4d& modelRotation,
         RGBImageUncompressed* outputImage);
+    static void deleteSnapshot(SimpleSceneSnapshot* snapshot);
 };
 
 #endif

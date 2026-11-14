@@ -4,6 +4,8 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "ShaderOperationMode.h"
+#include "ShadersGeometry.h"
+#include "ShadersGeometryFixture.h"
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
@@ -39,6 +41,9 @@ public:
     double sphereRotationAngleRadians;
     int sphereMeridians;
     int sphereParallels;
+    /// Selected geometry; its fixture is null for the sphere
+    ShadersGeometry geometry;
+    ShadersGeometryFixture* geometryFixture;
 
     ShadersModel();
     ~ShadersModel();
@@ -56,6 +61,8 @@ public:
     SimpleMaterial* createActiveMaterialCopy() const;
     java::String getCookTorranceMaterialLabel() const;
     void cycleCookTorranceMaterial();
+    void selectGeometry(ShadersGeometry selected);
+    void cycleGeometry();
 };
 
 #endif

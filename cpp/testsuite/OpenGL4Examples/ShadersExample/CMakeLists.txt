@@ -29,6 +29,7 @@ add_executable(ShadersExample
     src/render/JogHudRenderer.cpp
     src/options/CommandLineOptions.cpp
     src/model/ShadersModel.cpp
+    src/model/ShadersGeometryFixture.cpp
     src/render/SoftwareRaycaster.cpp
     src/render/OpenGlOfflineSphereRenderer.cpp
     src/gui/Animation.cpp

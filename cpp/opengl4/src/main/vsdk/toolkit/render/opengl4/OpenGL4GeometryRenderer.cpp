@@ -17,11 +17,15 @@
 #include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
+#include "vsdk/toolkit/environment/geometry/surface/SubdividedBezierPatch.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
+#include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
 #include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
@@ -29,6 +33,10 @@
 #include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/environment/geometry/element/GeometryBounds.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/processing/BezierPatchTessellator.h"
+#include "vsdk/toolkit/processing/SolidBoundaryTessellator.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
@@ -52,6 +60,10 @@ const int SLICES = 32;
 const int TORUS_MAJOR_SEGMENTS = 48;
 const int TORUS_MINOR_SEGMENTS = 24;
 const size_t MAX_CACHED_MESHES = 256;
+/// Cells along the longest side of the bounds of a tessellated solid
+const int SOLID_TESSELLATION_RESOLUTION = 64;
+/// Parameter steps of a tessellated Bezier patch along u and v
+const int PATCH_TESSELLATION_STEPS = 24;
 /// Side of the square shown for an infinite plane
 const double INFINITE_PLANE_SIZE = 20.0;
 /// Cells along each side of the square shown for an infinite plane
@@ -402,6 +414,51 @@ OpenGL4MeshRenderer::Mesh* buildBiCubicPatch(ParametricBiCubicPatch& patch)
 }
 
 /**
+Quadrics, implicit solids and height fields are drawn from the
+`SolidBoundaryTessellator` mesh of their finite bounds; unbounded ones are
+not supported.
+*/
+OpenGL4MeshRenderer::Mesh* buildTessellatedSolid(Geometry* geometry)
+{
+    GeometryBounds bounds;
+    geometry->getBounds(bounds);
+    if ( bounds.getKind() != GeometryBounds::Kind::Finite ) {
+        return nullptr;
+    }
+    SimpleBody body;
+    body.setGeometryReference(geometry);
+    SolidBoundaryTessellationReport report;
+    // The margin keeps the extreme points of the solid inside the region
+    TriangleMesh* mesh = SolidBoundaryTessellator::tessellate(body,
+        bounds.inflated(1e-3 * maxAbsExtent(geometry->getMinMax())),
+        SOLID_TESSELLATION_RESOLUTION, report);
+    if ( mesh == nullptr ) {
+        return nullptr;
+    }
+    OpenGL4MeshRenderer::Mesh* result = buildTriangleMesh(*mesh);
+    delete mesh;
+    return result;
+}
+
+/**
+A Bezier patch is drawn from the `BezierPatchTessellator` mesh of its
+surface, visible from both sides.
+*/
+OpenGL4MeshRenderer::Mesh* buildBezierPatch(const SubdividedBezierPatch& patch)
+{
+    TriangleMesh* mesh = BezierPatchTessellator::tessellate(patch,
+        PATCH_TESSELLATION_STEPS, PATCH_TESSELLATION_STEPS);
+    if ( mesh == nullptr ) {
+        return nullptr;
+    }
+    OpenGL4MeshBuilder builder(maxAbsExtent(mesh->getMinMax()));
+    builder.setDoubleSided(true);
+    addTriangleMesh(builder, *mesh);
+    delete mesh;
+    return builder.build();
+}
+
+/**
 @param outFrame the point of the plane closest to the origin, two
 orthonormal directions (u, v) on it and its normal n, (u, v, n) right handed
 */
@@ -546,6 +603,15 @@ java::String keyOf(Geometry* geometry)
     if ( QuadMesh* q = dynamic_cast<QuadMesh*>(geometry) ) {
         return format("quadmesh/%p", (void*)q);
     }
+    if ( dynamic_cast<ImplicitSolid*>(geometry) != nullptr ||
+         dynamic_cast<QuadricSurface*>(geometry) != nullptr ||
+         dynamic_cast<HeightFieldSolid*>(geometry) != nullptr ) {
+        return format("tessellatedsolid/%p/%d", (void*)geometry,
+            SOLID_TESSELLATION_RESOLUTION);
+    }
+    if ( SubdividedBezierPatch* p = dynamic_cast<SubdividedBezierPatch*>(geometry) ) {
+        return format("subdividedbezierpatch/%p/%d", (void*)p, PATCH_TESSELLATION_STEPS);
+    }
     return java::String();
 }
 
@@ -569,6 +635,14 @@ OpenGL4MeshRenderer::Mesh* buildMesh(Geometry* geometry)
     }
     if ( VoxelVolume* v = dynamic_cast<VoxelVolume*>(geometry) ) {
         return OpenGL4VoxelVolumeRenderer::buildMesh(*v);
+    }
+    if ( dynamic_cast<ImplicitSolid*>(geometry) != nullptr ||
+         dynamic_cast<QuadricSurface*>(geometry) != nullptr ||
+         dynamic_cast<HeightFieldSolid*>(geometry) != nullptr ) {
+        return buildTessellatedSolid(geometry);
+    }
+    if ( SubdividedBezierPatch* p = dynamic_cast<SubdividedBezierPatch*>(geometry) ) {
+        return buildBezierPatch(*p);
     }
     return buildTriangulatedGeometry(geometry);
 }

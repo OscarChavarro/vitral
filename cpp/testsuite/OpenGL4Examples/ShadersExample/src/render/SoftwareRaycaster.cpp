@@ -12,6 +12,7 @@
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/background/SimpleBackground.h"
+#include "vsdk/toolkit/environment/background/Background.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/light/AmbientLight.h"
@@ -70,17 +71,21 @@ SimpleSceneSnapshot* SoftwareRaycaster::buildSceneSnapshot(
         viewportWidth,
         viewportHeight);
 
-    SimpleBody* sphereBody = new SimpleBody();
-    sphereBody->setGeometry(new Sphere(model->sphere->getRadius()));
-
-    sphereBody->setMaterial(model->createActiveMaterialCopy());
-
-    sphereBody->setTexture(model->textureMap ? model->textureMap->clone() : 0);
-    sphereBody->setNormalMap(bumpNormalMap ? bumpNormalMap->clone() : 0);
-    sphereBody->setRotation(modelRotation);
-
+    // The frame's body shares the model's geometries and maps; it owns only
+    // its material copy.
     java::ArrayList<SimpleBody*> bodies;
-    bodies.add(sphereBody);
+    if ( model->geometryFixture != 0 ) {
+        bodies.add(model->geometryFixture->createBody(model->createActiveMaterialCopy(), modelRotation));
+    }
+    else {
+        SimpleBody* sphereBody = new SimpleBody();
+        sphereBody->setGeometryReference(model->sphere);
+        sphereBody->setMaterial(model->createActiveMaterialCopy());
+        sphereBody->setTextureReference(model->textureMap);
+        sphereBody->setNormalMapReference(bumpNormalMap);
+        sphereBody->setRotation(modelRotation);
+        bodies.add(sphereBody);
+    }
 
     java::ArrayList<Light*> lights;
     Light* ambientLight = new AmbientLight(ColorRgb(1, 1, 1));
@@ -118,9 +123,18 @@ void SoftwareRaycaster::render(
             false);
     }
     catch (...) {
-        delete snapshot;
+        deleteSnapshot(snapshot);
         throw;
     }
 
+    deleteSnapshot(snapshot);
+}
+
+void SoftwareRaycaster::deleteSnapshot(SimpleSceneSnapshot* snapshot)
+{
+    // The snapshot does not own its bodies, lights and background
+    for ( long int i = 0; i < snapshot->getSimpleBodies().size(); i++ ) delete snapshot->getSimpleBodies()[i];
+    for ( long int i = 0; i < snapshot->getLights().size(); i++ ) delete snapshot->getLights()[i];
+    delete snapshot->getBackground();
     delete snapshot;
 }

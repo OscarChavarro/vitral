@@ -3,6 +3,7 @@
 
 #include "java/lang/String.h"
 #include "../model/ShaderOperationMode.h"
+#include "../model/ShadersGeometry.h"
 class CommandLineOptions {
 public:
     enum class TextureFilterOption {
@@ -33,6 +34,8 @@ public:
     double cpuTextureOffsetUTexels;
     bool hasCpuTextureOffsetV;
     double cpuTextureOffsetVTexels;
+    bool hasGeometry;
+    ShadersGeometry geometry;
     bool showHud;
     int width;
     int height;

@@ -41,6 +41,11 @@ static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererCo
 
     rendererConfiguration->setTexture(hasTextures);
     rendererConfiguration->setBumpMap(hasNormalMaps);
+    // The default Gouraud selection shades without normal perturbation; the
+    // Phong shaders apply the same per-pixel lighting plus the bump map.
+    if ( hasNormalMaps ) {
+        rendererConfiguration->setShadingType(RendererConfiguration::SHADING_TYPE_PHONG);
+    }
 }
 
 static void offlineExecution(const java::String& fileName,

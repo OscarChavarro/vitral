@@ -23,6 +23,7 @@ int OfflineControl::run(const CommandLineOptions& options)
     if (options.hasShadingType) model.quality.setShadingType(options.shadingType);
     if (options.hasMeridians) model.sphereMeridians = options.meridians;
     if (options.hasParallels) model.sphereParallels = options.parallels;
+    if (options.hasGeometry) model.selectGeometry(options.geometry);
     if (options.hasTextureFilter) {
         OpenGL4ImageRenderer::setTextureFilterMode(
             options.textureFilter == CommandLineOptions::TextureFilterOption::NEAREST

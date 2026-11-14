@@ -6,6 +6,9 @@
 #include <GLFW/glfw3.h>
 
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
@@ -36,17 +39,33 @@ RGBImageUncompressed* OpenGlOfflineSphereRenderer::render(
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    OpenGL4SphereRenderer::draw(
-        model->sphere,
-        model->camera,
-        model->light,
-        &model->getActiveMaterialForCurrentShading(),
-        &model->quality,
-        model->textureMap,
-        model->bumpMapHeightRgb,
-        modelRotation,
-        model->sphereMeridians,
-        model->sphereParallels);
+    if ( model->geometryFixture != 0 ) {
+        // The drawable mesh of the same geometry the software path traces
+        java::ArrayList<Light*> lights;
+        lights.add(model->light);
+        OpenGL4GeometryRenderer::draw(
+            model->geometryFixture->getDrawableMesh(),
+            model->camera,
+            &lights,
+            &model->getActiveMaterialForCurrentShading(),
+            &model->quality,
+            0,
+            0,
+            modelRotation);
+    }
+    else {
+        OpenGL4SphereRenderer::draw(
+            model->sphere,
+            model->camera,
+            model->light,
+            &model->getActiveMaterialForCurrentShading(),
+            &model->quality,
+            model->textureMap,
+            model->bumpMapHeightRgb,
+            modelRotation,
+            model->sphereMeridians,
+            model->sphereParallels);
+    }
 
     glFinish();
 
@@ -66,6 +85,7 @@ RGBImageUncompressed* OpenGlOfflineSphereRenderer::render(
     delete[] bytes;
 
     OpenGL4SphereRenderer::dispose();
+    OpenGL4GeometryRenderer::dispose();
     OpenGL4ImageRenderer::dispose();
     OpenGL4MatrixRenderer::release();
     glfwDestroyWindow(window);

@@ -27,7 +27,8 @@ ShadersModel::ShadersModel()
       textureMap(0), bumpMapHeightRgb(0), bumpNormalMap(0), softwareFrameImage(0),
       renderingMode(ShaderOperationMode::OPENGL_4_1), showHud(true),
       animationEnabled(false), lightAnimationEnabled(false), sphereRotationAngleRadians(0.0),
-      sphereMeridians(100), sphereParallels(50)
+      sphereMeridians(100), sphereParallels(50),
+      geometry(ShadersGeometry::SPHERE), geometryFixture(0)
 {
     camera->setPosition(Vector3Dd(0, -4, 0));
     camera->setRotation(Matrix4x4d().eulerAnglesRotation(M_PI / 2.0, 0.0, 0.0));
@@ -93,6 +94,7 @@ ShadersModel::ShadersModel()
 
 ShadersModel::~ShadersModel()
 {
+    delete geometryFixture;
     delete qualityController;
     delete cameraController;
     delete light;
@@ -165,4 +167,18 @@ void ShadersModel::cycleCookTorranceMaterial()
     cookTorranceMaterial = new MicroFacetedMaterial(
         "../../../../etc/materials/microFacetMAterials.csv",
         name);
+}
+
+void ShadersModel::selectGeometry(ShadersGeometry selected)
+{
+    if ( selected == geometry ) return;
+    delete geometryFixture;
+    geometryFixture = 0;
+    geometry = selected;
+    if ( geometry != ShadersGeometry::SPHERE ) geometryFixture = new ShadersGeometryFixture(geometry);
+}
+
+void ShadersModel::cycleGeometry()
+{
+    selectGeometry(ShadersGeometryFixture::next(geometry));
 }

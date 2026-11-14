@@ -39,6 +39,8 @@ bool ShadersKeyboardInteractionTechniques::processPressed(const KeyEvent& event,
         case KeyEvent::KEY_B: model->quality.changeBumpMap(); repaint = true; break;
         case KeyEvent::KEY_m:
         case KeyEvent::KEY_M: model->cycleCookTorranceMaterial(); repaint = true; break;
+        case KeyEvent::KEY_o:
+        case KeyEvent::KEY_O: model->cycleGeometry(); repaint = true; break;
         case KeyEvent::KEY_q: model->changeSphereMeridians(-1); repaint = true; break;
         case KeyEvent::KEY_Q: model->changeSphereMeridians(1); repaint = true; break;
         case KeyEvent::KEY_w: model->changeSphereParallels(-1); repaint = true; break;

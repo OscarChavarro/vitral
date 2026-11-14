@@ -48,7 +48,10 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "model/ShadersGeometryFixture.h"
 #include "options/CommandLineOptions.h"
 #include "OfflineControl.h"
 #include "gui/Animation.h"
@@ -143,6 +146,8 @@ public:
     bool lightAnimationEnabled;
     bool showHud;
     ShaderOperationMode renderingMode;
+    ShadersGeometry geometry;
+    ShadersGeometryFixture* geometryFixture;
     double lastHudTitleTickSeconds;
     RGBImageUncompressed* softwareFrameImage;
     JogHudRenderer* hudRenderer;
@@ -158,6 +163,7 @@ public:
           textureMap(0), bumpMap(0), bumpNormalMap(0), meridians(100), parallels(50), angle(0.0),
           animationEnabled(false), lightAnimationEnabled(false), showHud(true),
           renderingMode(ShaderOperationMode::OPENGL_4_1),
+          geometry(ShadersGeometry::SPHERE), geometryFixture(0),
           lastHudTitleTickSeconds(-1.0), softwareFrameImage(0), hudRenderer(0),
           softwareThreadCount(java::Math::max(1, detectCpuCount())),
           softwareThreadInfoPrinted(false) {}
@@ -172,9 +178,17 @@ public:
         const int triangles = java::Math::max(0, (parallels - 1) * meridians * 2);
         const char* modeText = renderingMode == ShaderOperationMode::OPENGL_4_1 ? "GPU" : "CPU";
         char title[512];
-        std::snprintf(title, sizeof(title),
-            "VITRAL ShadersExample | Mode: %s [.] | Meridians: %d | Parallels: %d | Triangles: %d | HUD [h]",
-            modeText, meridians, parallels, triangles);
+        if (geometryFixture != 0) {
+            std::snprintf(title, sizeof(title),
+                "VITRAL ShadersExample | Mode: %s [.] | Geometry: %s [o] | Mesh triangles: %d | HUD [h]",
+                modeText, ShadersGeometryFixture::nameOf(geometry),
+                geometryFixture->getDrawableMesh() ? geometryFixture->getDrawableMesh()->getNumTriangles() : 0);
+        }
+        else {
+            std::snprintf(title, sizeof(title),
+                "VITRAL ShadersExample | Mode: %s [.] | Geometry: sphere [o] | Meridians: %d | Parallels: %d | Triangles: %d | HUD [h]",
+                modeText, meridians, parallels, triangles);
+        }
         glfwSetWindowTitle(window, title);
     }
 
@@ -214,17 +228,23 @@ public:
         try {
             camera->updateViewportResize(softwareFrameImage->getXSize(), softwareFrameImage->getYSize());
 
-            SimpleBody* sphereBody = new SimpleBody();
-            sphereBody->setGeometry(new Sphere(sphere->getRadius()));
-            sphereBody->setMaterial(createActiveMaterialCopy());
-            if (textureMap != 0 && quality.isTextureSet()) {
-                sphereBody->setTexture(textureMap->clone());
+            // The frame's body shares the application's geometries and maps.
+            if (geometryFixture != 0) {
+                bodies.add(geometryFixture->createBody(createActiveMaterialCopy(), modelRotation));
             }
-            if (bumpNormalMap != 0 && quality.isBumpMapSet()) {
-                sphereBody->setNormalMap(bumpNormalMap->clone());
+            else {
+                SimpleBody* sphereBody = new SimpleBody();
+                sphereBody->setGeometryReference(sphere);
+                sphereBody->setMaterial(createActiveMaterialCopy());
+                if (textureMap != 0 && quality.isTextureSet()) {
+                    sphereBody->setTextureReference(textureMap);
+                }
+                if (bumpNormalMap != 0 && quality.isBumpMapSet()) {
+                    sphereBody->setNormalMapReference(bumpNormalMap);
+                }
+                sphereBody->setRotation(modelRotation);
+                bodies.add(sphereBody);
             }
-            sphereBody->setRotation(modelRotation);
-            bodies.add(sphereBody);
 
             Light* ambientLight = new AmbientLight(ColorRgb(1, 1, 1));
             ambientLight->setId(0);
@@ -333,10 +353,28 @@ public:
             cookTorranceMaterialNames.get((long int)cookTorranceMaterialIndex));
     }
 
+    const SimpleMaterial* activeMaterial() const
+    {
+        if (quality.getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE &&
+            cookTorranceMaterial != 0) {
+            return cookTorranceMaterial;
+        }
+        return &material;
+    }
+
     java::String getCookTorranceMaterialLabel() const
     {
         if (!cookTorranceMaterial || cookTorranceMaterial->getName().isEmpty()) return "Copper";
         return cookTorranceMaterial->getName();
+    }
+
+    void selectGeometry(ShadersGeometry selected)
+    {
+        if (selected == geometry) return;
+        delete geometryFixture;
+        geometryFixture = 0;
+        geometry = selected;
+        if (geometry != ShadersGeometry::SPHERE) geometryFixture = new ShadersGeometryFixture(geometry);
     }
 
     SimpleMaterial* createActiveMaterialCopy() const
@@ -377,10 +415,12 @@ public:
         }
         delete light;
         delete sphere;
+        delete geometryFixture;
         delete qualityController;
         delete controller;
         delete camera;
         OpenGL4SphereRenderer::dispose();
+        OpenGL4GeometryRenderer::dispose();
         OpenGL4ImageRenderer::dispose();
         OpenGL4CameraRenderer::dispose();
         OpenGL4MatrixRenderer::release();
@@ -480,6 +520,7 @@ public:
         if (options.hasMeridians) meridians = options.meridians;
         if (options.hasParallels) parallels = options.parallels;
         if (options.hasRotation) angle = options.rotationDegrees * M_PI / 180.0;
+        if (options.hasGeometry) selectGeometry(options.geometry);
 
         glfwSetFramebufferSizeCallback(window, [](GLFWwindow* w, int width, int height) {
             glViewport(0, 0, width, height);
@@ -515,6 +556,9 @@ public:
                     &actions);
                 if (ev.keycode == KeyEvent::KEY_m || ev.keycode == KeyEvent::KEY_M) {
                     app->cycleCookTorranceMaterial();
+                }
+                if (ev.keycode == KeyEvent::KEY_o || ev.keycode == KeyEvent::KEY_O) {
+                    app->selectGeometry(ShadersGeometryFixture::next(app->geometry));
                 }
             } else if (action == GLFW_RELEASE) {
                 KeyEvent ev = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
@@ -581,17 +625,26 @@ public:
             if (renderingMode == ShaderOperationMode::SOFTWARE) {
                 renderSoftwareFrame(worldTransform);
             }
+            else if (geometryFixture != 0) {
+                // The drawable mesh of the geometry the software path traces
+                java::ArrayList<Light*> lights;
+                lights.add(light);
+                OpenGL4GeometryRenderer::draw(
+                    geometryFixture->getDrawableMesh(),
+                    camera,
+                    &lights,
+                    activeMaterial(),
+                    &quality,
+                    0,
+                    0,
+                    worldTransform);
+            }
             else {
-                const SimpleMaterial* activeMaterial =
-                    (quality.getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE &&
-                     cookTorranceMaterial != 0)
-                    ? static_cast<const SimpleMaterial*>(cookTorranceMaterial)
-                    : static_cast<const SimpleMaterial*>(&material);
                 OpenGL4SphereRenderer::draw(
                     sphere,
                     camera,
                     light,
-                    activeMaterial,
+                    activeMaterial(),
                     &quality,
                     textureMap,
                     bumpMap,

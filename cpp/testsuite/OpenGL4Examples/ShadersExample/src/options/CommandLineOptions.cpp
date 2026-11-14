@@ -5,6 +5,7 @@
 
 #include <java/lang/Math.h>
 #include "CommandLineOptions.h"
+#include "../model/ShadersGeometryFixture.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
@@ -21,6 +22,7 @@ CommandLineOptions::CommandLineOptions()
       hasParallels(false), parallels(50),
       hasCpuTextureOffsetU(false), cpuTextureOffsetUTexels(-0.5),
       hasCpuTextureOffsetV(false), cpuTextureOffsetVTexels(-0.5),
+      hasGeometry(false), geometry(ShadersGeometry::SPHERE),
       showHud(false), width(1100), height(900) {}
 
 static java::String lower(const java::String& s)
@@ -141,6 +143,15 @@ CommandLineOptions CommandLineOptions::parse(int argc, char** argv)
         if (startsWith(arg, "--width=")) { o.width = java::Math::max(1, std::atoi(arg.substr(8).c_str())); continue; }
         if (arg == "--height") { o.height = java::Math::max(1, std::atoi(readValue("--height").c_str())); continue; }
         if (startsWith(arg, "--height=")) { o.height = java::Math::max(1, std::atoi(arg.substr(9).c_str())); continue; }
+        if (arg == "--geometry" || startsWith(arg, "--geometry=")) {
+            const java::String value = arg == "--geometry" ? readValue("--geometry") : arg.substr(11);
+            if (!ShadersGeometryFixture::parse(lower(value), o.geometry)) {
+                Logger::reportMessage("CommandLineOptions", Logger::ERROR, "parse", java::String("Unknown --geometry value: ").concat(value).concat(". Use sphere, quartic, blob, heightfield, csg or patch.").toCString());
+                throw VSDKFatalException(java::String("Unknown --geometry value: ").concat(value));
+            }
+            o.hasGeometry = true;
+            continue;
+        }
         if (arg == "--hud") { o.showHud = true; continue; }
         if (startsWith(arg, "--hud=")) { o.showHud = lower(arg.substr(6)) != "off"; continue; }
         Logger::reportMessage("CommandLineOptions", Logger::ERROR, "parse", java::String("Unknown option: ").concat(arg).toCString());
