@@ -4,7 +4,6 @@
 #include "java/util/ArrayList.txx"
 #include "processing/ConstructivePolygonGeometryProcessor.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
 /** A vertex of the cell grid, by its column and row indices */
 class GridPoint {
   public:
@@ -218,6 +217,6 @@ Polygon2D ConstructivePolygonGeometryProcessor::execute(java::ArrayList<Polygon2
         }
     }
 
-    PolygonProcessor::classifyContourHoles(&out);
+    out.classifyContourHoles();
     return out;
 }
