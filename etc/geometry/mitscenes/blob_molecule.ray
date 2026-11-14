@@ -1,0 +1,35 @@
+# Blobs: "blob <threshold> [sturm]" opens a block of
+# "component <strength> <radius> <x> <y> <z>" lines closed by "end"; each
+# component adds strength*(1 - d^2/radius^2)^2 within its radius and the solid
+# is where the summed density exceeds the threshold. Negative strengths carve.
+viewport 640 480
+eye 0 -8 3.5
+up 0 0 1
+lookat 0 0 0.6
+fov 45
+background 0.06 0.08 0.12
+light 0.3 0.3 0.3 ambient
+light 0.8 0.8 0.75 point 4 -6 7
+light 0.3 0.35 0.45 point -6 -3 4
+surface 0.7 0.72 0.75 0.2 0.8 0.2 20 0 0 1
+sphere 0 0 -1001 1000
+# Three merging atoms and a dimple carved by a negative component.
+surface 0.3 0.75 0.4 0.2 0.8 0.7 50 0.05 0 1
+blob 0.6
+component 1 1.3 -1.6 0 0.4
+component 1 1.3 -0.6 0 0.4
+component 1 1.0 -1.1 0 1.3
+component -0.6 0.7 -1.1 -0.9 0.6
+end
+# Chain of shrinking components, placed by a transform and cut by a box.
+surface 0.85 0.35 0.3 0.2 0.8 0.7 50 0.05 0 1
+transform 0.7071068 -0.7071068 0 1.6  0.7071068 0.7071068 0 0.3  0 0 1 0.2
+csg difference
+blob 0.5 sturm
+component 1 1.2 0 0 0
+component 1 1.0 0.9 0 0.3
+component 1 0.8 1.6 0 0.6
+component 1 0.6 2.1 0 0.9
+end
+box -2 -2 0.55 2 -0.1 2
+end
