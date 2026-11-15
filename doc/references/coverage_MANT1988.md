@@ -1,85 +1,102 @@
 # Coverage audit for [MANT1988] An Introduction to Solid Modeling
 
-This document estimates how much of Mantyla's book is represented by the
-current Vitral polyhedral bounded solid implementation. The estimate is based
-on a source sweep of:
+**Updated:** 2026-11-14, at revision `4412e55a` (Java port, `java/base`).
 
-- `base/src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid`
-- `base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators`
-- `testsuite/VSDKExamples/PolyhedralBoundedSolidExample/src`
-- `base/src/test`
+This document estimates how much of Mäntylä's book is represented by the
+Vitral polyhedral bounded solid implementation. Paths are relative to
+`java/base/src/`:
 
-The percentages are engineering estimates, not page-count measurements. They
-combine code correspondence, figure/program fixture coverage, and the presence
-of executable tests. Rows with known boolean failures are intentionally scored
-lower even when the code mirrors the book structure, because correctness is not
-yet stable across the full neighborhood-classification space.
+- `main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid`
+- `main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators`
+- `main/vsdk/toolkit/common/dataStructures/CircularDoubleLinkedList.java`
+- `test/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid`
+- `test/vsdk/toolkit/processing/polyhedralBoundedSolidOperators`
+- `testsuite/Jogl4Examples/PolyhedralBoundedSolidExample`
 
-| [MANT1988] section | Implemented coverage: text, figures, code, problems | Estimated implementation coverage | Tests / executable coverage |
+The percentages are engineering estimates, not page counts. They combine
+code correspondence, fixture coverage and executable tests. A row is scored
+lower when a confirmed defect exists, even if the code mirrors the book.
+Defect ids (B-, S-, E-, L-, C-) refer to
+`doc/polyhedralBoundedSolidDevelopment/Fable5.2Analysis.md`.
+
+| [MANT1988] section | Implemented coverage | Estimate | Tests |
 | --- | --- | ---: | --- |
-| Ch. 6, Boundary Models | Polyhedral B-Rep representation is implemented as `PolyhedralBoundedSolid` with face, loop, half-edge, edge, and vertex nodes. The implementation focuses on polyhedral solids and does not cover the whole theoretical chapter. | 45% | Indirect coverage through validators, rendering tests, boolean regression tests, and demo fixtures. |
-| Ch. 9.1, Manipulation of Plane Models | Plane-model intuition is present as comments and as the topological basis for Euler operators, but there is no separate plane-model subsystem. | 20% | Covered only indirectly by Euler construction fixtures. |
-| Ch. 9.2.2, Skeletal Primitives: `MVFS` / `KVFS` | `mvfs` and `kvfs` are implemented in `PolyhedralBoundedSolid`; empty-loop skeletal state follows the book. | 90% | Exercised by almost every fixture, validation tests, and modeling tests. No isolated exhaustive inverse test for all malformed preconditions. |
-| Ch. 9.2.3, Local Manipulations: `MEV`, `MEF`, `KEMR` and inverses | Low-level `lmev`, `lkev`, `lmef`, `lkef`, `lkemr`, `lmekr` and high-level `mev`, `smev`, `mef`, `smef`, `kemr` exist. `lmev` now keeps one robust public implementation that handles both vertex splitting and practical strut insertion. | 88% | Direct unit coverage in `PolyhedralBoundedSolidLowLevelEulerOperatorsTest`, fixture construction, validation tests, and stable CSG regressions. Fatal malformed-precondition paths remain intentionally untested as normal JUnit assertions. |
-| Ch. 9.2.4, Global Manipulations: `KFMRH`, `MFKRH` | Same-shell `lkfmrh` / `lmfkrh` and aliases `lkimrh` / `lmikrh` are implemented. Cross-shell semantics are not modeled as a separate shell abstraction. | 70% | `PolyhedralBoundedSolidKimrhMikrhTest`, hollow/holed fixtures, split/boolean finish stages. |
-| Ch. 9.3, Example of Euler Operators | The box, hole, and holed-box construction style is represented in `SimpleTestGeometryLibrary` and demo builders. | 65% | Fixture smoke tests and validation tests exercise representative constructions, but not a literal step-by-step assertion of Figure 9.11. |
-| Ch. 9.4, Properties of Euler Operators | Euler characteristic and topological consistency are partially enforced by validators, but algebraic proof machinery is not implemented. | 35% | Topological/geometric validators and stable CSG regression tests catch drift, but no full Euler-coordinate algebra tests. |
-| Ch. 10.2, Half-edge Data Structure Overview | Solid, face, loop, half-edge, edge, and vertex nodes match the book hierarchy and identification model. Empty loops and mirrored half-edges are represented. | 85% | `TopologicalValidatorTest`, `ValidationEngineTest`, geometric validator tests, many fixtures. |
-| Ch. 10.3-10.4, Implementation Details and Access | Java classes replace C structs and allocator/list procedures. Neighbor access, loop traversal, mirror access, and parent pointers are implemented. | 75% | Validators check many structural invariants. Iterator/access procedure behavior is mostly covered indirectly. |
-| Ch. 11.2, Storage, Linked Lists, Half-edge Procedures | Storage allocation is Java-managed; list operations use project containers and Java collections. Half-edge insertion/deletion helpers exist in `PolyhedralBoundedSolid`. | 60% | Exercised by all Euler/modeling operations. No allocator-equivalent tests because Java removes that layer. |
-| Ch. 11.3, Low-level Euler Operators | `mvfs`, `kvfs`, `lmev`, `lkev`, `lmef`, `lkef`, `lkemr`, `lmekr`, `lkfmrh`, `lmfkrh`, and same-shell loop/face helpers are implemented. The implementation is no longer split into book-vs-extended variants; the robust production operator is the canonical one. | 88% | Direct unit tests now cover creation, inverse operations, split-vs-strut `lmev`, ring creation/removal, face merge/split, and `lringmv` support. Remaining gaps are malformed fatal preconditions and exhaustive neighborhood permutations. |
-| Ch. 11.5, High-level Euler Operators | `mev`, `smev`, `mef`, `smef`, `kemr`, `kfmrh` are implemented as search wrappers over low-level operators. | 82% | Direct wrapper tests exercise successful paths; fixture-heavy coverage remains. The negative lookup/precondition matrix is still not exhaustive. |
-| Ch. 12.2, Arc/Circle Generators | `PolyhedralBoundedSolidEulerConstructions::addArcToExistingFace` and `createCircularLamina` follow Programs 12.1-12.2. | 70% | Used by `Cone` and `Arrow` (cylinders through `Cone`), moon/block fixtures, lamp shell tests, rotational sweep tests. |
-| Ch. 12.3, Translational Sweep | `PolyhedralBoundedSolidEulerConstructions::translationalSweepExtrudeFace` and planar variant implement the face sweep style, generalized with transforms. | 70% | Fixtures and demo primitives exercise it; few direct tests for all loop/ring combinations. |
-| Ch. 12.3/12.5, Rotational Sweep | `rotationalSweepExtrudeWireAroundXAxis` follows the open-wire sweep idea with project-specific axis handling and degeneracy fixes. | 65% | `CurveModelerRotationalSweepTest` plus demo solids; closed-profile cases are partial. |
-| Ch. 12.4, Gluing and `loopglue` | `loopGlue`, solid joining behavior, and maximal-face cleanup support the book's gluing and later boolean finish phases. | 65% | Covered by CSG finish, hollow/holed cases, and stable regression tests. Dedicated loopglue combinatorial tests are still missing. |
-| Ch. 13.1, Face Equations | Plane/normal calculation and face planarity validation are implemented. | 75% | `PolyhedralBoundedSolidGeometricValidatorTest`, validation engine tests, all strict/intermediate validations. |
-| Ch. 13.2, Containment and Intersection Algorithms | Vertex equality, point-in-face, edge/face intersection, coplanar interval/sector predicates, and tolerance policy exist, mostly integrated into splitting and set operations. | 60% | Predicate tests, coplanar predicate tests, no-intersection/touching tests, and boolean regressions. Many degenerate geometric cases remain active risk. |
-| Ch. 13.3, Integral Properties | Volume/integral-property algorithms from the book are not a visible focus of the current bounded-solid operator implementation. | 10% | No direct tests found in the reviewed paths. |
-| Ch. 14.1-14.3, Splitting Problem and Outline | `_PolyhedralBoundedSolidSplitter.split` follows Program 14.1 with `splitGenerate`, `splitClassify`, `splitConnect`, and `splitFinish`. | 75% | Demo `splitTest` exercises it; base JUnit coverage appears mostly indirect. |
-| Ch. 14.4, `splitgenerate` Reduction Step | Edge-plane crossings are detected, crossing edges are subdivided with `lmev`, and `soov` is collected. | 80% | Indirect tests through split demos and downstream modeling; no focused JUnit suite for all signed-distance cases. |
-| Ch. 14.5, Split Vertex Neighborhood Classification | `getNeighborhood`, `reclassifyOnSectors`, `reclassifyOnEdges`, and wide-sector handling are implemented with orientation adaptations. | 70% | Indirect coverage. Risk remains around orientation-specific adaptations and coplanar/on-edge cases. |
-| Ch. 14.6, Split Null-edge Insertion | `insertNullEdges` implements Program 14.7-style null-edge creation using `lmev`, with extra orientation checks. | 65% | Indirect coverage; no dedicated null-edge sequence oracle. |
-| Ch. 14.7, Split Null-edge Joining / Connect | `splitConnect`, `canJoin`, `join`, and `cut` follow Programs 14.8-14.10 with lexicographic sorting. | 65% | Mostly demo/indirect coverage. More stress tests needed for multiple section polygons and ambiguous neighbor order. |
-| Ch. 14.8, Split Finish / Result Classification | `splitFinish`, `lmfkrh`, face movement, cleanup, and null-face fixing implement the result generation phase. | 60% | Indirect validation of generated solids; recursive/topological classification is simplified relative to the book. |
-| Ch. 14 slicing variant | The slicing idea is referenced by the split implementation and demos, but a standalone slicing-only operator that leaves the original object intact is not clearly implemented as in Section 14.9. | 25% | Demo visualization only; no dedicated JUnit coverage found. |
-| Ch. 15.1-15.4, Boolean Set-operation Statement and Boundary Classification | `PolyhedralBoundedSolidSetOperator` follows the five-phase algorithm and implements 4-way/8-way-inspired classification logic for `UNION`, `INTERSECTION`, and `SUBTRACT`. | 65% | `PolyhedralBoundedSolidSetOperatorTest`, algebraic properties tests, stable regression tests, and diagnostic tests. Known failures lower confidence. |
-| Ch. 15.5, Boolean `setopgenerate` / Reduction Step | `_PolyhedralBoundedSolidSetIntersector.setOpGenerate` implements vertex/face and vertex/vertex coincidence generation (`sonva`, `sonvb`, `sonvv`) and edge subdivision. | 70% | Covered by all boolean tests and fixtures. Degenerate coplanar/tangential paths remain under investigation. |
-| Ch. 15.6.1, Boolean classify vertex/face | `_PolyhedralBoundedSolidSetVertexFaceClassifier` and predicate processor adapt split classification with set-op reclassification rules. | 60% | `CoplanarPredicateTest`, general set-op tests, and fixture smoke tests. MANT1988_15_2_HOLED indicates incomplete tangential/coplanar handling. |
-| Ch. 15.6.2, Boolean classify vertex/vertex | `_PolyhedralBoundedSolidSetVertexVertexClassifier` and `_PolyhedralBoundedSolidSetClassifier` implement sector-pair search, on-sector/on-edge reclassification, and null-edge insertion. Current diagnostic work focuses here. | 50% | `CrossPairDiagnosticTest` traces this path; stable fixtures pass. CROSS_PAIR and MANT1988_6_13 intersection/difference failures show this phase is not yet fully faithful. |
-| Ch. 15.7, Boolean `setopconnect` | `_PolyhedralBoundedSolidSetNullEdgesConnector` sorts paired null edges and joins/cuts corresponding A/B null edges per Programs 15.13-15.14. | 50% | Stable fixtures exercise the phase. Current traces show failing cases can reach connect with apparently plausible classifications but produce `sonfa=0` / `sonfb=0`, so coverage is not correctness-complete. |
-| Ch. 15.8, Boolean `setopfinish` / Result Generation | `_PolyhedralBoundedSolidSetFinisher` implements Program 15.15-style face selection, `lmfkrh`, optional B reversal for subtraction, cleanup, `lkfmrh`, and `loopGlue`. | 60% | Stable regression tests assert exact topology and approximate bounds for known-good fixtures. Finish correctness depends strongly on connect producing paired null faces. |
-| Ch. 15.1 problem cases: no intersection, touching, containment | `_PolyhedralBoundedSolidSetNonIntersectingClassifier` handles disjoint, touching-only preflight, and containment-without-boundary-intersection policies. | 70% | `PolyhedralBoundedSolidSetOperatorTest` has explicit disjoint, touching, and containment cases. |
-| Ch. 15 problem/exercise coverage | Problems 15.1, 15.2, 15.4, and 15.6 are partially addressed in comments and implementation (`setOpNoIntersectionCase`, `maximizeFaces`, vertex/face classifier adaptation, `revert`). | 45% | Partial tests exist. No comprehensive problem-by-problem acceptance matrix. |
-| Ch. 16, Undoing | Inverse Euler operators and `revert` exist, but there is no general undo transaction stack equivalent to the chapter's broader UI/modeling discussion. | 20% | Inverse-operator tests are partial; no command-history tests. |
-| Ch. 17, User Interface | JOGL debugger, HUD rendering, CSG sample navigation, and partial/direct modes provide a didactic visualization layer, not a complete GWB-style UI. | 30% | Manual/demo coverage through `PolyhedralBoundedSolidExample`; limited automated UI coverage. |
-| Ch. 18, Extensions | The reviewed implementation remains centered on polyhedral B-Reps and CSG/split workflows. Curved or broader extension material is mostly outside this module. | 10% | No direct tests in reviewed paths. |
-| Appendix A, Homogeneous Coordinates | `Vector3D`, `Matrix4x4`, transforms, sweeps, and render/debug transforms cover practical portions. | 35% | Sweep tests and geometry fixtures exercise this indirectly. |
-| Appendix B, Point-set Topology | Topological validity ideas are represented in validators and intermediate/strict validation modes. | 35% | `TopologicalValidatorTest`, `ValidationEngineTest`, strict/intermediate assertions in regression tests. |
+| Ch. 6, Boundary Models | Polyhedral B-Rep with face, loop, half-edge, edge and vertex nodes. Validity (§6.3) as two validation levels. | 50% | Validators, rendering tests, boolean regressions. |
+| Ch. 9.1, Plane Models | Present as the basis of the operators; no separate subsystem. | 20% | Indirect. |
+| Ch. 9.2.2, `MVFS` / `KVFS` | Implemented. | 90% | `PolyhedralBoundedSolidEulerOperatorsTest`. |
+| Ch. 9.2.3, `MEV`, `MEF`, `KEMR` and inverses | Low- and high-level forms implemented. Special cases with empty loops are broken (E-01 to E-04). | 80% | Operator suite; `…EulerOperatorsEdgeCasesTest` (1 enabled, 6 disabled). |
+| Ch. 9.2.4, `KFMRH`, `MFKRH` | Same-shell `lkfmrh`/`lmfkrh` and the `lkimrh`/`lmikrh` aliases. No shell abstraction. | 70% | `PolyhedralBoundedSolidKimrhMikrhTest`. |
+| Ch. 9.3, Example | Box and holed-box constructions in `Box` and `SimpleTestGeometryLibrary`. | 65% | Fixture tests; no step-by-step assertion of Fig. 9.11. |
+| Ch. 9.4, Properties | Euler characteristic and shells in `PolyhedralBoundedSolidTopologySummary`. Inverse round trips restore counts but not always back-pointers (E-03, E-05). | 40% | `PolyhedralBoundedSolidTopologySummaryTest`, inverse-pair tests. |
+| Ch. 10.2, Data structure | Node hierarchy matches the book. Half-edge links are held in a list container instead of `nxt`/`prv`. | 80% | Validator tests, fixtures. |
+| Ch. 10.3–10.4, Details and access | Neighbour access, mate, parent pointers. `next()` is a linear scan. | 70% | Indirect. |
+| Ch. 11.2, Storage and lists | Java-managed; `CircularDoubleLinkedList` replaces `addlist`/`dellist`. Three container defects (L-01 to L-03). `delhe` differs from the book. | 50% | `CircularDoubleLinkedListTest` (3 enabled, 4 disabled). |
+| Ch. 11.3, Low-level operators | All implemented. Preconditions are not enforced (E-06). | 82% | Operator suite and edge-case suite. |
+| Ch. 11.5, High-level operators | `mev`, `smev`, `mef`, `smef`, `kemr`, `kfmrh`. | 82% | Wrapper tests on successful paths. |
+| Ch. 12.2, Arcs and circles | `addArcToExistingFace`, `createCircularLamina`. | 70% | Cylinders, moon fixtures, sweep tests. |
+| Ch. 12.3, Translational sweep | `translationalSweepExtrudeFace` and planar variant. | 70% | Fixtures; few direct tests. |
+| Ch. 12.3/12.5, Rotational sweep | `rotationalSweepExtrudeWireAroundXAxis`. Closed profiles partial. | 65% | `CurveModelerRotationalSweepTest`. |
+| Ch. 12.4, Gluing and `loopglue` | `loopGlue` with a search for matching start vertices and guards for degenerate loops; `merge`. | 70% | Boolean finish tests; no dedicated `loopGlue` matrix. |
+| Ch. 13.1, Face equations | Newell plane, planarity validation. | 80% | Geometric validator tests. |
+| Ch. 13.2, Containment and intersection | Point-in-face, edge/face intersection, tolerance contexts, robust predicates class. | 65% | Predicate tests, numeric policy tests. |
+| Ch. 13.3, Integral properties | Not in production. Volume exists only in the test oracle. | 10% | `PolyhedralBoundedSolidVolumeOracle` (test helper). |
+| Ch. 14.1–14.3, Splitting outline | `_PolyhedralBoundedSolidSplitter.split` follows Program 14.1. | 75% | `…SplitterMantylaRegressionTest`, `…SplitterDegeneratePlaneTest`. |
+| Ch. 14.4, `splitgenerate` | Implemented. | 80% | Split tests. |
+| Ch. 14.5, Neighbourhood classification | Implemented with orientation adaptations. A plane through a vertex loses the solid (S-01). | 55% | 4 plane kinds pass; 2 disabled rows for S-01. |
+| Ch. 14.6, Null-edge insertion | `insertNullEdges`. | 60% | Indirect. |
+| Ch. 14.7, Joining | `splitConnect`, `canJoin`, `join`, `cut` with lexicographic sort. | 65% | Indirect. |
+| Ch. 14.8, Finish | `splitFinish`. The input solid is consumed. | 60% | Volume conservation on passing planes. |
+| Ch. 14.9, Slicing | Not implemented as a separate operator. | 15% | None. |
+| Ch. 15.1–15.4, Statement and classification | Five-phase algorithm for `UNION`, `INTERSECTION`, `SUBTRACT`. Criterion 3′ results are produced but rejected by strict validation (B-04). | 65% | Set-operator tests, strict set-op tests, oracle rows. |
+| Ch. 15.5, `setopgenerate` | `_PolyhedralBoundedSolidSetIntersector` with a worklist, weld of coincident vertices and split of self-touching loops. Edges lying in a face are not handled (B-03). | 75% | `IntersectorWeldTest`, `IntersectorParametricOrderingTest`. |
+| Ch. 15.6.1, Vertex/face classification | `_PolyhedralBoundedSolidSetVertexFaceClassifier`. Ring inside a face goes wrong downstream (B-01). | 60% | `VertexFaceClassifierCoplanarTest`, oracle rows. |
+| Ch. 15.6.2, Vertex/vertex classification | Sector search, reclassification of "on" sectors and edges, null-edge insertion. Coplanar faces with crossing edges fail (B-02). | 60% | `SectoroverlapTraceDiagnosticTest`, coplanar predicate tests, `VertexVertexEndpointRecoveryTest`. |
+| Ch. 15.7, `setopconnect` | `_PolyhedralBoundedSolidSetNullEdgesConnector`, ordered by the intersection curve builder, with ring rescue. Ring ownership is the open point (B-01). | 65% | `SetOpConnectScanJoinTest`, `SetOpConnectNoLooseInvariantTest`, `IntersectionCurveBuilderTest`. |
+| Ch. 15.8, `setopfinish` | `_PolyhedralBoundedSolidSetFinisher`: pair sanitising, `lmfkrh`, `revert`, `movefac`, `lkfmrh`, `loopGlue`, triangulation of non-planar faces. | 70% | `SetOpFinishInvariantsTest`, reference pairs. |
+| Ch. 15.4, "no intersections found" | Preflights for touching, identity, containment and partial coplanar area. Tangent containment and straddling solids are misjudged (B-02 b, B-03); face contact is not glued (B-04). | 55% | `PolyhedralBoundedSolidPreflightTest`, set-operator tests, oracle rows. |
+| Ch. 15 problems | 15.1, 15.2, 15.3, 15.4, 15.5, 15.6 implemented; 15.9 partly tested; 15.7 and 15.8 missing. | 65% | See the backlog in `vitralCadKernel.md`. |
+| Ch. 16, Undoing | Inverse operators and `revert`; no undo log; clone by serialisation. Operands are consumed (C-01). | 20% | Inverse-operator tests. |
+| Ch. 17, User Interface | JOGL4 debugger, HUD, CSG sample navigation, offline renderer. | 30% | Manual. |
+| Ch. 18, Extensions | Outside this module. | 10% | None. |
+| Appendix A, Homogeneous coordinates | `Vector3Dd`, `Matrix4x4d`, transforms. | 35% | Indirect. |
+| Appendix B, Point-set topology | Regularisation as validation rules; touching unions are not regularised (B-04). | 30% | Validator tests. |
 
-## Operator And Phase Test Map
+Not in the book and present in the kernel: the intersection curve builder,
+scaled tolerance contexts, strict validation as a postcondition, the
+topology summary, four shape-specific fallbacks, and quantitative
+invisibility for the Appel hidden-line renderer ([APPE1967]).
 
-| Area | Main implementation points | Current tests / demos | Coverage confidence |
+## Operator and phase test map
+
+| Area | Main implementation points | Tests | Confidence |
 | --- | --- | --- | --- |
-| Euler operators | `PolyhedralBoundedSolid.mvfs`, `kvfs`, `lmev`, `lkev`, `lmef`, `lkef`, `lkemr`, `lmekr`, `lringmv`, `lkfmrh`, `lmfkrh`, `mev`, `smev`, `mef`, `smef`, `kemr`, `kfmrh` | `PolyhedralBoundedSolidLowLevelEulerOperatorsTest`, `PolyhedralBoundedSolidKimrhMikrhTest`, validation tests, fixture construction, CSG regression tests | High for successful local Euler paths; medium for rare inverse/precondition cases. |
-| Half-edge invariants | Node classes plus `_PolyhedralBoundedSolidTopologicalValidator`, `PolyhedralBoundedSolidValidationEngine` | `TopologicalValidatorTest`, `ValidationEngineTest`, strict/intermediate checks in stable CSG tests | Medium-high. |
-| Geometric predicates | `PolyhedralBoundedSolidGeometricValidator`, `PolyhedralBoundedSolidNumericPolicy`, `_PolyhedralBoundedSolidSetGeometricPredicateProcessor` | `GeometricValidatorTest`, `NumericPolicyTest`, `CoplanarPredicateTest`, no-intersection tests | Medium; degenerates are still the riskiest zone. |
-| Slicing / split generate | `_PolyhedralBoundedSolidSplitter.splitGenerate` | Demo `splitTest`, indirect model tests | Medium-low; needs focused JUnit fixtures. |
-| Slicing / split classify | `_PolyhedralBoundedSolidSplitter.getNeighborhood`, `reclassifyOnSectors`, `reclassifyOnEdges`, `insertNullEdges` | Demo and indirect validation | Medium-low, especially for coplanar/on-edge orientation variants. |
-| Slicing / split connect | `_PolyhedralBoundedSolidSplitter.splitConnect`, `canJoin`, `join`, `cut` | Demo and indirect validation | Medium-low. |
-| Slicing / split finish | `_PolyhedralBoundedSolidSplitter.splitFinish`, `classify`, `fixNullFaces`, `cleanup` | Demo and indirect validation | Medium-low. |
-| Boolean generate | `_PolyhedralBoundedSolidSetIntersector.setOpGenerate` | `PolyhedralBoundedSolidSetOperatorTest`, stable CSG regressions, smoke corpus | Medium. |
-| Boolean classify v/f | `_PolyhedralBoundedSolidSetVertexFaceClassifier`, `_PolyhedralBoundedSolidSetGeometricPredicateProcessor` | `CoplanarPredicateTest`, set-op tests, smoke corpus | Medium-low because tangential/coplanar bugs remain. |
-| Boolean classify v/v | `_PolyhedralBoundedSolidSetVertexVertexClassifier`, `_PolyhedralBoundedSolidSetClassifier` | `CrossPairDiagnosticTest`, stable CSG regressions, smoke corpus | Low-medium; this is an active bug-hunt area. |
-| Boolean connect | `_PolyhedralBoundedSolidSetNullEdgesConnector` | Stable CSG regressions and CROSS_PAIR traces | Low-medium; known failures suggest classification/connect pairing mismatch. |
-| Boolean finish | `_PolyhedralBoundedSolidSetFinisher` | Stable CSG regressions assert topology and bounds for known-good fixtures | Medium; depends on correct `sonfa`/`sonfb` from connect. |
-| Boolean stable regression corpus | `MANT1986_2`, `STACKED_BLOCKS`, `MOON_BLOCK` fixtures | `PolyhedralBoundedSolidSetOperatorStableCsgRegressionTest` | High for these fixtures and four operation directions. |
-| Boolean exploratory corpus | `CROSS_PAIR`, `MANT1988_3`, `MANT1988_6_13`, `MANT1988_15_1`, `MANT1988_15_2_HOLED` | `PartialOperandsTest`, `CrossPairDiagnosticTest`, general set-op tests | Diagnostic only; assertions are intentionally weak where correctness is unknown. |
+| List container | `CircularDoubleLinkedList` | `CircularDoubleLinkedListTest` | Low until L-01 to L-03 are fixed. |
+| Euler operators | `PolyhedralBoundedSolidEulerOperators` | `…EulerOperatorsTest`, `…EulerOperatorsEdgeCasesTest`, `…KimrhMikrhTest` | High on main paths; low on empty-loop cases. |
+| Half-edge invariants | Node classes, `_PolyhedralBoundedSolidTopologicalValidator`, `PolyhedralBoundedSolidValidationEngine` | `…TopologicalValidatorTest`, `…ValidationEngineTest`, `…TopologySummaryTest` | Medium; back-pointers are not checked. |
+| Geometric predicates | `PolyhedralBoundedSolidGeometricValidator`, `…NumericPolicy`, `…Predicates`, `_…SetGeometricPredicateProcessor` | `…GeometricValidatorTest`, `…NumericPolicyTest`, `…PredicatesTest`, `…CoplanarPredicateTest` | Medium. |
+| Split | `_PolyhedralBoundedSolidSplitter` | `…SplitterMantylaRegressionTest`, `…SplitterDegeneratePlaneTest` | Medium away from vertices; none through vertices. |
+| Boolean generate | `_PolyhedralBoundedSolidSetIntersector` | `IntersectorWeldTest`, `IntersectorParametricOrderingTest` | Medium. |
+| Boolean classify | `_…SetVertexFaceClassifier`, `_…SetVertexVertexClassifier`, `_…SetClassifier`, `_…SetNonIntersectingClassifier` | `VertexFaceClassifierCoplanarTest`, `SectoroverlapTraceDiagnosticTest`, `VertexVertexEndpointRecoveryTest`, `…PreflightTest` | Medium-low for coplanar and tangent cases. |
+| Boolean connect | `_…SetNullEdgesConnector`, `_…SetIntersectionCurveBuilder` | `SetOpConnectScanJoinTest`, `SetOpConnectNoLooseInvariantTest`, `IntersectionCurveBuilderTest` | Medium; low for rings inside a face. |
+| Boolean finish | `_…SetFinisher` | `SetOpFinishInvariantsTest`, `…StrictSetOpTest` | Medium. |
+| Reference corpus | `SimpleTestGeometryLibrary`, `CsgSampleCorpus` | `BooleansFromReferenceObjectPairsTest`, `AlgebraicIdentityRegressionTest`, `Mant1988Section15_2UnionDiagnostic` | High for these fixtures; three families pass through fallbacks. |
+| Kurlander bowl | `CsgKurlanderBowlFixture` | `KurlanderBowlStarInvariantTest`, `KurlanderBowlMotifSweepRegressionTest`, `KurlanderMotif4OperationMatrixTest`, `CsgKurlanderBowl…RegressionTest`, `CsgMoonCylinderDifferenceDegeneracyTest`, `Stage6FaceSubdivisionDiagnosticTest` | High for A−B on 40 motifs; baselines are kernel snapshots. |
+| Applied models | `StepperMotorGuideCsgFixture` | `StepperMotorGuideStrictValidationTest` | High for this model. |
+| Independent oracle | `PolyhedralBoundedSolidVolumeOracle` (test) | `BooleanVolumeOracleTest`: 18 rows enabled, 20 disabled | The only correctness check that does not depend on kernel output. |
 
-## Known Alignment Gaps
+## Known alignment gaps
 
-- `CROSS_PAIR` currently works visually for `UNION` but fails for `INTERSECTION` and differences. Classification traces can look plausible while connect fails to produce matching null faces, so Sections 15.6-15.7 need further audit.
-- `MANT1988_6_13` has working `UNION` but broken `INTERSECTION` / differences in the current investigation context.
-- `MANT1988_15_2_HOLED` `UNION` remains a known coplanar/tangential bug: the result can validate intermediate but fail strict validation with intersecting loops.
-- Several splitter and boolean routines intentionally diverge from literal book pseudocode for orientation, Java data structures, tolerance policy, and degenerate cases. Those adaptations are reasonable engineering choices, but they should be documented with regression tests before being treated as faithful completions.
-- Test coverage is now strong for successful Euler operator paths and stable fixture outputs, but remains weakest for local neighborhood-classification truth tables, null-edge pairing order, and rare/fatal Euler preconditions.
+- Fixtures `CROSS_PAIR`, `MANT1988_6_13`, `MANT1988_15_1`, `MANT1988_3` and
+  `MANT1988_15_2_HOLED`, listed as failing in the previous version, now pass
+  in all four operations. `MANT1988_15_1` (B−A), `MANT1988_3` and
+  `MANT1988_6_13` pass through shape-specific fallbacks, not through the
+  Chapter 15 pipeline.
+- Ring strictly inside a face (B-01): `A ∩ B` and one difference keep a
+  zero-area face. This is the generic failure for rotated operands.
+- Coplanar faces outside axis alignment (B-02, B-05), edges lying in a face
+  (B-03) and touching solids (B-04).
+- Split by a plane through a vertex (S-01).
+- Empty-loop cases of the Euler operators and the list container (E-, L-).
+- Integral properties (§13.3), slicing (§14.9), simultaneous results
+  (Problem 15.7), two-dimensional set operations (Problem 15.8) and undo
+  (Ch. 16) are not implemented.

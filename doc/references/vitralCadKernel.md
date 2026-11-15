@@ -1,185 +1,275 @@
 # CAD Kernel Audit
 
+**Updated:** 2026-11-14, at revision `4412e55a` (Java port, `java/base`).
+This version replaces the April 2026 audit. The evidence behind every
+statement marked with a defect id (B-, S-, E-, L-, C-) is in
+`doc/polyhedralBoundedSolidDevelopment/Fable5.2Analysis.md`.
+
 ## 1) Scope and method
-This audit evaluates the current B-Rep CAD kernel quality against [MANT1988], focused on:
 
-- `base/src/main/vsdk/toolkit/environment/geometry/polyhedralBoundedSolid`
-- `base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators`
-- `testsuite/VSDKExamples/PolyhedralBoundedSolidExample`
+This audit evaluates the B-Rep kernel against [MANT1988]. Paths are relative
+to `java/base/src/main/vsdk/toolkit/`:
 
-And contrasts the result with the previous content of this same document.
+- `environment/geometry/volume/polyhedralBoundedSolid` — solid, node classes,
+  Euler operators, topology editing, validation, numeric policy, predicates.
+- `environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators`
+  — modeler façade, `slicing/`, `booleans/` (`intersection/`,
+  `classification/`, `topology/`), `fallbacks/`, `construction/`, `fixtures/`.
+- `common/dataStructures/CircularDoubleLinkedList` — the container under
+  every face, loop, edge, vertex and half-edge list.
+- Tests under `java/base/src/test/vsdk/toolkit/` (the directories
+  `processing/polyhedralBoundedSolidOperators` and
+  `environment/geometry/volume/polyhedralBoundedSolid`; the first one
+  declares the package of `geometricProcessing`, so directory and package do
+  not match).
 
-Important scope decision for this audit:
-- Lack of curved-surface support is intentionally excluded from the gap analysis.
+Scope decision kept from the previous audit: lack of curved-surface support
+is excluded from the gap analysis.
+
+Method: source reading, the stage plans 1–10, the full test suite
+(`gradle :base:test`: 712 tests, 0 failures, 48 skipped), and an independent
+volume oracle run on box pairs and splitting planes that are not part of the
+fixture corpus.
 
 ## 2) MANT1988 baseline used for comparison
-From the reference chapters:
 
-- Ch. 9 and Ch. 10: Euler operators and half-edge structure provide topological construction power, but geometric correctness is a separate concern.
-- Ch. 14: splitting should be closed, general, and robust under numerical inaccuracies.
-- Ch. 15: boolean set-op workflow is reduction -> classify -> connect -> finish; handling of coplanar and touching cases is central; 2-manifolds are not closed under set operations, so pseudomanifold-compatible handling is needed.
+- Ch. 9–11: Euler operators and the half-edge structure give topological
+  construction power; geometric correctness is a separate concern.
+- Ch. 14: splitting must be closed, general and robust under numerical
+  inaccuracy.
+- Ch. 15: reduction → classify → connect → finish; coplanar and touching
+  cases are central; 2-manifolds are not closed under set operations, so the
+  result may be a pseudomanifold (criterion 3′).
 
 ## 3) Current implementation assessment
 
-## 3.1 B-Rep core (`PolyhedralBoundedSolid`)
+### 3.1 B-Rep core
+
 Strengths:
-- Strong conceptual alignment with MANT1988 operator vocabulary (`mvfs/kvfs`, `lmev/lkev`, `lmef/lkef`, `lkemr/lmekr`, `kfmrh/lmfkrh`, etc.).
-- Data model reflects half-edge hierarchy from the book.
+- Operator vocabulary and data model follow the book (`mvfs/kvfs`,
+  `lmev/lkev`, `lmef/lkef`, `lkemr/lmekr`, `lkfmrh/lmfkrh`, `lringmv`).
+- Euler operators, topology editing and validation are separate classes
+  since the June refactor.
+- `maximizeFaces` is iterative and has a planarity guard; the open
+  "Case 2: not tested" marker of the previous audit is gone.
 
-Observed weaknesses:
-- `maximizeFaces()` now uses iterative restart after local mutation (improved over recursion), but still relies on mutation-heavy restart semantics and open-case heuristics.
-- `maximizeFaces()` still contains an explicit open status (`Case 2: Not tested!`) and an old TODO-level limitation about fully nested coplanar faces.
-- Some operations are permissive and rely on warnings/fatal reports rather than transactional failure semantics.
+Weaknesses:
+- The list container has three defects: stale head after the list becomes
+  empty (L-01), `remove` with an invalid index deletes the element under the
+  stale window (L-02), `insertBefore` with a missing pivot inserts at the
+  head (L-03).
+- Six operator edge cases are broken or unchecked: `lkev` followed by `lmev`
+  on a skeleton (E-01), `lkemr` when the outer loop collapses to one vertex
+  (E-02), `lmekr` leaving a null emanating half-edge (E-03), `lmef(he, he)`
+  (E-04), `lkev` leaving a dangling emanating half-edge (E-05), `lmef`
+  across two loops (E-06).
+- Operators report broken preconditions with warnings and may return after
+  partial modification.
+- `he.next()` is a linear scan of the loop; the book's intrusive links are
+  O(1).
 
-Assessment: architecturally solid, operationally still brittle in hard topology normalization paths.
+Assessment: sound on the main paths, not yet on the special cases the book
+calls out (empty loops, inverse round trips).
 
-## 3.2 Splitter (`PolyhedralBoundedSolidSplitter`)
+### 3.2 Splitter (`slicing/_PolyhedralBoundedSolidSplitter`)
+
 Strengths:
-- High structural fidelity with Ch. 14 decomposition (`splitGenerate`, `splitClassify`, `splitConnect`, `splitFinish`).
-- Numeric policy integration is present.
+- Follows Program 14.1 (`splitGenerate`, `splitClassify`, `splitConnect`,
+  `splitFinish`).
+- Correct on generic planes, planes containing an edge, planes through two
+  opposite edges, and planes coincident with a face (volume conserved,
+  pieces strict-valid).
+- A regression test exists for the MANT1986 fixture.
 
-Observed weaknesses:
-- The code explicitly documents local orientation adjustments and extra heuristics not formalized in the original algorithm.
-- There are still comments indicating uncertainty in behavior assumptions (e.g., branch when no intersections are found: "Plane should be tested here before assuming this order!").
-- Internal style remains mutation-heavy with complex control flow and list-side effects.
+Weaknesses:
+- A plane through a vertex of the solid returns two empty solids and
+  empties the input, without any message (S-01).
+- All state is still static (`soov`, `sone`, `sonf`, `ends`, …).
+- When the plane misses the solid, the input object itself is returned.
+- A slicing-only variant (§14.9, Problem 14.3) does not exist.
 
-Assessment: functionally rich and close to textbook flow, but not yet hardened for all degenerate/edge distributions expected in industrial geometry pipelines.
+Assessment: close to the book and reliable away from vertices; not general
+in the sense of §14.1.
 
-## 3.3 Set operations (`PolyhedralBoundedSolidSetOperator`)
+### 3.3 Set operations (`booleans/`)
+
 Strengths:
-- Macro-pipeline strongly aligned with Ch. 15 (`setOpGenerate`, `setOpClassify`, `setOpConnect`, `setOpFinish`).
-- Explicit no-intersection policy exists (disjoint/touching/containment).
-- Coplanar rules are now table-driven for vertex-face and vertex-vertex classification, which is a positive hardening step.
-- Uses numeric context (`PolyhedralBoundedSolidNumericPolicy`) instead of scattered tolerances.
+- Pipeline aligned with Ch. 15 and split into intersector, classifiers,
+  connector and finisher.
+- The intersection curve is an explicit object
+  (`_PolyhedralBoundedSolidSetIntersectionCurveBuilder`) and orders the
+  connect step.
+- Per-operation list state lives in `_SetOperationContext`.
+- Strict validation is a default postcondition of `setOp`, with a topology
+  summary in the failure message.
+- All reference fixtures and the 40-motif Kurlander bowl sweep pass.
 
-Observed weaknesses:
-- Implementation keeps extensive static mutable state (`son*` sets, debug flags, numeric context wiring), which is not thread-safe and complicates reentrancy.
-- Inputs are mutated in-place during set-op flow (`compactIds`, `maximizeFaces`, id remapping, etc.), making API behavior side-effectful and risky for product use unless clearly isolated by cloning.
-- Robustness still depends on heuristic logic in some topology-normalization and connection paths, but the core coplanar/touching predicate layer is now formalized.
+Weaknesses:
+- A section ring strictly inside a face is finished incorrectly when the
+  result needs the disk inside the ring: a zero-area face with two
+  coincident loops remains and strict validation throws (B-01). This is the
+  generic failure for rotated boxes: 26 of 48 operations correct on
+  randomly rotated box pairs.
+- Coplanar faces whose edges cross, and containment with tangent faces,
+  give wrong volumes or a fatal error (B-02).
+- A solid with edges lying in a face of the other is taken as contained;
+  the wrong result passes strict validation (B-03).
+- Two solids sharing a face are returned as two shells; strict validation
+  rejects that result (B-04).
+- Axis-aligned coplanar cases are answered by the cell fallback; the same
+  operands after a common rigid motion fail (B-05). `MANT1988_15_1`,
+  `MANT1988_3` and `MANT1988_6_13` are also answered by fallbacks.
+- Fallbacks are built before they are needed, and the cell fallback writes
+  the B-Rep directly, without Euler operators.
+- Operands are consumed (C-01).
+- Static mutable state remains: debug flags, numeric context, id namespace,
+  the connector's scratch and counters, finisher counters, global id
+  counters in `_HalfEdge` and `_Edge`. Execution is not reentrant.
+- No bounding-box rejection in generate.
 
-Assessment: very good research-grade realization of MANT1988 architecture, but not yet production-grade in determinism, side-effect isolation, and adversarial robustness.
+Assessment: correct on the fixture families and on axis-aligned general
+position; not yet correct for two arbitrary convex polyhedra.
 
-## 3.4 Validation subsystem
+### 3.4 Validation
+
 Strengths:
-- Validation is modularized (`validateIntermediate`, `validateStrict`) with strategy composition.
-- Strict validators include loop self-intersection and face-face improper intersection checks.
-- Numeric policy is centralized and propagated through validators.
+- Two levels (`validateIntermediate`, `validateStrict`) with composed
+  strategies; shells and adjusted Euler characteristic in
+  `PolyhedralBoundedSolidTopologySummary`.
+- Numeric policy is centralised.
 
-Observed weaknesses:
-- Core operator flows commonly gate on `validateIntermediate`; strict validation is not consistently part of post-op contracts.
-- Topological repair helper behavior can modify model content (`remakeEmanatingHalfedgesReferences` removes vertices with null emanating halfedge), mixing validation and mutation concerns.
+Weaknesses:
+- `validateIntermediate` does not check vertex back-pointers (E-05 passes).
+- The empty solid passes `validateStrict`.
+- Strict validation rejects the pseudomanifold results that §15.2 admits
+  and that the touching-only preflight produces.
+- `remakeEmanatingHalfedgesReferences` still removes vertices with a null
+  emanating half-edge, mixing validation and repair.
+- A failed input validation is logged and the operation continues.
 
-Assessment: good direction, but contract separation (validate vs repair) and strict-by-default safety profile are still incomplete.
+### 3.5 Tests
 
-## 3.5 Test and example reality
 Strengths:
-- Test suite now includes parameterized set-op scenarios (disjoint, touching, containment, MANT1988 fixtures).
-- Validation and numeric policy have dedicated tests.
+- 48 kernel-related test classes; direct operator tests, invariant tests on
+  connect and finish, curve builder tests, algebraic identity tests.
+- An independent volume oracle (`PolyhedralBoundedSolidVolumeOracle`) with
+  18 box-pair rows that pass and 20 rows kept as a disabled work queue.
 
-Observed weaknesses:
-- `PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest` currently encodes known algebraic drift by asserting that idempotence/absorption equivalences do not hold in selected corpus cases.
-- Example/harness code still contains commented-out stress paths and commented-out validation lines in CSG flows.
-- Visual example remains useful for debugging, but it is not a deterministic quality gate.
+Weaknesses:
+- Most regression tests assert topology counts captured from the kernel's
+  own output; they detect change, not error.
+- Touching cases are tested with strict validation off and assert two
+  shells.
+- `Logger` fatal errors call `System.exit(1)` unless a test class disables
+  it; only a few do.
+- No fuzz or rigid-motion invariance gate yet.
 
-Assessment: coverage is improving and now honestly captures known failure classes, but correctness envelope is still below industrial confidence levels.
+## 4) Comparison with the April 2026 version of this document
 
-## 4) Comparison vs previous version of this document
-Relative to the previous `vitralCadKernel.md`, this update keeps the same high-level verdict (strong conceptual alignment, robustness debt concentrated in hard boundary cases) but clarifies and tightens several points:
+Closed since then:
+- Table-driven coplanar predicates, touching-only policy, iterative
+  `maximizeFaces`.
+- `son*` lists and neighbourhood scratch moved out of static fields (stage
+  7).
+- Algebraic drift tests replaced by `AlgebraicIdentityRegressionTest`.
+- Strict validation checkpoint on every result path (stage 10).
+- Side-channel outputs `lastIntersected*` removed.
+- Performance: suite from about 14 minutes to about 1 minute for the same
+  tests (stage 8).
 
-- Confirms that coplanar/touching handling moved from ad-hoc logic toward explicit decision tables.
-- Closes the previous open item on coplanar overlap algebra by replacing the old overlap heuristic with interval/orientation classification and touching-only preflight handling.
-- Adds explicit emphasis on non-thread-safe static mutable state in operators.
-- Adds explicit emphasis on side-effectful API behavior (input solids mutated by set-op pipeline).
-- Updates test interpretation: there is now deliberate codification of known algebraic drift in automated tests, not only commented visual scenarios.
-- Separates validation maturity from production contract maturity: validators exist, but strict-mode enforcement is not yet systemic.
+Still open:
+- Operand mutation, remaining static state, validation mixed with repair,
+  typed failures, telemetry beyond the text trace.
 
-## 5) Production readiness evaluation (curved surfaces excluded)
-Current maturity level:
-- Advanced research prototype / early pre-production kernel.
+New in this version:
+- The defect families B-01 to B-05, S-01, E-01 to E-06, L-01 to L-03.
+- The finding that part of the green fixture matrix depends on fallbacks
+  and on axis alignment.
+
+## 5) Production readiness (curved surfaces excluded)
+
+Maturity: advanced research prototype.
 
 Why not production yet:
-- Coplanar/touching predicates are materially stronger now, but industrial confidence still needs broader numeric calibration and a larger adversarial regression corpus.
-- Algebraic properties expected by industrial CAD boolean engines are known to drift in selected corpora.
-- Thread safety and side-effect isolation are insufficient for concurrent, service-style, or transactional CAD backends.
-- Quality gates still rely partly on manual/visual workflows and known-failure expectations.
+- Wrong results on simple inputs outside the corpus, some of them silent.
+- The splitter loses the solid on a common degenerate plane.
+- Operands are destroyed and execution is not reentrant.
+- Quality gates are snapshots of the kernel's own output.
 
-## 6) What is missing for industrial CAD readiness
-Priority P0 (must-have):
-- Enforce non-mutating public boolean API contract (clone/isolate operands or provide explicit destructive variants).
-- Remove or encapsulate static mutable operator state for thread-safe execution.
-- Turn known algebraic drift corpus into pass criteria (not expected-failure criteria) for the target support domain.
-- Define and enforce strict validation checkpoints after split/set-op in production path.
+## 6) What is missing
 
-Priority P1 (high):
-- Harden topology-normalization convergence guarantees (bounded iterative passes, explicit progress metrics, fail-fast on non-convergence).
-- Expand deterministic regression corpus around MANT1988 Ch. 14/15 corner cases (coplanar overlap, touching-only, containment, nested rings).
-- Strengthen predicate robustness strategy (tolerance calibration suite + repeatability checks across scale ranges).
+Priority P0:
+- Fix the container and the Euler special cases; check operator
+  preconditions and reject without side effects.
+- Fix ring ownership in connect (B-01).
+- Fix the splitter for planes through vertices (S-01).
+- Make the volume oracle and a seeded fuzz a permanent gate.
 
-Priority P2 (important):
-- Separate validation from repair semantics in API and internals.
-- Add structured operation telemetry (candidate counts, phase timing, branch decisions) for reproducible diagnostics.
-- Add large-model stress benchmarks and memory/time budgets as CI gates.
+Priority P1:
+- Treat coplanar faces inside the pipeline with a two-dimensional boolean
+  (B-02, B-04, B-05) and unify the preflight predicates (B-03); then retire
+  the fallbacks.
+- Non-destructive `setOp` through a structural copy.
+- Remove the remaining static state; move the splitter to a context object.
 
-## 7) Final verdict
-The kernel is one of the strongest MANT1988-faithful implementations in the project, with clear architectural correspondence to Euler/split/set-op theory and meaningful recent hardening on numeric policy and coplanar classification.
+Priority P2:
+- Typed failures; validation separated from repair.
+- Bounding-box rejection in generate; spatial index for strict validation.
+- Intrusive half-edge links.
 
-However, excluding curved surfaces as requested, it still does not qualify as production-grade industrial CAD kernel yet. The main blockers are robustness closure in hard boolean neighborhoods, deterministic algebraic behavior, thread-safe/state-safe execution model, and stricter automated quality contracts.
+The staged plan is in `Fable5.2Analysis.md`, Section 7.
 
-## 8) MANT1988 Problems Backlog (Non-Theoretical, PolyhedralBoundedSolid-Relevant)
-This section lists implementation-oriented MANT1988 exercises that are directly relevant to the current B-Rep kernel and can be used as an execution roadmap.
+## 7) Verdict
 
-| MANT1988 problem | Current evidence in codebase | Status | What is still missing | Suggested implementation entry points |
-|---|---|---|---|---|
-| 11.3 (`lkev`, `lkef`) | Implemented in `PolyhedralBoundedSolid` | Implemented | Add stronger inverse-pair property tests (`lmev<->lkev`, `lmef<->lkef`) on random valid solids | `PolyhedralBoundedSolid.java`, new property tests in `base/src/test/...` |
-| 11.4 (`lmekr`) | Implemented in `PolyhedralBoundedSolid` | Implemented | Add ring-orientation and face-boundary-order invariants after operation | `PolyhedralBoundedSolid.java`, strict validation extensions |
-| 11.5 (`lkimrh`, `lmikrh` family) | Implemented in `PolyhedralBoundedSolid` via explicit `lkimrh/lmikrh` aliases backed by `lkfmrh/lmfkrh` | Implemented | Add dedicated regression tests for alias-equivalence and inverse pairing in complex shells | `PolyhedralBoundedSolid.java`, `base/src/test/...` |
-| 12.2 (rotational sweep, endpoint on axis) | Core operator `rotationalSweepExtrudeWireAroundXAxis` added in `GeometricModeler` with axis-endpoint handling path and dedicated tests | Implemented (baseline) | Harden topology regularization so resulting solids are strict-validator clean in all pole-degenerate cases | `GeometricModeler.java`, `GeometricModelerRotationalSweepTest.java` |
-| 12.3 (closed figure with edge on axis) | Partially addressed in modified sweep sample | Partial | Formalize constraints, remove ad-hoc branching, add deterministic corpus | `GeometricModeler.java`, dedicated sweep tests |
-| 12.4 (`upsweep`) | Conceptually present via sweep/glue flows; explicit book-level routine not isolated | Partial | Implement explicit `upsweep` API + pre/post contracts | `GeometricModeler.java`, operator façade |
-| 13.1 (`dropcoord`) | Implemented in face projection logic | Implemented | Expose reusable geometric primitive (currently embedded) and test degenerate normals | `_PolyhedralBoundedSolidFace.java`, `ComputationalGeometry.java` |
-| 13.3 (`contfv`) | Functionally covered by `testPointInside` | Implemented | Improve thread-safety of side-channel outputs (`lastIntersected*`) | `_PolyhedralBoundedSolidFace.java` |
-| 13.5 (ring-moving utility) | Implemented (`laringmv` path in operator base) | Implemented | Add formal preconditions and failure semantics when target loop assignment is impossible | `PolyhedralBoundedSolidOperator.java` |
-| 13.6 (wide-sector test) | Implemented (`checkWideness`) with orientation-consistent signed-angle predicate using face normal (`atan2`) | Implemented | Add targeted regression tests for mirrored sectors, near-colinear limits, and tolerance-boundary cases | `PolyhedralBoundedSolidOperator.java`, `PolyhedralBoundedSolidSetOperator.java`, operator tests |
-| 14.1 (`bisector`) | Implemented | Implemented | Add robustness handling for near-colinear edge vectors | `PolyhedralBoundedSolidOperator.java` |
-| 14.2 (`cleanup`) | Implemented | Implemented | Separate "rebuild indices" from "silent repair", and document mutation contract | `PolyhedralBoundedSolidOperator.java` |
-| 14.3 (slicing from splitting) | Splitter exists; dedicated slicing algorithm absent | Missing | Implement slicing output mode (section polygons/wires) as first-class operator | `PolyhedralBoundedSolidSplitter.java`, new output types |
-| 15.1 (containment no-intersection case) | Implemented in `setOpNoIntersectionCase` and tested | Implemented | Expand algebraic conformance tests for all operation pairs and operand orders | `PolyhedralBoundedSolidSetOperator.java`, set-op tests |
-| 15.2 (`maximize_faces`) | Implemented (`maximizeFaces`) | Implemented (with known gaps) | Resolve open cases (`Case 2`, nested coplanar-face scenarios), formal convergence criteria | `PolyhedralBoundedSolid.java` |
-| 15.3 (eliminate recursion in edge-face comparison) | Migrated to iterative worklist flow | Implemented | Add complexity/performance regression tests under high intersection density | `PolyhedralBoundedSolidSetOperator.java` |
-| 15.4 (vertex-face classifier for set-op) | Implemented | Implemented | Reduce heuristic branches for in-plane/coplanar tie-breaking | `PolyhedralBoundedSolidSetOperator.java` |
-| 15.5 (`sectoroverlap`) | Implemented with interval/orientation coplanar relation algebra and touching-only preflight support | Implemented | Expand micro-case regression coverage for edge/face/vertex touching permutations and tolerance-boundary perturbations | `PolyhedralBoundedSolidSetOperator.java`, set-op predicate tests |
-| 15.6 (`revert`) | Implemented in solid core | Implemented (partial semantics) | Ensure normal/plane consistency contract post-revert (today explicitly warned as not fully corrected) | `PolyhedralBoundedSolid.java`, validator hooks |
-| 15.7 (compute dual results simultaneously) | Not implemented | Missing | Add dual-result mode (`UNION+INTERSECTION`, `A\\B+B\\A`) sharing classification/connect phases | `PolyhedralBoundedSolidSetOperator.java` |
-| 15.8 (2D set-op from 3D algorithm) | Not implemented | Missing | Add planar 2D B-Rep profile boolean module reusing classifier core | new package under processing |
-| 15.9 (understanding check about `A\\B = A ∩ reverse(B)`) | No explicit executable check | Missing (as assertion suite) | Add theorem/regression test module to codify expected/non-expected equivalences | `base/src/test/...setOperator...` |
-| 16.1 (`printproperties`) | No production utility in kernel core | Missing | Add component/genus inspector for diagnostics and QA gates | new analysis utility under geometry/processing |
-| 16.2 (`scopy`) | No explicit deep-copy contract for solids | Missing | Add deterministic deep-copy API preserving topology ids optionally | `PolyhedralBoundedSolid.java` |
-| 16.4 (undo for transforms) | No transaction-grade undo subsystem | Missing | Introduce operation log / reversible command layer for kernel operations | new transaction module around operators |
+The kernel is a faithful and much-hardened realisation of [MANT1988], with
+one important addition of its own (the explicit intersection curve). It
+passes its corpus. Measured outside the corpus it is reliable for
+axis-aligned operands in general position and unreliable for rotated
+operands, coplanar faces and planes through vertices.
 
-Execution guidance:
-- Prioritize Chapter 15 and 14 items first (`15.2`, `15.7`, `14.3`) because they directly affect industrial Boolean/split reliability.
-- Treat Chapter 16 items as enablers for production operation safety and recoverability.
+## 8) MANT1988 problems backlog
 
-## 9) Industrial Robustness Strategy (Evidence-Driven)
-The table below turns the observed weaknesses into an explicit hardening plan, with concrete steps to replace heuristics by formal operations and tighten contracts.
+| Problem | Evidence in code | Status | Still missing |
+|---|---|---|---|
+| 11.3 (`lkev`, `lkef`) | `PolyhedralBoundedSolidEulerOperators` | Implemented, with defects | E-01, E-05 |
+| 11.4 (`lmekr`) | same | Implemented, with defects | E-03 |
+| 11.5 (`lkimrh`, `lmikrh`) | aliases of `lkfmrh`/`lmfkrh` | Implemented | Argument checks |
+| 12.2 (rotational sweep, endpoint on axis) | `rotationalSweepExtrudeWireAroundXAxis` | Implemented (baseline) | Strict-clean results at the poles |
+| 12.3 (closed figure with edge on axis) | same | Partial | Formal constraints, corpus |
+| 12.4 (`unsweep`) | — | Missing | The routine |
+| 13.1 (face equation at origin) | Newell plane on the face | Implemented | — |
+| 13.2 (`dropcoord`) | face projection | Implemented | — |
+| 13.3 (`contfv`) | `testPointInside` | Implemented | — |
+| 13.5 (ring moving) | `laringmv`, ring rescue | Implemented, with defects | B-01 |
+| 13.6 (wide sector) | `checkWideness` (signed angle) | Implemented | Tolerance-boundary tests |
+| 13.3 text (volume) | only in the test oracle | Missing in production | A kernel utility |
+| 14.1 (`bisector`) | operator base | Implemented | Near-colinear case |
+| 14.2 (`cleanup`) | operator base | Implemented | Separate rebuild from repair |
+| 14.3 (slicing) | — | Missing | Section polygons as output |
+| 15.1 (containment) | non-intersecting classifier, preflights | Implemented, with defects | B-02 (b), B-03 |
+| 15.2 (`maximize_faces`) | `maximizeFaces` | Implemented | Test for a face inside another |
+| 15.3 (no recursion) | worklist in the intersector | Implemented | — |
+| 15.4 (vertex/face classifier) | `_SetVertexFaceClassifier` | Implemented, with defects | B-01 |
+| 15.5 (`sectoroverlap`) | predicate processor | Implemented | B-02 |
+| 15.6 (`revert`) | solid core | Implemented | — |
+| 15.7 (both results at once) | — | Missing | Needs operand copy |
+| 15.8 (2D set operations) | Weiler–Atherton clipper exists separately | Missing in the kernel | Use it for coplanar faces |
+| 15.9 (`A \ B` as `A ∩ reverse(B)`) | `AlgebraicIdentityRegressionTest` | Partial | Oracle-based laws |
+| 16.1 (`printproperties`) | `PolyhedralBoundedSolidTopologySummary` | Implemented | — |
+| 16.2 (`scopy`) | serialisation-based clone | Partial | Structural copy |
+| 16.4 (undo) | — | Missing | Operation log or copy-on-entry |
 
-| Workstream | Current heuristic / weak contract | Formal replacement target | Explicit implementation steps | Contract hardening outcome |
-|---|---|---|---|---|
-| Sector wideness and orientation | Formal signed-angle predicate already implemented in `checkWideness` and reused by `sectorwide` | Keep signed-angle classification as canonical rule and harden its numeric regression envelope | 1. Preserve face-normal-oriented signed turn (`atan2`) as single source of truth. 2. Add mirror-symmetry and orientation invariance tests. 3. Add stress corpus for near-colinear sectors around tolerance boundaries. 4. Track behavioral deltas before/after numeric-policy tuning. | Deterministic sector classification independent of incidental vector magnitudes, with explicit regression guardrails |
-| Coplanar overlap/touching decisions | Interval- and orientation-based coplanar algebra is now the active path, with touching-only preflight fallback before destructive reduction | Keep formal coplanar algebra as canonical path and broaden its numeric/regression envelope | 1. Preserve angular-interval classification and touching-only preflight as the only coplanar/touching decision path. 2. Add exhaustive edge/face/vertex touching micro-cases in CI. 3. Stress mirrored and opposite-orientation coplanar neighborhoods under perturbation. 4. Tune `angle`/`coplanar` tolerances using those fixtures. | Reduced false positives/negatives on coplanar neighborhoods with explicit protection against touching-only false splits |
-| Point-in-solid fallback logic | Multi-ray parity with hardcoded directions | Deterministic inside/outside voting + explicit degeneracy policy | 1. Keep implemented multi-ray voting baseline (`classifyPointAgainstSolid`) and lock determinism tests. 2. Introduce robust ray selection seeded by model hash + retry budget. 3. Add explicit degeneracy resolver for `LIMIT` cases (symbolic perturbation policy). 4. Record classification confidence/ambiguity in result metadata. 5. Require deterministic replay under fixed seed in tests. | Reproducible containment classification, auditable ambiguity handling |
-| Topology normalization (`maximizeFaces`) | Mutation-restart loop with open cases and heuristic loop-size decisions | Rule-complete normalization graph with progress measure and bounded fixpoint | 1. Encode each normalization case as named rule with precondition predicate. 2. Compute rule candidates first, then apply one deterministic priority order. 3. Track monotonic progress metrics (`|edges|`, `|inessential edges|`, etc.). 4. Stop on no-progress and emit structured diagnostic instead of silent drift. 5. Implement missing nested-coplanar-face rule set. | Convergent, explainable normalization with clear non-convergence failure mode |
-| Split/set-op static mutable state | Global static arrays/context (`son*`, debug flags) | Per-operation context object with immutable config and local mutable state | 1. Create `SetOpContext` and `SplitContext` classes. 2. Move all static operation-state fields into context instances. 3. Pass context through all phase methods. 4. Keep only read-only lookup tables as static constants. | Thread-safe and reentrant execution model |
-| Input mutation semantics | `setOp` mutates operands in-place (ids, face maximization, orientation) | Non-mutating public API with explicit destructive internal variant | 1. Introduce `setOpImmutable(a,b,op)` that deep-copies operands. 2. Rename current behavior to `setOpInPlace` (internal/advanced). 3. Document complexity and memory tradeoffs. 4. Add tests proving input solids are unchanged for immutable API. | Safer production contracts for pipelines and concurrent services |
-| Validation behavior | Mixed validate/repair semantics, warnings over typed failures | Strict contract states: `validate`, `repair`, `assertValid` separated | 1. Split validators from mutating repair utilities. 2. Introduce typed exceptions (`TopologyViolation`, `GeometricViolation`, `NonConvergentNormalization`). 3. Add mandatory strict-validation checkpoints on production path. 4. Emit structured failure reports (offending face/edge ids). | Fail-fast, diagnosable correctness guarantees |
-| Algebraic consistency | Known-drift tests intentionally assert inequality | Property-based conformance suite with bounded accepted exceptions | 1. Reframe drift tests into target conformance tests by corpus tier. 2. Classify cases into `must-pass`, `known-exception`, `unsupported`. 3. Shrink known-exception set over milestones. 4. Gate releases on must-pass algebraic invariants. | Quantified progress toward CAD-grade Boolean algebra reliability |
-| Numeric policy calibration | Fixed global epsilons scaled by model extent only | Context-aware tolerance model + calibration benchmark suite | 1. Add calibration fixtures across scales and aspect ratios. 2. Measure predicate stability under perturbation sweeps. 3. Tune per-predicate tolerances (`angle`, `coplanar`, `interval`). 4. Version tolerance profiles and lock them in CI. | Controlled numeric behavior across industrial scale ranges |
-| Observability and forensics | Ad-hoc textual debug outputs | Structured phase telemetry and replayable traces | 1. Emit per-phase counters/timings and branch decisions. 2. Store deterministic replay seed and tolerance context in logs. 3. Add compact JSON trace export for failing cases. 4. Integrate trace diffing in regression triage. | Fast root-cause analysis and reproducible bug diagnosis |
+## 9) Robustness strategy
 
-Recommended milestone order:
-1. Contracts + context isolation (`setOp` immutability, static-state removal, validation separation).
-
-Remaining milestone order:
-1. Normalization completion (`maximizeFaces` missing cases + convergence proofs-in-practice).
-2. Algebraic conformance hard gates and telemetry-backed continuous hardening.
-3. Numeric calibration and scale-stability benchmarking.
+| Workstream | Current state | Target | Outcome |
+|---|---|---|---|
+| Container and Euler operators | Defects L-01–L-03, E-01–E-06 | Checked preconditions, intrusive half-edge links, round-trip tests | A trustworthy foundation |
+| Ring ownership in connect | Unconditional `laringmv`, operation-specific control, ring rescue | Invariant: one two-loop null face per curve and solid; carrier face keeps its hole | B-01 closed, rescue removable |
+| Coplanar faces | Sector-level reclassification, fallbacks for axis-aligned shapes | Face-pair `on` classification plus a 2D boolean | B-02, B-04, B-05 closed, fallbacks retired |
+| No-intersection decisions | Four preflights with separate predicates | One predicate set with interior witness points | B-03 closed |
+| Splitter | Static state, S-01 | Context object, shared classifier with the vertex/face path | General splitting |
+| Operand contract | Destructive | Copy on entry, destructive variant named explicitly | Safe failure |
+| Static state | Partly removed | None outside constants | Reentrant, parallel tests |
+| Validation | Two levels, gaps | Back-pointer checks, pseudomanifold rule, no repair in validators | Fail-fast, diagnosable |
+| Tests | Snapshots plus an oracle work queue | Seeded fuzz, rigid-motion invariance, result-path assertions | Errors detected, not only changes |
+| Efficiency | All edges × all faces, all-pairs strict scan | Box rejection, spatial index | Larger models |
