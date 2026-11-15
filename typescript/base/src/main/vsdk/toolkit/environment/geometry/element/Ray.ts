@@ -23,18 +23,30 @@ export class Ray extends FundamentalEntity implements GeometryRay {
             this.t = t;
         }
     }
+    // Explicit affine construction: preserve direction magnitude and t.
+    // Legacy constructors retain their historical normalization behavior.
+    public static fromAffine(origin: Vector3Dd, direction: Vector3Dd, t = 0): Ray {
+        return Ray.withComponents(origin, direction, t);
+    }
+    /** Builds a ray from components without normalizing, like the C++ member copies. */
+    private static withComponents(origin: Vector3Dd, direction: Vector3Dd, t: number): Ray {
+        const result = new Ray(origin, new Vector3Dd(1, 0, 0), t);
+        (result as unknown as { direction: Vector3Dd }).direction = direction;
+        return result;
+    }
     public static copyOf(x: Ray) {
         if (x === null) throw new TypeError("Ray to copy cannot be null");
         return x;
     }
+    // Copies replace only the named component; they never renormalize.
     public withOrigin(x: Vector3Dd) {
-        return new Ray(x, this.direction, this.t);
+        return Ray.withComponents(x, this.direction, this.t);
     }
     public withDirection(x: Vector3Dd) {
-        return new Ray(this.origin, x, this.t);
+        return Ray.withComponents(this.origin, x, this.t);
     }
     public withT(x: number) {
-        return Double.compare(x, this.t) === 0 ? this : new Ray(this.origin, this.direction, x);
+        return Ray.withComponents(this.origin, this.direction, x);
     }
     public getOrigin() {
         return this.origin;

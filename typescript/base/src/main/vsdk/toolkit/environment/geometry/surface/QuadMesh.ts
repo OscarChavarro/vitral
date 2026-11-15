@@ -5,6 +5,7 @@ import { RayHit } from "../element/RayHit.js";
 import { Triangle } from "../element/Triangle.js";
 import { Vertex } from "../element/Vertex.js";
 import { Surface } from "./Surface.js";
+import { TriangleMesh } from "./TriangleMesh.js";
 import { TriangleMeshGroup } from "./TriangleMeshGroup.js";
 
 /** Indexed quad mesh. Each quad is tested as the two triangles (0,1,2) and (0,2,3). */
@@ -126,38 +127,14 @@ export class QuadMesh extends Surface<Ray, RayHit> {
         }
         for (let i = 0; i < sums.length; i++) this.setVector(this.vertexNormals!, i, sums[i]!.normalized());
     }
-    public doIntersectionFirstHit(ray: Ray, out: RayHit, triangleInformation?: Int32Array | number[]): boolean {
-        let nearest: { t: number; point: Vector3Dd; normal: Vector3Dd; triangle: number } | null = null;
-        for (let q = 0; q < this.getNumQuads(); q++) {
-            const [a, b, c, d] = this.quad(q);
-            for (const [x, y, z, offset] of [
-                [a, b, c, 0],
-                [a, c, d, 1],
-            ] as const) {
-                const hit = Triangle.doIntersectionWithTriangle(
-                    ray,
-                    this.position(x),
-                    this.position(y),
-                    this.position(z),
-                );
-                if (hit !== null && (nearest === null || hit.getT() < nearest.t))
-                    nearest = {
-                        t: hit.getT(),
-                        point: hit.getPoint(),
-                        normal: hit.getNormal(),
-                        triangle: q * 2 + offset,
-                    };
-            }
-        }
-        if (nearest === null) return false;
-        out.setRay(ray.withT(nearest.t));
-        out.point = nearest.point;
-        out.normal = nearest.normal;
-        if (triangleInformation !== undefined) triangleInformation[0] = nearest.triangle;
-        return true;
+    /** cpp: intersects the triangles of `exportToTriangleMeshGroup`. */
+    public doIntersectionFirstHit(ray: Ray, out: RayHit): boolean {
+        const g = this.exportToTriangleMeshGroup();
+        return g.doIntersectionFirstHit(ray, out);
     }
     public override doExtraInformation(ray: Ray, t: number, out: RayHit): void {
-        this.doIntersectionFirstHit(ray.withT(t), out);
+        const g = this.exportToTriangleMeshGroup();
+        g.doExtraInformation(ray, t, out);
     }
     public override doContainmentTest(point: Vector3Dd, tolerance: number): number {
         for (let q = 0; q < this.getNumQuads(); q++) {
@@ -185,8 +162,60 @@ export class QuadMesh extends Surface<Ray, RayHit> {
         }
         return result;
     }
+    /**
+    cpp `exportToTriangleMeshGroup`: a triangle mesh with copies of the vertex
+    arrays and the triangles (0,1,2) and (0,2,3) of each quad, with its
+    normals recalculated.
+    */
     public exportToTriangleMeshGroup(): TriangleMeshGroup {
-        return new TriangleMeshGroup([this]);
+        const mesh = new TriangleMesh();
+        mesh.setName(this.name);
+        mesh.initVertexPositionsArray(this.getNumVertices());
+        if (this.vertexPositions !== null) mesh.getVertexPositions()!.set(this.vertexPositions);
+        if (this.vertexNormals !== null) {
+            mesh.initVertexNormalsArray();
+            mesh.getVertexNormals()!.set(this.vertexNormals);
+        }
+        if (this.vertexBinormals !== null) {
+            mesh.initVertexBinormalsArray();
+            mesh.getVertexBinormals()!.set(this.vertexBinormals);
+        }
+        if (this.vertexTangents !== null) {
+            mesh.initVertexTangentsArray();
+            mesh.getVertexTangents()!.set(this.vertexTangents);
+        }
+        if (this.vertexColors !== null) {
+            mesh.initVertexColorsArray();
+            mesh.getVertexColors()!.set(this.vertexColors);
+        }
+        if (this.vertexUvs !== null) {
+            mesh.initVertexUvsArray();
+            mesh.getVertexUvs()!.set(this.vertexUvs);
+        }
+
+        mesh.initTriangleArrays(this.getNumQuads() * 2);
+        const tri = mesh.getTriangleIndexes()!;
+
+        let t = 0;
+        for (let i = 0; i < this.getNumQuads(); i++) {
+            const p0 = this.quadIndices![4 * i]!;
+            const p1 = this.quadIndices![4 * i + 1]!;
+            const p2 = this.quadIndices![4 * i + 2]!;
+            const p3 = this.quadIndices![4 * i + 3]!;
+            tri[3 * t] = p0;
+            tri[3 * t + 1] = p1;
+            tri[3 * t + 2] = p2;
+            t++;
+            tri[3 * t] = p0;
+            tri[3 * t + 1] = p2;
+            tri[3 * t + 2] = p3;
+            t++;
+        }
+        mesh.calculateNormals();
+
+        const g = new TriangleMeshGroup();
+        g.addMesh(mesh);
+        return g;
     }
     public override toString(): string {
         return `- QuadMesh\n  - Number of quads: ${this.getNumQuads()}\n  - Number of vertexes: ${this.getNumVertices()}\n`;

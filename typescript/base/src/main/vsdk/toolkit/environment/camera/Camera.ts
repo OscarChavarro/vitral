@@ -1,4 +1,3 @@
-import { Math as JavaMath } from "../../../../java/lang/Math.js";
 import { Entity } from "../../common/Entity.js";
 import { Matrix4x4d } from "../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
@@ -35,6 +34,15 @@ export class Camera extends Entity {
     private rightWithScale = new Vector3Dd();
     private normalizingTransformation = new Matrix4x4d();
     private modificationVersion = 0;
+
+    /**
+    cpp `Camera.cpp` static helper: `degrees * PI / 180.0`. It is not
+    `Math.toRadians` (`degrees / 180.0 * PI`), which rounds some angles one
+    ulp differently and shifts the primary rays.
+    */
+    private static degreesToRadians(degrees: number): number {
+        return (degrees * Math.PI) / 180.0;
+    }
 
     public constructor(other?: Camera) {
         super();
@@ -188,8 +196,8 @@ export class Camera extends Entity {
 
         const fovFactor: number = this.viewportXSize / this.viewportYSize;
         this.frontWithScale = this.front.multiply(0.5);
-        this.upWithScale = this.up.multiply(Math.tan(JavaMath.toRadians(this.fov / 2)));
-        this.rightWithScale = this.left.multiply(-fovFactor * Math.tan(JavaMath.toRadians(this.fov / 2)));
+        this.upWithScale = this.up.multiply(Math.tan(Camera.degreesToRadians(this.fov / 2)));
+        this.rightWithScale = this.left.multiply(-fovFactor * Math.tan(Camera.degreesToRadians(this.fov / 2)));
 
         //-----------------------------------------------------------------
         /*
@@ -214,7 +222,7 @@ export class Camera extends Entity {
         R1 = R1.invert();
 
         let R2: Matrix4x4d = new Matrix4x4d();
-        R2 = R2.eulerAnglesRotation(JavaMath.toRadians(90), JavaMath.toRadians(-90), 0);
+        R2 = R2.eulerAnglesRotation(Camera.degreesToRadians(90), Camera.degreesToRadians(-90), 0);
         const RTOTAL: Matrix4x4d = R2.multiply(R1);
 
         // 3. Translate such that the center of projection is at the origin
@@ -250,21 +258,34 @@ export class Camera extends Entity {
         this.normalizingTransformation = T3.multiply(S2.multiply(S1.multiply(T2.multiply(RTOTAL.multiply(T1)))));
     }
     public exportToCameraSnapshot(width = this.viewportXSize, height = this.viewportYSize): CameraSnapshot {
-        this.updateViewportResize(width, height);
+        // As cpp `Camera::exportToCameraSnapshot` (a const method) and the
+        // Java port: the snapshot is taken from a copy resized to the given
+        // viewport, so its vectors are normalized as many times as in cpp
+        // (the copy constructor and the resize both call `updateVectors`).
+        // This camera only takes the viewport size, without renormalizing.
+        const tmp = new Camera(this);
+        if (this.viewportXSize !== width || this.viewportYSize !== height) {
+            this.viewportXSize = width;
+            this.viewportYSize = height;
+            this.markModified();
+        }
+        tmp.viewportXSize = width;
+        tmp.viewportYSize = height;
+        tmp.updateVectors();
         return new CameraSnapshot(
-            this.position,
-            this.front,
-            this.left,
-            this.up,
-            this.projectionMode,
-            this.orthogonalZoom,
-            width,
-            height,
-            this.frontWithScale,
-            this.upWithScale,
-            this.rightWithScale,
-            this.nearPlaneDistance,
-            this.farPlaneDistance,
+            tmp.position,
+            tmp.front,
+            tmp.left,
+            tmp.up,
+            tmp.projectionMode,
+            tmp.orthogonalZoom,
+            tmp.viewportXSize,
+            tmp.viewportYSize,
+            tmp.frontWithScale,
+            tmp.upWithScale,
+            tmp.rightWithScale,
+            tmp.nearPlaneDistance,
+            tmp.farPlaneDistance,
         );
     }
     public generateRay(x: number, y: number): Ray {
@@ -314,7 +335,7 @@ export class Camera extends Entity {
                 [0, 0, 0, 1],
             ]);
         }
-        const top = this.nearPlaneDistance * Math.tan((this.fov * Math.PI) / 360),
+        const top = this.nearPlaneDistance * Math.tan(Camera.degreesToRadians(this.fov / 2)),
             bottom = -top,
             right = aspect * top,
             left = -right;
@@ -334,8 +355,8 @@ export class Camera extends Entity {
     public calculateTransformationMatrix(): Matrix4x4d {
         const rotation = this.getRotation().invert();
         const translation = new Matrix4x4d().translation(this.position.multiply(-1));
-        const z90 = new Matrix4x4d().axisRotation(Math.PI / 2, 0, 0, 1);
-        const xMinus90 = new Matrix4x4d().axisRotation(-Math.PI / 2, 1, 0, 0);
+        const z90 = new Matrix4x4d().axisRotation(Camera.degreesToRadians(90), 0, 0, 1);
+        const xMinus90 = new Matrix4x4d().axisRotation(Camera.degreesToRadians(-90), 1, 0, 0);
         return xMinus90.multiply(z90.multiply(rotation.multiply(translation)));
     }
     public calculateProjectionMatrix(): Matrix4x4d {
@@ -508,7 +529,7 @@ export class Camera extends Entity {
         if (hit === null || ray.getDirection().length() === 0) return null;
         projected = hit.getOrigin().add(hit.getDirection().multiply(hit.getT())).subtract(center);
         const aspect = this.viewportXSize / this.viewportYSize;
-        const scale = 1 / Math.tan((this.fov * Math.PI) / 360);
+        const scale = 1.0 / Math.tan(Camera.degreesToRadians(this.fov / 2));
         const right = this.left
             .multiply(-1)
             .normalized()

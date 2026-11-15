@@ -1,15 +1,24 @@
 import {
     Arrow,
+    BezierPatchTessellator,
     Box,
     Cone,
     FunctionalExplicitSurface,
+    GeometryBounds,
+    HeightFieldSolid,
     identityHashCode,
+    ImplicitSolid,
     InfinitePlane,
     Logger,
     ParametricBiCubicPatch,
     ParametricCurve,
+    QuadricSurface,
     RendererConfiguration,
+    SimpleBody,
+    SolidBoundaryTessellationReport,
+    SolidBoundaryTessellator,
     Sphere,
+    SubdividedBezierPatch,
     Torus,
     TriangleMesh,
     Vector3Dd,
@@ -43,7 +52,10 @@ bounding volume, texture, bump map and shading).
 Supported geometries: `Sphere`, `Cone` (also cylinders and truncated cones),
 `Arrow`, `Box`, `Torus`, `TriangleMesh`, and the open surfaces
 `FunctionalExplicitSurface`, `ParametricBiCubicPatch` and `InfinitePlane`
-(tessellated by their `WebGL*Renderer`, visible from both sides). A
+(tessellated by their `WebGL*Renderer`, visible from both sides). Quadrics,
+implicit solids and height fields with finite bounds are drawn from their
+`SolidBoundaryTessellator` mesh, and a `SubdividedBezierPatch` from its
+`BezierPatchTessellator` mesh, visible from both sides. A
 `ParametricCurve` has no surface: it is drawn as lines by
 `WebGLParametricCurveRenderer`.
 
@@ -57,6 +69,10 @@ export class WebGLGeometryRenderer {
     private static readonly TORUS_MAJOR_SEGMENTS: number = 48;
     private static readonly TORUS_MINOR_SEGMENTS: number = 24;
     private static readonly MAX_CACHED_MESHES: number = 256;
+    /** Cells along the longest side of the bounds of a tessellated solid */
+    private static readonly SOLID_TESSELLATION_RESOLUTION: number = 64;
+    /** Parameter steps of a tessellated Bezier patch along u and v */
+    private static readonly PATCH_TESSELLATION_STEPS: number = 24;
 
     private static readonly MESHES: Map<string, WebGLMesh> = new Map<string, WebGLMesh>();
     private static readonly REPORTED_UNSUPPORTED: Set<string> = new Set<string>();
@@ -74,6 +90,10 @@ export class WebGLGeometryRenderer {
             geometry instanceof FunctionalExplicitSurface ||
             geometry instanceof ParametricBiCubicPatch ||
             geometry instanceof InfinitePlane ||
+            geometry instanceof ImplicitSolid ||
+            geometry instanceof QuadricSurface ||
+            geometry instanceof HeightFieldSolid ||
+            geometry instanceof SubdividedBezierPatch ||
             geometry instanceof ParametricCurve;
     }
 
@@ -242,6 +262,16 @@ export class WebGLGeometryRenderer {
         if (geometry instanceof InfinitePlane) {
             return WebGLInfinitePlaneRenderer.meshKey(geometry);
         }
+        if (geometry instanceof ImplicitSolid ||
+            geometry instanceof QuadricSurface ||
+            geometry instanceof HeightFieldSolid) {
+            return "tessellatedsolid/" + identityHashCode(geometry) + "/" +
+                WebGLGeometryRenderer.SOLID_TESSELLATION_RESOLUTION;
+        }
+        if (geometry instanceof SubdividedBezierPatch) {
+            return "subdividedbezierpatch/" + identityHashCode(geometry) + "/" +
+                WebGLGeometryRenderer.PATCH_TESSELLATION_STEPS;
+        }
         return null;
     }
 
@@ -269,6 +299,14 @@ export class WebGLGeometryRenderer {
         }
         if (geometry instanceof InfinitePlane) {
             return WebGLInfinitePlaneRenderer.buildMesh(geometry);
+        }
+        if (geometry instanceof ImplicitSolid ||
+            geometry instanceof QuadricSurface ||
+            geometry instanceof HeightFieldSolid) {
+            return WebGLGeometryRenderer.buildTessellatedSolid(geometry);
+        }
+        if (geometry instanceof SubdividedBezierPatch) {
+            return WebGLGeometryRenderer.buildBezierPatch(geometry);
         }
         return null;
     }
@@ -401,21 +439,34 @@ export class WebGLGeometryRenderer {
 
     private static buildTriangleMesh(mesh: TriangleMesh): WebGLMesh | null {
         const p: Float64Array | null = mesh.getVertexPositions();
-        const n: Float64Array | null = mesh.getVertexNormals();
-        const uv: Float64Array | null = mesh.getVertexUvs();
         const idx: Int32Array | null = mesh.getTriangleIndexes();
 
         if (p === null || idx === null) {
             return null;
         }
-        const minmax: ArrayLike<number> | null = mesh.getMinMax();
+        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(WebGLGeometryRenderer.maxAbsExtent(mesh.getMinMax()));
+        WebGLGeometryRenderer.addTriangleMesh(builder, mesh);
+        return builder.build();
+    }
+
+    private static maxAbsExtent(minmax: ArrayLike<number> | null): number {
         let size: number = 1.0;
         if (minmax !== null && minmax.length >= 6) {
             size = Math.max(Math.abs(minmax[3]! - minmax[0]!),
                 Math.max(Math.abs(minmax[4]! - minmax[1]!), Math.abs(minmax[5]! - minmax[2]!)));
         }
-        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(size);
+        return size;
+    }
 
+    private static addTriangleMesh(builder: WebGLMeshBuilder, mesh: TriangleMesh): void {
+        const p: Float64Array | null = mesh.getVertexPositions();
+        const n: Float64Array | null = mesh.getVertexNormals();
+        const uv: Float64Array | null = mesh.getVertexUvs();
+        const idx: Int32Array | null = mesh.getTriangleIndexes();
+
+        if (p === null || idx === null) {
+            return;
+        }
         for (let t: number = 0; t + 2 < idx.length; t += 3) {
             const pos: Vector3Dd[] = [];
             const nor: Vector3Dd[] = [];
@@ -436,6 +487,46 @@ export class WebGLGeometryRenderer {
             builder.addTriangle(pos[0]!, nor[0]!, u[0]!, v[0]!, pos[1]!, nor[1]!, u[1]!, v[1]!,
                 pos[2]!, nor[2]!, u[2]!, v[2]!);
         }
+    }
+
+    /**
+    Quadrics, implicit solids and height fields are drawn from the
+    `SolidBoundaryTessellator` mesh of their finite bounds; unbounded ones are
+    not supported.
+    */
+    private static buildTessellatedSolid(geometry: Geometry): WebGLMesh | null {
+        const bounds: GeometryBounds = new GeometryBounds();
+        geometry.getBounds(bounds);
+        if (bounds.getKind() !== GeometryBounds.Kind.Finite) {
+            return null;
+        }
+        const body: SimpleBody = new SimpleBody();
+        // cpp setGeometryReference (borrowed); the same under garbage collection.
+        body.setGeometry(geometry);
+        const report: SolidBoundaryTessellationReport = new SolidBoundaryTessellationReport();
+        // The margin keeps the extreme points of the solid inside the region
+        const mesh: TriangleMesh | null = SolidBoundaryTessellator.tessellate(body,
+            bounds.inflated(1e-3 * WebGLGeometryRenderer.maxAbsExtent(geometry.getMinMax())),
+            WebGLGeometryRenderer.SOLID_TESSELLATION_RESOLUTION, report);
+        if (mesh === null) {
+            return null;
+        }
+        return WebGLGeometryRenderer.buildTriangleMesh(mesh);
+    }
+
+    /**
+    A Bezier patch is drawn from the `BezierPatchTessellator` mesh of its
+    surface, visible from both sides.
+    */
+    private static buildBezierPatch(patch: SubdividedBezierPatch): WebGLMesh | null {
+        const mesh: TriangleMesh | null = BezierPatchTessellator.tessellate(patch,
+            WebGLGeometryRenderer.PATCH_TESSELLATION_STEPS, WebGLGeometryRenderer.PATCH_TESSELLATION_STEPS);
+        if (mesh === null) {
+            return null;
+        }
+        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(WebGLGeometryRenderer.maxAbsExtent(mesh.getMinMax()));
+        builder.setDoubleSided(true);
+        WebGLGeometryRenderer.addTriangleMesh(builder, mesh);
         return builder.build();
     }
 }

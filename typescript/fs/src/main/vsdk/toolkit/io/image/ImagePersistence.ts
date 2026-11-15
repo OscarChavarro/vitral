@@ -10,6 +10,9 @@ import {
 } from "@vitral/base";
 import { File } from "../../../../java/io/File.js";
 import { FileOutputStream } from "../../../../java/io/FileOutputStream.js";
+import type { RGBAImageUncompressed } from "@vitral/base/vsdk/toolkit/media/RGBAImageUncompressed";
+import type { RGBImageUncompressed } from "@vitral/base/vsdk/toolkit/media/RGBImageUncompressed";
+import { ImagePersistenceRasterImport } from "./ImagePersistenceRasterImport.js";
 
 // Node owns a real DEFLATE implementation, so the platform-neutral PNG writer
 // is upgraded from its dependency-free stored-blocks default to true zlib
@@ -34,6 +37,24 @@ an NPM dependency of this package, never of `@vitral/base`.
 PPM stays hand-written and dependency-free, as in the Java and C++ ports.
 */
 export class ImagePersistence extends ImagePersistenceBase {
+    /**
+    Reads a JPEG, PNG or binary PPM file, picked by its extension (see
+    `ImagePersistenceRasterImport`).
+    @return the image, empty when the file cannot be read
+    */
+    public static importRGB(fd: File): RGBImageUncompressed {
+        return ImagePersistenceRasterImport.importRGB(fd.getPath().toString());
+    }
+
+    /**
+    The alpha-preserving flavor of `importRGB`: PNG files keep their alpha
+    channel, and the other formats come back opaque.
+    @return the image, or null for unreadable PNG files
+    */
+    public static importRGBA(fd: File): RGBAImageUncompressed | null {
+        return ImagePersistenceRasterImport.importRGBA(fd.getPath().toString());
+    }
+
     public static override exportPNG(os: OutputStream, img: Image): void;
     public static override exportPNG(fd: File, img: Image): void;
     public static override exportPNG(target: OutputStream | File, img: Image): void {

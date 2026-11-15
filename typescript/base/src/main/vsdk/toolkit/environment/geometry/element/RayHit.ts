@@ -24,6 +24,8 @@ export class RayHit extends FundamentalEntity implements GeometryRayHit {
     private ray: Ray | null = null;
     private hitDistance = 0;
     private hitDistanceKnown = false;
+    private availableDetailMask = SurfaceDetail.NONE;
+    private detailAvailabilityKnown = false;
     public constructor(
         mask = 15,
         private storeRay = true,
@@ -37,6 +39,8 @@ export class RayHit extends FundamentalEntity implements GeometryRayHit {
         this.u = this.v = 0;
         this.material = this.texture = this.normalMap = null;
         this.ray = null;
+        this.availableDetailMask = SurfaceDetail.NONE;
+        this.detailAvailabilityKnown = false;
         this.hitDistance = 0;
         this.hitDistanceKnown = false;
     }
@@ -47,12 +51,28 @@ export class RayHit extends FundamentalEntity implements GeometryRayHit {
     public resetForDistanceOnly() {
         this.requiredDetailMask = 0;
         this.ray = null;
+        this.availableDetailMask = SurfaceDetail.NONE;
+        this.detailAvailabilityKnown = false;
         this.hitDistance = 0;
         this.hitDistanceKnown = false;
     }
     public override clone(other?: RayHit): RayHit | void {
         if (other === undefined) return new RayHit(this.requiredDetailMask, this.storeRay);
         Object.assign(this, other);
+    }
+    // Legacy producers may leave availability unknown; requested is not available.
+    public isDetailAvailabilityKnown(): boolean {
+        return this.detailAvailabilityKnown;
+    }
+    public getAvailableDetailMask(): number {
+        return this.availableDetailMask;
+    }
+    public beginDetailEvaluation(): void {
+        this.availableDetailMask = SurfaceDetail.NONE;
+        this.detailAvailabilityKnown = true;
+    }
+    public markDetailAvailable(mask: number): void {
+        this.availableDetailMask |= mask & SurfaceDetail.ALL;
     }
     public getRequiredDetailMask() {
         return this.requiredDetailMask;

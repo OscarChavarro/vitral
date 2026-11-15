@@ -1,3 +1,6 @@
+import type { GeometryBounds } from "../element/GeometryBounds.js";
+import { Double } from "../../../../../java/lang/Double.js";
+import { PolyhedralBoundedSolidEulerConstructions } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 //= References:                                                             =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
@@ -10,7 +13,6 @@ import type { Ray } from "../element/Ray.js";
 import { RayHit } from "../element/RayHit.js";
 import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "./polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
-import { PolyhedralBoundedSolidModeler } from "../geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
 import { Solid } from "./Solid.js";
 
 export class Cone extends Solid {
@@ -448,6 +450,16 @@ export class Cone extends Solid {
         }
     }
 
+    // Finite solid bounds: |x|,|y| <= max radius and 0 <= z <= height.
+    public override getBounds(result: GeometryBounds): void {
+        const r = this.bottomRadius > this.topRadius ? this.bottomRadius : this.topRadius;
+        if (!Double.isFinite(r) || !Double.isFinite(this.height) || this.height <= 0 || this.bottomRadius < 0 || this.topRadius < 0) {
+            result.setIndeterminate();
+            return;
+        }
+        result.setFinite(new Vector3Dd(-r, -r, 0), new Vector3Dd(r, r, this.height));
+    }
+
     /**
     @return a new 6 valued double array containing the coordinates of a min-max
     bounding box for current geometry.
@@ -569,7 +581,7 @@ export class Cone extends Solid {
         let S: Matrix4x4d;
         let M: Matrix4x4d;
 
-        const solid = PolyhedralBoundedSolidModeler.createCircularLamina(0.0, 0.0, this.bottomRadius, 0.0, nsides);
+        const solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(0.0, 0.0, this.bottomRadius, 0.0, nsides);
 
         if (this.topRadius > VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
             let prevRadius = this.bottomRadius;
@@ -583,7 +595,7 @@ export class Cone extends Solid {
                 S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
+                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }
         } else if (this.topRadius <= VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
@@ -599,7 +611,7 @@ export class Cone extends Solid {
                 S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
+                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }
             Cone.closeTopFaceToApex(solid, this.height);

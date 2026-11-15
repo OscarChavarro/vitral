@@ -1,8 +1,8 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { Matrix4x4d } from "../../../../../common/linealAlgebra/Matrix4x4d.js";
 import { PolyhedralBoundedSolid } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidTopologyEditing } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.js";
-import { PolyhedralBoundedSolidModeler } from "../PolyhedralBoundedSolidModeler.js";
 import { _PolyhedralBoundedSolidOperator } from "../_PolyhedralBoundedSolidOperator.js";
 import { _PolyhedralBoundedSolidFallbackGeometry } from "../fallbacks/_PolyhedralBoundedSolidFallbackGeometry.js";
 import { _PolyhedralBoundedSolidProfileDifferenceFallbackSpec } from "./_PolyhedralBoundedSolidProfileDifferenceFallbackSpec.js";
@@ -80,7 +80,11 @@ export class _PolyhedralBoundedSolidProfileDifferenceFallback extends _Polyhedra
         );
         let translation = new Matrix4x4d();
         translation = translation.translation(spec.xMax - spec.xCut, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, translation);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
+            solid,
+            solid.findFace(1)!,
+            translation,
+        );
         PolyhedralBoundedSolidTopologyEditing.compactIds(solid);
         return solid;
     }

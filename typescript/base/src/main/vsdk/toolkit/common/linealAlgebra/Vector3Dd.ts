@@ -24,8 +24,16 @@ export class Vector3Dd extends FundamentalEntity {
         if (o === null) throw new TypeError("Vector3Dd to copy cannot be null");
         return new Vector3Dd(o);
     }
-    public multiply(a: number): Vector3Dd {
+    public multiply(a: number): Vector3Dd;
+    /** Componentwise product, as cpp `Vector3Dd::multiply(const Vector3Dd&)`. */
+    public multiply(other: Vector3Dd): Vector3Dd;
+    public multiply(a: number | Vector3Dd): Vector3Dd {
+        if (a instanceof Vector3Dd) return new Vector3Dd(this.xv * a.xv, this.yv * a.yv, this.zv * a.zv);
         return new Vector3Dd(a * this.xv, a * this.yv, a * this.zv);
+    }
+    /** As cpp `Vector3Dd::midpoint`. */
+    public midpoint(o: Vector3Dd): Vector3Dd {
+        return new Vector3Dd(0.5 * (this.xv + o.xv), 0.5 * (this.yv + o.yv), 0.5 * (this.zv + o.zv));
     }
     public crossProduct(o: Vector3Dd): Vector3Dd {
         return new Vector3Dd(
@@ -42,6 +50,10 @@ export class Vector3Dd extends FundamentalEntity {
         if (t <= VSDK.EPSILON * VSDK.EPSILON) return this;
         if (t !== 1) t = 1 / Math.sqrt(t);
         return this.multiply(t);
+    }
+    public normalizedFast(): Vector3Dd {
+        const vTemp = Math.sqrt(this.xv * this.xv + this.yv * this.yv + this.zv * this.zv);
+        return new Vector3Dd(this.xv / vTemp, this.yv / vTemp, this.zv / vTemp);
     }
     public length(): number {
         return Math.sqrt(this.dotProduct(this));

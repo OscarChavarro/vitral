@@ -1,6 +1,7 @@
 import { RendererConfiguration, RGBImageUncompressed } from '@vitral/base';
 import { WebGLImageRenderer } from '@vitral/webgl';
 import type { ShadersModel } from '../model/shaders-model';
+import { ShadersGeometryFixture } from '../model/shaders-geometry-fixture';
 
 /**
  * Port of
@@ -53,7 +54,16 @@ export class WebGLHudRenderer {
     this.ensureHudBuffers(targetHudWidth, targetHudHeight);
 
     let line1: string;
-    if (model.getRenderingMode() === 'OPENGL_4_1') {
+    const geometryFixture = model.getGeometryFixture();
+    if (geometryFixture !== null) {
+      // cpp shows this in the window title.
+      const mesh = geometryFixture.getDrawableMesh();
+      line1 =
+        'Geometry [o]: ' +
+        ShadersGeometryFixture.nameOf(model.getGeometry()) +
+        ' Mesh triangles: ' +
+        (mesh !== null ? mesh.getNumTriangles() : 0);
+    } else if (model.getRenderingMode() === 'OPENGL_4_1') {
       const meridians: number = model.getSphereMeridians();
       const parallels: number = model.getSphereParallels();
       const triangles: number = Math.max(0, (parallels - 1) * meridians * 2);

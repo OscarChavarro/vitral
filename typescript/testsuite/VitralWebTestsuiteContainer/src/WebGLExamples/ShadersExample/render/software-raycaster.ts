@@ -9,6 +9,7 @@ import {
   type ParallelRaytracerTileResult,
 } from '@vitral/base';
 import type { ShadersModel } from '../model/shaders-model';
+import { ShadersGeometryFixture } from '../model/shaders-geometry-fixture';
 import type { ShadersSceneDescriptor } from './software-raycaster-protocol';
 
 /**
@@ -198,6 +199,7 @@ export class SoftwareRaycaster {
       cameraRotation: activeCamera.getRotation().exportToDoubleArrayRowOrder(),
       cameraFov: activeCamera.getFov(),
       sphereRadius: model.getSphere().getRadius(),
+      geometryName: ShadersGeometryFixture.nameOf(model.getGeometry()),
       modelRotation: modelRotation.exportToDoubleArrayRowOrder(),
       lightPosition: Float64Array.from([lightPosition.x(), lightPosition.y(), lightPosition.z()]),
       lightColor: Float64Array.from([lightColor.r(), lightColor.g(), lightColor.b()]),

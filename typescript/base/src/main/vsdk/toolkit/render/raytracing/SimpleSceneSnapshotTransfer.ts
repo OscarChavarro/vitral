@@ -39,9 +39,25 @@ import { SpotLight } from "../../environment/light/SpotLight.js";
 import { MicroFacetedMaterial } from "../../environment/material/MicroFacetedMaterial.js";
 import { SimpleMaterial } from "../../environment/material/SimpleMaterial.js";
 import { SimpleBody } from "../../environment/scene/SimpleBody.js";
+import { AffinePlacement } from "../../environment/scene/AffinePlacement.js";
+import { TriangleMeshIntersectionIndex } from "../../environment/geometry/surface/TriangleMeshIntersectionIndex.js";
+import { PlanarHalfSpace } from "../../environment/geometry/volume/PlanarHalfSpace.js";
+import { QuadricSurface } from "../../environment/geometry/volume/QuadricSurface.js";
+import { PolynomialSurface } from "../../environment/geometry/volume/PolynomialSurface.js";
+import { BlobComponent } from "../../environment/geometry/volume/BlobComponent.js";
+import { BlobSolid } from "../../environment/geometry/volume/BlobSolid.js";
+import { HeightFieldBlock } from "../../environment/geometry/volume/HeightFieldBlock.js";
+import { HeightFieldSolid } from "../../environment/geometry/volume/HeightFieldSolid.js";
+import { SubdividedBezierPatchNode } from "../../environment/geometry/surface/SubdividedBezierPatchNode.js";
+import { SubdividedBezierPatch } from "../../environment/geometry/surface/SubdividedBezierPatch.js";
 import { SimpleSceneSnapshot } from "../../environment/scene/SimpleSceneSnapshot.js";
+import { CsgBody } from "../../environment/scene/csg/CsgBody.js";
+import { CsgBodyOperand } from "../../environment/scene/csg/CsgBodyOperand.js";
+import { CsgPlacedExpression } from "../../environment/scene/csg/CsgPlacedExpression.js";
+import { CsgTree } from "../../environment/scene/csg/CsgTree.js";
 import { IndexedColorImageUncompressed } from "../../media/IndexedColorImageUncompressed.js";
 import { NormalMap } from "../../media/NormalMap.js";
+import { NormalMapTexture } from "../../media/NormalMapTexture.js";
 import { RGBAImageCompressed } from "../../media/RGBAImageCompressed.js";
 import { RGBAImageUncompressed } from "../../media/RGBAImageUncompressed.js";
 import { RGBImageUncompressed } from "../../media/RGBImageUncompressed.js";
@@ -78,6 +94,11 @@ function sceneTransfer(): ObjectGraphTransfer {
             // Scene
             SimpleSceneSnapshot,
             SimpleBody,
+            AffinePlacement,
+            CsgBody,
+            CsgTree,
+            CsgBodyOperand,
+            CsgPlacedExpression,
             CameraSnapshot,
             Camera,
             // Linear algebra and colors
@@ -92,6 +113,7 @@ function sceneTransfer(): ObjectGraphTransfer {
             RGBAImageCompressed,
             IndexedColorImageUncompressed,
             NormalMap,
+            NormalMapTexture,
             // Lights and backgrounds
             AmbientLight,
             DirectionalLight,
@@ -112,7 +134,17 @@ function sceneTransfer(): ObjectGraphTransfer {
             ParametricBiCubicPatch,
             ParametricCurve,
             TriangleMesh,
+            TriangleMeshIntersectionIndex,
             TriangleMeshGroup,
+            PlanarHalfSpace,
+            QuadricSurface,
+            PolynomialSurface,
+            BlobComponent,
+            BlobSolid,
+            HeightFieldBlock,
+            HeightFieldSolid,
+            SubdividedBezierPatchNode,
+            SubdividedBezierPatch,
             Triangle,
             Vertex,
             PolyhedralBoundedSolid,

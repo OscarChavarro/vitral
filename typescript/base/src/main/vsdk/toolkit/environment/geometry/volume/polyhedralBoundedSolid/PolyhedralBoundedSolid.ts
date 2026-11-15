@@ -20,7 +20,7 @@ import type { _PolyhedralBoundedSolidHalfEdge } from "./nodes/_PolyhedralBounded
 import type { _PolyhedralBoundedSolidEdge } from "./nodes/_PolyhedralBoundedSolidEdge.js";
 import type { _PolyhedralBoundedSolidVertex } from "./nodes/_PolyhedralBoundedSolidVertex.js";
 import { ComputationalGeometry } from "../../../../processing/ComputationalGeometry.js";
-import { PolygonProcessor } from "../../geometricProcessing/polygonClipper/PolygonProcessor.js";
+import { Polygon2D } from "../../surface/polygon/Polygon2D.js";
 import { PolyhedralBoundedSolidNumericPolicy, type ToleranceContext } from "./PolyhedralBoundedSolidNumericPolicy.js";
 import { PolyhedralBoundedSolidPredicates } from "./PolyhedralBoundedSolidPredicates.js";
 
@@ -341,7 +341,7 @@ export class PolyhedralBoundedSolid extends Solid {
                 he = he.next()!;
             } while (he !== start);
 
-            loopStatus = PolygonProcessor.isPointInsidePolygon2D(projectedPoint2D, projectedLoopVertices);
+            loopStatus = Polygon2D.isPointInsideContour(projectedPoint2D, projectedLoopVertices);
             if (loopStatus === 0) {
                 return Geometry.LIMIT;
             }

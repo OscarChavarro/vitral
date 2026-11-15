@@ -6,7 +6,6 @@ specifiers. Every module the worker reaches transitively is written the same
 way, for the same reason.
 */
 import { installNodeWorkerRuntime } from "@vitral/fs/java/concurrent/NodeWorkerRuntime";
-import { FileInputStream } from "@vitral/fs/java/io/FileInputStream";
 import { ReaderMitScene } from "@vitral/fs/vsdk/toolkit/io/geometry/ReaderMitScene";
 import { SimpleScene } from "@vitral/base/vsdk/toolkit/environment/scene/SimpleScene";
 import { ParallelRaytracerTileRenderer } from "@vitral/base/vsdk/toolkit/render/raytracing/ParallelRaytracerTileRenderer";
@@ -31,12 +30,9 @@ the object graph and bit-for-bit deterministic.
 */
 function loadScene(sceneDescriptor: WorkerTransferValue, xSize: number, ySize: number): SimpleSceneSnapshot {
     const scene: SimpleScene = new SimpleScene();
-    const input: FileInputStream = new FileInputStream(String(sceneDescriptor));
-    try {
-        new ReaderMitScene().importEnvironment(input, scene);
-    } finally {
-        input.close();
-    }
+    // The file name entry point, as RaytracerSimple: resources resolve from
+    // the scene directory.
+    new ReaderMitScene().importEnvironment(String(sceneDescriptor), scene);
 
     const camera = scene.getActiveCamera();
     return scene.exportToSimpleSceneSnapshot(

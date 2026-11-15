@@ -7,6 +7,8 @@ import type { Background } from "../background/Background.js";
 import type { Camera } from "../camera/Camera.js";
 import type { CameraSnapshot } from "../camera/CameraSnapshot.js";
 import type { Light } from "../light/Light.js";
+import type { Image } from "../../media/Image.js";
+import type { NormalMap } from "../../media/NormalMap.js";
 import type { SimpleBody } from "./SimpleBody.js";
 import { SimpleSceneSnapshot } from "./SimpleSceneSnapshot.js";
 
@@ -15,6 +17,9 @@ export class SimpleScene extends Entity {
     private lights: ArrayList<Light>;
     private backgrounds: ArrayList<Background>;
     private cameras: ArrayList<Camera>;
+    // Resources shared by reference among bodies and backgrounds.
+    private images: ArrayList<Image>;
+    private normalMaps: ArrayList<NormalMap>;
     private activeCameraIndex = 0;
     private activeBackgroundIndex = 0;
 
@@ -24,6 +29,25 @@ export class SimpleScene extends Entity {
         this.lights = new ArrayList<Light>();
         this.backgrounds = new ArrayList<Background>();
         this.cameras = new ArrayList<Camera>();
+        this.images = new ArrayList<Image>();
+        this.normalMaps = new ArrayList<NormalMap>();
+    }
+
+    /**
+    Removes the bodies, lights, backgrounds, cameras, images and normal maps of
+    the scene and resets the active indices (cpp `clearOwnedElements`, which
+    also releases them).
+    */
+    public clearOwnedElements(): void {
+        this.simpleBodies.clear();
+        this.lights.clear();
+        this.backgrounds.clear();
+        this.cameras.clear();
+        this.images.clear();
+        this.normalMaps.clear();
+
+        this.activeCameraIndex = 0;
+        this.activeBackgroundIndex = 0;
     }
 
     public getActiveCameraIndex(): number {
@@ -48,6 +72,30 @@ export class SimpleScene extends Entity {
 
     public addCamera(c: Camera): void {
         this.cameras.add(c);
+    }
+
+    /**
+    Takes ownership of an image that bodies (`SimpleBody.setTextureReference`)
+    or backgrounds reference.
+    */
+    public addImage(image: Image): void {
+        this.images.add(image);
+    }
+
+    /**
+    Takes ownership of a normal map that bodies reference
+    (`SimpleBody.setNormalMapReference`).
+    */
+    public addNormalMap(normalMap: NormalMap): void {
+        this.normalMaps.add(normalMap);
+    }
+
+    public getImages(): ArrayList<Image> {
+        return this.images;
+    }
+
+    public getNormalMaps(): ArrayList<NormalMap> {
+        return this.normalMaps;
     }
 
     public addBackground(b: Background): void {

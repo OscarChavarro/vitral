@@ -7,6 +7,20 @@ import { RayHit } from "../element/RayHit.js";
 import { Triangle } from "../element/Triangle.js";
 import { Vertex } from "../element/Vertex.js";
 import { Surface } from "./Surface.js";
+import { TriangleMeshIntersectionIndex } from "./TriangleMeshIntersectionIndex.js";
+import { RayBoundary } from "../element/RayBoundary.js";
+import { RayCrossing } from "../element/RayCrossing.js";
+import { RayCrossingKind } from "../element/RayCrossingKind.js";
+import { RayCrossingQuery } from "../element/RayCrossingQuery.js";
+import type { RayCrossingSink } from "../element/RayCrossingSink.js";
+import { RayCrossingSupport } from "../element/RayCrossingSupport.js";
+import { RayFirstHitStatus } from "../element/RayFirstHitStatus.js";
+import type { GeometryBounds } from "../element/GeometryBounds.js";
+import type { Geometry } from "../Geometry.js";
+import { VSDK } from "../../../common/VSDK.js";
+import { Double } from "../../../../../java/lang/Double.js";
+import { Math as JavaMath } from "../../../../../java/lang/Math.js";
+import { ArrayList } from "../../../../../java/util/ArrayList.js";
 import { TriangleMeshGroup } from "./TriangleMeshGroup.js";
 
 /** Indexed triangle mesh with optional vertex attributes and material spans. */
@@ -26,7 +40,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     private textures: Image[] | null = null;
     private textureRanges: number[][] | null = null;
     private materialRanges: number[][] | null = null;
-    private intersectionTriangleIndex = -1;
+    private readonly intersectionTriangleIndex = new TriangleMeshIntersectionIndex();
     public getName(): string {
         return this.name;
     }
@@ -239,32 +253,345 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
             }
         }
     }
+    // Mathematical copy; scene-owned materials and textures are not copied.
+    public override copyGeometry(): Geometry | null {
+        const copy = this.clone() as TriangleMesh;
+        copy.materials = [];
+        copy.textures = [];
+        copy.materialRanges = [];
+        copy.textureRanges = [];
+        return copy;
+    }
+
+    public override getBounds(result: GeometryBounds): void {
+        const triangleIndexes = this.triangleIndexes ?? new Int32Array(0);
+        const vertexPositions = this.vertexPositions ?? new Float64Array(0);
+        if (triangleIndexes.length % 3 !== 0 || vertexPositions.length % 3 !== 0) {
+            result.setIndeterminate();
+            return;
+        }
+        if (this.getNumTriangles() === 0) {
+            result.setEmpty();
+            return;
+        }
+        let minimum = new Vector3Dd(),
+            maximum = new Vector3Dd();
+        let first = true;
+        for (let i = 0; i < triangleIndexes.length; ++i) {
+            const index = triangleIndexes[i]!;
+            if (index < 0 || index >= this.getNumVertices()) {
+                result.setIndeterminate();
+                return;
+            }
+            const x = vertexPositions[index * 3]!,
+                y = vertexPositions[index * 3 + 1]!;
+            const z = vertexPositions[index * 3 + 2]!;
+            if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)) {
+                result.setIndeterminate();
+                return;
+            }
+            if (first) {
+                minimum = maximum = new Vector3Dd(x, y, z);
+                first = false;
+            } else {
+                minimum = new Vector3Dd(
+                    JavaMath.min(minimum.x(), x),
+                    JavaMath.min(minimum.y(), y),
+                    JavaMath.min(minimum.z(), z),
+                );
+                maximum = new Vector3Dd(
+                    JavaMath.max(maximum.x(), x),
+                    JavaMath.max(maximum.y(), y),
+                    JavaMath.max(maximum.z(), z),
+                );
+            }
+        }
+        if (first) result.setEmpty();
+        else result.setFinite(minimum, maximum);
+    }
+
+    private getTrianglePoints(index: number, p0: Vector3Dd[], p1: Vector3Dd[], p2: Vector3Dd[]): boolean {
+        const triangleIndexes = this.triangleIndexes ?? new Int32Array(0);
+        const vertexPositions = this.vertexPositions ?? new Float64Array(0);
+        if (
+            index < 0 ||
+            index >= this.getNumTriangles() ||
+            vertexPositions.length % 3 !== 0 ||
+            triangleIndexes.length % 3 !== 0
+        )
+            return false;
+        const a = triangleIndexes[index * 3]!,
+            b = triangleIndexes[index * 3 + 1]!,
+            c = triangleIndexes[index * 3 + 2]!;
+        if (
+            a < 0 ||
+            b < 0 ||
+            c < 0 ||
+            a >= this.getNumVertices() ||
+            b >= this.getNumVertices() ||
+            c >= this.getNumVertices()
+        )
+            return false;
+        p0[0] = new Vector3Dd(vertexPositions[a * 3]!, vertexPositions[a * 3 + 1]!, vertexPositions[a * 3 + 2]!);
+        p1[0] = new Vector3Dd(vertexPositions[b * 3]!, vertexPositions[b * 3 + 1]!, vertexPositions[b * 3 + 2]!);
+        p2[0] = new Vector3Dd(vertexPositions[c * 3]!, vertexPositions[c * 3 + 1]!, vertexPositions[c * 3 + 2]!);
+        return true;
+    }
+
+    private fillTypedDetail(
+        ray: Ray,
+        t: number,
+        face: number,
+        u: number,
+        v: number,
+        p0: Vector3Dd,
+        p1: Vector3Dd,
+        p2: Vector3Dd,
+        normalReversed: boolean,
+        hit: RayHit | null,
+    ): void {
+        if (!hit || !hit.needsAnySurfaceData()) return;
+        hit.beginDetailEvaluation();
+        if (hit.needsPoint()) {
+            hit.point = ray.getOrigin().add(ray.getDirection().multiply(t));
+            hit.markDetailAvailable(RayHit.DETAIL_POINT);
+        }
+        if (hit.needsNormal()) {
+            const normal = p1.subtract(p0).crossProduct(p2.subtract(p0));
+            const squared = normal.dotProduct(normal);
+            if (Double.isFinite(squared) && squared > 0) {
+                hit.normal =
+                    squared < VSDK.EPSILON ? normal.multiply(1.0 / JavaMath.sqrt(squared)) : normal.normalized();
+                if (normalReversed) hit.normal = hit.normal.multiply(-1);
+                hit.markDetailAvailable(RayHit.DETAIL_NORMAL);
+            }
+        }
+        const vertexUvs = this.vertexUvs ?? new Float64Array(0);
+        if (hit.needsTextureCoordinates() && vertexUvs.length >= this.getNumVertices() * 2) {
+            const triangleIndexes = this.triangleIndexes!;
+            const a = triangleIndexes[face * 3]!,
+                b = triangleIndexes[face * 3 + 1]!,
+                c = triangleIndexes[face * 3 + 2]!;
+            const w = 1.0 - u - v;
+            const texU = w * vertexUvs[a * 2]! + u * vertexUvs[b * 2]! + v * vertexUvs[c * 2]!;
+            const texV = w * vertexUvs[a * 2 + 1]! + u * vertexUvs[b * 2 + 1]! + v * vertexUvs[c * 2 + 1]!;
+            if (Double.isFinite(texU) && Double.isFinite(texV)) {
+                hit.u = texU;
+                hit.v = texV;
+                hit.markDetailAvailable(RayHit.DETAIL_UV);
+            }
+        }
+    }
+
+    public override queryFirstHit(
+        ray: Ray,
+        query: RayCrossingQuery,
+        hit: RayHit | null,
+        boundary: RayBoundary | null = null,
+    ): RayFirstHitStatus {
+        if (hit) hit.clear();
+        if (boundary) boundary.assign(new RayBoundary());
+        if ((this.triangleIndexes?.length ?? 0) % 3 !== 0 || (this.vertexPositions?.length ?? 0) % 3 !== 0)
+            return RayFirstHitStatus.Indeterminate;
+        const t = [0],
+            u = [0],
+            v = [0];
+        if (this.getNumTriangles() === 0) {
+            const zero = new Vector3Dd();
+            return Triangle.queryIntersection(ray, zero, zero, zero, query, t, u, v);
+        }
+        let best = -1;
+        let bestT = 0,
+            bestU = 0,
+            bestV = 0;
+        let bestP0 = new Vector3Dd(),
+            bestP1 = new Vector3Dd(),
+            bestP2 = new Vector3Dd();
+        for (let i = 0; i < this.getNumTriangles(); ++i) {
+            const p0 = [new Vector3Dd()],
+                p1 = [new Vector3Dd()],
+                p2 = [new Vector3Dd()];
+            if (!this.getTrianglePoints(i, p0, p1, p2)) return RayFirstHitStatus.Indeterminate;
+            const status = Triangle.queryIntersection(ray, p0[0]!, p1[0]!, p2[0]!, query, t, u, v);
+            if (status !== RayFirstHitStatus.Hit && status !== RayFirstHitStatus.Miss) return status;
+            if (status === RayFirstHitStatus.Hit && (best < 0 || t[0]! < bestT)) {
+                best = i;
+                bestT = t[0]!;
+                bestU = u[0]!;
+                bestV = v[0]!;
+                bestP0 = p0[0]!;
+                bestP1 = p1[0]!;
+                bestP2 = p2[0]!;
+            }
+        }
+        if (best < 0) return RayFirstHitStatus.Miss;
+        const point = ray.getOrigin().add(ray.getDirection().multiply(bestT));
+        if (!Double.isFinite(point.x()) || !Double.isFinite(point.y()) || !Double.isFinite(point.z()))
+            return RayFirstHitStatus.Indeterminate;
+        if (boundary) boundary.assign(new RayBoundary(bestT, this, false, best));
+        if (hit) {
+            hit.setHitDistance(bestT);
+            if (hit.shouldStoreRay()) hit.setRay(ray.withT(bestT));
+            this.fillTypedDetail(ray, bestT, best, bestU, bestV, bestP0, bestP1, bestP2, false, hit);
+        }
+        return RayFirstHitStatus.Hit;
+    }
+
+    public override querySurfaceDetail(ray: Ray, boundary: RayBoundary, hit: RayHit | null): RayFirstHitStatus {
+        if (hit) hit.clear();
+        if (
+            !hit ||
+            boundary.geometry !== this ||
+            boundary.surfaceIndex < 0 ||
+            boundary.surfaceIndex >= this.getNumTriangles() ||
+            !Double.isFinite(boundary.t)
+        )
+            return RayFirstHitStatus.InvalidInput;
+        if (boundary.getInstanceCount() !== 0) return RayFirstHitStatus.Unsupported;
+        const face = Math.trunc(boundary.surfaceIndex);
+        const p0 = [new Vector3Dd()],
+            p1 = [new Vector3Dd()],
+            p2 = [new Vector3Dd()];
+        if (!this.getTrianglePoints(face, p0, p1, p2)) return RayFirstHitStatus.Indeterminate;
+        const t = [0],
+            u = [0],
+            v = [0];
+        const status = Triangle.queryIntersection(
+            ray,
+            p0[0]!,
+            p1[0]!,
+            p2[0]!,
+            new RayCrossingQuery(boundary.t, boundary.t),
+            t,
+            u,
+            v,
+        );
+        if (status !== RayFirstHitStatus.Hit) return status;
+        const point = ray.getOrigin().add(ray.getDirection().multiply(t[0]!));
+        if (!Double.isFinite(point.x()) || !Double.isFinite(point.y()) || !Double.isFinite(point.z()))
+            return RayFirstHitStatus.Indeterminate;
+        hit.setHitDistance(t[0]!);
+        if (hit.shouldStoreRay()) hit.setRay(ray.withT(t[0]!));
+        this.fillTypedDetail(ray, t[0]!, face, u[0]!, v[0]!, p0[0]!, p1[0]!, p2[0]!, boundary.normalReversed, hit);
+        return RayFirstHitStatus.Hit;
+    }
+
+    public override emitRayCrossings(ray: Ray, query: RayCrossingQuery, sink: RayCrossingSink): RayCrossingSupport {
+        if ((this.triangleIndexes?.length ?? 0) % 3 !== 0 || (this.vertexPositions?.length ?? 0) % 3 !== 0)
+            return RayCrossingSupport.Indeterminate;
+        const depths = new ArrayList<number>();
+        const faces = new ArrayList<number>();
+        const t = [0],
+            u = [0],
+            v = [0];
+        if (this.getNumTriangles() === 0) {
+            const zero = new Vector3Dd();
+            const status = Triangle.queryIntersection(ray, zero, zero, zero, query, t, u, v);
+            if (status === RayFirstHitStatus.Unsupported) return RayCrossingSupport.Unsupported;
+            if (status === RayFirstHitStatus.InvalidInput) return RayCrossingSupport.InvalidInput;
+            if (status === RayFirstHitStatus.Indeterminate) return RayCrossingSupport.Indeterminate;
+            return RayCrossingSupport.Supported;
+        }
+        for (let i = 0; i < this.getNumTriangles(); ++i) {
+            const p0 = [new Vector3Dd()],
+                p1 = [new Vector3Dd()],
+                p2 = [new Vector3Dd()];
+            if (!this.getTrianglePoints(i, p0, p1, p2)) return RayCrossingSupport.Indeterminate;
+            const status = Triangle.queryIntersection(ray, p0[0]!, p1[0]!, p2[0]!, query, t, u, v);
+            if (status === RayFirstHitStatus.Unsupported) return RayCrossingSupport.Unsupported;
+            if (status === RayFirstHitStatus.InvalidInput) return RayCrossingSupport.InvalidInput;
+            if (status === RayFirstHitStatus.Indeterminate) return RayCrossingSupport.Indeterminate;
+            if (status === RayFirstHitStatus.Hit) {
+                const point = ray.getOrigin().add(ray.getDirection().multiply(t[0]!));
+                if (!Double.isFinite(point.x()) || !Double.isFinite(point.y()) || !Double.isFinite(point.z()))
+                    return RayCrossingSupport.Indeterminate;
+                let at = 0;
+                while (at < depths.size() && depths.get(at) <= t[0]!) ++at;
+                if (at === depths.size()) {
+                    depths.add(t[0]!);
+                    faces.add(i);
+                } else {
+                    depths.add(at, t[0]!);
+                    faces.add(at, i);
+                }
+            }
+        }
+        for (let i = 0; i < depths.size(); ++i) {
+            const event = new RayCrossing(depths.get(i), this, RayCrossingKind.Unclassified);
+            event.surfaceIndex = faces.get(i);
+            sink.crossing(event);
+        }
+        return RayCrossingSupport.Supported;
+    }
+
+    /** C++ returns a read-only view of the stored array; this port returns the array itself. */
+    public getVertexPositionsView(): Float64Array | null {
+        return this.vertexPositions;
+    }
+    public getTriangleIndexesView(): Int32Array | null {
+        return this.triangleIndexes;
+    }
+    public getTriangleNormalsView(): Float64Array | null {
+        return this.triangleNormals;
+    }
+
     public doIntersectionInformation(): number {
-        return this.intersectionTriangleIndex;
+        return this.intersectionTriangleIndex.get();
     }
     public doIntersectionFirstHit(ray: Ray, out: RayHit, triangleInformation?: Int32Array | number[]): boolean {
-        let best: { index: number; t: number; point: Vector3Dd; normal: Vector3Dd } | null = null;
-        for (let i = 0; i < this.getNumTriangles(); i++) {
-            const [a, b, c] = this.triangle(i);
-            const hit = Triangle.doIntersectionWithTriangle(ray, this.position(a), this.position(b), this.position(c));
-            if (hit !== null && (best === null || hit.getT() < best.t))
-                best = { index: i, t: hit.getT(), point: hit.getPoint(), normal: hit.getNormal() };
-        }
-        if (best === null) {
-            this.intersectionTriangleIndex = -1;
+        return this.doIntersectionInternal(ray, out, triangleInformation);
+    }
+    // cpp `doIntersectionInternal`: nearest Moller-Trumbore hit, flat normal
+    // first, then `interpolateTriangleData` with the hit's barycentrics.
+    private doIntersectionInternal(ray: Ray, out: RayHit | null, triangleInformation?: Int32Array | number[]): boolean {
+        if (this.getNumTriangles() === 0) {
+            this.intersectionTriangleIndex.set(-1);
             if (triangleInformation !== undefined) triangleInformation[0] = -1;
             return false;
         }
-        this.intersectionTriangleIndex = best.index;
-        if (triangleInformation !== undefined) triangleInformation[0] = best.index;
-        out.setRay(ray.withT(best.t));
-        out.point = new Vector3Dd(best.point);
-        out.normal = new Vector3Dd(best.normal).normalized();
-        out.tangent = new Vector3Dd();
-        out.u = 0;
-        out.v = 0;
-        this.interpolateTriangleData(best.index, out, ray.getDirection());
-        this.fillMaterialAndTexture(best.index, out);
+        if (this.triangleNormals === null || this.triangleNormals.length < this.getNumTriangles() * 3)
+            this.calculateNormals();
+
+        let found = false;
+        let bestT = 1e308;
+        let bestTri = -1;
+        let bestU = 0,
+            bestV = 0;
+        const t = [0],
+            u = [0],
+            v = [0];
+        for (let i = 0; i < this.getNumTriangles(); i++) {
+            const [i0, i1, i2] = this.triangle(i);
+            if (
+                Triangle.intersectRay(ray, this.position(i0), this.position(i1), this.position(i2), t, u, v) &&
+                t[0]! < bestT
+            ) {
+                bestT = t[0]!;
+                bestTri = i;
+                bestU = u[0]!;
+                bestV = v[0]!;
+                found = true;
+            }
+        }
+
+        if (!found) {
+            this.intersectionTriangleIndex.set(-1);
+            if (triangleInformation !== undefined) triangleInformation[0] = -1;
+            return false;
+        }
+        this.intersectionTriangleIndex.set(bestTri);
+        if (triangleInformation !== undefined) triangleInformation[0] = bestTri;
+
+        if (out !== null) {
+            out.setRay(ray.withT(bestT));
+            out.point = ray.getOrigin().add(ray.getDirection().multiply(bestT));
+            out.normal = this.vector(this.triangleNormals!, bestTri).normalized();
+            out.tangent = new Vector3Dd();
+            out.u = 0;
+            out.v = 0;
+            this.interpolateTriangleData(bestTri, bestU, bestV, out, ray.getDirection());
+            this.fillMaterialAndTexture(bestTri, out);
+        }
         return true;
     }
     public override doExtraInformation(ray: Ray, t: number, out: RayHit): void {
@@ -510,38 +837,39 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     public override toString(): string {
         return `- TriangleMesh\n  - Number of triangles: ${this.getNumTriangles()}\n  - Number of vertexes: ${this.getNumVertices()}\n`;
     }
-    private interpolateTriangleData(index: number, out: RayHit, direction: Vector3Dd): void {
-        const [a, b, c] = this.triangle(index);
-        const p0 = this.position(a),
-            p1 = this.position(b),
-            p2 = this.position(c);
-        const q = out.point;
-        const v0 = p1.subtract(p0),
-            v1 = p2.subtract(p0),
-            v2 = q.subtract(p0);
-        const d00 = v0.dotProduct(v0),
-            d01 = v0.dotProduct(v1),
-            d11 = v1.dotProduct(v1),
-            d20 = v2.dotProduct(v0),
-            d21 = v2.dotProduct(v1),
-            den = d00 * d11 - d01 * d01;
-        if (Math.abs(den) > 0) {
-            const w = (d00 * d21 - d01 * d20) / den,
-                u = (d11 * d20 - d01 * d21) / den,
-                v = 1 - u - w;
-            if (this.vertexNormals !== null)
-                out.normal = this.vector(this.vertexNormals, a)
-                    .multiply(v)
-                    .add(this.vector(this.vertexNormals, b).multiply(u))
-                    .add(this.vector(this.vertexNormals, c).multiply(w))
-                    .normalized();
-            if (this.vertexUvs !== null) {
-                out.u = this.vertexUvs[a * 2]! * v + this.vertexUvs[b * 2]! * u + this.vertexUvs[c * 2]! * w;
-                out.v =
-                    this.vertexUvs[a * 2 + 1]! * v + this.vertexUvs[b * 2 + 1]! * u + this.vertexUvs[c * 2 + 1]! * w;
+    private interpolateTriangleData(tri: number, u: number, v: number, out: RayHit, rayDirection: Vector3Dd): void {
+        const [i0, i1, i2] = this.triangle(tri);
+        const w = 1.0 - u - v;
+
+        if (out.needsNormal()) {
+            if (
+                this.vertexNormals !== null &&
+                this.vertexNormals.length >= this.getNumVertices() * 3 &&
+                this.vertexUvs !== null &&
+                this.vertexUvs.length >= this.getNumVertices() * 2
+            ) {
+                const vn = this.vertexNormals;
+                const n = new Vector3Dd(
+                    w * vn[i0 * 3]! + u * vn[i1 * 3]! + v * vn[i2 * 3]!,
+                    w * vn[i0 * 3 + 1]! + u * vn[i1 * 3 + 1]! + v * vn[i2 * 3 + 1]!,
+                    w * vn[i0 * 3 + 2]! + u * vn[i1 * 3 + 2]! + v * vn[i2 * 3 + 2]!,
+                );
+                out.normal = n.normalized();
+            } else {
+                out.normal = this.vector(this.triangleNormals!, tri).normalized();
             }
+            if (out.normal.dotProduct(rayDirection) >= 0) out.normal = out.normal.multiply(-1);
         }
-        if (out.normal.dotProduct(direction) >= 0) out.normal = out.normal.multiply(-1);
+
+        if (
+            out.needsTextureCoordinates() &&
+            this.vertexUvs !== null &&
+            this.vertexUvs.length >= this.getNumVertices() * 2
+        ) {
+            const uv = this.vertexUvs;
+            out.u = w * uv[i0 * 2]! + u * uv[i1 * 2]! + v * uv[i2 * 2]!;
+            out.v = w * uv[i0 * 2 + 1]! + u * uv[i1 * 2 + 1]! + v * uv[i2 * 2 + 1]!;
+        }
     }
     private fillMaterialAndTexture(triangle: number, out: RayHit): void {
         out.material = this.materials?.[0] ?? null;

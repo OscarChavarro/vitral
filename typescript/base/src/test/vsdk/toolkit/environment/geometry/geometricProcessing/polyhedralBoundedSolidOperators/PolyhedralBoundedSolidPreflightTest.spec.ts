@@ -1,3 +1,4 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "../../../../../../../main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { describe, expect, it } from "vitest";
 
 import { StringBuilder } from "java/lang/StringBuilder.js";
@@ -6,7 +7,6 @@ import { Sphere } from "vsdk/toolkit/environment/geometry/volume/Sphere.js";
 import { PolyhedralBoundedSolidGeometricValidator } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import { PolyhedralBoundedSolidValidationEngine } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
-import { PolyhedralBoundedSolidModeler } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
 import { CsgKurlanderBowlFixture } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/CsgKurlanderBowlFixture.js";
 
 /**
@@ -70,15 +70,15 @@ describe("PolyhedralBoundedSolidPreflightTest", () => {
     });
 
     it("given_twoCylindersWithSameRadius_when_inspectingEachSolid_then_noCoincidentVertices", () => {
-        const cylA = PolyhedralBoundedSolidModeler.createCircularLamina(0.0, 0.0, 0.15, 0.0, 30);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        const cylA = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(0.0, 0.0, 0.15, 0.0, 30);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             cylA,
             cylA.findFace(1)!,
             new Matrix4x4d().translation(0.0, 0.0, 0.5),
         );
 
-        const cylB = PolyhedralBoundedSolidModeler.createCircularLamina(0.11, 0.0, 0.15, 0.06, 30);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        const cylB = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(0.11, 0.0, 0.15, 0.06, 30);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             cylB,
             cylB.findFace(1)!,
             new Matrix4x4d().translation(0.0, 0.0, 0.5),

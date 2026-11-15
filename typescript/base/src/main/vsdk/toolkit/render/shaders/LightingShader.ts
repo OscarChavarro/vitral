@@ -5,6 +5,7 @@
 //=          principles and practice" - second edition, Addison Wesley,     =
 //=          1992.                                                          =
 
+import { ShadowTransmittance } from "./ShadowTransmittance.js";
 import type { TraceWorkspace } from "../TraceWorkspace.js";
 
 import type { List } from "../../../../java/util/List.js";
@@ -78,14 +79,24 @@ export abstract class LightingShader extends Shader {
 
             const shadowDirection: Vector3Dd = new Vector3Dd(lx, ly, lz);
             const lightSourceRay: Ray = new Ray(info.point, shadowDirection);
-            const attenuation: number = light.evaluateLightResponseFactor(lightSourceRay);
+            let attenuation: number = light.evaluateLightResponseFactor(lightSourceRay);
             if (attenuation <= 0.0) {
                 continue;
             }
 
-            if (LightingShader.isShadowed(info, lx, ly, lz, maxShadowDistance, objects, workspace)) {
+            const shadowFactor: number = LightingShader.shadowTransmittance(
+                info,
+                lx,
+                ly,
+                lz,
+                maxShadowDistance,
+                objects,
+                workspace,
+            );
+            if (shadowFactor <= 0.0) {
                 continue;
             }
+            attenuation *= shadowFactor;
 
             const lambert: number = normalX * lx + normalY * ly + normalZ * lz;
             if (lambert <= 0) {
@@ -134,7 +145,7 @@ export abstract class LightingShader extends Shader {
         return new Shader.LocalShadingResult(surfaceNormal, new ColorRgb(outR, outG, outB));
     }
 
-    private static isShadowed(
+    private static shadowTransmittance(
         info: RayHit,
         lightDirX: number,
         lightDirY: number,
@@ -142,7 +153,7 @@ export abstract class LightingShader extends Shader {
         maxShadowDistance: number,
         objects: List<SimpleBody>,
         workspace: TraceWorkspace,
-    ): boolean {
+    ): number {
         const shadowOrigin: Vector3Dd = new Vector3Dd(
             info.point.x() + VSDK.EPSILON * lightDirX,
             info.point.y() + VSDK.EPSILON * lightDirY,
@@ -150,20 +161,7 @@ export abstract class LightingShader extends Shader {
         );
         const shadowDirection: Vector3Dd = new Vector3Dd(lightDirX, lightDirY, lightDirZ);
         const shadowRay: Ray = new Ray(shadowOrigin, shadowDirection);
-        const shadowCandidateHit: RayHit = workspace.shadowCandidateHit();
-        shadowCandidateHit.setStoreRay(false);
-
-        for (let i = 0; i < objects.size(); i++) {
-            const candidateObject: SimpleBody = objects.get(i);
-            shadowCandidateHit.resetForDistanceOnly();
-            if (candidateObject.doIntersectionFirstHit(shadowRay, shadowCandidateHit)) {
-                const hitDistance: number = shadowCandidateHit.getHitDistance();
-                if (hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return ShadowTransmittance.evaluate(shadowRay, maxShadowDistance, objects, workspace, true);
     }
 
     private static computeBlinnPerturbedNormal(info: RayHit, surfaceNormal: Vector3Dd): Vector3Dd {

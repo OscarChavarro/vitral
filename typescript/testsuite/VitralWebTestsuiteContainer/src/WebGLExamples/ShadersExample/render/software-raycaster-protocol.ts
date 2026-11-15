@@ -25,6 +25,12 @@ export interface ShadersSceneDescriptor {
   readonly cameraFov: number;
 
   readonly sphereRadius: number;
+  /**
+   * `ShadersGeometryFixture.nameOf` the model's geometry; for any other than
+   * `sphere` the worker builds its own fixture of that kind and traces the
+   * body it creates, as Java's snapshot traces the model fixture's body.
+   */
+  readonly geometryName: string;
   readonly modelRotation: Float64Array;
 
   readonly lightPosition: Float64Array;

@@ -1,8 +1,10 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { Math as JavaMath } from "../../../../../../../java/lang/Math.js";
 import { platformPrintln } from "../../../../../../../java/lang/_PlatformConsole.js";
 import { Matrix4x4d } from "../../../../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../../../../common/linealAlgebra/Vector3Dd.js";
 import { Sphere } from "../../../volume/Sphere.js";
+import { Cone } from "../../../volume/Cone.js";
 import { PolyhedralBoundedSolid } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidValidationEngine } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
@@ -60,16 +62,8 @@ export class CsgKurlanderBowlFixture {
     }
 
     private static createCylinder(radius: number, height: number, translation: Vector3Dd): PolyhedralBoundedSolid {
-        const solid = PolyhedralBoundedSolidModeler.createCircularLamina(
-            0.0,
-            0.0,
-            radius,
-            0.0,
-            CsgKurlanderBowlFixture.CYLINDER_SIDES,
-        );
-        let sweep = new Matrix4x4d();
-        sweep = sweep.translation(0.0, 0.0, height);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, sweep);
+        const cylinder = new Cone(radius, radius, height);
+        const solid = cylinder.exportToPolyhedralBoundedSolid(CsgKurlanderBowlFixture.CYLINDER_SIDES, 1);
 
         let move = new Matrix4x4d();
         move = move.translation(translation);
@@ -90,7 +84,7 @@ export class CsgKurlanderBowlFixture {
 
         let t = new Matrix4x4d();
         t = t.translation(0.0, 0.0, thickness);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, t);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, t);
         return solid;
     }
 

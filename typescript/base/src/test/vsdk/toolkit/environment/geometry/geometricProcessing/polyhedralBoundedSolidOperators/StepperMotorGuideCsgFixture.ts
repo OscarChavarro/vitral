@@ -1,3 +1,4 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "../../../../../../../main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { ArrayList } from "java/util/ArrayList.js";
 import { Matrix4x4d } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
@@ -268,7 +269,7 @@ export class StepperMotorGuideCsgFixture {
         PolyhedralBoundedSolidEulerOperators.smef(solid, 1, polygon.size(), 1, 2);
         let sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, height);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, sweep);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, sweep);
         return solid;
     }
 

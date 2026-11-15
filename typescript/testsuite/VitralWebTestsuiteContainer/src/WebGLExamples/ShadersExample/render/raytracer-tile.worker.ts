@@ -32,6 +32,7 @@ import type {
 // a worker that does not load the barrel must ask for them explicitly.
 import '@vitral/base/vsdk/toolkit/environment/material/RendererConfigurationBehavior';
 import type { ShadersSceneDescriptor } from './software-raycaster-protocol';
+import { ShadersGeometryFixture } from '../model/shaders-geometry-fixture';
 
 /**
  * Worker entry module of the `ParallelRaytracer` of `render.SoftwareRaycaster`.
@@ -56,6 +57,24 @@ interface LoadedResources {
 }
 
 let loaded: LoadedResources | undefined;
+
+/**
+ * The worker's own fixture of the model's geometry, rebuilt only when the
+ * user picks another one (`[o]`); null for the sphere.
+ */
+let fixture: ShadersGeometryFixture | null = null;
+
+function fixtureOf(request: ShadersSceneDescriptor): ShadersGeometryFixture | null {
+  const kind = ShadersGeometryFixture.parse(request.geometryName);
+  if (kind === null || kind === 'SPHERE') {
+    fixture = null;
+    return null;
+  }
+  if (fixture === null || fixture.getKind() !== kind) {
+    fixture = new ShadersGeometryFixture(kind);
+  }
+  return fixture;
+}
 
 function loadResources(request: ShadersSceneDescriptor): LoadedResources {
   if (loaded !== undefined && loaded.generation === request.generation) {
@@ -104,20 +123,28 @@ function buildSceneSnapshot(
   camera.updateViewportResize(width, height);
   const cameraSnapshot = camera.exportToCameraSnapshot(width, height);
 
-  const sphereBody = new SimpleBody();
-  sphereBody.setGeometry(new Sphere(request.sphereRadius));
+  // The frame's body shares the fixture's geometries and the maps; it owns
+  // only its material copy.
   const activeMaterial: SimpleMaterial = buildActiveMaterial(request);
+  let materialCopy: SimpleMaterial;
   if (activeMaterial instanceof MicroFacetedMaterial) {
-    sphereBody.setMaterial(new MicroFacetedMaterial(activeMaterial));
+    materialCopy = new MicroFacetedMaterial(activeMaterial);
   } else {
-    sphereBody.setMaterial(new SimpleMaterial(activeMaterial));
+    materialCopy = new SimpleMaterial(activeMaterial);
   }
-  sphereBody.setTexture(resources.textureMap);
-  sphereBody.setNormalMap(resources.normalMap);
-  sphereBody.setRotation(matrixFromRowOrder(request.modelRotation));
-
   const bodies = new ArrayList<SimpleBody>(1);
-  bodies.add(sphereBody);
+  const geometryFixture = fixtureOf(request);
+  if (geometryFixture !== null) {
+    bodies.add(geometryFixture.createBody(materialCopy, matrixFromRowOrder(request.modelRotation)));
+  } else {
+    const sphereBody = new SimpleBody();
+    sphereBody.setGeometry(new Sphere(request.sphereRadius));
+    sphereBody.setMaterial(materialCopy);
+    sphereBody.setTexture(resources.textureMap);
+    sphereBody.setNormalMap(resources.normalMap);
+    sphereBody.setRotation(matrixFromRowOrder(request.modelRotation));
+    bodies.add(sphereBody);
+  }
 
   const lights = new ArrayList<Light>(2);
   const ambientLight: Light = new AmbientLight(new ColorRgb(1, 1, 1));

@@ -10,8 +10,13 @@ import {
   ViewChild,
   signal,
 } from '@angular/core';
-import { Matrix4x4d, Vector3Dd, type RGBImageUncompressed } from '@vitral/base';
-import { WebGLImageRenderer, WebGLSphereRenderer, WebSystem } from '@vitral/webgl';
+import { Matrix4x4d, Vector3Dd, type Light, type RGBImageUncompressed } from '@vitral/base';
+import {
+  WebGLGeometryRenderer,
+  WebGLImageRenderer,
+  WebGLSphereRenderer,
+  WebSystem,
+} from '@vitral/webgl';
 import { ExampleCameraInteraction } from '../_shared/example-camera-interaction';
 import { ExampleRendererConfigurationInteraction } from '../_shared/example-renderer-configuration-interaction';
 import { Animation } from './gui/animation';
@@ -162,6 +167,7 @@ export class ShadersExample implements OnChanges, OnDestroy {
       // `glResourcesReleased` flag; the component is torn down once, which is
       // that flag.
       WebGLSphereRenderer.dispose(this.gl);
+      WebGLGeometryRenderer.dispose(this.gl);
       this.unloadImage(this.model.getTextureMap());
       this.unloadImage(this.model.getBumpMapHeightRgb());
       this.unloadImage(this.model.getSoftwareFrameImage());
@@ -492,19 +498,37 @@ export class ShadersExample implements OnChanges, OnDestroy {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    await WebGLSphereRenderer.draw(
-      gl,
-      this.model.getSphere(),
-      this.model.getCamera(),
-      this.model.getLight(),
-      this.model.getActiveMaterialForCurrentShading(),
-      this.model.getQuality(),
-      this.model.getTextureMap(),
-      this.model.getBumpMapHeightRgb(),
-      modelRotation,
-      this.model.getSphereMeridians(),
-      this.model.getSphereParallels(),
-    );
+    const geometryFixture = this.model.getGeometryFixture();
+    if (geometryFixture !== null) {
+      // The drawable mesh of the geometry the software path traces
+      const lights: Light[] = [];
+      lights.push(this.model.getLight());
+      await WebGLGeometryRenderer.draw(
+        gl,
+        geometryFixture.getDrawableMesh(),
+        this.model.getCamera(),
+        lights,
+        this.model.getActiveMaterialForCurrentShading(),
+        this.model.getQuality(),
+        null,
+        null,
+        modelRotation,
+      );
+    } else {
+      await WebGLSphereRenderer.draw(
+        gl,
+        this.model.getSphere(),
+        this.model.getCamera(),
+        this.model.getLight(),
+        this.model.getActiveMaterialForCurrentShading(),
+        this.model.getQuality(),
+        this.model.getTextureMap(),
+        this.model.getBumpMapHeightRgb(),
+        modelRotation,
+        this.model.getSphereMeridians(),
+        this.model.getSphereParallels(),
+      );
+    }
     await this.hudRenderer.draw(gl, this.model);
   }
 

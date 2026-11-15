@@ -15,3 +15,4 @@ export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
 export { EnvironmentPersistence } from "./vsdk/toolkit/io/geometry/EnvironmentPersistence.js";
 export { ReaderObj } from "./vsdk/toolkit/io/geometry/ReaderObj.js";
 export { ReaderMitScene } from "./vsdk/toolkit/io/geometry/ReaderMitScene.js";
+export { ReaderAltimetry } from "./vsdk/toolkit/io/geometry/ReaderAltimetry.js";

@@ -1,3 +1,4 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "../../../../../../../main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { describe, expect, it } from "vitest";
 
 import { Matrix4x4d } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
@@ -8,10 +9,10 @@ import { PolyhedralBoundedSolidTestFixtures } from "./PolyhedralBoundedSolidTest
 
 describe("PolyhedralBoundedSolidTopologySummaryTest", () => {
     function createCylinder(radius: number, height: number, z: number): PolyhedralBoundedSolid {
-        const solid = PolyhedralBoundedSolidModeler.createCircularLamina(0.0, 0.0, radius, 0.0, 24);
+        const solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(0.0, 0.0, radius, 0.0, 24);
         let sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, height);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, sweep);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, sweep);
         if (z !== 0.0) {
             let translation = new Matrix4x4d();
             translation = translation.translation(0.0, 0.0, z);

@@ -1,3 +1,12 @@
+// Shared binary64 bit views (single-threaded per realm).
+const conversionBuffer = new ArrayBuffer(8);
+const conversionFloat = new Float64Array(conversionBuffer);
+const conversionBits = new BigUint64Array(conversionBuffer);
+const conversionWords = new Uint32Array(conversionBuffer);
+conversionFloat[0] = 1.0;
+const highWord = conversionWords[1] === 0x3ff00000 ? 1 : 0;
+const lowWord = 1 - highWord;
+
 export class Math {
     public static readonly E = 2.7182818284590452354;
     public static readonly PI = 3.14159265358979323846;
@@ -101,14 +110,144 @@ export class Math {
         return globalThis.Math.sqrt(a);
     }
 
+    /**
+    Unbiased binary exponent, as the C++ emulation (`std::ilogb`) computes it:
+    subnormal values report their true exponent (`-1074` for `MIN_VALUE`).
+    Zero, infinities and NaN keep the historical result `0` of this port.
+    */
     public static getExponent(a: number): number {
         if (a === 0 || !globalThis.Number.isFinite(a)) {
             return 0;
         }
-        return globalThis.Math.floor(globalThis.Math.log2(globalThis.Math.abs(a)));
+        conversionFloat[0] = a;
+        const high = conversionWords[highWord]!;
+        const biased = (high >>> 20) & 0x7ff;
+        if (biased !== 0) {
+            return biased - 1023;
+        }
+        // Subnormal: the exponent of the leading fraction bit.
+        const highFraction = high & 0xfffff;
+        if (highFraction !== 0) {
+            return -1011 - globalThis.Math.clz32(highFraction);
+        }
+        return -1043 - globalThis.Math.clz32(conversionWords[lowWord]!);
     }
 
+    /** `Math.scalb(double, int)`: `a * 2^scaleFactor` with a single rounding (`std::ldexp`). */
     public static scalb(a: number, scaleFactor: number): number {
-        return a * globalThis.Math.pow(2.0, scaleFactor);
+        if (a === 0 || !globalThis.Number.isFinite(a)) {
+            return a;
+        }
+        if (scaleFactor >= -1074 && scaleFactor <= 1023) {
+            // The power of two is exact, so the product is the single rounding.
+            return a * 2 ** scaleFactor;
+        }
+        const decomposition = Math.decompose(a);
+        return Math.roundToDouble(
+            decomposition.negative,
+            decomposition.significand,
+            decomposition.exponent + scaleFactor,
+        );
+    }
+
+    /** `Math.nextAfter(double, double)` (`std::nextafter`). */
+    public static nextAfter(start: number, direction: number): number {
+        if (globalThis.Number.isNaN(start) || globalThis.Number.isNaN(direction)) {
+            return NaN;
+        }
+        if (start === direction) {
+            return direction;
+        }
+        if (start === 0) {
+            return direction > 0 ? 4.9406564584124654e-324 : -4.9406564584124654e-324;
+        }
+        conversionFloat[0] = start;
+        if (start < direction === start > 0) {
+            conversionBits[0] = conversionBits[0]! + 1n;
+        } else {
+            conversionBits[0] = conversionBits[0]! - 1n;
+        }
+        return conversionFloat[0]!;
+    }
+
+    /** `Math.fma(double, double, double)`: `a * b + c` with a single rounding. */
+    public static fma(a: number, b: number, c: number): number {
+        if (!globalThis.Number.isFinite(a) || !globalThis.Number.isFinite(b)) {
+            return a * b + c;
+        }
+        if (!globalThis.Number.isFinite(c)) {
+            // The exact product of finite factors is finite.
+            return c;
+        }
+        const x = Math.decompose(a);
+        const y = Math.decompose(b);
+        const z = Math.decompose(c);
+        const productNegative = x.negative !== y.negative;
+        let product = x.significand * y.significand;
+        let productExponent = x.exponent + y.exponent;
+        let addend = z.significand;
+        let addendExponent = z.exponent;
+        if (product === 0n) {
+            productExponent = addendExponent;
+        }
+        if (addend === 0n) {
+            addendExponent = productExponent;
+        }
+        const exponent = productExponent < addendExponent ? productExponent : addendExponent;
+        product <<= BigInt(productExponent - exponent);
+        addend <<= BigInt(addendExponent - exponent);
+        const sum = (productNegative ? -product : product) + (z.negative ? -addend : addend);
+        if (sum === 0n) {
+            const productIsNegativeZero = productNegative;
+            return productIsNegativeZero && z.negative ? -0 : 0;
+        }
+        return sum < 0n ? Math.roundToDouble(true, -sum, exponent) : Math.roundToDouble(false, sum, exponent);
+    }
+
+    /** Exact `value = (-1)^negative * significand * 2^exponent` of a finite double. */
+    private static decompose(value: number): { negative: boolean; significand: bigint; exponent: number } {
+        conversionFloat[0] = value;
+        const bits = conversionBits[0]!;
+        const biased = globalThis.Number((bits >> 52n) & 0x7ffn);
+        const fraction = bits & 0xfffffffffffffn;
+        return {
+            negative: bits >> 63n === 1n,
+            significand: biased === 0 ? fraction : fraction | 0x10000000000000n,
+            exponent: biased === 0 ? -1074 : biased - 1075,
+        };
+    }
+
+    private static bitLength(value: bigint): number {
+        return value === 0n ? 0 : value.toString(2).length;
+    }
+
+    /** Rounds `significand * 2^exponent` (significand > 0) to nearest, ties to even. */
+    private static roundToDouble(negative: boolean, significand: bigint, exponent: number): number {
+        const length = Math.bitLength(significand);
+        let quantum = exponent + length - 53;
+        if (quantum < -1074) {
+            quantum = -1074;
+        }
+        let rounded = significand;
+        if (quantum > exponent) {
+            const shift = BigInt(quantum - exponent);
+            rounded = significand >> shift;
+            const remainder = significand - (rounded << shift);
+            const half = 1n << (shift - 1n);
+            if (remainder > half || (remainder === half && (rounded & 1n) === 1n)) {
+                rounded += 1n;
+            }
+        } else {
+            quantum = exponent;
+        }
+        let result = globalThis.Number(rounded);
+        // quantum >= -1074 and the value is representable (or overflows), so the
+        // power-of-two steps are exact.
+        while (quantum > 1000) {
+            result *= 2 ** 1000;
+            quantum -= 1000;
+        }
+        result *= 2 ** quantum;
+        return negative ? -result : result;
     }
 }

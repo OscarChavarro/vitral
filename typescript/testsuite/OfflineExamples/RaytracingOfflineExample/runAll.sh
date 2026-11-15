@@ -9,7 +9,19 @@ npm --prefix "$script_dir" run build
 
 cd "$script_dir"
 
-if [[ $# -gt 0 ]]; then
+# Si se indica una escena/salida concreta (o --help), delegar en una sola ejecución.
+# Flags de renderizado como --parallel o --nosave se reenvían a cada escena del lote.
+single_run=false
+for arg in "$@"; do
+  case "${arg}" in
+    --scene|-s|--output|-o|--help|-h) single_run=true ;;
+    nosave) ;;
+    -*) ;;
+    *) single_run=true ;;
+  esac
+done
+
+if [[ "${single_run}" == true ]]; then
   node "$script_dir/dist/RaytracerSimple.js" "$@"
 else
   # The program runs with this directory as its working directory, and the
@@ -27,10 +39,10 @@ else
 
   for scene_file in "${ray_files[@]}"; do
     base_name="$(basename "${scene_file}" .ray)"
-    output_file="${output_dir}/${base_name}.bmp"
+    output_file="${output_dir}/${base_name}.ppm"
 
     echo "Rendering ${scene_file} -> ${output_file}"
-    node "$script_dir/dist/RaytracerSimple.js" \
+    node "$script_dir/dist/RaytracerSimple.js" "$@" \
       --scene "${scene_file}" --output "${output_file}"
   done
 fi

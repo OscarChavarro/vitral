@@ -14,6 +14,7 @@ import {
   Matrix4x4d,
   PolyhedralBoundedSolid,
   PolyhedralBoundedSolidEulerOperators,
+  PolyhedralBoundedSolidEulerConstructions,
   PolyhedralBoundedSolidModeler,
   PolyhedralBoundedSolidStatistics,
   PolyhedralBoundedSolidTopologyEditing,
@@ -118,7 +119,7 @@ export class GeneralModelsBuilder {
       case 'ARC_SAMPLE':
         mySolid = new PolyhedralBoundedSolid();
         PolyhedralBoundedSolidEulerOperators.mvfs(mySolid, new Vector3Dd(1, 0.5, 0.1), 1, 1);
-        PolyhedralBoundedSolidModeler.addArcToExistingFace(
+        PolyhedralBoundedSolidEulerConstructions.addArcToExistingFace(
           mySolid,
           1,
           1,
@@ -132,12 +133,18 @@ export class GeneralModelsBuilder {
         );
         break;
       case 'CIRCULAR_LAMINA':
-        mySolid = PolyhedralBoundedSolidModeler.createCircularLamina(0.5, 0.5, 0.5, 0.1, 12);
+        mySolid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
+          0.5,
+          0.5,
+          0.5,
+          0.1,
+          12,
+        );
         break;
       case 'TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC':
         mySolid = new PolyhedralBoundedSolid();
         PolyhedralBoundedSolidEulerOperators.mvfs(mySolid, new Vector3Dd(1, 0.5, 0.1), 1, 1);
-        PolyhedralBoundedSolidModeler.addArcToExistingFace(
+        PolyhedralBoundedSolidEulerConstructions.addArcToExistingFace(
           mySolid,
           1,
           1,
@@ -158,7 +165,7 @@ export class GeneralModelsBuilder {
         scaleMatrix = scaleMatrix.scale(0.5, 0.5, 0.5);
         transformationMatrix = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
 
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
           mySolid,
           mySolid.findFace(1),
           transformationMatrix,
@@ -166,7 +173,13 @@ export class GeneralModelsBuilder {
 
         break;
       case 'TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_CIRCULAR':
-        mySolid = PolyhedralBoundedSolidModeler.createCircularLamina(0.5, 0.5, 0.5, 0.1, 24);
+        mySolid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
+          0.5,
+          0.5,
+          0.5,
+          0.1,
+          24,
+        );
 
         translationMatrix = new Matrix4x4d();
         translationMatrix = translationMatrix.translation(0.0, 0.0, 0.5);
@@ -175,7 +188,7 @@ export class GeneralModelsBuilder {
         scaleMatrix = new Matrix4x4d();
         scaleMatrix = scaleMatrix.scale(0.5, 0.5, 0.5);
         transformationMatrix = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
           mySolid,
           mySolid.findFace(1),
           transformationMatrix,
@@ -189,7 +202,7 @@ export class GeneralModelsBuilder {
             S = new Matrix4x4d();
             S = S.scale(0.2, 0.2, 0.2);
             M = T.multiply(R.multiply(S));
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFace(
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFace(
                 solid, solid.findFace(1), M);
 */
         break;
@@ -255,7 +268,7 @@ export class GeneralModelsBuilder {
         translationMatrix = new Matrix4x4d();
         translationMatrix = translationMatrix.translation(0.0, 0.0, 0.1);
 
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
           mySolid,
           mySolid.findFace(1),
           translationMatrix,
@@ -751,14 +764,9 @@ export class GeneralModelsBuilder {
     let T = new Matrix4x4d();
     T = T.translation(0, 0, 0.4);
 
-    const solid1: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.createCircularLamina(
-      0.0,
-      0.0,
-      0.5,
-      0.0,
-      6,
-    );
-    PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+    const solid1: PolyhedralBoundedSolid =
+      PolyhedralBoundedSolidEulerConstructions.createCircularLamina(0.0, 0.0, 0.5, 0.0, 6);
+    PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
       solid1,
       solid1.findFace(1),
       T,
@@ -776,14 +784,9 @@ export class GeneralModelsBuilder {
     PolyhedralBoundedSolidModeler.applyTransformation(solid1, R);
 
     //- Create cilynder 2 ---------------------------------------------
-    const solid2: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.createCircularLamina(
-      0.0,
-      0.0,
-      0.5,
-      0.0,
-      6,
-    );
-    PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+    const solid2: PolyhedralBoundedSolid =
+      PolyhedralBoundedSolidEulerConstructions.createCircularLamina(0.0, 0.0, 0.5, 0.0, 6);
+    PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
       solid2,
       solid2.findFace(1),
       T,
@@ -1061,13 +1064,14 @@ export class GeneralModelsBuilder {
   private static createTestTorus(nsides: number, nrad: number): PolyhedralBoundedSolid {
     const center = new Vector3Dd(0.5, 0.5, 0);
 
-    const solid: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.createCircularLamina(
-      center.x(),
-      center.y(),
-      0.2,
-      0.0,
-      nsides,
-    );
+    const solid: PolyhedralBoundedSolid =
+      PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
+        center.x(),
+        center.y(),
+        0.2,
+        0.0,
+        nsides,
+      );
 
     // For seting 4 sided case to be equal to figure [MANT1988].12.5.
     // an aditional rotation must be applied to the lamina prior to the
@@ -1119,7 +1123,7 @@ export class GeneralModelsBuilder {
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 4, 3, 1, 2, 2);
         Matrix4x4d T = new Matrix4x4d();
         T = T.translation(0, 0, 0.4);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 */
 

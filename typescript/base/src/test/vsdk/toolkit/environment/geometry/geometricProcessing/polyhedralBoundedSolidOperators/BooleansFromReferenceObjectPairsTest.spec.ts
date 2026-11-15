@@ -1,3 +1,4 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "../../../../../../../main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { Matrix4x4d } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
@@ -8,6 +9,7 @@ import { Math as JavaMath } from "java/lang/Math.js";
 import { PolyhedralBoundedSolid } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidValidationEngine } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
+import { Cone } from "vsdk/toolkit/environment/geometry/volume/Cone.js";
 import { PolyhedralBoundedSolidModeler } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
 import { SimpleTestGeometryLibrary } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.js";
 import { CsgSampleCorpus } from "./CsgSampleCorpus.js";
@@ -736,17 +738,8 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
         },
 
         createCylinder(radius: number, height: number, translation: Vector3Dd): PolyhedralBoundedSolid {
-            const solid = PolyhedralBoundedSolidModeler.createCircularLamina(
-                0.0,
-                0.0,
-                radius,
-                0.0,
-                KurlanderBowlBuilder.CYLINDER_SIDES,
-            );
-            let sweep = new Matrix4x4d();
-            sweep = sweep.translation(0.0, 0.0, height);
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, sweep);
-
+            const cylinder = new Cone(radius, radius, height);
+            const solid = cylinder.exportToPolyhedralBoundedSolid(KurlanderBowlBuilder.CYLINDER_SIDES, 1);
             let move = new Matrix4x4d();
             move = move.translation(translation);
             PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
@@ -764,7 +757,7 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
 
             let t = new Matrix4x4d();
             t = t.translation(0.0, 0.0, thickness);
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, t);
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, t);
             return solid;
         },
 

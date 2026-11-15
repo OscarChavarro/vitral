@@ -15,6 +15,8 @@ import {
 } from '@vitral/base';
 import type { ShadersResources } from '../io/shaders-reader';
 import { nextShaderOperationMode, type ShaderOperationMode } from './shader-operation-mode';
+import type { ShadersGeometry } from './shaders-geometry';
+import { ShadersGeometryFixture } from './shaders-geometry-fixture';
 
 /**
  * Port of
@@ -75,6 +77,9 @@ export class ShadersModel {
   private sphereRotationAngleRadians: number;
   private sphereMeridians: number;
   private sphereParallels: number;
+  /** Selected geometry; its fixture is null for the sphere */
+  private geometry: ShadersGeometry;
+  private geometryFixture: ShadersGeometryFixture | null;
 
   constructor() {
     this.camera = new Camera();
@@ -104,6 +109,8 @@ export class ShadersModel {
     this.sphereRotationAngleRadians = 0.0;
     this.sphereMeridians = 100;
     this.sphereParallels = 50;
+    this.geometry = 'SPHERE';
+    this.geometryFixture = null;
     this.updateSoftwareViewportAndCamera(
       Math.trunc(this.camera.getViewportXSize()),
       Math.trunc(this.camera.getViewportYSize()),
@@ -341,6 +348,26 @@ export class ShadersModel {
 
   changeSphereParallels(delta: number): void {
     this.setSphereParallels(this.sphereParallels + delta);
+  }
+
+  getGeometry(): ShadersGeometry {
+    return this.geometry;
+  }
+
+  getGeometryFixture(): ShadersGeometryFixture | null {
+    return this.geometryFixture;
+  }
+
+  selectGeometry(selected: ShadersGeometry): void {
+    if (selected === this.geometry) return;
+    this.geometryFixture = null;
+    this.geometry = selected;
+    if (this.geometry !== 'SPHERE')
+      this.geometryFixture = new ShadersGeometryFixture(this.geometry);
+  }
+
+  cycleGeometry(): void {
+    this.selectGeometry(ShadersGeometryFixture.next(this.geometry));
   }
 
   private static normalizeAngleRadians(angle: number): number {

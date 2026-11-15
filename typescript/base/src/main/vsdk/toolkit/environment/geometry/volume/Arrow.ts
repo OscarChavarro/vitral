@@ -1,3 +1,4 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { PolyhedralBoundedSolidEulerOperators } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { VSDK } from "../../../common/VSDK.js";
 import { Ray } from "../element/Ray.js";
@@ -5,7 +6,6 @@ import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import { RayHit } from "../element/RayHit.js";
 import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
-import { PolyhedralBoundedSolidModeler } from "../geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
 import { Cone } from "./Cone.js";
 import { Solid } from "./Solid.js";
 
@@ -298,7 +298,13 @@ export class Arrow extends Solid {
         let S: Matrix4x4d;
         let M: Matrix4x4d;
 
-        const solid = PolyhedralBoundedSolidModeler.createCircularLamina(0.0, 0.0, this.baseRadius, 0.0, nsides);
+        const solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
+            0.0,
+            0.0,
+            this.baseRadius,
+            0.0,
+            nsides,
+        );
 
         // Cylinder case
         const cylinderZStep = this.baseLength / heightDivisions;
@@ -306,7 +312,7 @@ export class Arrow extends Solid {
         for (i = 0; i < heightDivisions; i++) {
             T = new Matrix4x4d();
             T = T.translation(0.0, 0.0, cylinderZStep);
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), T);
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), T);
         }
 
         T = new Matrix4x4d();
@@ -315,7 +321,7 @@ export class Arrow extends Solid {
         S = new Matrix4x4d();
         S = S.scale(f, f, 1);
         M = T.multiply(S);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
 
         // Cone case
         let prevRadius = this.headRadius;
@@ -328,7 +334,7 @@ export class Arrow extends Solid {
             S = new Matrix4x4d();
             S = S.scale(coneScale, coneScale, 1.0);
             M = T.multiply(S);
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
             prevRadius = nextRadius;
         }
 

@@ -2,6 +2,7 @@
 //= [COOK1982] Cook, Robert L.; Torrance, Kenneth E. "A Reflectance Model   =
 //= for Computer Graphics", ACM Transactions on Graphics, 1982.             =
 
+import { ShadowTransmittance } from "./ShadowTransmittance.js";
 import type { TraceWorkspace } from "../TraceWorkspace.js";
 
 import type { List } from "../../../../java/util/List.js";
@@ -97,24 +98,24 @@ export class CookTorranceShader extends Shader {
             const lightDirZ: number = lightDirection.direction().z();
 
             const lightSourceRay: Ray = new Ray(info.point, lightDirection.direction());
-            const attenuation: number = light.evaluateLightResponseFactor(lightSourceRay);
+            let attenuation: number = light.evaluateLightResponseFactor(lightSourceRay);
             if (attenuation <= 0.0) {
                 continue;
             }
 
-            if (
-                CookTorranceShader.isShadowed(
-                    info,
-                    lightDirX,
-                    lightDirY,
-                    lightDirZ,
-                    lightDirection.maxShadowDistance(),
-                    objects,
-                    workspace,
-                )
-            ) {
+            const shadowFactor: number = CookTorranceShader.shadowTransmittance(
+                info,
+                lightDirX,
+                lightDirY,
+                lightDirZ,
+                lightDirection.maxShadowDistance(),
+                objects,
+                workspace,
+            );
+            if (shadowFactor <= 0.0) {
                 continue;
             }
+            attenuation *= shadowFactor;
 
             const ndotL: number = Math.max(0.0, normalX * lightDirX + normalY * lightDirY + normalZ * lightDirZ);
             if (ndotL <= 0.0) {
@@ -253,7 +254,7 @@ export class CookTorranceShader extends Shader {
         return surfaceNormal.add(normalPerturbation).normalized();
     }
 
-    private static isShadowed(
+    private static shadowTransmittance(
         info: RayHit,
         lightDirX: number,
         lightDirY: number,
@@ -261,9 +262,9 @@ export class CookTorranceShader extends Shader {
         maxShadowDistance: number,
         objects: List<SimpleBody>,
         workspace: TraceWorkspace,
-    ): boolean {
+    ): number {
         if (maxShadowDistance <= VSDK.EPSILON) {
-            return true;
+            return 0.0;
         }
         const shadowOrigin: Vector3Dd = new Vector3Dd(
             info.point.x() + VSDK.EPSILON * lightDirX,
@@ -272,19 +273,6 @@ export class CookTorranceShader extends Shader {
         );
         const shadowDirection: Vector3Dd = new Vector3Dd(lightDirX, lightDirY, lightDirZ);
         const shadowRay: Ray = new Ray(shadowOrigin, shadowDirection);
-        const shadowCandidateHit: RayHit = workspace.shadowCandidateHit();
-        shadowCandidateHit.setStoreRay(false);
-
-        for (let i = 0; i < objects.size(); i++) {
-            const candidateObject: SimpleBody = objects.get(i);
-            shadowCandidateHit.resetForDistanceOnly();
-            if (candidateObject.doIntersectionFirstHit(shadowRay, shadowCandidateHit)) {
-                const hitDistance: number = shadowCandidateHit.getHitDistance();
-                if (hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return ShadowTransmittance.evaluate(shadowRay, maxShadowDistance, objects, workspace, false);
     }
 }

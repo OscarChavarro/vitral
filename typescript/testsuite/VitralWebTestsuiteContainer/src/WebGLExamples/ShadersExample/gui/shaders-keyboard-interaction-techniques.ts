@@ -127,6 +127,11 @@ export class ShadersKeyboardInteractionTechniques {
         this.model.cycleCookTorranceMaterial();
         repaint = true;
         break;
+      case 'KEY_o':
+      case 'KEY_O':
+        this.model.cycleGeometry();
+        repaint = true;
+        break;
       case 'KEY_q':
         this.model.changeSphereMeridians(-1);
         repaint = true;

@@ -1,8 +1,6 @@
 // Java classes
 import { platformPrintln } from "@vitral/base";
-import type { InputStream } from "@vitral/base";
 import type { ArrayList } from "@vitral/base";
-import { FileInputStream } from "@vitral/fs";
 
 // Vitral classes
 import { RendererConfiguration } from "@vitral/base";
@@ -58,6 +56,11 @@ export class RaytracerSimple {
 
         rendererConfiguration.setTexture(hasTextures);
         rendererConfiguration.setBumpMap(hasNormalMaps);
+        // The default Gouraud selection shades without normal perturbation; the
+        // Phong shaders apply the same per-pixel lighting plus the bump map.
+        if (hasNormalMaps) {
+            rendererConfiguration.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
+        }
     }
 
     private async offlineExecution(
@@ -70,19 +73,13 @@ export class RaytracerSimple {
 
         //- 1. Import the scene from scene description file to RAM -----
         console.log("Loading scene from " + fileName + ": ");
-        let is: InputStream | null = null;
         try {
-            is = new FileInputStream(fileName);
             const readerMitScene: ReaderMitScene = new ReaderMitScene();
-            readerMitScene.importEnvironment(is, this.scene);
-        } catch {
-            console.error("Error reading " + fileName);
+            readerMitScene.importEnvironment(fileName, this.scene);
+        } catch (e) {
+            console.error("Error reading " + fileName + ": " + (e instanceof Error ? e.message : String(e)));
             console.error("There are scene samples on " + RaytracerSimple.SCENE_SAMPLES_PATH);
             process.exit(RaytracerSimple.EXIT_CODE_READ_ERROR);
-        } finally {
-            // `try (InputStream is = ...)`: the reader already closes the
-            // stream on the success path, and this closes it on the error one.
-            is?.close();
         }
         console.log("Scene loaded OK!");
 

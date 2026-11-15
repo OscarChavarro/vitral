@@ -1,1 +1,1 @@
-export enum RayCrossingSupport { Unsupported, Supported }
+export enum RayCrossingSupport { Unsupported, Supported, InvalidInput, Indeterminate }

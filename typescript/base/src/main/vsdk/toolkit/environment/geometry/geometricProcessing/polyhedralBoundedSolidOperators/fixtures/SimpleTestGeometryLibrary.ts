@@ -1,3 +1,4 @@
+import { PolyhedralBoundedSolidEulerConstructions } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 //= References:                                                             =
 //= [APPE1967] Appel, Arthur. "The notion of quantitative invisibility and  =
 //=          the machine rendering of solids". Proceedings, ACM National    =
@@ -251,7 +252,7 @@ export class SimpleTestGeometryLibrary extends ProcessingElement {
 
         let T = new Matrix4x4d();
         T = T.translation(0, -0.4, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, T);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, T);
 
         return solid;
     }
@@ -332,7 +333,7 @@ export class SimpleTestGeometryLibrary extends ProcessingElement {
 
         let T = new Matrix4x4d();
         T = T.translation(0, -0.42, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(a, a.findFace(1)!, T);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(a, a.findFace(1)!, T);
 
         //-----------------------------------------------------------------
         let transformationMatrix = new Matrix4x4d();
@@ -378,7 +379,11 @@ export class SimpleTestGeometryLibrary extends ProcessingElement {
 
         let T = new Matrix4x4d();
         T = T.translation(0, -1.0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(leftView, leftView.findFace(1)!, T);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
+            leftView,
+            leftView.findFace(1)!,
+            T,
+        );
 
         //-----------------------------------------------------------------
         let frontView: PolyhedralBoundedSolid;
@@ -395,7 +400,11 @@ export class SimpleTestGeometryLibrary extends ProcessingElement {
 
         T = new Matrix4x4d();
         T = T.translation(1, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(frontView, frontView.findFace(1)!, T);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
+            frontView,
+            frontView.findFace(1)!,
+            T,
+        );
 
         //-----------------------------------------------------------------
         operands[0] = leftView;
@@ -431,7 +440,11 @@ export class SimpleTestGeometryLibrary extends ProcessingElement {
 
         let T = new Matrix4x4d();
         T = T.translation(0, -1.0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(leftView, leftView.findFace(1)!, T);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
+            leftView,
+            leftView.findFace(1)!,
+            T,
+        );
 
         //-----------------------------------------------------------------
         let frontView: PolyhedralBoundedSolid;
@@ -446,7 +459,11 @@ export class SimpleTestGeometryLibrary extends ProcessingElement {
 
         T = new Matrix4x4d();
         T = T.translation(1, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(frontView, frontView.findFace(1)!, T);
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
+            frontView,
+            frontView.findFace(1)!,
+            T,
+        );
 
         //-----------------------------------------------------------------
         operands[0] = leftView;
@@ -528,7 +545,7 @@ export class SimpleTestGeometryLibrary extends ProcessingElement {
 
         transformationMatrix = new Matrix4x4d();
         transformationMatrix = transformationMatrix.translation(0.775, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             wedge,
             wedge.findFace(1)!,
             transformationMatrix,

@@ -1,3 +1,4 @@
+import { ArrayList } from "../../../java/util/ArrayList.js";
 import { ColorRgb } from "../common/color/ColorRgb.js";
 import { RayHit } from "../environment/geometry/element/RayHit.js";
 
@@ -10,6 +11,9 @@ export class TraceWorkspace {
     public readonly reflectionHits: RayHit[];
     public readonly shadingHits: RayHit[];
     public readonly reflectionColors: ColorRgb[];
+    /** Indices of refraction of the transmissive solids that contain the
+    current ray, innermost last; empty means the ray travels in vacuum. */
+    public readonly mediumIndices: ArrayList<number>;
 
     public constructor(maxRecursionLevel: number = TraceWorkspace.DEFAULT_MAX_RECURSION_LEVEL) {
         this.traversalCandidateHit = new RayHit(RayHit.DETAIL_NONE, false);
@@ -20,6 +24,7 @@ export class TraceWorkspace {
         this.reflectionHits = new Array<RayHit>(levels);
         this.shadingHits = new Array<RayHit>(levels);
         this.reflectionColors = new Array<ColorRgb>(levels);
+        this.mediumIndices = new ArrayList<number>(levels);
         for (let i = 0; i < levels; i++) {
             this.reflectionHits[i] = new RayHit(RayHit.DETAIL_NONE, false);
             this.shadingHits[i] = new RayHit();
