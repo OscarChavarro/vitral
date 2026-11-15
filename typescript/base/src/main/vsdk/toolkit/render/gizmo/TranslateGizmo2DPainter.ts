@@ -126,7 +126,7 @@ export class TranslateGizmo2DPainter {
             if (p !== null) {
                 const highlighted = ColorRgb.distance(TranslateGizmo2DPainter.HIGHLIGHT_COLOR,
                     r.getMaterial()!.getDiffuse()) < VSDK.EPSILON;
-                projector.getDrawList().addOverlayLabel(
+                projector.getGizmo2DDrawList().addOverlayLabel(
                     Math.trunc(p[0]!) + offsetX, Math.trunc(p[1]!) + offsetY,
                     TranslateGizmo2DPainter.AXES.getAxisLabel(i),
                     highlighted ? TranslateGizmo2DPainter.HIGHLIGHT_COLOR

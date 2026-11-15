@@ -19,17 +19,17 @@ const double CLIP_PLANES[NUMBER_OF_CLIP_PLANES][4] = {
 }
 
 Gizmo2DProjector::Gizmo2DProjector(const Camera* camera,
-                                   Gizmo2DDrawList* out)
+                                   Gizmo2DDrawList* gizmo2DDrawList)
     : projection(camera->calculateProjectionMatrix()),
       width(camera->getViewportXSize()),
       height(camera->getViewportYSize()),
-      out(out)
+      gizmo2DDrawList(gizmo2DDrawList)
 {
 }
 
-Gizmo2DDrawList* Gizmo2DProjector::getDrawList() const
+Gizmo2DDrawList* Gizmo2DProjector::getGizmo2DDrawList() const
 {
-    return out;
+    return gizmo2DDrawList;
 }
 
 //= Polygons ==============================================================
@@ -63,7 +63,7 @@ void Gizmo2DProjector::addPolygon(const java::ArrayList<Vector3Dd>& vertices,
         y.add(toPixelY(ndc.y()));
         depth += ndc.z();
     }
-    out->addPolygon(x, y, depth / n, color, opacity);
+    gizmo2DDrawList->addPolygon(x, y, depth / n, color, opacity);
 }
 
 void Gizmo2DProjector::addStrip(const java::ArrayList<Vector3Dd>& strip,
@@ -153,7 +153,7 @@ void Gizmo2DProjector::addSegment(const Vector3Dd& p0, const Vector3Dd& p1,
     }
     Vector4Dd a = start.dividedByW();
     Vector4Dd b = end.dividedByW();
-    out->addLine(toPixelX(a.x()), toPixelY(a.y()), toPixelX(b.x()),
+    gizmo2DDrawList->addLine(toPixelX(a.x()), toPixelY(a.y()), toPixelX(b.x()),
         toPixelY(b.y()), (a.z() + b.z()) / 2 + depthBias, color, lineWidth);
 }
 

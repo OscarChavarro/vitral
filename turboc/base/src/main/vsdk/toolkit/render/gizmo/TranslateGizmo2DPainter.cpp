@@ -166,7 +166,7 @@ void TranslateGizmo2DPainter::addLabels(Gizmo2DProjector& projector,
                 color = highlightColor;
             }
 
-            projector.getDrawList()->addOverlayLabel(
+            projector.getGizmo2DDrawList()->addOverlayLabel(
                 (int)p[0] + offsetX, (int)p[1] + offsetY,
                 axes().getAxisLabel(i), color, fontSize,
                 Gizmo2DDrawList::Alignment::LOWER_LEFT);

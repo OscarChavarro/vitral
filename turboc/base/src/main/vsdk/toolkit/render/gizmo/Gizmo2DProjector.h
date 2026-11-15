@@ -29,7 +29,7 @@ private:
     Matrix4x4d projection;
     double width;
     double height;
-    Gizmo2DDrawList* out;
+    Gizmo2DDrawList* gizmo2DDrawList;
 
     double toPixelX(double ndcX) const;
     double toPixelY(double ndcY) const;
@@ -42,11 +42,11 @@ private:
 public:
     /**
     @param camera camera viewing the gizmo, with its viewport size updated
-    @param out list receiving the projected primitives
+    @param gizmo2DDrawList list receiving the projected primitives
     */
-    Gizmo2DProjector(const Camera* camera, Gizmo2DDrawList* out);
+    Gizmo2DProjector(const Camera* camera, Gizmo2DDrawList* gizmo2DDrawList);
 
-    Gizmo2DDrawList* getDrawList() const;
+    Gizmo2DDrawList* getGizmo2DDrawList() const;
 
     //= Polygons ==========================================================
 

@@ -37,23 +37,23 @@ public class Gizmo2DProjector
     private final Matrix4x4d projection;
     private final double width;
     private final double height;
-    private final Gizmo2DDrawList out;
+    private final Gizmo2DDrawList gizmo2DDrawList;
 
     /**
     @param camera camera viewing the gizmo, with its viewport size updated
-    @param out list receiving the projected primitives
+    @param gizmo2DDrawList list receiving the projected primitives
     */
-    public Gizmo2DProjector(Camera camera, Gizmo2DDrawList out)
+    public Gizmo2DProjector(Camera camera, Gizmo2DDrawList gizmo2DDrawList)
     {
         this.projection = camera.calculateProjectionMatrix();
         this.width = camera.getViewportXSize();
         this.height = camera.getViewportYSize();
-        this.out = out;
+        this.gizmo2DDrawList = gizmo2DDrawList;
     }
 
-    public Gizmo2DDrawList getDrawList()
+    public Gizmo2DDrawList getGizmo2DDrawList()
     {
-        return out;
+        return gizmo2DDrawList;
     }
 
     //= Polygons ==========================================================
@@ -86,7 +86,7 @@ public class Gizmo2DProjector
             y[i] = toPixelY(ndc.y());
             depth += ndc.z();
         }
-        out.addPolygon(x, y, depth / n, color, opacity);
+        gizmo2DDrawList.addPolygon(x, y, depth / n, color, opacity);
     }
 
     /**
@@ -175,7 +175,7 @@ public class Gizmo2DProjector
         }
         Vector4Dd a = start.dividedByW();
         Vector4Dd b = end.dividedByW();
-        out.addLine(toPixelX(a.x()), toPixelY(a.y()), toPixelX(b.x()),
+        gizmo2DDrawList.addLine(toPixelX(a.x()), toPixelY(a.y()), toPixelX(b.x()),
             toPixelY(b.y()), (a.z() + b.z()) / 2 + depthBias, color, lineWidth);
     }
 

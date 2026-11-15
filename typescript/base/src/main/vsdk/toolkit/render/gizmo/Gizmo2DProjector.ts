@@ -34,21 +34,21 @@ export class Gizmo2DProjector {
     private readonly projection: Matrix4x4d;
     private readonly width: number;
     private readonly height: number;
-    private readonly out: Gizmo2DDrawList;
+    private readonly gizmo2DDrawList: Gizmo2DDrawList;
 
     /**
     @param camera camera viewing the gizmo, with its viewport size updated
-    @param out list receiving the projected primitives
+    @param gizmo2DDrawList list receiving the projected primitives
     */
-    public constructor(camera: Camera, out: Gizmo2DDrawList) {
+    public constructor(camera: Camera, gizmo2DDrawList: Gizmo2DDrawList) {
         this.projection = camera.calculateProjectionMatrix();
         this.width = camera.getViewportXSize();
         this.height = camera.getViewportYSize();
-        this.out = out;
+        this.gizmo2DDrawList = gizmo2DDrawList;
     }
 
-    public getDrawList(): Gizmo2DDrawList {
-        return this.out;
+    public getGizmo2DDrawList(): Gizmo2DDrawList {
+        return this.gizmo2DDrawList;
     }
 
     //= Polygons ==========================================================
@@ -80,7 +80,7 @@ export class Gizmo2DProjector {
             y[i] = this.toPixelY(ndc.y());
             depth += ndc.z();
         }
-        this.out.addPolygon(x, y, depth / n, color, opacity);
+        this.gizmo2DDrawList.addPolygon(x, y, depth / n, color, opacity);
     }
 
     /**
@@ -164,7 +164,7 @@ export class Gizmo2DProjector {
         }
         const a = start.dividedByW();
         const b = end.dividedByW();
-        this.out.addLine(this.toPixelX(a.x()), this.toPixelY(a.y()), this.toPixelX(b.x()),
+        this.gizmo2DDrawList.addLine(this.toPixelX(a.x()), this.toPixelY(a.y()), this.toPixelX(b.x()),
             this.toPixelY(b.y()), (a.z() + b.z()) / 2 + depthBias, color, lineWidth);
     }
 

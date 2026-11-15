@@ -139,7 +139,7 @@ public class TranslateGizmo2DPainter
                 boolean highlighted = ColorRgb.distance(HIGHLIGHT_COLOR,
                     r.getMaterial().getDiffuse()) < VSDK.EPSILON;
 
-                projector.getDrawList().addOverlayLabel(
+                projector.getGizmo2DDrawList().addOverlayLabel(
                     (int)p[0] + offsetX, (int)p[1] + offsetY, AXES.getAxisLabel(i),
                     highlighted ? HIGHLIGHT_COLOR : AXES.getAxisColor(i),
                     fontSize, Gizmo2DDrawList.Alignment.LOWER_LEFT);
