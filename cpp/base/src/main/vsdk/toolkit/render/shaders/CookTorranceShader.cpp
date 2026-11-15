@@ -12,6 +12,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "vsdk/toolkit/render/shaders/CookTorranceShader.h"
+#include "vsdk/toolkit/render/shaders/ShadowTransmittance.h"
 #include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 const double DEFAULT_ROUGHNESS = 0.35;
 const double MIN_ROUGHNESS = 0.02;
@@ -90,33 +91,20 @@ static LightDirection resolveLightDirection(const Light* light, const RayHit* in
     return ld;
 }
 
-static bool isShadowed(
+static double shadowTransmittance(
     const RayHit* info,
     double lightDirX, double lightDirY, double lightDirZ,
     double maxShadowDistance,
     java::ArrayList<SimpleBody*>& objects,
     TraceWorkspace* workspace)
 {
-    if ( maxShadowDistance <= VSDK::EPSILON ) return true;
-    if ( workspace == 0 ) return false;
+    if ( maxShadowDistance <= VSDK::EPSILON ) return 0.0;
     Vector3Dd shadowOrigin(
         info->point.x() + VSDK::EPSILON * lightDirX,
         info->point.y() + VSDK::EPSILON * lightDirY,
         info->point.z() + VSDK::EPSILON * lightDirZ);
     Ray shadowRay(shadowOrigin, Vector3Dd(lightDirX, lightDirY, lightDirZ));
-    RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
-    shadowCandidateHit->setStoreRay(false);
-    for ( long int i = 0; i < objects.size(); i++ ) {
-        SimpleBody* candidateObject = objects.get(i);
-        shadowCandidateHit->resetForDistanceOnly();
-        if ( candidateObject && candidateObject->doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
-            double hitDistance = shadowCandidateHit->getHitDistance();
-            if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return ShadowTransmittance::evaluate(shadowRay, maxShadowDistance, objects, workspace, false);
 }
 
 static MicrofacetParams resolveMicrofacetParams(SimpleMaterial* material)
@@ -184,7 +172,9 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
         Ray lightSourceRay(info->point, Vector3Dd(ld.x, ld.y, ld.z));
         double attenuation = light->evaluateLightResponseFactor(&lightSourceRay);
         if ( attenuation <= 0.0 ) continue;
-        if ( isShadowed(info, ld.x, ld.y, ld.z, ld.maxShadowDistance, objects, workspace) ) continue;
+        double shadowFactor = shadowTransmittance(info, ld.x, ld.y, ld.z, ld.maxShadowDistance, objects, workspace);
+        if ( shadowFactor <= 0.0 ) continue;
+        attenuation *= shadowFactor;
 
         double ndotL = java::Math::max(0.0, normalX * ld.x + normalY * ld.y + normalZ * ld.z);
         if ( ndotL <= 0.0 ) continue;

@@ -13,6 +13,7 @@ TraceWorkspace::TraceWorkspace(int maxRecursionLevel)
     reflectionHits.reserve((long int)levels);
     shadingHits.reserve((long int)levels);
     reflectionColors.reserve((long int)levels);
+    mediumIndices.reserve((long int)levels);
     for ( int i = 0; i < levels; i++ ) {
         reflectionHits.add(RayHit(RayHit::DETAIL_NONE, false));
         shadingHits.add(RayHit());

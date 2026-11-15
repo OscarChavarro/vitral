@@ -28,6 +28,7 @@
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/SnellRefraction.h"
 #include "vsdk/toolkit/render/shaders/Shader.h"
 #include "vsdk/toolkit/render/shaders/ShaderSelector.h"
 SimpleRaytracer::SimpleRaytracer() : workspace(MAX_RECURSION_LEVEL)
@@ -40,6 +41,9 @@ bool SimpleRaytracer::hasNonAmbientLights(java::ArrayList<Light*>& lights)
 bool SimpleRaytracer::isReflective(SimpleMaterial* material)
 { return material != 0 && material->getReflectionCoefficient() > 0; }
 
+bool SimpleRaytracer::isTransmissive(SimpleMaterial* material)
+{ return material != 0 && material->getRefractionCoefficient() > 0; }
+
 RenderContext SimpleRaytracer::buildRenderContext(const RendererConfiguration* qualitySelection,java::ArrayList<Light*>& lights)
 {
     Shader* localShader = ShaderSelector::select(qualitySelection);
@@ -51,7 +55,7 @@ RenderContext SimpleRaytracer::buildRenderContext(const RendererConfiguration* q
 
 int SimpleRaytracer::buildSurfaceDetailMask(SimpleMaterial* material, Image* texture, NormalMap* normalMap, const RenderContext& renderContext)
 {
-    bool objectReflective = isReflective(material);
+    bool objectReflective = isReflective(material) || isTransmissive(material);
     bool needsPoint = renderContext.localLightingEnabled || objectReflective;
     bool needsNormal = needsPoint;
     bool needsUv = (renderContext.textureEnabled && texture != 0) || ((renderContext.localLightingEnabled || objectReflective) && normalMap != 0);
@@ -139,26 +143,82 @@ ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,do
             Vector3Dd reflect(rx, ry, rz);
             Vector3Dd poffset(info->point.x() + VSDK::EPSILON*rx, info->point.y() + VSDK::EPSILON*ry, info->point.z() + VSDK::EPSILON*rz);
             Ray reflectedRay(poffset, reflect);
-
-            RayHit* reflectedHit = &workspace.reflectionHits[recursionLevel];
-            int nearestObjectIndex = selectNearestThingInRayDirection(reflectedRay, objects, reflectedHit, &workspace.traversalCandidateHit);
-            if ( nearestObjectIndex >= 0 ) {
-                SimpleBody* nearestObject = objects.get(nearestObjectIndex);
-                const SceneObjectRenderData& objectData = cache.objects.get(nearestObjectIndex);
-                RayHit* subInfo = &workspace.shadingHits[recursionLevel + 1];
-                Ray reflectedHitRay = reflectedRay.withT(reflectedHit->getHitDistance());
-                prepareSurfaceHit(nearestObject, objectData, reflectedHitRay, subInfo);
-                ColorRgb rcolor = evaluateIlluminationModel(subInfo, -reflectedRay.getDirection().x(), -reflectedRay.getDirection().y(), -reflectedRay.getDirection().z(), lights, objects, cache, background, resolveMaterial(subInfo, objectData), renderContext, recursions - 1, recursionLevel + 1);
-                outR += rcolor.r() * kr; outG += rcolor.g() * kr; outB += rcolor.b() * kr;
-            }
-            else {
-                ColorRgb reflectedBackground = background->colorInDireccion(reflect);
-                outR += reflectedBackground.r() * kr; outG += reflectedBackground.g() * kr; outB += reflectedBackground.b() * kr;
-            }
+            ColorRgb rcolor = shadeSecondaryRay(reflectedRay, lights, objects, cache, background, renderContext, recursions, recursionLevel);
+            outR += rcolor.r() * kr; outG += rcolor.g() * kr; outB += rcolor.b() * kr;
         }
     }
 
+    double kt = material->getRefractionCoefficient();
+    if ( kt > 0 && recursions > 0 ) {
+        ColorRgb tcolor = shadeTransmission(info, viewX, viewY, viewZ, surfaceNormal, lights, objects, cache, background, material, renderContext, recursions, recursionLevel);
+        outR += tcolor.r() * kt; outG += tcolor.g() * kt; outB += tcolor.b() * kt;
+    }
+
     return ColorRgb(outR > 1 ? 1 : outR, outG > 1 ? 1 : outG, outB > 1 ? 1 : outB);
+}
+
+ColorRgb SimpleRaytracer::shadeSecondaryRay(const Ray& ray,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& cache,Background* background,RenderContext& renderContext,int recursions,int recursionLevel)
+{
+    RayHit* secondaryHit = &workspace.reflectionHits[recursionLevel];
+    int nearestObjectIndex = selectNearestThingInRayDirection(ray, objects, secondaryHit, &workspace.traversalCandidateHit);
+    if ( nearestObjectIndex < 0 ) return background->colorInDireccion(ray.getDirection());
+    SimpleBody* nearestObject = objects.get(nearestObjectIndex);
+    const SceneObjectRenderData& objectData = cache.objects.get(nearestObjectIndex);
+    RayHit* subInfo = &workspace.shadingHits[recursionLevel + 1];
+    Ray hitRay = ray.withT(secondaryHit->getHitDistance());
+    prepareSurfaceHit(nearestObject, objectData, hitRay, subInfo);
+    return evaluateIlluminationModel(subInfo, -ray.getDirection().x(), -ray.getDirection().y(), -ray.getDirection().z(), lights, objects, cache, background, resolveMaterial(subInfo, objectData), renderContext, recursions - 1, recursionLevel + 1);
+}
+
+/**
+Transmitted branch of the illumination model [WHIT1980]: the direction comes
+from Snell's law, n1 sin(i) = n2 sin(t), with n1 the index of the medium the
+ray travels in and n2 that of the medium past the surface. A ray arriving on
+the side opposite to the surface normal leaves the solid, so n2 is the index
+of the enclosing medium (`TraceWorkspace::mediumIndices`). Without a real
+solution the light is totally reflected inside the current medium.
+*/
+ColorRgb SimpleRaytracer::shadeTransmission(RayHit* info,double viewX,double viewY,double viewZ,const Vector3Dd& surfaceNormal,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& cache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel)
+{
+    java::ArrayList<double>& media = workspace.mediumIndices;
+    double nx = surfaceNormal.x(), ny = surfaceNormal.y(), nz = surfaceNormal.z();
+    double length = std::sqrt(nx*nx + ny*ny + nz*nz);
+    double vlength = std::sqrt(viewX*viewX + viewY*viewY + viewZ*viewZ);
+    if ( length <= 0 || vlength <= 0 ) return ColorRgb(0, 0, 0);
+    nx /= length; ny /= length; nz /= length;
+    double vx = viewX/vlength, vy = viewY/vlength, vz = viewZ/vlength;
+    double cosI = vx*nx + vy*ny + vz*nz;
+    bool entering = cosI > 0;
+    if ( !entering ) { nx = -nx; ny = -ny; nz = -nz; cosI = -cosI; }
+
+    double currentIndex = media.size() > 0 ? media.get(media.size() - 1) : 1.0;
+    double materialIndex = material->getIndexOfRefraction();
+    double n1, n2;
+    if ( entering ) { n1 = currentIndex; n2 = materialIndex; }
+    else { n1 = materialIndex; n2 = media.size() > 1 ? media.get(media.size() - 2) : 1.0; }
+    Vector3Dd towardViewer(vx, vy, vz);
+    Vector3Dd normal(nx, ny, nz);
+    Vector3Dd direction;
+    bool totalInternalReflection = !SnellRefraction::refract(towardViewer, normal, n1 / n2, &direction);
+    if ( totalInternalReflection ) {
+        direction = SnellRefraction::reflect(towardViewer, normal);
+    }
+    double dx = direction.x(), dy = direction.y(), dz = direction.z();
+    Vector3Dd origin(info->point.x() + VSDK::EPSILON*dx, info->point.y() + VSDK::EPSILON*dy, info->point.z() + VSDK::EPSILON*dz);
+    Ray transmittedRay(origin, Vector3Dd(dx, dy, dz));
+
+    // The medium stack follows the ray: entering pushes the solid's index,
+    // leaving pops it; both are undone once the branch is traced.
+    double removedIndex = 0;
+    bool pushed = false, popped = false;
+    if ( !totalInternalReflection ) {
+        if ( entering ) { media.add(materialIndex); pushed = true; }
+        else if ( media.size() > 0 ) { removedIndex = media.get(media.size() - 1); media.remove(media.size() - 1); popped = true; }
+    }
+    ColorRgb color = shadeSecondaryRay(transmittedRay, lights, objects, cache, background, renderContext, recursions, recursionLevel);
+    if ( pushed ) media.remove(media.size() - 1);
+    if ( popped ) media.add(removedIndex);
+    return color;
 }
 
 int SimpleRaytracer::selectNearestThingInRayDirection(const Ray& inRay,java::ArrayList<SimpleBody*>& bodies,RayHit* outHit,RayHit* candidateHit)

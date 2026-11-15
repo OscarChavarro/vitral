@@ -289,6 +289,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/raytracing/RasterTileArea.cpp
     src/main/vsdk/toolkit/render/raytracing/RasterTileGenerator.cpp
     src/main/vsdk/toolkit/render/raytracing/SimpleRaytracer.cpp
+    src/main/vsdk/toolkit/render/raytracing/SnellRefraction.cpp
     src/main/vsdk/toolkit/render/AutoStereogramGenerator.cpp
     src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.cpp
     src/main/vsdk/toolkit/render/raster/Rasterizer2D.cpp
@@ -296,6 +297,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/PolyhedralBoundedSolidDebugger.cpp
     src/main/vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.cpp
     src/main/vsdk/toolkit/render/shaders/LightingShader.cpp
+    src/main/vsdk/toolkit/render/shaders/ShadowTransmittance.cpp
     src/main/vsdk/toolkit/render/shaders/ConstantShader.cpp
     src/main/vsdk/toolkit/render/shaders/ConstantTextureShader.cpp
     src/main/vsdk/toolkit/render/shaders/CookTorranceShader.cpp
@@ -571,6 +573,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/ray_affine_contract_tests.cpp
     src/test/ray_crossing_tests.cpp
     src/test/bounding_volume_hierarchy_tests.cpp
+    src/test/refraction_tests.cpp
     src/test/reader_mit_triangles_tests.cpp
     src/test/reader_mit_scene_commands_tests.cpp
     src/test/csg_point_workspace_tests.cpp

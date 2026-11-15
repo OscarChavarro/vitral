@@ -10,6 +10,7 @@
 class Ray;
 class RayHit;
 class ColorRgb;
+class Vector3Dd;
 class RGBImageUncompressed;
 class RGBPixel;
 class ZBuffer;
@@ -48,6 +49,7 @@ private:
 
     static bool hasNonAmbientLights(java::ArrayList<Light*>& lights);
     static bool isReflective(SimpleMaterial* material);
+    static bool isTransmissive(SimpleMaterial* material);
     static RenderContext buildRenderContext(const RendererConfiguration* qualitySelection,java::ArrayList<Light*>& lights);
     static int buildSurfaceDetailMask(SimpleMaterial* material, Image* texture, NormalMap* normalMap, const RenderContext& renderContext);
     static void captureBodyVersions(java::ArrayList<SimpleBody*>& bodies, java::ArrayList<long long>& out);
@@ -57,6 +59,8 @@ private:
     void prepareSurfaceHit(SimpleBody* nearestObject, const SceneObjectRenderData& objectData, const Ray& hitRay, RayHit* outHit);
     static SimpleMaterial* resolveMaterial(RayHit* hit, const SceneObjectRenderData& objectData);
     ColorRgb evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
+    ColorRgb shadeSecondaryRay(const Ray& ray,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,RenderContext& renderContext,int recursions,int recursionLevel);
+    ColorRgb shadeTransmission(RayHit* info,double viewX,double viewY,double viewZ,const Vector3Dd& surfaceNormal,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
     int selectNearestThingInRayDirection(const Ray& inRay,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,RayHit* outHit,RayHit* candidateHit);
     ColorRgb followRayPath(const Ray& inRay,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,java::ArrayList<Light*>& inLightsArray,Background* in_background,RenderContext& renderContext,const SceneRenderCache& sceneRenderCache);
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,java::ArrayList<Light*>& inLightsArray,Background* inBackground,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2);

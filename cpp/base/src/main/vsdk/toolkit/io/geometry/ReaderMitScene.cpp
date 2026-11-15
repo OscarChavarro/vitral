@@ -560,9 +560,12 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
                     ColorRgb(r * ka, g * ka, b * ka),
                     ColorRgb(r * kd, g * kd, b * kd),
                     ColorRgb(ks, ks, ks),
+                    ColorRgb(0.0, 0.0, 0.0),
+                    ColorRgb(0.0, 0.0, 0.0),
                     true,
                     kr,
                     kt,
+                    index,
                     1.0,
                     ns);
             }

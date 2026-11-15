@@ -12,6 +12,7 @@
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/render/shaders/LightingShader.h"
+#include "vsdk/toolkit/render/shaders/ShadowTransmittance.h"
 static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd& surfaceNormal)
 {
     if ( info == 0 || info->normalMap == 0 ) {
@@ -110,27 +111,10 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
         double attenuation = light->evaluateLightResponseFactor(&shadowRay);
         if ( attenuation <= 0.0 ) continue;
 
-        if ( workspace != 0 ) {
-            RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
-            shadowCandidateHit->setStoreRay(false);
-
-            bool shadowed = false;
-            for ( long int oi = 0; oi < objects.size(); oi++ ) {
-                SimpleBody* candidateObject = objects.get(oi);
-                shadowCandidateHit->resetForDistanceOnly();
-                RaytraceStatistics::recordShadowRay();
-                if ( candidateObject != 0 && candidateObject->doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
-                    double hitDistance = shadowCandidateHit->getHitDistance();
-                    if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
-                        shadowed = true;
-                        break;
-                    }
-                }
-            }
-            if ( shadowed ) {
-                continue;
-            }
-        }
+        double shadowFactor = ShadowTransmittance::evaluate(
+            shadowRay, maxShadowDistance, objects, workspace, true);
+        if ( shadowFactor <= 0.0 ) continue;
+        attenuation *= shadowFactor;
 
         double lambert = nx*lx + ny*ly + nz*lz;
         if ( lambert <= 0 ) continue;
