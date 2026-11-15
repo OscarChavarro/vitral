@@ -1,5 +1,5 @@
-#ifndef __INDEXED_COLOR_IMAGE_UNCOMPRESSED__
-#define __INDEXED_COLOR_IMAGE_UNCOMPRESSED__
+#ifndef __INDXD_CLR_IMG_UNCMPRSSD__
+#define __INDXD_CLR_IMG_UNCMPRSSD__
 
 #include <stddef.h>
 #include "vsdk/toolkit/common/VSDK.h"

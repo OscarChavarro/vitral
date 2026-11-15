@@ -11,6 +11,7 @@
 class Ray;
 class RayHit;
 class ColorRgb;
+class Vector3Dd;
 class RGBImageUncompressed;
 class RGBPixel;
 class ZBuffer;
@@ -48,6 +49,7 @@ private:
 
     static BOOLEAN hasNonAmbientLights(ArrayList<Light*>& lights);
     static BOOLEAN isReflective(SimpleMaterial* material);
+    static BOOLEAN isTransmissive(SimpleMaterial* material);
     static RenderContext buildRenderContext(const RendererConfiguration* qualitySelection,ArrayList<Light*>& lights);
     static int buildSurfaceDetailMask(SimpleMaterial* material, Image* texture, NormalMap* normalMap, const RenderContext& renderContext);
     static void captureBodyVersions(ArrayList<SimpleBody*>& bodies, ArrayList<long long>& out);
@@ -57,6 +59,8 @@ private:
     void prepareSurfaceHit(SimpleBody* nearestObject, const SceneObjectRenderData& objectData, const Ray& hitRay, RayHit* outHit);
     static SimpleMaterial* resolveMaterial(RayHit* hit, const SceneObjectRenderData& objectData);
     ColorRgb evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,ArrayList<Light*>& lights,ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
+    ColorRgb shadeSecondaryRay(const Ray& ray,ArrayList<Light*>& lights,ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,RenderContext& renderContext,int recursions,int recursionLevel);
+    ColorRgb shadeTransmission(RayHit* info,double viewX,double viewY,double viewZ,const Vector3Dd& surfaceNormal,ArrayList<Light*>& lights,ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
     int selectNearestThingInRayDirection(const Ray& inRay,ArrayList<SimpleBody*>& inSimpleBodiesArray,RayHit* outHit,RayHit* candidateHit);
     ColorRgb followRayPath(const Ray& inRay,ArrayList<SimpleBody*>& inSimpleBodiesArray,ArrayList<Light*>& inLightsArray,Background* in_background,RenderContext& renderContext,const SceneRenderCache& sceneRenderCache);
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,ArrayList<SimpleBody*>& inSimpleBodiesArray,ArrayList<Light*>& inLightsArray,Background* inBackground,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2);

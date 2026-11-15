@@ -1,5 +1,5 @@
-#ifndef __SCENE_EDITOR_OPEN_GL_1_DRAWING_AREA_RENDERER__
-#define __SCENE_EDITOR_OPEN_GL_1_DRAWING_AREA_RENDERER__
+#ifndef __SCN_EDTR_GL1_DRWNG_AR_RNDRR__
+#define __SCN_EDTR_GL1_DRWNG_AR_RNDRR__
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"

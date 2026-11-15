@@ -1,5 +1,5 @@
-#ifndef __JAVAX_XML_TRANSFORM_TRANSFORMER__
-#define __JAVAX_XML_TRANSFORM_TRANSFORMER__
+#ifndef __JVX_XML_TRNSFRM_TRNSFRMR__
+#define __JVX_XML_TRNSFRM_TRNSFRMR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"

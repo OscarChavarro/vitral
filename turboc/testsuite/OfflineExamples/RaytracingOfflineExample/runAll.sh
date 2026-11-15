@@ -8,6 +8,21 @@ SCENE_DIR="../../../../etc/geometry/mitscenes"
 OUTPUT_DIR="."
 cd "$SCRIPT_DIR"
 
+# A given scene/output (or --help) is a single run; rendering flags as
+# --parallel or nosave are forwarded to each scene of the batch
+single_run=false
+for arg in "$@"; do
+    case "$arg" in
+        --scene|-s|--output|-o|--help|-h) single_run=true ;;
+        nosave) ;;
+        -*) ;;
+        *) single_run=true ;;
+    esac
+done
+if [ "$single_run" = true ]; then
+    exec sh ./run.sh "$@"
+fi
+
 found=0
 for scene_file in "$SCENE_DIR"/*.ray; do
     [ -f "$scene_file" ] || continue

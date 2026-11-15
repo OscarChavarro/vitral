@@ -1,5 +1,5 @@
-#ifndef __FILE_H__
-#define __FILE_H__
+#ifndef __JAVA_IO_FILE__
+#define __JAVA_IO_FILE__
 
 #include <stddef.h>
 #include "vsdk/toolkit/common/VSDK.h"

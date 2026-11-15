@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_EDGE__
-#define __POLYHEDRAL_BOUNDED_SOLID_EDGE__
+#ifndef __PLYHDRL_BNDD_SLD_EDG__
+#define __PLYHDRL_BNDD_SLD_EDG__
 
 #include "java/lang/String.h"
 

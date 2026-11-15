@@ -1,5 +1,5 @@
-#ifndef __RAY_GIZMO_INTERACTION_TECHNIQUES__
-#define __RAY_GIZMO_INTERACTION_TECHNIQUES__
+#ifndef __RY_GZM_INTRCTN_TCHNQS__
+#define __RY_GZM_INTRCTN_TCHNQS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

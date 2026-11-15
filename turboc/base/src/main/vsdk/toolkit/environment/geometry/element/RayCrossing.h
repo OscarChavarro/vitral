@@ -1,10 +1,22 @@
-#ifndef VSDK_RAYCROSSING_H
-#define VSDK_RAYCROSSING_H
+#ifndef __RAY_CROSSING__
+#define __RAY_CROSSING__
+
 #include "vsdk/toolkit/environment/geometry/element/RayCrossingKind.h"
-class Geometry; class SimpleBody; class Material;
-class RayCrossing { public:
+#include "vsdk/toolkit/environment/geometry/element/RayBoundary.h"
+
+class Geometry;
+class SceneSolid;
+class Material;
+
+// Leaf identity and optional instance/material attribution; pointers are borrowed.
+class RayCrossing : public RayBoundary {
+public:
     typedef RayCrossingKind::Value Kind;
-    double t; const Geometry* geometry; Kind kind; const SimpleBody* body; Material* material;
-    RayCrossing(double t, const Geometry* geometry, Kind kind) : t(t), geometry(geometry), kind(kind), body(0), material(0) {}
+    Kind kind;
+    const SceneSolid* body;
+    Material* material;
+
+    RayCrossing(double t, const Geometry* geometry, Kind kind);
 };
+
 #endif

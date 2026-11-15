@@ -1,5 +1,5 @@
-#ifndef __XT_OPENGL1_GUI_EVENT_EXECUTOR__
-#define __XT_OPENGL1_GUI_EVENT_EXECUTOR__
+#ifndef __XT_OPNGL1_G_EVNT_EXCTR__
+#define __XT_OPNGL1_G_EVNT_EXCTR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

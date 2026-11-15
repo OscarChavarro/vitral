@@ -1,5 +1,5 @@
-#ifndef __RGB_COLOR_PALETTE_PERSISTENCE__
-#define __RGB_COLOR_PALETTE_PERSISTENCE__
+#ifndef __RGB_CLR_PLTT_PRSSTNC__
+#define __RGB_CLR_PLTT_PRSSTNC__
 
 #include "java/io/InputStream.h"
 #include "java/io/Reader.h"

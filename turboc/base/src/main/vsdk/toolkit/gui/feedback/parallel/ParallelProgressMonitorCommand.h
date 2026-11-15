@@ -1,5 +1,5 @@
-#ifndef __PARALLEL_PROGRESS_MONITOR_COMMAND__
-#define __PARALLEL_PROGRESS_MONITOR_COMMAND__
+#ifndef __PRLLL_PRGRSS_MNTR_CMMND__
+#define __PRLLL_PRGRSS_MNTR_CMMND__
 
 enum ParallelProgressMonitorCommand {
     INIT,

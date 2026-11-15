@@ -1,5 +1,5 @@
-#ifndef __WEILER_ATHERTON_POLYGON_CLIPPER__
-#define __WEILER_ATHERTON_POLYGON_CLIPPER__
+#ifndef __WLR_ATHRTN_PLYGN_CLPPR__
+#define __WLR_ATHRTN_PLYGN_CLPPR__
 
 // First: gcc 2.7.2 fails if _DoubleLinkedListNode is defined before it
 #include "vsdk/toolkit/common/VSDK.h"

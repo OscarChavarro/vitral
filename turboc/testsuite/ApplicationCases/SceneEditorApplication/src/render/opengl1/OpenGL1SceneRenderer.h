@@ -1,5 +1,5 @@
-#ifndef __SCENE_EDITOR_OPEN_GL_1_SCENE_RENDERER__
-#define __SCENE_EDITOR_OPEN_GL_1_SCENE_RENDERER__
+#ifndef __SCN_EDTR_GL1_SCN_RNDRR__
+#define __SCN_EDTR_GL1_SCN_RNDRR__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 class BodyEditFeedbackProvider;class Camera;class Light;class RendererConfiguration;class Scene;class SimpleBody;class SimpleBodyGroup;

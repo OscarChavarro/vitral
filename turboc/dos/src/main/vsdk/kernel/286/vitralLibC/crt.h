@@ -1,5 +1,5 @@
-#ifndef VITRAL_286_CRT_H
-#define VITRAL_286_CRT_H
+#ifndef __VITRAL_286_CRT__
+#define __VITRAL_286_CRT__
 
 #include <stddef.h>
 

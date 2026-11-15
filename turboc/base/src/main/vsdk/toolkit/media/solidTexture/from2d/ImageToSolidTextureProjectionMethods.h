@@ -1,5 +1,5 @@
-#ifndef __IMAGE_TO_SOLID_TEXTURE_PROJECTION_METHODS__
-#define __IMAGE_TO_SOLID_TEXTURE_PROJECTION_METHODS__
+#ifndef __IMG_T_SLD_TXTR_PRJCTN_MTHDS__
+#define __IMG_T_SLD_TXTR_PRJCTN_MTHDS__
 
 enum ImageToSolidTextureProjectionMethods {
     PLANAR_MAP = 0,

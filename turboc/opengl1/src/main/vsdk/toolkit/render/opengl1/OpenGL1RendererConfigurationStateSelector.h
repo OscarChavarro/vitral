@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_RENDERER_CONFIGURATION_STATE_SELECTOR__
-#define __OPEN_GL_1_RENDERER_CONFIGURATION_STATE_SELECTOR__
+#ifndef __OPN_GL_1_RNDR_CNFG_ST_SLCT__
+#define __OPN_GL_1_RNDR_CNFG_ST_SLCT__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

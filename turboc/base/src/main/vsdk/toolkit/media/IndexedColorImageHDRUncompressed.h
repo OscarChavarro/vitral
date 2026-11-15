@@ -1,5 +1,5 @@
-#ifndef __INDEXED_COLOR_IMAGE_HDR_UNCOMPRESSED__
-#define __INDEXED_COLOR_IMAGE_HDR_UNCOMPRESSED__
+#ifndef __INDXD_CLR_IMG_HDR_UNCMPRSSD__
+#define __INDXD_CLR_IMG_HDR_UNCMPRSSD__
 
 #include "vsdk/toolkit/media/RGBAPixelHDR.h"
 class IndexedColorImageHDRUncompressed {

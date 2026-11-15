@@ -8,8 +8,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef __SIMPLE_TEST_GEOMETRY_LIBRARY__
-#define __SIMPLE_TEST_GEOMETRY_LIBRARY__
+#ifndef __SMPL_TST_GMTRY_LBRRY__
+#define __SMPL_TST_GMTRY_LBRRY__
 
 #include "java/util/ArrayList.h"
 

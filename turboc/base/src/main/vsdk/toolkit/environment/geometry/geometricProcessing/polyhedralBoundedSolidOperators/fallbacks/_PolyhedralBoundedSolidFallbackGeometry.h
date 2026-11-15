@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_FALLBACK_GEOMETRY__
-#define ___POLYHEDRAL_BOUNDED_SOLID_FALLBACK_GEOMETRY__
+#ifndef ___PBS_FLLBCK_GMTRY__
+#define ___PBS_FLLBCK_GMTRY__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_BOOLEAN_TOPOLOGY_PREDICATES__
-#define __POLYHEDRAL_BOUNDED_SOLID_BOOLEAN_TOPOLOGY_PREDICATES__
+#ifndef __PBS_BLN_TPLGY_PRDCTS__
+#define __PBS_BLN_TPLGY_PRDCTS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"

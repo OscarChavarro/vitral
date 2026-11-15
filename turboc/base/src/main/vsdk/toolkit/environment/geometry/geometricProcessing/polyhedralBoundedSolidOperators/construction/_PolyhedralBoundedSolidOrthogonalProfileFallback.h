@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_ORTHOGONAL_PROFILE_FALLBACK__
-#define ___POLYHEDRAL_BOUNDED_SOLID_ORTHOGONAL_PROFILE_FALLBACK__
+#ifndef ___PBS_ORTHGNL_PRFL_FLLBCK__
+#define ___PBS_ORTHGNL_PRFL_FLLBCK__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"

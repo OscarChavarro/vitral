@@ -1,5 +1,5 @@
-#ifndef __UNDO_REDO_INTERACTION_TECHNIQUE__
-#define __UNDO_REDO_INTERACTION_TECHNIQUE__
+#ifndef __UND_RD_INTRCTN_TCHNQ__
+#define __UND_RD_INTRCTN_TCHNQ__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

@@ -1,5 +1,5 @@
-#ifndef __GEOMETRIC_STRICT_LOOPS_STRATEGY__
-#define __GEOMETRIC_STRICT_LOOPS_STRATEGY__
+#ifndef __GMTRC_STRCT_LPS_STRTGY__
+#define __GMTRC_STRCT_LPS_STRTGY__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"

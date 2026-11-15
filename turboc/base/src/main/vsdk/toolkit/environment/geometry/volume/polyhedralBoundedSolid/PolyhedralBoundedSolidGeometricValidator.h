@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_GEOMETRIC_VALIDATOR__
-#define __POLYHEDRAL_BOUNDED_SOLID_GEOMETRIC_VALIDATOR__
+#ifndef __PBS_GMTRC_VLDTR__
+#define __PBS_GMTRC_VLDTR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

@@ -1,5 +1,5 @@
-#ifndef __TRIANGLE_MESH_GROUP_VOXELIZATION__
-#define __TRIANGLE_MESH_GROUP_VOXELIZATION__
+#ifndef __TRNGL_MSH_GRP_VXLZTN__
+#define __TRNGL_MSH_GRP_VXLZTN__
 
 class TriangleMeshGroup;
 class VoxelVolume;

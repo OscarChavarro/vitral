@@ -1,5 +1,5 @@
-#ifndef __TANGIBLE_INTERFACE_EVENT_2_RAY_GIZMO_MAPPER__
-#define __TANGIBLE_INTERFACE_EVENT_2_RAY_GIZMO_MAPPER__
+#ifndef __TI_EVNT_2_RY_GZM_MPPR__
+#define __TI_EVNT_2_RY_GZM_MPPR__
 
 class Camera;
 class RayGizmo;

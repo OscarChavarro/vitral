@@ -1,5 +1,5 @@
-#ifndef __RENDERER_CONFIGURATION_CONTROLLER__
-#define __RENDERER_CONFIGURATION_CONTROLLER__
+#ifndef __RNDRR_CNFGRTN_CNTRLLR__
+#define __RNDRR_CNFGRTN_CNTRLLR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/Controller.h"

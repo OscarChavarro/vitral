@@ -1,9 +1,18 @@
-#ifndef VSDK_RAYCROSSINGQUERY_H
-#define VSDK_RAYCROSSINGQUERY_H
-#include <math.h>
-class RayCrossingQuery { public:
-    double minT, maxT, minimumChordSquared, minimumExteriorApproach;
-    RayCrossingQuery(double minT, double maxT, double chord = 0.0, double approach = -HUGE_VAL)
-      : minT(minT), maxT(maxT), minimumChordSquared(chord), minimumExteriorApproach(approach) {}
+#ifndef __RAY_CROSSING_QUERY__
+#define __RAY_CROSSING_QUERY__
+
+#include "java/lang/Double.h"
+
+// Interval in the original affine ray parameterization, including its endpoints.
+class RayCrossingQuery {
+public:
+    double minT;
+    double maxT;
+    double minimumChordSquared;
+    // Compatibility cutoff in normalized-direction distance units.
+    double minimumExteriorApproach;
+
+    RayCrossingQuery(double minT, double maxT, double minimumChordSquared = 0.0,
+        double minimumExteriorApproach = Double::NEGATIVE_INFINITY);
 };
 #endif

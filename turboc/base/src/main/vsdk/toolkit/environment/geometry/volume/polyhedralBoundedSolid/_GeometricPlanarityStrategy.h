@@ -1,5 +1,5 @@
-#ifndef __GEOMETRIC_PLANARITY_STRATEGY__
-#define __GEOMETRIC_PLANARITY_STRATEGY__
+#ifndef __GMTRC_PLNRTY_STRTGY__
+#define __GMTRC_PLNRTY_STRTGY__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"

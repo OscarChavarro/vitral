@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_COLOR_DEPTH_IMAGE_RENDERER__
-#define __OPEN_GL_1_COLOR_DEPTH_IMAGE_RENDERER__
+#ifndef __OPN_GL_1_CLR_DPTH_IMG_RNDRR__
+#define __OPN_GL_1_CLR_DPTH_IMG_RNDRR__
 
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 

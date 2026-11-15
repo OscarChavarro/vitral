@@ -1,5 +1,5 @@
-#ifndef __INCREMENTAL_SEGMENT_INSERTER__
-#define __INCREMENTAL_SEGMENT_INSERTER__
+#ifndef __INCRMNTL_SGMNT_INSRTR__
+#define __INCRMNTL_SGMNT_INSRTR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"

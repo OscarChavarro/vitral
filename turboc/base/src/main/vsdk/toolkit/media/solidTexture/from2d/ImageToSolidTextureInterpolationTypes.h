@@ -1,5 +1,5 @@
-#ifndef __IMAGE_TO_SOLID_TEXTURE_INTERPOLATION_TYPES__
-#define __IMAGE_TO_SOLID_TEXTURE_INTERPOLATION_TYPES__
+#ifndef __IMG_T_SLD_TXTR_INTRP_TYPS__
+#define __IMG_T_SLD_TXTR_INTRP_TYPS__
 
 enum ImageToSolidTextureInterpolationTypes {
     NO_INTERPOLATION = 0,

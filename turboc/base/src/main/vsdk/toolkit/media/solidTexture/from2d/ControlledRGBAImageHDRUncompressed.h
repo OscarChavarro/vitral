@@ -1,5 +1,5 @@
-#ifndef __CONTROLLED_RGBA_IMAGE_HDR_UNCOMPRESSED__
-#define __CONTROLLED_RGBA_IMAGE_HDR_UNCOMPRESSED__
+#ifndef __CNTRL_RGBA_IMG_HDR_UNCMP__
+#define __CNTRL_RGBA_IMG_HDR_UNCMP__
 
 #include <stddef.h>
 #include "vsdk/toolkit/common/VSDK.h"

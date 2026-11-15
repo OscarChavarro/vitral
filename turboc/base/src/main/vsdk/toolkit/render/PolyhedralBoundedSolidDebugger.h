@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_DEBUGGER__
-#define __POLYHEDRAL_BOUNDED_SOLID_DEBUGGER__
+#ifndef __PLYHDRL_BNDD_SLD_DBGGR__
+#define __PLYHDRL_BNDD_SLD_DBGGR__
 #include "vsdk/toolkit/render/RenderingElement.h"
 class PolyhedralBoundedSolidDebugger : public RenderingElement {};
 #endif

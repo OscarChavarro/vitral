@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_ROTATE_GIZMO_RENDERER__
-#define __OPEN_GL_1_ROTATE_GIZMO_RENDERER__
+#ifndef __OPN_GL_1_RTT_GZM_RNDRR__
+#define __OPN_GL_1_RTT_GZM_RNDRR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

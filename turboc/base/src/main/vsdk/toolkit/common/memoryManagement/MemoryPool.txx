@@ -1,5 +1,5 @@
-#ifndef VSDK_MEMORY_POOL_TXX
-#define VSDK_MEMORY_POOL_TXX
+#ifndef __MEMORY_POOL_TXX__
+#define __MEMORY_POOL_TXX__
 #include <stddef.h>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/memoryManagement/MemoryPool.h"

@@ -1,5 +1,5 @@
-#ifndef __GEOMETRY_CREATION_COMMANDS_EXECUTOR__
-#define __GEOMETRY_CREATION_COMMANDS_EXECUTOR__
+#ifndef __GMTRY_CRTN_CMMNDS_EXCTR__
+#define __GMTRY_CRTN_CMMNDS_EXCTR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

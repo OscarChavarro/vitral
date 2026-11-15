@@ -1,5 +1,5 @@
-#ifndef __POLYGON_SURFACE_TESSELLATION_MODE__
-#define __POLYGON_SURFACE_TESSELLATION_MODE__
+#ifndef __PLYGN_SRFC_TSSLLTN_MD__
+#define __PLYGN_SRFC_TSSLLTN_MD__
 
 class PolygonSurfaceTessellationMode {
   public:

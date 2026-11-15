@@ -112,7 +112,8 @@ TOOLKIT_LIBRARIES = \
     $(VITRAL_DIR)/xt/build/libvitral_xt.a \
     $(VITRAL_DIR)/opengl1/build/libvitral_opengl1.a \
     $(BASE_LIBRARY)
-LIBS = $(TOOLKIT_LIBRARIES) $(GL_LIBS) $(WIDGET_SET_LIBS) $(X11_LIBS) \
+LIBS = $(filter-out $(BASE_LIBRARY),$(TOOLKIT_LIBRARIES)) $(BASE_LINK) \
+    $(GL_LIBS) $(WIDGET_SET_LIBS) $(X11_LIBS) \
     $(SYSTEM_LIBS)
 
 OBJECTS = $(patsubst %.cpp,buildmk/$(VARIANT)/%.o,$(SOURCES))

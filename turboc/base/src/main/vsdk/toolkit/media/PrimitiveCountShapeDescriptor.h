@@ -1,5 +1,5 @@
-#ifndef __PRIMITIVE_COUNT_SHAPE_DESCRIPTOR__
-#define __PRIMITIVE_COUNT_SHAPE_DESCRIPTOR__
+#ifndef __PRMTV_CNT_SHP_DSCRPTR__
+#define __PRMTV_CNT_SHP_DSCRPTR__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/ShapeDescriptor.h"

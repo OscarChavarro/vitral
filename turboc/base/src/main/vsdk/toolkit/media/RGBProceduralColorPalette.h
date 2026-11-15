@@ -1,5 +1,5 @@
-#ifndef __RGB_PROCEDURAL_COLOR_PALETTE__
-#define __RGB_PROCEDURAL_COLOR_PALETTE__
+#ifndef __RGB_PRCDRL_CLR_PLTT__
+#define __RGB_PRCDRL_CLR_PLTT__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"

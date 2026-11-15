@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_NUMERIC_POLICY__
-#define __POLYHEDRAL_BOUNDED_SOLID_NUMERIC_POLICY__
+#ifndef __PLYHDRL_BNDD_SLD_NMRC_PLCY__
+#define __PLYHDRL_BNDD_SLD_NMRC_PLCY__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

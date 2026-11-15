@@ -78,6 +78,8 @@ void RayHit::clear()
     texture = NULL;
     normalMap = NULL;
     hasRay = FALSE;
+    availableDetailMask = DETAIL_NONE;
+    detailAvailabilityKnown = FALSE;
     hitDistance = 0;
     hitDistanceKnown = FALSE;
 }
@@ -92,6 +94,8 @@ void RayHit::resetForDistanceOnly()
 {
     requiredDetailMask = DETAIL_NONE;
     hasRay = FALSE;
+    availableDetailMask = DETAIL_NONE;
+    detailAvailabilityKnown = FALSE;
     hitDistance = 0;
     hitDistanceKnown = FALSE;
 }
@@ -101,6 +105,8 @@ void RayHit::clone(const RayHit& other)
     RaytraceStatistics::recordHitInfoClone();
     requiredDetailMask = other.requiredDetailMask;
     storeRay = other.storeRay;
+    availableDetailMask = other.availableDetailMask;
+    detailAvailabilityKnown = other.detailAvailabilityKnown;
     hitDistance = other.hitDistance;
     hitDistanceKnown = other.hitDistanceKnown;
     point = other.point;
@@ -200,3 +206,8 @@ void RayHit::setHitDistance(double value)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
+
+BOOLEAN RayHit::isDetailAvailabilityKnown() const { return detailAvailabilityKnown; }
+int RayHit::getAvailableDetailMask() const { return availableDetailMask; }
+void RayHit::beginDetailEvaluation() { availableDetailMask = DETAIL_NONE; detailAvailabilityKnown = TRUE; }
+void RayHit::markDetailAvailable(int mask) { availableDetailMask |= mask & DETAIL_ALL; }

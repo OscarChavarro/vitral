@@ -1,5 +1,5 @@
-#ifndef __FUNCTIONAL_EXPLICIT_SURFACE_EDITOR__
-#define __FUNCTIONAL_EXPLICIT_SURFACE_EDITOR__
+#ifndef __FNCTNL_EXPLCT_SRFC_EDTR__
+#define __FNCTNL_EXPLCT_SRFC_EDTR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

@@ -2,8 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___PBS_SET_INTERSECTION_CURVE_BUILDER__
-#define ___PBS_SET_INTERSECTION_CURVE_BUILDER__
+#ifndef ___PBS_ST_INTRSCTN_CRV_BLDR__
+#define ___PBS_ST_INTRSCTN_CRV_BLDR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

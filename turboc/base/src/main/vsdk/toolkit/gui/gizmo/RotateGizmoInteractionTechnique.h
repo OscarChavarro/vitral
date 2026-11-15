@@ -1,5 +1,5 @@
-#ifndef __ROTATE_GIZMO_INTERACTION_TECHNIQUE__
-#define __ROTATE_GIZMO_INTERACTION_TECHNIQUE__
+#ifndef __RTT_GZM_INTRCTN_TCHNQ__
+#define __RTT_GZM_INTRCTN_TCHNQ__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

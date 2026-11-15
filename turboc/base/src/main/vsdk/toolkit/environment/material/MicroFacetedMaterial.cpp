@@ -83,7 +83,8 @@ static double clamp01(double v)
 
 static double parseDoubleOr(const String& s, double fallback)
 {
-    const char* str = trim(s).toCString();
+    const String trimmed = trim(s);
+    const char* str = trimmed.toCString();
     char* endptr = NULL;
     double val = strtod(str, &endptr);
     if (endptr == str) return fallback;
@@ -92,7 +93,8 @@ static double parseDoubleOr(const String& s, double fallback)
 
 static int parseIntOr(const String& s, int fallback)
 {
-    const char* str = trim(s).toCString();
+    const String trimmed = trim(s);
+    const char* str = trimmed.toCString();
     char* endptr = NULL;
     long val = strtol(str, &endptr, 10);
     if (endptr == str) return fallback;

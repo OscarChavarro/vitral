@@ -1,0 +1,35 @@
+#ifndef __CSG_POINT_EVIDENCE__
+#define __CSG_POINT_EVIDENCE__
+
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/environment/geometry/element/GeometryContainment.h"
+#include "vsdk/toolkit/environment/scene/csg/CsgPointWitness.h"
+// A leaf fact and the coordinates/tolerance at which it was certified.
+class CsgPointEvidence {
+private:
+    CsgPointWitness path;
+    CsgPointWitness equivalentPath;
+    BOOLEAN equivalence;
+    GeometryContainment::Value classification;
+    Vector3Dd point;
+    double tolerance;
+public:
+    CsgPointEvidence();
+    CsgPointEvidence(const CsgPointWitness& path, GeometryContainment::Value classification,
+        const Vector3Dd& point, double tolerance);
+    // Records a proven identity between two sibling solid views; path is the
+    // source of the certified classification, equivalentPath its recipient.
+    CsgPointEvidence(const CsgPointWitness& source, const CsgPointWitness& equivalent,
+        const Vector3Dd& point, double tolerance);
+    BOOLEAN isEquivalence() const;
+    const CsgPointWitness& getEquivalentPath() const;
+    BOOLEAN prepend(const CsgOperandView* operand);
+    void reverseOrientation();
+    CsgPointWitness& getPath();
+    const CsgPointWitness& getPath() const;
+    GeometryContainment::Value getClassification() const;
+    const Vector3Dd& getPoint() const;
+    double getTolerance() const;
+};
+#endif

@@ -1,5 +1,5 @@
-#ifndef VITRAL_JAVA_LANG_MATH_H
-#define VITRAL_JAVA_LANG_MATH_H
+#ifndef __VITRAL_JAVA_LANG_MATH__
+#define __VITRAL_JAVA_LANG_MATH__
 
 #include <math.h>
 
@@ -46,6 +46,10 @@ class Math {
     static double max(double a, double b);
     static float sqrt(float a);
     static double sqrt(double a);
+    // C++ port note: C99 nextafter is missing in Turbo C++ 3.0 (and in some
+    // libc 5 versions): the next binary64 value is found from the bytes of
+    // the number (little endian, as every target of the port)
+    static double nextAfter(double start, double direction);
     static int getExponent(double a);
     static int getExponent(float a);
     static double toRadians(double angdeg);

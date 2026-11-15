@@ -1,5 +1,5 @@
-#ifndef __RASTER_TILE_GENERATION_STRATEGY__
-#define __RASTER_TILE_GENERATION_STRATEGY__
+#ifndef __RSTR_TL_GNRTN_STRTGY__
+#define __RSTR_TL_GNRTN_STRTGY__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

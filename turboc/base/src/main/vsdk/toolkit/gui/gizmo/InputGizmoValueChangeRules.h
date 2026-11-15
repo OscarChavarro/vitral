@@ -1,5 +1,5 @@
-#ifndef __INPUT_GIZMO_VALUE_CHANGE_RULES__
-#define __INPUT_GIZMO_VALUE_CHANGE_RULES__
+#ifndef __INPT_GZM_VL_CHNG_RLS__
+#define __INPT_GZM_VL_CHNG_RLS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

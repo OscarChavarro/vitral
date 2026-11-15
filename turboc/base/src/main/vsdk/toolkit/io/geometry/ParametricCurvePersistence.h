@@ -1,5 +1,5 @@
-#ifndef __PARAMETRIC_CURVE_PERSISTENCE__
-#define __PARAMETRIC_CURVE_PERSISTENCE__
+#ifndef __PRMTRC_CRV_PRSSTNC__
+#define __PRMTRC_CRV_PRSSTNC__
 
 #include "java/lang/String.h"
 

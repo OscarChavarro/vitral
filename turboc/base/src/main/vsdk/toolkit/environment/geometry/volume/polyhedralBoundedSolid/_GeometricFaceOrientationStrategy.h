@@ -1,5 +1,5 @@
-#ifndef __GEOMETRIC_FACE_ORIENTATION_STRATEGY__
-#define __GEOMETRIC_FACE_ORIENTATION_STRATEGY__
+#ifndef __GMTRC_FC_ORNTTN_STRTGY__
+#define __GMTRC_FC_ORNTTN_STRTGY__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"

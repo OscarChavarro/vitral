@@ -1,5 +1,5 @@
-#ifndef __MESH_KEYBOARD_INTERACTION_TECHNIQUES__
-#define __MESH_KEYBOARD_INTERACTION_TECHNIQUES__
+#ifndef __MSH_KYBRD_INTRCTN_TCHNQS__
+#define __MSH_KYBRD_INTRCTN_TCHNQS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

@@ -1,5 +1,5 @@
-#ifndef __XT_OPENGL1_SCENE_EDITOR_APPLICATION__
-#define __XT_OPENGL1_SCENE_EDITOR_APPLICATION__
+#ifndef __XT_OPNGL1_SCN_EDTR_APPLCTN__
+#define __XT_OPNGL1_SCN_EDTR_APPLCTN__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

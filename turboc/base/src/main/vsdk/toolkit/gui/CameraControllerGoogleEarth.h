@@ -1,5 +1,5 @@
-#ifndef __CAMERA_CONTROLLER_GOOGLE_EARTH__
-#define __CAMERA_CONTROLLER_GOOGLE_EARTH__
+#ifndef __CMR_CNTRLLR_GGL_ERTH__
+#define __CMR_CNTRLLR_GGL_ERTH__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/CameraController.h"

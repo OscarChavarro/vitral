@@ -1,5 +1,5 @@
-#ifndef __DRAWING_AREA_INTERACTION_LISTENER__
-#define __DRAWING_AREA_INTERACTION_LISTENER__
+#ifndef __DRWNG_AR_INTRCTN_LSTNR__
+#define __DRWNG_AR_INTRCTN_LSTNR__
 
 #include "java/lang/String.h"
 #include "gui/PointerCursor.h"

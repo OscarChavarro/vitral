@@ -1,5 +1,5 @@
-#ifndef VITRAL_PROTECTED286_RGB_IMAGE_H
-#define VITRAL_PROTECTED286_RGB_IMAGE_H
+#ifndef __VTRL_PRTCTD286_RGB_IMG__
+#define __VTRL_PRTCTD286_RGB_IMG__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "kernel/Protected286Memory.h"

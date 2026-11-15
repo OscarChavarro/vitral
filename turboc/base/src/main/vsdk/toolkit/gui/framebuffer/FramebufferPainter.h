@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_PAINTER_H
-#define VITRAL_FRAMEBUFFER_PAINTER_H
+#ifndef __VITRAL_FRAMEBUFFER_PAINTER__
+#define __VITRAL_FRAMEBUFFER_PAINTER__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

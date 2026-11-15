@@ -1,5 +1,5 @@
-#ifndef __PARAMETRIC_BI_CUBIC_PATCH_PERSISTENCE__
-#define __PARAMETRIC_BI_CUBIC_PATCH_PERSISTENCE__
+#ifndef __PRMTRC_B_CBC_PTCH_PRSSTNC__
+#define __PRMTRC_B_CBC_PTCH_PRSSTNC__
 
 class Document;
 class Element;

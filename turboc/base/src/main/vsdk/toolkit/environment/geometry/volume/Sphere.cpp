@@ -1,11 +1,17 @@
 #include <stddef.h>
+#include "java/lang/Double.h"
+#include "java/lang/IllegalStateException.h"
+#include "java/lang/Math.h"
+#include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include <math.h>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/numerics/FloatingInterval.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/element/GeometryBounds.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #ifndef __TURBOC__
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
@@ -22,41 +28,26 @@ Sphere::Sphere(double r) : radius(r), radiusSquared(r * r) {
 
 Ray*
 Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
-    double dx = -inoutRay.getOrigin().x();
-    double dy = -inoutRay.getOrigin().y();
-    double dz = -inoutRay.getOrigin().z();
-    const Vector3Dd& direction = inoutRay.getDirection();
-    double v = direction.x() * dx + direction.y() * dy + direction.z() * dz;
-
-    double t = radiusSquared + v * v - dx * dx - dy * dy - dz * dz;
-    if (t < 0) {
+    double nearT, farT;
+    if (intersectionRoots(inoutRay.getOrigin(), inoutRay.getDirection(), radius,
+            RayCrossingQuery(0, Double::POSITIVE_INFINITY), nearT, farT) == 0) {
         return NULL;
     }
-
-    t = v - sqrt(t);
-    if (t < 0) {
-        return NULL;
-    }
-
-    Ray r = inoutRay.withT(t);
-    return new Ray(r);
+    return new Ray(inoutRay.withT(nearT));
 }
 
 BOOLEAN
 Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
-    double dx = -inRay.getOrigin().x();
-    double dy = -inRay.getOrigin().y();
-    double dz = -inRay.getOrigin().z();
-    const Vector3Dd& direction = inRay.getDirection();
-    double projection = direction.x() * dx + direction.y() * dy + direction.z() * dz;
+    return doIntersectionFirstHit(inRay,
+        RayCrossingQuery(0, Double::POSITIVE_INFINITY), outHit);
+}
 
-    double discriminant = radiusSquared + projection * projection - dx * dx - dy * dy - dz * dz;
-    if (discriminant < 0) {
-        return FALSE;
-    }
-
-    double t = projection - sqrt(discriminant);
-    if (t < 0) {
+BOOLEAN
+Sphere::doIntersectionFirstHit(const Ray& inRay, const RayCrossingQuery& query,
+    RayHit* outHit) {
+    double t, farT;
+    if (intersectionRoots(inRay.getOrigin(), inRay.getDirection(), radius,
+            query, t, farT) == 0) {
         return FALSE;
     }
 
@@ -78,10 +69,16 @@ Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
 
 void
 Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
+    fillSurfaceDetail(inRay, inT, outData);
+}
+
+void
+Sphere::fillSurfaceDetail(const Ray& inRay, double inT, RayHit* outData) const {
     if (outData == NULL) {
         return;
     }
 
+    outData->beginDetailEvaluation();
     RaytraceStatistics::recordGeometryDetailComputation();
     BOOLEAN needsNormalVector = outData->needsNormal() || outData->needsTextureCoordinates() || outData->needsTangent();
     if (!outData->needsPoint() && !needsNormalVector) {
@@ -95,13 +92,25 @@ Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
 
     if (outData->needsPoint()) {
         outData->point = point;
+        if (Double::isFinite(point.x()) && Double::isFinite(point.y()) && Double::isFinite(point.z()))
+            outData->markDetailAvailable(RayHit::DETAIL_POINT);
     }
 
     Vector3Dd normal;
     if (needsNormalVector) {
-        normal = point.normalized();
+        const double pointSquared = point.dotProduct(point);
+        // Vector3Dd::normalized intentionally treats lengths below VSDK::EPSILON
+        // as zero; a small but valid sphere still needs a unit surface normal.
+        if (Double::isFinite(pointSquared) && pointSquared > 0 && pointSquared < VSDK::EPSILON)
+            normal = point.multiply(1.0 / Math::sqrt(pointSquared));
+        else
+            normal = point.normalized();
         if (outData->needsNormal()) {
             outData->normal = normal;
+            const double normalSquared = normal.dotProduct(normal);
+            if (Double::isFinite(normalSquared) && normalSquared > 0 &&
+                Double::isFinite(normal.x()) && Double::isFinite(normal.y()) && Double::isFinite(normal.z()))
+                outData->markDetailAvailable(RayHit::DETAIL_NORMAL);
         }
     }
 
@@ -129,25 +138,90 @@ Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     if (outData->needsTextureCoordinates()) {
         outData->u = ((theta + M_PI / 2) / (2 * M_PI));
         outData->v = 1 - (phi / M_PI);
+        if (Double::isFinite(outData->u) && Double::isFinite(outData->v))
+            outData->markDetailAvailable(RayHit::DETAIL_UV);
     }
     if (outData->needsTangent()) {
         outData->tangent = Vector3Dd(
             sin(theta - M_PI / 2),
             -cos(theta - M_PI / 2),
             0);
+        if (Double::isFinite(outData->tangent.x()) && Double::isFinite(outData->tangent.y()))
+            outData->markDetailAvailable(RayHit::DETAIL_TANGENT);
     }
+}
+
+GeometryContainment::Value
+Sphere::classifyBoxCertified(const Vector3Dd& center, const Vector3Dd& halfWidths) const {
+    if (!Double::isFinite(radius) || radius <= 0) return GeometryContainment::InvalidInput;
+    if (!FloatingInterval::isSupportedEnvironment()) return GeometryContainment::Unsupported;
+    const double c[3] = {center.x(), center.y(), center.z()};
+    const double h[3] = {halfWidths.x(), halfWidths.y(), halfWidths.z()};
+    // Squared distances from the centre to the farthest and nearest box points.
+    FloatingInterval farthest = FloatingInterval::exact(0), nearest = FloatingInterval::exact(0);
+    for (int i = 0; i < 3; ++i) {
+        const FloatingInterval range = FloatingInterval::around(c[i], h[i]);
+        if (!range.isValid()) return GeometryContainment::InvalidInput;
+        const double extreme = Math::max(Math::abs(range.getLower()), Math::abs(range.getUpper()));
+        farthest = farthest.add(FloatingInterval::exact(extreme).square());
+        if (range.getLower() > 0) nearest = nearest.add(FloatingInterval::exact(range.getLower()).square());
+        else if (range.getUpper() < 0) nearest = nearest.add(FloatingInterval::exact(range.getUpper()).square());
+    }
+    const FloatingInterval squaredRadius = FloatingInterval::exact(radius).square();
+    if (!farthest.isValid() || !nearest.isValid() || !squaredRadius.isValid()) return GeometryContainment::Indeterminate;
+    if (farthest.getUpper() < squaredRadius.getLower()) return GeometryContainment::Inside;
+    if (nearest.getLower() > squaredRadius.getUpper()) return GeometryContainment::Outside;
+    return GeometryContainment::Indeterminate;
+}
+
+GeometryContainment::Value
+Sphere::classifyPointCertified(const Vector3Dd& p, double distanceTolerance) const {
+    if (!Double::isFinite(radius) || radius <= 0 ||
+        !Double::isFinite(distanceTolerance) || distanceTolerance < 0 ||
+        !Double::isFinite(p.x()) || !Double::isFinite(p.y()) ||
+        !Double::isFinite(p.z())) return GeometryContainment::InvalidInput;
+    if (!FloatingInterval::isSupportedEnvironment()) return GeometryContainment::Unsupported;
+    FloatingInterval squared=FloatingInterval::exact(0);
+    squared=squared.add(FloatingInterval::exact(p.x()).square());
+    squared=squared.add(FloatingInterval::exact(p.y()).square());
+    squared=squared.add(FloatingInterval::exact(p.z()).square());
+    const FloatingInterval signedDistance=squared.squareRoot().subtract(FloatingInterval::exact(radius));
+    if (!signedDistance.isValid()) return GeometryContainment::Indeterminate;
+    if (signedDistance.getUpper() < -distanceTolerance) return GeometryContainment::Inside;
+    if (signedDistance.getLower() > distanceTolerance) return GeometryContainment::Outside;
+    if (signedDistance.getLower() >= -distanceTolerance && signedDistance.getUpper() <= distanceTolerance)
+        return GeometryContainment::Boundary;
+    return GeometryContainment::Indeterminate;
+}
+
+GeometryContainment::Value
+Sphere::classifyPoint(const Vector3Dd& p, double distanceTolerance) const {
+    if (!Double::isFinite(radius) || radius <= 0 ||
+        !Double::isFinite(distanceTolerance) || distanceTolerance < 0 ||
+        !Double::isFinite(p.x()) || !Double::isFinite(p.y()) ||
+        !Double::isFinite(p.z())) return GeometryContainment::InvalidInput;
+    if (distanceTolerance>0) return classifyPointCertified(p, distanceTolerance);
+    const double squared = p.dotProduct(p);
+    const double radiusSquaredValue = radius * radius;
+    if (!Double::isFinite(squared) || !Double::isFinite(radius + distanceTolerance) ||
+        !Double::isFinite(radiusSquaredValue) || radiusSquaredValue == 0 ||
+        (squared == 0 && (p.x() != 0 || p.y() != 0 || p.z() != 0)))
+        return GeometryContainment::Indeterminate;
+    const double distance = p.length();
+    if (distance < radius - distanceTolerance) return GeometryContainment::Inside;
+    if (distance > radius + distanceTolerance) return GeometryContainment::Outside;
+    return GeometryContainment::Boundary;
 }
 
 int
 Sphere::doContainmentTest(const Vector3Dd& p, double distanceTolerance) {
-    double l = p.length();
-    if (l < radius - distanceTolerance) {
-        return INSIDE;
-    }
-    else if (l > radius + distanceTolerance) {
-        return OUTSIDE;
-    }
-    return LIMIT;
+    const GeometryContainment::Value result = classifyPoint(p, distanceTolerance);
+    if (result == GeometryContainment::Inside) return INSIDE;
+    if (result == GeometryContainment::Boundary) return LIMIT;
+    if (result == GeometryContainment::Outside) return OUTSIDE;
+    // The legacy integer contract has no representation for uncertainty.
+    // Do not silently convert an indeterminate or failed query to outside.
+    throw IllegalStateException("Sphere containment cannot be represented by the legacy integer result");
 }
 
 double*
@@ -324,27 +398,39 @@ Sphere::getClass() const
     return &CLASS;
 }
 
-int Sphere::intersectionRoots(const Vector3Dd& p, const Vector3Dd& d, double radius,
-    const RayCrossingQuery& query, double& nearT, double& farT)
+// C++ port note: out of line (the cpp port defines it inline in the header)
+int Sphere::intersectionRoots(const Vector3Dd& p, const Vector3Dd& d,
+    double radius, const RayCrossingQuery& query, double& nearT, double& farT)
 {
-    double lengthSquared = d.dotProduct(d);
+    const double lengthSquared = d.dotProduct(d);
     if (!(lengthSquared > 0.0) || query.minT > query.maxT) return 0;
-    double length = sqrt(lengthSquared), closest = -p.dotProduct(d) / length;
-    double ocSquared = p.dotProduct(p), radiusSquared = radius * radius;
-    if (!(ocSquared < radiusSquared) && closest < query.minimumExteriorApproach) return 0;
-    double chordSquared = radiusSquared - ocSquared + closest * closest;
+    const double directionLength = sqrt(lengthSquared);
+    const Vector3Dd unitDirection = d.multiply(1.0 / directionLength);
+    const double radiusSquared = radius * radius;
+    const double ocSquared = p.dotProduct(p);
+    const BOOLEAN inside = ocSquared < radiusSquared;
+    const double closest = -p.dotProduct(unitDirection);
+    if (!inside && closest < query.minimumExteriorApproach) return 0;
+    const double chordSquared = radiusSquared - ocSquared + closest * closest;
     if (chordSquared < query.minimumChordSquared) return 0;
-    double half = sqrt(chordSquared);
-    nearT = (closest - half) / length; farT = (closest + half) / length;
-    BOOLEAN n = nearT >= query.minT && nearT <= query.maxT;
-    BOOLEAN f = farT >= query.minT && farT <= query.maxT;
-    if (!n && !f) return 0;
-    if (!n) nearT = farT;
-    if (!f) farT = nearT;
+    const double halfChord = sqrt(chordSquared);
+    farT = (closest + halfChord) / directionLength;
+    nearT = (closest - halfChord) / directionLength;
+    const BOOLEAN nearValid = nearT >= query.minT && nearT <= query.maxT;
+    const BOOLEAN farValid = farT >= query.minT && farT <= query.maxT;
+    if (!nearValid && !farValid) return 0;
+    if (!nearValid) nearT = farT;
+    if (!farValid) farT = nearT;
     return nearT == farT ? 1 : 2;
 }
+
 RayCrossingSupport::Value Sphere::emitRayCrossings(const Ray& ray, const RayCrossingQuery& query, RayCrossingSink& sink) const
 {
+    RayFirstHitStatus::Value failure;
+    if (!validateSurfaceQuery(ray, query, failure)) {
+        return failure == RayFirstHitStatus::InvalidInput ? RayCrossingSupport::InvalidInput
+            : RayCrossingSupport::Indeterminate;
+    }
     double nearT, farT;
     int count = intersectionRoots(ray.getOrigin(), ray.getDirection(), radius, query, nearT, farT);
     for (int i = 0; i < count; ++i) {
@@ -355,4 +441,118 @@ RayCrossingSupport::Value Sphere::emitRayCrossings(const Ray& ray, const RayCros
         sink.crossing(RayCrossing(t, this, kind));
     }
     return RayCrossingSupport::Supported;
+}
+
+
+RaySolidQueryStatus::Value Sphere::classifyRay(const Ray& ray,
+    const RayCrossingQuery& query, RaySolidClassification& result) const
+{
+    result.clear();
+    const Vector3Dd& origin = ray.getOrigin();
+    const Vector3Dd& direction = ray.getDirection();
+    const double infinity = Double::POSITIVE_INFINITY;
+    // Surface compatibility cutoffs may discard genuine boundaries and cannot
+    // define a solid classification. Applications apply those to surface queries.
+    if (Double::isNaN(query.minT) || Double::isNaN(query.maxT) || query.minT >= query.maxT ||
+        query.minimumChordSquared != 0.0 || query.minimumExteriorApproach != -infinity ||
+        !Double::isFinite(radius) || radius <= 0.0 ||
+        !Double::isFinite(origin.x()) || !Double::isFinite(origin.y()) || !Double::isFinite(origin.z()) ||
+        !Double::isFinite(direction.x()) || !Double::isFinite(direction.y()) || !Double::isFinite(direction.z()) ||
+        (direction.x() == 0 && direction.y() == 0 && direction.z() == 0)) {
+        return RaySolidQueryStatus::InvalidInput;
+    }
+    const double lengthSquared = direction.dotProduct(direction);
+    // C++ port note: the square is stored (volatile) before comparing it, as
+    // Turbo C++ 3.0 and gcc 2.7.2 keep it in the x87 extended exponent range
+    volatile double storedRadiusSquared = radius * radius;
+    if (!Double::isFinite(lengthSquared) || lengthSquared == 0 ||
+        !Double::isFinite(origin.dotProduct(origin)) || !Double::isFinite(storedRadiusSquared) ||
+        storedRadiusSquared == 0.0) {
+        return RaySolidQueryStatus::Indeterminate;
+    }
+    // Obtain the complete analytic interval before clipping: an empty set of
+    // surface events in the requested range can still mean entirely inside.
+    double nearT = 0, farT = 0;
+    const int count = intersectionRoots(origin, direction, radius,
+        RayCrossingQuery(-infinity, infinity), nearT, farT);
+    if (!Double::isFinite(nearT) || !Double::isFinite(farT)) {
+        return RaySolidQueryStatus::Indeterminate;
+    }
+    if (count < 2) {
+        if (!result.insideSegments.add(FALSE)) {
+            result.clear(); return RaySolidQueryStatus::Indeterminate;
+        }
+        return RaySolidQueryStatus::Supported; // Miss or point tangency (IN/OUT).
+    }
+    if (!result.insideSegments.add(query.minT > nearT && query.minT <= farT)) {
+        result.clear(); return RaySolidQueryStatus::Indeterminate;
+    }
+    if (nearT >= query.minT && nearT <= query.maxT) {
+        if (!result.boundaries.add(RaySolidBoundary(nearT, this)) || !result.insideSegments.add(TRUE)) {
+            result.clear(); return RaySolidQueryStatus::Indeterminate;
+        }
+    }
+    if (farT >= query.minT && farT <= query.maxT) {
+        if (!result.boundaries.add(RaySolidBoundary(farT, this)) || !result.insideSegments.add(FALSE)) {
+            result.clear(); return RaySolidQueryStatus::Indeterminate;
+        }
+    }
+    return RaySolidQueryStatus::Supported;
+}
+
+void Sphere::getBounds(GeometryBounds& result) const
+{
+    if (!Double::isFinite(radius) || radius <= 0) {
+        result.setIndeterminate();
+        return;
+    }
+    result.setFinite(Vector3Dd(-radius,-radius,-radius), Vector3Dd(radius,radius,radius));
+}
+
+BOOLEAN Sphere::validateSurfaceQuery(const Ray& ray, const RayCrossingQuery& query,
+    RayFirstHitStatus::Value& failure) const
+{
+    const Vector3Dd& p = ray.getOrigin();
+    const Vector3Dd& d = ray.getDirection();
+    if (Double::isNaN(query.minT) || Double::isNaN(query.maxT) ||
+        query.minT > query.maxT || !Double::isFinite(query.minimumChordSquared) ||
+        query.minimumChordSquared < 0 || Double::isNaN(query.minimumExteriorApproach) ||
+        !Double::isFinite(radius) || radius <= 0 ||
+        !Double::isFinite(p.x()) || !Double::isFinite(p.y()) || !Double::isFinite(p.z()) ||
+        !Double::isFinite(d.x()) || !Double::isFinite(d.y()) || !Double::isFinite(d.z()) ||
+        (d.x() == 0 && d.y() == 0 && d.z() == 0)) { failure = RayFirstHitStatus::InvalidInput; return FALSE; }
+    const double lengthSquared = d.dotProduct(d);
+    const double originSquared = p.dotProduct(p);
+    const double rSquared = radius * radius;
+    if (!Double::isFinite(lengthSquared) || lengthSquared == 0 ||
+        !Double::isFinite(originSquared) || !Double::isFinite(rSquared) || rSquared == 0)
+        { failure = RayFirstHitStatus::Indeterminate; return FALSE; }
+    return TRUE;
+}
+
+RayFirstHitStatus::Value Sphere::queryFirstHit(const Ray& ray, const RayCrossingQuery& query,
+    RayHit* result, RayBoundary* boundary) const
+{
+    if (result) result->clear();
+    if (boundary) *boundary = RayBoundary();
+    const Vector3Dd& p = ray.getOrigin();
+    const Vector3Dd& d = ray.getDirection();
+    RayFirstHitStatus::Value failure;
+    if (!validateSurfaceQuery(ray, query, failure)) return failure;
+    double nearT, farT;
+    if (intersectionRoots(p, d, radius, query, nearT, farT) == 0) return RayFirstHitStatus::Miss;
+    if (!Double::isFinite(nearT)) return RayFirstHitStatus::Indeterminate;
+    if (boundary) *boundary = RayBoundary(nearT, this);
+    if (result) {
+        result->setHitDistance(nearT);
+        if (result->shouldStoreRay() || result->needsAnySurfaceData()) {
+            const Ray hitRay = ray.withT(nearT);
+            result->setRay(hitRay);
+            if (result->needsAnySurfaceData()) {
+                fillSurfaceDetail(hitRay, nearT, result);
+                result->setRay(hitRay);
+            }
+        }
+    }
+    return RayFirstHitStatus::Hit;
 }

@@ -1,5 +1,5 @@
-#ifndef __CONTOUR_AWARE_POLYGON_TRIANGULATOR__
-#define __CONTOUR_AWARE_POLYGON_TRIANGULATOR__
+#ifndef __CNTR_AWR_PLYGN_TRNGLTR__
+#define __CNTR_AWR_PLYGN_TRNGLTR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

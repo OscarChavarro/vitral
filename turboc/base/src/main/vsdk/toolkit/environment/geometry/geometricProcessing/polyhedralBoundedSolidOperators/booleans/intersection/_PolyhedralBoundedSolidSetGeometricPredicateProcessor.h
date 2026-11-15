@@ -2,8 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___PBS_SET_GEOMETRIC_PREDICATE_PROCESSOR__
-#define ___PBS_SET_GEOMETRIC_PREDICATE_PROCESSOR__
+#ifndef ___PBS_ST_GMTRC_PRDCT_PRCSSR__
+#define ___PBS_ST_GMTRC_PRDCT_PRCSSR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

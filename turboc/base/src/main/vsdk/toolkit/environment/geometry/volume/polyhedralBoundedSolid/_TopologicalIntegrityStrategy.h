@@ -1,5 +1,5 @@
-#ifndef __TOPOLOGICAL_INTEGRITY_STRATEGY__
-#define __TOPOLOGICAL_INTEGRITY_STRATEGY__
+#ifndef __TPLGCL_INTGRTY_STRTGY__
+#define __TPLGCL_INTGRTY_STRTGY__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"

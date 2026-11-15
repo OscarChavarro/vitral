@@ -1,5 +1,5 @@
-#ifndef __PROGRESS_MONITOR_CONSOLE_LONG_FORMAT__
-#define __PROGRESS_MONITOR_CONSOLE_LONG_FORMAT__
+#ifndef __PRGRSS_MNTR_CNSL_LNG_FRMT__
+#define __PRGRSS_MNTR_CNSL_LNG_FRMT__
 
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 class ProgressMonitorConsoleLongFormat : public ProgressMonitor {

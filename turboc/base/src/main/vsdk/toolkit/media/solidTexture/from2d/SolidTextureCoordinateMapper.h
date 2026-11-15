@@ -1,5 +1,5 @@
-#ifndef __SOLID_TEXTURE_COORDINATE_MAPPER__
-#define __SOLID_TEXTURE_COORDINATE_MAPPER__
+#ifndef __SLD_TXTR_CRDNT_MPPR__
+#define __SLD_TXTR_CRDNT_MPPR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/solidTexture/from2d/ControlledRGBAImageHDRUncompressed.h"

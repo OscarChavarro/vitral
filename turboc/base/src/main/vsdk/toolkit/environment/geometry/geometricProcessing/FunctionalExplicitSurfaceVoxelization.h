@@ -1,5 +1,5 @@
-#ifndef __FUNCTIONAL_EXPLICIT_SURFACE_VOXELIZATION__
-#define __FUNCTIONAL_EXPLICIT_SURFACE_VOXELIZATION__
+#ifndef __FNCTNL_EXPLCT_SRFC_VXLZTN__
+#define __FNCTNL_EXPLCT_SRFC_VXLZTN__
 
 class FunctionalExplicitSurface;
 class VoxelVolume;

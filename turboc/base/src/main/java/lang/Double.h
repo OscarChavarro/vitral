@@ -1,6 +1,7 @@
 #ifndef __DOUBLE__
 #define __DOUBLE__
 
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
 
@@ -8,6 +9,14 @@ class Double {
   public:
 static const double MIN_VALUE;
 static const double MAX_VALUE;
+static const double POSITIVE_INFINITY;
+static const double NEGATIVE_INFINITY;
+
+// C++ port note: Turbo C++ 3.0 has no NaN literal; the constant is built at
+// run time from its bytes (Cpp98Support::nan)
+static const double NaN;
+static BOOLEAN isNaN(double value);
+static BOOLEAN isFinite(double value);
 
 /**
 Emulation of `Double.parseDouble`: leading and trailing white space is

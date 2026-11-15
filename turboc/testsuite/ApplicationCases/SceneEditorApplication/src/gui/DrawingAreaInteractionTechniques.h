@@ -1,5 +1,5 @@
-#ifndef __DRAWING_AREA_INTERACTION_TECHNIQUES__
-#define __DRAWING_AREA_INTERACTION_TECHNIQUES__
+#ifndef __DRWNG_AR_INTRCTN_TCHNQS__
+#define __DRWNG_AR_INTRCTN_TCHNQS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"

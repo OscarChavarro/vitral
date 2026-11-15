@@ -1,5 +1,5 @@
-#ifndef VITRAL_OPEN_GL_1_ARROW_RENDERER_H
-#define VITRAL_OPEN_GL_1_ARROW_RENDERER_H
+#ifndef __VTRL_OPN_GL_1_ARRW_RNDRR__
+#define __VTRL_OPN_GL_1_ARRW_RNDRR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

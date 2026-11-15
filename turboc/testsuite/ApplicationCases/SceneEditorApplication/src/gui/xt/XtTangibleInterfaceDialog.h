@@ -1,5 +1,5 @@
-#ifndef __XT_TANGIBLE_INTERFACE_DIALOG__
-#define __XT_TANGIBLE_INTERFACE_DIALOG__
+#ifndef __XT_TNGBL_INTRFC_DLG__
+#define __XT_TNGBL_INTRFC_DLG__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

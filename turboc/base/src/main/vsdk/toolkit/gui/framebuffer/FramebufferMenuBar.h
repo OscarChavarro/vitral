@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_MENU_BAR_H
-#define VITRAL_FRAMEBUFFER_MENU_BAR_H
+#ifndef __VITRAL_FRAMEBUFFER_MENU_BAR__
+#define __VITRAL_FRAMEBUFFER_MENU_BAR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

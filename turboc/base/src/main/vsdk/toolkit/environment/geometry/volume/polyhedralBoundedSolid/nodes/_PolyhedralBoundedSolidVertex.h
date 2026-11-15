@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_VERTEX__
-#define __POLYHEDRAL_BOUNDED_SOLID_VERTEX__
+#ifndef __PLYHDRL_BNDD_SLD_VRTX__
+#define __PLYHDRL_BNDD_SLD_VRTX__
 
 #include "java/lang/String.h"
 

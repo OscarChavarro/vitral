@@ -1,5 +1,5 @@
-#ifndef __COMMAND_LINE_OPTIONS__
-#define __COMMAND_LINE_OPTIONS__
+#ifndef __PLYGN_CLPPNG_CMMND_LN_OPTNS__
+#define __PLYGN_CLPPNG_CMMND_LN_OPTNS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "model/PolygonSurfaceTessellationMode.h"

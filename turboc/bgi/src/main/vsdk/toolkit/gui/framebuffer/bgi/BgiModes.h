@@ -1,5 +1,5 @@
-#ifndef VITRAL_BGI_MODES_H
-#define VITRAL_BGI_MODES_H
+#ifndef __VITRAL_BGI_MODES__
+#define __VITRAL_BGI_MODES__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

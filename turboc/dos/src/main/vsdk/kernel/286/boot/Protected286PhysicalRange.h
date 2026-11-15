@@ -1,5 +1,5 @@
-#ifndef VITRAL_286_PHYSICAL_RANGE_H
-#define VITRAL_286_PHYSICAL_RANGE_H
+#ifndef __VITRAL_286_PHYSICAL_RANGE__
+#define __VITRAL_286_PHYSICAL_RANGE__
 #include "kernel/Protected286Types.h"
 
 /* BIOS 88h reports contiguous KiB above 1 MiB. Keep the HMA unused, cap

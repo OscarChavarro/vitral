@@ -23,8 +23,12 @@ public:
     Ray(const Vector3Dd& origin, const Vector3Dd& direction, double t);
     Ray(const Ray& b);
 
+    // Explicit affine construction: preserve direction magnitude and t.
+    // Legacy constructors retain their historical normalization behavior.
+    static Ray fromAffine(const Vector3Dd& origin, const Vector3Dd& direction, double t = 0.0);
     static Ray copyOf(const Ray& other);
 
+    // Copies replace only the named component; they never renormalize.
     Ray withOrigin(const Vector3Dd& newOrigin) const;
     Ray withDirection(const Vector3Dd& newDirection) const;
     Ray withT(double newT) const;

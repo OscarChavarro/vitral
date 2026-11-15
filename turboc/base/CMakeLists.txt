@@ -178,7 +178,6 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationTrapezoid.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationTrapezoidQueryNode.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_Polygon2DWA.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonTopologicalMerger.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.cpp
@@ -346,6 +345,89 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/feedback/ProgressMonitor.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetElement.cpp
     src/main/vsdk/toolkit/gui/widget/variable/WidgetVariable.cpp
+    src/main/vsdk/toolkit/common/numerics/FloatingInterval.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayCrossing.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayCrossingQuery.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayCrossingSink.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayBoundary.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RaySolidBoundary.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RaySolidClassification.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayInstancePath.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayInstanceStep.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/GeometryBounds.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/GeometryQueryWorkspace.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshIntersectionIndex.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/AffineEllipsoidDistance.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/AffineEllipsoidDistanceBounds.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/AffineEllipsoidDualBound.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/AffineEllipsoidMinimumDistance.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/OrthogonalEllipsoidDistance.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/QuadraticInteriorBound.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.cpp
+    src/main/vsdk/toolkit/environment/scene/AffinePlacement.cpp
+    src/main/vsdk/toolkit/environment/scene/AffineToleranceMap.cpp
+    src/main/vsdk/toolkit/environment/scene/InstanceRayCrossingBuffer.cpp
+    src/main/vsdk/toolkit/environment/scene/SceneSolid.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBinHierarchy.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBoundingVolume.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AxisAlignedBoundingBox.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BoundingVolumeHierarchy.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/PreRayHitElement.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/RaySlabReciprocals.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/SubdividedBezierPatch.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/BlobComponent.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/BlobSolid.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/ImplicitSolid.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/PolynomialSurface.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/QuadricSurface.cpp
+    src/main/vsdk/toolkit/io/geometry/ReaderAltimetry.cpp
+    src/main/vsdk/toolkit/io/geometry/ReaderMitQuadGroup.cpp
+    src/main/vsdk/toolkit/io/geometry/ReaderMitTriangleGroup.cpp
+    src/main/vsdk/toolkit/processing/BezierPatchTessellator.cpp
+    src/main/vsdk/toolkit/processing/SolidBoundaryTessellationReport.cpp
+    src/main/vsdk/toolkit/processing/SolidBoundaryTessellator.cpp
+    src/main/vsdk/toolkit/render/raytracing/SnellRefraction.cpp
+    src/main/vsdk/toolkit/render/shaders/ShadowTransmittance.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgBody.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgBodyOperand.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgCrossingMembershipFilter.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgDyadic.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgDyadicSolid.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgDyadicTransform.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgExactArithmetic.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgExactPlane.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgExactQuadric.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgExactTransform.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgExpression.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgExpressionEquivalence.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgOperandView.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPlacedExpression.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPointAttribution.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPointCandidate.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPointClassification.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPointEvidence.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPointProof.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPointWitness.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgPointWorkspace.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayClassification.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayEventBatch.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayEventCursor.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayEventGroup.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayEventQuery.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayEventReference.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayLeaf.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayLeafBatch.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayLeafQuery.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayPlacement.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRaySurfaceEvents.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRayWorkspace.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgRothRayClassifier.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgSolidBounds.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgSolidEquivalence.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgTree.cpp
+    src/main/vsdk/toolkit/environment/scene/csg/CsgVersionStamp.cpp
 )
 
 if(WITH_FREETYPE)

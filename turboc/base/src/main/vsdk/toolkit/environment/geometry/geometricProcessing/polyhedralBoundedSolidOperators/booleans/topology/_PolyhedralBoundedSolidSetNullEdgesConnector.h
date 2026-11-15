@@ -2,8 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___PBS_SET_NULL_EDGES_CONNECTOR__
-#define ___PBS_SET_NULL_EDGES_CONNECTOR__
+#ifndef ___PBS_ST_NLL_EDGS_CNNCTR__
+#define ___PBS_ST_NLL_EDGS_CNNCTR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"

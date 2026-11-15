@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_COLORED_PRIMITIVE_RENDERER__
-#define __OPEN_GL_1_COLORED_PRIMITIVE_RENDERER__
+#ifndef __OPN_GL_1_CLRD_PRMTV_RNDRR__
+#define __OPN_GL_1_CLRD_PRMTV_RNDRR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

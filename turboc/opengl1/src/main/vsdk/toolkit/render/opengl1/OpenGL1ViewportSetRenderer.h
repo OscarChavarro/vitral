@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_VIEWPORT_SET_RENDERER__
-#define __OPEN_GL_1_VIEWPORT_SET_RENDERER__
+#ifndef __OPN_GL_1_VWPRT_ST_RNDRR__
+#define __OPN_GL_1_VWPRT_ST_RNDRR__
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 class OpenGL1LabelImageProvider;class OpenGL1ViewportWindow;class Viewport;class ViewportSet;

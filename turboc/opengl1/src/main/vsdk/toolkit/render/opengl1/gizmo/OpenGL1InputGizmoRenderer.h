@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_INPUT_GIZMO_RENDERER__
-#define __OPEN_GL_1_INPUT_GIZMO_RENDERER__
+#ifndef __OPN_GL_1_INPT_GZM_RNDRR__
+#define __OPN_GL_1_INPT_GZM_RNDRR__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

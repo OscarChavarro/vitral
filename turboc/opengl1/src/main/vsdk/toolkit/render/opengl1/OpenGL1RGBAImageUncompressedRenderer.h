@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_RGBA_IMAGE_UNCOMPRESSED_RENDERER__
-#define __OPEN_GL_1_RGBA_IMAGE_UNCOMPRESSED_RENDERER__
+#ifndef __OPN_GL_1_RGBA_IMG_UNCM_RNDR__
+#define __OPN_GL_1_RGBA_IMG_UNCM_RNDR__
 
 #include "java/util/HashMap.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"

@@ -2,11 +2,27 @@
 #include <math.h>
 
 #include "java/lang/String.h"
+#include "java/lang/Double.h"
+#include "java/lang/Math.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/Cpp98Support.h"
+#include "vsdk/toolkit/environment/geometry/element/GeometryBounds.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+
+/**
+C++ port note: true when the binary64 product of two nonzero factors is zero.
+The product is stored (volatile) first: Turbo C++ 3.0 and gcc 2.7.2 compare
+it in the extended exponent range of the x87, where it does not underflow.
+*/
+static BOOLEAN
+productUnderflows(double a, double b)
+{
+    volatile double product = a * b;
+    return a != 0 && b != 0 && product == 0;
+}
 InfinitePlane::InfinitePlane(const InfinitePlane& other) { clone(other); }
 
 InfinitePlane::InfinitePlane(double a_, double b_, double c_, double d_)
@@ -31,6 +47,108 @@ InfinitePlane::InfinitePlane(const Vector3Dd& p0, const Vector3Dd& p1, const Vec
 void InfinitePlane::clone(const InfinitePlane& other)
 {
     a = other.a; b = other.b; c = other.c; d = other.d;
+}
+
+void InfinitePlane::getBounds(GeometryBounds& result) const
+{
+    if (!Double::isFinite(a) || !Double::isFinite(b) ||
+        !Double::isFinite(c) || !Double::isFinite(d) ||
+        (a == 0 && b == 0 && c == 0)) result.setIndeterminate();
+    else result.setUnbounded();
+}
+
+RayFirstHitStatus::Value InfinitePlane::evaluateRay(const Ray& ray, const RayCrossingQuery& query,
+    double& depth) const
+{
+    const Vector3Dd& origin = ray.getOrigin();
+    const Vector3Dd& direction = ray.getDirection();
+    if (!Double::isFinite(a) || !Double::isFinite(b) ||
+        !Double::isFinite(c) || !Double::isFinite(d) ||
+        (a == 0 && b == 0 && c == 0) ||
+        !Double::isFinite(origin.x()) || !Double::isFinite(origin.y()) ||
+        !Double::isFinite(origin.z()) || !Double::isFinite(direction.x()) ||
+        !Double::isFinite(direction.y()) || !Double::isFinite(direction.z()) ||
+        (direction.x() == 0 && direction.y() == 0 && direction.z() == 0) ||
+        Double::isNaN(query.minT) || Double::isNaN(query.maxT) || query.minT > query.maxT ||
+        !Double::isFinite(query.minimumChordSquared) || query.minimumChordSquared < 0 ||
+        Double::isNaN(query.minimumExteriorApproach)) return RayFirstHitStatus::InvalidInput;
+    if (query.minimumChordSquared != 0 || query.minimumExteriorApproach != Double::NEGATIVE_INFINITY)
+        return RayFirstHitStatus::Unsupported;
+    const Vector3Dd normal(a,b,c);
+    const double squared = normal.dotProduct(normal);
+    const double numerator = -(normal.dotProduct(origin) + d);
+    const double denominator = normal.dotProduct(direction);
+    if (!Double::isFinite(squared) || squared == 0 ||
+        !Double::isFinite(numerator) || !Double::isFinite(denominator))
+        return RayFirstHitStatus::Indeterminate;
+    if (denominator == 0 &&
+        ((productUnderflows(a, direction.x())) ||
+         (productUnderflows(b, direction.y())) ||
+         (productUnderflows(c, direction.z()))))
+        return RayFirstHitStatus::Indeterminate;
+    const RayFirstHitStatus::Value status = intersectionDepth(numerator, denominator, 0,
+        query.minT, query.maxT, TRUE, depth);
+    if (status != RayFirstHitStatus::Hit) return status;
+    const Vector3Dd point = origin.add(direction.multiply(depth));
+    if (!Double::isFinite(point.x()) || !Double::isFinite(point.y()) ||
+        !Double::isFinite(point.z())) return RayFirstHitStatus::Indeterminate;
+    return RayFirstHitStatus::Hit;
+}
+
+RayCrossingSupport::Value InfinitePlane::emitRayCrossings(const Ray& ray,
+    const RayCrossingQuery& query, RayCrossingSink& sink) const
+{
+    double depth;
+    const RayFirstHitStatus::Value status = evaluateRay(ray, query, depth);
+    if (status == RayFirstHitStatus::Unsupported) return RayCrossingSupport::Unsupported;
+    if (status == RayFirstHitStatus::InvalidInput) return RayCrossingSupport::InvalidInput;
+    if (status == RayFirstHitStatus::Indeterminate) return RayCrossingSupport::Indeterminate;
+    if (status == RayFirstHitStatus::Hit)
+        sink.crossing(RayCrossing(depth, this, RayCrossingKind::Unclassified));
+    return RayCrossingSupport::Supported;
+}
+
+RayFirstHitStatus::Value InfinitePlane::queryFirstHit(const Ray& ray, const RayCrossingQuery& query,
+    RayHit* result, RayBoundary* boundary) const
+{
+    if (result) result->clear();
+    if (boundary) *boundary = RayBoundary();
+    double depth;
+    const RayFirstHitStatus::Value status = evaluateRay(ray, query, depth);
+    if (status != RayFirstHitStatus::Hit) return status;
+    if (boundary) *boundary = RayBoundary(depth, this);
+    if (result) {
+        result->setHitDistance(depth);
+        if (result->shouldStoreRay()) result->setRay(ray.withT(depth));
+        if (result->needsAnySurfaceData()) ((InfinitePlane*)(this))->doExtraInformation(ray, depth, result);
+    }
+    return RayFirstHitStatus::Hit;
+}
+
+RayFirstHitStatus::Value InfinitePlane::querySurfaceDetail(const Ray& ray, const RayBoundary& boundary,
+    RayHit* hit) const
+{
+    if (hit) hit->clear();
+    if (!hit || boundary.geometry != this || !Double::isFinite(boundary.t))
+        return RayFirstHitStatus::InvalidInput;
+    if (boundary.getInstanceCount() != 0) return RayFirstHitStatus::Unsupported;
+    const RayFirstHitStatus::Value status = queryFirstHit(ray, RayCrossingQuery(boundary.t, boundary.t), NULL);
+    if (status != RayFirstHitStatus::Hit) return status;
+    hit->setHitDistance(boundary.t);
+    if (hit->shouldStoreRay()) hit->setRay(ray.withT(boundary.t));
+    ((InfinitePlane*)(this))->doExtraInformation(ray, boundary.t, hit);
+    if (boundary.normalReversed && hit->needsNormal() &&
+        (hit->getAvailableDetailMask() & RayHit::DETAIL_NORMAL))
+        hit->normal = hit->normal.multiply(-1);
+    return RayFirstHitStatus::Hit;
+}
+
+Vector3Dd InfinitePlane::surfaceNormal() const
+{
+    const Vector3Dd normal(a,b,c);
+    const double squared = normal.dotProduct(normal);
+    if (squared > 0 && squared < VSDK::EPSILON) return normal.multiply(1.0 / Math::sqrt(squared));
+    return normal.normalized();
 }
 
 Ray* InfinitePlane::doIntersectionFirstHit(const Ray& inout_rayo)
@@ -92,11 +210,14 @@ int InfinitePlane::doContainmentTest(const Vector3Dd& p, double distanceToleranc
 void InfinitePlane::doExtraInformation(const Ray& inRay, double inT, RayHit* outData)
 {
     if (outData == NULL) return;
+    outData->beginDetailEvaluation();
     outData->point = Vector3Dd(
         inRay.getOrigin().x() + inT*inRay.getDirection().x(),
         inRay.getOrigin().y() + inT*inRay.getDirection().y(),
         inRay.getOrigin().z() + inT*inRay.getDirection().z());
-    outData->normal = getNormal();
+    outData->normal = surfaceNormal();
+    if (outData->needsPoint()) outData->markDetailAvailable(RayHit::DETAIL_POINT);
+    if (outData->needsNormal()) outData->markDetailAvailable(RayHit::DETAIL_NORMAL);
 }
 
 double* InfinitePlane::getMinMax()

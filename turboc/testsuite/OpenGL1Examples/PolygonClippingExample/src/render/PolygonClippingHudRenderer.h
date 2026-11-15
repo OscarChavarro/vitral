@@ -1,5 +1,5 @@
-#ifndef __POLYGON_CLIPPING_HUD_RENDERER__
-#define __POLYGON_CLIPPING_HUD_RENDERER__
+#ifndef __PLYGN_CLPPNG_HD_RNDRR__
+#define __PLYGN_CLPPNG_HD_RNDRR__
 
 #include "java/lang/String.h"
 class RGBImageUncompressed;

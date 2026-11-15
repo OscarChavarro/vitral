@@ -1,5 +1,5 @@
-#ifndef __VIEWPORT_INTERACTION_TECHNIQUES__
-#define __VIEWPORT_INTERACTION_TECHNIQUES__
+#ifndef __VWPRT_INTRCTN_TCHNQS__
+#define __VWPRT_INTRCTN_TCHNQS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"

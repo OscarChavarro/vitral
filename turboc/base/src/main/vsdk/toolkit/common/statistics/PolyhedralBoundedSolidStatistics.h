@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_STATISTICS__
-#define __POLYHEDRAL_BOUNDED_SOLID_STATISTICS__
+#ifndef __PLYHDRL_BNDD_SLD_STTSTCS__
+#define __PLYHDRL_BNDD_SLD_STTSTCS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

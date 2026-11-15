@@ -1,0 +1,24 @@
+#ifndef __CSG_RAY_LEAF_QUERY__
+#define __CSG_RAY_LEAF_QUERY__
+#include "java/util/ArrayList.h"
+#include "vsdk/toolkit/environment/geometry/element/RaySolidQueryStatus.h"
+class CsgExpression;
+class CsgRayLeafBatch;
+class CsgRayWorkspace;
+class Ray;
+class RayCrossingQuery;
+// Collects typed leaf intervals, preserving ties; it does not combine them into
+// a CSG solid. Failure clears the output and never exposes partial leaves.
+class CsgRayLeafQuery {
+private:
+    static RaySolidQueryStatus::Value collect(const CsgExpression& expression, const Ray& ray,
+        const RayCrossingQuery& query, ArrayList<const CsgExpression*>& path,
+        CsgRayLeafBatch& result);
+public:
+    static RaySolidQueryStatus::Value query(const CsgExpression& expression, const Ray& ray,
+        const RayCrossingQuery& query, CsgRayLeafBatch& result);
+    // Same query with caller-owned scratch storage.
+    static RaySolidQueryStatus::Value query(const CsgExpression& expression, const Ray& ray,
+        const RayCrossingQuery& query, CsgRayWorkspace& workspace, CsgRayLeafBatch& result);
+};
+#endif

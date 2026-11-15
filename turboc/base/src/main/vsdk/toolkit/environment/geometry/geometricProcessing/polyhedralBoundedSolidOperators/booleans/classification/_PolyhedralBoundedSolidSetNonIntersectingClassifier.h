@@ -2,8 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___PBS_SET_NON_INTERSECTING_CLASSIFIER__
-#define ___PBS_SET_NON_INTERSECTING_CLASSIFIER__
+#ifndef ___PBS_ST_NN_INTRSCTNG_CLSSFR__
+#define ___PBS_ST_NN_INTRSCTNG_CLSSFR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

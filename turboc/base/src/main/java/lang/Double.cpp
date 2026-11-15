@@ -242,3 +242,17 @@ int Double::compare(double d1, double d2)
 
 const double Double::MIN_VALUE = 4.9406564584124654e-324;
 const double Double::MAX_VALUE = 1.7976931348623157e+308;
+const double Double::POSITIVE_INFINITY = HUGE_VAL;
+const double Double::NEGATIVE_INFINITY = -HUGE_VAL;
+const double Double::NaN = Cpp98Support::nan();
+
+
+BOOLEAN Double::isNaN(double value)
+{
+    return value != value;
+}
+
+BOOLEAN Double::isFinite(double value)
+{
+    return value >= -MAX_VALUE && value <= MAX_VALUE;
+}

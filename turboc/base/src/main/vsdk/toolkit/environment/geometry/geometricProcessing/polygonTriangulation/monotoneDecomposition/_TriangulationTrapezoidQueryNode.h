@@ -1,5 +1,5 @@
-#ifndef __TRIANGULATION_TRAPEZOID_QUERY_NODE__
-#define __TRIANGULATION_TRAPEZOID_QUERY_NODE__
+#ifndef __TRNGLTN_TRPZD_QRY_ND__
+#define __TRNGLTN_TRPZD_QRY_ND__
 
 #include <stddef.h>
 #include "vsdk/toolkit/common/VSDK.h"

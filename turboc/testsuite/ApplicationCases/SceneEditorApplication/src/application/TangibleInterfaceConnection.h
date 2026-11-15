@@ -1,5 +1,5 @@
-#ifndef __TANGIBLE_INTERFACE_CONNECTION__
-#define __TANGIBLE_INTERFACE_CONNECTION__
+#ifndef __TNGBL_INTRFC_CNNCTN__
+#define __TNGBL_INTRFC_CNNCTN__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"

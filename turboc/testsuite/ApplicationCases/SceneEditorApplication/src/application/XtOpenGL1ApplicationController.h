@@ -1,5 +1,5 @@
-#ifndef __XT_OPENGL1_APPLICATION_CONTROLLER__
-#define __XT_OPENGL1_APPLICATION_CONTROLLER__
+#ifndef __XT_OPNGL1_APPLCTN_CNTRLLR__
+#define __XT_OPNGL1_APPLCTN_CNTRLLR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/io/File.h"

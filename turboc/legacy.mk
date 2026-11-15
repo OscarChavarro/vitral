@@ -61,7 +61,11 @@ endif
 SYSTEM_LIBS += -lm
 
 BASE_INCLUDES = -I$(VITRAL_DIR)/base/src -I$(VITRAL_DIR)/base/src/main
-BASE_LIBRARY = $(VITRAL_DIR)/base/build/libvitral_base.a
+# The two archives of the base library (see base/Makefile), as prerequisites,
+# and as linked: a group, as they refer to each other
+BASE_LIBRARY = $(VITRAL_DIR)/base/build/libvitral_base.a \
+    $(VITRAL_DIR)/base/build/libvitral_base_geometry.a
+BASE_LINK = -Wl,--start-group $(BASE_LIBRARY) -Wl,--end-group
 
 # X11 (the Xt layer, its Athena widget set and the scene editor). The `String`
 # type of Xt is renamed `XtString` around its headers (see XtIntrinsics.h)

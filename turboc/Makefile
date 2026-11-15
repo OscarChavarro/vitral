@@ -4,7 +4,8 @@
 # Athena variant of SceneEditorApplication and the application,
 # (scene-editor-motif) its Motif variant, and
 # (glut-examples) the GLUT programs of testsuite/OpenGL1Examples and
-# testsuite/_APITests. The options are the ones of legacy.mk, i.e.
+# testsuite/_APITests; (check) runs the test programs of base/src/test.
+# The options are the ones of legacy.mk, i.e.
 #   make WITH_POSIX_THREADS=1
 #   make scene-editor GL_DIR=$HOME/mesa/usr
 # scripts/compileWithMake.sh runs it. The CMake build (scripts/compile.sh)
@@ -14,6 +15,11 @@ all:
 	cd base && $(MAKE)
 	cd dos && $(MAKE)
 	cd testsuite/OfflineExamples && $(MAKE)
+	cd base/src/test && $(MAKE)
+
+# Runs the test programs of the base library (base/src/test/Makefile)
+check: all
+	cd base/src/test && $(MAKE) check
 
 # Needs X11 (Xt, Xaw, Xmu) and OpenGL 1.1 or later
 scene-editor: all
@@ -37,6 +43,7 @@ glut-examples: all
 
 clean:
 	cd base && $(MAKE) clean
+	cd base/src/test && $(MAKE) clean
 	cd dos && $(MAKE) clean
 	cd testsuite/OfflineExamples && $(MAKE) clean
 	cd opengl1 && $(MAKE) clean
@@ -48,4 +55,4 @@ clean:
 	cd testsuite/OpenGL1Examples && $(MAKE) clean
 	cd testsuite/_APITests && $(MAKE) clean
 
-.PHONY: all scene-editor scene-editor-motif glut-examples clean
+.PHONY: all check scene-editor scene-editor-motif glut-examples clean

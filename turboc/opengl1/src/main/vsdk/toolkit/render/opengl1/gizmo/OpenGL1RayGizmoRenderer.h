@@ -1,5 +1,5 @@
-#ifndef VITRAL_OPEN_GL_1_RAY_GIZMO_RENDERER_H
-#define VITRAL_OPEN_GL_1_RAY_GIZMO_RENDERER_H
+#ifndef __VTRL_OPN_GL_1_RY_GZM_RNDRR__
+#define __VTRL_OPN_GL_1_RY_GZM_RNDRR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

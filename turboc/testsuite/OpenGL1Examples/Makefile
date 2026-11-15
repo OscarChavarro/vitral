@@ -14,7 +14,8 @@ TOOLKIT_LIBRARIES = \
     $(VITRAL_DIR)/opengl1/build/libvitral_opengl1.a \
     $(VITRAL_DIR)/glut/build/libvitral_glut.a \
     $(BASE_LIBRARY)
-LIBS = $(TOOLKIT_LIBRARIES) $(GLUT_LIBS) $(GL_LIBS) $(SYSTEM_LIBS)
+LIBS = $(filter-out $(BASE_LIBRARY),$(TOOLKIT_LIBRARIES)) $(BASE_LINK) \
+    $(GLUT_LIBS) $(GL_LIBS) $(SYSTEM_LIBS)
 
 CXXFLAGS = $(OPTIMIZATION) -Wall $(LEGACY_CXXFLAGS) $(EXTRA_CXXFLAGS) \
     $(BASE_INCLUDES) -I$(VITRAL_DIR)/opengl1/src/main \

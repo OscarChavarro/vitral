@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_FRAME_BUFFER_READER__
-#define __OPEN_GL_1_FRAME_BUFFER_READER__
+#ifndef __OPN_GL_1_FRM_BFFR_RDR__
+#define __OPN_GL_1_FRM_BFFR_RDR__
 class RGBImageUncompressed;
 class ZBuffer;
 class OpenGL1FrameBufferReader {

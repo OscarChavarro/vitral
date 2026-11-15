@@ -1,5 +1,5 @@
-#ifndef __TRANSLATE_GIZMO_INTERACTION_TECHNIQUE__
-#define __TRANSLATE_GIZMO_INTERACTION_TECHNIQUE__
+#ifndef __TRNSLT_GZM_INTRCTN_TCHNQ__
+#define __TRNSLT_GZM_INTRCTN_TCHNQ__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

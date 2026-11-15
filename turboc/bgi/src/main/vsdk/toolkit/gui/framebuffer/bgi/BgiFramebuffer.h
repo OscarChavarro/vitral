@@ -1,5 +1,5 @@
-#ifndef VITRAL_BGI_FRAMEBUFFER_H
-#define VITRAL_BGI_FRAMEBUFFER_H
+#ifndef __VITRAL_BGI_FRAMEBUFFER__
+#define __VITRAL_BGI_FRAMEBUFFER__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/framebuffer/Framebuffer.h"

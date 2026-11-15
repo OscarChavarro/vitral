@@ -1,5 +1,5 @@
-#ifndef __TANGIBLE_INTERFACE_NETWORK_CLIENT__
-#define __TANGIBLE_INTERFACE_NETWORK_CLIENT__
+#ifndef __TNGBL_INTRFC_NTWRK_CLNT__
+#define __TNGBL_INTRFC_NTWRK_CLNT__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/PosixThreads.h"

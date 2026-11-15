@@ -1,5 +1,5 @@
-#ifndef __XT_MODIFY_PANEL_FOR_FUNCTIONAL_EXPLICIT_SURFACE__
-#define __XT_MODIFY_PANEL_FOR_FUNCTIONAL_EXPLICIT_SURFACE__
+#ifndef __XT_MDF_PNL_FR_FNC_EXP_SRF__
+#define __XT_MDF_PNL_FR_FNC_EXP_SRF__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

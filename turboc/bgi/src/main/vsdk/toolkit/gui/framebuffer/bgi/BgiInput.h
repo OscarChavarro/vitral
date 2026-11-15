@@ -1,5 +1,5 @@
-#ifndef VITRAL_BGI_INPUT_H
-#define VITRAL_BGI_INPUT_H
+#ifndef __VITRAL_BGI_INPUT__
+#define __VITRAL_BGI_INPUT__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferEvent.h"

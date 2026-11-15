@@ -1,5 +1,5 @@
-#ifndef ___PBS_PROFILE_DIFF_FALLBACK_SPEC__
-#define ___PBS_PROFILE_DIFF_FALLBACK_SPEC__
+#ifndef ___PBS_PRFL_DFF_FLLBCK_SPC__
+#define ___PBS_PRFL_DFF_FLLBCK_SPC__
 
 #include "java/util/ArrayList.h"
 

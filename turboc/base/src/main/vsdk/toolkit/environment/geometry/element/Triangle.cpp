@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "java/lang/Math.h"
+#include "java/lang/Double.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/processing/Containment.h"
@@ -31,23 +32,36 @@ static Vector3Dd closestPointOnTriangle(const Vector3Dd& p, const Vector3Dd& a, 
     return a.add(ab.multiply(v)).add(ac.multiply(w));
 }
 
+RayFirstHitStatus::Value Triangle::queryIntersection(const Ray& ray, const Vector3Dd& v0,
+    const Vector3Dd& v1, const Vector3Dd& v2, const RayCrossingQuery& query,
+    double& t, double& u, double& v)
+{
+    const Vector3Dd& p = ray.getOrigin();
+    const Vector3Dd& d = ray.getDirection();
+    if (Double::isNaN(query.minT) || Double::isNaN(query.maxT) || query.minT > query.maxT ||
+        !Double::isFinite(query.minimumChordSquared) || query.minimumChordSquared < 0 ||
+        Double::isNaN(query.minimumExteriorApproach) ||
+        !Double::isFinite(p.x()) || !Double::isFinite(p.y()) || !Double::isFinite(p.z()) ||
+        !Double::isFinite(d.x()) || !Double::isFinite(d.y()) || !Double::isFinite(d.z()) ||
+        (d.x() == 0 && d.y() == 0 && d.z() == 0) ||
+        !Double::isFinite(v0.x()) || !Double::isFinite(v0.y()) || !Double::isFinite(v0.z()) ||
+        !Double::isFinite(v1.x()) || !Double::isFinite(v1.y()) || !Double::isFinite(v1.z()) ||
+        !Double::isFinite(v2.x()) || !Double::isFinite(v2.y()) || !Double::isFinite(v2.z()))
+        return RayFirstHitStatus::InvalidInput;
+    if (query.minimumChordSquared != 0 || query.minimumExteriorApproach != Double::NEGATIVE_INFINITY)
+        return RayFirstHitStatus::Unsupported;
+    const double lengthSquared = d.dotProduct(d);
+    if (!Double::isFinite(lengthSquared) || lengthSquared == 0) return RayFirstHitStatus::Indeterminate;
+    return intersectRayCore(ray, v0, v1, v2, query.minT, query.maxT, 0, TRUE, TRUE, t, u, v);
+}
+
 Intersection* Triangle::doIntersectionWithTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2)
 {
-    Vector3Dd e1 = v1.subtract(v0), e2 = v2.subtract(v0), h = ray.getDirection().crossProduct(e2);
-    double a = e1.dotProduct(h);
-    if (Cpp98Support::abs(a) < VSDK::EPSILON) return 0;
-    double f = 1.0/a;
-    Vector3Dd s = ray.getOrigin().subtract(v0);
-    double u = f * s.dotProduct(h);
-    if (u < 0 || u > 1) return 0;
-    Vector3Dd q = s.crossProduct(e1);
-    double v = f * ray.getDirection().dotProduct(q);
-    if (v < 0 || u + v > 1) return 0;
-    double t = f * e2.dotProduct(q);
-    if (t <= VSDK::EPSILON) return 0;
+    double t, u, v;
+    if (!intersectRay(ray, v0, v1, v2, t, u, v)) return 0;
 
     Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(t));
-    Vector3Dd normal = e1.crossProduct(e2).normalized();
+    Vector3Dd normal = v1.subtract(v0).crossProduct(v2.subtract(v0)).normalized();
     return new Intersection(t, point, normal);
 }
 

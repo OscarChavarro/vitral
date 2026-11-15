@@ -1,5 +1,5 @@
-#ifndef VITRAL_286_FORMAT_H
-#define VITRAL_286_FORMAT_H
+#ifndef __VITRAL_286_FORMAT__
+#define __VITRAL_286_FORMAT__
 #include <stddef.h>
 #include <stdarg.h>
 typedef int (*Crt286Output)(char, void*);

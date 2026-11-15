@@ -1,5 +1,5 @@
-#ifndef __PROTECTED_286_PROGRESS_MONITOR__
-#define __PROTECTED_286_PROGRESS_MONITOR__
+#ifndef __PRTCTD_286_PRGRSS_MNTR__
+#define __PRTCTD_286_PRGRSS_MNTR__
 
 #include "kernel/Protected286Types.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"

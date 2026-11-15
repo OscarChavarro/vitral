@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_OFFSET_CYLINDER_FALLBACK__
-#define ___POLYHEDRAL_BOUNDED_SOLID_OFFSET_CYLINDER_FALLBACK__
+#ifndef ___PBS_OFFST_CYLNDR_FLLBCK__
+#define ___PBS_OFFST_CYLNDR_FLLBCK__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"

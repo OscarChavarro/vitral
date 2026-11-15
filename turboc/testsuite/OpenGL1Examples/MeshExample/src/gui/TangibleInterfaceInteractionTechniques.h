@@ -1,5 +1,5 @@
-#ifndef __TANGIBLE_INTERFACE_INTERACTION_TECHNIQUES__
-#define __TANGIBLE_INTERFACE_INTERACTION_TECHNIQUES__
+#ifndef __TNGBL_INTRFC_INTRCTN_TCHNQS__
+#define __TNGBL_INTRFC_INTRCTN_TCHNQS__
 
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.h"

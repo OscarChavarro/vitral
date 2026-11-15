@@ -1,5 +1,5 @@
-#ifndef __DRAWING_AREA_GIZMO_PRESENTER__
-#define __DRAWING_AREA_GIZMO_PRESENTER__
+#ifndef __DRWNG_AR_GZM_PRSNTR__
+#define __DRWNG_AR_GZM_PRSNTR__
 
 class Camera;
 class DrawingArea;

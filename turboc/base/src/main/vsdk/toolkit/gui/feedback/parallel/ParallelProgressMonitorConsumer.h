@@ -1,5 +1,5 @@
-#ifndef __PARALLEL_PROGRESS_MONITOR_CONSUMER__
-#define __PARALLEL_PROGRESS_MONITOR_CONSUMER__
+#ifndef __PRLLL_PRGRSS_MNTR_CNSMR__
+#define __PRLLL_PRGRSS_MNTR_CNSMR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"

@@ -4,8 +4,10 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+// C++ port note: Vertex2D is complete here, as gcc 2.7.2 instantiates
+// ArrayList<Vertex2D> where the parameters of isPointInsideContour name it
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 class _Polygon2DContour;
-class Vertex2D;
 class Ray;
 class RayHit;
 template <class T> class BinaryTreeNode;
@@ -22,6 +24,9 @@ private:
     _Polygon2DContour* currentLoop;
     BinaryTreeNode<_Polygon2DContour*>* headNode;
 
+    static BOOLEAN isPointOnSegment(const Vertex2D& p, const Vertex2D& a, const Vertex2D& b);
+    static BOOLEAN isContourInsideContour(const ArrayList<Vertex2D>& contour, const ArrayList<Vertex2D>& container);
+
 public:
     Polygon2D();
     virtual ~Polygon2D();
@@ -33,6 +38,9 @@ public:
     void nextLoop();
     void eraseLastLoop();
     void invert();
+    void classifyContourHoles();
+
+    static signed char isPointInsideContour(const Vertex2D& point, const ArrayList<Vertex2D>& contour);
 
     virtual double* getMinMax();
 

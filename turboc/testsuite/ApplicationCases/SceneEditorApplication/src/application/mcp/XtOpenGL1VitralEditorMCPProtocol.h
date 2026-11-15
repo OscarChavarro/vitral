@@ -1,5 +1,5 @@
-#ifndef __XT_OPENGL1_VITRAL_EDITOR_MCP_PROTOCOL__
-#define __XT_OPENGL1_VITRAL_EDITOR_MCP_PROTOCOL__
+#ifndef __XT_OPNG_VTRL_EDTR_MCP_PRTC__
+#define __XT_OPNG_VTRL_EDTR_MCP_PRTC__
 
 #include "java/lang/Runnable.h"
 #include "java/lang/String.h"

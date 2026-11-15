@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_AXIS_ALIGNED_CELL_FALLBACK__
-#define ___POLYHEDRAL_BOUNDED_SOLID_AXIS_ALIGNED_CELL_FALLBACK__
+#ifndef ___PBS_AXS_ALGND_CLL_FLLBCK__
+#define ___PBS_AXS_ALGND_CLL_FLLBCK__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"

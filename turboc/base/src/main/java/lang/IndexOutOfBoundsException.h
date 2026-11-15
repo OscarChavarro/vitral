@@ -1,5 +1,5 @@
-#ifndef __INDEX_OUT_OF_BOUNDS_EXCEPTION__
-#define __INDEX_OUT_OF_BOUNDS_EXCEPTION__
+#ifndef __INDX_OT_OF_BNDS_EXCPTN__
+#define __INDX_OT_OF_BNDS_EXCPTN__
 
 #include "java/lang/RuntimeException.h"
 

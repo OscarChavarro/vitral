@@ -15,7 +15,8 @@ TOOLKIT_LIBRARIES = \
     $(VITRAL_DIR)/opengl1/build/libvitral_opengl1.a \
     $(VITRAL_DIR)/glut/build/libvitral_glut.a \
     $(BASE_LIBRARY)
-LIBS = $(TOOLKIT_LIBRARIES) $(GLUT_LIBS) $(GL_LIBS) $(SYSTEM_LIBS)
+LIBS = $(filter-out $(BASE_LIBRARY),$(TOOLKIT_LIBRARIES)) $(BASE_LINK) \
+    $(GLUT_LIBS) $(GL_LIBS) $(SYSTEM_LIBS)
 
 CXXFLAGS = $(OPTIMIZATION) -Wall $(LEGACY_CXXFLAGS) $(EXTRA_CXXFLAGS) \
     $(BASE_INCLUDES) -I$(VITRAL_DIR)/opengl1/src/main \
@@ -46,7 +47,7 @@ _OpenGL1PbufferExample/build/_OpenGL1PbufferExample: \
     buildmk/_OpenGL1PbufferExample/osmesa/OpenGL1PbufferExample.o \
     $(BASE_LIBRARY)
 	@mkdir -p $(dir $@)
-	$(CXX) -o $@ $< $(BASE_LIBRARY) $(OSMESA_LIBS) $(SYSTEM_LIBS) \
+	$(CXX) -o $@ $< $(BASE_LINK) $(OSMESA_LIBS) $(SYSTEM_LIBS) \
 	    $(EXTRA_LIBS)
 
 buildmk/_OpenGL1PbufferExample/osmesa/OpenGL1PbufferExample.o: \

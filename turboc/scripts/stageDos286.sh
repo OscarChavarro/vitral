@@ -30,6 +30,18 @@ python3 "$port_root/scripts/validateDos83.py" "$stage_root/TURBOC"
 mkdir -p "$stage_root/ETC"
 cp "$port_root/../etc/geometry/mitscenes/balls.ray" "$stage_root/ETC/BALLS.RAY"
 cp "$port_root/../etc/geometry/mitscenes/balls_featured_object.ray" "$stage_root/ETC/APPEL3.RAY"
+# Scenes of the analytic, CSG and refraction raytracing (their 8.3 names of
+# mappings_83.csv); heightfield_terrain.ray reads TERRAIN.ALT from its folder
+for scene in bezier_patches:BEZIPATC blob_molecule:BLOBMOLE box_offsets:BOXOFFSE \
+    csg_lens:CSGLENS csg_sculpture:CSGSCULP csg_sculpture_pov:CSGSCUPO \
+    csg_union_pov:CSGUNIPO glass_lens:GLASLENS halfspace_sloped:HALFSLOP \
+    heightfield_terrain:HEIGTERR poly_surfaces:POLYSURF quadric_cylinder:QUADCYLI \
+    quadric_ellipsoid:QUADELLI quadric_hyperboloid:QUADHYPE quadric_pair:QUADPAIR \
+    quadric_paraboloid:QUADPARA quadric_rotated_ellipsoid:QUAROTEL \
+    quadric_saddle:QUADSADD sboard:SBOARD test:TEST; do
+    cp "$port_root/../etc/geometry/mitscenes/${scene%%:*}.ray" "$stage_root/ETC/${scene##*:}.RAY"
+done
+cp "$port_root/../etc/geometry/mitscenes/terrain.alt" "$stage_root/ETC/TERRAIN.ALT"
 tar -czf "$stage_root/VITRAL.TGZ" --exclude='*/BUILD' --exclude='*/BUILDTC' \
     --exclude='*/output.ppm' -C "$stage_root" \
     TURBOC/BASE TURBOC/DOS TURBOC/TESTSUIT/OFFLEXAM/RAYOFFEX ETC

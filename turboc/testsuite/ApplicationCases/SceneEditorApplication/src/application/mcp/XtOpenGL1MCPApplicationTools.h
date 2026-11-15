@@ -1,5 +1,5 @@
-#ifndef __XT_OPENGL1_MCP_APPLICATION_TOOLS__
-#define __XT_OPENGL1_MCP_APPLICATION_TOOLS__
+#ifndef __XT_OPNGL1_MCP_APPLCTN_TLS__
+#define __XT_OPNGL1_MCP_APPLCTN_TLS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

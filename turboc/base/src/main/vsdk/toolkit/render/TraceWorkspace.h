@@ -15,6 +15,9 @@ public:
     ArrayList<RayHit> reflectionHits;
     ArrayList<RayHit> shadingHits;
     ArrayList<ColorRgb> reflectionColors;
+    /** Indices of refraction of the transmissive solids that contain the
+    current ray, innermost last; empty means the ray travels in vacuum. */
+    ArrayList<double> mediumIndices;
 
     TraceWorkspace();
     explicit TraceWorkspace(int maxRecursionLevel);

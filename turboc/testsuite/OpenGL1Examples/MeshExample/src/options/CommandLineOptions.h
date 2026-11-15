@@ -1,5 +1,5 @@
-#ifndef __COMMAND_LINE_OPTIONS__
-#define __COMMAND_LINE_OPTIONS__
+#ifndef __MESH_COMMAND_LINE_OPTIONS__
+#define __MESH_COMMAND_LINE_OPTIONS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

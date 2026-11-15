@@ -1,5 +1,5 @@
-#ifndef VITRAL_BGI_POINTER_H
-#define VITRAL_BGI_POINTER_H
+#ifndef __VITRAL_BGI_POINTER__
+#define __VITRAL_BGI_POINTER__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

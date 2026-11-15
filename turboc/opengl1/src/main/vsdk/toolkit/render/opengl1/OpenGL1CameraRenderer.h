@@ -1,5 +1,5 @@
-#ifndef VITRAL_OPEN_GL_1_CAMERA_RENDERER_H
-#define VITRAL_OPEN_GL_1_CAMERA_RENDERER_H
+#ifndef __VTRL_OPN_GL_1_CMR_RNDRR__
+#define __VTRL_OPN_GL_1_CMR_RNDRR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

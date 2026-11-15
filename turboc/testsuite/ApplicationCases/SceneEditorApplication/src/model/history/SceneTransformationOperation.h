@@ -1,5 +1,5 @@
-#ifndef __SCENE_TRANSFORMATION_OPERATION__
-#define __SCENE_TRANSFORMATION_OPERATION__
+#ifndef __SCN_TRNSFRMTN_OPRTN__
+#define __SCN_TRNSFRMTN_OPRTN__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

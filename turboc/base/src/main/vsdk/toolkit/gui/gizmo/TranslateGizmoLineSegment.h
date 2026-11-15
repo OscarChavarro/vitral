@@ -1,5 +1,5 @@
-#ifndef __TRANSLATE_GIZMO_LINE_SEGMENT__
-#define __TRANSLATE_GIZMO_LINE_SEGMENT__
+#ifndef __TRNSLT_GZM_LN_SGMNT__
+#define __TRNSLT_GZM_LN_SGMNT__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

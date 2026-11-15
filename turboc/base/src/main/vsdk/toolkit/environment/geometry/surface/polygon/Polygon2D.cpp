@@ -8,10 +8,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
-class PolygonProcessor {
-public:
-    static void classifyContourHoles(Polygon2D* polygon);
-};
+#include <math.h>
 
 Polygon2D::Polygon2D() : currentLoop(NULL), headNode(NULL) { nextLoop(); }
 
@@ -46,7 +43,7 @@ void Polygon2D::eraseLastLoop()
         loops.remove(loops.size() - 1);
         currentLoop = loops[loops.size() - 1];
     }
-    PolygonProcessor::classifyContourHoles(this);
+    classifyContourHoles();
 }
 
 void Polygon2D::invert()
@@ -87,7 +84,8 @@ static BOOLEAN pointInLoop(const _Polygon2DContour* loop, double x, double y)
     ArrayList<Vertex2D>& v = ((_Polygon2DContour*)(loop))->vertices;
     long int n = v.size();
     if (n < 3) return FALSE;
-    for (long int i = 0, j = n - 1; i < n; j = i++) {
+    long int i, j;
+    for (i = 0, j = n - 1; i < n; j = i++) {
         BOOLEAN inter = ((v[i].y > y) != (v[j].y > y)) &&
                      (x < (v[j].x - v[i].x) * (y - v[i].y) / ((v[j].y - v[i].y) + 1e-30) + v[i].x);
         if (inter) inside = !inside;
@@ -145,4 +143,59 @@ const Class *
 Polygon2D::getClass() const
 {
     return &CLASS;
+}
+
+BOOLEAN Polygon2D::isPointOnSegment(const Vertex2D& p, const Vertex2D& a, const Vertex2D& b)
+{
+    double cross = (p.y-a.y)*(b.x-a.x) - (p.x-a.x)*(b.y-a.y);
+    if (fabs(cross) > 1e-12) return FALSE;
+    double dot = (p.x-a.x)*(b.x-a.x) + (p.y-a.y)*(b.y-a.y);
+    if (dot < 0) return FALSE;
+    double len2 = (b.x-a.x)*(b.x-a.x) + (b.y-a.y)*(b.y-a.y);
+    return dot <= len2;
+}
+
+signed char Polygon2D::isPointInsideContour(const Vertex2D& point, const ArrayList<Vertex2D>& polygon)
+{
+    BOOLEAN inside = FALSE;
+    long int n = polygon.size();
+    if (n < 3) return -1;
+    long int i, j;
+    for (i = 0, j = n - 1; i < n; j = i++) {
+        Vertex2D vi = polygon.get(i);
+        Vertex2D vj = polygon.get(j);
+        if (isPointOnSegment(point, vj, vi)) return 0;
+        BOOLEAN intersect = ((vi.y > point.y) != (vj.y > point.y)) &&
+                         (point.x < (vj.x - vi.x) * (point.y - vi.y) / ((vj.y - vi.y) + 1e-30) + vi.x);
+        if (intersect) inside = !inside;
+    }
+    return inside ? 1 : -1;
+}
+
+BOOLEAN Polygon2D::isContourInsideContour(const ArrayList<Vertex2D>& contour, const ArrayList<Vertex2D>& mainPolygon)
+{
+    for (long int i = 0; i < contour.size(); ++i) {
+        signed char r = isPointInsideContour(contour.get(i), mainPolygon);
+        if (r == 1) return TRUE;
+        if (r == -1) return FALSE;
+    }
+    return FALSE;
+}
+
+void Polygon2D::classifyContourHoles()
+{ long int i;
+    for (i = 0; i < loops.size(); ++i) loops[i]->setExteriorContour(0);
+    BinaryTreeNode<_Polygon2DContour*>* root = new BinaryTreeNode<_Polygon2DContour*>(0);
+    setHeadNode(root);
+    for (i = 0; i < loops.size(); ++i) {
+        _Polygon2DContour* a = loops[i];
+        for (long int j = 0; j < loops.size(); ++j) {
+            if (i == j) continue;
+            _Polygon2DContour* b = loops[j];
+            if (isContourInsideContour(a->vertices, b->vertices)) {
+                a->setExteriorContour(b);
+                break;
+            }
+        }
+    }
 }

@@ -1,5 +1,5 @@
-#ifndef __XT_OPENGL1_VITRAL_EDITOR_MCP__
-#define __XT_OPENGL1_VITRAL_EDITOR_MCP__
+#ifndef __XT_OPNGL1_VTRL_EDTR_MCP__
+#define __XT_OPNGL1_VTRL_EDTR_MCP__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Runnable.h"

@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_EULER_OPERATORS__
-#define __POLYHEDRAL_BOUNDED_SOLID_EULER_OPERATORS__
+#ifndef __PLYHDRL_BNDD_SLD_ELR_OPRTRS__
+#define __PLYHDRL_BNDD_SLD_ELR_OPRTRS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

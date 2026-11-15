@@ -47,6 +47,8 @@ private:
     BOOLEAN hasRay;
 
     int requiredDetailMask;
+    int availableDetailMask;
+    BOOLEAN detailAvailabilityKnown;
     BOOLEAN storeRay;
     double hitDistance;
     BOOLEAN hitDistanceKnown;
@@ -63,6 +65,12 @@ public:
     void resetForDistanceOnly();
 
     void clone(const RayHit& other);
+
+    // Legacy producers may leave availability unknown; requested is not available.
+    BOOLEAN isDetailAvailabilityKnown() const;
+    int getAvailableDetailMask() const;
+    void beginDetailEvaluation();
+    void markDetailAvailable(int mask);
 
     int getRequiredDetailMask() const;
     void setRequiredDetailMask(int value);

@@ -1,5 +1,5 @@
-#ifndef __XT_SCENE_EDITOR_OPENGL_VARIANT__
-#define __XT_SCENE_EDITOR_OPENGL_VARIANT__
+#ifndef __XT_SCN_EDTR_OPNGL_VRNT__
+#define __XT_SCN_EDTR_OPNGL_VRNT__
 
 /**
 Names of the classes of the OpenGL version the editor is built with, for

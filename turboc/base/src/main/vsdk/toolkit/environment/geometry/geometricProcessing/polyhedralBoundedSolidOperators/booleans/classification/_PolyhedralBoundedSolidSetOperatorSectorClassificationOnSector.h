@@ -2,8 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___PBS_SET_OP_SECTOR_ON_SECTOR__
-#define ___PBS_SET_OP_SECTOR_ON_SECTOR__
+#ifndef ___PBS_ST_OP_SCTR_ON_SCTR__
+#define ___PBS_ST_OP_SCTR_ON_SCTR__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

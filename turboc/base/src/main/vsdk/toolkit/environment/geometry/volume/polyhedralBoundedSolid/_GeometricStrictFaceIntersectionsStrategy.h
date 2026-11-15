@@ -1,5 +1,5 @@
-#ifndef __GEOMETRIC_STRICT_FACE_INTERSECTIONS_STRATEGY__
-#define __GEOMETRIC_STRICT_FACE_INTERSECTIONS_STRATEGY__
+#ifndef __GMTRC_STRCT_FC_INTRS_STRTG__
+#define __GMTRC_STRCT_FC_INTRS_STRTG__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.h"

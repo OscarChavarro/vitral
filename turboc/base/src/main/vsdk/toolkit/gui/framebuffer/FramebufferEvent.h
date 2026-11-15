@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_EVENT_H
-#define VITRAL_FRAMEBUFFER_EVENT_H
+#ifndef __VITRAL_FRAMEBUFFER_EVENT__
+#define __VITRAL_FRAMEBUFFER_EVENT__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"

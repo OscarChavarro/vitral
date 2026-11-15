@@ -1,5 +1,5 @@
-#ifndef __JAVAX_XML_PARSERS_DOCUMENT_BUILDER__
-#define __JAVAX_XML_PARSERS_DOCUMENT_BUILDER__
+#ifndef __JVX_XML_PRSRS_DCMNT_BLDR__
+#define __JVX_XML_PRSRS_DCMNT_BLDR__
 
 #include "java/io/File.h"
 #include "java/lang/String.h"

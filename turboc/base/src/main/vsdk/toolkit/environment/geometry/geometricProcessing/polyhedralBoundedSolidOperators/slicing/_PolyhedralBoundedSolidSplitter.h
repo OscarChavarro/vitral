@@ -2,8 +2,8 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#ifndef ___POLYHEDRAL_BOUNDED_SOLID_SPLITTER__
-#define ___POLYHEDRAL_BOUNDED_SOLID_SPLITTER__
+#ifndef ___PLYHDRL_BNDD_SLD_SPLTTR__
+#define ___PLYHDRL_BNDD_SLD_SPLTTR__
 
 
 #include "vsdk/toolkit/common/VSDK.h"

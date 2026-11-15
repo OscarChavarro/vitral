@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRAL_BOUNDED_SOLID_PREDICATES__
-#define __POLYHEDRAL_BOUNDED_SOLID_PREDICATES__
+#ifndef __PLYHDRL_BNDD_SLD_PRDCTS__
+#define __PLYHDRL_BNDD_SLD_PRDCTS__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

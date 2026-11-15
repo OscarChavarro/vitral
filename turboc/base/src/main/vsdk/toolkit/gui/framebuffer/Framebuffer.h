@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_H
-#define VITRAL_FRAMEBUFFER_H
+#ifndef __VITRAL_FRAMEBUFFER__
+#define __VITRAL_FRAMEBUFFER__
 
 #include "vsdk/toolkit/common/VSDK.h"
 

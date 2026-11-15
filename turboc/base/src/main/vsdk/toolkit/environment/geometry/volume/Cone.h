@@ -50,6 +50,8 @@ public:
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
     virtual double* getMinMax();
+    // Finite solid bounds: |x|,|y| <= max radius and 0 <= z <= height.
+    virtual void getBounds(GeometryBounds& result) const;
 
     /**
     @return a new boundary representation of the cone with the default

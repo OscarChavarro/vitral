@@ -1,5 +1,5 @@
-#ifndef __OPEN_GL_1_SIMPLE_CORRIDOR_SAMPLE__
-#define __OPEN_GL_1_SIMPLE_CORRIDOR_SAMPLE__
+#ifndef __OPN_GL_1_SMPL_CRRDR_SMPL__
+#define __OPN_GL_1_SMPL_CRRDR_SMPL__
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"

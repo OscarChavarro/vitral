@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMeshIntersectionIndex.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex.h"
 #include "vsdk/toolkit/environment/geometry/element/Triangle.h"
@@ -37,13 +38,16 @@ private:
     ArrayList< ArrayList<int> > textureRanges;
     ArrayList< ArrayList<int> > materialRanges;
 
-    int intersectionTriangleIndex;
+    TriangleMeshIntersectionIndex intersectionTriangleIndex;
     BOOLEAN ownsMaterials;
 
-    static BOOLEAN intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2, double& t, double& u, double& v);
     void interpolateTriangleData(int triangleIndex, double u, double v, RayHit* outHit, const Vector3Dd& rayDirection);
     void fillMaterialAndTexture(int triangleIndex, RayHit* outHit);
     BOOLEAN doIntersectionInternal(const Ray& inRay, RayHit* outHit, int* outTriangleIndex);
+    BOOLEAN getTrianglePoints(int index, Vector3Dd& p0, Vector3Dd& p1, Vector3Dd& p2) const;
+    void fillTypedDetail(const Ray& ray, double t, int face, double u, double v,
+        const Vector3Dd& p0, const Vector3Dd& p1, const Vector3Dd& p2,
+        BOOLEAN normalReversed, RayHit* hit) const;
 
     double* calculateMinMaxPositions();
 
@@ -69,6 +73,14 @@ public:
     ~TriangleMesh();
 
     TriangleMesh* clone() const;
+    // Mathematical copy; scene-owned materials and textures are not copied.
+    virtual Geometry* copyGeometry() const;
+    virtual RayFirstHitStatus::Value queryFirstHit(const Ray& ray, const RayCrossingQuery& query,
+        RayHit* hit, RayBoundary* boundary = NULL) const;
+    virtual RayFirstHitStatus::Value querySurfaceDetail(const Ray& ray, const RayBoundary& boundary,
+        RayHit* hit) const;
+    virtual RayCrossingSupport::Value emitRayCrossings(const Ray& ray, const RayCrossingQuery& query,
+        RayCrossingSink& sink) const;
 
     String getName() const;
     void setName(const String& name);
@@ -105,6 +117,7 @@ public:
     ArrayList<BOOLEAN>& getVertexSelections();
 
     ArrayList<double>& getVertexPositions();
+    const ArrayList<double>& getVertexPositionsView() const { return vertexPositions; }
     ArrayList<double>& getVertexNormals();
     ArrayList<double>& getVertexBinormals();
     ArrayList<double>& getVertexTangents();
@@ -112,6 +125,8 @@ public:
     ArrayList<double>& getVertexUvs();
     ArrayList<int>& getTriangleIndexes();
     ArrayList<double>& getTriangleNormals();
+    const ArrayList<int>& getTriangleIndexesView() const { return triangleIndexes; }
+    const ArrayList<double>& getTriangleNormalsView() const { return triangleNormals; }
 
     ArrayList<SimpleMaterial*>& getMaterials();
     ArrayList<Image*>& getTextures();
@@ -137,6 +152,7 @@ public:
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
+    virtual void getBounds(GeometryBounds& result) const;
     virtual double* getMinMax();
 
     TriangleMeshGroup* exportToTriangleMeshGroup();
