@@ -416,8 +416,8 @@ int HeightFieldSolid::intersectHfNode(const Vector3Dd& origin, const Vector3Dd& 
     blockSize = this->blockSize;
     invBlkSize = this->inverseBlockSize;
 
-    xSize = abs((int)(ex * invBlkSize) - (int)(sx * invBlkSize));
-    zSize = abs((int)(ez * invBlkSize) - (int)(sz * invBlkSize));
+    xSize = java::Math::abs((int)(ex * invBlkSize) - (int)(sx * invBlkSize));
+    zSize = java::Math::abs((int)(ez * invBlkSize) - (int)(sz * invBlkSize));
     length = xSize + zSize;
 
     curr = &temp1;

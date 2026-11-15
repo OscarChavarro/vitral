@@ -1,6 +1,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include <cctype>
+#include <cstddef>
 #include <cmath>
 
 #include "java/lang/Double.h"

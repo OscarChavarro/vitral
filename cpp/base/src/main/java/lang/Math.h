@@ -2,6 +2,7 @@
 #define __VITRAL_JAVA_LANG_MATH__
 
 #include <cmath>
+#include <stdlib.h>
 namespace java {
 class Math {
   public:
@@ -32,6 +33,8 @@ class Math {
     static float pow(float a, float e);
     static double abs(double a);
     static float abs(float a);
+    static int abs(int a);
+    static long abs(long a);
     static int min(int a, int b);
     static int max(int a, int b);
     static float min(float a, float b);
@@ -182,6 +185,16 @@ Math::abs(double a) {
 inline float
 Math::abs(float a) {
     return a < 0.0 ? -a : a;
+}
+
+inline int
+Math::abs(int a) {
+    return ::abs(a);
+}
+
+inline long
+Math::abs(long a) {
+    return ::labs(a);
 }
 
 inline int
