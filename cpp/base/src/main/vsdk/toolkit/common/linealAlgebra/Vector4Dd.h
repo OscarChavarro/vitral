@@ -24,6 +24,8 @@ class Vector4Dd {
     }
 
 public:
+    /// Origin (0, 0, 0, 0), so containers can hold values of this class
+    Vector4Dd() : x_(0), y_(0), z_(0), w_(0) {}
     Vector4Dd(double x, double y, double z, double w) : x_(x), y_(y), z_(z), w_(w) {}
     explicit Vector4Dd(const Vector3Dd& other);
 

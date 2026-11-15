@@ -1,12 +1,12 @@
 #ifndef __NORMAL_MAP_TEXTURE__
 #define __NORMAL_MAP_TEXTURE__
-#include <vector>
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 class NormalMapTexture : public RGBImageUncompressed {
-    std::vector<float> samples;
+    java::ArrayList<float> samples;
 public:
     explicit NormalMapTexture(const NormalMap& source) {
         int w = source.getXSize(), h = source.getYSize();
@@ -17,7 +17,7 @@ public:
             Vector3Dd n = sample ? sample->normalized() : Vector3Dd(0, 0, 1);
             delete sample;
             float r = (n.x() + 1) * 0.5, g = (n.y() + 1) * 0.5, b = (n.z() + 1) * 0.5;
-            samples.push_back(r); samples.push_back(g); samples.push_back(b);
+            samples.add(r); samples.add(g); samples.add(b);
             putPixel(x, y, (char)(r * 255), (char)(g * 255), (char)(b * 255));
         }
     }

@@ -594,6 +594,76 @@ double
 scalbn(double x, int e) { return (double)scalbnl(x, e); }
 float
 scalbnf(float x, int e) { return (float)scalbnl(x, e); }
+// The next representable value after x towards y, stepping the IEEE 754 bits: the magnitude grows when moving away
+// from zero and shrinks towards it; from zero the step is the smallest subnormal with the sign of y.
+double
+nextafter(double x, double y) {
+    if (__builtin_isnan(x) || __builtin_isnan(y)) {
+        return x + y;
+    }
+    if (x == y) {
+        return y;
+    }
+    if (x == 0) {
+        return __builtin_copysign(__DBL_DENORM_MIN__, y);
+    }
+    unsigned long long bits;
+    __builtin_memcpy(&bits, &x, sizeof(bits));
+    if ((x < y) == (x > 0)) {
+        bits++;
+    } else {
+        bits--;
+    }
+    __builtin_memcpy(&x, &bits, sizeof(bits));
+    return x;
+}
+float
+nextafterf(float x, float y) {
+    if (__builtin_isnan(x) || __builtin_isnan(y)) {
+        return x + y;
+    }
+    if (x == y) {
+        return y;
+    }
+    if (x == 0) {
+        return __builtin_copysignf(__FLT_DENORM_MIN__, y);
+    }
+    unsigned int bits;
+    __builtin_memcpy(&bits, &x, sizeof(bits));
+    if ((x < y) == (x > 0)) {
+        bits++;
+    } else {
+        bits--;
+    }
+    __builtin_memcpy(&x, &bits, sizeof(bits));
+    return x;
+}
+// Long double: the step is one unit in the last place of the binade of x (half of it when x is the lowest power of
+// two of its binade and the step goes towards zero).
+Real
+nextafterl(Real x, Real y) {
+    if (__builtin_isnan(x) || __builtin_isnan(y)) {
+        return x + y;
+    }
+    if (x == y) {
+        return y;
+    }
+    if (x == 0) {
+        return __builtin_copysignl(__LDBL_DENORM_MIN__, y);
+    }
+    int exponent;
+    Real mantissa = frexpl(x, &exponent);
+    if (exponent < __LDBL_MIN_EXP__) {
+        exponent = __LDBL_MIN_EXP__;
+    }
+    Real step = ldexpl(1, exponent - __LDBL_MANT_DIG__);
+    bool towardsZero = (x < y) != (x > 0);
+    if (towardsZero && __builtin_fabsl(mantissa) == 0.5L && exponent > __LDBL_MIN_EXP__) {
+        step /= 2;
+    }
+    return x < y ? x + step : x - step;
+}
+
 int
 ilogb(double x) { return ilogbl(x); }
 int

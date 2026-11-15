@@ -36,6 +36,7 @@ typedef float float_t;
     type round##suffix(type x); type trunc##suffix(type x); type rint##suffix(type x); \
     type nearbyint##suffix(type x); type fmod##suffix(type x, type y); \
     type remainder##suffix(type x, type y); type copysign##suffix(type x, type y); \
+    type nextafter##suffix(type x, type y); \
     type fmin##suffix(type x, type y); type fmax##suffix(type x, type y); \
     type fdim##suffix(type x, type y); type ldexp##suffix(type x, int exponent); \
     type scalbn##suffix(type x, int exponent); type frexp##suffix(type x, int *exponent); \

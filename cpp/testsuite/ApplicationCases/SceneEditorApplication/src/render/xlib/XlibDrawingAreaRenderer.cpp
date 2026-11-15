@@ -11,6 +11,8 @@
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
 #include "model/Scene.h"
+#include "model/selection/SceneSelectionEditor.h"
+#include "render/DrawingAreaGizmoPresenter.h"
 #include "render/DrawingAreaHost.h"
 #include "render/FrameBufferSource.h"
 #include "render/FrameCaptureService.h"
@@ -23,6 +25,8 @@
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
+#include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportElementScaler.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
@@ -31,6 +35,12 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
 #include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
+#include "vsdk/toolkit/render/gizmo/Gizmo2DDrawList.h"
+#include "vsdk/toolkit/render/gizmo/InputGizmo2DPainter.h"
+#include "vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.h"
+#include "vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.h"
+#include "vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.h"
+#include "vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 
 namespace {
@@ -165,15 +175,68 @@ void drawGrid(Display* display, Drawable frame, GC gc, Visual* visual,
 
 XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
     ApplicationModel* m, DrawingAreaHost* h,
-    const java::Consumer<Viewport*>& selected)
+    const java::Consumer<Viewport*>& selected,
+    TranslateGizmo* translationGizmo, RotateGizmo* rotateGizmo,
+    ScaleGizmo* scaleGizmo)
     : model(m), host(h), frameCapture(new FrameCaptureService(m,h)),
       selectedListener(selected), fontDisplay(nullptr), titleFont(nullptr),
-      titleFontSize(0) {}
+      titleFontSize(0),
+      selectionEditor(new SceneSelectionEditor(m->getScene())),
+      gizmoPresenter(nullptr), gizmoDrawList(new Gizmo2DDrawList()),
+      gizmoRenderer(new XlibGizmo2DDrawListRenderer())
+{
+    gizmoPresenter = new DrawingAreaGizmoPresenter(m->getDrawingArea(),
+        selectionEditor, translationGizmo, rotateGizmo, scaleGizmo);
+}
 
 XlibDrawingAreaRenderer::~XlibDrawingAreaRenderer()
 {
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
+    delete gizmoRenderer;
+    delete gizmoDrawList;
+    delete gizmoPresenter;
+    delete selectionEditor;
     delete frameCapture;
+}
+
+void XlibDrawingAreaRenderer::drawGizmos(Display* display, Drawable frame,
+    GC gc, Visual* visual, Viewport* viewport, int x, int y, int width,
+    int height)
+{
+    Camera* camera = model->getScene()->activeCamera;
+    ViewportSet* set = model->getDrawingArea()->getViewportSet();
+
+    gizmoRenderer->setDisplay(display);
+    gizmoDrawList->clear();
+    switch (gizmoPresenter->prepareForView(camera)) {
+      case DrawingAreaGizmoPresenter::GizmoKind::TRANSLATE:
+        TranslateGizmo2DPainter::paint(gizmoDrawList,
+            gizmoPresenter->getTranslationGizmo(), camera,
+            set->getElementScaler());
+        break;
+      case DrawingAreaGizmoPresenter::GizmoKind::ROTATE:
+        RotateGizmo2DPainter::paint(gizmoDrawList,
+            gizmoPresenter->getRotateGizmo(), camera,
+            set->getElementScaler());
+        break;
+      case DrawingAreaGizmoPresenter::GizmoKind::SCALE:
+        ScaleGizmo2DPainter::paint(gizmoDrawList,
+            gizmoPresenter->getScaleGizmo(), camera);
+        break;
+      default:
+        break;
+    }
+
+    // Only the selected viewport shows them: it is the one that receives
+    // the keyboard
+    InputGizmo* inputGizmo = gizmoPresenter->getInputGizmo();
+    if (inputGizmo == nullptr && model->getRayGizmo()->isVisible())
+        inputGizmo = model->getRayGizmo()->getInputGizmo();
+    if (inputGizmo != nullptr && set->isSelected(viewport))
+        InputGizmo2DPainter::paint(gizmoDrawList, inputGizmo, width, height,
+            set->getElementScaler(), *gizmoRenderer);
+    gizmoRenderer->draw(frame, gc, visual, *gizmoDrawList, x, y, width,
+                        height);
 }
 
 void XlibDrawingAreaRenderer::ensureTitleFont(Display* display, int size)
@@ -290,6 +353,9 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
                       pixel(visual, ColorRgb(0,0,0)), 2);
         }
     }
+
+    // Must be the last to draw, over the scene
+    drawGizmos(display, frame, gc, visual, viewport, x, y, width, height);
 
     XlibFrameBufferSource source(display, frame, visual, x, y, width, height);
     frameCapture->copyColorBufferIfNeeded(&source,

@@ -400,6 +400,13 @@ set(VITRAL_BASE_SOURCES
     src/main/jackson/databind/JsonNode.cpp
     src/main/jackson/databind/ObjectMapper.cpp
     src/main/vsdk/toolkit/gui/framebuffer/Framebuffer.cpp
+    src/main/vsdk/toolkit/render/framebuffer/FramebufferGizmo2DDrawListRenderer.cpp
+    src/main/vsdk/toolkit/render/gizmo/Gizmo2DDrawList.cpp
+    src/main/vsdk/toolkit/render/gizmo/Gizmo2DProjector.cpp
+    src/main/vsdk/toolkit/render/gizmo/InputGizmo2DPainter.cpp
+    src/main/vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.cpp
+    src/main/vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.cpp
+    src/main/vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.cpp
     src/main/vsdk/toolkit/gui/framebuffer/FramebufferMenuBar.cpp
     src/main/vsdk/toolkit/gui/framebuffer/FramebufferMenuReader.cpp
     src/main/vsdk/toolkit/gui/framebuffer/FramebufferPainter.cpp

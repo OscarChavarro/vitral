@@ -71,7 +71,11 @@ window the desktop allows, not full screen). The font is `10x20` unless
 `SCENE_EDITOR_GUI_LANGUAGE` variable.
 
 The viewports are rendered in CPU (hidden lines, or raytracing chosen from
-the menu of the viewport title); there is no OpenGL. At the right, the
+the menu of the viewport title); there is no OpenGL. The translation,
+rotation and scale gizmos and the input boxes are drawn over them as 2D
+primitives (painter's algorithm, see `vsdk/toolkit/render/gizmo` and
+`FramebufferGizmo2DDrawListRenderer`), as in the CPU modes of the Xt
+variants and the AWT mode of the Java port. At the right, the
 tabbed side panel has the button groups of the GUI definition, as in the Xt
 variants: creation of geometries, lights, import and export (in two
 collapsible sections), GUI, scene components and render; its modify tab

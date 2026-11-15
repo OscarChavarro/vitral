@@ -82,7 +82,10 @@ public:
             techniques->getRotateGizmo(),
             techniques->getScaleGizmo());
         xlibRenderer = new XlibDrawingAreaRenderer(model, this,
-            [t](Viewport* viewport) { t->activateViewport(viewport); });
+            [t](Viewport* viewport) { t->activateViewport(viewport); },
+            techniques->getTranslationGizmo(),
+            techniques->getRotateGizmo(),
+            techniques->getScaleGizmo());
         executor = new GuiEventExecutor(model, this);
     }
 

@@ -194,7 +194,9 @@ FramebufferSceneEditor::FramebufferSceneEditor(Framebuffer& target,
     techniques->getViewportSetTechniques()->setListener(this);
     DrawingAreaInteractionTechniques* t = techniques;
     renderer = new FramebufferDrawingAreaRenderer(model, this,
-        [t](Viewport* viewport) { t->activateViewport(viewport); });
+        [t](Viewport* viewport) { t->activateViewport(viewport); },
+        techniques->getTranslationGizmo(), techniques->getRotateGizmo(),
+        techniques->getScaleGizmo());
     executor = new GuiEventExecutor(model, this);
 
     // No GPU: the views are hidden line drawings or raytraced images.

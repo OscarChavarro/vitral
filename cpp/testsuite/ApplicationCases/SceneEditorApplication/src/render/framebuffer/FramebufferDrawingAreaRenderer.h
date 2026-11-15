@@ -9,8 +9,14 @@ class Calligraphic2DBuffer;
 class Camera;
 class ColorRgb;
 class DrawingAreaHost;
+class DrawingAreaGizmoPresenter;
 class FrameCaptureService;
 class Framebuffer;
+class Gizmo2DDrawList;
+class RotateGizmo;
+class ScaleGizmo;
+class SceneSelectionEditor;
+class TranslateGizmo;
 class Viewport;
 
 /**
@@ -22,8 +28,13 @@ works with Xlib, svgalib or any other backend.
 
 Each viewport shows its background, its grid, the wireframes of surfaces and
 the hidden line drawings of volumes (the bodies of the selection in red), or
-the raytraced image of the scene in raytracing mode, and its title. Frame
-captures read the surface back with `Framebuffer::readImage`.
+the raytraced image of the scene in raytracing mode, and its title. Over
+both, the manipulation gizmo of the interaction mode and the input gizmo
+(numeric boxes) of the selected viewport are drawn as 2D primitives computed
+by the gizmo painters of `vsdk/toolkit/render/gizmo` (hidden surfaces solved
+with the painter's algorithm) and drawn by
+`FramebufferGizmo2DDrawListRenderer`, as the Java `AwtDrawingAreaRenderer`
+does. Frame captures read the surface back with `Framebuffer::readImage`.
 */
 class FramebufferDrawingAreaRenderer {
 private:
@@ -32,6 +43,9 @@ private:
     FrameCaptureService* frameCapture;
     int ditheringMode;
     java::Consumer<Viewport*> selectedListener;
+    SceneSelectionEditor* selectionEditor;
+    DrawingAreaGizmoPresenter* gizmoPresenter;
+    Gizmo2DDrawList* gizmoDrawList;
 
     void drawLines(Framebuffer& surface, const Calligraphic2DBuffer& lines,
                    int x, int y, int width, int height, uint32_t color,
@@ -41,6 +55,8 @@ private:
     void drawView(Framebuffer& surface, Viewport* viewport, int x, int y,
                   int width, int height);
     void drawTitle(Framebuffer& surface, Viewport* viewport, int x, int y);
+    void drawGizmos(Framebuffer& surface, Viewport* viewport, int x, int y,
+                    int width, int height);
 
     FramebufferDrawingAreaRenderer(const FramebufferDrawingAreaRenderer&);
     FramebufferDrawingAreaRenderer& operator=(
@@ -51,10 +67,15 @@ public:
     @param model the model whose viewport set is drawn
     @param host services of the GUI (raytracing, messages)
     @param selected called with the selected viewport on each frame
+    @param translationGizmo gizmo to draw in translation mode
+    @param rotateGizmo gizmo to draw in rotation mode
+    @param scaleGizmo gizmo to draw in scale mode
     */
     FramebufferDrawingAreaRenderer(
         ApplicationModel* model, DrawingAreaHost* host,
-        const java::Consumer<Viewport*>& selected);
+        const java::Consumer<Viewport*>& selected,
+        TranslateGizmo* translationGizmo, RotateGizmo* rotateGizmo,
+        ScaleGizmo* scaleGizmo);
     ~FramebufferDrawingAreaRenderer();
 
     /**
