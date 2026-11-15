@@ -21,7 +21,8 @@ SOURCES = \
     src/main/vsdk/toolkit/render/xt/XtDialogHost.cpp \
     src/main/vsdk/toolkit/render/xt/XtTreeView.cpp \
     src/main/vsdk/toolkit/render/xlib/XlibRGBAImageUncompressedRenderer.cpp \
-    src/main/vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.cpp
+    src/main/vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.cpp \
+    src/main/vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.cpp
 
 OBJECTS = $(patsubst %.cpp,buildmk/%.o,$(SOURCES))
 LIBRARY = build/libvitral_xt.a

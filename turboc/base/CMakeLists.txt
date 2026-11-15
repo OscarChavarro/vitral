@@ -212,6 +212,13 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/CameraControllerGoogleEarth.cpp
     src/main/vsdk/toolkit/render/TraceWorkspace.cpp
     src/main/vsdk/toolkit/render/SpherePolyhedralCache.cpp
+    src/main/vsdk/toolkit/render/framebuffer/FramebufferGizmo2DDrawListRenderer.cpp
+    src/main/vsdk/toolkit/render/gizmo/Gizmo2DDrawList.cpp
+    src/main/vsdk/toolkit/render/gizmo/Gizmo2DProjector.cpp
+    src/main/vsdk/toolkit/render/gizmo/InputGizmo2DPainter.cpp
+    src/main/vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.cpp
+    src/main/vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.cpp
+    src/main/vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.cpp
     src/main/vsdk/toolkit/render/raytracing/DepthBufferEncoder.cpp
     src/main/vsdk/toolkit/render/raytracing/ParallelRaytracer.cpp
     src/main/vsdk/toolkit/render/raytracing/RasterTileArea.cpp

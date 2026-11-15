@@ -58,3 +58,6 @@ hs_err_pid*.log
 output*
 ._.DS_Store
 .DS_Store
+
+# TurboC local build dirs
+**/buildtc/

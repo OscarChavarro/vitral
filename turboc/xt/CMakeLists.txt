@@ -46,6 +46,7 @@ set(VITRAL_XT_SOURCES
     src/main/vsdk/toolkit/render/xt/XtTreeView.cpp
     src/main/vsdk/toolkit/render/xlib/XlibRGBAImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.cpp
+    src/main/vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.cpp
 )
 
 include_directories(src/main ${VITRAL_BASE_DIR}/src ${VITRAL_BASE_DIR}/src/main
