@@ -436,6 +436,12 @@ export {
 
 export { RenderingElement } from "./vsdk/toolkit/render/RenderingElement.js";
 export { Rasterizer2D } from "./vsdk/toolkit/render/raster/Rasterizer2D.js";
+export { Gizmo2DDrawList } from "./vsdk/toolkit/render/gizmo/Gizmo2DDrawList.js";
+export { Gizmo2DProjector } from "./vsdk/toolkit/render/gizmo/Gizmo2DProjector.js";
+export { InputGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/InputGizmo2DPainter.js";
+export { RotateGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.js";
+export { ScaleGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.js";
+export { TranslateGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.js";
 export { WireframeRenderer } from "./vsdk/toolkit/render/hiddenLine/WireframeRenderer.js";
 export { HiddenLineRenderer } from "./vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.js";
 export { TraceWorkspace } from "./vsdk/toolkit/render/TraceWorkspace.js";

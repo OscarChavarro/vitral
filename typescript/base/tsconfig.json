@@ -174,6 +174,7 @@
         "src/main/vsdk/toolkit/render/dithering/**/*.ts",
         "src/main/vsdk/toolkit/render/SelectionCorners.ts",
         "src/main/vsdk/toolkit/render/raster/Rasterizer2D.ts",
+        "src/main/vsdk/toolkit/render/gizmo/**/*.ts",
         "src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.ts",
         "src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.ts",
         "src/main/vsdk/toolkit/render/TraceWorkspace.ts",
