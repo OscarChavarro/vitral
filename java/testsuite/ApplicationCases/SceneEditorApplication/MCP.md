@@ -192,7 +192,9 @@ has not been created`).
   `technology` (`opengl4` or `awt`). With `awt` no OpenGL is used: viewports
   are drawn with AWT 2D operations, as lines (wireframe, or Appel hidden line
   removal for the solids when `surfaces` is on; hidden lines dashed when
-  `wires` is also on) or as raytraced images. Gizmos are not drawn there yet.
+  `wires` is also on) or as raytraced images. The translation, rotation and
+  scale gizmos and the input boxes are drawn there as 2D primitives (painter's
+  algorithm, see `vsdk.toolkit.render.gizmo`); the visual debug ray is not.
 - `render.raytrace_png`: raytraces the scene and exports it as a PNG. It uses
   the active camera and rendering configuration of the scene, which the
   editor sets to the ones of each viewport while drawing it: in practice, the

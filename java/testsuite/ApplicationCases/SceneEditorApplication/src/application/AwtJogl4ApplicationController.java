@@ -88,7 +88,10 @@ public class AwtJogl4ApplicationController
         DrawingAreaInteractionTechniques techniques = createTechniques(application);
 
         awtCanvas.setRenderer(new AwtDrawingAreaRenderer(model, awtFeedback,
-            techniques::activateViewport));
+            techniques::activateViewport,
+            techniques.getTranslationGizmo(),
+            techniques.getRotateGizmo(),
+            techniques.getScaleGizmo()));
         return techniques;
     }
 

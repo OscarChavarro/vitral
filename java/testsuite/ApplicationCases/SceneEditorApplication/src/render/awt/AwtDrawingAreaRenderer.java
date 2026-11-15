@@ -12,14 +12,27 @@ import java.util.function.Consumer;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.gui.gizmo.InputGizmo;
+import vsdk.toolkit.gui.gizmo.RotateGizmo;
+import vsdk.toolkit.gui.gizmo.ScaleGizmo;
+import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
+import vsdk.toolkit.render.awt.AwtGizmo2DDrawListRenderer;
 import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;
+import vsdk.toolkit.render.gizmo.Gizmo2DDrawList;
+import vsdk.toolkit.render.gizmo.InputGizmo2DPainter;
+import vsdk.toolkit.render.gizmo.RotateGizmo2DPainter;
+import vsdk.toolkit.render.gizmo.ScaleGizmo2DPainter;
+import vsdk.toolkit.render.gizmo.TranslateGizmo2DPainter;
 
 // Application classes
 import model.ApplicationModel;
 import model.DrawingArea;
 import model.Scene;
+import model.selection.SceneSelectionEditor;
+import render.DrawingAreaGizmoPresenter;
 import render.DrawingAreaHost;
 import render.FrameCaptureService;
 import render.ProjectedLineLayer;
@@ -39,12 +52,17 @@ modes AWT offers (see `model.RenderTechnology.AWT`):
     annotations (selection corners, lights...) are drawn over it as lines,
     without depth test.
 
+Over both, the manipulation gizmo of the interaction mode and the input
+gizmo (numeric boxes) of the selected viewport are drawn as 2D primitives
+computed by the gizmo painters of `vsdk.toolkit.render.gizmo` (hidden
+surfaces solved with the painter's algorithm) and drawn by
+`AwtGizmo2DDrawListRenderer`.
+
 The frame is composed in an off-screen image with one pixel for each
 physical pixel of the screen (the "surface" of `DrawingArea`), which is also
 the frame buffer read by `FrameCaptureService`.
 
-Not presented yet in this technology: manipulation gizmos, the visual debug
-ray, the depth buffer captures and the projected views debugger.
+Not presented yet in this technology: the visual debug ray, the depth buffer captures and the projected views debugger.
 */
 public class AwtDrawingAreaRenderer
 {
@@ -58,6 +76,8 @@ public class AwtDrawingAreaRenderer
     private final FrameCaptureService frameCapture;
     private final ProjectedLinesViewBuilder linesBuilder;
     private final AwtViewportSetRenderer viewportSetRenderer;
+    private final DrawingAreaGizmoPresenter gizmoPresenter;
+    private final Gizmo2DDrawList gizmoDrawList;
     private BufferedImage frame;
 
     /**
@@ -66,9 +86,15 @@ public class AwtDrawingAreaRenderer
     @param selectedViewportListener notified with the viewport about to be
     drawn when it is the selected one (or the only one shown), so interaction
     techniques can work over its camera
+    @param translationGizmo gizmo to draw in translation mode
+    @param rotateGizmo gizmo to draw in rotation mode
+    @param scaleGizmo gizmo to draw in scale mode
     */
     public AwtDrawingAreaRenderer(ApplicationModel model, DrawingAreaHost host,
-                                  Consumer<Viewport> selectedViewportListener)
+                                  Consumer<Viewport> selectedViewportListener,
+                                  TranslateGizmo translationGizmo,
+                                  RotateGizmo rotateGizmo,
+                                  ScaleGizmo scaleGizmo)
     {
         this.model = model;
         this.theScene = model.getScene();
@@ -78,6 +104,9 @@ public class AwtDrawingAreaRenderer
         this.frameCapture = new FrameCaptureService(model, host);
         this.linesBuilder = new ProjectedLinesViewBuilder();
         this.frame = null;
+        this.gizmoPresenter = new DrawingAreaGizmoPresenter(drawingArea,
+            new SceneSelectionEditor(theScene), translationGizmo, rotateGizmo, scaleGizmo);
+        this.gizmoDrawList = new Gizmo2DDrawList();
 
         viewportSetRenderer = new AwtViewportSetRenderer(viewportSet,
             new AwtViewportSetRenderer.ViewRenderer() {
@@ -184,9 +213,50 @@ public class AwtDrawingAreaRenderer
         AwtProjectedLineLayerRenderer.draw(g, layers, x, y, width, height,
             viewportSet.getElementScaler().getScale());
 
+        // Must be the last to draw, over the scene
+        drawGizmos(g, viewport, x, y, width, height);
+
         frameCapture.copyColorBufferIfNeeded(
             new AwtFrameBufferSource(frame, x, y, width, height),
             viewportSet.isSelected(viewport));
+    }
+
+    private void drawGizmos(Graphics2D g, Viewport viewport, int x, int y,
+                            int width, int height)
+    {
+        Camera camera = theScene.activeCamera;
+
+        gizmoDrawList.clear();
+        switch ( gizmoPresenter.prepareForView(camera) ) {
+          case TRANSLATE:
+            TranslateGizmo2DPainter.paint(gizmoDrawList,
+                gizmoPresenter.getTranslationGizmo(), camera,
+                viewportSet.getElementScaler());
+            break;
+          case ROTATE:
+            RotateGizmo2DPainter.paint(gizmoDrawList,
+                gizmoPresenter.getRotateGizmo(), camera,
+                viewportSet.getElementScaler());
+            break;
+          case SCALE:
+            ScaleGizmo2DPainter.paint(gizmoDrawList,
+                gizmoPresenter.getScaleGizmo(), camera);
+            break;
+          default:
+            break;
+        }
+
+        // Only the selected viewport shows them: it is the one that receives the keyboard
+        InputGizmo inputGizmo = gizmoPresenter.getInputGizmo();
+        if ( inputGizmo == null && model.getRayGizmo().isVisible() ) {
+            inputGizmo = model.getRayGizmo().getInputGizmo();
+        }
+        if ( inputGizmo != null && viewportSet.isSelected(viewport) ) {
+            InputGizmo2DPainter.paint(gizmoDrawList, inputGizmo, width, height,
+                viewportSet.getElementScaler(),
+                AwtGizmo2DDrawListRenderer.TEXT_MEASURER);
+        }
+        AwtGizmo2DDrawListRenderer.draw(g, gizmoDrawList, x, y);
     }
 
     /**
