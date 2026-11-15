@@ -224,8 +224,11 @@ RGBAImageCompressed* importDDSCompressed(const File& inImageFd) {
     return image;
 }
 
+// The headers of libjpeg up to 6b have no C++ guards
 #ifdef VITRAL_WITH_JPEG
+extern "C" {
 #include <jpeglib.h>
+}
 #endif
 
 #ifdef VITRAL_WITH_PNG

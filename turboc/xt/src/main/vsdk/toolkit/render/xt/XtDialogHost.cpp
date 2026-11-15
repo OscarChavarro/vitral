@@ -109,115 +109,7 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
 {
     Form* form = new Form(widgetSet, fontSet, shell, definition, onAction);
     try {
-        XtPanelWidgets* widgets = widgetSet->getPanelWidgets();
-        String title = messages->message(definition->getTitleKey().c_str());
-        const String shownTitle = XtTextEncoding::toLocale(title);
-        XtVaSetValues(shell, XtNtitle, shownTitle.c_str(), NULL);
-        widgetSet->setWindowCloseHandler(shell,
-            &XtDialogHost::Form::closeRequested, form);
-
-        // The elements, in order: rows and columns only group them (as the
-        // Swing host does), and the buttons go to the bottom row
-        ArrayList<const WidgetDialogElement*> pending;
-        long i;
-        for ( i = definition->getElements().size(); i > 0; i-- ) {
-            pending.add(&definition->getElements()[i - 1]);
-        }
-        ArrayList<const WidgetDialogElement*> inputs;
-        ArrayList<const WidgetDialogElement*> buttons;
-        BOOLEAN withTree = FALSE;
-        while ( !pending.isEmpty() ) {
-            const WidgetDialogElement* element = pending[pending.size() - 1];
-            pending.remove(pending.size() - 1);
-            String kind = element->getKind().c_str();
-            if ( kind == "textInput" || kind == "tree" ) {
-                inputs.add(element);
-                withTree = withTree || kind == "tree";
-            }
-            else if ( kind == "action" ) {
-                // Offered by the application with keys or menus
-            }
-            else if ( kind == "button" ) {
-                buttons.add(element);
-            }
-            else if ( kind == "row" || kind == "column" ) {
-                const ArrayList<WidgetDialogElement>& children =
-                    element->getChildren();
-                for ( i = children.size(); i > 0; i-- ) {
-                    pending.add(&children[i - 1]);
-                }
-            }
-            else {
-                throw IllegalArgumentException(
-                    "Unsupported form element: " + kind);
-            }
-        }
-
-        if ( withTree ) {
-            form->width = TREE_DIALOG_WIDTH;
-        }
-        ArrayList<ArrayList<String> > prompts;
-        int height = MARGIN;
-        for ( i = 0; i < inputs.size(); i++ ) {
-            String labelKey = inputs[i]->getLabelKey().c_str();
-            prompts.add(labelKey.isEmpty() ? ArrayList<String>() :
-                wrapText(fontSet, messages->message(labelKey), form->width - 2 * MARGIN));
-            height += ((int)(prompts[i].size())) * LINE_HEIGHT +
-                (prompts[i].isEmpty() ? 0 : 6) +
-                (inputs[i]->getKind().equals("tree") ? TREE_HEIGHT : FIELD_HEIGHT) +
-                MARGIN;
-        }
-        form->buttonsY = height;
-        if ( !buttons.isEmpty() ) {
-            height += BUTTON_HEIGHT + MARGIN;
-        }
-
-        XtWidget frame = widgets->createPanel(shell, "dialogFrame", 0, 0,
-                                              form->width, height, TRUE);
-        int y = MARGIN;
-        for ( i = 0; i < inputs.size(); i++ ) {
-            for ( long line = 0; line < prompts[i].size(); line++ ) {
-                widgets->createLabel(frame, prompts[i][line], fontSet,
-                                     XtPanelWidgets::LEFT, MARGIN, y,
-                                     form->width - 2 * MARGIN, LINE_HEIGHT);
-                y += LINE_HEIGHT;
-            }
-            if ( !prompts[i].isEmpty() ) {
-                y += 6;
-            }
-            if ( inputs[i]->getKind().equals("tree") ) {
-                XtTreeView* tree = new XtTreeView(frame, fontSet, MARGIN, y,
-                    form->width - 2 * MARGIN, TREE_HEIGHT);
-                form->trees.put(inputs[i]->getBinding(), tree);
-                if ( form->firstField == NULL ) {
-                    form->firstField = tree->getWidget();
-                }
-                y += TREE_HEIGHT + MARGIN;
-                continue;
-            }
-            XtWidget field = widgets->createTextField(frame, "", fontSet,
-                MARGIN, y, form->width - 2 * MARGIN, FIELD_HEIGHT,
-                ignoreActivation, NULL);
-            form->fields.put(inputs[i]->getBinding(), field);
-            if ( form->firstField == NULL ) {
-                form->firstField = field;
-            }
-            y += FIELD_HEIGHT + MARGIN;
-        }
-        for ( i = 0; i < buttons.size(); i++ ) {
-            // Fully qualified (as Form::buttonPressed below): gcc 2.7.2 does
-            // not find the members of Form here
-            XtDialogHost::Form::Button* button =
-                new XtDialogHost::Form::Button;
-            button->form = form;
-            button->action = buttons[i]->getAction().c_str();
-            button->label = messages->message(buttons[i]->getLabelKey().c_str());
-            button->widget = widgets->createPushButton(frame, button->label,
-                fontSet, 0, form->buttonsY, 1, BUTTON_HEIGHT,
-                &XtDialogHost::Form::buttonPressed, button);
-            form->buttons.add(button);
-        }
-        form->layoutButtons();
+        buildForm(form, messages);
     }
     catch ( ... ) {
         // i.e. IllegalArgumentException for unknown elements
@@ -225,6 +117,155 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
         throw;
     }
     return form;
+}
+
+void XtDialogHost::buildForm(Form* form, MessageSource* messages)
+{
+    XtWidgetSet* widgetSet = form->widgetSet;
+    XtPanelWidgets* widgets = widgetSet->getPanelWidgets();
+    String title = messages->message(form->definition->getTitleKey().c_str());
+    const String shownTitle = XtTextEncoding::toLocale(title);
+    XtVaSetValues(form->shell, XtNtitle, shownTitle.c_str(), NULL);
+    widgetSet->setWindowCloseHandler(form->shell,
+        &XtDialogHost::Form::closeRequested, form);
+
+    ArrayList<const WidgetDialogElement*> inputs;
+    ArrayList<const WidgetDialogElement*> buttons;
+    BOOLEAN withTree = collectElements(form->definition, inputs, buttons);
+
+    if ( withTree ) {
+        form->width = TREE_DIALOG_WIDTH;
+    }
+    ArrayList<ArrayList<String> > prompts;
+    int height = MARGIN;
+    long i;
+    for ( i = 0; i < inputs.size(); i++ ) {
+        String labelKey = inputs[i]->getLabelKey().c_str();
+        if ( labelKey.isEmpty() ) {
+            prompts.add(ArrayList<String>());
+        }
+        else {
+            String message = messages->message(labelKey);
+            prompts.add(wrapText(form->fontSet, message,
+                                 form->width - 2 * MARGIN));
+        }
+        height += ((int)(prompts[i].size())) * LINE_HEIGHT +
+            (prompts[i].isEmpty() ? 0 : 6) +
+            (inputs[i]->getKind().equals("tree") ? TREE_HEIGHT : FIELD_HEIGHT) +
+            MARGIN;
+    }
+    form->buttonsY = height;
+    if ( !buttons.isEmpty() ) {
+        height += BUTTON_HEIGHT + MARGIN;
+    }
+
+    XtWidget frame = widgets->createPanel(form->shell, "dialogFrame", 0, 0,
+                                          form->width, height, TRUE);
+    layoutInputs(form, frame, inputs, prompts);
+    createButtons(form, frame, messages, buttons);
+    form->layoutButtons();
+}
+
+/**
+Collects the elements of a dialog definition, in order: rows and columns
+only group them (as the Swing host does), and the buttons go to the bottom
+row.
+@return TRUE when there is a tree among the inputs
+*/
+BOOLEAN XtDialogHost::collectElements(const WidgetDialog* definition,
+    ArrayList<const WidgetDialogElement*>& inputs,
+    ArrayList<const WidgetDialogElement*>& buttons)
+{
+    ArrayList<const WidgetDialogElement*> pending;
+    long i;
+    for ( i = definition->getElements().size(); i > 0; i-- ) {
+        pending.add(&definition->getElements()[i - 1]);
+    }
+    BOOLEAN withTree = FALSE;
+    while ( !pending.isEmpty() ) {
+        const WidgetDialogElement* element = pending[pending.size() - 1];
+        pending.remove(pending.size() - 1);
+        String kind = element->getKind().c_str();
+        if ( kind == "textInput" || kind == "tree" ) {
+            inputs.add(element);
+            withTree = withTree || kind == "tree";
+        }
+        else if ( kind == "action" ) {
+            // Offered by the application with keys or menus
+        }
+        else if ( kind == "button" ) {
+            buttons.add(element);
+        }
+        else if ( kind == "row" || kind == "column" ) {
+            const ArrayList<WidgetDialogElement>& children =
+                element->getChildren();
+            for ( i = children.size(); i > 0; i-- ) {
+                pending.add(&children[i - 1]);
+            }
+        }
+        else {
+            throw IllegalArgumentException(
+                "Unsupported form element: " + kind);
+        }
+    }
+    return withTree;
+}
+
+void XtDialogHost::layoutInputs(Form* form, XtWidget frame,
+    const ArrayList<const WidgetDialogElement*>& inputs,
+    const ArrayList<ArrayList<String> >& prompts)
+{
+    XtPanelWidgets* widgets = form->widgetSet->getPanelWidgets();
+    int y = MARGIN;
+    for ( long i = 0; i < inputs.size(); i++ ) {
+        for ( long line = 0; line < prompts[i].size(); line++ ) {
+            widgets->createLabel(frame, prompts[i][line], form->fontSet,
+                                 XtPanelWidgets::LEFT, MARGIN, y,
+                                 form->width - 2 * MARGIN, LINE_HEIGHT);
+            y += LINE_HEIGHT;
+        }
+        if ( !prompts[i].isEmpty() ) {
+            y += 6;
+        }
+        if ( inputs[i]->getKind().equals("tree") ) {
+            XtTreeView* tree = new XtTreeView(frame, form->fontSet, MARGIN, y,
+                form->width - 2 * MARGIN, TREE_HEIGHT);
+            form->trees.put(inputs[i]->getBinding(), tree);
+            if ( form->firstField == NULL ) {
+                form->firstField = tree->getWidget();
+            }
+            y += TREE_HEIGHT + MARGIN;
+            continue;
+        }
+        XtWidget field = widgets->createTextField(frame, "", form->fontSet,
+            MARGIN, y, form->width - 2 * MARGIN, FIELD_HEIGHT,
+            ignoreActivation, NULL);
+        form->fields.put(inputs[i]->getBinding(), field);
+        if ( form->firstField == NULL ) {
+            form->firstField = field;
+        }
+        y += FIELD_HEIGHT + MARGIN;
+    }
+}
+
+void XtDialogHost::createButtons(Form* form, XtWidget frame,
+    MessageSource* messages,
+    const ArrayList<const WidgetDialogElement*>& buttons)
+{
+    XtPanelWidgets* widgets = form->widgetSet->getPanelWidgets();
+    for ( long i = 0; i < buttons.size(); i++ ) {
+        // Fully qualified (as Form::buttonPressed below): gcc 2.7.2 does
+        // not find the members of Form here
+        XtDialogHost::Form::Button* button =
+            new XtDialogHost::Form::Button;
+        button->form = form;
+        button->action = buttons[i]->getAction().c_str();
+        button->label = messages->message(buttons[i]->getLabelKey().c_str());
+        button->widget = widgets->createPushButton(frame, button->label,
+            form->fontSet, 0, form->buttonsY, 1, BUTTON_HEIGHT,
+            &XtDialogHost::Form::buttonPressed, button);
+        form->buttons.add(button);
+    }
 }
 
 /**

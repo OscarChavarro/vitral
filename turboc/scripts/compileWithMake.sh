@@ -53,8 +53,18 @@ if [ -n "$GL_DIR" ] || [ -f /usr/include/GL/gl.h ] || \
         echo "=== OpenGL from $GL_DIR"
     fi
 fi
-echo "=== Building with make: $TARGETS"
-make $TARGETS "$@"
+# Image formats of the libraries found (i.e. libjpeg 6a from Debian and
+# libpng 1.2 built in /usr/local on Debian 1.1); "WITH_JPEG= WITH_PNG=" on the
+# command line turns them off
+FEATURES=
+if [ -f /usr/include/jpeglib.h ] || [ -f /usr/local/include/jpeglib.h ]; then
+    FEATURES="$FEATURES WITH_JPEG=1"
+fi
+if [ -f /usr/include/png.h ] || [ -f /usr/local/include/png.h ]; then
+    FEATURES="$FEATURES WITH_PNG=1"
+fi
+echo "=== Building with make: $TARGETS$FEATURES"
+make $TARGETS $FEATURES "$@"
 
 if [ -f base/build/libvitral_base.a ]; then
     echo "=== Libraries:"

@@ -13,6 +13,7 @@
 #include "java/lang/IllegalArgumentException.h"
 
 class WidgetDialog;
+class WidgetDialogElement;
 class XtTreeView;
 class XtWidgetSet;
 
@@ -171,6 +172,19 @@ public:
 
 private:
     XtDialogHost();
+
+    // The steps of form(), in separate functions: gcc 2.7.2 crashes
+    // (internal compiler error) compiling them as one function in a try
+    static void buildForm(Form* form, MessageSource* messages);
+    static BOOLEAN collectElements(const WidgetDialog* definition,
+        ArrayList<const WidgetDialogElement*>& inputs,
+        ArrayList<const WidgetDialogElement*>& buttons);
+    static void layoutInputs(Form* form, XtWidget frame,
+        const ArrayList<const WidgetDialogElement*>& inputs,
+        const ArrayList<ArrayList<String> >& prompts);
+    static void createButtons(Form* form, XtWidget frame,
+        MessageSource* messages,
+        const ArrayList<const WidgetDialogElement*>& buttons);
 };
 
 #endif

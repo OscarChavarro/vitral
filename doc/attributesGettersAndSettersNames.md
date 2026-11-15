@@ -29,7 +29,8 @@ implica `getBottomRadius()` y `setBottomRadius(double)`.
      `com` en C++ y TS.
    - **E4 notación establecida**: registros de [MANT1988] cap. 15 (`va`, `vb`,
      `he`, `wa`, `wb`, `cl`, `e`…), plano `a b c d`, parámetro de rayo `t`
-     (`Ray`, `Intersection`), pesos `kd`/`ks` (columnas de archivo y
+     (`Ray`, `Intersection`, `RayBoundary`, `CsgRayEventGroup`,
+     `CsgSegmentEvent`), pesos `kd`/`ks` (columnas de archivo y
      uniforms de shader), registros del formato MD2 (`s`, `t`, `st`), estado
      SHA-1 `h`.
    - **E5 registros inmutables** con accessors estilo record de Java
@@ -38,7 +39,11 @@ implica `getBottomRadius()` y `setBottomRadius(double)`.
    - **Accessors de vista** (problema M exento): `get*Reference`, `getRaw*`,
      `get*Enum`, alias (`WidgetDialog.getChildren`), estado actual de gizmos
      (`RayGizmo`, `InfinitePlaneGizmo`: `current*` frente al valor
-     configurado), `ZBuffer.getZBuffer`, valores derivados.
+     configurado), `ZBuffer.getZBuffer`, valores derivados; en CSG: `get*View` de
+     `TriangleMesh`, `InfinitePlane.getConstantCoefficient` (`d`),
+     `getBoundaryPlane`, `getProvenance`, `HeightFieldSolid.getColumnCount/
+     getRowCount` y `getChildExpression` de `CsgOperandView`. Un getter que
+     devuelve `this` no se reporta.
 6. Serialización: renombrar atributos privados de clases `Serializable`
    rompe objetos Java serializados antes; se aceptó (mismo criterio que
    Sphere/Cone), sin `readObject` de compatibilidad.

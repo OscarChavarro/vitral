@@ -43,8 +43,11 @@ pkgs/SpharmonicKit27/tmp/
 testsuite/**/output/
 testsuite/**/*.ppm
 cpp/testsuite/**/*.ppm
+java/testsuite/OfflineExamples/RaytracingOfflineExample/*.ppm
+typescript/testsuite/OfflineExamples/RaytracingOfflineExample/*.ppm
 testsuite/**/*.jpg
 testsuite/**/*.bmp
+java/testsuite/OfflineExamples/RaytracingOfflineExample/*.bmp
 testsuite/**/PolyhedralBoundedSolidExample/*.png
 testsuite/_APITests/_JOGL2HelloWorld/doc/javadoc/
 .codex

@@ -75,6 +75,7 @@ NOTATION_EXEMPTIONS = {
     "InfinitePlane:a", "InfinitePlane:b", "InfinitePlane:c", "InfinitePlane:d",
     # Ray parameter: point = origin + t * direction (getT / withT API).
     "Ray:t", "Intersection:t", "RayCrossing:t",
+    "RayBoundary:t", "CsgRayEventGroup:t", "CsgSegmentEvent:t",
     "_ParametricBiCubicPatchIntersector:t", "VoxelVolume:t",
     # Diffuse/specular weights Kd, Ks: also the columns of the material
     # files and the shader uniforms (cookKd, cookKs).
@@ -175,6 +176,15 @@ ACCESSOR_EXEMPTIONS = {
     "triangulatePolygon2D:getImageHeight",
     "ServletSessionInformation:getMethod", "ServletSessionInformation:getId",
     "SketchCanvas:getImage",
+    # CSG geometry: raw buffers and borrowed views, plane constant d,
+    # count accessors and CsgOperandView interface accessors.
+    "TriangleMesh:getVertexPositionsView", "TriangleMesh:getTriangleIndexesView",
+    "TriangleMesh:getTriangleNormalsView", "Box:getRawBounds",
+    "Sphere:getRadiusReference", "InfinitePlane:getConstantCoefficient",
+    "PlanarHalfSpace:getBoundaryPlane", "RayBoundary:getProvenance",
+    "HeightFieldSolid:getColumnCount", "HeightFieldSolid:getRowCount",
+    "CsgPlacedExpression:getChildExpression", "CsgPolicyTestOperand:getChildExpression",
+    "ShadersGeometryFixture:getTessellationReport",
 }
 GETTER_PATTERNS = {
     "java": re.compile(r"\b(?:public|protected)\s+[\w<>\[\],.? ]+\s+(get\w+)\s*\(\s*\)\s*\{\s*return\s+(?:this\.)?(\w+)\s*;\s*\}", re.S),
@@ -188,7 +198,7 @@ def accessor_mismatches(path, lang, class_file):
     for m in GETTER_PATTERNS[lang].finditer(text):
         getter, attribute = m.group(1), m.group(2)
         expected = getter[3:4].lower() + getter[4:]
-        if attribute == expected or attribute in ("null", "nullptr", "true", "false") or \
+        if attribute == expected or attribute in ("null", "nullptr", "true", "false", "this") or \
                 not attribute[:1].islower() or class_file in ACCESSOR_EXEMPTIONS or \
                 class_file + ":" + getter in ACCESSOR_EXEMPTIONS:
             continue
@@ -389,9 +399,9 @@ def main(argv):
                     for line, getter, attribute in accessor_mismatches(path, port, class_file):
                         violations += 1
                         if csv_mode:
-                            print(f"{port},{relative},{line},{getter},M,")
+                            print("{},{},{},{},M,".format(port, relative, line, getter))
                         else:
-                            print(f"{relative}:{line}: {getter}() returns {attribute} (M)")
+                            print("{}:{}: {}() returns {} (M)".format(relative, line, getter, attribute))
                 seen = set()
                 for line, name, constant in scan(path, port):
                     if (line, name) in seen:
@@ -402,15 +412,15 @@ def main(argv):
                         continue
                     exemption = exemption_of("/" + relative, class_file, name, problems)
                     if csv_mode:
-                        print(f"{port},{relative},{line},{name},{''.join(problems)},{exemption}")
+                        print("{},{},{},{},{},{}".format(port, relative, line, name, "".join(problems), exemption))
                     elif not exemption:
-                        print(f"{relative}:{line}: {name} ({''.join(problems)})")
+                        print("{}:{}: {} ({})".format(relative, line, name, "".join(problems)))
                     elif exemption.startswith("PENDING"):
-                        print(f"warning: {relative}:{line}: {name} ({exemption})", file=sys.stderr)
+                        print("warning: {}:{}: {} ({})".format(relative, line, name, exemption), file=sys.stderr)
                     if not exemption:
                         violations += 1
     if not csv_mode:
-        print(f"{violations} attribute name violations", file=sys.stderr)
+        print("{} attribute name violations".format(violations), file=sys.stderr)
     return 1 if violations else 0
 
 

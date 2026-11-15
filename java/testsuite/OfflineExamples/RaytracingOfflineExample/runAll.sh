@@ -37,7 +37,7 @@ else
 
   for scene_file in "${ray_files[@]}"; do
     base_name="$(basename "${scene_file}" .ray)"
-    output_file="${output_dir}/${base_name}.bmp"
+    output_file="${output_dir}/${base_name}.ppm"
 
     echo "Rendering ${scene_file} -> ${output_file}"
     gradle :testsuite:OfflineExamples:RaytracingOfflineExample:runMain \
