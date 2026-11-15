@@ -1,5 +1,5 @@
-#ifndef VSDK_INSTANCE_RAY_CROSSING_BUFFER_H
-#define VSDK_INSTANCE_RAY_CROSSING_BUFFER_H
+#ifndef __INSTANCE_RAY_CROSSING_BUFFER__
+#define __INSTANCE_RAY_CROSSING_BUFFER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RayCrossingSink.h"

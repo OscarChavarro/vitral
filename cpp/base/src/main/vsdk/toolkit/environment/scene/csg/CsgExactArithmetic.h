@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_EXACT_ARITHMETIC_H
-#define VSDK_CSG_EXACT_ARITHMETIC_H
+#ifndef __CSG_EXACT_ARITHMETIC__
+#define __CSG_EXACT_ARITHMETIC__
 // Exact comparisons of finite binary64 expressions using dyadic integer limbs.
 // Unsupported arithmetic environments or out-of-range intermediates return false.
 class CsgExactArithmetic {

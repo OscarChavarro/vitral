@@ -1,5 +1,5 @@
-#ifndef VSDK_HEIGHT_FIELD_TRAVERSAL_H
-#define VSDK_HEIGHT_FIELD_TRAVERSAL_H
+#ifndef __HEIGHT_FIELD_TRAVERSAL__
+#define __HEIGHT_FIELD_TRAVERSAL__
 
 // Per-ray stepping state of the height field first-hit traversal: direction
 // signs, the dominant axis and the slopes between ray coordinates.

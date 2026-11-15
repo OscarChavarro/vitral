@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_CROSSING_MEMBERSHIP_FILTER_H
-#define VSDK_CSG_CROSSING_MEMBERSHIP_FILTER_H
+#ifndef __CSG_CROSSING_MEMBERSHIP_FILTER__
+#define __CSG_CROSSING_MEMBERSHIP_FILTER__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidQueryStatus.h"
 #include "vsdk/toolkit/environment/geometry/element/GeometryContainment.h"

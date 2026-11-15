@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_EVENT_QUERY_H
-#define VSDK_CSG_RAY_EVENT_QUERY_H
+#ifndef __CSG_RAY_EVENT_QUERY__
+#define __CSG_RAY_EVENT_QUERY__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidQueryStatus.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayEventReference.h"

@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_SOLID_EQUIVALENCE_H
-#define VSDK_CSG_SOLID_EQUIVALENCE_H
+#ifndef __CSG_SOLID_EQUIVALENCE__
+#define __CSG_SOLID_EQUIVALENCE__
 class SceneSolid;
 class Matrix4x4d;
 class Vector3Dd;

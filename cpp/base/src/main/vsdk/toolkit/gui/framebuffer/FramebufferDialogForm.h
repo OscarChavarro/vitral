@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_DIALOG_FORM_H
-#define VITRAL_FRAMEBUFFER_DIALOG_FORM_H
+#ifndef __VITRAL_FRAMEBUFFER_DIALOG_FORM__
+#define __VITRAL_FRAMEBUFFER_DIALOG_FORM__
 
 #include "java/util/TreeMap.h"
 #include "java/util/ArrayList.h"

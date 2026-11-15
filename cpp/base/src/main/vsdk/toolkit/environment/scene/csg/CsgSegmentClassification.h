@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_SEGMENT_CLASSIFICATION_H
-#define VSDK_CSG_SEGMENT_CLASSIFICATION_H
+#ifndef __CSG_SEGMENT_CLASSIFICATION__
+#define __CSG_SEGMENT_CLASSIFICATION__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgOperation.h"

@@ -1,5 +1,5 @@
-#ifndef VITRAL_OPEN_GL_4_RAY_GIZMO_RENDERER_H
-#define VITRAL_OPEN_GL_4_RAY_GIZMO_RENDERER_H
+#ifndef __VITRAL_OPEN_GL_4_RAY_GIZMO_RENDERER__
+#define __VITRAL_OPEN_GL_4_RAY_GIZMO_RENDERER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

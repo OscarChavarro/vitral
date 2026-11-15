@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_POINT_CANDIDATE_H
-#define VSDK_CSG_POINT_CANDIDATE_H
+#ifndef __CSG_POINT_CANDIDATE__
+#define __CSG_POINT_CANDIDATE__
 #include "vsdk/toolkit/environment/geometry/element/GeometryContainment.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgPointWitness.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgPointProof.h"

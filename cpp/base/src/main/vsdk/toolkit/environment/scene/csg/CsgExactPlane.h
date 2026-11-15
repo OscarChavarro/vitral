@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_EXACT_PLANE_H
-#define VSDK_CSG_EXACT_PLANE_H
+#ifndef __CSG_EXACT_PLANE__
+#define __CSG_EXACT_PLANE__
 class Matrix4x4d;
 // Exact sufficient conversion of a local oriented plane to world coefficients.
 // Returns false when any binary64 intermediate is not exactly representable.

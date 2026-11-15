@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_TEST_OPERAND_H
-#define VSDK_CSG_TEST_OPERAND_H
+#ifndef __CSG_TEST_OPERAND__
+#define __CSG_TEST_OPERAND__
 #include "vsdk/toolkit/environment/scene/csg/CsgOperandView.h"
 class CsgTestOperand : public CsgOperandView {
 private:

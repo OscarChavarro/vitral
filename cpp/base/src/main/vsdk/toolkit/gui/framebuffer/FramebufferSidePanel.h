@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_SIDE_PANEL_H
-#define VITRAL_FRAMEBUFFER_SIDE_PANEL_H
+#ifndef __VITRAL_FRAMEBUFFER_SIDE_PANEL__
+#define __VITRAL_FRAMEBUFFER_SIDE_PANEL__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

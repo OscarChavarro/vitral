@@ -1,5 +1,5 @@
-#ifndef VSDK_PLANAR_HALF_SPACE_H
-#define VSDK_PLANAR_HALF_SPACE_H
+#ifndef __PLANAR_HALF_SPACE__
+#define __PLANAR_HALF_SPACE__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"

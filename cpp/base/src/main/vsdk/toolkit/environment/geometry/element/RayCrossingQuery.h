@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_CROSSING_QUERY_H
-#define VSDK_RAY_CROSSING_QUERY_H
+#ifndef __RAY_CROSSING_QUERY__
+#define __RAY_CROSSING_QUERY__
 
 #include "java/lang/Double.h"
 

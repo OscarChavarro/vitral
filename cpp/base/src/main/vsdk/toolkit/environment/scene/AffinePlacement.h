@@ -1,5 +1,5 @@
-#ifndef VSDK_AFFINE_PLACEMENT_H
-#define VSDK_AFFINE_PLACEMENT_H
+#ifndef __AFFINE_PLACEMENT__
+#define __AFFINE_PLACEMENT__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/scene/AffinePlacementStatus.h"

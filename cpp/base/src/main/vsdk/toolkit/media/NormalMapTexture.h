@@ -1,5 +1,5 @@
-#ifndef VSDK_NORMAL_MAP_TEXTURE_H
-#define VSDK_NORMAL_MAP_TEXTURE_H
+#ifndef __NORMAL_MAP_TEXTURE__
+#define __NORMAL_MAP_TEXTURE__
 #include <vector>
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"

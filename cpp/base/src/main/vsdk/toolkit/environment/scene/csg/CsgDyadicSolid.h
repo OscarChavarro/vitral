@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_DYADIC_SOLID_H
-#define VSDK_CSG_DYADIC_SOLID_H
+#ifndef __CSG_DYADIC_SOLID__
+#define __CSG_DYADIC_SOLID__
 #include "vsdk/toolkit/environment/scene/csg/CsgDyadic.h"
 class Matrix4x4d;
 // Exact sufficient certificates; failure never establishes non-equivalence.

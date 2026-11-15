@@ -1,5 +1,5 @@
-#ifndef VITRAL_XLIB_INPUT_H
-#define VITRAL_XLIB_INPUT_H
+#ifndef __VITRAL_XLIB_INPUT__
+#define __VITRAL_XLIB_INPUT__
 
 #include <X11/Xlib.h>
 #include "vsdk/toolkit/gui/framebuffer/FramebufferEvent.h"

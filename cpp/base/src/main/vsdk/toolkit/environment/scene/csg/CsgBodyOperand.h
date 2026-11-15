@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_BODY_OPERAND_H
-#define VSDK_CSG_BODY_OPERAND_H
+#ifndef __CSG_BODY_OPERAND__
+#define __CSG_BODY_OPERAND__
 
 #include "vsdk/toolkit/environment/scene/csg/CsgOperandView.h"
 class SceneSolid;

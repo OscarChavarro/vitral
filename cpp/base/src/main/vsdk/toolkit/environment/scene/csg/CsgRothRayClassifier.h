@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_ROTH_RAY_CLASSIFIER_H
-#define VSDK_CSG_ROTH_RAY_CLASSIFIER_H
+#ifndef __CSG_ROTH_RAY_CLASSIFIER__
+#define __CSG_ROTH_RAY_CLASSIFIER__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidQueryStatus.h"
 class CsgExpression;

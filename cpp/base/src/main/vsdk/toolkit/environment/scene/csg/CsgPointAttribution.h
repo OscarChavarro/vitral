@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_POINT_ATTRIBUTION_H
-#define VSDK_CSG_POINT_ATTRIBUTION_H
+#ifndef __CSG_POINT_ATTRIBUTION__
+#define __CSG_POINT_ATTRIBUTION__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgPointWitness.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgVersionStamp.h"

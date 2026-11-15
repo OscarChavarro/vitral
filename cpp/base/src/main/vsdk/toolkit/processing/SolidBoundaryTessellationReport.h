@@ -1,5 +1,5 @@
-#ifndef VSDK_SOLID_BOUNDARY_TESSELLATION_REPORT_H
-#define VSDK_SOLID_BOUNDARY_TESSELLATION_REPORT_H
+#ifndef __SOLID_BOUNDARY_TESSELLATION_REPORT__
+#define __SOLID_BOUNDARY_TESSELLATION_REPORT__
 
 // Resolution and accuracy of a SolidBoundaryTessellator mesh.
 class SolidBoundaryTessellationReport {

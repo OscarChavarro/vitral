@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_SOLID_QUERY_STATUS_H
-#define VSDK_RAY_SOLID_QUERY_STATUS_H
+#ifndef __RAY_SOLID_QUERY_STATUS__
+#define __RAY_SOLID_QUERY_STATUS__
 
 // Supported includes an empty boundary list (all inside or all outside).
 enum class RaySolidQueryStatus { Unsupported, Supported, InvalidInput, Indeterminate };

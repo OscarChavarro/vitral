@@ -1,5 +1,5 @@
-#ifndef VSDK_QUADRIC_RAY_EXPANSION_H
-#define VSDK_QUADRIC_RAY_EXPANSION_H
+#ifndef __QUADRIC_RAY_EXPANSION__
+#define __QUADRIC_RAY_EXPANSION__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"

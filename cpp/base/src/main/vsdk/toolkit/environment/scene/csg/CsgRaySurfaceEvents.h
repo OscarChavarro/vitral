@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_SURFACE_EVENTS_H
-#define VSDK_CSG_RAY_SURFACE_EVENTS_H
+#ifndef __CSG_RAY_SURFACE_EVENTS__
+#define __CSG_RAY_SURFACE_EVENTS__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayLeafBatch.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayEventReference.h"

@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_LABEL_H
-#define VITRAL_FRAMEBUFFER_LABEL_H
+#ifndef __VITRAL_FRAMEBUFFER_LABEL__
+#define __VITRAL_FRAMEBUFFER_LABEL__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferControl.h"

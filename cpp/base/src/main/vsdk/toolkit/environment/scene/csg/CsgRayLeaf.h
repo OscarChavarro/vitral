@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_LEAF_H
-#define VSDK_CSG_RAY_LEAF_H
+#ifndef __CSG_RAY_LEAF__
+#define __CSG_RAY_LEAF__
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgPointWitness.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayPlacement.h"

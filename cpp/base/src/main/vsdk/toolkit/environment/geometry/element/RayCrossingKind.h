@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_CROSSING_KIND_H
-#define VSDK_RAY_CROSSING_KIND_H
+#ifndef __RAY_CROSSING_KIND__
+#define __RAY_CROSSING_KIND__
 
 enum class RayCrossingKind { Entering, Leaving, Tangent, Unclassified };
 

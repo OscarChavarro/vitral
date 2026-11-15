@@ -1,5 +1,5 @@
-#ifndef VSDK_HEIGHT_FIELD_BLOCK_H
-#define VSDK_HEIGHT_FIELD_BLOCK_H
+#ifndef __HEIGHT_FIELD_BLOCK__
+#define __HEIGHT_FIELD_BLOCK__
 
 // Height range of one square block of height field cells, used to skip
 // blocks a ray passes above or below.

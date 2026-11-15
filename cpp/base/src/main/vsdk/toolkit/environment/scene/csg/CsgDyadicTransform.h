@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_DYADIC_TRANSFORM_H
-#define VSDK_CSG_DYADIC_TRANSFORM_H
+#ifndef __CSG_DYADIC_TRANSFORM__
+#define __CSG_DYADIC_TRANSFORM__
 #include "vsdk/toolkit/environment/scene/csg/CsgDyadic.h"
 class Matrix4x4d;
 // Exact homogeneous inverse numerator; no intermediate binary64 rounding.

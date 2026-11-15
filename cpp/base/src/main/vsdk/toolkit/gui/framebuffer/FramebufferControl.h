@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_CONTROL_H
-#define VITRAL_FRAMEBUFFER_CONTROL_H
+#ifndef __VITRAL_FRAMEBUFFER_CONTROL__
+#define __VITRAL_FRAMEBUFFER_CONTROL__
 
 class Framebuffer;
 class FramebufferEvent;

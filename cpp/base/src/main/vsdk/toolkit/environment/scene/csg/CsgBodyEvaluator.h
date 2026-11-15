@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_BODY_EVALUATOR_H
-#define VSDK_CSG_BODY_EVALUATOR_H
+#ifndef __CSG_BODY_EVALUATOR__
+#define __CSG_BODY_EVALUATOR__
 
 // Ray evaluator of a CsgBody: the regularized [ROTH1982] classification
 // (CsgRothRayClassifier) or the POV-Ray 1.0 crossing membership heuristic

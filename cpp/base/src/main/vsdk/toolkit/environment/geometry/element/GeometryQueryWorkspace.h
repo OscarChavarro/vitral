@@ -1,5 +1,5 @@
-#ifndef VSDK_GEOMETRY_QUERY_WORKSPACE_H
-#define VSDK_GEOMETRY_QUERY_WORKSPACE_H
+#ifndef __GEOMETRY_QUERY_WORKSPACE__
+#define __GEOMETRY_QUERY_WORKSPACE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"

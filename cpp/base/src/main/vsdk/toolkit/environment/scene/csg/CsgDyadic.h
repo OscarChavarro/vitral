@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_DYADIC_H
-#define VSDK_CSG_DYADIC_H
+#ifndef __CSG_DYADIC__
+#define __CSG_DYADIC__
 // Signed exact dyadic number. Fixed-capacity binary limbs avoid heap allocation;
 // every operation reports failure and leaves its output unchanged on overflow.
 class CsgDyadic {

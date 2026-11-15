@@ -1,5 +1,5 @@
-#ifndef VITRAL_LIBPNG_PNG_H
-#define VITRAL_LIBPNG_PNG_H
+#ifndef __VITRAL_LIBPNG_PNG__
+#define __VITRAL_LIBPNG_PNG__
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>

@@ -1,5 +1,5 @@
-#ifndef VSDK_GEOMETRY_CONTAINMENT_H
-#define VSDK_GEOMETRY_CONTAINMENT_H
+#ifndef __GEOMETRY_CONTAINMENT__
+#define __GEOMETRY_CONTAINMENT__
 
 enum class GeometryContainment { Unsupported, Inside, Boundary, Outside, InvalidInput, Indeterminate };
 #endif

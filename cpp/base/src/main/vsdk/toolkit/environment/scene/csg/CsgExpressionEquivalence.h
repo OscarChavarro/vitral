@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_EXPRESSION_EQUIVALENCE_H
-#define VSDK_CSG_EXPRESSION_EQUIVALENCE_H
+#ifndef __CSG_EXPRESSION_EQUIVALENCE__
+#define __CSG_EXPRESSION_EQUIVALENCE__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgOperation.h"
 class CsgExpression;

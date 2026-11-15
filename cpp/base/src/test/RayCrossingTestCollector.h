@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_CROSSING_TEST_COLLECTOR_H
-#define VSDK_RAY_CROSSING_TEST_COLLECTOR_H
+#ifndef __RAY_CROSSING_TEST_COLLECTOR__
+#define __RAY_CROSSING_TEST_COLLECTOR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RayCrossingSink.h"

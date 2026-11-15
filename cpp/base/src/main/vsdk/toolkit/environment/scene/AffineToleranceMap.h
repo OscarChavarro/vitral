@@ -1,5 +1,5 @@
-#ifndef VSDK_AFFINE_TOLERANCE_MAP_H
-#define VSDK_AFFINE_TOLERANCE_MAP_H
+#ifndef __AFFINE_TOLERANCE_MAP__
+#define __AFFINE_TOLERANCE_MAP__
 #include "vsdk/toolkit/environment/scene/AffinePlacementStatus.h"
 class Matrix4x4d;
 class Vector3Dd;

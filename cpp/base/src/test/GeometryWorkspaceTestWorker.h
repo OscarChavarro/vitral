@@ -1,5 +1,5 @@
-#ifndef VSDK_GEOMETRY_WORKSPACE_TEST_WORKER_H
-#define VSDK_GEOMETRY_WORKSPACE_TEST_WORKER_H
+#ifndef __GEOMETRY_WORKSPACE_TEST_WORKER__
+#define __GEOMETRY_WORKSPACE_TEST_WORKER__
 #include "java/lang/Runnable.h"
 #include "vsdk/toolkit/environment/geometry/element/GeometryQueryWorkspace.h"
 class Sphere;

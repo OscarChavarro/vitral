@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_MEMBERSHIP_RULE_H
-#define VSDK_CSG_MEMBERSHIP_RULE_H
+#ifndef __CSG_MEMBERSHIP_RULE__
+#define __CSG_MEMBERSHIP_RULE__
 #include "vsdk/toolkit/environment/scene/csg/CsgOperation.h"
 // Boolean rules shared by every CSG evaluator over an ordered expression.
 class CsgMembershipRule {

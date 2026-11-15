@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_POINT_EVIDENCE_H
-#define VSDK_CSG_POINT_EVIDENCE_H
+#ifndef __CSG_POINT_EVIDENCE__
+#define __CSG_POINT_EVIDENCE__
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/GeometryContainment.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgPointWitness.h"

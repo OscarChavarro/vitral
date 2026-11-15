@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_SOLID_CLASSIFICATION_H
-#define VSDK_RAY_SOLID_CLASSIFICATION_H
+#ifndef __RAY_SOLID_CLASSIFICATION__
+#define __RAY_SOLID_CLASSIFICATION__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidBoundary.h"

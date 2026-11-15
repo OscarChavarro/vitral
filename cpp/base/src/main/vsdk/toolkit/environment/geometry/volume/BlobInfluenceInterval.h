@@ -1,5 +1,5 @@
-#ifndef VSDK_BLOB_INFLUENCE_INTERVAL_H
-#define VSDK_BLOB_INFLUENCE_INTERVAL_H
+#ifndef __BLOB_INFLUENCE_INTERVAL__
+#define __BLOB_INFLUENCE_INTERVAL__
 
 // Start or end, along a ray, of the influence sphere of one blob component.
 class BlobInfluenceInterval {

@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_INSTANCE_STEP_H
-#define VSDK_RAY_INSTANCE_STEP_H
+#ifndef __RAY_INSTANCE_STEP__
+#define __RAY_INSTANCE_STEP__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 class Entity;

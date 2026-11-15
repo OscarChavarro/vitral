@@ -1,5 +1,5 @@
-#ifndef VSDK_BEZIER_PATCH_TESSELLATOR_H
-#define VSDK_BEZIER_PATCH_TESSELLATOR_H
+#ifndef __BEZIER_PATCH_TESSELLATOR__
+#define __BEZIER_PATCH_TESSELLATOR__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class SubdividedBezierPatch;

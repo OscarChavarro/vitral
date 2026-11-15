@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_BUTTON_H
-#define VITRAL_FRAMEBUFFER_BUTTON_H
+#ifndef __VITRAL_FRAMEBUFFER_BUTTON__
+#define __VITRAL_FRAMEBUFFER_BUTTON__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferControl.h"

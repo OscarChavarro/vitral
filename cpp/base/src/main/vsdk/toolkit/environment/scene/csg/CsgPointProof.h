@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_POINT_PROOF_H
-#define VSDK_CSG_POINT_PROOF_H
+#ifndef __CSG_POINT_PROOF__
+#define __CSG_POINT_PROOF__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgPointEvidence.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgVersionStamp.h"

@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_BODY_H
-#define VSDK_CSG_BODY_H
+#ifndef __CSG_BODY__
+#define __CSG_BODY__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"

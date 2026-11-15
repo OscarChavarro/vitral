@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_OPAQUE_TEST_EXPRESSION_H
-#define VSDK_CSG_OPAQUE_TEST_EXPRESSION_H
+#ifndef __CSG_OPAQUE_TEST_EXPRESSION__
+#define __CSG_OPAQUE_TEST_EXPRESSION__
 #include "vsdk/toolkit/environment/scene/csg/CsgExpression.h"
 class CsgOpaqueTestExpression : public CsgExpression {
 private:

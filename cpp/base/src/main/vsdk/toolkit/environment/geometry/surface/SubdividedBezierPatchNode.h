@@ -1,5 +1,5 @@
-#ifndef VSDK_SUBDIVIDED_BEZIER_PATCH_NODE_H
-#define VSDK_SUBDIVIDED_BEZIER_PATCH_NODE_H
+#ifndef __SUBDIVIDED_BEZIER_PATCH_NODE__
+#define __SUBDIVIDED_BEZIER_PATCH_NODE__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 

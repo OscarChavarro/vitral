@@ -1,5 +1,5 @@
-#ifndef VITRAL_XLIB_FRAMEBUFFER_H
-#define VITRAL_XLIB_FRAMEBUFFER_H
+#ifndef __VITRAL_XLIB_FRAMEBUFFER__
+#define __VITRAL_XLIB_FRAMEBUFFER__
 
 #include "java/util/TreeMap.h"
 #include <X11/Xlib.h>

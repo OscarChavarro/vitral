@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_TOOL_BAR_H
-#define VITRAL_FRAMEBUFFER_TOOL_BAR_H
+#ifndef __VITRAL_FRAMEBUFFER_TOOL_BAR__
+#define __VITRAL_FRAMEBUFFER_TOOL_BAR__
 
 #include <stdint.h>
 #include "java/util/ArrayList.h"

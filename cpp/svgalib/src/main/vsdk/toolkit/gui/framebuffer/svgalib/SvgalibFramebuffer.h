@@ -1,5 +1,5 @@
-#ifndef VITRAL_SVGALIB_FRAMEBUFFER_H
-#define VITRAL_SVGALIB_FRAMEBUFFER_H
+#ifndef __VITRAL_SVGALIB_FRAMEBUFFER__
+#define __VITRAL_SVGALIB_FRAMEBUFFER__
 
 #include <stddef.h>
 #include <stdint.h>

@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_OPERAND_VIEW_H
-#define VSDK_CSG_OPERAND_VIEW_H
+#ifndef __CSG_OPERAND_VIEW__
+#define __CSG_OPERAND_VIEW__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/scene/AffinePlacementStatus.h"

@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_TEXT_H
-#define VITRAL_FRAMEBUFFER_TEXT_H
+#ifndef __VITRAL_FRAMEBUFFER_TEXT__
+#define __VITRAL_FRAMEBUFFER_TEXT__
 
 #include "java/lang/String.h"
 

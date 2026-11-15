@@ -1,5 +1,5 @@
-#ifndef VSDK_TESSELLATION_MESH_CHECK_H
-#define VSDK_TESSELLATION_MESH_CHECK_H
+#ifndef __TESSELLATION_MESH_CHECK__
+#define __TESSELLATION_MESH_CHECK__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class TriangleMesh;

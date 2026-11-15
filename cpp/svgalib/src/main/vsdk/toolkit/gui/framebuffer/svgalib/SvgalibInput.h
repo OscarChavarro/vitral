@@ -1,5 +1,5 @@
-#ifndef VITRAL_SVGALIB_INPUT_H
-#define VITRAL_SVGALIB_INPUT_H
+#ifndef __VITRAL_SVGALIB_INPUT__
+#define __VITRAL_SVGALIB_INPUT__
 
 #include "vsdk/toolkit/gui/framebuffer/FramebufferEvent.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferInput.h"

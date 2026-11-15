@@ -1,5 +1,5 @@
-#ifndef VSDK_AFFINE_PLACEMENT_STATUS_H
-#define VSDK_AFFINE_PLACEMENT_STATUS_H
+#ifndef __AFFINE_PLACEMENT_STATUS__
+#define __AFFINE_PLACEMENT_STATUS__
 
 enum class AffinePlacementStatus { Valid, Invalid, Indeterminate, Unsupported };
 #endif

@@ -1,5 +1,5 @@
-#ifndef VSDK_HEIGHT_FIELD_SOLID_H
-#define VSDK_HEIGHT_FIELD_SOLID_H
+#ifndef __HEIGHT_FIELD_SOLID__
+#define __HEIGHT_FIELD_SOLID__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldBlock.h"

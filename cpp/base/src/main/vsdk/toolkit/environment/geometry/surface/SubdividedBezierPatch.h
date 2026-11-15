@@ -1,5 +1,5 @@
-#ifndef VSDK_SUBDIVIDED_BEZIER_PATCH_H
-#define VSDK_SUBDIVIDED_BEZIER_PATCH_H
+#ifndef __SUBDIVIDED_BEZIER_PATCH__
+#define __SUBDIVIDED_BEZIER_PATCH__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

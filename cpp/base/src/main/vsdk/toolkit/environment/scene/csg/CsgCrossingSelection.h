@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_CROSSING_SELECTION_H
-#define VSDK_CSG_CROSSING_SELECTION_H
+#ifndef __CSG_CROSSING_SELECTION__
+#define __CSG_CROSSING_SELECTION__
 
 #include "vsdk/toolkit/environment/scene/csg/CsgMembershipRule.h"
 

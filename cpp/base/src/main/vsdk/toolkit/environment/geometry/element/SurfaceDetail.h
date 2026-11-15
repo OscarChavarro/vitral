@@ -1,5 +1,5 @@
-#ifndef VSDK_SURFACE_DETAIL_H
-#define VSDK_SURFACE_DETAIL_H
+#ifndef __SURFACE_DETAIL__
+#define __SURFACE_DETAIL__
 
 // Shared query vocabulary; renderers choose which details they request.
 class SurfaceDetail {

@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_INSTANCE_PATH_H
-#define VSDK_RAY_INSTANCE_PATH_H
+#ifndef __RAY_INSTANCE_PATH__
+#define __RAY_INSTANCE_PATH__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RayInstanceStep.h"

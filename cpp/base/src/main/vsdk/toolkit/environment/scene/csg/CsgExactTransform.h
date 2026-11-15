@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_EXACT_TRANSFORM_H
-#define VSDK_CSG_EXACT_TRANSFORM_H
+#ifndef __CSG_EXACT_TRANSFORM__
+#define __CSG_EXACT_TRANSFORM__
 class Matrix4x4d;
 // Homogeneous inverse numerator det(A) * [A^-1, -A^-1 t; 0, 1].
 class CsgExactTransform {

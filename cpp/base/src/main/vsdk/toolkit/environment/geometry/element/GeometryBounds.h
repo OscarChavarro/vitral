@@ -1,5 +1,5 @@
-#ifndef VSDK_GEOMETRY_BOUNDS_H
-#define VSDK_GEOMETRY_BOUNDS_H
+#ifndef __GEOMETRY_BOUNDS__
+#define __GEOMETRY_BOUNDS__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 

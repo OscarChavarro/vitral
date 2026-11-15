@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_CROSSING_SINK_H
-#define VSDK_RAY_CROSSING_SINK_H
+#ifndef __RAY_CROSSING_SINK__
+#define __RAY_CROSSING_SINK__
 
 #include "vsdk/toolkit/environment/geometry/element/RayCrossing.h"
 

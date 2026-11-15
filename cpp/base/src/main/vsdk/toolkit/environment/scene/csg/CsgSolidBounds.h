@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_SOLID_BOUNDS_H
-#define VSDK_CSG_SOLID_BOUNDS_H
+#ifndef __CSG_SOLID_BOUNDS__
+#define __CSG_SOLID_BOUNDS__
 #include "java/util/ArrayList.h"
 class CsgExpression;
 class GeometryBounds;

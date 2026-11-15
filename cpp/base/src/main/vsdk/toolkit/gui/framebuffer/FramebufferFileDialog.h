@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_FILE_DIALOG_H
-#define VITRAL_FRAMEBUFFER_FILE_DIALOG_H
+#ifndef __VITRAL_FRAMEBUFFER_FILE_DIALOG__
+#define __VITRAL_FRAMEBUFFER_FILE_DIALOG__
 
 #include "java/util/ArrayList.h"
 #include "java/lang/String.h"

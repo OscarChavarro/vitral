@@ -1,5 +1,5 @@
-#ifndef VSDK_UNCERTIFIED_TEST_BODY_H
-#define VSDK_UNCERTIFIED_TEST_BODY_H
+#ifndef __UNCERTIFIED_TEST_BODY__
+#define __UNCERTIFIED_TEST_BODY__
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 // An application body that preserves its core solid for equivalence but
 // cannot certify point containment through its own policies.

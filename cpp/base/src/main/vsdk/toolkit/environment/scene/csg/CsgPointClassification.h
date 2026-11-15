@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_POINT_CLASSIFICATION_H
-#define VSDK_CSG_POINT_CLASSIFICATION_H
+#ifndef __CSG_POINT_CLASSIFICATION__
+#define __CSG_POINT_CLASSIFICATION__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/GeometryContainment.h"

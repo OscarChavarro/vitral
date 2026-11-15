@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_CLASSIFICATION_H
-#define VSDK_CSG_RAY_CLASSIFICATION_H
+#ifndef __CSG_RAY_CLASSIFICATION__
+#define __CSG_RAY_CLASSIFICATION__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayLeafBatch.h"

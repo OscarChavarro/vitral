@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_PLACED_EXPRESSION_H
-#define VSDK_CSG_PLACED_EXPRESSION_H
+#ifndef __CSG_PLACED_EXPRESSION__
+#define __CSG_PLACED_EXPRESSION__
 #include "vsdk/toolkit/environment/scene/AffinePlacement.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgOperandView.h"
 class CsgExpression;

@@ -1,5 +1,5 @@
-#ifndef VSDK_BEZIER_PATCH_SUBDIVISION_H
-#define VSDK_BEZIER_PATCH_SUBDIVISION_H
+#ifndef __BEZIER_PATCH_SUBDIVISION__
+#define __BEZIER_PATCH_SUBDIVISION__
 
 // How a SubdividedBezierPatch approximates its Bezier surface by flat
 // triangles, with the numbering of PovRay bicubic_patch types.

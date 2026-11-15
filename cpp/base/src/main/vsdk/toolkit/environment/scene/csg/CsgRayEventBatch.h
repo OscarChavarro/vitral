@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_EVENT_BATCH_H
-#define VSDK_CSG_RAY_EVENT_BATCH_H
+#ifndef __CSG_RAY_EVENT_BATCH__
+#define __CSG_RAY_EVENT_BATCH__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayEventGroup.h"
 class CsgRayEventBatch {

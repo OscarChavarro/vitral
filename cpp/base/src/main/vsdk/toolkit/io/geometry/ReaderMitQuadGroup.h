@@ -1,5 +1,5 @@
-#ifndef VSDK_READER_MIT_QUAD_GROUP_H
-#define VSDK_READER_MIT_QUAD_GROUP_H
+#ifndef __READER_MIT_QUAD_GROUP__
+#define __READER_MIT_QUAD_GROUP__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

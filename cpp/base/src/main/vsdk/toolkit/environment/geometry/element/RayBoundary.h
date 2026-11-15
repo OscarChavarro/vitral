@@ -1,5 +1,5 @@
-#ifndef VSDK_RAY_BOUNDARY_H
-#define VSDK_RAY_BOUNDARY_H
+#ifndef __RAY_BOUNDARY__
+#define __RAY_BOUNDARY__
 
 #include "vsdk/toolkit/environment/geometry/element/RayInstancePath.h"
 class Geometry;

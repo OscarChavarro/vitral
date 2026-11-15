@@ -1,5 +1,5 @@
-#ifndef VSDK_HEIGHT_FIELD_TEST_FACTORY_H
-#define VSDK_HEIGHT_FIELD_TEST_FACTORY_H
+#ifndef __HEIGHT_FIELD_TEST_FACTORY__
+#define __HEIGHT_FIELD_TEST_FACTORY__
 
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
 

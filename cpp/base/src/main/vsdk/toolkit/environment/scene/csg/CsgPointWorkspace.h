@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_POINT_WORKSPACE_H
-#define VSDK_CSG_POINT_WORKSPACE_H
+#ifndef __CSG_POINT_WORKSPACE__
+#define __CSG_POINT_WORKSPACE__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/GeometryContainment.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayEventReference.h"

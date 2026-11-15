@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_SEGMENT_CLASSIFICATION_TXX
-#define VSDK_CSG_SEGMENT_CLASSIFICATION_TXX
+#ifndef __CSG_SEGMENT_CLASSIFICATION_TXX__
+#define __CSG_SEGMENT_CLASSIFICATION_TXX__
 
 #include "vsdk/toolkit/environment/scene/csg/CsgSegmentClassification.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgMembershipRule.h"

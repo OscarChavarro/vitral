@@ -1,5 +1,5 @@
-#ifndef VSDK_QUADRIC_SURFACE_H
-#define VSDK_QUADRIC_SURFACE_H
+#ifndef __QUADRIC_SURFACE__
+#define __QUADRIC_SURFACE__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 #include "java/lang/Math.h"

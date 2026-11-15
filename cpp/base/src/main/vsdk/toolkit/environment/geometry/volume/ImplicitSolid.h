@@ -1,5 +1,5 @@
-#ifndef VSDK_IMPLICIT_SOLID_H
-#define VSDK_IMPLICIT_SOLID_H
+#ifndef __IMPLICIT_SOLID__
+#define __IMPLICIT_SOLID__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/numerics/FloatingInterval.h"

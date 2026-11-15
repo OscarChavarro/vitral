@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_TEXT_FIELD_H
-#define VITRAL_FRAMEBUFFER_TEXT_FIELD_H
+#ifndef __VITRAL_FRAMEBUFFER_TEXT_FIELD__
+#define __VITRAL_FRAMEBUFFER_TEXT_FIELD__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferControl.h"

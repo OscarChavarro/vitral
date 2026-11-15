@@ -1,5 +1,5 @@
-#ifndef VSDK_IMPLICIT_SOLID_TEST_FACTORY_H
-#define VSDK_IMPLICIT_SOLID_TEST_FACTORY_H
+#ifndef __IMPLICIT_SOLID_TEST_FACTORY__
+#define __IMPLICIT_SOLID_TEST_FACTORY__
 
 #include "vsdk/toolkit/environment/geometry/volume/PolynomialSurface.h"
 

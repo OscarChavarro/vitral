@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_SEGMENT_EVENT_H
-#define VSDK_CSG_SEGMENT_EVENT_H
+#ifndef __CSG_SEGMENT_EVENT__
+#define __CSG_SEGMENT_EVENT__
 
 /**
 One boundary event of a ray's alternating in/out classification: the ray

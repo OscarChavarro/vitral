@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_VERSION_STAMP_H
-#define VSDK_CSG_VERSION_STAMP_H
+#ifndef __CSG_VERSION_STAMP__
+#define __CSG_VERSION_STAMP__
 #include "java/util/ArrayList.h"
 class CsgExpression;
 class CsgOperandView;

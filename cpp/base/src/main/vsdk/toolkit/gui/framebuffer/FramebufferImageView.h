@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_IMAGE_VIEW_H
-#define VITRAL_FRAMEBUFFER_IMAGE_VIEW_H
+#ifndef __VITRAL_FRAMEBUFFER_IMAGE_VIEW__
+#define __VITRAL_FRAMEBUFFER_IMAGE_VIEW__
 
 #include <stdint.h>
 #include "java/util/ArrayList.h"

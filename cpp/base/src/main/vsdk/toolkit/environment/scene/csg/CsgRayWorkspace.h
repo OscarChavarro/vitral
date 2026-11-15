@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_WORKSPACE_H
-#define VSDK_CSG_RAY_WORKSPACE_H
+#ifndef __CSG_RAY_WORKSPACE__
+#define __CSG_RAY_WORKSPACE__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayEventReference.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayEventCursor.h"

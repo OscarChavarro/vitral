@@ -1,5 +1,5 @@
-#ifndef VSDK_BLOB_COMPONENT_H
-#define VSDK_BLOB_COMPONENT_H
+#ifndef __BLOB_COMPONENT__
+#define __BLOB_COMPONENT__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 

@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_TREE_H
-#define VSDK_CSG_TREE_H
+#ifndef __CSG_TREE__
+#define __CSG_TREE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgExpression.h"

@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_EVENT_GROUP_H
-#define VSDK_CSG_RAY_EVENT_GROUP_H
+#ifndef __CSG_RAY_EVENT_GROUP__
+#define __CSG_RAY_EVENT_GROUP__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayEventReference.h"
 // Events with exactly equal binary64 ray parameters, with stable leaf order.

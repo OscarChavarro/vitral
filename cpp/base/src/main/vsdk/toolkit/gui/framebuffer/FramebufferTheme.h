@@ -1,5 +1,5 @@
-#ifndef VITRAL_FRAMEBUFFER_THEME_H
-#define VITRAL_FRAMEBUFFER_THEME_H
+#ifndef __VITRAL_FRAMEBUFFER_THEME__
+#define __VITRAL_FRAMEBUFFER_THEME__
 
 #include <stdint.h>
 

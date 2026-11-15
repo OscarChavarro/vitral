@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_POINT_WITNESS_H
-#define VSDK_CSG_POINT_WITNESS_H
+#ifndef __CSG_POINT_WITNESS__
+#define __CSG_POINT_WITNESS__
 #include "java/util/ArrayList.h"
 class CsgOperandView;
 // Borrowed root-to-leaf path for a single operand proving a point result.

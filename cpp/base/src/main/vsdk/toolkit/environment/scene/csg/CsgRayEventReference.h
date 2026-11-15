@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_EVENT_REFERENCE_H
-#define VSDK_CSG_RAY_EVENT_REFERENCE_H
+#ifndef __CSG_RAY_EVENT_REFERENCE__
+#define __CSG_RAY_EVENT_REFERENCE__
 // Indexes into the input leaf batch and that leaf's boundary array.
 class CsgRayEventReference {
 public:

@@ -1,5 +1,5 @@
-#ifndef VSDK_SOLID_BOUNDARY_TESSELLATOR_H
-#define VSDK_SOLID_BOUNDARY_TESSELLATOR_H
+#ifndef __SOLID_BOUNDARY_TESSELLATOR__
+#define __SOLID_BOUNDARY_TESSELLATOR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

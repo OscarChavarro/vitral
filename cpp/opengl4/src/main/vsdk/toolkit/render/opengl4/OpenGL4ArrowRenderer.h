@@ -1,5 +1,5 @@
-#ifndef VITRAL_OPEN_GL_4_ARROW_RENDERER_H
-#define VITRAL_OPEN_GL_4_ARROW_RENDERER_H
+#ifndef __VITRAL_OPEN_GL_4_ARROW_RENDERER__
+#define __VITRAL_OPEN_GL_4_ARROW_RENDERER__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

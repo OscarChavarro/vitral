@@ -1,5 +1,5 @@
-#ifndef VSDK_BLOB_SOLID_H
-#define VSDK_BLOB_SOLID_H
+#ifndef __BLOB_SOLID__
+#define __BLOB_SOLID__
 
 #include "vsdk/toolkit/environment/geometry/volume/BlobComponent.h"
 #include "vsdk/toolkit/environment/geometry/volume/BlobInfluenceInterval.h"

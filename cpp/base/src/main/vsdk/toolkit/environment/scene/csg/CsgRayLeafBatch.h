@@ -1,5 +1,5 @@
-#ifndef VSDK_CSG_RAY_LEAF_BATCH_H
-#define VSDK_CSG_RAY_LEAF_BATCH_H
+#ifndef __CSG_RAY_LEAF_BATCH__
+#define __CSG_RAY_LEAF_BATCH__
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRayLeaf.h"
 // Borrowed leaf identities; owns snapshots of the classifications and paths.

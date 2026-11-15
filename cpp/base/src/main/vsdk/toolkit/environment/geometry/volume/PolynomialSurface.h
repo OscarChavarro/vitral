@@ -1,5 +1,5 @@
-#ifndef VSDK_POLYNOMIAL_SURFACE_H
-#define VSDK_POLYNOMIAL_SURFACE_H
+#ifndef __POLYNOMIAL_SURFACE__
+#define __POLYNOMIAL_SURFACE__
 
 #include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
 
