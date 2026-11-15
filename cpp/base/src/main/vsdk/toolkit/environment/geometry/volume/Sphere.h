@@ -42,17 +42,17 @@ public:
     virtual ~Sphere() {}
 
     Ray* doIntersectionFirstHit(const Ray& inoutRay);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) override;
     // Explicit inclusive interval; the legacy overload queries [0,+infinity).
     bool doIntersectionFirstHit(const Ray& inRay, const RayCrossingQuery& query,
         RayHit* outHit);
-    virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
+    void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
     GeometryContainment classifyPoint(const Vector3Dd& p, double distanceTolerance) const override;
     GeometryContainment classifyPointCertified(const Vector3Dd& p, double distanceTolerance) const override;
     GeometryContainment classifyBoxCertified(const Vector3Dd& center, const Vector3Dd& halfWidths) const override;
-    virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
+    int doContainmentTest(const Vector3Dd& p, double distanceTolerance) override;
     void getBounds(GeometryBounds& result) const override;
-    virtual double* getMinMax();
+    double* getMinMax() override;
 
     double getRadius() const;
     // Borrowed reference to this object's intrinsic radius; valid while it lives.
@@ -64,7 +64,7 @@ public:
     double getRadiusSquared() const;
     void setRadius(double value);
 
-    virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
     PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int meridians, int parallels);
 
     Vector3Dd spherePosition(double theta, double phi);

@@ -4,15 +4,19 @@
 #include <fenv.h>
 #include <cmath>
 #include <cfloat>
+#include <limits>
 
 FloatingInterval::FloatingInterval() : lower(0), upper(0), valid(false) {}
 FloatingInterval::FloatingInterval(double lo, double hi, bool ok) : lower(lo), upper(hi), valid(ok) {}
 
 bool FloatingInterval::isSupportedEnvironment()
 {
-#if (!defined(__GNUC__) && !defined(__clang__)) || defined(__FAST_MATH__) || !defined(__STDC_IEC_559__) || __STDC_IEC_559__ != 1
+#if (!defined(__GNUC__) && !defined(__clang__)) || defined(__FAST_MATH__)
     return false;
 #endif
+    // __STDC_IEC_559__ comes from the C library (glibc defines it, macOS does not),
+    // so ask the C++ implementation instead.
+    if (!std::numeric_limits<double>::is_iec559) return false;
     if (FLT_RADIX!=2 || DBL_MANT_DIG!=53 || DBL_MAX_EXP!=1024 || FLT_EVAL_METHOD!=0 ||
         fegetround()!=FE_TONEAREST) return false;
     volatile double tiny=java::Double::MIN_VALUE;

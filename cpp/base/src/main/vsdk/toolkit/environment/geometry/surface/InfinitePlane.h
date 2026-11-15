@@ -40,7 +40,7 @@ public:
         double& depth);
 
     Ray* doIntersectionFirstHit(const Ray& inout_rayo);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) override;
 
     Ray* doIntersectionWithNegative(const Ray& inout_rayo);
 
@@ -48,10 +48,10 @@ public:
     // form classifies n.p + d <= 0; the surface form reports LIMIT on the plane
     // and OUTSIDE elsewhere (its -INSIDE equals OUTSIDE).
     int doContainmentTestHalfSpace(const Vector3Dd& p, double distanceTolerance);
-    virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
+    int doContainmentTest(const Vector3Dd& p, double distanceTolerance) override;
 
-    virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
-    virtual double* getMinMax();
+    void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
+    double* getMinMax() override;
 
     // Raw coefficients preserve the equation scale; getNormal() is normalized.
     Vector3Dd getCoefficients() const { return Vector3Dd(a, b, c); }

@@ -143,13 +143,13 @@ public:
     int doIntersectionInformation() const;
 
     Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
-    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
+    bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) override;
     bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit, int* outTriangleIndex);
-    virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
+    void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
 
-    virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
+    int doContainmentTest(const Vector3Dd& p, double distanceTolerance) override;
     void getBounds(GeometryBounds& result) const override;
-    virtual double* getMinMax();
+    double* getMinMax() override;
 
     TriangleMeshGroup* exportToTriangleMeshGroup();
 
