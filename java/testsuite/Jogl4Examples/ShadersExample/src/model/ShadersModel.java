@@ -54,6 +54,9 @@ public class ShadersModel
     private double sphereRotationAngleRadians;
     private int sphereMeridians;
     private int sphereParallels;
+    /** Selected geometry; its fixture is null for the sphere */
+    private ShadersGeometry geometry;
+    private ShadersGeometryFixture geometryFixture;
 
     public static ShadersModel createDefault()
     {
@@ -118,6 +121,8 @@ public class ShadersModel
         sphereRotationAngleRadians = 0.0;
         sphereMeridians = 100;
         sphereParallels = 50;
+        geometry = ShadersGeometry.SPHERE;
+        geometryFixture = null;
         updateSoftwareViewportAndCamera(
             (int)camera.getViewportXSize(),
             (int)camera.getViewportYSize());
@@ -324,6 +329,29 @@ public class ShadersModel
     public void changeSphereParallels(int delta)
     {
         setSphereParallels(sphereParallels + delta);
+    }
+
+    public ShadersGeometry getGeometry()
+    {
+        return geometry;
+    }
+
+    public ShadersGeometryFixture getGeometryFixture()
+    {
+        return geometryFixture;
+    }
+
+    public void selectGeometry(ShadersGeometry selected)
+    {
+        if ( selected == geometry ) return;
+        geometryFixture = null;
+        geometry = selected;
+        if ( geometry != ShadersGeometry.SPHERE ) geometryFixture = new ShadersGeometryFixture(geometry);
+    }
+
+    public void cycleGeometry()
+    {
+        selectGeometry(ShadersGeometryFixture.next(geometry));
     }
 
     private static double normalizeAngleRadians(double angle)

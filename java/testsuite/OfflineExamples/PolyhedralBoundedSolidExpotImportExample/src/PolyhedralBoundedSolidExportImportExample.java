@@ -1,3 +1,4 @@
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -112,12 +113,12 @@ public class PolyhedralBoundedSolidExportImportExample {
                                                          Vector3Dd translation)
     {
         PolyhedralBoundedSolid solid =
-            PolyhedralBoundedSolidModeler.createCircularLamina(
+            PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
                 0.0, 0.0, radius, 0.0, CYLINDER_SIDES);
 
         Matrix4x4d sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, height);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
 
         Matrix4x4d move = new Matrix4x4d();

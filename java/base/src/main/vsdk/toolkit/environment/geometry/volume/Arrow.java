@@ -1,5 +1,6 @@
 package vsdk.toolkit.environment.geometry.volume;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
@@ -9,7 +10,6 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class Arrow extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
@@ -306,7 +306,7 @@ public class Arrow extends Solid {
         PolyhedralBoundedSolid solid;
         Matrix4x4d T, S, M;
 
-        solid = PolyhedralBoundedSolidModeler.createCircularLamina(
+        solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
             0.0, 0.0, baseRadius, 0.0, nsides
         );
 
@@ -316,7 +316,7 @@ public class Arrow extends Solid {
         for ( i = 0; i < heightDivisions; i++ ) {
             T = new Matrix4x4d();
             T = T.translation(0.0, 0.0, cylinderZStep);
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
                 solid, solid.findFace(1), T);
         }
 
@@ -326,7 +326,7 @@ public class Arrow extends Solid {
         S = new Matrix4x4d();
         S = S.scale(f, f, 1);
         M = T.multiply(S);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), M);
 
         // Cone case
@@ -342,7 +342,7 @@ public class Arrow extends Solid {
             S = new Matrix4x4d();
             S = S.scale(coneScale, coneScale, 1.0);
             M = T.multiply(S);
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
                 solid, solid.findFace(1), M);
             prevRadius = nextRadius;
         }

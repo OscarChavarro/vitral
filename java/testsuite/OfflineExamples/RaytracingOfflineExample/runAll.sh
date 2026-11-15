@@ -4,7 +4,19 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 cd "${script_dir}"
 
-if [[ $# -gt 0 ]]; then
+# Si se indica una escena/salida concreta (o --help), delegar en una sola ejecución.
+# Flags de renderizado como --parallel o --nosave se reenvían a cada escena del lote.
+single_run=false
+for arg in "$@"; do
+  case "${arg}" in
+    --scene|-s|--output|-o|--help|-h) single_run=true ;;
+    nosave) ;;
+    -*) ;;
+    *) single_run=true ;;
+  esac
+done
+
+if [[ "${single_run}" == true ]]; then
   gradle :testsuite:OfflineExamples:RaytracingOfflineExample:runMain \
     -PrunMainClass=RaytracerSimple \
     -PrunJvmArgs='-Xms300m|-Xmx300m' \
@@ -31,6 +43,6 @@ else
     gradle :testsuite:OfflineExamples:RaytracingOfflineExample:runMain \
       -PrunMainClass=RaytracerSimple \
       -PrunJvmArgs='-Xms300m|-Xmx300m' \
-      --args="--scene ${scene_file} --output ${output_file}"
+      --args="$* --scene ${scene_file} --output ${output_file}"
   done
 fi

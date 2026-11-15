@@ -1,6 +1,7 @@
 package render;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
@@ -13,7 +14,9 @@ import com.jogamp.opengl.GLProfile;
 
 import model.ShadersModel;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
 
 public class OpenGlOfflineSphereRenderer
@@ -76,18 +79,35 @@ public class OpenGlOfflineSphereRenderer
             gl.glClearColor(0, 0, 0, 1);
             gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
-            Jogl4SphereRenderer.draw(
-                gl,
-                model.getSphere(),
-                model.getCamera(),
-                model.getLight(),
-                model.getActiveMaterialForCurrentShading(),
-                model.getQuality(),
-                model.getTextureMap(),
-                model.getBumpMapHeightRgb(),
-                modelRotation,
-                model.getSphereMeridians(),
-                model.getSphereParallels());
+            if ( model.getGeometryFixture() != null ) {
+                // The drawable mesh of the same geometry the software path traces
+                ArrayList<Light> lights = new ArrayList<Light>();
+                lights.add(model.getLight());
+                Jogl4GeometryRenderer.draw(
+                    gl,
+                    model.getGeometryFixture().getDrawableMesh(),
+                    model.getCamera(),
+                    lights,
+                    model.getActiveMaterialForCurrentShading(),
+                    model.getQuality(),
+                    null,
+                    null,
+                    modelRotation);
+            }
+            else {
+                Jogl4SphereRenderer.draw(
+                    gl,
+                    model.getSphere(),
+                    model.getCamera(),
+                    model.getLight(),
+                    model.getActiveMaterialForCurrentShading(),
+                    model.getQuality(),
+                    model.getTextureMap(),
+                    model.getBumpMapHeightRgb(),
+                    modelRotation,
+                    model.getSphereMeridians(),
+                    model.getSphereParallels());
+            }
 
             gl.glFinish();
             capturedImage = captureRgbImage(gl, width, height);
@@ -98,6 +118,7 @@ public class OpenGlOfflineSphereRenderer
         {
             GL4 gl = drawable.getGL().getGL4();
             Jogl4SphereRenderer.dispose(gl);
+            Jogl4GeometryRenderer.dispose(gl);
         }
 
         @Override

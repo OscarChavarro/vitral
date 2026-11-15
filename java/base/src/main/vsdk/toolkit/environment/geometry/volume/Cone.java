@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.volume;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
@@ -11,13 +12,13 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.environment.geometry.element.GeometryBounds;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
-import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class Cone extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
@@ -517,6 +518,15 @@ public class Cone extends Solid {
     @return a new 6 valued double array containing the coordinates of a min-max
     bounding box for current geometry.
     */
+    /** Finite solid bounds: |x|,|y| <= max radius and 0 <= z <= height. */
+    @Override
+    public void getBounds(GeometryBounds result) {
+        final double r = (bottomRadius > topRadius) ? bottomRadius : topRadius;
+        if (!Double.isFinite(r) || !Double.isFinite(height) || height <= 0 ||
+            bottomRadius < 0 || topRadius < 0) { result.setIndeterminate(); return; }
+        result.setFinite(new Vector3Dd(-r,-r,0), new Vector3Dd(r,r,height));
+    }
+
     @Override
     public double[] getMinMax()
     {
@@ -619,7 +629,7 @@ public class Cone extends Solid {
         PolyhedralBoundedSolid solid;
         Matrix4x4d T, S, M;
 
-        solid = PolyhedralBoundedSolidModeler.createCircularLamina(
+        solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
             0.0, 0.0, bottomRadius, 0.0, nsides
         );
 
@@ -636,7 +646,7 @@ public class Cone extends Solid {
                 S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
                     solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }
@@ -655,7 +665,7 @@ public class Cone extends Solid {
                 S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
                     solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }

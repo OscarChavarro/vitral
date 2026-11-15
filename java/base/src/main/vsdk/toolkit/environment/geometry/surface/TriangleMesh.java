@@ -16,7 +16,16 @@ import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.element.Triangle;
 import vsdk.toolkit.environment.geometry.element.Intersection;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.element.GeometryBounds;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayBoundary;
+import vsdk.toolkit.environment.geometry.element.RayCrossing;
+import vsdk.toolkit.environment.geometry.element.RayCrossingKind;
+import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSink;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSupport;
+import vsdk.toolkit.environment.geometry.element.RayFirstHitStatus;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
@@ -51,7 +60,7 @@ sole responsability of the cooperating utilities and applications.
       (rename methods and attributes)
 \todo  Extend the model to allow dangling edges
 */
-public class TriangleMesh extends Surface {
+public class TriangleMesh extends Surface implements Cloneable {
 
 //= Class attributes ========================================================
 
@@ -125,8 +134,8 @@ public class TriangleMesh extends Surface {
 
     // Auxiliary data structures for storage of parcial results and 
     // preprocessing
-    private final ThreadLocal<Integer> intersectionTriangleIndex =
-        ThreadLocal.withInitial(() -> -1);
+    private final TriangleMeshIntersectionIndex intersectionTriangleIndex =
+        new TriangleMeshIntersectionIndex();
 
 //= Basic class management methods ==========================================
 
@@ -237,6 +246,203 @@ public class TriangleMesh extends Surface {
         int[][] materialRanges;
 */
         return other;
+    }
+
+    /** Mathematical copy; scene-owned materials and textures are not copied. */
+    @Override
+    public Geometry copyGeometry()
+    {
+        // cpp copy-constructs and clears materials, textures and both range
+        // tables; Java clone() already leaves those unset.
+        try {
+            return clone();
+        }
+        catch ( CloneNotSupportedException e ) {
+            return null;
+        }
+    }
+
+    public double[] getVertexPositionsView() { return vertexPositions; }
+    public int[] getTriangleIndexesView() { return triangleIndexes; }
+    public double[] getTriangleNormalsView() { return triangleNormals; }
+
+    private static int lengthOf(double[] a) { return a == null ? 0 : a.length; }
+    private static int lengthOf(int[] a) { return a == null ? 0 : a.length; }
+
+    @Override
+    public void getBounds(GeometryBounds result)
+    {
+        if (lengthOf(triangleIndexes) % 3 != 0 || lengthOf(vertexPositions) % 3 != 0) {
+            result.setIndeterminate(); return;
+        }
+        if (getNumTriangles() == 0) { result.setEmpty(); return; }
+        Vector3Dd minimum = new Vector3Dd(), maximum = new Vector3Dd();
+        boolean first = true;
+        for (int i = 0; i < triangleIndexes.length; ++i) {
+            final int index = triangleIndexes[i];
+            if (index < 0 || index >= getNumVertices()) { result.setIndeterminate(); return; }
+            final double x = vertexPositions[index*3], y = vertexPositions[index*3+1];
+            final double z = vertexPositions[index*3+2];
+            if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)) {
+                result.setIndeterminate(); return;
+            }
+            if (first) { minimum = maximum = new Vector3Dd(x,y,z); first = false; }
+            else {
+                minimum = new Vector3Dd(Math.min(minimum.x(),x), Math.min(minimum.y(),y), Math.min(minimum.z(),z));
+                maximum = new Vector3Dd(Math.max(maximum.x(),x), Math.max(maximum.y(),y), Math.max(maximum.z(),z));
+            }
+        }
+        if (first) result.setEmpty();
+        else result.setFinite(minimum, maximum);
+    }
+
+    /** `points` receives p0, p1, p2 (cpp output references). */
+    private boolean getTrianglePoints(int index, Vector3Dd[] points)
+    {
+        if (index < 0 || index >= getNumTriangles() || lengthOf(vertexPositions) % 3 != 0 ||
+            lengthOf(triangleIndexes) % 3 != 0) return false;
+        final int a = triangleIndexes[index*3], b = triangleIndexes[index*3+1], c = triangleIndexes[index*3+2];
+        if (a < 0 || b < 0 || c < 0 || a >= getNumVertices() || b >= getNumVertices() || c >= getNumVertices())
+            return false;
+        points[0] = new Vector3Dd(vertexPositions[a*3], vertexPositions[a*3+1], vertexPositions[a*3+2]);
+        points[1] = new Vector3Dd(vertexPositions[b*3], vertexPositions[b*3+1], vertexPositions[b*3+2]);
+        points[2] = new Vector3Dd(vertexPositions[c*3], vertexPositions[c*3+1], vertexPositions[c*3+2]);
+        return true;
+    }
+
+    private void fillTypedDetail(Ray ray, double t, int face, double u, double v,
+        Vector3Dd p0, Vector3Dd p1, Vector3Dd p2,
+        boolean normalReversed, RayHit hit)
+    {
+        if (hit == null || !hit.needsAnySurfaceData()) return;
+        hit.beginDetailEvaluation();
+        if (hit.needsPoint()) {
+            hit.point = ray.getOrigin().add(ray.getDirection().multiply(t));
+            hit.markDetailAvailable(RayHit.DETAIL_POINT);
+        }
+        if (hit.needsNormal()) {
+            final Vector3Dd normal = p1.subtract(p0).crossProduct(p2.subtract(p0));
+            final double squared = normal.dotProduct(normal);
+            if (Double.isFinite(squared) && squared > 0) {
+                hit.normal = squared < VSDK.EPSILON ? normal.multiply(1.0/Math.sqrt(squared)) : normal.normalized();
+                if (normalReversed) hit.normal = hit.normal.multiply(-1);
+                hit.markDetailAvailable(RayHit.DETAIL_NORMAL);
+            }
+        }
+        if (hit.needsTextureCoordinates() && lengthOf(vertexUvs) >= (long)getNumVertices()*2) {
+            final int a = triangleIndexes[face*3], b = triangleIndexes[face*3+1], c = triangleIndexes[face*3+2];
+            final double w = 1.0-u-v;
+            final double texU = w*vertexUvs[a*2] + u*vertexUvs[b*2] + v*vertexUvs[c*2];
+            final double texV = w*vertexUvs[a*2+1] + u*vertexUvs[b*2+1] + v*vertexUvs[c*2+1];
+            if (Double.isFinite(texU) && Double.isFinite(texV)) {
+                hit.u = texU; hit.v = texV; hit.markDetailAvailable(RayHit.DETAIL_UV);
+            }
+        }
+    }
+
+    @Override
+    public RayFirstHitStatus queryFirstHit(Ray ray, RayCrossingQuery query,
+        RayHit hit, RayBoundary boundary)
+    {
+        if (hit != null) hit.clear();
+        if (boundary != null) boundary.assign(new RayBoundary());
+        if (lengthOf(triangleIndexes) % 3 != 0 || lengthOf(vertexPositions) % 3 != 0)
+            return RayFirstHitStatus.Indeterminate;
+        double[] t = {0}, u = {0}, v = {0};
+        if (getNumTriangles() == 0) {
+            final Vector3Dd zero = new Vector3Dd();
+            return Triangle.queryIntersection(ray, zero, zero, zero, query, t, u, v);
+        }
+        int best = -1;
+        double bestT = 0, bestU = 0, bestV = 0;
+        Vector3Dd bestP0 = new Vector3Dd(), bestP1 = new Vector3Dd(), bestP2 = new Vector3Dd();
+        Vector3Dd[] p = new Vector3Dd[3];
+        for (int i = 0; i < getNumTriangles(); ++i) {
+            if (!getTrianglePoints(i, p)) return RayFirstHitStatus.Indeterminate;
+            final RayFirstHitStatus status = Triangle.queryIntersection(ray, p[0], p[1], p[2], query, t, u, v);
+            if (status != RayFirstHitStatus.Hit && status != RayFirstHitStatus.Miss) return status;
+            if (status == RayFirstHitStatus.Hit && (best < 0 || t[0] < bestT)) {
+                best = i; bestT = t[0]; bestU = u[0]; bestV = v[0]; bestP0 = p[0]; bestP1 = p[1]; bestP2 = p[2];
+            }
+        }
+        if (best < 0) return RayFirstHitStatus.Miss;
+        final Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(bestT));
+        if (!Double.isFinite(point.x()) || !Double.isFinite(point.y()) ||
+            !Double.isFinite(point.z())) return RayFirstHitStatus.Indeterminate;
+        if (boundary != null) boundary.assign(new RayBoundary(bestT, this, false, best));
+        if (hit != null) {
+            hit.setHitDistance(bestT);
+            if (hit.shouldStoreRay()) hit.setRay(ray.withT(bestT));
+            fillTypedDetail(ray, bestT, best, bestU, bestV, bestP0, bestP1, bestP2, false, hit);
+        }
+        return RayFirstHitStatus.Hit;
+    }
+
+    @Override
+    public RayFirstHitStatus querySurfaceDetail(Ray ray, RayBoundary boundary,
+        RayHit hit)
+    {
+        if (hit != null) hit.clear();
+        if (hit == null || boundary.geometry != this || boundary.surfaceIndex < 0 ||
+            boundary.surfaceIndex >= getNumTriangles() || !Double.isFinite(boundary.t))
+            return RayFirstHitStatus.InvalidInput;
+        if (boundary.getInstanceCount() != 0) return RayFirstHitStatus.Unsupported;
+        final int face = (int)boundary.surfaceIndex;
+        Vector3Dd[] p = new Vector3Dd[3];
+        if (!getTrianglePoints(face, p)) return RayFirstHitStatus.Indeterminate;
+        double[] t = {0}, u = {0}, v = {0};
+        final RayFirstHitStatus status = Triangle.queryIntersection(ray, p[0], p[1], p[2],
+            new RayCrossingQuery(boundary.t, boundary.t), t, u, v);
+        if (status != RayFirstHitStatus.Hit) return status;
+        final Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(t[0]));
+        if (!Double.isFinite(point.x()) || !Double.isFinite(point.y()) ||
+            !Double.isFinite(point.z())) return RayFirstHitStatus.Indeterminate;
+        hit.setHitDistance(t[0]);
+        if (hit.shouldStoreRay()) hit.setRay(ray.withT(t[0]));
+        fillTypedDetail(ray, t[0], face, u[0], v[0], p[0], p[1], p[2], boundary.normalReversed, hit);
+        return RayFirstHitStatus.Hit;
+    }
+
+    @Override
+    public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query,
+        RayCrossingSink sink)
+    {
+        if (lengthOf(triangleIndexes) % 3 != 0 || lengthOf(vertexPositions) % 3 != 0)
+            return RayCrossingSupport.Indeterminate;
+        ArrayList<Double> depths = new ArrayList<>();
+        ArrayList<Integer> faces = new ArrayList<>();
+        double[] t = {0}, u = {0}, v = {0};
+        if (getNumTriangles() == 0) {
+            final Vector3Dd zero = new Vector3Dd();
+            final RayFirstHitStatus status = Triangle.queryIntersection(ray, zero, zero, zero, query, t, u, v);
+            if (status == RayFirstHitStatus.Unsupported) return RayCrossingSupport.Unsupported;
+            if (status == RayFirstHitStatus.InvalidInput) return RayCrossingSupport.InvalidInput;
+            if (status == RayFirstHitStatus.Indeterminate) return RayCrossingSupport.Indeterminate;
+            return RayCrossingSupport.Supported;
+        }
+        Vector3Dd[] p = new Vector3Dd[3];
+        for (int i = 0; i < getNumTriangles(); ++i) {
+            if (!getTrianglePoints(i, p)) return RayCrossingSupport.Indeterminate;
+            final RayFirstHitStatus status = Triangle.queryIntersection(ray, p[0], p[1], p[2], query, t, u, v);
+            if (status == RayFirstHitStatus.Unsupported) return RayCrossingSupport.Unsupported;
+            if (status == RayFirstHitStatus.InvalidInput) return RayCrossingSupport.InvalidInput;
+            if (status == RayFirstHitStatus.Indeterminate) return RayCrossingSupport.Indeterminate;
+            if (status == RayFirstHitStatus.Hit) {
+                final Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(t[0]));
+                if (!Double.isFinite(point.x()) || !Double.isFinite(point.y()) ||
+                    !Double.isFinite(point.z())) return RayCrossingSupport.Indeterminate;
+                int at = 0;
+                while (at < depths.size() && depths.get(at) <= t[0]) ++at;
+                if (at == depths.size()) { depths.add(t[0]); faces.add(i); }
+                else { depths.add(at, t[0]); faces.add(at, i); }
+            }
+        }
+        for (int i = 0; i < depths.size(); ++i) {
+            RayCrossing event = new RayCrossing(depths.get(i), this, RayCrossingKind.Unclassified);
+            event.surfaceIndex = faces.get(i);
+            sink.crossing(event);
+        }
+        return RayCrossingSupport.Supported;
     }
 
     public String getName() {

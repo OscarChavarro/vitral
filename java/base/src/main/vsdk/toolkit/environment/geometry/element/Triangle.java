@@ -92,32 +92,154 @@ public class Triangle extends FundamentalEntity
         this.normal = normal;
     }
 
+    public enum ProjectionAxis { X, Y, Z }
+
+    public static RayFirstHitStatus queryIntersection(Ray ray, Vector3Dd v0,
+        Vector3Dd v1, Vector3Dd v2, RayCrossingQuery query,
+        double[] t, double[] u, double[] v)
+    {
+        final Vector3Dd p = ray.getOrigin();
+        final Vector3Dd d = ray.getDirection();
+        if (Double.isNaN(query.minT) || Double.isNaN(query.maxT) || query.minT > query.maxT ||
+            !Double.isFinite(query.minimumChordSquared) || query.minimumChordSquared < 0 ||
+            Double.isNaN(query.minimumExteriorApproach) ||
+            !Double.isFinite(p.x()) || !Double.isFinite(p.y()) || !Double.isFinite(p.z()) ||
+            !Double.isFinite(d.x()) || !Double.isFinite(d.y()) || !Double.isFinite(d.z()) ||
+            (d.x() == 0 && d.y() == 0 && d.z() == 0) ||
+            !Double.isFinite(v0.x()) || !Double.isFinite(v0.y()) || !Double.isFinite(v0.z()) ||
+            !Double.isFinite(v1.x()) || !Double.isFinite(v1.y()) || !Double.isFinite(v1.z()) ||
+            !Double.isFinite(v2.x()) || !Double.isFinite(v2.y()) || !Double.isFinite(v2.z()))
+            return RayFirstHitStatus.InvalidInput;
+        if (query.minimumChordSquared != 0 || query.minimumExteriorApproach != Double.NEGATIVE_INFINITY)
+            return RayFirstHitStatus.Unsupported;
+        final double lengthSquared = d.dotProduct(d);
+        if (!Double.isFinite(lengthSquared) || lengthSquared == 0) return RayFirstHitStatus.Indeterminate;
+        return intersectRayCore(ray, v0, v1, v2, query.minT, query.maxT, 0, true, true, t, u, v);
+    }
+
     public static Intersection doIntersectionWithTriangle(
         Ray ray,
         Vector3Dd v0,
         Vector3Dd v1,
         Vector3Dd v2)
     {
-        Vector3Dd e1 = v1.subtract(v0);
-        Vector3Dd e2 = v2.subtract(v0);
-        Vector3Dd h = ray.getDirection().crossProduct(e2);
-        double a = e1.dotProduct(h);
-        if ( Math.abs(a) < VSDK.EPSILON ) return null;
-        double f = 1.0 / a;
-        Vector3Dd s = ray.getOrigin().subtract(v0);
-        double u = f * s.dotProduct(h);
-        if ( u < 0 || u > 1 ) return null;
-        Vector3Dd q = s.crossProduct(e1);
-        double v = f * ray.getDirection().dotProduct(q);
-        if ( v < 0 || u + v > 1 ) return null;
-        double t = f * e2.dotProduct(q);
-        if ( t <= VSDK.EPSILON ) return null;
+        double[] t = new double[1], u = new double[1], v = new double[1];
+        if ( !intersectRay(ray, v0, v1, v2, t, u, v) ) return null;
 
         return new Intersection(
-            t,
-            ray.getOrigin().add(ray.getDirection().multiply(t)),
-            e1.crossProduct(e2).normalized()
+            t[0],
+            ray.getOrigin().add(ray.getDirection().multiply(t[0])),
+            v1.subtract(v0).crossProduct(v2.subtract(v0)).normalized()
         );
+    }
+
+    /**
+    Shared allocation-free Moller-Trumbore query; returns affine t and the
+    barycentric coordinates corresponding to v1 and v2.
+    */
+    public static boolean intersectRay(Ray ray, Vector3Dd v0,
+        Vector3Dd v1, Vector3Dd v2, double[] t, double[] u, double[] v)
+    {
+        return intersectRayCore(ray, v0, v1, v2, VSDK.EPSILON,
+            Double.POSITIVE_INFINITY, VSDK.EPSILON, false, false, t, u, v) == RayFirstHitStatus.Hit;
+    }
+
+    /** `normal` and `distance` are one-element output holders. */
+    public static boolean supportingPlane(Vector3Dd p0, Vector3Dd p1,
+        Vector3Dd p2, double minimumNormalLength, Vector3Dd[] normal, double[] distance)
+    {
+        normal[0] = p0.subtract(p1).crossProduct(p2.subtract(p1));
+        final double length = normal[0].length();
+        if (!Double.isFinite(length) || length == 0 || length < minimumNormalLength) return false;
+        normal[0] = normal[0].multiply(1.0 / length);
+        distance[0] = -normal[0].dotProduct(p0);
+        return true;
+    }
+
+    public static ProjectionAxis dominantProjection(Vector3Dd normal)
+    {
+        final double x = Math.abs(normal.x()), y = Math.abs(normal.y());
+        final double z = Math.abs(normal.z());
+        return x > y ? (x > z ? ProjectionAxis.X : ProjectionAxis.Z) :
+            (y > z ? ProjectionAxis.Y : ProjectionAxis.Z);
+    }
+
+    public static boolean requiresProjectionSwap(Vector3Dd p0, Vector3Dd p1,
+        Vector3Dd p2, ProjectionAxis axis)
+    {
+        if (axis == ProjectionAxis.X)
+            return (p1.y()-p2.y())*(p1.z()-p0.z()) < (p1.z()-p2.z())*(p1.y()-p0.y());
+        if (axis == ProjectionAxis.Y)
+            return (p1.x()-p2.x())*(p1.z()-p0.z()) < (p1.z()-p2.z())*(p1.x()-p0.x());
+        return (p1.x()-p2.x())*(p1.y()-p0.y()) < (p1.y()-p2.y())*(p1.x()-p0.x());
+    }
+
+    /** Apply the optional vertex swap before testing projected containment. */
+    public static boolean containsProjected(Vector3Dd p0, Vector3Dd p1,
+        Vector3Dd p2, Vector3Dd point, ProjectionAxis axis)
+    {
+        double a0, a1, a2, b0, b1, b2, s, t;
+        if (axis == ProjectionAxis.X) {
+            a0=p0.y(); a1=p1.y(); a2=p2.y(); b0=p0.z(); b1=p1.z(); b2=p2.z(); s=point.y(); t=point.z();
+        } else if (axis == ProjectionAxis.Y) {
+            a0=p0.x(); a1=p1.x(); a2=p2.x(); b0=p0.z(); b1=p1.z(); b2=p2.z(); s=point.x(); t=point.z();
+        } else {
+            a0=p0.x(); a1=p1.x(); a2=p2.x(); b0=p0.y(); b1=p1.y(); b2=p2.y(); s=point.x(); t=point.y();
+        }
+        if ((a1-s)*(b1-b0) < (b1-t)*(a1-a0)) return false;
+        if ((a2-s)*(b2-b1) < (b2-t)*(a2-a1)) return false;
+        if ((a0-s)*(b0-b2) < (b0-t)*(a0-a2)) return false;
+        return true;
+    }
+
+    private static RayFirstHitStatus intersectRayCore(Ray ray, Vector3Dd v0,
+        Vector3Dd v1, Vector3Dd v2, double minT, double maxT,
+        double determinantTolerance, boolean includeMin, boolean checkArithmetic,
+        double[] t, double[] u, double[] v)
+    {
+        final Vector3Dd e1 = v1.subtract(v0);
+        final Vector3Dd e2 = v2.subtract(v0);
+        final Vector3Dd h = ray.getDirection().crossProduct(e2);
+        final double determinant = e1.dotProduct(h);
+        if (checkArithmetic && (!Double.isFinite(e1.x()) || !Double.isFinite(e1.y()) ||
+            !Double.isFinite(e1.z()) || !Double.isFinite(e2.x()) ||
+            !Double.isFinite(e2.y()) || !Double.isFinite(e2.z()) ||
+            !Double.isFinite(determinant))) return RayFirstHitStatus.Indeterminate;
+        Vector3Dd geometricNormal = new Vector3Dd();
+        if (checkArithmetic) {
+            geometricNormal = e1.crossProduct(e2);
+            final double squared = geometricNormal.dotProduct(geometricNormal);
+            if (!Double.isFinite(squared)) return RayFirstHitStatus.Indeterminate;
+            if (squared == 0) return geometricNormal.x() == 0 && geometricNormal.y() == 0 && geometricNormal.z() == 0 ?
+                RayFirstHitStatus.Miss : RayFirstHitStatus.Indeterminate;
+        }
+        if (checkArithmetic && determinant == 0) {
+            final Vector3Dd normal = geometricNormal;
+            final Vector3Dd direction = ray.getDirection();
+            final double normalDotDirection = normal.dotProduct(direction);
+            if (!Double.isFinite(normalDotDirection) || normalDotDirection != 0 ||
+                (normal.x() != 0 && direction.x() != 0 && normal.x()*direction.x() == 0) ||
+                (normal.y() != 0 && direction.y() != 0 && normal.y()*direction.y() == 0) ||
+                (normal.z() != 0 && direction.z() != 0 && normal.z()*direction.z() == 0))
+                return RayFirstHitStatus.Indeterminate;
+            final double side = ray.getOrigin().subtract(v0).dotProduct(normal);
+            if (!Double.isFinite(side)) return RayFirstHitStatus.Indeterminate;
+            return side == 0 ? RayFirstHitStatus.Indeterminate : RayFirstHitStatus.Miss;
+        }
+        if (Math.abs(determinant) < determinantTolerance) return RayFirstHitStatus.Miss;
+        final double inverse = 1.0 / determinant;
+        final Vector3Dd offset = ray.getOrigin().subtract(v0);
+        u[0] = inverse * offset.dotProduct(h);
+        if (checkArithmetic && !Double.isFinite(u[0])) return RayFirstHitStatus.Indeterminate;
+        if (u[0] < 0.0 || u[0] > 1.0) return RayFirstHitStatus.Miss;
+        final Vector3Dd q = offset.crossProduct(e1);
+        v[0] = inverse * ray.getDirection().dotProduct(q);
+        if (checkArithmetic && !Double.isFinite(v[0])) return RayFirstHitStatus.Indeterminate;
+        if (v[0] < 0.0 || u[0] + v[0] > 1.0) return RayFirstHitStatus.Miss;
+        t[0] = inverse * e2.dotProduct(q);
+        if (checkArithmetic && !Double.isFinite(t[0])) return RayFirstHitStatus.Indeterminate;
+        return (includeMin ? t[0] >= minT : t[0] > minT) && t[0] <= maxT ?
+            RayFirstHitStatus.Hit : RayFirstHitStatus.Miss;
     }
 
     private static Vector3Dd closestPointOnTriangle(

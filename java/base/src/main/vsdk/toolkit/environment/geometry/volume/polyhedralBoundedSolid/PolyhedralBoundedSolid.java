@@ -29,7 +29,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.processing.ComputationalGeometry;
-import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper.PolygonProcessor;
+import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 
 /**
 This class encapsulates a polyhedral boundary representation for 2-manifold
@@ -367,7 +367,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 he = he.next();
             } while ( he != start );
 
-            loopStatus = PolygonProcessor.isPointInsidePolygon2D(
+            loopStatus = Polygon2D.isPointInsideContour(
                 projectedPoint2D, projectedLoopVertices);
             if ( loopStatus == 0 ) {
                 return Geometry.LIMIT;

@@ -1,5 +1,6 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -234,7 +235,7 @@ final class StepperMotorGuideCsgFixture
             solid, 1, polygon.size(), 1, 2);
         Matrix4x4d sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, height);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
         return solid;
     }

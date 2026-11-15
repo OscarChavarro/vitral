@@ -1,6 +1,4 @@
 // Java classes
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 // Vitral classes
@@ -53,6 +51,11 @@ public class RaytracerSimple {
 
         rendererConfiguration.setTexture(hasTextures);
         rendererConfiguration.setBumpMap(hasNormalMaps);
+        // The default Gouraud selection shades without normal perturbation; the
+        // Phong shaders apply the same per-pixel lighting plus the bump map.
+        if ( hasNormalMaps ) {
+            rendererConfiguration.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
+        }
     }
 
     private void
@@ -66,12 +69,12 @@ public class RaytracerSimple {
 
         //- 1. Import the scene from scene description file to RAM -----
         System.out.println("Loading scene from " + fileName + ": ");
-        try (InputStream is = new FileInputStream(fileName)) {
+        try {
             ReaderMitScene readerMitScene = new ReaderMitScene();
-            readerMitScene.importEnvironment(is, scene);
-          }
-          catch ( Exception e ) {
-            System.err.println("Error reading " + fileName);
+            readerMitScene.importEnvironment(fileName, scene);
+        }
+        catch ( Exception e ) {
+            System.err.println("Error reading " + fileName + ": " + e.getMessage());
             System.err.println("There are scene samples on " + SCENE_SAMPLES_PATH);
             System.exit(EXIT_CODE_READ_ERROR);
         }

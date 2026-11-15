@@ -2,7 +2,16 @@ package vsdk.toolkit.environment.geometry.surface;
 import java.io.Serial;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.element.GeometryBounds;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayBoundary;
+import vsdk.toolkit.environment.geometry.element.RayCrossing;
+import vsdk.toolkit.environment.geometry.element.RayCrossingKind;
+import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSink;
+import vsdk.toolkit.environment.geometry.element.RayCrossingSupport;
+import vsdk.toolkit.environment.geometry.element.RayFirstHitStatus;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 
@@ -58,6 +67,144 @@ public class InfinitePlane extends HalfSpace {
         this.c = other.c;
         this.d = other.d;
     }
+    @Override public Geometry copyGeometry() { return new InfinitePlane(this); }
+
+    @Override
+    public void getBounds(GeometryBounds result)
+    {
+        if (!Double.isFinite(a) || !Double.isFinite(b) ||
+            !Double.isFinite(c) || !Double.isFinite(d) ||
+            (a == 0 && b == 0 && c == 0)) result.setIndeterminate();
+        else result.setUnbounded();
+    }
+
+    /** `depth` is a one-element output holder. */
+    private RayFirstHitStatus evaluateRay(Ray ray, RayCrossingQuery query,
+        double[] depth)
+    {
+        final Vector3Dd origin = ray.getOrigin();
+        final Vector3Dd direction = ray.getDirection();
+        if (!Double.isFinite(a) || !Double.isFinite(b) ||
+            !Double.isFinite(c) || !Double.isFinite(d) ||
+            (a == 0 && b == 0 && c == 0) ||
+            !Double.isFinite(origin.x()) || !Double.isFinite(origin.y()) ||
+            !Double.isFinite(origin.z()) || !Double.isFinite(direction.x()) ||
+            !Double.isFinite(direction.y()) || !Double.isFinite(direction.z()) ||
+            (direction.x() == 0 && direction.y() == 0 && direction.z() == 0) ||
+            Double.isNaN(query.minT) || Double.isNaN(query.maxT) || query.minT > query.maxT ||
+            !Double.isFinite(query.minimumChordSquared) || query.minimumChordSquared < 0 ||
+            Double.isNaN(query.minimumExteriorApproach)) return RayFirstHitStatus.InvalidInput;
+        if (query.minimumChordSquared != 0 || query.minimumExteriorApproach != Double.NEGATIVE_INFINITY)
+            return RayFirstHitStatus.Unsupported;
+        final Vector3Dd normal = new Vector3Dd(a,b,c);
+        final double squared = normal.dotProduct(normal);
+        final double numerator = -(normal.dotProduct(origin) + d);
+        final double denominator = normal.dotProduct(direction);
+        if (!Double.isFinite(squared) || squared == 0 ||
+            !Double.isFinite(numerator) || !Double.isFinite(denominator))
+            return RayFirstHitStatus.Indeterminate;
+        if (denominator == 0 &&
+            ((a != 0 && direction.x() != 0 && a * direction.x() == 0) ||
+             (b != 0 && direction.y() != 0 && b * direction.y() == 0) ||
+             (c != 0 && direction.z() != 0 && c * direction.z() == 0)))
+            return RayFirstHitStatus.Indeterminate;
+        final RayFirstHitStatus status = intersectionDepth(numerator, denominator, 0,
+            query.minT, query.maxT, true, depth);
+        if (status != RayFirstHitStatus.Hit) return status;
+        final Vector3Dd point = origin.add(direction.multiply(depth[0]));
+        if (!Double.isFinite(point.x()) || !Double.isFinite(point.y()) ||
+            !Double.isFinite(point.z())) return RayFirstHitStatus.Indeterminate;
+        return RayFirstHitStatus.Hit;
+    }
+
+    @Override
+    public RayCrossingSupport emitRayCrossings(Ray ray,
+        RayCrossingQuery query, RayCrossingSink sink)
+    {
+        double[] depth = new double[1];
+        final RayFirstHitStatus status = evaluateRay(ray, query, depth);
+        if (status == RayFirstHitStatus.Unsupported) return RayCrossingSupport.Unsupported;
+        if (status == RayFirstHitStatus.InvalidInput) return RayCrossingSupport.InvalidInput;
+        if (status == RayFirstHitStatus.Indeterminate) return RayCrossingSupport.Indeterminate;
+        if (status == RayFirstHitStatus.Hit)
+            sink.crossing(new RayCrossing(depth[0], this, RayCrossingKind.Unclassified));
+        return RayCrossingSupport.Supported;
+    }
+
+    @Override
+    public RayFirstHitStatus queryFirstHit(Ray ray, RayCrossingQuery query,
+        RayHit result, RayBoundary boundary)
+    {
+        if (result != null) result.clear();
+        if (boundary != null) boundary.assign(new RayBoundary());
+        double[] depthH = new double[1];
+        final RayFirstHitStatus status = evaluateRay(ray, query, depthH);
+        if (status != RayFirstHitStatus.Hit) return status;
+        final double depth = depthH[0];
+        if (boundary != null) boundary.assign(new RayBoundary(depth, this));
+        if (result != null) {
+            result.setHitDistance(depth);
+            if (result.shouldStoreRay()) result.setRay(ray.withT(depth));
+            if (result.needsAnySurfaceData()) doExtraInformation(ray, depth, result);
+        }
+        return RayFirstHitStatus.Hit;
+    }
+
+    @Override
+    public RayFirstHitStatus querySurfaceDetail(Ray ray, RayBoundary boundary,
+        RayHit hit)
+    {
+        if (hit != null) hit.clear();
+        if (hit == null || boundary.geometry != this || !Double.isFinite(boundary.t))
+            return RayFirstHitStatus.InvalidInput;
+        if (boundary.getInstanceCount() != 0) return RayFirstHitStatus.Unsupported;
+        final RayFirstHitStatus status = queryFirstHit(ray, new RayCrossingQuery(boundary.t, boundary.t), null);
+        if (status != RayFirstHitStatus.Hit) return status;
+        hit.setHitDistance(boundary.t);
+        if (hit.shouldStoreRay()) hit.setRay(ray.withT(boundary.t));
+        doExtraInformation(ray, boundary.t, hit);
+        if (boundary.normalReversed && hit.needsNormal() &&
+            (hit.getAvailableDetailMask() & RayHit.DETAIL_NORMAL) != 0)
+            hit.normal = hit.normal.multiply(-1);
+        return RayFirstHitStatus.Hit;
+    }
+
+    private Vector3Dd surfaceNormal()
+    {
+        final Vector3Dd normal = new Vector3Dd(a,b,c);
+        final double squared = normal.dotProduct(normal);
+        if (squared > 0 && squared < VSDK.EPSILON) return normal.multiply(1.0 / Math.sqrt(squared));
+        return normal.normalized();
+    }
+
+    /**
+    Intersect a plane from its precomputed signed numerator and directional
+    denominator. The caller supplies the parallel and interval policies.
+    `depth` is a one-element output holder.
+    */
+    public static RayFirstHitStatus intersectionDepth(double numerator, double denominator,
+        double parallelTolerance, double minT, double maxT, boolean checkArithmetic, double[] depth)
+    {
+        if (checkArithmetic && (!Double.isFinite(numerator) ||
+            !Double.isFinite(denominator) || !Double.isFinite(parallelTolerance) ||
+            parallelTolerance < 0 || Double.isNaN(minT) || Double.isNaN(maxT) || minT > maxT))
+            return RayFirstHitStatus.InvalidInput;
+        final boolean parallel = parallelTolerance == 0 ? denominator == 0 :
+            denominator < parallelTolerance && denominator > -parallelTolerance;
+        if (parallel) return checkArithmetic && numerator == 0 ?
+            RayFirstHitStatus.Indeterminate : RayFirstHitStatus.Miss;
+        depth[0] = numerator / denominator;
+        if (checkArithmetic && !Double.isFinite(depth[0])) return RayFirstHitStatus.Indeterminate;
+        return depth[0] >= minT && depth[0] <= maxT ? RayFirstHitStatus.Hit : RayFirstHitStatus.Miss;
+    }
+
+    /** Raw coefficients preserve the equation scale; getNormal() is normalized. */
+    public Vector3Dd getCoefficients() { return new Vector3Dd(a, b, c); }
+    public double getConstantCoefficient() { return d; }
+    public void setCoefficients(Vector3Dd normal, double constant) {
+        a = normal.x(); b = normal.y(); c = normal.z(); d = constant;
+    }
+
     public Ray
     doIntersectionFirstHit(Ray inout_rayo) {
         double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
@@ -112,6 +259,9 @@ public class InfinitePlane extends HalfSpace {
     Note that current interpretation of the plane is done as a semispace,
     where "outside" means the direction pointed by plane's normal.
     */
+    // Legacy predicates in unnormalized plane units (Java parity). The half-space
+    // form classifies n.p + d <= 0; the surface form reports LIMIT on the plane
+    // and OUTSIDE elsewhere (its -INSIDE equals OUTSIDE).
     public int doContainmentTestHalfSpace(Vector3Dd p,
                                           double distanceTolerance) {
         double num = a*p.x() + b*p.y() + c*p.z() + d;
@@ -154,12 +304,16 @@ public class InfinitePlane extends HalfSpace {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   RayHit outData) {
+        if ( outData == null ) return;
+        outData.beginDetailEvaluation();
         outData.point = new Vector3Dd(
             inRay.getOrigin().x() + inT*inRay.getDirection().x(),
             inRay.getOrigin().y() + inT*inRay.getDirection().y(),
             inRay.getOrigin().z() + inT*inRay.getDirection().z()
         );
-        outData.normal = getNormal();
+        outData.normal = surfaceNormal();
+        if (outData.needsPoint()) outData.markDetailAvailable(RayHit.DETAIL_POINT);
+        if (outData.needsNormal()) outData.markDetailAvailable(RayHit.DETAIL_NORMAL);
     }
 
     /**

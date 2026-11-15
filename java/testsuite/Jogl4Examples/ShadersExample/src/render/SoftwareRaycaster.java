@@ -14,7 +14,6 @@ import vsdk.toolkit.environment.light.AmbientLight;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.material.MicroFacetedMaterial;
 import vsdk.toolkit.environment.background.SimpleBackground;
-import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -78,21 +77,29 @@ public class SoftwareRaycaster
             viewportWidth,
             viewportHeight);
 
-        SimpleBody sphereBody = new SimpleBody();
-        sphereBody.setGeometry(new Sphere(model.getSphere().getRadius()));
+        // The frame's body shares the model's geometries and maps; it owns only
+        // its material copy.
         SimpleMaterial activeMaterial = model.getActiveMaterialForCurrentShading();
+        SimpleMaterial materialCopy;
         if ( activeMaterial instanceof MicroFacetedMaterial microFacetedMaterial ) {
-            sphereBody.setMaterial(new MicroFacetedMaterial(microFacetedMaterial));
+            materialCopy = new MicroFacetedMaterial(microFacetedMaterial);
         }
         else {
-            sphereBody.setMaterial(new SimpleMaterial(activeMaterial));
+            materialCopy = new SimpleMaterial(activeMaterial);
         }
-        sphereBody.setTexture(model.getTextureMap());
-        sphereBody.setNormalMap(bumpNormalMap);
-        sphereBody.setRotation(modelRotation);
-
         ArrayList<SimpleBody> bodies = new ArrayList<SimpleBody>(1);
-        bodies.add(sphereBody);
+        if ( model.getGeometryFixture() != null ) {
+            bodies.add(model.getGeometryFixture().createBody(materialCopy, modelRotation));
+        }
+        else {
+            SimpleBody sphereBody = new SimpleBody();
+            sphereBody.setGeometry(model.getSphere());
+            sphereBody.setMaterial(materialCopy);
+            sphereBody.setTexture(model.getTextureMap());
+            sphereBody.setNormalMap(bumpNormalMap);
+            sphereBody.setRotation(modelRotation);
+            bodies.add(sphereBody);
+        }
 
         ArrayList<Light> lights = new ArrayList<Light>(2);
         Light ambientLight = new AmbientLight(new ColorRgb(1, 1, 1));

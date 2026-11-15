@@ -48,6 +48,8 @@ public class RayHit extends FundamentalEntity {
     private Ray ray; // Intersected ray with valid t at hit point
 
     private int requiredDetailMask;
+    private int availableDetailMask;
+    private boolean detailAvailabilityKnown;
     private boolean storeRay;
     private double hitDistance;
     private boolean hitDistanceKnown;
@@ -87,6 +89,8 @@ public class RayHit extends FundamentalEntity {
         texture = null;
         normalMap = null;
         ray = null;
+        availableDetailMask = DETAIL_NONE;
+        detailAvailabilityKnown = false;
         hitDistance = 0;
         hitDistanceKnown = false;
     }
@@ -101,6 +105,8 @@ public class RayHit extends FundamentalEntity {
     {
         requiredDetailMask = DETAIL_NONE;
         ray = null;
+        availableDetailMask = DETAIL_NONE;
+        detailAvailabilityKnown = false;
         hitDistance = 0;
         hitDistanceKnown = false;
     }
@@ -110,6 +116,8 @@ public class RayHit extends FundamentalEntity {
         RaytraceStatistics.recordHitInfoClone();
         this.requiredDetailMask = other.requiredDetailMask;
         this.storeRay = other.storeRay;
+        this.availableDetailMask = other.availableDetailMask;
+        this.detailAvailabilityKnown = other.detailAvailabilityKnown;
         this.hitDistance = other.hitDistance;
         this.hitDistanceKnown = other.hitDistanceKnown;
         this.point = other.point;
@@ -122,6 +130,12 @@ public class RayHit extends FundamentalEntity {
         this.normalMap = other.normalMap;
         this.ray = other.ray;
     }
+
+    // Legacy producers may leave availability unknown; requested is not available.
+    public boolean isDetailAvailabilityKnown() { return detailAvailabilityKnown; }
+    public int getAvailableDetailMask() { return availableDetailMask; }
+    public void beginDetailEvaluation() { availableDetailMask = DETAIL_NONE; detailAvailabilityKnown = true; }
+    public void markDetailAvailable(int mask) { availableDetailMask |= mask & DETAIL_ALL; }
 
     public int getRequiredDetailMask()
     {

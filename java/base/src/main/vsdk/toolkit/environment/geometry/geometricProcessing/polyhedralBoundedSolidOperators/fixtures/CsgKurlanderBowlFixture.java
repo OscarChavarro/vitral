@@ -1,5 +1,7 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
@@ -77,12 +79,9 @@ public class CsgKurlanderBowlFixture
                                                          double height,
                                                          Vector3Dd translation)
     {
-        PolyhedralBoundedSolid solid = PolyhedralBoundedSolidModeler
-            .createCircularLamina(0.0, 0.0, radius, 0.0, CYLINDER_SIDES);
-        Matrix4x4d sweep = new Matrix4x4d();
-        sweep = sweep.translation(0.0, 0.0, height);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
-            solid, solid.findFace(1), sweep);
+        Cone cylinder = new Cone(radius, radius, height);
+        PolyhedralBoundedSolid solid =
+            cylinder.exportToPolyhedralBoundedSolid(CYLINDER_SIDES, 1);
 
         Matrix4x4d move = new Matrix4x4d();
         move = move.translation(translation);
@@ -105,7 +104,7 @@ public class CsgKurlanderBowlFixture
 
         Matrix4x4d t = new Matrix4x4d();
         t = t.translation(0.0, 0.0, thickness);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), t);
         return solid;
     }

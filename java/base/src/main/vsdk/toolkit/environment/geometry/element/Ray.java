@@ -43,6 +43,20 @@ public final class Ray extends FundamentalEntity
              true);
     }
 
+    /**
+    Explicit affine construction: preserve direction magnitude and t.
+    Legacy constructors retain their historical normalization behavior.
+    */
+    public static Ray fromAffine(Vector3Dd origin, Vector3Dd direction, double t)
+    {
+        return new Ray(origin, direction, t, true);
+    }
+
+    public static Ray fromAffine(Vector3Dd origin, Vector3Dd direction)
+    {
+        return fromAffine(origin, direction, 0.0);
+    }
+
     public static Ray copyOf(Ray other)
     {
         return Objects.requireNonNull(other, "Ray to copy cannot be null");
@@ -53,17 +67,15 @@ public final class Ray extends FundamentalEntity
         return new Ray(newOrigin, direction, t, true);
     }
 
+    // Copies replace only the named component; they never renormalize.
     public Ray withDirection(Vector3Dd newDirection)
     {
-        return new Ray(origin, newDirection, t, false);
+        return new Ray(origin, newDirection, t, true);
     }
 
     public Ray withT(double newT)
     {
         RaytraceStatistics.recordRayWithT();
-        if ( Double.compare(newT, t) == 0 ) {
-            return this;
-        }
         return new Ray(origin, direction, newT, true);
     }
 

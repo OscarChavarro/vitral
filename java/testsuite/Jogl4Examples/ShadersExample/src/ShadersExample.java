@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -33,8 +34,10 @@ import render.SoftwareRaycaster;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.AwtSystem;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
@@ -197,18 +200,35 @@ public class ShadersExample extends JFrame implements
         }
         lastRenderingMode = ShaderOperationMode.OPENGL_4_1;
 
-        Jogl4SphereRenderer.draw(
-            gl,
-            model.getSphere(),
-            model.getCamera(),
-            model.getLight(),
-            model.getActiveMaterialForCurrentShading(),
-            model.getQuality(),
-            model.getTextureMap(),
-            model.getBumpMapHeightRgb(),
-            modelRotation,
-            model.getSphereMeridians(),
-            model.getSphereParallels());
+        if ( model.getGeometryFixture() != null ) {
+            // The drawable mesh of the geometry the software path traces
+            ArrayList<Light> lights = new ArrayList<Light>();
+            lights.add(model.getLight());
+            Jogl4GeometryRenderer.draw(
+                gl,
+                model.getGeometryFixture().getDrawableMesh(),
+                model.getCamera(),
+                lights,
+                model.getActiveMaterialForCurrentShading(),
+                model.getQuality(),
+                null,
+                null,
+                modelRotation);
+        }
+        else {
+            Jogl4SphereRenderer.draw(
+                gl,
+                model.getSphere(),
+                model.getCamera(),
+                model.getLight(),
+                model.getActiveMaterialForCurrentShading(),
+                model.getQuality(),
+                model.getTextureMap(),
+                model.getBumpMapHeightRgb(),
+                modelRotation,
+                model.getSphereMeridians(),
+                model.getSphereParallels());
+        }
         hudRenderer.draw(gl, model);
     }
 
@@ -221,6 +241,7 @@ public class ShadersExample extends JFrame implements
                 animationTimer.stop();
             }
             Jogl4SphereRenderer.dispose(gl);
+            Jogl4GeometryRenderer.dispose(gl);
             Jogl4ImageRenderer.unload(gl, model.getTextureMap());
             Jogl4ImageRenderer.unload(gl, model.getBumpMapHeightRgb());
             Jogl4ImageRenderer.unload(gl, model.getSoftwareFrameImage());

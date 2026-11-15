@@ -1,5 +1,6 @@
 package models;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -270,7 +271,7 @@ public class TangibleInterfaceCubeFixture {
 
         Matrix4x4d sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, extrusionHeight);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
@@ -625,7 +626,7 @@ public class TangibleInterfaceCubeFixture {
 
         Matrix4x4d sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, extrusionHeight);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
@@ -713,7 +714,7 @@ public class TangibleInterfaceCubeFixture {
 
         Matrix4x4d sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, GLYPH_TEXT_EXTRUSION_HEIGHT);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
         glyphSanitizeSolid(solid);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);

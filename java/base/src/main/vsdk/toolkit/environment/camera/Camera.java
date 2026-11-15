@@ -71,6 +71,16 @@ public class Camera extends Entity
 
     // Private values which are preprocessed to speed up calculations
     private Vector3Dd frontWithScale, upWithScale, rightWithScale;
+
+    /**
+    cpp `Camera.cpp` static helper: `degrees * PI / 180.0`. It is not
+    `Math.toRadians` (`degrees * 0.017453292519943295`), which rounds some
+    angles one ulp differently and shifts the primary rays.
+    */
+    private static double degreesToRadians(double degrees)
+    {
+        return degrees * Math.PI / 180.0;
+    }
     private Matrix4x4d normalizingTransformation;
     private final AtomicLong modificationVersion = new AtomicLong();
     
@@ -365,8 +375,8 @@ public class Camera extends Entity
 
         double fovFactor = viewportXSize / viewportYSize;
         frontWithScale = front.multiply(0.5);
-        upWithScale = up.multiply(Math.tan(Math.toRadians(fov/2)));
-        rightWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
+        upWithScale = up.multiply(Math.tan(degreesToRadians(fov/2)));
+        rightWithScale = left.multiply(-fovFactor*Math.tan(degreesToRadians(fov/2)));
 
         //-----------------------------------------------------------------
         /*
@@ -391,7 +401,7 @@ public class Camera extends Entity
         R1 = R1.invert();
         
         Matrix4x4d R2 = new Matrix4x4d();
-        R2 = R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
+        R2 = R2.eulerAnglesRotation(degreesToRadians(90), degreesToRadians(-90), 0);
         Matrix4x4d RTOTAL = R2.multiply(R1);
 
         //System.out.println("----------------------");
@@ -443,23 +453,41 @@ public class Camera extends Entity
         return exportToCameraSnapshot((int)viewportXSize, (int)viewportYSize);
     }
 
+    /**
+    As cpp `Camera::exportToCameraSnapshot` (a const method): the snapshot is
+    taken from a copy resized to the given viewport, and this camera is left
+    unchanged in its vectors. The copy constructor and the resize both call
+    `updateVectors`, so the snapshot vectors are normalized as many times as
+    in cpp, which matters in the last bit of nearly unit vectors.
+    Java only: this camera keeps the historic side effect of taking the
+    viewport size (without renormalizing its vectors), which callers such as
+    `calculateProjectionMatrix` users rely on.
+    */
     public CameraSnapshot exportToCameraSnapshot(int viewportXSize, int viewportYSize)
     {
-        updateViewportResize(viewportXSize, viewportYSize);
+        Camera tmp = new Camera(this);
+        if ( this.viewportXSize != viewportXSize || this.viewportYSize != viewportYSize ) {
+            this.viewportXSize = viewportXSize;
+            this.viewportYSize = viewportYSize;
+            markModified();
+        }
+        tmp.viewportXSize = viewportXSize;
+        tmp.viewportYSize = viewportYSize;
+        tmp.updateVectors();
         return new CameraSnapshot(
-            position,
-            front,
-            left,
-            up,
-            projectionMode,
-            orthogonalZoom,
-            this.viewportXSize,
-            this.viewportYSize,
-            frontWithScale,
-            upWithScale,
-            rightWithScale,
-            nearPlaneDistance,
-            farPlaneDistance);
+            tmp.position,
+            tmp.front,
+            tmp.left,
+            tmp.up,
+            tmp.projectionMode,
+            tmp.orthogonalZoom,
+            tmp.viewportXSize,
+            tmp.viewportYSize,
+            tmp.frontWithScale,
+            tmp.upWithScale,
+            tmp.rightWithScale,
+            tmp.nearPlaneDistance,
+            tmp.farPlaneDistance);
     }
 
     /**
@@ -575,7 +603,7 @@ public class Camera extends Entity
                                        nearPlaneDistance, farPlaneDistance);
             break;
           case Camera.PROJECTION_MODE_PERSPECTIVE:
-            upDistance = nearPlaneDistance * Math.tan(Math.toRadians(fov/2));
+            upDistance = nearPlaneDistance * Math.tan(degreesToRadians(fov/2));
             downDistance = -upDistance;
             leftDistance = aspect * downDistance;
             rightDistance = aspect * upDistance;
@@ -605,8 +633,8 @@ public class Camera extends Entity
         R1 = R1.invert();
 
         T1 = T1.translation(-position.x(), -position.y(), -position.z());
-        R_adic2 = R_adic2.axisRotation(Math.toRadians(90), 0, 0, 1);
-        R_adic1 = R_adic1.axisRotation(Math.toRadians(-90), 1, 0, 0);
+        R_adic2 = R_adic2.axisRotation(degreesToRadians(90), 0, 0, 1);
+        R_adic1 = R_adic1.axisRotation(degreesToRadians(-90), 1, 0, 0);
 
         R = R_adic1.multiply(R_adic2.multiply(R1.multiply(T1)));
 
@@ -696,7 +724,7 @@ public class Camera extends Entity
         P = new Matrix4x4d();
         aspect = viewportXSize / viewportYSize; 
         if ( projectionMode == PROJECTION_MODE_PERSPECTIVE ) {
-            upDistance = nearPlaneDistance * Math.tan(Math.toRadians(fov/2));
+            upDistance = nearPlaneDistance * Math.tan(degreesToRadians(fov/2));
             downDistance = -upDistance;
             leftDistance = aspect * downDistance;
             rightDistance = aspect * upDistance;
@@ -1449,7 +1477,7 @@ public class Camera extends Entity
             // 3.1. Vector calculation for perspective case
             upCopy = new Vector3Dd(up);
             rightCopy = new Vector3Dd(left.multiply(-1));
-            scaleFactor = 1.0/Math.tan(Math.toRadians(fov/2));
+            scaleFactor = 1.0/Math.tan(degreesToRadians(fov/2));
             upCopy = upCopy.normalized();
             upCopy = upCopy.multiply(scaleFactor);
             rightCopy = rightCopy.normalized();

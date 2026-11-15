@@ -1,5 +1,6 @@
 package vsdk.toolkit.render;
 
+import java.util.ArrayList;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 
@@ -12,6 +13,9 @@ public final class TraceWorkspace {
     public final RayHit[] reflectionHits;
     public final RayHit[] shadingHits;
     public final ColorRgb[] reflectionColors;
+    /** Indices of refraction of the transmissive solids that contain the
+    current ray, innermost last; empty means the ray travels in vacuum. */
+    public final ArrayList<Double> mediumIndices;
 
     public TraceWorkspace()
     {
@@ -28,6 +32,7 @@ public final class TraceWorkspace {
         reflectionHits = new RayHit[levels];
         shadingHits = new RayHit[levels];
         reflectionColors = new ColorRgb[levels];
+        mediumIndices = new ArrayList<Double>(levels);
         for ( int i = 0; i < levels; i++ ) {
             reflectionHits[i] = new RayHit(RayHit.DETAIL_NONE, false);
             shadingHits[i] = new RayHit();

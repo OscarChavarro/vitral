@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import java.util.ArrayList;
@@ -270,7 +271,7 @@ final class _PolyhedralBoundedSolidSetFinisher
 
     This routine fans each offending face into triangles using the same
     `lmef(scan.next, scan.previous, newId)` split used by
-    `PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar`. Each
+    `PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar`. Each
     split peels off one triangle (always planar) from the remaining polygon
     until the polygon itself is a triangle, restoring the planarity invariant
     expected by `validateIntermediate`.

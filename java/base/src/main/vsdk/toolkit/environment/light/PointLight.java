@@ -20,9 +20,8 @@ public final class PointLight extends Light
         if ( distance <= VSDK.EPSILON ) {
             return new LightDirection(new Vector3Dd(0, 0, 0), 0.0);
         }
-        double invDistance = 1.0 / distance;
         return new LightDirection(
-            new Vector3Dd(toLight.x() * invDistance, toLight.y() * invDistance, toLight.z() * invDistance),
+            new Vector3Dd(toLight.x() / distance, toLight.y() / distance, toLight.z() / distance),
             distance - VSDK.EPSILON);
     }
 

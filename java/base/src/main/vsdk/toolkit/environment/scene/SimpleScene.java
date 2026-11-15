@@ -10,6 +10,8 @@ import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.NormalMap;
 
 public class SimpleScene extends Entity
 {
@@ -19,6 +21,9 @@ public class SimpleScene extends Entity
     private ArrayList<Light> lights;
     private ArrayList<Background> backgrounds;
     private ArrayList<Camera> cameras;
+    // Resources shared by reference among bodies and backgrounds.
+    private ArrayList<Image> images;
+    private ArrayList<NormalMap> normalMaps;
     private int activeCameraIndex;
     private int activeBackgroundIndex;
 
@@ -28,6 +33,26 @@ public class SimpleScene extends Entity
         lights = new ArrayList<Light>();
         backgrounds = new ArrayList<Background>();
         cameras = new ArrayList<Camera>();
+        images = new ArrayList<Image>();
+        normalMaps = new ArrayList<NormalMap>();
+    }
+
+    /**
+    Removes the bodies, lights, backgrounds, cameras and shared resources of
+    the scene and resets the active indices (cpp `clearOwnedElements`, which
+    also releases them).
+    */
+    public void clearOwnedElements()
+    {
+        simpleBodies.clear();
+        lights.clear();
+        backgrounds.clear();
+        cameras.clear();
+        images.clear();
+        normalMaps.clear();
+
+        activeCameraIndex = 0;
+        activeBackgroundIndex = 0;
     }
 
     public int getActiveCameraIndex()
@@ -70,6 +95,22 @@ public class SimpleScene extends Entity
         l.setId(lights.size());
         lights.add(l);
     }
+
+    /**
+    Takes ownership of an image that bodies (`SimpleBody.setTextureReference`)
+    or backgrounds reference; it is released with the scene's other elements.
+    */
+    public void addImage(Image image) { images.add(image); }
+
+    /**
+    Takes ownership of a normal map that bodies reference
+    (`SimpleBody.setNormalMapReference`).
+    */
+    public void addNormalMap(NormalMap normalMap) { normalMaps.add(normalMap); }
+
+    public ArrayList<Image> getImages() { return images; }
+
+    public ArrayList<NormalMap> getNormalMaps() { return normalMaps; }
 
     public ArrayList<SimpleBody> getSimpleBodies()
     {

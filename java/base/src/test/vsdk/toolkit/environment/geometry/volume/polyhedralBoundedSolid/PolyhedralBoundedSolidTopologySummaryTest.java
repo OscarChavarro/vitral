@@ -91,11 +91,11 @@ class PolyhedralBoundedSolidTopologySummaryTest
     private static PolyhedralBoundedSolid createCylinder(
         double radius, double height, double z)
     {
-        PolyhedralBoundedSolid solid = PolyhedralBoundedSolidModeler
+        PolyhedralBoundedSolid solid = PolyhedralBoundedSolidEulerConstructions
             .createCircularLamina(0.0, 0.0, radius, 0.0, 24);
         Matrix4x4d sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, height);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
         if ( z != 0.0 ) {
             Matrix4x4d translation = new Matrix4x4d();

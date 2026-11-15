@@ -9,6 +9,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 // Vitral classes
@@ -257,7 +258,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4d T = new Matrix4x4d();
         T = T.translation(0, -0.4, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 
         return solid;
@@ -341,7 +342,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4d T = new Matrix4x4d();
         T = T.translation(0, -0.42, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             a, a.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -387,7 +388,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4d T = new Matrix4x4d();
         T = T.translation(0, -1.0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             leftView, leftView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -405,7 +406,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         T = new Matrix4x4d();
         T = T.translation(1, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             frontView, frontView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -443,7 +444,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Matrix4x4d T = new Matrix4x4d();
         T = T.translation(0, -1.0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             leftView, leftView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -459,7 +460,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         T = new Matrix4x4d();
         T = T.translation(1, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             frontView, frontView.findFace(1), T);
 
         //-----------------------------------------------------------------
@@ -528,7 +529,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         transformationMatrix = new Matrix4x4d();
         transformationMatrix = transformationMatrix.translation(0.775, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             wedge, wedge.findFace(1), transformationMatrix);
 
         //-----------------------------------------------------------------

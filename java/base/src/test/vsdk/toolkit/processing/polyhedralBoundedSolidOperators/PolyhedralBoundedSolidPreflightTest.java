@@ -1,5 +1,6 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -80,16 +81,16 @@ class PolyhedralBoundedSolidPreflightTest
     @Test
     void given_twoCylindersWithSameRadius_when_inspectingEachSolid_then_noCoincidentVertices()
     {
-        PolyhedralBoundedSolid cylA = PolyhedralBoundedSolidModeler
+        PolyhedralBoundedSolid cylA = PolyhedralBoundedSolidEulerConstructions
             .createCircularLamina(0.0, 0.0, 0.15, 0.0, 30);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             cylA, cylA.findFace(1),
             new vsdk.toolkit.common.linealAlgebra.Matrix4x4d()
                 .translation(0.0, 0.0, 0.5));
 
-        PolyhedralBoundedSolid cylB = PolyhedralBoundedSolidModeler
+        PolyhedralBoundedSolid cylB = PolyhedralBoundedSolidEulerConstructions
             .createCircularLamina(0.11, 0.0, 0.15, 0.06, 30);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             cylB, cylB.findFace(1),
             new vsdk.toolkit.common.linealAlgebra.Matrix4x4d()
                 .translation(0.0, 0.0, 0.5));

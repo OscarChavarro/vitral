@@ -90,16 +90,18 @@ public final class CookTorranceShader extends Shader {
                 continue;
             }
 
-            if ( isShadowed(
+            double shadowFactor = shadowTransmittance(
                 info,
                 lightDirX,
                 lightDirY,
                 lightDirZ,
                 lightDirection.maxShadowDistance(),
                 objects,
-                workspace) ) {
+                workspace);
+            if ( shadowFactor <= 0.0 ) {
                 continue;
             }
+            attenuation *= shadowFactor;
 
             double ndotL = Math.max(0.0, normalX * lightDirX + normalY * lightDirY + normalZ * lightDirZ);
             if ( ndotL <= 0.0 ) {
@@ -247,7 +249,7 @@ public final class CookTorranceShader extends Shader {
     {
     }
 
-    private static boolean isShadowed(
+    private static double shadowTransmittance(
         RayHit info,
         double lightDirX,
         double lightDirY,
@@ -257,7 +259,7 @@ public final class CookTorranceShader extends Shader {
         TraceWorkspace workspace)
     {
         if ( maxShadowDistance <= VSDK.EPSILON ) {
-            return true;
+            return 0.0;
         }
         Vector3Dd shadowOrigin = new Vector3Dd(
             info.point.x() + VSDK.EPSILON * lightDirX,
@@ -265,19 +267,7 @@ public final class CookTorranceShader extends Shader {
             info.point.z() + VSDK.EPSILON * lightDirZ);
         Vector3Dd shadowDirection = new Vector3Dd(lightDirX, lightDirY, lightDirZ);
         Ray shadowRay = new Ray(shadowOrigin, shadowDirection);
-        RayHit shadowCandidateHit = workspace.shadowCandidateHit();
-        shadowCandidateHit.setStoreRay(false);
-
-        for ( int i = 0; i < objects.size(); i++ ) {
-            SimpleBody candidateObject = objects.get(i);
-            shadowCandidateHit.resetForDistanceOnly();
-            if ( candidateObject.doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
-                double hitDistance = shadowCandidateHit.getHitDistance();
-                if ( hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance ) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return ShadowTransmittance.evaluate(
+            shadowRay, maxShadowDistance, objects, workspace, false);
     }
 }

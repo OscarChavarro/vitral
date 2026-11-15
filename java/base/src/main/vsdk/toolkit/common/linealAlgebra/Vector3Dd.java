@@ -64,6 +64,35 @@ public final class Vector3Dd extends FundamentalEntity
     }
 
     /**
+    Componentwise product, as cpp `Vector3Dd::multiply(const Vector3Dd&)`.
+    @param other the second factor
+    @return (x*other.x, y*other.y, z*other.z)
+    */
+    public Vector3Dd multiply(Vector3Dd other) {
+        return new Vector3Dd(x * other.x, y * other.y, z * other.z);
+    }
+
+    /**
+    As cpp `Vector3Dd::midpoint`.
+    @param other the second point
+    @return 0.5*(this + other), componentwise
+    */
+    public Vector3Dd midpoint(Vector3Dd other) {
+        return new Vector3Dd(
+            0.5 * (x + other.x), 0.5 * (y + other.y), 0.5 * (z + other.z));
+    }
+
+    /**
+    As cpp `Vector3Dd::normalizedFast`: divides by the length with no
+    degeneracy guard.
+    @return this vector divided by its length
+    */
+    public Vector3Dd normalizedFast() {
+        final double vTemp = Math.sqrt(x*x + y*y + z*z);
+        return new Vector3Dd(x / vTemp, y / vTemp, z / vTemp);
+    }
+
+    /**
     @param other the second vector in cross product
     @return Vector3Dd, the result of the operation
     */

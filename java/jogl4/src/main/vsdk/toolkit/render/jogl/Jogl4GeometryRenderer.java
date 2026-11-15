@@ -19,17 +19,26 @@ import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.surface.SubdividedBezierPatch;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.HeightFieldSolid;
+import vsdk.toolkit.environment.geometry.volume.ImplicitSolid;
+import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.geometry.element.GeometryBounds;
+import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.processing.BezierPatchTessellator;
+import vsdk.toolkit.processing.SolidBoundaryTessellationReport;
+import vsdk.toolkit.processing.SolidBoundaryTessellator;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
 /**
@@ -43,7 +52,10 @@ Supported geometries: `Sphere`, `Cone` (also cylinders and truncated cones),
 `Arrow`, `Box`, `Torus`, `TriangleMesh`, `TriangleMeshGroup`, `VoxelVolume` (as the cubes of its
 voxels, tessellated by `Jogl4VoxelVolumeRenderer`), and the open surfaces
 `FunctionalExplicitSurface`, `ParametricBiCubicPatch` and `InfinitePlane`
-(tessellated by their `Jogl4*Renderer`, visible from both sides). A
+(tessellated by their `Jogl4*Renderer`, visible from both sides). Quadrics,
+implicit solids and height fields with finite bounds are drawn from their
+`SolidBoundaryTessellator` mesh, and a `SubdividedBezierPatch` from its
+`BezierPatchTessellator` mesh, visible from both sides. A
 `ParametricCurve` has no surface: it is drawn as lines by
 `Jogl4ParametricCurveRenderer`.
 */
@@ -52,6 +64,10 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     private static final int TORUS_MAJOR_SEGMENTS = 48;
     private static final int TORUS_MINOR_SEGMENTS = 24;
     private static final int MAX_CACHED_MESHES = 256;
+    /** Cells along the longest side of the bounds of a tessellated solid */
+    private static final int SOLID_TESSELLATION_RESOLUTION = 64;
+    /** Parameter steps of a tessellated Bezier patch along u and v */
+    private static final int PATCH_TESSELLATION_STEPS = 24;
 
     private static final Map<String, Jogl4MeshRenderer.Mesh> MESHES = new HashMap<>();
     private static final Set<String> REPORTED_UNSUPPORTED = new HashSet<>();
@@ -73,6 +89,10 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             geometry instanceof ParametricBiCubicPatch ||
             geometry instanceof InfinitePlane ||
             geometry instanceof VoxelVolume ||
+            geometry instanceof ImplicitSolid ||
+            geometry instanceof QuadricSurface ||
+            geometry instanceof HeightFieldSolid ||
+            geometry instanceof SubdividedBezierPatch ||
             geometry instanceof ParametricCurve;
     }
 
@@ -327,6 +347,16 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         if ( geometry instanceof VoxelVolume v ) {
             return Jogl4VoxelVolumeRenderer.meshKey(v);
         }
+        if ( geometry instanceof ImplicitSolid ||
+             geometry instanceof QuadricSurface ||
+             geometry instanceof HeightFieldSolid ) {
+            return "tessellatedsolid/" + System.identityHashCode(geometry) + "/" +
+                SOLID_TESSELLATION_RESOLUTION;
+        }
+        if ( geometry instanceof SubdividedBezierPatch ) {
+            return "subdividedbezierpatch/" + System.identityHashCode(geometry) + "/" +
+                PATCH_TESSELLATION_STEPS;
+        }
         return null;
     }
 
@@ -358,6 +388,14 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         }
         if ( geometry instanceof VoxelVolume v ) {
             return Jogl4VoxelVolumeRenderer.buildMesh(v);
+        }
+        if ( geometry instanceof ImplicitSolid ||
+             geometry instanceof QuadricSurface ||
+             geometry instanceof HeightFieldSolid ) {
+            return buildTessellatedSolid(geometry);
+        }
+        if ( geometry instanceof SubdividedBezierPatch p ) {
+            return buildBezierPatch(p);
         }
         return null;
     }
@@ -495,22 +533,37 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     private static Jogl4MeshRenderer.Mesh buildTriangleMesh(TriangleMesh mesh)
     {
         double[] p = mesh.getVertexPositions();
-        double[] n = mesh.getVertexNormals();
-        double[] uv = mesh.getVertexUvs();
         int[] idx = mesh.getTriangleIndexes();
 
         if ( p == null || idx == null ) {
             return null;
         }
-        double[] minmax = mesh.getMinMax();
+        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(maxAbsExtent(mesh.getMinMax()));
+        builder.setDoubleSided(mesh.isDoubleSided());
+        addTriangleMesh(builder, mesh);
+        return builder.build();
+    }
+
+    private static double maxAbsExtent(double[] minmax)
+    {
         double size = 1.0;
         if ( minmax != null && minmax.length >= 6 ) {
             size = Math.max(Math.abs(minmax[3] - minmax[0]),
                 Math.max(Math.abs(minmax[4] - minmax[1]), Math.abs(minmax[5] - minmax[2])));
         }
-        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(size);
-        builder.setDoubleSided(mesh.isDoubleSided());
+        return size;
+    }
 
+    private static void addTriangleMesh(Jogl4MeshBuilder builder, TriangleMesh mesh)
+    {
+        double[] p = mesh.getVertexPositions();
+        double[] n = mesh.getVertexNormals();
+        double[] uv = mesh.getVertexUvs();
+        int[] idx = mesh.getTriangleIndexes();
+
+        if ( p == null || idx == null ) {
+            return;
+        }
         for ( int t = 0; t + 2 < idx.length; t += 3 ) {
             Vector3Dd[] pos = new Vector3Dd[3];
             Vector3Dd[] nor = new Vector3Dd[3];
@@ -531,6 +584,48 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             builder.addTriangle(pos[0], nor[0], u[0], v[0], pos[1], nor[1], u[1], v[1],
                 pos[2], nor[2], u[2], v[2]);
         }
+    }
+
+    /**
+    Quadrics, implicit solids and height fields are drawn from the
+    `SolidBoundaryTessellator` mesh of their finite bounds; unbounded ones are
+    not supported.
+    */
+    private static Jogl4MeshRenderer.Mesh buildTessellatedSolid(Geometry geometry)
+    {
+        GeometryBounds bounds = new GeometryBounds();
+        geometry.getBounds(bounds);
+        if ( bounds.getKind() != GeometryBounds.Kind.Finite ) {
+            return null;
+        }
+        SimpleBody body = new SimpleBody();
+        // cpp setGeometryReference (borrowed); the same under garbage collection.
+        body.setGeometry(geometry);
+        SolidBoundaryTessellationReport report = new SolidBoundaryTessellationReport();
+        // The margin keeps the extreme points of the solid inside the region
+        TriangleMesh mesh = SolidBoundaryTessellator.tessellate(body,
+            bounds.inflated(1e-3 * maxAbsExtent(geometry.getMinMax())),
+            SOLID_TESSELLATION_RESOLUTION, report);
+        if ( mesh == null ) {
+            return null;
+        }
+        return buildTriangleMesh(mesh);
+    }
+
+    /**
+    A Bezier patch is drawn from the `BezierPatchTessellator` mesh of its
+    surface, visible from both sides.
+    */
+    private static Jogl4MeshRenderer.Mesh buildBezierPatch(SubdividedBezierPatch patch)
+    {
+        TriangleMesh mesh = BezierPatchTessellator.tessellate(patch,
+            PATCH_TESSELLATION_STEPS, PATCH_TESSELLATION_STEPS);
+        if ( mesh == null ) {
+            return null;
+        }
+        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(maxAbsExtent(mesh.getMinMax()));
+        builder.setDoubleSided(true);
+        addTriangleMesh(builder, mesh);
         return builder.build();
     }
 }

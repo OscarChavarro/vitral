@@ -14,6 +14,7 @@
 package vsdk.toolkit.render.raytracing;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
 import java.util.List;
 
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
@@ -132,6 +133,11 @@ public class SimpleRaytracer extends RenderingElement {
         return material != null && material.getReflectionCoefficient() > 0;
     }
 
+    private static boolean isTransmissive(SimpleMaterial material)
+    {
+        return material != null && material.getRefractionCoefficient() > 0;
+    }
+
     private static RenderContext buildRenderContext(
         RendererConfiguration qualitySelection,
         List<Light> lights)
@@ -154,7 +160,7 @@ public class SimpleRaytracer extends RenderingElement {
         NormalMap normalMap,
         RenderContext renderContext)
     {
-        boolean objectReflective = isReflective(material);
+        boolean objectReflective = isReflective(material) || isTransmissive(material);
         boolean needsPoint = renderContext.localLightingEnabled || objectReflective;
         boolean needsNormal = needsPoint;
         boolean needsUv =
@@ -360,63 +366,172 @@ public class SimpleRaytracer extends RenderingElement {
                 //delete reflect;
                 //delete poffset;
 
-                RayHit reflectedHit = workspace.reflectionHits[recursionLevel];
-                int nearestObjectIndex =
-                    selectNearestThingInRayDirection(
-                        reflected_ray,
-                        objects,
-                        reflectedHit,
-                        workspace.traversalCandidateHit);
-                if ( nearestObjectIndex >= 0 ) {
-                    SimpleBody nearestObject = objects.get(nearestObjectIndex);
-                    SceneObjectRenderData objectData =
-                        sceneRenderCache.objectData(nearestObjectIndex);
-                    RayHit subInfo = workspace.shadingHits[recursionLevel + 1];
-                    Ray reflectedHitRay =
-                        reflected_ray.withT(reflectedHit.getHitDistance());
-
-                    prepareSurfaceHit(
-                        nearestObject,
-                        objectData,
-                        reflectedHitRay,
-                        subInfo);
-                    ColorRgb rcolor = evaluateIlluminationModel(
-                        subInfo,
-                        -reflected_ray.getDirection().x(),
-                        -reflected_ray.getDirection().y(),
-                        -reflected_ray.getDirection().z(),
-                        lights,
-                        objects,
-                        sceneRenderCache,
-                        background,
-                        resolveMaterial(subInfo, objectData),
-                        renderContext,
-                        recursions - 1,
-                        recursionLevel + 1,
-                        workspace);
-
-                    outR += rcolor.r() * kr;
-                    outG += rcolor.g() * kr;
-                    outB += rcolor.b() * kr;
-                  }
-                  else {
-                    ColorRgb reflectedBackground =
-                        background.colorInDireccion(reflect);
-                    outR += reflectedBackground.r() * kr;
-                    outG += reflectedBackground.g() * kr;
-                    outB += reflectedBackground.b() * kr;
-                }
+                ColorRgb rcolor = shadeSecondaryRay(
+                    reflected_ray,
+                    lights,
+                    objects,
+                    sceneRenderCache,
+                    background,
+                    renderContext,
+                    recursions,
+                    recursionLevel,
+                    workspace);
+                outR += rcolor.r() * kr;
+                outG += rcolor.g() * kr;
+                outB += rcolor.b() * kr;
             }
         }
 
-        // Add code for refraction here
-        // <TODO>
+        double kt = material.getRefractionCoefficient();
+        if ( kt > 0 && recursions > 0 ) {
+            ColorRgb tcolor = shadeTransmission(
+                info,
+                viewX,
+                viewY,
+                viewZ,
+                surfaceNormal,
+                lights,
+                objects,
+                sceneRenderCache,
+                background,
+                material,
+                renderContext,
+                recursions,
+                recursionLevel,
+                workspace);
+            outR += tcolor.r() * kt;
+            outG += tcolor.g() * kt;
+            outB += tcolor.b() * kt;
+        }
 
         // Clamp outColor to MAX 1.0 intensity.
         return new ColorRgb(
             (outR > 1) ? 1 : outR,
             (outG > 1) ? 1 : outG,
             (outB > 1) ? 1 : outB);
+    }
+
+    private ColorRgb shadeSecondaryRay(
+        Ray ray,
+        List<Light> lights,
+        List<SimpleBody> objects,
+        SceneRenderCache sceneRenderCache,
+        Background background,
+        RenderContext renderContext,
+        int recursions,
+        int recursionLevel,
+        TraceWorkspace workspace)
+    {
+        RayHit secondaryHit = workspace.reflectionHits[recursionLevel];
+        int nearestObjectIndex = selectNearestThingInRayDirection(
+            ray, objects, secondaryHit, workspace.traversalCandidateHit);
+        if ( nearestObjectIndex < 0 ) {
+            return background.colorInDireccion(ray.getDirection());
+        }
+        SimpleBody nearestObject = objects.get(nearestObjectIndex);
+        SceneObjectRenderData objectData =
+            sceneRenderCache.objectData(nearestObjectIndex);
+        RayHit subInfo = workspace.shadingHits[recursionLevel + 1];
+        Ray hitRay = ray.withT(secondaryHit.getHitDistance());
+        prepareSurfaceHit(nearestObject, objectData, hitRay, subInfo);
+        return evaluateIlluminationModel(
+            subInfo,
+            -ray.getDirection().x(),
+            -ray.getDirection().y(),
+            -ray.getDirection().z(),
+            lights,
+            objects,
+            sceneRenderCache,
+            background,
+            resolveMaterial(subInfo, objectData),
+            renderContext,
+            recursions - 1,
+            recursionLevel + 1,
+            workspace);
+    }
+
+    /**
+    Transmitted branch of the illumination model [WHIT1980]: the direction comes
+    from Snell's law, n1 sin(i) = n2 sin(t), with n1 the index of the medium the
+    ray travels in and n2 that of the medium past the surface. A ray arriving on
+    the side opposite to the surface normal leaves the solid, so n2 is the index
+    of the enclosing medium (`TraceWorkspace.mediumIndices`). Without a real
+    solution the light is totally reflected inside the current medium.
+    */
+    private ColorRgb shadeTransmission(
+        RayHit info,
+        double viewX,
+        double viewY,
+        double viewZ,
+        Vector3Dd surfaceNormal,
+        List<Light> lights,
+        List<SimpleBody> objects,
+        SceneRenderCache sceneRenderCache,
+        Background background,
+        SimpleMaterial material,
+        RenderContext renderContext,
+        int recursions,
+        int recursionLevel,
+        TraceWorkspace workspace)
+    {
+        ArrayList<Double> media = workspace.mediumIndices;
+        double nx = surfaceNormal.x(), ny = surfaceNormal.y(), nz = surfaceNormal.z();
+        double length = Math.sqrt(nx*nx + ny*ny + nz*nz);
+        double vlength = Math.sqrt(viewX*viewX + viewY*viewY + viewZ*viewZ);
+        if ( length <= 0 || vlength <= 0 ) {
+            return new ColorRgb(0, 0, 0);
+        }
+        nx /= length; ny /= length; nz /= length;
+        double vx = viewX/vlength, vy = viewY/vlength, vz = viewZ/vlength;
+        double cosI = vx*nx + vy*ny + vz*nz;
+        boolean entering = cosI > 0;
+        if ( !entering ) { nx = -nx; ny = -ny; nz = -nz; cosI = -cosI; }
+
+        double currentIndex = media.size() > 0 ? media.get(media.size() - 1) : 1.0;
+        double materialIndex = material.getIndexOfRefraction();
+        double n1, n2;
+        if ( entering ) { n1 = currentIndex; n2 = materialIndex; }
+        else { n1 = materialIndex; n2 = media.size() > 1 ? media.get(media.size() - 2) : 1.0; }
+        Vector3Dd towardViewer = new Vector3Dd(vx, vy, vz);
+        Vector3Dd normal = new Vector3Dd(nx, ny, nz);
+        Vector3Dd[] direction = {new Vector3Dd()};
+        boolean totalInternalReflection =
+            !SnellRefraction.refract(towardViewer, normal, n1 / n2, direction);
+        if ( totalInternalReflection ) {
+            direction[0] = SnellRefraction.reflect(towardViewer, normal);
+        }
+        double dx = direction[0].x(), dy = direction[0].y(), dz = direction[0].z();
+        Vector3Dd origin = new Vector3Dd(
+            info.point.x() + VSDK.EPSILON*dx,
+            info.point.y() + VSDK.EPSILON*dy,
+            info.point.z() + VSDK.EPSILON*dz);
+        Ray transmittedRay = new Ray(origin, new Vector3Dd(dx, dy, dz));
+
+        // The medium stack follows the ray: entering pushes the solid's index,
+        // leaving pops it; both are undone once the branch is traced.
+        double removedIndex = 0;
+        boolean pushed = false, popped = false;
+        if ( !totalInternalReflection ) {
+            if ( entering ) { media.add(materialIndex); pushed = true; }
+            else if ( media.size() > 0 ) {
+                removedIndex = media.get(media.size() - 1);
+                media.remove(media.size() - 1);
+                popped = true;
+            }
+        }
+        ColorRgb color = shadeSecondaryRay(
+            transmittedRay,
+            lights,
+            objects,
+            sceneRenderCache,
+            background,
+            renderContext,
+            recursions,
+            recursionLevel,
+            workspace);
+        if ( pushed ) media.remove(media.size() - 1);
+        if ( popped ) media.add(removedIndex);
+        return color;
     }
 
     /**

@@ -9,7 +9,13 @@ import java.io.Serial;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.environment.geometry.element.GeometryBounds;
+import vsdk.toolkit.environment.geometry.element.GeometryContainment;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayBoundary;
+import vsdk.toolkit.environment.geometry.element.RayFirstHitStatus;
+import vsdk.toolkit.environment.geometry.element.RaySolidClassification;
+import vsdk.toolkit.environment.geometry.element.RaySolidQueryStatus;
 import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
 import vsdk.toolkit.environment.geometry.element.RayCrossingSink;
 import vsdk.toolkit.environment.geometry.element.RayCrossingSupport;
@@ -30,7 +36,75 @@ supplied by all geometries in order to be managed uniformly by every
 geometric algorithm, including but not limited to rendering operations.<P>
 */
 public abstract class Geometry extends Entity {
+    /** An independent mathematical copy, or null when copying is unsupported. */
+    public Geometry copyGeometry() { return null; }
+
+    /** Unsupported is distinct from an empty sequence of crossings. */
     public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query, RayCrossingSink sink) { return RayCrossingSupport.Unsupported; }
+
+    /**
+    Full solid membership over the query interval; never infer interior from
+    surface hits alone. Unsupported geometries leave result empty.
+    */
+    public RaySolidQueryStatus classifyRay(Ray ray, RayCrossingQuery query,
+        RaySolidClassification result)
+    {
+        result.clear();
+        return RaySolidQueryStatus.Unsupported;
+    }
+
+    /** Inclusive explicit interval; unsupported implementations clear output. */
+    public final RayFirstHitStatus queryFirstHit(Ray ray, RayCrossingQuery query, RayHit result)
+    {
+        return queryFirstHit(ray, query, result, null);
+    }
+
+    /** Inclusive explicit interval; unsupported implementations clear output. */
+    public RayFirstHitStatus queryFirstHit(Ray ray, RayCrossingQuery query, RayHit result,
+        RayBoundary boundary)
+    {
+        if (result != null) result.clear();
+        if (boundary != null) boundary.assign(new RayBoundary());
+        return RayFirstHitStatus.Unsupported;
+    }
+
+    /**
+    Resolve detail for a boundary in this geometry's local coordinates.
+    Hit means evaluated; unsupported and numerical failures remain explicit.
+    */
+    public RayFirstHitStatus querySurfaceDetail(Ray ray, RayBoundary boundary, RayHit result)
+    {
+        if (result != null) result.clear();
+        return RayFirstHitStatus.Unsupported;
+    }
+
+    /** Unsupported is explicit; legacy getMinMax remains available. */
+    public void getBounds(GeometryBounds result) { result.setUnsupported(); }
+
+    /** Typed containment; unsupported is explicit here. */
+    public GeometryContainment classifyPoint(Vector3Dd p, double distanceTolerance)
+    { return GeometryContainment.Unsupported; }
+
+    /**
+    Certified local-space classification of the closed ball of radius
+    distanceTolerance around the point. Inside/Outside: the whole ball lies
+    strictly in the interior/exterior. Boundary: a boundary point lies within
+    the ball. Anything not proven, including at zero tolerance, is Indeterminate.
+    */
+    public GeometryContainment classifyPointCertified(Vector3Dd p, double distanceTolerance)
+    {
+        return GeometryContainment.Unsupported;
+    }
+
+    /**
+    Certified classification of the closed axis-aligned local box
+    center +/- halfWidths: Inside/Outside only when the whole box lies strictly
+    in the interior/exterior; never Boundary. Other results are Indeterminate.
+    */
+    public GeometryContainment classifyBoxCertified(Vector3Dd center, Vector3Dd halfWidths)
+    {
+        return GeometryContainment.Unsupported;
+    }
 
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20150218L;
@@ -153,6 +227,13 @@ public abstract class Geometry extends Entity {
     public abstract double[] getMinMax();
 
     /**
+    Legacy integer predicate kept for parity with the Java port. It is not
+    the typed contract: its tolerance band is family specific, the default
+    reports OUTSIDE for unsupported geometries, and surfaces report LIMIT only
+    on the surface. Typed scene and CSG queries never consult it. Adapters for
+    solids introduced with the typed contract raise when a typed result has
+    no integer representation.<P>
+
     Given a point `p`, this method classifies if point lies `INSIDE` current
     geometry, `OUTSIDE` current geometry or `LIMIT` if it is near the geometry
     at some specified `distanceTolerance`.

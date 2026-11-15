@@ -97,6 +97,9 @@ public final class OfflineControl
         if ( options.getParallels() != null ) {
             model.setSphereParallels(options.getParallels().intValue());
         }
+        if ( options.getGeometry() != null ) {
+            model.selectGeometry(options.getGeometry());
+        }
         if ( options.getTextureFilter() != null ) {
             if ( options.getTextureFilter() == CommandLineOptions.TextureFilterOption.NEAREST ) {
                 Jogl4ImageRenderer.setTextureFilterMode(

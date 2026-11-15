@@ -2,6 +2,7 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 package models;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 // Java classes
@@ -64,18 +65,18 @@ public final class GeneralModelsBuilder
           case ARC_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
             PolyhedralBoundedSolidEulerOperators.mvfs(mySolid, new Vector3Dd(1, 0.5, 0.1), 1, 1);
-            PolyhedralBoundedSolidModeler.addArcToExistingFace(
+            PolyhedralBoundedSolidEulerConstructions.addArcToExistingFace(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
           case CIRCULAR_LAMINA:
-            mySolid = PolyhedralBoundedSolidModeler.createCircularLamina(
+            mySolid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 12
             );
             break;
           case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC:
             mySolid = new PolyhedralBoundedSolid();
             PolyhedralBoundedSolidEulerOperators.mvfs(mySolid, new Vector3Dd(1, 0.5, 0.1), 1, 1);
-            PolyhedralBoundedSolidModeler.addArcToExistingFace(
+            PolyhedralBoundedSolidEulerConstructions.addArcToExistingFace(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
 
             translationMatrix = new Matrix4x4d();
@@ -86,12 +87,12 @@ public final class GeneralModelsBuilder
             scaleMatrix = scaleMatrix.scale(0.5, 0.5, 0.5);
             transformationMatrix = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
 
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), transformationMatrix);
 
             break;
           case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_CIRCULAR:
-            mySolid = PolyhedralBoundedSolidModeler.createCircularLamina(
+            mySolid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
                 0.5, 0.5, 0.5, 0.1, 24
             );
 
@@ -102,7 +103,7 @@ public final class GeneralModelsBuilder
             scaleMatrix = new Matrix4x4d();
             scaleMatrix = scaleMatrix.scale(0.5, 0.5, 0.5);
             transformationMatrix = translationMatrix.multiply(rotationMatrix.multiply(scaleMatrix));
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), transformationMatrix);
 
 /*
@@ -113,7 +114,7 @@ public final class GeneralModelsBuilder
             S = new Matrix4x4d();
             S = S.scale(0.2, 0.2, 0.2);
             M = T.multiply(R.multiply(S));
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFace(
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFace(
                 solid, solid.findFace(1), M);
 */
             break;
@@ -158,7 +159,7 @@ public final class GeneralModelsBuilder
             translationMatrix = new Matrix4x4d();
             translationMatrix = translationMatrix.translation(0.0, 0.0, 0.1);
 
-            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
                 mySolid, mySolid.findFace(1), translationMatrix);
 
             break;
@@ -650,10 +651,10 @@ public final class GeneralModelsBuilder
         Matrix4x4d T = new Matrix4x4d();
         T = T.translation(0, 0, 0.4);
 
-        solid1 = PolyhedralBoundedSolidModeler.createCircularLamina(
+        solid1 = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
             0.0, 0.0, 0.5, 0.0, 6
         );
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid1, solid1.findFace(1), T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid1);
 
@@ -670,10 +671,10 @@ public final class GeneralModelsBuilder
         //- Create cilynder 2 ---------------------------------------------
         PolyhedralBoundedSolid solid2;
 
-        solid2 = PolyhedralBoundedSolidModeler.createCircularLamina(
+        solid2 = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
             0.0, 0.0, 0.5, 0.0, 6
         );
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid2, solid2.findFace(1), T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid2);
 
@@ -894,7 +895,7 @@ public final class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
         Vector3Dd center = new Vector3Dd(0.5, 0.5, 0);
 
-        solid = PolyhedralBoundedSolidModeler.createCircularLamina(center.x(), center.y(),
+        solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(center.x(), center.y(),
                                                       0.2, 0.0, nsides);
 
         // For seting 4 sided case to be equal to figure [MANT1988].12.5.
@@ -952,7 +953,7 @@ public final class GeneralModelsBuilder
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 4, 3, 1, 2, 2);
         Matrix4x4d T = new Matrix4x4d();
         T = T.translation(0, 0, 0.4);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 */
 

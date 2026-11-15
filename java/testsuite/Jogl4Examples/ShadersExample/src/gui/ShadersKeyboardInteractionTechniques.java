@@ -102,6 +102,11 @@ public class ShadersKeyboardInteractionTechniques
                 model.cycleCookTorranceMaterial();
                 repaint = true;
                 break;
+            case KeyEvent.KEY_o:
+            case KeyEvent.KEY_O:
+                model.cycleGeometry();
+                repaint = true;
+                break;
             case KeyEvent.KEY_q:
                 model.changeSphereMeridians(-1);
                 repaint = true;

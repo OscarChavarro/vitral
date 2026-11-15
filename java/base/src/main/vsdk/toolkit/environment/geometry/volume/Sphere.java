@@ -9,7 +9,16 @@ import java.io.Serial;
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.numerics.FloatingInterval;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.element.GeometryBounds;
+import vsdk.toolkit.environment.geometry.element.GeometryContainment;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayBoundary;
+import vsdk.toolkit.environment.geometry.element.RayFirstHitStatus;
+import vsdk.toolkit.environment.geometry.element.RaySolidBoundary;
+import vsdk.toolkit.environment.geometry.element.RaySolidClassification;
+import vsdk.toolkit.environment.geometry.element.RaySolidQueryStatus;
 import vsdk.toolkit.environment.geometry.element.RayCrossing;
 import vsdk.toolkit.environment.geometry.element.RayCrossingKind;
 import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
@@ -20,31 +29,61 @@ import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 public class Sphere extends Solid {
-    // The returned array contains zero, one or two ordered affine parameters.
-    public static double[] intersectionRoots(Vector3Dd p, Vector3Dd d, double radius, RayCrossingQuery query) {
-        double lengthSquared = d.dotProduct(d);
-        if (!(lengthSquared > 0) || query.minT > query.maxT) return new double[0];
-        double length = Math.sqrt(lengthSquared);
-        double closest = -p.dotProduct(d) / length;
-        double ocSquared = p.dotProduct(p), radiusSquared = radius * radius;
-        if (!(ocSquared < radiusSquared) && closest < query.minimumExteriorApproach) return new double[0];
-        double chordSquared = radiusSquared - ocSquared + closest * closest;
-        if (chordSquared < query.minimumChordSquared) return new double[0];
-        double half = Math.sqrt(chordSquared), near = (closest - half) / length, far = (closest + half) / length;
-        boolean n = near >= query.minT && near <= query.maxT, f = far >= query.minT && far <= query.maxT;
-        if (!n && !f) return new double[0];
-        if (!n) near = far;
-        if (!f) far = near;
-        return near == far ? new double[]{near} : new double[]{near, far};
+    /**
+    Returns zero, one or two roots in increasing order without allocation.
+    `nearT` and `farT` are one-element output holders.
+    */
+    public static int intersectionRoots(Vector3Dd p, Vector3Dd d,
+        double radius, RayCrossingQuery query, double[] nearT, double[] farT)
+    {
+        final double lengthSquared = d.dotProduct(d);
+        if (!(lengthSquared > 0.0) || query.minT > query.maxT) return 0;
+        final double directionLength = Math.sqrt(lengthSquared);
+        final Vector3Dd unitDirection = d.multiply(1.0 / directionLength);
+        final double radiusSquared = radius * radius;
+        final double ocSquared = p.dotProduct(p);
+        final boolean inside = ocSquared < radiusSquared;
+        final double closest = -p.dotProduct(unitDirection);
+        if (!inside && closest < query.minimumExteriorApproach) return 0;
+        final double chordSquared = radiusSquared - ocSquared + closest * closest;
+        if (chordSquared < query.minimumChordSquared) return 0;
+        final double halfChord = Math.sqrt(chordSquared);
+        farT[0] = (closest + halfChord) / directionLength;
+        nearT[0] = (closest - halfChord) / directionLength;
+        final boolean nearValid = nearT[0] >= query.minT && nearT[0] <= query.maxT;
+        final boolean farValid = farT[0] >= query.minT && farT[0] <= query.maxT;
+        if (!nearValid && !farValid) return 0;
+        if (!nearValid) nearT[0] = farT[0];
+        if (!farValid) farT[0] = nearT[0];
+        return nearT[0] == farT[0] ? 1 : 2;
     }
-    @Override public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query, RayCrossingSink sink) {
-        Vector3Dd p = ray.getOrigin(), d = ray.getDirection();
-        for (double t : intersectionRoots(p, d, radius, query)) {
-            double orientation = p.add(d.multiply(t)).dotProduct(d);
-            sink.crossing(new RayCrossing(t, this, orientation < 0 ? RayCrossingKind.Entering : orientation > 0 ? RayCrossingKind.Leaving : RayCrossingKind.Tangent));
+
+    @Override public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query, RayCrossingSink sink)
+    {
+        RayFirstHitStatus[] failure = new RayFirstHitStatus[1];
+        if (!validateSurfaceQuery(ray, query, failure)) {
+            return failure[0] == RayFirstHitStatus.InvalidInput ? RayCrossingSupport.InvalidInput
+                : RayCrossingSupport.Indeterminate;
         }
+        double[] nearT = new double[1], farT = new double[1];
+        final int count = intersectionRoots(ray.getOrigin(), ray.getDirection(),
+            radius, query, nearT, farT);
+        if (count > 0) emitCrossing(ray, sink, nearT[0]);
+        if (count > 1) emitCrossing(ray, sink, farT[0]);
         return RayCrossingSupport.Supported;
     }
+
+    // cpp lambda `emit` of emitRayCrossings.
+    private void emitCrossing(Ray ray, RayCrossingSink sink, double t)
+    {
+        final Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(t));
+        final double orientation = point.dotProduct(ray.getDirection());
+        final RayCrossingKind kind = orientation < 0 ? RayCrossingKind.Entering
+            : orientation > 0 ? RayCrossingKind.Leaving : RayCrossingKind.Tangent;
+        sink.crossing(new RayCrossing(t, this, kind));
+    }
+
+    @Override public Geometry copyGeometry() { return new Sphere(radius); }
 
     @Serial private static final long serialVersionUID = 20060502L;
 
@@ -70,53 +109,31 @@ public class Sphere extends Solid {
     */
     public Ray
     doIntersectionFirstHit(Ray inout_rayo) {
-        double dx = -inout_rayo.getOrigin().x();
-        double dy = -inout_rayo.getOrigin().y();
-        double dz = -inout_rayo.getOrigin().z();
-        Vector3Dd direction = inout_rayo.getDirection();
-        double v = direction.x()*dx + direction.y()*dy + direction.z()*dz;
-
-        // Test if the inout_rayo actually intersects the sphere
-        double t = radiusSquared + v*v 
-                  - dx*dx
-                  - dy*dy
-                  - dz*dz;
-        if ( t < 0 ) {
+        double[] nearT = new double[1], farT = new double[1];
+        if (intersectionRoots(inout_rayo.getOrigin(), inout_rayo.getDirection(), radius,
+                new RayCrossingQuery(0, Double.POSITIVE_INFINITY), nearT, farT) == 0) {
             return null;
         }
-
-        // Test if the intersection is in the positive
-        // inout_rayo direction
-        t = v - Math.sqrt(t);
-        if ( t < 0 ) {
-            return null;
-        }
-
-        return inout_rayo.withT(t);
+        return inout_rayo.withT(nearT[0]);
     }
 
     @Override
     public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        double dx = -inRay.getOrigin().x();
-        double dy = -inRay.getOrigin().y();
-        double dz = -inRay.getOrigin().z();
-        Vector3Dd direction = inRay.getDirection();
-        double projection =
-            direction.x()*dx + direction.y()*dy + direction.z()*dz;
+        return doIntersectionFirstHit(inRay,
+            new RayCrossingQuery(0, Double.POSITIVE_INFINITY), outHit);
+    }
 
-        double discriminant = radiusSquared + projection*projection
-                            - dx*dx
-                            - dy*dy
-                            - dz*dz;
-        if ( discriminant < 0 ) {
+    /** Explicit inclusive interval; the legacy overload queries [0,+infinity). */
+    public boolean doIntersectionFirstHit(Ray inRay, RayCrossingQuery query,
+        RayHit outHit)
+    {
+        double[] tHolder = new double[1], farT = new double[1];
+        if (intersectionRoots(inRay.getOrigin(), inRay.getDirection(), radius,
+                query, tHolder, farT) == 0) {
             return false;
         }
-
-        double t = projection - Math.sqrt(discriminant);
-        if ( t < 0 ) {
-            return false;
-        }
+        double t = tHolder[0];
 
         if ( outHit != null ) {
             if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
@@ -140,8 +157,17 @@ public class Sphere extends Solid {
     @param inT
     */
     public void
-    doExtraInformation(Ray inRay, double inT, 
+    doExtraInformation(Ray inRay, double inT,
                                   RayHit outData) {
+        fillSurfaceDetail(inRay, inT, outData);
+    }
+
+    private void fillSurfaceDetail(Ray inRay, double inT, RayHit outData) {
+        if ( outData == null ) {
+            return;
+        }
+
+        outData.beginDetailEvaluation();
         RaytraceStatistics.recordGeometryDetailComputation();
         boolean needsNormalVector =
             outData.needsNormal() ||
@@ -157,13 +183,25 @@ public class Sphere extends Solid {
             inRay.getOrigin().z() + inT*inRay.getDirection().z());
         if ( outData.needsPoint() ) {
             outData.point = point;
+            if (Double.isFinite(point.x()) && Double.isFinite(point.y()) && Double.isFinite(point.z()))
+                outData.markDetailAvailable(RayHit.DETAIL_POINT);
         }
 
         Vector3Dd normal = null;
         if ( needsNormalVector ) {
-            normal = new Vector3Dd(point).normalized();
+            final double pointSquared = point.dotProduct(point);
+            // Vector3Dd.normalized intentionally treats lengths below VSDK.EPSILON
+            // as zero; a small but valid sphere still needs a unit surface normal.
+            if (Double.isFinite(pointSquared) && pointSquared > 0 && pointSquared < VSDK.EPSILON)
+                normal = point.multiply(1.0 / Math.sqrt(pointSquared));
+            else
+                normal = point.normalized();
             if ( outData.needsNormal() ) {
                 outData.normal = normal;
+                final double normalSquared = normal.dotProduct(normal);
+                if (Double.isFinite(normalSquared) && normalSquared > 0 &&
+                    Double.isFinite(normal.x()) && Double.isFinite(normal.y()) && Double.isFinite(normal.z()))
+                    outData.markDetailAvailable(RayHit.DETAIL_NORMAL);
             }
         }
 
@@ -191,12 +229,16 @@ public class Sphere extends Solid {
         if ( outData.needsTextureCoordinates() ) {
             outData.u = ((theta+Math.PI/2)/(2*Math.PI));
             outData.v = 1 - (phi / Math.PI);
+            if (Double.isFinite(outData.u) && Double.isFinite(outData.v))
+                outData.markDetailAvailable(RayHit.DETAIL_UV);
         }
         if ( outData.needsTangent() ) {
             outData.tangent = new Vector3Dd(
                 Math.sin(theta-Math.PI/2),
                 -Math.cos(theta-Math.PI/2),
                 0);
+            if (Double.isFinite(outData.tangent.x()) && Double.isFinite(outData.tangent.y()))
+                outData.markDetailAvailable(RayHit.DETAIL_TANGENT);
         }
     }
 
@@ -206,16 +248,210 @@ public class Sphere extends Solid {
     @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
+    public GeometryContainment classifyBoxCertified(Vector3Dd center, Vector3Dd halfWidths) {
+        if (!Double.isFinite(radius) || radius <= 0) return GeometryContainment.InvalidInput;
+        if (!FloatingInterval.isSupportedEnvironment()) return GeometryContainment.Unsupported;
+        final double[] c = {center.x(), center.y(), center.z()};
+        final double[] h = {halfWidths.x(), halfWidths.y(), halfWidths.z()};
+        // Squared distances from the centre to the farthest and nearest box points.
+        FloatingInterval farthest = FloatingInterval.exact(0), nearest = FloatingInterval.exact(0);
+        for (int i = 0; i < 3; ++i) {
+            final FloatingInterval range = FloatingInterval.around(c[i], h[i]);
+            if (!range.isValid()) return GeometryContainment.InvalidInput;
+            final double extreme = Math.max(Math.abs(range.getLower()), Math.abs(range.getUpper()));
+            farthest = farthest.add(FloatingInterval.exact(extreme).square());
+            if (range.getLower() > 0) nearest = nearest.add(FloatingInterval.exact(range.getLower()).square());
+            else if (range.getUpper() < 0) nearest = nearest.add(FloatingInterval.exact(range.getUpper()).square());
+        }
+        final FloatingInterval squaredRadius = FloatingInterval.exact(radius).square();
+        if (!farthest.isValid() || !nearest.isValid() || !squaredRadius.isValid()) return GeometryContainment.Indeterminate;
+        if (farthest.getUpper() < squaredRadius.getLower()) return GeometryContainment.Inside;
+        if (nearest.getLower() > squaredRadius.getUpper()) return GeometryContainment.Outside;
+        return GeometryContainment.Indeterminate;
+    }
+
+    @Override
+    public GeometryContainment classifyPointCertified(Vector3Dd p, double distanceTolerance) {
+        if (!Double.isFinite(radius) || radius <= 0 ||
+            !Double.isFinite(distanceTolerance) || distanceTolerance < 0 ||
+            !Double.isFinite(p.x()) || !Double.isFinite(p.y()) ||
+            !Double.isFinite(p.z())) return GeometryContainment.InvalidInput;
+        if (!FloatingInterval.isSupportedEnvironment()) return GeometryContainment.Unsupported;
+        FloatingInterval squared=FloatingInterval.exact(0);
+        squared=squared.add(FloatingInterval.exact(p.x()).square());
+        squared=squared.add(FloatingInterval.exact(p.y()).square());
+        squared=squared.add(FloatingInterval.exact(p.z()).square());
+        final FloatingInterval signedDistance=squared.squareRoot().subtract(FloatingInterval.exact(radius));
+        if (!signedDistance.isValid()) return GeometryContainment.Indeterminate;
+        if (signedDistance.getUpper() < -distanceTolerance) return GeometryContainment.Inside;
+        if (signedDistance.getLower() > distanceTolerance) return GeometryContainment.Outside;
+        if (signedDistance.getLower() >= -distanceTolerance && signedDistance.getUpper() <= distanceTolerance)
+            return GeometryContainment.Boundary;
+        return GeometryContainment.Indeterminate;
+    }
+
+    @Override
+    public GeometryContainment classifyPoint(Vector3Dd p, double distanceTolerance) {
+        if (!Double.isFinite(radius) || radius <= 0 ||
+            !Double.isFinite(distanceTolerance) || distanceTolerance < 0 ||
+            !Double.isFinite(p.x()) || !Double.isFinite(p.y()) ||
+            !Double.isFinite(p.z())) return GeometryContainment.InvalidInput;
+        if (distanceTolerance>0) return classifyPointCertified(p, distanceTolerance);
+        final double squared = p.dotProduct(p);
+        final double radiusSquaredValue = radius * radius;
+        if (!Double.isFinite(squared) || !Double.isFinite(radius + distanceTolerance) ||
+            !Double.isFinite(radiusSquaredValue) || radiusSquaredValue == 0 ||
+            (squared == 0 && (p.x() != 0 || p.y() != 0 || p.z() != 0)))
+            return GeometryContainment.Indeterminate;
+        final double distance = p.length();
+        if (distance < radius - distanceTolerance) return GeometryContainment.Inside;
+        if (distance > radius + distanceTolerance) return GeometryContainment.Outside;
+        return GeometryContainment.Boundary;
+    }
+
+    @Override
     public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
-        double l = p.length();
-        if ( l < radius - distanceTolerance ) {
-            return INSIDE;
+        final GeometryContainment result = classifyPoint(p, distanceTolerance);
+        if (result == GeometryContainment.Inside) return INSIDE;
+        if (result == GeometryContainment.Boundary) return LIMIT;
+        if (result == GeometryContainment.Outside) return OUTSIDE;
+        // The legacy integer contract has no representation for uncertainty.
+        // Do not silently convert an indeterminate or failed query to outside.
+        throw new IllegalStateException("Sphere containment cannot be represented by the legacy integer result");
+    }
+
+    @Override
+    public RaySolidQueryStatus classifyRay(Ray ray,
+        RayCrossingQuery query, RaySolidClassification result)
+    {
+        result.clear();
+        final Vector3Dd origin = ray.getOrigin();
+        final Vector3Dd direction = ray.getDirection();
+        final double infinity = Double.POSITIVE_INFINITY;
+        // Surface compatibility cutoffs may discard genuine boundaries and cannot
+        // define a solid classification. Applications apply those to surface queries.
+        if (Double.isNaN(query.minT) || Double.isNaN(query.maxT) || query.minT >= query.maxT ||
+            query.minimumChordSquared != 0.0 || query.minimumExteriorApproach != -infinity ||
+            !Double.isFinite(radius) || radius <= 0.0 ||
+            !Double.isFinite(origin.x()) || !Double.isFinite(origin.y()) || !Double.isFinite(origin.z()) ||
+            !Double.isFinite(direction.x()) || !Double.isFinite(direction.y()) || !Double.isFinite(direction.z()) ||
+            (direction.x() == 0 && direction.y() == 0 && direction.z() == 0)) {
+            return RaySolidQueryStatus.InvalidInput;
         }
-        else if ( l > radius + distanceTolerance ) {
-            return OUTSIDE;
+        final double lengthSquared = direction.dotProduct(direction);
+        if (!Double.isFinite(lengthSquared) || lengthSquared == 0 ||
+            !Double.isFinite(origin.dotProduct(origin)) || !Double.isFinite(radius * radius) ||
+            radius * radius == 0.0) {
+            return RaySolidQueryStatus.Indeterminate;
         }
-        return LIMIT;
+        // Obtain the complete analytic interval before clipping: an empty set of
+        // surface events in the requested range can still mean entirely inside.
+        double[] nearH = {0}, farH = {0};
+        final int count = intersectionRoots(origin, direction, radius,
+            new RayCrossingQuery(-infinity, infinity), nearH, farH);
+        final double nearT = nearH[0], farT = farH[0];
+        if (!Double.isFinite(nearT) || !Double.isFinite(farT)) {
+            return RaySolidQueryStatus.Indeterminate;
+        }
+        if (count < 2) {
+            if (!result.insideSegments.add(false)) {
+                result.clear(); return RaySolidQueryStatus.Indeterminate;
+            }
+            return RaySolidQueryStatus.Supported; // Miss or point tangency (IN/OUT).
+        }
+        if (!result.insideSegments.add(query.minT > nearT && query.minT <= farT)) {
+            result.clear(); return RaySolidQueryStatus.Indeterminate;
+        }
+        if (nearT >= query.minT && nearT <= query.maxT) {
+            if (!result.boundaries.add(new RaySolidBoundary(nearT, this)) || !result.insideSegments.add(true)) {
+                result.clear(); return RaySolidQueryStatus.Indeterminate;
+            }
+        }
+        if (farT >= query.minT && farT <= query.maxT) {
+            if (!result.boundaries.add(new RaySolidBoundary(farT, this)) || !result.insideSegments.add(false)) {
+                result.clear(); return RaySolidQueryStatus.Indeterminate;
+            }
+        }
+        return RaySolidQueryStatus.Supported;
+    }
+
+    @Override
+    public void getBounds(GeometryBounds result)
+    {
+        if (!Double.isFinite(radius) || radius <= 0) {
+            result.setIndeterminate();
+            return;
+        }
+        result.setFinite(new Vector3Dd(-radius,-radius,-radius), new Vector3Dd(radius,radius,radius));
+    }
+
+    /** `failure` is a one-element output holder. */
+    private boolean validateSurfaceQuery(Ray ray, RayCrossingQuery query,
+        RayFirstHitStatus[] failure)
+    {
+        final Vector3Dd p = ray.getOrigin();
+        final Vector3Dd d = ray.getDirection();
+        if (Double.isNaN(query.minT) || Double.isNaN(query.maxT) ||
+            query.minT > query.maxT || !Double.isFinite(query.minimumChordSquared) ||
+            query.minimumChordSquared < 0 || Double.isNaN(query.minimumExteriorApproach) ||
+            !Double.isFinite(radius) || radius <= 0 ||
+            !Double.isFinite(p.x()) || !Double.isFinite(p.y()) || !Double.isFinite(p.z()) ||
+            !Double.isFinite(d.x()) || !Double.isFinite(d.y()) || !Double.isFinite(d.z()) ||
+            (d.x() == 0 && d.y() == 0 && d.z() == 0)) { failure[0] = RayFirstHitStatus.InvalidInput; return false; }
+        final double lengthSquared = d.dotProduct(d);
+        final double originSquared = p.dotProduct(p);
+        final double rSquared = radius * radius;
+        if (!Double.isFinite(lengthSquared) || lengthSquared == 0 ||
+            !Double.isFinite(originSquared) || !Double.isFinite(rSquared) || rSquared == 0)
+            { failure[0] = RayFirstHitStatus.Indeterminate; return false; }
+        return true;
+    }
+
+    @Override
+    public RayFirstHitStatus queryFirstHit(Ray ray, RayCrossingQuery query,
+        RayHit result, RayBoundary boundary)
+    {
+        if (result != null) result.clear();
+        if (boundary != null) boundary.assign(new RayBoundary());
+        final Vector3Dd p = ray.getOrigin();
+        final Vector3Dd d = ray.getDirection();
+        RayFirstHitStatus[] failure = new RayFirstHitStatus[1];
+        if (!validateSurfaceQuery(ray, query, failure)) return failure[0];
+        double[] nearH = new double[1], farH = new double[1];
+        if (intersectionRoots(p, d, radius, query, nearH, farH) == 0) return RayFirstHitStatus.Miss;
+        final double nearT = nearH[0];
+        if (!Double.isFinite(nearT)) return RayFirstHitStatus.Indeterminate;
+        if (boundary != null) boundary.assign(new RayBoundary(nearT, this));
+        if (result != null) {
+            result.setHitDistance(nearT);
+            if (result.shouldStoreRay() || result.needsAnySurfaceData()) {
+                final Ray hitRay = ray.withT(nearT);
+                result.setRay(hitRay);
+                if (result.needsAnySurfaceData()) {
+                    fillSurfaceDetail(hitRay, nearT, result);
+                    result.setRay(hitRay);
+                }
+            }
+        }
+        return RayFirstHitStatus.Hit;
+    }
+
+    /**
+    cpp returns a borrowed `const double&` to the intrinsic radius; Java has no
+    references to primitives, so this returns the current value.
+    */
+    public double getRadiusReference() { return radius; }
+
+    /** Signed squared implicit function: negative inside, positive outside. */
+    public double implicitValue(Vector3Dd point) { return point.dotProduct(point) - radiusSquared; }
+
+    /** Fast normal for a known nonzero surface point in local coordinates. */
+    public Vector3Dd surfaceNormalAtNonzeroPoint(Vector3Dd point)
+    {
+        // cpp Vector3Dd::normalizedFast.
+        final double vTemp = Math.sqrt(point.x()*point.x() + point.y()*point.y() + point.z()*point.z());
+        return new Vector3Dd(point.x() / vTemp, point.y() / vTemp, point.z() / vTemp);
     }
 
     /**

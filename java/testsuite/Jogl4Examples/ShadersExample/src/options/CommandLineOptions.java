@@ -1,6 +1,8 @@
 package options;
 
 import model.ShaderOperationMode;
+import model.ShadersGeometry;
+import model.ShadersGeometryFixture;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 
 public class CommandLineOptions
@@ -25,6 +27,7 @@ public class CommandLineOptions
     private Integer parallels;
     private Double cpuTextureOffsetUTexels;
     private Double cpuTextureOffsetVTexels;
+    private ShadersGeometry geometry;
     private boolean showHud;
     private int width;
     private int height;
@@ -45,6 +48,7 @@ public class CommandLineOptions
         options.parallels = null;
         options.cpuTextureOffsetUTexels = null;
         options.cpuTextureOffsetVTexels = null;
+        options.geometry = null;
         options.showHud = false;
         options.width = DEFAULT_OFFLINE_WIDTH;
         options.height = DEFAULT_OFFLINE_HEIGHT;
@@ -199,6 +203,22 @@ public class CommandLineOptions
             if ( arg.startsWith("--height=") ) {
                 options.height = Math.max(1, parseInt(
                     arg.substring("--height=".length()), "--height"));
+                continue;
+            }
+            if ( "--geometry".equals(arg) || arg.startsWith("--geometry=") ) {
+                String value;
+                if ( "--geometry".equals(arg) ) {
+                    ensureHasValue(args, i, "--geometry");
+                    value = args[++i];
+                }
+                else {
+                    value = arg.substring("--geometry=".length());
+                }
+                options.geometry = ShadersGeometryFixture.parse(value.toLowerCase());
+                if ( options.geometry == null ) {
+                    throw new IllegalArgumentException("Unknown --geometry value: " + value +
+                        ". Use sphere, quartic, blob, heightfield, csg or patch.");
+                }
                 continue;
             }
             if ( "--hud".equals(arg) ) {
@@ -422,6 +442,12 @@ public class CommandLineOptions
     public Double getCpuTextureOffsetVTexels()
     {
         return cpuTextureOffsetVTexels;
+    }
+
+    /** @return the selected geometry, or null when not given */
+    public ShadersGeometry getGeometry()
+    {
+        return geometry;
     }
 
     public boolean getShowHud()

@@ -87,16 +87,18 @@ public abstract class LightingShader extends Shader {
                 continue;
             }
 
-            if ( isShadowed(
+            double shadowFactor = shadowTransmittance(
                 info,
                 lx,
                 ly,
                 lz,
                 maxShadowDistance,
                 objects,
-                workspace) ) {
+                workspace);
+            if ( shadowFactor <= 0.0 ) {
                 continue;
             }
+            attenuation *= shadowFactor;
 
             double lambert = normalX*lx + normalY*ly + normalZ*lz;
             if ( lambert <= 0 ) {
@@ -150,7 +152,7 @@ public abstract class LightingShader extends Shader {
         return new LocalShadingResult(surfaceNormal, new ColorRgb(outR, outG, outB));
     }
 
-    private static boolean isShadowed(
+    private static double shadowTransmittance(
         RayHit info,
         double lightDirX,
         double lightDirY,
@@ -165,20 +167,8 @@ public abstract class LightingShader extends Shader {
             info.point.z() + VSDK.EPSILON * lightDirZ);
         Vector3Dd shadowDirection = new Vector3Dd(lightDirX, lightDirY, lightDirZ);
         Ray shadowRay = new Ray(shadowOrigin, shadowDirection);
-        RayHit shadowCandidateHit = workspace.shadowCandidateHit();
-        shadowCandidateHit.setStoreRay(false);
-
-        for ( int i = 0; i < objects.size(); i++ ) {
-            SimpleBody candidateObject = objects.get(i);
-            shadowCandidateHit.resetForDistanceOnly();
-            if ( candidateObject.doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
-                double hitDistance = shadowCandidateHit.getHitDistance();
-                if ( hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance ) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return ShadowTransmittance.evaluate(
+            shadowRay, maxShadowDistance, objects, workspace, true);
     }
 
     private static Vector3Dd computeBlinnPerturbedNormal(

@@ -17,7 +17,7 @@ public final class DirectionalLight extends Light
         Vector3Dd direction = getPosition();
         return new LightDirection(
             new Vector3Dd(-direction.x(), -direction.y(), -direction.z()),
-            Double.POSITIVE_INFINITY);
+            1e308);
     }
 
     @Override

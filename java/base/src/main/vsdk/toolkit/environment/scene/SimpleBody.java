@@ -2,44 +2,35 @@ package vsdk.toolkit.environment.scene;
 
 // Java
 import java.io.Serial;
-import java.util.concurrent.atomic.AtomicLong;
 
 // Vitral
-import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Quaterniond;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
-import vsdk.toolkit.environment.geometry.element.RayCrossingSink;
-import vsdk.toolkit.environment.geometry.element.RayCrossingSupport;
-
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
+import vsdk.toolkit.media.NormalMapTexture;
+import vsdk.toolkit.environment.material.Material;
 import vsdk.toolkit.environment.material.SimpleMaterial;
-import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.geometricProcessing.SurfaceRayIntersection;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 
 /**
-Represents a scene body composed of geometry plus object-to-world transform
-state and visual attributes.
-
-<p>The underlying geometry remains defined in object space around the origin.
-`SimpleBody` is responsible for moving rays between world and object space.
+The VITRAL scene body: a `SceneSolid` whose placement is edited either as
+position, rotation and scale or as an arbitrary affine map, with VITRAL
+appearance (material, texture, normal map) and first hit fast paths for
+identity and translation-only placements.
 */
-public class SimpleBody extends Entity {
-    public RayCrossingSupport emitRayCrossings(Ray ray, RayCrossingQuery query, RayCrossingSink sink) { return RayCrossingSupport.Unsupported; }
-
+public class SimpleBody extends SceneSolid {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    //- Model (1/6): body form ----------------------------------------
-    protected Geometry geometry;
-
-    //- Model (2/6): body geometric transformations -------------------
+    private AffinePlacement affinePlacement;
+    private boolean explicitAffinePlacement;
     private Vector3Dd position;
     private Vector3Dd scale;
     private Matrix4x4d rotation;
@@ -51,278 +42,275 @@ public class SimpleBody extends Entity {
     private boolean hasIdentityRotation;
     private boolean hasUnitScale;
     private boolean hasZeroTranslation;
-    private boolean hasIdentityTransform;
     private boolean hasTranslationOnlyTransform;
+    private boolean hasIdentityTransform;
 
-    //- Model (3/6): body visual data ---------------------------------
     private SimpleMaterial material;
+    /// False when the material is shared (see `setMaterialReference`)
+    private boolean ownsMaterial;
     private Image texture;
+    /// False when the texture is shared (see `setTextureReference`)
+    private boolean ownsTexture;
     private NormalMap normalMap;
+    /// False when the normal map is shared (see `setNormalMapReference`)
+    private boolean ownsNormalMap;
     private RGBImageUncompressed normalMapRgb;
 
-    //- Model (4/6): body physical data -------------------------------
-
-    //- Model (5/6): body structural relationships --------------------
-
-    //- Model (6/6): body semantic data -------------------------------
-    private String name;
-    private final AtomicLong modificationVersion = new AtomicLong();
+    private enum QueryPlacementStatus { Valid, Invalid, Indeterminate }
 
     public SimpleBody()
     {
-        geometry = null;
-        setPosition(new Vector3Dd(0, 0, 0));
-        setRotation(new Matrix4x4d());
-        setScale(new Vector3Dd(1, 1, 1));
+        super();
+        affinePlacement = new AffinePlacement();
+        explicitAffinePlacement = false;
+        position = new Vector3Dd(0, 0, 0);
+        scale = new Vector3Dd(1, 1, 1);
+        rotation = new Matrix4x4d();
+        rotationInverse = new Matrix4x4d();
+        rotationQuaternion = rotation.exportToQuaternion();
+        rotationInverseQuaternion = rotationInverse.exportToQuaternion();
+        inverseScale = new Vector3Dd(1, 1, 1);
+        hasInvertibleScale = true;
+        hasIdentityRotation = true;
+        hasUnitScale = true;
+        hasZeroTranslation = true;
+        hasTranslationOnlyTransform = true;
+        hasIdentityTransform = true;
+        // Java keeps its historic default material; cpp starts with none.
         material = new SimpleMaterial();
+        ownsMaterial = true;
         texture = null;
+        ownsTexture = true;
         normalMap = null;
+        ownsNormalMap = true;
+        normalMapRgb = null;
     }
 
-    /**
-    @return application-defined body name, or {@code null}
-    */
-    public String getName()
+    /// Only plain SimpleBody instances; subclasses opt in themselves
+    @Override
+    protected boolean denotesPlacedGeometry() { return getClass() == SimpleBody.class; }
+
+    public boolean supportsDecomposedPlacement() { return !explicitAffinePlacement; }
+
+    private static boolean isIdentityRotation(Matrix4x4d matrix)
     {
-        return name;
+        return
+            Math.abs(matrix.get(0, 0) - 1.0) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(0, 1)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(0, 2)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(1, 0)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(1, 1) - 1.0) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(1, 2)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(2, 0)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(2, 1)) <= VSDK.EPSILON &&
+            Math.abs(matrix.get(2, 2) - 1.0) <= VSDK.EPSILON;
     }
 
-    public long getModificationVersion()
+    private void updateTransformFlags()
     {
-        return modificationVersion.get();
+        hasIdentityRotation = isIdentityRotation(rotation);
+        hasUnitScale =
+            Math.abs(scale.x() - 1.0) <= VSDK.EPSILON &&
+            Math.abs(scale.y() - 1.0) <= VSDK.EPSILON &&
+            Math.abs(scale.z() - 1.0) <= VSDK.EPSILON;
+        hasZeroTranslation =
+            Math.abs(position.x()) <= VSDK.EPSILON &&
+            Math.abs(position.y()) <= VSDK.EPSILON &&
+            Math.abs(position.z()) <= VSDK.EPSILON;
+        hasTranslationOnlyTransform = hasIdentityRotation && hasUnitScale;
+        hasIdentityTransform = hasTranslationOnlyTransform && hasZeroTranslation;
     }
 
-    protected void markModified()
+    private void updateDecomposedPlacement()
     {
-        modificationVersion.incrementAndGet();
+        final Matrix4x4d forward = new Matrix4x4d().translation(position)
+            .multiply(rotation.multiply(new Matrix4x4d().scale(scale)));
+        final Matrix4x4d inverse = new Matrix4x4d().scale(inverseScale)
+            .multiply(rotationInverse).multiply(new Matrix4x4d().translation(position.multiply(-1)));
+        affinePlacement.assign(forward, inverse);
     }
 
-    /**
-    @param n application-defined body name
-    */
-    public void setName(String n)
-    {
-        name = n;
-        markModified();
-    }
-
-    /**
-    @return the body geometry in object space
-    */
-    public Geometry getGeometry()
-    {
-        return geometry;
-    }
-
-    /**
-    @param g geometry in object space
-    */
-    public void setGeometry(Geometry g)
-    {
-        geometry = g;
-        markModified();
-    }
-
-    /**
-    @return the cached object-to-world rotation matrix
-    */
     public Matrix4x4d getRotation()
     {
+        if (explicitAffinePlacement) throw new IllegalStateException("Rotation is not defined for an arbitrary affine placement");
         return rotation;
     }
 
-    /**
-    Sets the object-to-world rotation and refreshes the cached inverse
-    rotation and quaternion forms used during intersection queries.
-
-    @param rotation rigid-body rotation matrix without translation
-    */
-    public void setRotation(Matrix4x4d rotation)
+    public void setRotation(Matrix4x4d r)
     {
-        Matrix4x4d sanitizedRotation = sanitizeRotationMatrix(rotation);
-        Quaterniond cachedRotationQuaternion =
-            sanitizedRotation.exportToQuaternion().normalized();
-
-        this.rotation = sanitizedRotation;
-        this.rotationQuaternion = cachedRotationQuaternion;
-        this.rotationInverseQuaternion = cachedRotationQuaternion.conjugated();
-        this.rotationInverse = new Matrix4x4d()
-            .importFromQuaternion(rotationInverseQuaternion);
+        if (explicitAffinePlacement) throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
+        Matrix4x4d sanitized = r.withoutTranslation();
+        rotationQuaternion = sanitized.exportToQuaternion().normalized();
+        rotation = sanitized;
+        rotationInverseQuaternion = rotationQuaternion.conjugated();
+        rotationInverse = new Matrix4x4d().importFromQuaternion(rotationInverseQuaternion);
         updateTransformFlags();
+        updateDecomposedPlacement();
         markModified();
     }
 
-    /**
-    @return the cached world-to-object rotation matrix
-    */
     public Matrix4x4d getRotationInverse()
     {
+        if (explicitAffinePlacement) throw new IllegalStateException("Rotation is not defined for an arbitrary affine placement");
         return rotationInverse;
     }
 
-    /**
-    Sets the world-to-object rotation and refreshes the cached forward
-    rotation and quaternion forms used during intersection queries.
-
-    @param rotationInverse rigid-body inverse rotation matrix without translation
-    */
-    public void setRotationInverse(Matrix4x4d rotationInverse)
+    public void setRotationInverse(Matrix4x4d ri)
     {
-        Matrix4x4d sanitizedInverseRotation =
-            sanitizeRotationMatrix(rotationInverse);
-        Quaterniond cachedInverseRotationQuaternion =
-            sanitizedInverseRotation.exportToQuaternion().normalized();
-
-        this.rotationInverse = sanitizedInverseRotation;
-        this.rotationInverseQuaternion = cachedInverseRotationQuaternion;
-        this.rotationQuaternion = cachedInverseRotationQuaternion.conjugated();
-        this.rotation = new Matrix4x4d().importFromQuaternion(rotationQuaternion);
+        if (explicitAffinePlacement) throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
+        Matrix4x4d sanitized = ri.withoutTranslation();
+        rotationInverseQuaternion = sanitized.exportToQuaternion().normalized();
+        rotationInverse = sanitized;
+        rotationQuaternion = rotationInverseQuaternion.conjugated();
+        rotation = new Matrix4x4d().importFromQuaternion(rotationQuaternion);
         updateTransformFlags();
+        updateDecomposedPlacement();
         markModified();
     }
 
-    /**
-    @return default material used by this body
-    */
-    public boolean supportsDecomposedPlacement() { return true; }
-    public vsdk.toolkit.environment.material.Material getSurfaceMaterial() { return material; }
+    public SimpleMaterial getMaterial() { return material; }
 
-    public SimpleMaterial getMaterial()
-    {
-        return material;
-    }
+    @Override
+    public Material getSurfaceMaterial() { return material; }
 
     /**
-    @param m default material used by this body
+    Sets the material, taking its ownership (it is deleted with this body or
+    when replaced).
+    @param m new material, or null
     */
     public void setMaterial(SimpleMaterial m)
     {
         material = m;
+        ownsMaterial = true;
         markModified();
     }
 
     /**
-    @return body texture, or {@code null}
+    Sets a material shared with other owners: this body does not delete it.
+    @param m shared material, or null
     */
-    public Image getTexture()
+    public void setMaterialReference(SimpleMaterial m)
     {
-        return texture;
+        material = m;
+        ownsMaterial = false;
+        markModified();
     }
 
+    public Image getTexture() { return texture; }
+
     /**
-    @param in texture to associate with this body
+    Sets the texture, taking its ownership (it is deleted with this body or
+    when replaced).
+    @param in new texture, or null
     */
     public void setTexture(Image in)
     {
         texture = in;
+        ownsTexture = true;
         markModified();
     }
 
     /**
-    @return body normal map, or {@code null}
+    Sets a texture shared with other owners, such as a scene resource
+    (`SimpleScene.addImage`): this body does not delete it.
+    @param in shared texture, or null
     */
-    public NormalMap getNormalMap()
+    public void setTextureReference(Image in)
     {
-        return normalMap;
+        texture = in;
+        ownsTexture = false;
+        markModified();
     }
 
-    /**
-    @return RGB preview image for the current normal map, or {@code null}
-    */
-    public RGBImageUncompressed getNormalMapRgb()
-    {
-        return normalMapRgb;
-    }
+    public NormalMap getNormalMap() { return normalMap; }
+
+    public RGBImageUncompressed getNormalMapRgb() { return normalMapRgb; }
 
     /**
-    @param in normal map to associate with this body
+    Sets the normal map, taking its ownership.
+    @param in new normal map, or null
     */
     public void setNormalMap(NormalMap in)
     {
         normalMap = in;
-        normalMapRgb = normalMap != null ? new vsdk.toolkit.media.NormalMapTexture(normalMap) : null;
+        ownsNormalMap = true;
+        normalMapRgb = in != null ? new NormalMapTexture(in) : null;
         markModified();
     }
 
     /**
-    @return body position in world space
+    Sets a normal map shared with other owners, such as a scene resource
+    (`SimpleScene.addNormalMap`): this body does not delete it. The body
+    keeps its own RGB encoding of the map.
+    @param in shared normal map, or null
     */
+    public void setNormalMapReference(NormalMap in)
+    {
+        normalMap = in;
+        ownsNormalMap = false;
+        normalMapRgb = in != null ? new NormalMapTexture(in) : null;
+        markModified();
+    }
+
     public Vector3Dd getPosition()
     {
-        return position;
+        return explicitAffinePlacement ? affinePlacement.getForward().extractTranslation() : position;
     }
 
-    /**
-    @param p body position in world space
-    */
     public void setPosition(Vector3Dd p)
     {
-        position = p;
-        updateTransformFlags();
-        markModified();
+        if (explicitAffinePlacement) {
+            final Matrix4x4d forward = affinePlacement.getForward().withTranslation(p);
+            final Vector3Dd inverseTranslation = affinePlacement.getInverse().withoutTranslation().multiply(p).multiply(-1);
+            final Matrix4x4d inverse = affinePlacement.getInverse().withTranslation(inverseTranslation);
+            AffinePlacement candidate = new AffinePlacement();
+            if (candidate.assign(forward,inverse) != AffinePlacementStatus.Valid)
+                throw new IllegalStateException("Invalid affine translation");
+            affinePlacement = candidate;
+            markModified();
+            return;
+        }
+        position = p; updateTransformFlags(); updateDecomposedPlacement(); markModified();
     }
 
-    /**
-    @return body scale relative to object space axes
-    */
     public Vector3Dd getScale()
     {
+        if (explicitAffinePlacement) throw new IllegalStateException("Scale is not defined for an arbitrary affine placement");
         return scale;
     }
 
-    /**
-    Transforms an object-space surface normal into world space, applying the
-    inverse-scale then the body rotation (the correct normal transform for an
-    affine body transform), and renormalizing. Orientation is preserved, so an
-    outward object-space normal maps to an outward world-space normal.
+    public Matrix4x4d getTransformationMatrix() { return affinePlacement.getForward(); }
 
-    @param normal object-space normal
-    @return the corresponding unit world-space normal
-    */
-    public Vector3Dd transformNormalToWorld(Vector3Dd normal)
+    @Override
+    public Matrix4x4d getAffinePlacement() { return affinePlacement.getForward(); }
+
+    @Override
+    public AffinePlacementStatus setAffinePlacement(Matrix4x4d forward, Matrix4x4d inverse)
     {
-        return objectNormalToWorldSpace(normal);
+        AffinePlacement candidate = new AffinePlacement();
+        final AffinePlacementStatus status = candidate.assign(forward,inverse);
+        if (status != AffinePlacementStatus.Valid) return status;
+        affinePlacement = candidate;
+        explicitAffinePlacement = true;
+        markModified();
+        return status;
     }
 
-    /**
-    Transforms an object-space point into world space (scale, rotation,
-    translation).
-
-    @param point object-space point
-    @return the corresponding world-space point
-    */
-    public Vector3Dd transformPointToWorld(Vector3Dd point)
+    // Reset to identity and re-enable decomposed editing.
+    @Override
+    public void resetAffinePlacement()
     {
-        return objectPointToWorldSpace(point);
+        explicitAffinePlacement = false;
+        position = new Vector3Dd(); scale = new Vector3Dd(1,1,1); inverseScale = new Vector3Dd(1,1,1);
+        rotation = Matrix4x4d.identityMatrix(); rotationInverse = rotation;
+        rotationQuaternion = rotation.exportToQuaternion(); rotationInverseQuaternion = rotationQuaternion;
+        hasInvertibleScale = true;
+        updateTransformFlags(); updateDecomposedPlacement(); markModified();
     }
 
-    /**
-    @return object-to-world matrix with scale, rotation and translation
-    */
-    public Matrix4x4d getTransformationMatrix()
-    {
-        Matrix4x4d scaleMatrix = new Matrix4x4d();
-        Matrix4x4d translateMatrix = new Matrix4x4d();
-        Matrix4x4d multipliedMatrix;
-        scaleMatrix = scaleMatrix.scale(scale);
-        translateMatrix = translateMatrix.translation(position);
-        multipliedMatrix = translateMatrix.multiply(rotation.multiply(scaleMatrix));
-        return multipliedMatrix;
-    }
-
-    /**
-    Sets the body scale and refreshes cached reciprocal values required by
-    world-to-object ray conversion.
-
-    <p>Ray queries require every scale component to be non-zero. If any
-    component is near zero the body remains visually transformable, but
-    intersection queries report no hits because the inverse transform is not
-    defined.
-
-    @param s body scale relative to object space axes
-    */
     public void setScale(Vector3Dd s)
     {
+        if (explicitAffinePlacement) throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
         scale = s;
         hasInvertibleScale =
             Math.abs(scale.x()) > VSDK.EPSILON &&
@@ -339,51 +327,80 @@ public class SimpleBody extends Entity {
             inverseScale = new Vector3Dd();
         }
         updateTransformFlags();
+        updateDecomposedPlacement();
         markModified();
     }
 
     /**
-    Intersects a world-space ray against this body.
-
-    <p>The incoming ray is transformed into object space using the cached
-    inverse scale and inverse rotation. The resulting hit information is then
-    transformed back into world space.
-
-    @param inRay ray to be tested for intersection
-    @return a new ray containing the closest hit distance, or {@code null}
-        when the ray misses the body
+    Java-only helper (kept from the previous Java port, used by the hidden
+    line renderer): object-space normal to unit world-space normal.
     */
-    public final Ray doIntersectionFirstHit(Ray inRay)
+    public Vector3Dd transformNormalToWorld(Vector3Dd normal)
     {
-        RayHit hit = new RayHit();
-        if ( doIntersectionFirstHit(inRay, hit) ) {
-            return hit.getRay();
+        if (explicitAffinePlacement) {
+            final Matrix4x4d inverse = affinePlacement.getInverse();
+            return normalizeIfPossible(new Vector3Dd(
+                inverse.get(0,0)*normal.x()+inverse.get(1,0)*normal.y()+inverse.get(2,0)*normal.z(),
+                inverse.get(0,1)*normal.x()+inverse.get(1,1)*normal.y()+inverse.get(2,1)*normal.z(),
+                inverse.get(0,2)*normal.x()+inverse.get(1,2)*normal.y()+inverse.get(2,2)*normal.z()));
         }
-        return null;
+        Vector3Dd scaledNormal = scaleComponents(normal, inverseScale);
+        return normalizeIfPossible(rotationQuaternion.rotate(scaledNormal));
     }
 
     /**
-    Intersects a world-space ray against this body and reports the hit in
-    world coordinates.
-
-    @param inOutRay world-space ray to test
-    @param outHit output structure populated on hit; may be {@code null}
-    @return {@code true} when the ray intersects the body
+    Java-only helper (kept from the previous Java port): object-space point
+    to world space.
     */
-    public final boolean doIntersectionFirstHit(Ray inOutRay, RayHit outHit)
+    public Vector3Dd transformPointToWorld(Vector3Dd point)
     {
-        if ( geometry == null || !hasInvertibleScale ) {
+        if (explicitAffinePlacement) return affinePlacement.getForward().multiply(point);
+        Vector3Dd scaledPoint = scaleComponents(point, scale);
+        return rotationQuaternion.rotate(scaledPoint).add(position);
+    }
+
+    public Ray doIntersectionFirstHit(Ray inRay)
+    {
+        RayHit hit = new RayHit();
+        if ( !doIntersectionFirstHit(inRay, hit) || hit.getRay() == null ) {
+            return null;
+        }
+        return hit.getRay();
+    }
+
+    private boolean doIntersectionWithTranslationOnlySphereFastPath(Ray inOutRay, RayHit outHit)
+    {
+        final Sphere sphere = (Sphere)geometry;
+        double[] t = {0}, farT = {0};
+        if (Sphere.intersectionRoots(inOutRay.getOrigin().subtract(position),
+                inOutRay.getDirection(), sphere.getRadius(),
+                new RayCrossingQuery(0, Double.POSITIVE_INFINITY), t, farT) == 0) {
             return false;
         }
 
-        int requiredDetailMask =
-            outHit != null ? outHit.getRequiredDetailMask() : RayHit.DETAIL_NONE;
+        if ( outHit != null ) {
+            if ( outHit.shouldStoreRay() ) {
+                outHit.setRay(inOutRay.withT(t[0]));
+            }
+            else {
+                outHit.setHitDistance(t[0]);
+            }
+        }
+        return true;
+    }
 
-        if ( hasTranslationOnlyTransform &&
-             requiredDetailMask == RayHit.DETAIL_NONE &&
-             geometry instanceof Sphere sphere ) {
-            return doIntersectionWithTranslationOnlySphereFastPath(
-                inOutRay, outHit, sphere);
+    @Override
+    public boolean doIntersectionFirstHit(Ray inOutRay, RayHit outHit)
+    {
+        if ( geometry == null || (!explicitAffinePlacement && !hasInvertibleScale) ) {
+            return false;
+        }
+        if (explicitAffinePlacement) return doIntersectionWithAffinePlacement(inOutRay, outHit);
+
+        final int requestedDetailMask = outHit != null ? outHit.getRequiredDetailMask() : RayHit.DETAIL_NONE;
+
+        if ( hasTranslationOnlyTransform && requestedDetailMask == RayHit.DETAIL_NONE && hasSphereGeometry() ) {
+            return doIntersectionWithTranslationOnlySphereFastPath(inOutRay, outHit);
         }
 
         if ( hasIdentityTransform ) {
@@ -391,193 +408,133 @@ public class SimpleBody extends Entity {
         }
 
         if ( hasTranslationOnlyTransform ) {
-            return doIntersectionWithTranslationOnly(
-                inOutRay,
-                outHit,
-                requiredDetailMask);
+            return doIntersectionWithTranslationOnly(inOutRay, outHit, requestedDetailMask);
         }
 
-        Vector3Dd localOrigin = worldPointToObjectSpace(inOutRay.getOrigin());
-        Vector3Dd localDirection = worldDirectionToObjectSpace(inOutRay.getDirection());
-        double localDirectionLength = localDirection.length();
+        Vector3Dd translatedOrigin = inOutRay.getOrigin().subtract(position);
+        Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
+        Vector3Dd localOrigin = new Vector3Dd(
+            rotatedOrigin.x() * inverseScale.x(),
+            rotatedOrigin.y() * inverseScale.y(),
+            rotatedOrigin.z() * inverseScale.z());
+
+        Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(inOutRay.getDirection());
+        Vector3Dd localDirection = new Vector3Dd(
+            rotatedDirection.x() * inverseScale.x(),
+            rotatedDirection.y() * inverseScale.y(),
+            rotatedDirection.z() * inverseScale.z());
+        final double localDirectionLength = localDirection.length();
         if ( localDirectionLength <= VSDK.EPSILON ) {
             return false;
         }
+        localDirection = localDirection.multiply(1.0 / localDirectionLength);
 
-        Ray localRay = new Ray(
-            localOrigin,
-            localDirection.multiply(1.0 / localDirectionLength),
-            scaleRayParameterForObjectSpace(inOutRay.getT(), localDirectionLength));
-
-        RayHit hit = outHit;
-        if ( hit == null ) {
-            hit = new RayHit(RayHit.DETAIL_NONE);
+        double localRayT = inOutRay.getT();
+        if ( localRayT >= Double.MAX_VALUE / localDirectionLength ) {
+            localRayT = Double.MAX_VALUE;
         }
         else {
-            if ( requiredDetailMask == RayHit.DETAIL_NONE ) {
-                hit.resetForDistanceOnly();
+            localRayT *= localDirectionLength;
+        }
+
+        Ray localRay = new Ray(localOrigin, localDirection, localRayT);
+        final boolean requestedStoreRay = outHit != null ? outHit.shouldStoreRay() : false;
+
+        if ( outHit != null ) {
+            outHit.setStoreRay(false);
+            outHit.resetForDistanceOnly();
+            if ( !SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, outHit) ) {
+                outHit.setStoreRay(requestedStoreRay);
+                outHit.setRequiredDetailMask(requestedDetailMask);
+                return false;
             }
-            else {
-                hit.reset(requiredDetailMask);
+        }
+        else {
+            RayHit localHitStorage = new RayHit();
+            localHitStorage.setStoreRay(false);
+            localHitStorage.resetForDistanceOnly();
+            if ( !SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, localHitStorage) ) {
+                return false;
             }
         }
 
-        // ... and compute doIntersectionFirstHit operation on object's coordinates
-        if ( SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, hit) ) {
+        if ( outHit != null ) {
             double localHitT;
-            if ( hit.getRay() != null ) {
-                localHitT = hit.getRay().getT();
+            if ( outHit.getRay() != null ) {
+                localHitT = outHit.getRay().getT();
             }
-            else if ( hit.hasHitDistance() ) {
-                localHitT = hit.getHitDistance();
+            else if ( outHit.hasHitDistance() ) {
+                localHitT = outHit.getHitDistance();
             }
             else {
                 return false;
             }
-            if ( outHit != null ) {
-                double worldT = localHitT / localDirectionLength;
-                if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
-                    outHit.setRay(inOutRay.withT(worldT));
+
+            double worldT = localHitT / localDirectionLength;
+
+            outHit.setStoreRay(requestedStoreRay);
+            outHit.setRequiredDetailMask(requestedDetailMask);
+            if ( requestedStoreRay || requestedDetailMask != RayHit.DETAIL_NONE ) {
+                Ray worldRay = inOutRay.withT(worldT);
+                outHit.setRay(worldRay);
+                if ( requestedDetailMask != RayHit.DETAIL_NONE ) {
+                    doExtraInformation(worldRay, worldT, outHit);
                 }
-                else {
-                    outHit.setHitDistance(worldT);
-                }
-                if ( outHit.needsPoint() ) {
-                    outHit.point = objectPointToWorldSpace(hit.point);
-                }
-                if ( outHit.needsNormal() ) {
-                    outHit.normal = objectNormalToWorldSpace(hit.normal);
-                }
-                if ( outHit.needsTextureCoordinates() ) {
-                    outHit.u = hit.u;
-                    outHit.v = hit.v;
-                }
-                if ( outHit.needsTangent() ) {
-                    outHit.tangent = objectTangentToWorldSpace(hit.tangent);
-                }
-                outHit.material = hit.material;
-                outHit.texture = hit.texture;
-                outHit.normalMap = hit.normalMap;
             }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-    Computes quantitative invisibility in object space by transforming the
-    input points from world coordinates into the body's local coordinates.
-
-    @param origin world-space observer position
-    @param p world-space point being tested
-    @return quantitative invisibility value reported by the underlying geometry
-    */
-    public int computeQuantitativeInvisibility(Vector3Dd origin, Vector3Dd p)
-    {
-        if ( geometry == null || !hasInvertibleScale ) {
-            return 0;
-        }
-
-        Vector3Dd myOrigin = worldPointToObjectSpace(origin);
-        Vector3Dd myP = worldPointToObjectSpace(p);
-
-        return geometry.computeQuantitativeInvisibility(myOrigin, myP);
-    }
-
-    /**
-    Rebuilds detailed hit information for a world-space ray/parameter pair.
-
-    @param inRay world-space ray that previously hit the body
-    @param inT hit distance measured along the world-space ray
-    @param outInfo structure populated with world-space hit data
-    */
-    public void doExtraInformation(Ray inRay, double inT,
-                                   RayHit outInfo)
-    {
-        if ( outInfo == null || geometry == null || !hasInvertibleScale ) {
-            return;
-        }
-
-        if ( hasIdentityTransform ) {
-            outInfo.setRay(inRay);
-            geometry.doExtraInformation(inRay, inT, outInfo);
-            outInfo.setRay(inRay);
-            return;
-        }
-
-        if ( hasTranslationOnlyTransform ) {
-            Ray localRay = inRay.withOrigin(inRay.getOrigin().subtract(position));
-            outInfo.setRay(inRay);
-            geometry.doExtraInformation(localRay, inT, outInfo);
-            outInfo.setRay(inRay);
-            if ( outInfo.needsPoint() ) {
-                outInfo.point = outInfo.point.add(position);
+            else {
+                outHit.setHitDistance(worldT);
             }
-            return;
         }
-
-        Vector3Dd localOrigin = worldPointToObjectSpace(inRay.getOrigin());
-        Vector3Dd localDirection = worldDirectionToObjectSpace(inRay.getDirection());
-        double localDirectionLength = localDirection.length();
-        if ( localDirectionLength <= VSDK.EPSILON ) {
-            return;
-        }
-
-        double localT = scaleRayParameterForObjectSpace(inT, localDirectionLength);
-        Ray localRay = new Ray(
-            localOrigin,
-            localDirection.multiply(1.0 / localDirectionLength),
-            localT);
-
-        outInfo.setRay(inRay);
-        geometry.doExtraInformation(localRay, localT, outInfo);
-        outInfo.setRay(inRay);
-        if ( outInfo.needsPoint() ) {
-            outInfo.point = objectPointToWorldSpace(outInfo.point);
-        }
-        if ( outInfo.needsNormal() ) {
-            outInfo.normal = objectNormalToWorldSpace(outInfo.normal);
-        }
-        if ( outInfo.needsTangent() ) {
-            outInfo.tangent = objectTangentToWorldSpace(outInfo.tangent);
-        }
+        return true;
     }
 
-    private static Matrix4x4d sanitizeRotationMatrix(Matrix4x4d rotationMatrix)
+    private boolean doIntersectionWithAffinePlacement(Ray ray, RayHit outHit)
     {
-        return rotationMatrix.withoutTranslation();
+        final Matrix4x4d inverse = affinePlacement.getInverse();
+        final Vector3Dd origin = inverse.multiply(ray.getOrigin());
+        final Vector3Dd direction = inverse.withoutTranslation().multiply(ray.getDirection());
+        final double length = direction.length();
+        if (!Double.isFinite(length) || length <= VSDK.EPSILON) return false;
+        double localT = ray.getT();
+        if (localT >= Double.MAX_VALUE / length) localT = Double.MAX_VALUE; else localT *= length;
+        final Ray localRay = new Ray(origin, direction, localT);
+        RayHit localHit = new RayHit(RayHit.DETAIL_NONE, false);
+        if (!SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, localHit)) return false;
+        final double distance = localHit.getRay() != null ? localHit.getRay().getT() : localHit.getHitDistance();
+        if (localHit.getRay() == null && !localHit.hasHitDistance()) return false;
+        final double worldT = distance / length;
+        if (!Double.isFinite(worldT)) return false;
+        if (outHit != null) {
+            if (outHit.shouldStoreRay() || outHit.needsAnySurfaceData()) {
+                final Ray worldRay = ray.withT(worldT);
+                outHit.setRay(worldRay);
+                if (outHit.needsAnySurfaceData()) doExtraInformationWithAffinePlacement(worldRay, worldT, outHit);
+            } else outHit.setHitDistance(worldT);
+        }
+        return true;
     }
 
-    private void updateTransformFlags()
+    private void doExtraInformationWithAffinePlacement(Ray ray, double t, RayHit hit)
     {
-        hasIdentityRotation =
-            rotation != null && isIdentityRotation(rotation);
-        hasUnitScale =
-            scale != null &&
-            Math.abs(scale.x() - 1.0) <= VSDK.EPSILON &&
-            Math.abs(scale.y() - 1.0) <= VSDK.EPSILON &&
-            Math.abs(scale.z() - 1.0) <= VSDK.EPSILON;
-        hasZeroTranslation =
-            position != null &&
-            Math.abs(position.x()) <= VSDK.EPSILON &&
-            Math.abs(position.y()) <= VSDK.EPSILON &&
-            Math.abs(position.z()) <= VSDK.EPSILON;
-        hasTranslationOnlyTransform = hasIdentityRotation && hasUnitScale;
-        hasIdentityTransform = hasTranslationOnlyTransform && hasZeroTranslation;
-    }
-
-    private static boolean isIdentityRotation(Matrix4x4d matrix)
-    {
-        return
-            Math.abs(matrix.get(0, 0) - 1.0) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(0, 1)) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(0, 2)) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(1, 0)) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(1, 1) - 1.0) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(1, 2)) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(2, 0)) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(2, 1)) <= VSDK.EPSILON &&
-            Math.abs(matrix.get(2, 2) - 1.0) <= VSDK.EPSILON;
+        final Matrix4x4d forward = affinePlacement.getForward();
+        final Matrix4x4d inverse = affinePlacement.getInverse();
+        final Vector3Dd origin = inverse.multiply(ray.getOrigin());
+        final Vector3Dd rawDirection = inverse.withoutTranslation().multiply(ray.getDirection());
+        final double length = rawDirection.length();
+        if (!Double.isFinite(length) || length <= VSDK.EPSILON) return;
+        final Ray localRay = new Ray(origin, rawDirection, t*length);
+        geometry.doExtraInformation(localRay, t*length, hit);
+        if (hit.needsPoint()) hit.point = forward.multiply(hit.point);
+        if (hit.needsNormal()) {
+            final Vector3Dd n = hit.normal;
+            hit.normal = new Vector3Dd(
+                inverse.get(0,0)*n.x()+inverse.get(1,0)*n.y()+inverse.get(2,0)*n.z(),
+                inverse.get(0,1)*n.x()+inverse.get(1,1)*n.y()+inverse.get(2,1)*n.z(),
+                inverse.get(0,2)*n.x()+inverse.get(1,2)*n.y()+inverse.get(2,2)*n.z()).normalized();
+        }
+        if (hit.needsTangent()) hit.tangent = forward.withoutTranslation().multiply(hit.tangent).normalized();
+        hit.material = material; hit.texture = texture; hit.normalMap = normalMap;
+        hit.setRay(ray.withT(t));
     }
 
     private boolean doIntersectionWithTranslationOnly(
@@ -587,22 +544,20 @@ public class SimpleBody extends Entity {
     {
         Ray localRay = inOutRay.withOrigin(inOutRay.getOrigin().subtract(position));
 
-        RayHit hit = outHit;
-        if ( hit == null ) {
-            hit = new RayHit(RayHit.DETAIL_NONE);
+        RayHit localHitStorage = new RayHit();
+        RayHit hit = outHit != null ? outHit : localHitStorage;
+
+        if ( requiredDetailMask == RayHit.DETAIL_NONE ) {
+            hit.resetForDistanceOnly();
         }
         else {
-            if ( requiredDetailMask == RayHit.DETAIL_NONE ) {
-                hit.resetForDistanceOnly();
-            }
-            else {
-                hit.reset(requiredDetailMask);
-            }
+            hit.reset(requiredDetailMask);
         }
 
         if ( !SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, hit) ) {
             return false;
         }
+
         double localHitT;
         if ( hit.getRay() != null ) {
             localHitT = hit.getRay().getT();
@@ -613,6 +568,7 @@ public class SimpleBody extends Entity {
         else {
             return false;
         }
+
         if ( outHit != null ) {
             if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
                 outHit.setRay(inOutRay.withT(localHitT));
@@ -637,42 +593,152 @@ public class SimpleBody extends Entity {
             outHit.texture = hit.texture;
             outHit.normalMap = hit.normalMap;
         }
+
         return true;
     }
 
-    private boolean doIntersectionWithTranslationOnlySphereFastPath(
-        Ray inOutRay,
-        RayHit outHit,
-        Sphere sphere)
+    public int computeQuantitativeInvisibility(Vector3Dd origin, Vector3Dd p)
     {
-        double dx = position.x() - inOutRay.getOrigin().x();
-        double dy = position.y() - inOutRay.getOrigin().y();
-        double dz = position.z() - inOutRay.getOrigin().z();
-        Vector3Dd direction = inOutRay.getDirection();
-        double projection =
-            direction.x()*dx + direction.y()*dy + direction.z()*dz;
-        double discriminant =
-            sphere.getRadiusSquared() + projection*projection
-            - dx*dx - dy*dy - dz*dz;
+        if ( geometry == null || (!explicitAffinePlacement && !hasInvertibleScale) ) {
+            return 0;
+        }
+        if (explicitAffinePlacement) return geometry.computeQuantitativeInvisibility(
+            affinePlacement.getInverse().multiply(origin), affinePlacement.getInverse().multiply(p));
 
-        if ( discriminant < 0 ) {
-            return false;
+        Vector3Dd translatedOrigin = origin.subtract(position);
+        Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
+        Vector3Dd myOrigin = new Vector3Dd(
+            rotatedOrigin.x() * inverseScale.x(),
+            rotatedOrigin.y() * inverseScale.y(),
+            rotatedOrigin.z() * inverseScale.z());
+
+        Vector3Dd translatedPoint = p.subtract(position);
+        Vector3Dd rotatedPoint = rotationInverseQuaternion.rotate(translatedPoint);
+        Vector3Dd myPoint = new Vector3Dd(
+            rotatedPoint.x() * inverseScale.x(),
+            rotatedPoint.y() * inverseScale.y(),
+            rotatedPoint.z() * inverseScale.z());
+
+        return geometry.computeQuantitativeInvisibility(myOrigin, myPoint);
+    }
+
+    @Override
+    public void doExtraInformation(Ray inRay, double inT, RayHit outData)
+    {
+        if ( outData == null || geometry == null || (!explicitAffinePlacement && !hasInvertibleScale) ) return;
+        if (explicitAffinePlacement) {
+            if (outData.getRay() != null) doExtraInformationWithAffinePlacement(outData.getRay(), outData.getRay().getT(), outData);
+            return;
         }
 
-        double t = projection - Math.sqrt(discriminant);
-        if ( t < 0 ) {
-            return false;
+        final Ray worldRayPtr = outData.getRay();
+        if ( worldRayPtr == null ) {
+            outData.material = material;
+            outData.texture = texture;
+            outData.normalMap = normalMap;
+            return;
         }
 
-        if ( outHit != null ) {
-            if ( outHit.shouldStoreRay() ) {
-                outHit.setRay(inOutRay.withT(t));
+        final Ray worldRay = worldRayPtr;
+        final double worldT = worldRay.getT();
+
+        Vector3Dd translatedOrigin = worldRay.getOrigin().subtract(position);
+        Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
+        Vector3Dd localOrigin = new Vector3Dd(
+            rotatedOrigin.x() * inverseScale.x(),
+            rotatedOrigin.y() * inverseScale.y(),
+            rotatedOrigin.z() * inverseScale.z());
+
+        Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(worldRay.getDirection());
+        Vector3Dd localDirection = new Vector3Dd(
+            rotatedDirection.x() * inverseScale.x(),
+            rotatedDirection.y() * inverseScale.y(),
+            rotatedDirection.z() * inverseScale.z());
+        double localDirLength = localDirection.length();
+        if ( localDirLength <= VSDK.EPSILON ) {
+            outData.material = material;
+            outData.texture = texture;
+            outData.normalMap = normalMap;
+            return;
+        }
+        localDirection = localDirection.multiply(1.0 / localDirLength);
+        double localT = worldT * localDirLength;
+        Ray localRay = new Ray(localOrigin, localDirection, localT);
+
+        geometry.doExtraInformation(localRay, localT, outData);
+
+        if ( outData.needsPoint() ) {
+            Vector3Dd worldPoint = rotation.multiply(new Vector3Dd(
+                outData.point.x() * scale.x(),
+                outData.point.y() * scale.y(),
+                outData.point.z() * scale.z())).add(position);
+            outData.point = worldPoint;
+        }
+
+        if ( outData.needsNormal() ) {
+            Vector3Dd worldNormal = rotation.multiply(new Vector3Dd(
+                outData.normal.x() * inverseScale.x(),
+                outData.normal.y() * inverseScale.y(),
+                outData.normal.z() * inverseScale.z())).normalized();
+            outData.normal = worldNormal;
+        }
+
+        if ( outData.needsTangent() ) {
+            Vector3Dd worldTangent = rotation.multiply(new Vector3Dd(
+                outData.tangent.x() * scale.x(),
+                outData.tangent.y() * scale.y(),
+                outData.tangent.z() * scale.z())).normalized();
+            outData.tangent = worldTangent;
+        }
+
+        outData.material = material;
+        outData.texture = texture;
+        outData.normalMap = normalMap;
+        outData.setRay(worldRay.withT(worldT));
+    }
+
+    private QueryPlacementStatus queryPlacementStatus()
+    {
+        if (!Double.isFinite(position.x()) || !Double.isFinite(position.y()) ||
+            !Double.isFinite(position.z()) || !Double.isFinite(scale.x()) ||
+            !Double.isFinite(scale.y()) || !Double.isFinite(scale.z()) ||
+            scale.x() == 0 || scale.y() == 0 || scale.z() == 0) return QueryPlacementStatus.Invalid;
+        if (!hasInvertibleScale) return QueryPlacementStatus.Indeterminate;
+        // This scene type promises a decomposed rotation, not a general affine matrix.
+        // Reject non-orthogonal or inconsistent matrices rather than silently using
+        // the quaternion-derived inverse as if it were the inverse of a shear.
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                double product = 0, orthogonal = 0;
+                for (int k = 0; k < 3; k++) {
+                    final double a = rotation.get(row,k), inv = rotationInverse.get(k,column);
+                    final double x = rotation.get(k,row), y = rotation.get(k,column);
+                    if (!Double.isFinite(a) || !Double.isFinite(inv) ||
+                        !Double.isFinite(x) || !Double.isFinite(y)) return QueryPlacementStatus.Invalid;
+                    product += a * inv;
+                    orthogonal += x * y;
+                }
+                final double expected = row == column ? 1.0 : 0.0;
+                if (!Double.isFinite(product) || !Double.isFinite(orthogonal) ||
+                    Math.abs(product - expected) > 1e-8 ||
+                    Math.abs(orthogonal - expected) > 1e-8) return QueryPlacementStatus.Indeterminate;
             }
-            else {
-                outHit.setHitDistance(t);
-            }
         }
-        return true;
+        return QueryPlacementStatus.Valid;
+    }
+
+    @Override
+    public AffinePlacementStatus queryAffinePlacement(Matrix4x4d[] forward, Matrix4x4d[] inverse)
+    {
+        if (explicitAffinePlacement) {
+            forward[0] = affinePlacement.getForward(); inverse[0] = affinePlacement.getInverse();
+            return affinePlacement.getStatus();
+        }
+        final QueryPlacementStatus status = queryPlacementStatus();
+        if (status == QueryPlacementStatus.Invalid) return AffinePlacementStatus.Invalid;
+        if (status == QueryPlacementStatus.Indeterminate) return AffinePlacementStatus.Indeterminate;
+        forward[0] = affinePlacement.getForward(); inverse[0] = affinePlacement.getInverse();
+        return affinePlacement.getStatus();
     }
 
     private static Vector3Dd scaleComponents(Vector3Dd value, Vector3Dd factors)
@@ -689,45 +755,5 @@ public class SimpleBody extends Entity {
             return vector;
         }
         return vector.normalized();
-    }
-
-    private static double scaleRayParameterForObjectSpace(
-        double worldSpaceRayParameter, double localDirectionLength)
-    {
-        if ( worldSpaceRayParameter >= Double.MAX_VALUE / localDirectionLength ) {
-            return Double.MAX_VALUE;
-        }
-        return worldSpaceRayParameter * localDirectionLength;
-    }
-
-    private Vector3Dd worldPointToObjectSpace(Vector3Dd point)
-    {
-        Vector3Dd translatedPoint = point.subtract(position);
-        Vector3Dd rotatedPoint = rotationInverseQuaternion.rotate(translatedPoint);
-        return scaleComponents(rotatedPoint, inverseScale);
-    }
-
-    private Vector3Dd worldDirectionToObjectSpace(Vector3Dd direction)
-    {
-        Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(direction);
-        return scaleComponents(rotatedDirection, inverseScale);
-    }
-
-    private Vector3Dd objectPointToWorldSpace(Vector3Dd point)
-    {
-        Vector3Dd scaledPoint = scaleComponents(point, scale);
-        return rotationQuaternion.rotate(scaledPoint).add(position);
-    }
-
-    private Vector3Dd objectNormalToWorldSpace(Vector3Dd normal)
-    {
-        Vector3Dd scaledNormal = scaleComponents(normal, inverseScale);
-        return normalizeIfPossible(rotationQuaternion.rotate(scaledNormal));
-    }
-
-    private Vector3Dd objectTangentToWorldSpace(Vector3Dd tangent)
-    {
-        Vector3Dd scaledTangent = scaleComponents(tangent, scale);
-        return normalizeIfPossible(rotationQuaternion.rotate(scaledTangent));
     }
 }

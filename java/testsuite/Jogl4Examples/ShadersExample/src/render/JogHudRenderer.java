@@ -8,6 +8,8 @@ import java.awt.image.BufferedImage;
 
 import com.jogamp.opengl.GL4;
 
+import model.ShadersGeometryFixture;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import model.ShaderOperationMode;
 import model.ShadersModel;
 import vsdk.toolkit.environment.material.RendererConfiguration;
@@ -49,7 +51,13 @@ public class JogHudRenderer
         ensureHudBuffers(targetHudWidth, targetHudHeight);
 
         String line1;
-        if ( model.getRenderingMode() == ShaderOperationMode.OPENGL_4_1 ) {
+        if ( model.getGeometryFixture() != null ) {
+            // cpp shows this in the window title.
+            TriangleMesh mesh = model.getGeometryFixture().getDrawableMesh();
+            line1 = "Geometry [o]: " + ShadersGeometryFixture.nameOf(model.getGeometry()) +
+                    " Mesh triangles: " + (mesh != null ? mesh.getNumTriangles() : 0);
+        }
+        else if ( model.getRenderingMode() == ShaderOperationMode.OPENGL_4_1 ) {
             int meridians = model.getSphereMeridians();
             int parallels = model.getSphereParallels();
             int triangles = Math.max(0, (parallels - 1) * meridians * 2);

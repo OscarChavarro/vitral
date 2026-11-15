@@ -1,5 +1,6 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -111,7 +112,7 @@ final class _PolyhedralBoundedSolidProfileDifferenceFallback
 
         translation = new Matrix4x4d();
         translation = translation.translation(spec.xMax - spec.xCut, 0, 0);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+        PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), translation);
         PolyhedralBoundedSolidTopologyEditing.compactIds(solid);
         return solid;
