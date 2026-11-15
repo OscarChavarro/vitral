@@ -9,14 +9,21 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
 static bool rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
 {
-    double* mm = geometry->getMinMax();
+    // Meshes with a prepared acceleration structure keep their bounds;
+    // getMinMax() walks every vertex, on every ray.
+    double prepared[6];
+    const TriangleMesh* mesh = dynamic_cast<const TriangleMesh*>(geometry);
+    const TriangleMeshGroup* group = dynamic_cast<const TriangleMeshGroup*>(geometry);
+    const bool usePrepared = (mesh != 0 && mesh->getPreparedMinMax(prepared)) ||
+        (group != 0 && group->getPreparedMinMax(prepared));
+    double* mm = usePrepared ? prepared : geometry->getMinMax();
     Vector3Dd size(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
     Vector3Dd center(
         (mm[3]+mm[0])/2,
         (mm[4]+mm[1])/2,
         (mm[5]+mm[2])/2
     );
-    delete [] mm;
+    if (!usePrepared) delete [] mm;
 
     Box boundingVolume(size);
     Ray localRay(

@@ -4,6 +4,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshIntersectionIndex.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 class Vertex;
 class Triangle;
@@ -39,6 +40,8 @@ private:
 
     TriangleMeshIntersectionIndex intersectionTriangleIndex;
     bool ownsMaterials;
+    // Optional ray acceleration structure, see prepareAccelerationStructure
+    TriangleAccelerationStructureSlot accelerationStructure;
 
     void interpolateTriangleData(int triangleIndex, double u, double v, RayHit* outHit, const Vector3Dd& rayDirection);
     void fillMaterialAndTexture(int triangleIndex, RayHit* outHit);
@@ -141,6 +144,28 @@ public:
     void reorientateNormals();
 
     int doIntersectionInformation() const;
+
+    /**
+    Makes `doIntersectionFirstHit` use the given method: builds its
+    acceleration structure (single threaded) unless one of the same method
+    is already built for the current sizes; `BRUTE_FORCE` releases it. Also
+    computes missing triangle normals. Call it before tracing from several
+    threads: afterwards, calls with the same method only read. The result of
+    the intersection does not depend on the method.
+
+    The structure is a snapshot: the mutators of this class release it, but
+    writes through the non const array getters (`getVertexPositions`,
+    `getTriangleIndexes`) do not, so call `releaseAccelerationStructure` or
+    this method again after them.
+    */
+    void prepareAccelerationStructure(TriangleMeshAccelerationMethod method);
+    void releaseAccelerationStructure();
+    /** Current structure, null when the brute force loop is used */
+    const TriangleAccelerationStructure* getAccelerationStructure() const;
+    /** When a structure built for the current sizes exists: writes what
+    `getMinMax` would return, without walking the vertices, and returns
+    true */
+    bool getPreparedMinMax(double* outMinMax) const;
 
     Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
     bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) override;

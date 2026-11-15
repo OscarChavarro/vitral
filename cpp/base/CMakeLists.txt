@@ -110,6 +110,9 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BoundingVolumeHierarchy.cpp
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBoundingVolume.cpp
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBinHierarchy.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.cpp
     src/main/vsdk/toolkit/environment/geometry/element/GeometryQueryWorkspace.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayInstanceStep.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayInstancePath.cpp
@@ -580,6 +583,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/ray_affine_contract_tests.cpp
     src/test/ray_crossing_tests.cpp
     src/test/bounding_volume_hierarchy_tests.cpp
+    src/test/triangle_acceleration_tests.cpp
     src/test/refraction_tests.cpp
     src/test/reader_mit_triangles_tests.cpp
     src/test/reader_mit_scene_commands_tests.cpp

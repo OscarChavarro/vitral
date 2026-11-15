@@ -6,7 +6,8 @@ RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(true), wires(false), boundingVolume(false), selectionCorners(false),
       texture(true), bumpMap(false), points(false), normals(false), trianglesNormals(false), useVertexColors(false),
       vertexNormalSmoothingThresholdDegrees(15.0),
-      wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0)
+      wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0),
+      meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
 {
 }
 
@@ -60,6 +61,7 @@ void RendererConfiguration::cloneFrom(const RendererConfiguration& other)
     useVertexColors = other.useVertexColors;
     vertexNormalSmoothingThresholdDegrees = other.vertexNormalSmoothingThresholdDegrees;
     lodHint = other.lodHint;
+    meshAccelerationMethod = other.meshAccelerationMethod;
 }
 
 RendererConfiguration RendererConfiguration::clone() const
@@ -137,6 +139,16 @@ void RendererConfiguration::setUseVertexColors(bool value) { useVertexColors = v
 ColorRgb RendererConfiguration::getBoundingVolumeColor() const { return boundingVolumeColor; }
 void RendererConfiguration::setBoundingVolumeColor(const ColorRgb& c) { boundingVolumeColor = c; }
 
+void RendererConfiguration::setMeshAccelerationMethod(TriangleMeshAccelerationMethod method)
+{
+    meshAccelerationMethod = method;
+}
+
+TriangleMeshAccelerationMethod RendererConfiguration::getMeshAccelerationMethod() const
+{
+    return meshAccelerationMethod;
+}
+
 java::String RendererConfiguration::toString() const
 {
     java::String msg = "<RendererConfiguration>:\n";
@@ -160,5 +172,7 @@ java::String RendererConfiguration::toString() const
     msg += "  - With bump map: " + java::String(bumpMap ? "ON" : "OFF") + "\n";
     msg += "  - Vertex normal smoothing threshold: " +
         java::String::valueOf(vertexNormalSmoothingThresholdDegrees) + " deg\n";
+    msg += "  - Mesh acceleration method: " +
+        java::String(TriangleMeshAccelerationMethodUtil::name(meshAccelerationMethod)) + "\n";
     return msg;
 }

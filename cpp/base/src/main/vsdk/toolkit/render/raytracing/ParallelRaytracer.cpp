@@ -283,6 +283,10 @@ void ParallelRaytracer::executeWithEncoder(
 #endif
     }
 
+    // Built here, before the workers start: their own calls only read.
+    SimpleRaytracer::prepareAccelerationStructures(
+        sceneSnapshot->getSimpleBodies(), rendererConfiguration);
+
     java::ArrayList<java::Future<java::Void> > futures;
     for ( int i = 0; i < numberOfThreads; i++ ) {
         futures.add(getExecutorService()->submit(new ParallelRaytracerTileWorker(

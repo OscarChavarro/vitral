@@ -7,7 +7,8 @@ const char* CommandOptionsProcessor::DEFAULT_OUTPUT_FILE_NAME = "./output.ppm";
 
 CommandOptionsProcessor::CommandOptionsProcessor()
     : sceneFile(DEFAULT_SCENE_FILE), outputFile(DEFAULT_OUTPUT_FILE_NAME),
-      save(true), parallel(false), showHelp(false)
+      save(true), parallel(false), showHelp(false),
+      meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
 {
 }
 
@@ -37,6 +38,21 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<j
                 return options;
             }
             options.sceneFile = args.get(++i);
+            continue;
+        }
+        if ( arg == "--mesh-acceleration" || arg == "-m" ) {
+            if ( i + 1 >= args.size() ) {
+                fprintf(stderr, "Missing value for %s\n", arg.c_str());
+                options.showHelp = true;
+                return options;
+            }
+            java::String value = args.get(++i);
+            if ( !TriangleMeshAccelerationMethodUtil::fromName(value.c_str(),
+                     options.meshAccelerationMethod) ) {
+                fprintf(stderr, "Unknown mesh acceleration method: %s\n", value.c_str());
+                options.showHelp = true;
+                return options;
+            }
             continue;
         }
         if ( arg == "--output" || arg == "-o" ) {
@@ -75,6 +91,10 @@ void CommandOptionsProcessor::printUsage()
     printf("  --output, -o <file>    Output image file (.ppm/.png/.jpg)\n");
     printf("  --nosave, -n           Render only, no image file\n");
     printf("  -parallel, --parallel  Render tiles in parallel\n");
+    printf("  --mesh-acceleration, -m <method>\n");
+    printf("                         Triangle mesh ray acceleration:\n");
+    printf("                         bruteforce (none) or wald2007 (binned SAH\n");
+    printf("                         BVH, default)\n");
     printf("  --help, -h             Show this help\n\n");
     printf("Legacy compatibility:\n");
     printf("  - `nosave` (without dashes) is still accepted.\n");
@@ -85,3 +105,4 @@ const java::String& CommandOptionsProcessor::getOutputFile() const { return outp
 bool CommandOptionsProcessor::shouldSave() const { return save; }
 bool CommandOptionsProcessor::shouldUseParallelExecutor() const { return parallel; }
 bool CommandOptionsProcessor::shouldShowHelp() const { return showHelp; }
+TriangleMeshAccelerationMethod CommandOptionsProcessor::getMeshAccelerationMethod() const { return meshAccelerationMethod; }

@@ -3,6 +3,7 @@
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.h"
 
 class CommandOptionsProcessor {
 private:
@@ -14,6 +15,7 @@ private:
     bool save;
     bool parallel;
     bool showHelp;
+    TriangleMeshAccelerationMethod meshAccelerationMethod;
 
 public:
     CommandOptionsProcessor();
@@ -26,6 +28,7 @@ public:
     bool shouldSave() const;
     bool shouldUseParallelExecutor() const;
     bool shouldShowHelp() const;
+    TriangleMeshAccelerationMethod getMeshAccelerationMethod() const;
 };
 
 #endif

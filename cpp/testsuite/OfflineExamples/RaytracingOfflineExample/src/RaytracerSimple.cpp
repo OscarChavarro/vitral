@@ -51,7 +51,8 @@ static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererCo
 static void offlineExecution(const java::String& fileName,
                              bool save,
                              const java::String& outputFileName,
-                             bool parallel)
+                             bool parallel,
+                             TriangleMeshAccelerationMethod meshAccelerationMethod)
 {
     SimpleScene scene;
 
@@ -80,12 +81,24 @@ static void offlineExecution(const java::String& fileName,
     ProgressMonitorConsole reporter;
     RendererConfiguration rendererConfiguration;
     optimizeRendererConfigurationForScene(&scene, &rendererConfiguration);
+    rendererConfiguration.setMeshAccelerationMethod(meshAccelerationMethod);
 
     SimpleRaytracer visualizationEngine;
     CameraSnapshot* cameraSnapshot =
         activeCamera->exportToCameraSnapshot(resultingImage.getXSize(), resultingImage.getYSize());
     SimpleSceneSnapshot* sceneSnapshot =
         scene.exportToSimpleSceneSnapshot(cameraSnapshot, scene.getActiveBackground());
+
+    // Acceleration structures are built here so their time is reported
+    // apart; the raytracers find them built and do not rebuild them.
+    StopWatch buildClock;
+    buildClock.start();
+    SimpleRaytracer::prepareAccelerationStructures(sceneSnapshot->getSimpleBodies(),
+        &rendererConfiguration);
+    buildClock.stop();
+    printf("Mesh acceleration \"%s\" prepared in %s seconds.\n",
+        TriangleMeshAccelerationMethodUtil::name(meshAccelerationMethod),
+        VSDK::formatDouble(buildClock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS).c_str());
 
     StopWatch clock;
 
@@ -141,6 +154,7 @@ int main(int argc, char** argv)
     offlineExecution(options.getSceneFile(),
                      options.shouldSave(),
                      options.getOutputFile(),
-                     options.shouldUseParallelExecutor());
+                     options.shouldUseParallelExecutor(),
+                     options.getMeshAccelerationMethod());
     return 0;
 }

@@ -46,7 +46,7 @@ TriangleMesh::TriangleMesh(const TriangleMesh& o)
       triangleIndexes(o.triangleIndexes), triangleNormals(o.triangleNormals),
       materials(o.materials), textureRanges(o.textureRanges), materialRanges(o.materialRanges),
       textures(o.textures), intersectionTriangleIndex(o.intersectionTriangleIndex),
-      ownsMaterials(false)
+      ownsMaterials(false), accelerationStructure(o.accelerationStructure)
 {
 }
 
@@ -87,6 +87,7 @@ void TriangleMesh::getVertexAt(int i, Vertex& vertex) const
 
 void TriangleMesh::initVertexPositionsArray(int n)
 {
+    accelerationStructure.reset(0);
     vertexPositions.clear(); vertexPositions.reserve((long int)n*3);
     for (long int i = 0; i < (long int)n*3; i++) vertexPositions.add(0.0);
     vertexSelections.clear(); vertexSelections.reserve((long int)n);
@@ -155,6 +156,7 @@ void TriangleMesh::setVertexes(const java::ArrayList<Vertex>& vertexes, bool wit
 
 void TriangleMesh::initTriangleArrays(int n)
 {
+    accelerationStructure.reset(0);
     triangleIndexes.clear(); triangleIndexes.reserve((long int)n*3);
     for (long int i = 0; i < (long int)n*3; i++) triangleIndexes.add(0);
     triangleNormals.clear(); triangleNormals.reserve((long int)n*3);
@@ -186,6 +188,7 @@ PRE: 0 <= i < vertexPositions.length/3
 */
 void TriangleMesh::setVertexAt(int i, const Vertex& v)
 {
+    accelerationStructure.reset(0);
     vertexPositions[i*3] = v.position.x();
     vertexPositions[i*3+1] = v.position.y();
     vertexPositions[i*3+2] = v.position.z();
@@ -212,6 +215,7 @@ PRE: 0 <= i < vertexPositions.length/3
 */
 void TriangleMesh::setTriangleAt(int i, const Triangle& t)
 {
+    accelerationStructure.reset(0);
     triangleIndexes[i*3] = t.getPoint0();
     triangleIndexes[i*3+1] = t.getPoint1();
     triangleIndexes[i*3+2] = t.getPoint2();
@@ -496,6 +500,37 @@ RayCrossingSupport TriangleMesh::emitRayCrossings(const Ray& ray, const RayCross
 
 int TriangleMesh::doIntersectionInformation() const { return (int)intersectionTriangleIndex.get(); }
 
+void TriangleMesh::prepareAccelerationStructure(TriangleMeshAccelerationMethod method)
+{
+    // Done here, single threaded, instead of lazily from the tracing threads.
+    if ((int)triangleNormals.size() < getNumTriangles()*3) calculateNormals();
+    if (method == TriangleMeshAccelerationMethod::BRUTE_FORCE) {
+        if (accelerationStructure.get() != 0) accelerationStructure.reset(0);
+        return;
+    }
+    const TriangleAccelerationStructure* current = accelerationStructure.get();
+    if (current != 0 && current->getMethod() == method &&
+        current->matches(getNumVertices(), getNumTriangles())) return;
+    TriangleAccelerationStructure* structure = TriangleAccelerationStructure::create(method);
+    if (structure != 0) structure->build(vertexPositions, triangleIndexes);
+    accelerationStructure.reset(structure);
+}
+
+void TriangleMesh::releaseAccelerationStructure() { accelerationStructure.reset(0); }
+
+const TriangleAccelerationStructure* TriangleMesh::getAccelerationStructure() const
+{
+    return accelerationStructure.get();
+}
+
+bool TriangleMesh::getPreparedMinMax(double* outMinMax) const
+{
+    const TriangleAccelerationStructure* structure = accelerationStructure.get();
+    if (structure == 0 || !structure->matches(getNumVertices(), getNumTriangles())) return false;
+    structure->getVertexBounds(outMinMax);
+    return true;
+}
+
 Ray* TriangleMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     RayHit hit;
@@ -568,20 +603,19 @@ bool TriangleMesh::doIntersectionInternal(const Ray& inRay, RayHit* outHit, int*
     }
     if ((int)triangleNormals.size() < getNumTriangles()*3) calculateNormals();
 
-    bool found = false;
     double bestT = 1e308;
     int bestTri = -1;
     double bestU = 0, bestV = 0;
+    bool found;
 
-    for (int i = 0; i < getNumTriangles(); i++) {
-        int i0 = triangleIndexes[i*3], i1 = triangleIndexes[i*3+1], i2 = triangleIndexes[i*3+2];
-        Vector3Dd v0(vertexPositions[i0*3], vertexPositions[i0*3+1], vertexPositions[i0*3+2]);
-        Vector3Dd v1(vertexPositions[i1*3], vertexPositions[i1*3+1], vertexPositions[i1*3+2]);
-        Vector3Dd v2(vertexPositions[i2*3], vertexPositions[i2*3+1], vertexPositions[i2*3+2]);
-        double t,u,v;
-        if (Triangle::intersectRay(inRay, v0, v1, v2, t, u, v) && t < bestT) {
-            bestT=t; bestTri=i; bestU=u; bestV=v; found=true;
-        }
+    const TriangleAccelerationStructure* structure = accelerationStructure.get();
+    if (structure != 0 && structure->matches(getNumVertices(), getNumTriangles())) {
+        found = structure->firstHit(inRay, vertexPositions, triangleIndexes,
+            bestT, bestU, bestV, bestTri);
+    }
+    else {
+        found = TriangleAccelerationStructure::firstHitBruteForce(inRay,
+            vertexPositions, triangleIndexes, bestT, bestU, bestV, bestTri);
     }
 
     if (!found) {
@@ -645,6 +679,7 @@ TriangleMeshGroup* TriangleMesh::exportToTriangleMeshGroup()
 
 void TriangleMesh::compact()
 {
+    accelerationStructure.reset(0);
     vertexNormals.clear();
 
     int n = getNumVertices();
@@ -706,6 +741,7 @@ void TriangleMesh::compact()
 
 void TriangleMesh::removeSelectedVertices()
 {
+    accelerationStructure.reset(0);
     if (vertexSelections.size() == 0) return;
 
     vertexNormals.clear();
@@ -833,6 +869,7 @@ void TriangleMesh::doubleTriangleCut(InfinitePlane& p, java::ArrayList<double>& 
 
 void TriangleMesh::slice(InfinitePlane& p)
 {
+    accelerationStructure.reset(0);
     java::ArrayList<int> extraTriangles;
     java::ArrayList<double> extraVertices;
 

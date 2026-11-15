@@ -6,21 +6,26 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h"
 TriangleMeshGroup::TriangleMeshGroup()
-    : intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
+    : intersectionMeshIndex(-1), intersectionTriangleIndex(-1), preparedMeshCount(-1)
 {
 }
 
 TriangleMeshGroup::TriangleMeshGroup(const java::ArrayList<TriangleMesh>& meshes)
-    : meshes(meshes), intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
+    : meshes(meshes), intersectionMeshIndex(-1), intersectionTriangleIndex(-1),
+      preparedMeshCount(-1)
 {
 }
 
 TriangleMeshGroup::TriangleMeshGroup(const TriangleMeshGroup& group)
     : meshes(group.meshes),
       intersectionMeshIndex(group.intersectionMeshIndex),
-      intersectionTriangleIndex(group.intersectionTriangleIndex)
+      intersectionTriangleIndex(group.intersectionTriangleIndex),
+      meshHierarchy(group.meshHierarchy),
+      preparedMeshCount(group.preparedMeshCount)
 {
+    for (int i = 0; i < 6; i++) preparedBounds[i] = group.preparedBounds[i];
 }
 
 java::ArrayList<TriangleMesh>& TriangleMeshGroup::getMeshes()
@@ -28,14 +33,84 @@ java::ArrayList<TriangleMesh>& TriangleMeshGroup::getMeshes()
     return meshes;
 }
 
+void TriangleMeshGroup::prepareAccelerationStructures(TriangleMeshAccelerationMethod method)
+{
+    bool changed = false;
+    for (long int i = 0; i < meshes.size(); i++) {
+        const TriangleAccelerationStructure* before = meshes[i].getAccelerationStructure();
+        meshes[i].prepareAccelerationStructure(method);
+        if (meshes[i].getAccelerationStructure() != before) changed = true;
+    }
+    if (method == TriangleMeshAccelerationMethod::BRUTE_FORCE) {
+        if (preparedMeshCount != -1) preparedMeshCount = -1;
+        return;
+    }
+    // Nothing written when already prepared: safe from tracing threads.
+    if (!changed && preparedMeshCount == meshes.size()) return;
+    buildMeshHierarchy();
+}
+
+void TriangleMeshGroup::buildMeshHierarchy()
+{
+    preparedMeshCount = -1;
+    double bounds[6];
+    if (!getPreparedMinMax(bounds)) return;  // some mesh has no structure
+    // [WALD2007] top level: one padded box per mesh, from its cached bounds.
+    java::ArrayList<double> boxes(6 * (meshes.size() > 0 ? meshes.size() : 1));
+    for (long int i = 0; i < meshes.size(); i++) {
+        double mm[6];
+        meshes[i].getPreparedMinMax(mm);
+        TriangleAccelerationStructure::padBox(mm, mm + 3);
+        for (int k = 0; k < 6; k++) boxes.add(mm[k]);
+    }
+    meshHierarchy.build(boxes);
+    for (int k = 0; k < 6; k++) preparedBounds[k] = bounds[k];
+    preparedMeshCount = meshes.size();
+}
+
+const BinnedSahHierarchy* TriangleMeshGroup::getMeshHierarchy() const
+{
+    return preparedMeshCount == meshes.size() ? &meshHierarchy : 0;
+}
+
+bool TriangleMeshGroup::getPreparedMinMax(double* outMinMax) const
+{
+    if (preparedMeshCount >= 0 && preparedMeshCount == meshes.size()) {
+        for (int k = 0; k < 6; k++) outMinMax[k] = preparedBounds[k];
+        return true;
+    }
+    // Same combination as computeMinMaxPositions, from cached mesh bounds.
+    if (meshes.size() == 0) return false;
+    double minX = 0, minY = 0, minZ = 0, maxX = 0, maxY = 0, maxZ = 0;
+    for (long int i = 0; i < meshes.size(); i++) {
+        double mm[6];
+        if (!meshes[i].getPreparedMinMax(mm)) return false;
+        if (i == 0) {
+            minX = mm[0]; minY = mm[1]; minZ = mm[2];
+            maxX = mm[3]; maxY = mm[4]; maxZ = mm[5];
+        }
+        if (mm[0] < minX) minX = mm[0];
+        if (mm[1] < minY) minY = mm[1];
+        if (mm[2] < minZ) minZ = mm[2];
+        if (mm[3] > maxX) maxX = mm[3];
+        if (mm[4] > maxY) maxY = mm[4];
+        if (mm[5] > maxZ) maxZ = mm[5];
+    }
+    outMinMax[0] = minX; outMinMax[1] = minY; outMinMax[2] = minZ;
+    outMinMax[3] = maxX; outMinMax[4] = maxY; outMinMax[5] = maxZ;
+    return true;
+}
+
 void TriangleMeshGroup::setMeshes(const java::ArrayList<TriangleMesh>& inMeshes)
 {
     meshes = inMeshes;
+    preparedMeshCount = -1;
 }
 
 void TriangleMeshGroup::addMesh(const TriangleMesh& mesh)
 {
     meshes.add(mesh);
+    preparedMeshCount = -1;
 }
 
 TriangleMesh& TriangleMeshGroup::getMeshAt(int index)
@@ -129,36 +204,76 @@ Ray* TriangleMeshGroup::doIntersectionFirstHit(const Ray& inOut_Ray)
     return 0;
 }
 
-bool TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
-{
-    double minT = 1e308;
+/**
+Closest hit over the meshes of a group: the leaf test of the top level
+hierarchy and, called for every mesh in order, the linear loop. Keeps the
+first (lowest index) mesh among equal distances, as the linear loop does.
+*/
+class _TriangleMeshGroupClosestHit : public BinnedSahLeafVisitor {
+  public:
+    java::ArrayList<TriangleMesh>& meshes;
+    const Ray& ray;
     RayHit bestHit;
-    bool hasBestHit = false;
-    int bestMesh = -1;
-    int bestTriangle = -1;
-    int triangleInformation = -1;
+    bool hasBestHit;
+    int bestMesh;
+    int bestTriangle;
 
-    for (long int i = 0; i < meshes.size(); i++) {
-        TriangleMesh& mesh = meshes[i];
+    _TriangleMeshGroupClosestHit(java::ArrayList<TriangleMesh>& inMeshes, const Ray& inRay)
+        : meshes(inMeshes), ray(inRay), hasBestHit(false), bestMesh(-1), bestTriangle(-1) {}
+
+    void reset()
+    {
+        hasBestHit = false;
+        bestMesh = -1;
+        bestTriangle = -1;
+    }
+
+    void visit(int mesh, double& inOutBestT)
+    {
         RayHit meshHit;
-        if (mesh.doIntersectionFirstHit(inRay, &meshHit, &triangleInformation) &&
-            meshHit.getRay() != 0 && meshHit.getRay()->getT() < minT) {
-            minT = meshHit.getRay()->getT();
+        int triangle = -1;
+        if (!meshes[mesh].doIntersectionFirstHit(ray, &meshHit, &triangle) || meshHit.getRay() == 0)
+            return;
+        const double t = meshHit.getRay()->getT();
+        if (t < inOutBestT || (t == inOutBestT && hasBestHit && mesh < bestMesh)) {
+            inOutBestT = t;
             bestHit.clone(meshHit);
-            bestMesh = (int)i;
-            bestTriangle = triangleInformation;
+            bestMesh = mesh;
+            bestTriangle = triangle;
             hasBestHit = true;
         }
     }
+};
 
-    if (!hasBestHit) {
-        intersectionMeshIndex = -1;
-        intersectionTriangleIndex = -1;
+void TriangleMeshGroup::setIntersectionIndexes(int mesh, int triangle)
+{
+    // Legacy last-hit state written by every ray: skip writes that change
+    // nothing, so tracing threads do not keep invalidating its cache line.
+    if (intersectionMeshIndex != mesh) intersectionMeshIndex = mesh;
+    if (intersectionTriangleIndex != triangle) intersectionTriangleIndex = triangle;
+}
+
+bool TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
+{
+    _TriangleMeshGroupClosestHit closest(meshes, inRay);
+    double minT = 1e308;
+    bool traversed = false;
+    if (preparedMeshCount >= 0 && preparedMeshCount == meshes.size()) {
+        traversed = meshHierarchy.traverseClosest(inRay, closest, minT);
+        if (!traversed) closest.reset();  // stack overflow: linear loop below
+    }
+    if (!traversed) {
+        minT = 1e308;
+        for (long int i = 0; i < meshes.size(); i++) closest.visit((int)i, minT);
+    }
+
+    if (!closest.hasBestHit) {
+        setIntersectionIndexes(-1, -1);
         return false;
     }
 
-    intersectionMeshIndex = bestMesh;
-    intersectionTriangleIndex = bestTriangle;
+    setIntersectionIndexes(closest.bestMesh, closest.bestTriangle);
+    RayHit& bestHit = closest.bestHit;
 
     if (outHit != 0) {
         outHit->clone(bestHit);
