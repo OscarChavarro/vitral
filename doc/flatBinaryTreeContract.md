@@ -131,7 +131,7 @@ median or spatial median splits, binned SAH with other bin counts or only
 the widest axis, full sweep SAH, LBVH (Morton codes), agglomerative
 clustering, refitting after deformation (same topology, new boxes), and
 SBVH with an entry repeated in several leaves (it relaxes invariant 2 to
-"at least once"; closest hit traversals already tolerate it).
+"at least once"; closest hit traversals tolerate it).
 
 Strategies that change the layout need a new contract and new traversals
 on both sides: wide trees (BVH4 / BVH8), compressed or quantized nodes,
