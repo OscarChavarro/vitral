@@ -1,6 +1,8 @@
 /**
-One node of a `BinnedSahHierarchy`, the double precision form of
-`VulkanBvhNode` (`CasNode` of `computeAccelerationStructure.glsl`):
+One node of a `BinnedSahHierarchy`, an element of the flat binary tree
+contract of `doc/flatBinaryTreeContract.md` (the Vulkan 1.4 compute path
+copies it into its single precision `VulkanBvhNode`, `CasNode` of
+`computeAccelerationStructure.glsl`):
 
 - inner node (`count == 0`): children at `leftOrFirst` and `leftOrFirst + 1`;
 - leaf (`count > 0`): entries `leftOrFirst` .. `leftOrFirst + count - 1`

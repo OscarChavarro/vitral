@@ -1,8 +1,13 @@
 // Port of cpp/base/src/test/triangle_acceleration_tests.cpp
 import { describe, expect, it } from "vitest";
+import { ArrayList } from "java/util/ArrayList.js";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { Ray } from "vsdk/toolkit/environment/geometry/element/Ray.js";
 import { RayHit } from "vsdk/toolkit/environment/geometry/element/RayHit.js";
+import { Matrix4x4d } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
+import { RaytraceStatistics } from "vsdk/toolkit/common/statistics/RaytraceStatistics.js";
+import { BinnedSahInstanceHierarchy } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.js";
+import type { BinnedSahInstanceVisitor } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceVisitor.js";
 import { BinnedSahHierarchy } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.js";
 import { BinnedSahTriangleHierarchy } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
 import { TriangleAccelerationStructure } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.js";
@@ -348,4 +353,213 @@ describe("TriangleMeshGroup", () => {
         accelerated.prepareAccelerationStructures(TriangleMeshAccelerationMethod.BRUTE_FORCE);
         expect(accelerated.getMeshHierarchy() === null).toBe(true);
     }, 120_000);
+});
+
+// Leaf size parameter: leaves never exceed twice the requested size (they
+// may keep up to that when a split is not cheaper), and size 1 gives one
+// primitive per leaf on boxes that never share a centroid.
+describe("BinnedSahHierarchy", () => {
+    it("MaximumLeafSizeIsHonored", () => {
+        const boxes = new ArrayList<number>();
+        const random = new TriangleAccelerationTestRandom(5);
+        for (let i = 0; i < 500; i++) {
+            const x = random.next() * 10,
+                y = random.next() * 10,
+                z = random.next() * 10;
+            boxes.add(x);
+            boxes.add(y);
+            boxes.add(z);
+            boxes.add(x + 0.1);
+            boxes.add(y + 0.1);
+            boxes.add(z + 0.1);
+        }
+        for (let leafSize = 1; leafSize <= 8; leafSize *= 2) {
+            const hierarchy = new BinnedSahHierarchy();
+            hierarchy.build(boxes, leafSize);
+            const nodes = hierarchy.getNodes();
+            let largest = 0;
+            for (let i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i).count > largest) largest = nodes.get(i).count;
+            }
+            expect(largest, String(leafSize)).toBeLessThanOrEqual(2 * leafSize);
+            if (leafSize === 1) {
+                expect(largest).toBe(1);
+                expect(hierarchy.getNodeCount()).toBe(2 * 500 - 1);
+            }
+        }
+        const byDefault = new BinnedSahHierarchy();
+        const explicitDefault = new BinnedSahHierarchy();
+        byDefault.build(boxes);
+        explicitDefault.build(boxes, BinnedSahHierarchy.DEFAULT_MAXIMUM_LEAF_SIZE);
+        expect(explicitDefault.getNodeCount()).toBe(byDefault.getNodeCount());
+    });
+});
+
+const instanceTransform = (k: number): Matrix4x4d => {
+    const identity = new Matrix4x4d();
+    const rotation = identity.axisRotation(0.3 + 0.7 * k, 1.0, 0.5 * k, 0.25);
+    const scale = identity.scale(0.2 + 0.05 * (k % 3), 0.25, 0.15 + 0.05 * (k % 2));
+    const translation = identity.translation(
+        (k % 5) * 0.6 - 1.2,
+        (Math.trunc(k / 5) % 5) * 0.6 - 1.2,
+        (k % 3) * 0.4 - 0.4,
+    );
+    return translation.multiply(rotation.multiply(scale));
+};
+
+// Closest hit over transformed copies of meshes: the visitor of the
+// instance hierarchy tests one mesh hierarchy in object space.
+class _InstanceTestClosestHit implements BinnedSahInstanceVisitor {
+    public readonly meshes: BinnedSahTriangleHierarchy[];
+    public readonly meshOfInstance: number[];
+    public readonly positions: number[][];
+    public readonly indexes: number[][];
+    public bestInstance: number;
+    public bestTriangle: number;
+    public constructor(
+        inMeshes: BinnedSahTriangleHierarchy[],
+        inMeshOfInstance: number[],
+        inPositions: number[][],
+        inIndexes: number[][],
+    ) {
+        this.meshes = inMeshes;
+        this.meshOfInstance = inMeshOfInstance;
+        this.positions = inPositions;
+        this.indexes = inIndexes;
+        this.bestInstance = -1;
+        this.bestTriangle = -1;
+    }
+    public visit(instance: number, objectRay: Ray, inOutBestT: number[]): void {
+        const m = this.meshOfInstance[instance]!;
+        const t = [0],
+            u = [0],
+            v = [0];
+        const triangle = [-1];
+        if (!this.meshes[m]!.firstHit(objectRay, this.positions[m]!, this.indexes[m]!, t, u, v, triangle)) return;
+        if (t[0]! < inOutBestT[0]! || (t[0] === inOutBestT[0] && instance < this.bestInstance)) {
+            inOutBestT[0] = t[0]!;
+            this.bestInstance = instance;
+            this.bestTriangle = triangle[0]!;
+        }
+    }
+}
+
+describe("BinnedSahInstanceHierarchy", () => {
+    it("TransformedInstancesMatchLinearLoop", () => {
+        const positions: number[][] = [];
+        const indexes: number[][] = [];
+        const meshes: BinnedSahTriangleHierarchy[] = [];
+        for (let m = 0; m < 3; m++) {
+            const p: number[] = [];
+            const i: number[] = [];
+            if (m === 1) buildGrid(6, p, i);
+            else buildSoup(60 + 40 * m, p, i);
+            positions.push(p);
+            indexes.push(i);
+        }
+        // Built after the arrays stop moving (the hierarchies keep no pointers,
+        // the arrays are passed again on each query).
+        for (let m = 0; m < 3; m++) {
+            const h = new BinnedSahTriangleHierarchy();
+            h.build(positions[m]!, indexes[m]!);
+            meshes.push(h);
+        }
+        const objectBoxes = new ArrayList<number>();
+        const transforms = new ArrayList<Matrix4x4d>();
+        const meshOfInstance: number[] = [];
+        for (let k = 0; k < 40; k++) {
+            const m = k % 3;
+            const bounds: number[] = [0, 0, 0, 0, 0, 0];
+            meshes[m]!.getVertexBounds(bounds);
+            for (let c = 0; c < 6; c++) objectBoxes.add(bounds[c]!);
+            transforms.add(instanceTransform(k));
+            meshOfInstance.push(m);
+        }
+        // One empty instance: never reached.
+        for (let c = 0; c < 3; c++) objectBoxes.add(1.0);
+        for (let c = 0; c < 3; c++) objectBoxes.add(-1.0);
+        transforms.add(new Matrix4x4d());
+        meshOfInstance.push(0);
+
+        const instances = new BinnedSahInstanceHierarchy();
+        instances.build(objectBoxes, transforms);
+        expect(instances.getInstanceCount()).toBe(41);
+        expect(instances.getHierarchy().getDepth()).toBeLessThanOrEqual(BinnedSahHierarchy.MAXIMUM_DEPTH);
+
+        const random = new TriangleAccelerationTestRandom(23);
+        let hits = 0;
+        for (let k = 0; k < 2000; k++) {
+            const ray = randomRay(random, k);
+            const linear = new _InstanceTestClosestHit(meshes, meshOfInstance, positions, indexes);
+            const linearT = [1e308];
+            for (let i = 0; i < 40; i++) {
+                linear.visit(i, instances.toObjectSpace(i, ray), linearT);
+            }
+            const accelerated = new _InstanceTestClosestHit(meshes, meshOfInstance, positions, indexes);
+            const acceleratedT = [1e308];
+            instances.traverseClosest(ray, accelerated, acceleratedT);
+            expect(accelerated.bestInstance, "ray " + k).toBe(linear.bestInstance);
+            expect(accelerated.bestTriangle, "ray " + k).toBe(linear.bestTriangle);
+            expect(acceleratedT[0], "ray " + k).toBe(linearT[0]);
+            if (linear.bestInstance >= 0) hits++;
+        }
+        expect(hits).toBeGreaterThan(200);
+    }, 120_000);
+
+    it("ObjectRayKeepsWorldParameter", () => {
+        const objectBoxes = new ArrayList<number>();
+        for (let c = 0; c < 3; c++) objectBoxes.add(-1.0);
+        for (let c = 0; c < 3; c++) objectBoxes.add(1.0);
+        const transforms = new ArrayList<Matrix4x4d>();
+        transforms.add(instanceTransform(7));
+        const instances = new BinnedSahInstanceHierarchy();
+        instances.build(objectBoxes, transforms);
+        const world = new Ray(new Vector3Dd(0.3, -2, 0.7), new Vector3Dd(0.1, 1, -0.2));
+        const object = instances.toObjectSpace(0, world);
+        // The point at t in object space, taken back, is the world point at t.
+        const t = 1.7;
+        const objectPoint = object.getOrigin().add(object.getDirection().multiply(t));
+        const back = BinnedSahInstanceHierarchy.transformPoint(instances.getObjectToWorld(0), objectPoint);
+        const expected = world.getOrigin().add(world.getDirection().multiply(t));
+        expect(Math.abs(expected.x() - back.x())).toBeLessThanOrEqual(1e-12);
+        expect(Math.abs(expected.y() - back.y())).toBeLessThanOrEqual(1e-12);
+        expect(Math.abs(expected.z() - back.z())).toBeLessThanOrEqual(1e-12);
+    });
+});
+
+describe("RaytraceStatistics", () => {
+    it("CountsHierarchyWork", () => {
+        const positions: number[] = [];
+        const indexes: number[] = [];
+        buildGrid(20, positions, indexes);
+        const hierarchy = new BinnedSahTriangleHierarchy();
+        hierarchy.build(positions, indexes);
+        const ray = new Ray(new Vector3Dd(0.31, -0.27, 2), new Vector3Dd(0, 0, -1));
+        const t = [0],
+            u = [0],
+            v = [0];
+        const triangle = [-1];
+
+        RaytraceStatistics.setEnabled(false);
+        RaytraceStatistics.reset();
+        expect(hierarchy.firstHit(ray, positions, indexes, t, u, v, triangle)).toBe(true);
+        expect(RaytraceStatistics.getPrimitiveLevelTraversals()).toBe(0);
+
+        RaytraceStatistics.setEnabled(true);
+        expect(hierarchy.firstHit(ray, positions, indexes, t, u, v, triangle)).toBe(true);
+        expect(RaytraceStatistics.getPrimitiveLevelTraversals()).toBe(1);
+        const visits = RaytraceStatistics.getPrimitiveLevelNodeVisits();
+        const tests = RaytraceStatistics.getPrimitiveLevelPrimitiveTests();
+        expect(visits).toBeGreaterThan(0);
+        expect(tests).toBeGreaterThan(0);
+        expect(tests).toBeLessThan(Math.trunc(indexes.length / 3));
+        expect(visits).toBeLessThanOrEqual(hierarchy.getNodeCount());
+
+        TriangleAccelerationStructure.firstHitBruteForce(ray, positions, indexes, t, u, v, triangle);
+        expect(RaytraceStatistics.getPrimitiveLevelTraversals()).toBe(2);
+        expect(RaytraceStatistics.getPrimitiveLevelPrimitiveTests()).toBe(tests + Math.trunc(indexes.length / 3));
+        expect(RaytraceStatistics.getPrimitiveLevelNodeVisits()).toBe(visits);
+        RaytraceStatistics.setEnabled(false);
+        RaytraceStatistics.reset();
+    });
 });

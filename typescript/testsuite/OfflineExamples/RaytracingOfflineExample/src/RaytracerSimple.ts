@@ -152,7 +152,9 @@ export class RaytracerSimple {
                 VSDK.formatDouble(clock.getElapsedRealTime(), RaytracerSimple.ELAPSED_TIME_DECIMALS) +
                 " seconds.",
         );
-        RaytraceStatistics.printSummary();
+        if (RaytraceStatistics.isEnabled()) {
+            RaytraceStatistics.printSummary();
+        }
 
         //- 4. Export resulting image to an image file --------------------
         if (save) {
@@ -172,6 +174,9 @@ export class RaytracerSimple {
             if (args.length > 0) {
                 process.exit(RaytracerSimple.EXIT_CODE_ARGUMENT_ERROR);
             }
+        }
+        if (options.shouldPrintStatistics()) {
+            RaytraceStatistics.setEnabled(true);
         }
         await instance.offlineExecution(
             options.getSceneFile(),

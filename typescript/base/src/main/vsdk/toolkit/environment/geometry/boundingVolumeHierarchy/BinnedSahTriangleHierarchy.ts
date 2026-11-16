@@ -4,6 +4,7 @@
 //=     Interactive Ray Tracing, 2007, pp. 33-40.                           =
 
 import { ArrayList } from "../../../../../java/util/ArrayList.js";
+import { RaytraceStatistics } from "../../../common/statistics/RaytraceStatistics.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import type { Ray } from "../element/Ray.js";
 import { Triangle } from "../element/Triangle.js";
@@ -102,8 +103,12 @@ export class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
 
         const rootDistance = slab.entry(nodes.get(0), bestT);
         if (rootDistance < 0.0) {
+            RaytraceStatistics.recordPrimitiveLevelTraversal(0, 0);
             return false;
         }
+        // Counted locally, reported once: no shared write per node.
+        let nodeVisits = 0;
+        let triangleTests = 0;
         // Traversal of casTraverseBlas (computeAccelerationStructure.glsl),
         // specialized for triangles: no virtual call per leaf entry.
         const nodeStack = new Int32Array(BinnedSahHierarchy.STACK_SIZE);
@@ -124,7 +129,9 @@ export class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
                 continue;
             }
             const node = nodes.get(nodeStack[sp]!);
+            nodeVisits++;
             if (node.count > 0) {
+                triangleTests += node.count;
                 for (let i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++) {
                     const p = 9 * i;
                     const v0 = new Vector3Dd(
@@ -171,6 +178,7 @@ export class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
             if (sp + 2 > BinnedSahHierarchy.STACK_SIZE) {
                 // Unreachable with MAXIMUM_DEPTH < STACK_SIZE; never give a
                 // wrong answer if it happens.
+                RaytraceStatistics.recordPrimitiveLevelTraversal(nodeVisits, triangleTests);
                 return TriangleAccelerationStructure.firstHitBruteForce(
                     ray,
                     positions,
@@ -192,6 +200,7 @@ export class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
                 sp++;
             }
         }
+        RaytraceStatistics.recordPrimitiveLevelTraversal(nodeVisits, triangleTests);
         if (best < 0) {
             return false;
         }

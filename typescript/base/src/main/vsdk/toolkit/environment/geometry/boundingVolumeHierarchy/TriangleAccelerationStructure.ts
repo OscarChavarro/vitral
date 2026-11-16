@@ -1,4 +1,5 @@
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
+import { RaytraceStatistics } from "../../../common/statistics/RaytraceStatistics.js";
 import type { Ray } from "../element/Ray.js";
 import { Triangle } from "../element/Triangle.js";
 import { TriangleMeshAccelerationMethod } from "./TriangleMeshAccelerationMethod.js";
@@ -209,6 +210,8 @@ export abstract class TriangleAccelerationStructure {
         outTriangle: number[],
     ): boolean {
         const triangleCount = Math.trunc(indexes.length / 3);
+        // No nodes: every triangle is a primitive test.
+        RaytraceStatistics.recordPrimitiveLevelTraversal(0, triangleCount);
         let bestT = 1e308;
         let bestU = 0;
         let bestV = 0;

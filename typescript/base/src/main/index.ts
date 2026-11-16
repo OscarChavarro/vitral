@@ -326,6 +326,8 @@ export { BinnedSahHierarchy } from "./vsdk/toolkit/environment/geometry/bounding
 export { BinnedSahHierarchyNode } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchyNode.js";
 export type { BinnedSahLeafVisitor } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahLeafVisitor.js";
 export { BinnedSahTriangleHierarchy } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
+export { BinnedSahInstanceHierarchy } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.js";
+export type { BinnedSahInstanceVisitor } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceVisitor.js";
 export { TriangleAccelerationStructure } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.js";
 export { TriangleMeshAccelerationMethod } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
 export { TriangleMeshAccelerationMethodUtil } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethodUtil.js";

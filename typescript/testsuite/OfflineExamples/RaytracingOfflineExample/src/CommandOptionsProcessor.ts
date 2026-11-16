@@ -12,6 +12,7 @@ export class CommandOptionsProcessor {
     private outputFile: string = CommandOptionsProcessor.DEFAULT_OUTPUT_FILE_NAME;
     private save = true;
     private parallel = false;
+    private statistics = false;
     private showHelp = false;
     private meshAccelerationMethod: TriangleMeshAccelerationMethod = TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
 
@@ -29,6 +30,10 @@ export class CommandOptionsProcessor {
             }
             if ("-parallel" === arg || "--parallel" === arg) {
                 options.parallel = true;
+                continue;
+            }
+            if ("--stats" === arg) {
+                options.statistics = true;
                 continue;
             }
             if ("--help" === arg || "-h" === arg) {
@@ -101,6 +106,8 @@ export class CommandOptionsProcessor {
         console.log("                         Triangle mesh ray acceleration:");
         console.log("                         bruteforce (none) or wald2007 (binned SAH");
         console.log("                         BVH, default)");
+        console.log("  --stats                Count rays and acceleration structure work");
+        console.log("                         (RaytraceStatistics) and print a summary");
         console.log("  --help, -h             Show this help");
         console.log();
         console.log("Legacy compatibility:");
@@ -121,6 +128,10 @@ export class CommandOptionsProcessor {
 
     public shouldUseParallelExecutor(): boolean {
         return this.parallel;
+    }
+
+    public shouldPrintStatistics(): boolean {
+        return this.statistics;
     }
 
     public shouldShowHelp(): boolean {
