@@ -8,6 +8,7 @@ package vsdk.toolkit.environment.geometry.boundingVolumeHierarchy;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.Triangle;
 
@@ -101,8 +102,12 @@ public class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
 
         final double rootDistance = slab.entry(nodes.get(0), bestT);
         if ( rootDistance < 0.0 ) {
+            RaytraceStatistics.recordPrimitiveLevelTraversal(0, 0);
             return false;
         }
+        // Counted locally, reported once: no shared write per node.
+        long nodeVisits = 0;
+        long triangleTests = 0;
         // Traversal of casTraverseBlas (computeAccelerationStructure.glsl),
         // specialized for triangles: no virtual call per leaf entry.
         int[] nodeStack = new int[BinnedSahHierarchy.STACK_SIZE];
@@ -123,7 +128,9 @@ public class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
                 continue;
             }
             final BinnedSahHierarchyNode node = nodes.get(nodeStack[sp]);
+            nodeVisits++;
             if ( node.count > 0 ) {
+                triangleTests += node.count;
                 for ( int i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++ ) {
                     final int p = 9 * i;
                     final Vector3Dd v0 = new Vector3Dd(leafVertices.get(p), leafVertices.get(p + 1), leafVertices.get(p + 2));
@@ -158,6 +165,7 @@ public class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
             if ( sp + 2 > BinnedSahHierarchy.STACK_SIZE ) {
                 // Unreachable with MAXIMUM_DEPTH < STACK_SIZE; never give a
                 // wrong answer if it happens.
+                RaytraceStatistics.recordPrimitiveLevelTraversal(nodeVisits, triangleTests);
                 return firstHitBruteForce(ray, positions, indexes, outT, outU, outV, outTriangle);
             }
             if ( dl >= 0.0 ) {
@@ -171,6 +179,7 @@ public class BinnedSahTriangleHierarchy extends TriangleAccelerationStructure {
                 sp++;
             }
         }
+        RaytraceStatistics.recordPrimitiveLevelTraversal(nodeVisits, triangleTests);
         if ( best < 0 ) {
             return false;
         }

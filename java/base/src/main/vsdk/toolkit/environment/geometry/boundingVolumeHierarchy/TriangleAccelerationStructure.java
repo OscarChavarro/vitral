@@ -1,6 +1,7 @@
 package vsdk.toolkit.environment.geometry.boundingVolumeHierarchy;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.Triangle;
 
@@ -175,6 +176,8 @@ public abstract class TriangleAccelerationStructure {
         int[] outTriangle)
     {
         final int triangleCount = indexes != null ? indexes.length / 3 : 0;
+        // No nodes: every triangle is a primitive test.
+        RaytraceStatistics.recordPrimitiveLevelTraversal(0, triangleCount);
         double bestT = 1e308;
         double bestU = 0;
         double bestV = 0;

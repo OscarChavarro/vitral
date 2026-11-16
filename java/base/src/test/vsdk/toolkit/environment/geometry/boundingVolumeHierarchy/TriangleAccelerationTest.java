@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
@@ -16,6 +18,8 @@ import static vsdk.toolkit.GTestAssertions.expectEq;
 import static vsdk.toolkit.GTestAssertions.expectFalse;
 import static vsdk.toolkit.GTestAssertions.expectGt;
 import static vsdk.toolkit.GTestAssertions.expectLe;
+import static vsdk.toolkit.GTestAssertions.expectLt;
+import static vsdk.toolkit.GTestAssertions.expectNear;
 import static vsdk.toolkit.GTestAssertions.expectTrue;
 
 /**
@@ -366,5 +370,212 @@ class TriangleAccelerationTest
         assertThat(accelerated.getMeshHierarchy()).isNull();
         accelerated.prepareAccelerationStructures(TriangleMeshAccelerationMethod.BRUTE_FORCE);
         assertThat(accelerated.getMeshHierarchy()).isNull();
+    }
+
+    // Leaf size parameter: leaves never exceed twice the requested size (they
+    // may keep up to that when a split is not cheaper), and size 1 gives one
+    // primitive per leaf on boxes that never share a centroid.
+    @Test
+    void BinnedSahHierarchy_MaximumLeafSizeIsHonored()
+    {
+        ArrayList<Double> boxes = new ArrayList<>();
+        TriangleAccelerationTestRandom random = new TriangleAccelerationTestRandom(5);
+        for ( int i = 0; i < 500; i++ ) {
+            final double x = random.next() * 10, y = random.next() * 10, z = random.next() * 10;
+            boxes.add(x); boxes.add(y); boxes.add(z);
+            boxes.add(x + 0.1); boxes.add(y + 0.1); boxes.add(z + 0.1);
+        }
+        for ( int leafSize = 1; leafSize <= 8; leafSize *= 2 ) {
+            BinnedSahHierarchy hierarchy = new BinnedSahHierarchy();
+            hierarchy.build(boxes, leafSize);
+            final ArrayList<BinnedSahHierarchyNode> nodes = hierarchy.getNodes();
+            int largest = 0;
+            for ( int i = 0; i < nodes.size(); i++ ) {
+                if ( nodes.get(i).count > largest ) largest = nodes.get(i).count;
+            }
+            expectLe(largest, 2 * leafSize, "" + leafSize);
+            if ( leafSize == 1 ) {
+                expectEq(1, largest);
+                expectEq(2L * 500 - 1, hierarchy.getNodeCount());
+            }
+        }
+        BinnedSahHierarchy byDefault = new BinnedSahHierarchy();
+        BinnedSahHierarchy explicitDefault = new BinnedSahHierarchy();
+        byDefault.build(boxes);
+        explicitDefault.build(boxes, BinnedSahHierarchy.DEFAULT_MAXIMUM_LEAF_SIZE);
+        expectEq(byDefault.getNodeCount(), explicitDefault.getNodeCount());
+    }
+
+    private static Matrix4x4d instanceTransform(int k)
+    {
+        final Matrix4x4d identity = new Matrix4x4d();
+        final Matrix4x4d rotation = identity.axisRotation(0.3 + 0.7 * k, 1.0, 0.5 * k, 0.25);
+        final Matrix4x4d scale = identity.scale(0.2 + 0.05 * (k % 3), 0.25, 0.15 + 0.05 * (k % 2));
+        final Matrix4x4d translation = identity.translation(
+            (k % 5) * 0.6 - 1.2, ((k / 5) % 5) * 0.6 - 1.2, (k % 3) * 0.4 - 0.4);
+        return translation.multiply(rotation.multiply(scale));
+    }
+
+    // Closest hit over transformed copies of meshes: the visitor of the
+    // instance hierarchy tests one mesh hierarchy in object space.
+    private static final class _InstanceTestClosestHit implements BinnedSahInstanceVisitor {
+        final ArrayList<BinnedSahTriangleHierarchy> meshes;
+        final ArrayList<Integer> meshOfInstance;
+        final ArrayList<double[]> positions;
+        final ArrayList<int[]> indexes;
+        int bestInstance;
+        int bestTriangle;
+
+        _InstanceTestClosestHit(ArrayList<BinnedSahTriangleHierarchy> inMeshes,
+            ArrayList<Integer> inMeshOfInstance, ArrayList<double[]> inPositions,
+            ArrayList<int[]> inIndexes)
+        {
+            meshes = inMeshes;
+            meshOfInstance = inMeshOfInstance;
+            positions = inPositions;
+            indexes = inIndexes;
+            bestInstance = -1;
+            bestTriangle = -1;
+        }
+
+        @Override
+        public void visit(int instance, Ray objectRay, double[] inOutBestT)
+        {
+            final int m = meshOfInstance.get(instance);
+            double[] t = {0}, u = {0}, v = {0};
+            int[] triangle = {-1};
+            if ( !meshes.get(m).firstHit(objectRay, positions.get(m), indexes.get(m),
+                    t, u, v, triangle) ) return;
+            if ( t[0] < inOutBestT[0] || (t[0] == inOutBestT[0] && instance < bestInstance) ) {
+                inOutBestT[0] = t[0];
+                bestInstance = instance;
+                bestTriangle = triangle[0];
+            }
+        }
+    }
+
+    @Test
+    void BinnedSahInstanceHierarchy_TransformedInstancesMatchLinearLoop()
+    {
+        ArrayList<double[]> positions = new ArrayList<>();
+        ArrayList<int[]> indexes = new ArrayList<>();
+        ArrayList<BinnedSahTriangleHierarchy> meshes = new ArrayList<>();
+        for ( int m = 0; m < 3; m++ ) {
+            ArrayList<Double> p = new ArrayList<>();
+            ArrayList<Integer> i = new ArrayList<>();
+            if ( m == 1 ) buildGrid(6, p, i); else buildSoup(60 + 40 * m, p, i);
+            positions.add(toDoubleArray(p));
+            indexes.add(toIntArray(i));
+        }
+        // Built after the arrays stop moving (the hierarchies keep no pointers,
+        // the arrays are passed again on each query).
+        for ( int m = 0; m < 3; m++ ) {
+            BinnedSahTriangleHierarchy h = new BinnedSahTriangleHierarchy();
+            h.build(positions.get(m), indexes.get(m));
+            meshes.add(h);
+        }
+        ArrayList<Double> objectBoxes = new ArrayList<>();
+        ArrayList<Matrix4x4d> transforms = new ArrayList<>();
+        ArrayList<Integer> meshOfInstance = new ArrayList<>();
+        for ( int k = 0; k < 40; k++ ) {
+            final int m = k % 3;
+            double[] bounds = new double[6];
+            meshes.get(m).getVertexBounds(bounds);
+            for ( int c = 0; c < 6; c++ ) objectBoxes.add(bounds[c]);
+            transforms.add(instanceTransform(k));
+            meshOfInstance.add(m);
+        }
+        // One empty instance: never reached.
+        for ( int c = 0; c < 3; c++ ) objectBoxes.add(1.0);
+        for ( int c = 0; c < 3; c++ ) objectBoxes.add(-1.0);
+        transforms.add(new Matrix4x4d());
+        meshOfInstance.add(0);
+
+        BinnedSahInstanceHierarchy instances = new BinnedSahInstanceHierarchy();
+        instances.build(objectBoxes, transforms);
+        assertThat(instances.getInstanceCount()).isEqualTo(41);
+        expectLe(instances.getHierarchy().getDepth(), BinnedSahHierarchy.MAXIMUM_DEPTH);
+
+        TriangleAccelerationTestRandom random = new TriangleAccelerationTestRandom(23);
+        int hits = 0;
+        for ( int k = 0; k < 2000; k++ ) {
+            final Ray ray = randomRay(random, k);
+            _InstanceTestClosestHit linear =
+                new _InstanceTestClosestHit(meshes, meshOfInstance, positions, indexes);
+            double[] linearT = {1e308};
+            for ( int i = 0; i < 40; i++ ) {
+                linear.visit(i, instances.toObjectSpace(i, ray), linearT);
+            }
+            _InstanceTestClosestHit accelerated =
+                new _InstanceTestClosestHit(meshes, meshOfInstance, positions, indexes);
+            double[] acceleratedT = {1e308};
+            instances.traverseClosest(ray, accelerated, acceleratedT);
+            assertThat(accelerated.bestInstance).as("ray " + k).isEqualTo(linear.bestInstance);
+            expectEq(linear.bestTriangle, accelerated.bestTriangle, "ray " + k);
+            expectEq(linearT[0], acceleratedT[0], "ray " + k);
+            if ( linear.bestInstance >= 0 ) hits++;
+        }
+        expectGt(hits, 200);
+    }
+
+    @Test
+    void BinnedSahInstanceHierarchy_ObjectRayKeepsWorldParameter()
+    {
+        ArrayList<Double> objectBoxes = new ArrayList<>();
+        for ( int c = 0; c < 3; c++ ) objectBoxes.add(-1.0);
+        for ( int c = 0; c < 3; c++ ) objectBoxes.add(1.0);
+        ArrayList<Matrix4x4d> transforms = new ArrayList<>();
+        transforms.add(instanceTransform(7));
+        BinnedSahInstanceHierarchy instances = new BinnedSahInstanceHierarchy();
+        instances.build(objectBoxes, transforms);
+        final Ray world = new Ray(new Vector3Dd(0.3, -2, 0.7), new Vector3Dd(0.1, 1, -0.2));
+        final Ray object = instances.toObjectSpace(0, world);
+        // The point at t in object space, taken back, is the world point at t.
+        final double t = 1.7;
+        final Vector3Dd objectPoint = object.getOrigin().add(object.getDirection().multiply(t));
+        final Vector3Dd back = BinnedSahInstanceHierarchy.transformPoint(
+            instances.getObjectToWorld(0), objectPoint);
+        final Vector3Dd expected = world.getOrigin().add(world.getDirection().multiply(t));
+        expectNear(expected.x(), back.x(), 1e-12);
+        expectNear(expected.y(), back.y(), 1e-12);
+        expectNear(expected.z(), back.z(), 1e-12);
+    }
+
+    @Test
+    void RaytraceStatistics_CountsHierarchyWork()
+    {
+        ArrayList<Double> positionList = new ArrayList<>();
+        ArrayList<Integer> indexList = new ArrayList<>();
+        buildGrid(20, positionList, indexList);
+        final double[] positions = toDoubleArray(positionList);
+        final int[] indexes = toIntArray(indexList);
+        BinnedSahTriangleHierarchy hierarchy = new BinnedSahTriangleHierarchy();
+        hierarchy.build(positions, indexes);
+        final Ray ray = new Ray(new Vector3Dd(0.31, -0.27, 2), new Vector3Dd(0, 0, -1));
+        double[] t = {0}, u = {0}, v = {0};
+        int[] triangle = {-1};
+
+        RaytraceStatistics.setEnabled(false);
+        RaytraceStatistics.reset();
+        assertThat(hierarchy.firstHit(ray, positions, indexes, t, u, v, triangle)).isTrue();
+        expectEq(0, RaytraceStatistics.getPrimitiveLevelTraversals());
+
+        RaytraceStatistics.setEnabled(true);
+        assertThat(hierarchy.firstHit(ray, positions, indexes, t, u, v, triangle)).isTrue();
+        expectEq(1, RaytraceStatistics.getPrimitiveLevelTraversals());
+        final long visits = RaytraceStatistics.getPrimitiveLevelNodeVisits();
+        final long tests = RaytraceStatistics.getPrimitiveLevelPrimitiveTests();
+        expectGt(visits, 0);
+        expectGt(tests, 0);
+        expectLt(tests, (long)(indexes.length / 3));
+        expectLe(visits, hierarchy.getNodeCount());
+
+        TriangleAccelerationStructure.firstHitBruteForce(ray, positions, indexes, t, u, v, triangle);
+        expectEq(2, RaytraceStatistics.getPrimitiveLevelTraversals());
+        expectEq(tests + (long)(indexes.length / 3),
+            RaytraceStatistics.getPrimitiveLevelPrimitiveTests());
+        expectEq(visits, RaytraceStatistics.getPrimitiveLevelNodeVisits());
+        RaytraceStatistics.setEnabled(false);
+        RaytraceStatistics.reset();
     }
 }

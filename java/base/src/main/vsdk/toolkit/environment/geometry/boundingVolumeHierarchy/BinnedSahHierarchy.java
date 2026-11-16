@@ -8,16 +8,19 @@ package vsdk.toolkit.environment.geometry.boundingVolumeHierarchy;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.environment.geometry.element.Ray;
 
 /**
 Binary bounding volume hierarchy over axis aligned primitive boxes, built
 top-down with the binned surface area heuristic of [WALD2007].3. It is the
-CPU, double precision port of `VulkanBvhBuilder` (Vulkan 1.4 raytracer,
-compute path without `VK_KHR_acceleration_structure`), with the same
-parameters, and serves both levels as there: the triangles of a mesh
-(`BinnedSahTriangleHierarchy`, bottom level) and the meshes of a
-`TriangleMeshGroup` (top level). Its traversal is the one of
+single builder of vitral for binary hierarchies: it serves the triangles of
+a mesh (`BinnedSahTriangleHierarchy`, bottom level), the meshes of a
+`TriangleMeshGroup` and the transformed instances of a
+`BinnedSahInstanceHierarchy` (top level), and the Vulkan 1.4 raytracer
+uploads its result to the GPU for the compute path without
+`VK_KHR_acceleration_structure`. The output follows the flat binary tree
+contract of `doc/flatBinaryTreeContract.md`. Its traversal is the one of
 `casTraverseBlas` in `computeAccelerationStructure.glsl`: a stack, nearest
 child first, nodes farther than the closest hit skipped.
 
@@ -29,7 +32,7 @@ members, grown from a negative box ([WALD2007].3.4); the cost
 sweep from each side ([WALD2007].3.1, .3.5); the build rearranges one
 primitive id array, with a temporary array ([WALD2007].3.6).
 
-Deviations from [WALD2007], the same of `VulkanBvhBuilder`:
+Deviations from [WALD2007]:
 - the three axes are binned, not only the widest one (the alternative
   mentioned in [WALD2007].3.1);
 - 12 bins (16 recommended, 4 already reasonable, [WALD2007].3.7);
@@ -38,7 +41,7 @@ Deviations from [WALD2007], the same of `VulkanBvhBuilder`:
 - termination ([WALD2007].3.8): a node with all its centroids at one point
   is split in halves instead of becoming a leaf, a split more expensive
   than the leaf is still taken while the node holds more than twice
-  `MAXIMUM_LEAF_SIZE` primitives, and the depth is capped by
+  `maximumLeafSize` primitives, and the depth is capped by
   `MAXIMUM_DEPTH` (bounded traversal stack);
 - single threaded and deterministic: the parallel build of [WALD2007].4 is
   not used, so it runs on every vitral platform.
@@ -46,7 +49,8 @@ Deviations from [WALD2007], the same of `VulkanBvhBuilder`:
 public class BinnedSahHierarchy {
     public static final int BIN_COUNT = 12;
     public static final int MAXIMUM_DEPTH = 30;
-    public static final int MAXIMUM_LEAF_SIZE = 4;
+    /** Leaf size of `build` when none is given (bottom level) */
+    public static final int DEFAULT_MAXIMUM_LEAF_SIZE = 4;
     /** Traversal stack; it never holds more than `MAXIMUM_DEPTH + 1`
     entries */
     public static final int STACK_SIZE = 64;
@@ -168,11 +172,27 @@ public class BinnedSahHierarchy {
     }
 
     /**
-    @param boxValues six values per primitive: lo x, y, z, hi x, y, z.
-    Callers pad the boxes so rounding never hides a hit.
+    `build(boxValues, DEFAULT_MAXIMUM_LEAF_SIZE)` (cpp default argument)
     */
     public void build(ArrayList<Double> boxValues)
     {
+        build(boxValues, DEFAULT_MAXIMUM_LEAF_SIZE);
+    }
+
+    /**
+    @param boxValues six values per primitive: lo x, y, z, hi x, y, z.
+    Callers pad the boxes so rounding never hides a hit. An empty box
+    (lo > hi) is allowed: its primitive is never reached.
+    @param maximumLeafSize leaves are split while they hold more primitives
+    than this and a split is cheaper (SAH), or while they hold more than
+    twice this; values below 1 count as 1. Top levels over instances use 1,
+    as a hardware TLAS.
+    */
+    public void build(ArrayList<Double> boxValues, int maximumLeafSize)
+    {
+        if ( maximumLeafSize < 1 ) {
+            maximumLeafSize = 1;
+        }
         final int primitiveCount = boxValues.size() / 6;
 
         // [WALD2007].3.2 Initial setup: the box of every primitive, given by
@@ -238,7 +258,7 @@ public class BinnedSahHierarchy {
 
             // [WALD2007].3.8 Termination a): few primitives. The depth cap is
             // not in [WALD2007]: it bounds the traversal stack.
-            if ( task.count <= MAXIMUM_LEAF_SIZE || task.depth >= MAXIMUM_DEPTH ) {
+            if ( task.count <= maximumLeafSize || task.depth >= MAXIMUM_DEPTH ) {
                 continue;
             }
 
@@ -254,7 +274,7 @@ public class BinnedSahHierarchy {
                 final double leafCost = (double)task.count * bounds.halfArea();
                 // [WALD2007].3.8 Termination c): the split costs more than the
                 // leaf (only for nodes small enough to stay a leaf).
-                if ( splitCost >= leafCost && task.count <= 2 * MAXIMUM_LEAF_SIZE ) {
+                if ( splitCost >= leafCost && task.count <= 2 * maximumLeafSize ) {
                     continue;
                 }
                 // [WALD2007].3.6 ID list partitioning with a temporary array;
@@ -312,6 +332,8 @@ public class BinnedSahHierarchy {
     resolving ties by primitive index gets the same answer as a linear
     loop. Returns false when the stack would overflow (not reachable with
     `MAXIMUM_DEPTH < STACK_SIZE`); the caller then uses its linear loop.
+    Node visits and leaf entries are reported to `RaytraceStatistics` as
+    instance level work (`recordInstanceLevelTraversal`).
     @param inOutBestT one-element input/output holder
     */
     public boolean traverseClosest(Ray ray, BinnedSahLeafVisitor visitor,
@@ -323,8 +345,12 @@ public class BinnedSahHierarchy {
         final RaySlab slab = new RaySlab(ray);
         final double rootDistance = slab.entry(nodes.get(0), inOutBestT[0]);
         if ( rootDistance < 0.0 ) {
+            RaytraceStatistics.recordInstanceLevelTraversal(0, 0);
             return true;
         }
+        // Counted locally, reported once: no shared write per node.
+        long nodeVisits = 0;
+        long entryTests = 0;
         int[] nodeStack = new int[STACK_SIZE];
         double[] distanceStack = new double[STACK_SIZE];
         int sp = 0;
@@ -337,10 +363,12 @@ public class BinnedSahHierarchy {
                 continue;
             }
             final BinnedSahHierarchyNode node = nodes.get(nodeStack[sp]);
+            nodeVisits++;
             if ( node.count > 0 ) {
                 for ( int i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++ ) {
                     visitor.visit(primitiveOrder.get(i), inOutBestT);
                 }
+                entryTests += node.count;
                 continue;
             }
             int left = node.leftOrFirst;
@@ -357,6 +385,7 @@ public class BinnedSahHierarchy {
                 dr = swapDistance;
             }
             if ( sp + 2 > STACK_SIZE ) {
+                RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits, entryTests);
                 return false;
             }
             if ( dl >= 0.0 ) {
@@ -370,6 +399,7 @@ public class BinnedSahHierarchy {
                 sp++;
             }
         }
+        RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits, entryTests);
         return true;
     }
 
@@ -441,12 +471,17 @@ public class BinnedSahHierarchy {
         }
 
         /** Entry parameter of the ray in the node box clipped to [0, tMax],
-        or -1 on a miss (`casSlab`) */
+        or -1 on a miss or an empty box (`casSlab`) */
         public double entry(BinnedSahHierarchyNode node, double tMax)
         {
             double tNear = 0.0;
             double tFar = tMax;
             for ( int a = 0; a < 3; a++ ) {
+                // Empty box (the negative box of an empty instance or mesh): the
+                // swap below would otherwise turn it into a box that is entered.
+                if ( node.lo[a] > node.hi[a] ) {
+                    return -1.0;
+                }
                 if ( parallel[a] ) {
                     if ( origin[a] < node.lo[a] || origin[a] > node.hi[a] ) {
                         return -1.0;

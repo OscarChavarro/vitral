@@ -10,6 +10,7 @@ final class CommandOptionsProcessor {
     private String outputFile = DEFAULT_OUTPUT_FILE_NAME;
     private boolean save = true;
     private boolean parallel = false;
+    private boolean statistics = false;
     private boolean showHelp = false;
     private TriangleMeshAccelerationMethod meshAccelerationMethod =
         TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
@@ -31,6 +32,10 @@ final class CommandOptionsProcessor {
             }
             if ( "-parallel".equals(arg) || "--parallel".equals(arg) ) {
                 options.parallel = true;
+                continue;
+            }
+            if ( "--stats".equals(arg) ) {
+                options.statistics = true;
                 continue;
             }
             if ( "--help".equals(arg) || "-h".equals(arg) ) {
@@ -106,6 +111,8 @@ final class CommandOptionsProcessor {
         System.out.println("                         Triangle mesh ray acceleration:");
         System.out.println("                         bruteforce (none) or wald2007 (binned SAH");
         System.out.println("                         BVH, default)");
+        System.out.println("  --stats                Count rays and acceleration structure work");
+        System.out.println("                         (RaytraceStatistics) and print a summary");
         System.out.println("  --help, -h             Show this help");
         System.out.println();
         System.out.println("Legacy compatibility:");
@@ -130,6 +137,11 @@ final class CommandOptionsProcessor {
     boolean shouldUseParallelExecutor()
     {
         return parallel;
+    }
+
+    boolean shouldPrintStatistics()
+    {
+        return statistics;
     }
 
     boolean shouldShowHelp()
