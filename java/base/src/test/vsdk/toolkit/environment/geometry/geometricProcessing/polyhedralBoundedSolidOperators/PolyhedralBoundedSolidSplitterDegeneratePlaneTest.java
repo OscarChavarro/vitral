@@ -3,6 +3,7 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -14,6 +15,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.offset;
 import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidVolumeOracle.translation;
 
 /**
@@ -164,5 +166,43 @@ class PolyhedralBoundedSolidSplitterDegeneratePlaneTest
                 .as("vertex side").isGreaterThanOrEqualTo(-TOLERANCE);
         }
         return PolyhedralBoundedSolidVolumeOracle.solidVolume(piece);
+    }
+
+    /**
+    A plane through the lower reflex vertex of the L-shaped hollow brick
+    cuts a section of two regions that touch at that vertex. Above the
+    plane the piece is one solid whose section has two faces sharing the
+    vertex; below, the two regions meet only at the vertex and come out as
+    two solids. Every piece is strict-valid and the volume is conserved.
+    */
+    @Test
+    void given_planeThroughReflexVertex_when_sectionIsPinched_then_simpleFaces()
+    {
+        PolyhedralBoundedSolid brick = CsgSampleCorpusFixtures.createPair(
+            CsgSampleCorpus.HOLLOW_BRICK)[0];
+        InfinitePlane plane = new InfinitePlane(
+            new Vector3Dd(-0.85, 1.14, 0.19).normalized(),
+            new Vector3Dd(0.2, 0.8, 0.0));
+        ArrayList<PolyhedralBoundedSolid> above = new ArrayList<>();
+        ArrayList<PolyhedralBoundedSolid> below = new ArrayList<>();
+        double total = 0.0;
+
+        PolyhedralBoundedSolidModeler.split(brick, plane, above, below);
+
+        assertThat(above).hasSize(1);
+        assertThat(below).hasSize(2);
+        for ( PolyhedralBoundedSolid piece : above ) {
+            assertThat(PolyhedralBoundedSolidValidationEngine.validateStrict(
+                piece, new StringBuilder())).isTrue();
+            total += PolyhedralBoundedSolidVolumeOracle.solidVolume(piece);
+        }
+        for ( PolyhedralBoundedSolid piece : below ) {
+            assertThat(PolyhedralBoundedSolidValidationEngine.validateStrict(
+                piece, new StringBuilder())).isTrue();
+            total += PolyhedralBoundedSolidVolumeOracle.solidVolume(piece);
+        }
+        assertThat(total).isCloseTo(
+            PolyhedralBoundedSolidVolumeOracle.solidVolume(brick),
+            offset(1.0e-9));
     }
 }

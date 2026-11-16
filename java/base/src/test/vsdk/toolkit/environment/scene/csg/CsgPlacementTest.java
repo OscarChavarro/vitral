@@ -2,7 +2,6 @@ package vsdk.toolkit.environment.scene.csg;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -241,19 +240,6 @@ class CsgPlacementTest
             expectLe(forward.multiply(childSample).subtract(point).length(), 0.25);
         }
     }
-}
-
-    @Test
-    void AffineToleranceMap_RejectsUnsupportedRoundingWithoutChangingOutputs()
-    {
-    // Java floating point always rounds to nearest and cannot change the
-    // rounding mode, which is the cpp case where fesetround fails: skipped.
-    assumeTrue(false, "Rounding mode cannot be changed");
-    Vector3Dd[] center = {new Vector3Dd(7,8,9)}; double[] outer={42}, inner={17};
-    final AffinePlacementStatus status=AffineToleranceMap.map(new Matrix4x4d().translation(1,2,3),
-        new Vector3Dd(4,5,6),0.1,center,outer,inner);
-    expectEq(AffinePlacementStatus.Unsupported, status);
-    expectDoubleEq(7, center[0].x()); expectDoubleEq(42, outer[0]); expectDoubleEq(17, inner[0]);
 }
 
     @Test
@@ -1335,11 +1321,6 @@ class CsgPlacementTest
     expectTrue(CsgDyadic.add(high,one,dense));
     expectTrue(CsgDyadic.multiply(dense,dense,square));
     expectFalse(CsgDyadic.multiply(square,square,result)); expectTrue(result.equals(sentinel));
-    // Java floating point always rounds to nearest and cannot change the
-    // rounding mode, which is the cpp case where fesetround fails: skipped.
-    assumeTrue(false, "Rounding mode cannot be changed");
-    final boolean success=CsgDyadic.fromDouble(1.25,result);
-    expectFalse(success); expectTrue(result.equals(sentinel));
 }
 
     @Test

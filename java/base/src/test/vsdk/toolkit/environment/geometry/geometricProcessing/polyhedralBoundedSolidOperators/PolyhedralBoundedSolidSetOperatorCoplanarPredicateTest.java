@@ -3,7 +3,6 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
@@ -86,11 +85,14 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         assertThat(relation).isTrue();
     }
 
+    /**
+    Closed-set decision: sectors that share only a boundary ray overlap.
+    The vertex/vertex path needs a null-edge strut at a coplanar
+    boundary-ray contact; an open-set test breaks the [MANT1988] Fig. 15.1
+    reference geometry (see the comment in sectoroverlap).
+    */
     @Test
-    @Disabled("Legacy sectoroverlap intentionally treats boundary-ray contact as overlap; "
-        + "fixing requires null-edge strut logic that knows the touching case from"
-        + " the coplanar V/V path — deferred to future rework")
-    void given_coplanarNeighborSectors_when_theyOnlyShareBoundaryRay_then_sectoroverlapReturnsFalse()
+    void given_coplanarNeighborSectors_when_theyOnlyShareBoundaryRay_then_sectoroverlapReturnsTrue()
         throws Exception
     {
         // Arrange
@@ -109,13 +111,10 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
             createSector(he, 60.0, 120.0));
 
         // Assert
-        assertThat(relation).isFalse();
+        assertThat(relation).isTrue();
     }
 
     @Test
-    @Disabled("Legacy sectoroverlap is deliberately permissive (epsilon-tolerant); "
-        + "fixing the B-left-of-A disjoint case without breaking touching-sector "
-        + "classification requires a restructured coplanar V/V path")
     void given_coplanarDisjointSectorsOnSameAngularSide_when_intervalsDoNotIntersect_then_sectoroverlapReturnsFalse()
         throws Exception
     {

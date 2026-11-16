@@ -649,6 +649,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             op, debugFlags, ctx.sonea, ctx.soneb);
         ctx.sonfa = result.sonfa();
         ctx.sonfb = result.sonfb();
+        ctx.connected = result;
     }
 
     /**
@@ -664,7 +665,8 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
     )
     {
         _PolyhedralBoundedSolidSetFinisher.finish(
-            inSolidA, inSolidB, outRes, op, debugFlags, ctx.sonfa, ctx.sonfb);
+            inSolidA, inSolidB, outRes, op, debugFlags, ctx.sonfa, ctx.sonfb,
+            ctx.connected);
     }
 
     private static boolean isTouchingOnlyPreflightCase(
@@ -1200,11 +1202,20 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
         StringBuilder booleanInputMsg = new StringBuilder();
-        if ( !PolyhedralBoundedSolidValidationEngine.validateBooleanInputs(
-                inSolidA, inSolidB, booleanInputMsg) ) {
-            Logger.reportMessage(null, VSDK.WARNING, "setOp",
-                "Boolean input validation failed:\n" + booleanInputMsg);
-        } else if ( booleanInputMsg.length() > 0 ) {
+        boolean validInputs;
+        try {
+            validInputs = PolyhedralBoundedSolidValidationEngine
+                .validateBooleanInputs(inSolidA, inSolidB, booleanInputMsg);
+        }
+        catch ( IllegalArgumentException e ) {
+            throw new InvalidOperandException(
+                "Boolean operands are not valid solids: " + e.getMessage(), e);
+        }
+        if ( !validInputs ) {
+            throw new InvalidOperandException(
+                "Boolean operands are not valid solids:\n" + booleanInputMsg);
+        }
+        if ( booleanInputMsg.length() > 0 ) {
             Logger.reportMessage(null, VSDK.DEBUG, "setOp",
                 "Boolean input pre-processing:\n" + booleanInputMsg);
         }

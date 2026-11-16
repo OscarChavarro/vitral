@@ -28,17 +28,20 @@ the side its list names, each is strict-valid, and no piece is empty while
 the plane really cuts the solid. The count of correct cases is a ratchet:
 raise it when a fix lands, never lower it.</p>
 
-<p>Known limitation (4 cases): when the section is pinched at a reflex
-vertex (two section regions meeting at the vertex inside one face), the
-section face comes out as one self-touching loop. Volumes are right; strict
-validation rejects the loop.</p>
+<p>When the section is pinched at a reflex vertex (two section regions
+meeting at the vertex), the splitter splits the self-touching section loop
+into two faces; regions that meet only at the vertex come out as separate
+solids.</p>
 
 <p>Traceability: [MANT1988] Ch. 14, Sections 14.4-14.8.</p>
  */
 class SplitterOracleFuzzTest
 {
-    /** Stage E (2026-11-16): 252 / 256. Before Stage E: 37 / 256. */
-    private static final int MINIMUM_CORRECT = 252;
+    /**
+    Before Stage E: 37 / 256. Stage E: 252 / 256. Pinched sections
+    resolved (2026-11-16): 256 / 256.
+    */
+    private static final int MINIMUM_CORRECT = 256;
 
     private static final double TOLERANCE = 1.0e-6;
 

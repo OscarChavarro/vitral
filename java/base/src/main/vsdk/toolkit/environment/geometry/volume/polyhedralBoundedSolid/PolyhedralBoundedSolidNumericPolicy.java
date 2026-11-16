@@ -23,9 +23,18 @@ public class PolyhedralBoundedSolidNumericPolicy
     public static final double BREP_EPSILON = VSDK.EPSILON;
     public static final double BREP_BIG_EPSILON = 10.0 * BREP_EPSILON;
 
-    private static final double MIN_SCALE = 1.0;
+    /** Scale of an empty or degenerate model (no extent to measure). */
+    private static final double DEFAULT_SCALE = 1.0;
+    /**
+    Smallest model scale. Tolerances follow the model down to this size, so
+    a part modelled in metres at 10^-3 gets 10^-3 times the tolerances of
+    the same part at unit size. They used to stop at scale 1: below it the
+    tolerances were absolute and, at 10^-3, a tenth of the features.
+    */
+    private static final double MIN_SCALE = 1.0e-9;
     private static final double MAX_UNIT_INTERVAL_TOLERANCE = 1.0e-3;
-    private static final ToleranceContext DEFAULT_CONTEXT = fromScale(MIN_SCALE);
+    private static final ToleranceContext DEFAULT_CONTEXT =
+        fromScale(DEFAULT_SCALE);
 
     private PolyhedralBoundedSolidNumericPolicy()
     {
@@ -133,8 +142,8 @@ public class PolyhedralBoundedSolidNumericPolicy
 
     private static double sanitizeScale(double scale)
     {
-        if ( !Double.isFinite(scale) ) {
-            return MIN_SCALE;
+        if ( !Double.isFinite(scale) || scale <= 0.0 ) {
+            return DEFAULT_SCALE;
         }
         if ( scale < MIN_SCALE ) {
             return MIN_SCALE;
@@ -145,12 +154,12 @@ public class PolyhedralBoundedSolidNumericPolicy
     private static double estimateSolidScale(PolyhedralBoundedSolid solid)
     {
         if ( solid == null ) {
-            return MIN_SCALE;
+            return DEFAULT_SCALE;
         }
 
         double[] minMax = solid.getMinMax();
         if ( minMax == null || minMax.length < 6 ) {
-            return MIN_SCALE;
+            return DEFAULT_SCALE;
         }
         return diagonalSize(minMax[0], minMax[1], minMax[2],
                             minMax[3], minMax[4], minMax[5]);
@@ -159,7 +168,7 @@ public class PolyhedralBoundedSolidNumericPolicy
     private static double estimateFaceScale(_PolyhedralBoundedSolidFace face)
     {
         if ( face == null || face.boundariesList == null ) {
-            return MIN_SCALE;
+            return DEFAULT_SCALE;
         }
 
         double minX = Double.POSITIVE_INFINITY;
@@ -197,7 +206,7 @@ public class PolyhedralBoundedSolidNumericPolicy
         }
 
         if ( !found ) {
-            return MIN_SCALE;
+            return DEFAULT_SCALE;
         }
         return diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
     }
@@ -205,7 +214,7 @@ public class PolyhedralBoundedSolidNumericPolicy
     private static double estimatePointsScale(ArrayList<Vector3Dd> points)
     {
         if ( points == null || points.size() < 2 ) {
-            return MIN_SCALE;
+            return DEFAULT_SCALE;
         }
 
         double minX = Double.POSITIVE_INFINITY;
@@ -232,7 +241,7 @@ public class PolyhedralBoundedSolidNumericPolicy
         }
 
         if ( !found ) {
-            return MIN_SCALE;
+            return DEFAULT_SCALE;
         }
         return diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
     }
@@ -298,8 +307,11 @@ public class PolyhedralBoundedSolidNumericPolicy
     public static boolean vectorsColinear(Vector3Dd a, Vector3Dd b,
                                           ToleranceContext context)
     {
-        double scale = Math.max(1.0, Math.max(a.length(), b.length()));
-        return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
+        // |a x b| = |a| |b| sin(angle): compare the sine, so that the test
+        // does not depend on the length of the vectors (it used to accept
+        // angles up to bigEpsilon / length, half a degree at 10^-3).
+        return a.crossProduct(b).length() <=
+            BREP_BIG_EPSILON * a.length() * b.length();
     }
 
     public static boolean unitVectorsParallel(Vector3Dd a, Vector3Dd b,
@@ -330,7 +342,11 @@ public class PolyhedralBoundedSolidNumericPolicy
                              Math.abs(b.x() - c.x()));
         double ly = Math.max(Math.max(Math.abs(a.y() - b.y()), Math.abs(a.y() - c.y())),
                              Math.abs(b.y() - c.y()));
-        double span = Math.max(1.0, Math.max(lx, ly));
+        // The orientation is a cross product, |b - a| times the distance of
+        // c from the line: a distance tolerance times the span. The span
+        // used to be at least 1, which below unit size made the tolerance
+        // an angle of bigEpsilon / span (half a degree at 10^-3).
+        double span = Math.max(lx, ly);
         return context.bigEpsilon() * span;
     }
 

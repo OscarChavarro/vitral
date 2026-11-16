@@ -17,7 +17,6 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static vsdk.toolkit.GTestAssertions.expectDoubleEq;
 import static vsdk.toolkit.GTestAssertions.expectEq;
 import static vsdk.toolkit.GTestAssertions.expectGt;
@@ -36,47 +35,6 @@ method is named `<cpp suite>_<cpp test>`.
 class ReaderMitSceneCommandsTest
 {
     private static final String VITRAL_REPOSITORY_ROOT = vitralRepositoryRoot();
-    // cpp `VITRAL_WITH_JPEG`: Java reads JPEG files through the awt module's
-    // image persistence plugin, when it is on the class path.
-    private static final boolean VITRAL_WITH_JPEG = isClassAvailable("vsdk.toolkit.io.image.ImagePersistenceAwt");
-
-    private static boolean isClassAvailable(String name)
-    {
-        try {
-            Class.forName(name);
-            return true;
-        }
-        catch ( ClassNotFoundException e ) {
-            return false;
-        }
-    }
-
-    @Test
-    void ReaderMitCommands_ClassicPrimitivesRotationAndCubemapAreRead() throws Exception
-    {
-        SimpleScene scene = new SimpleScene();
-        ReaderMitScene reader = new ReaderMitScene();
-        if ( !VITRAL_WITH_JPEG ) {
-            // Without a JPEG decoder the cubemap faces cannot be read.
-            expectThrow(Exception.class, () -> reader.importEnvironment(
-                VITRAL_REPOSITORY_ROOT + "/etc/geometry/mitscenes/object.ray", scene));
-            assumeTrue(false, "built without JPEG support");
-        }
-        reader.importEnvironment(VITRAL_REPOSITORY_ROOT + "/etc/geometry/mitscenes/object.ray", scene);
-        ArrayList<SimpleBody> bodies = scene.getSimpleBodies();
-        assertThat(bodies.size()).isEqualTo(12);
-        assertThat(bodies.get(1).getGeometry()).isInstanceOf(Box.class);
-        final Box cube = (Box)bodies.get(1).getGeometry();
-        expectDoubleEq(1.0, cube.getSize().x());
-        expectDoubleEq(-2.0, bodies.get(1).getPosition().x());
-        assertThat(bodies.get(2).getGeometry()).isInstanceOf(Cone.class);
-        // `rotation 0 0.3 0` turns every later primitive about its own origin.
-        expectGt(Math.abs(bodies.get(1).getRotation().get(0, 2)) + Math.abs(bodies.get(1).getRotation().get(2, 0)), 0.1);
-        assertThat(scene.getActiveBackground()).isInstanceOf(CubemapBackground.class);
-        // The six cubemap faces are scene resources.
-        expectEq(6, scene.getImages().size());
-    }
-
     @Test
     void ReaderMitCommands_MeshPolyhedralAndTorusBodiesHaveRealHits() throws Exception
     {

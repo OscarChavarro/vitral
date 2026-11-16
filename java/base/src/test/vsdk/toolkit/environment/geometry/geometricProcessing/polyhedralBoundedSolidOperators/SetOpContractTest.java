@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidVolumeOracle.OrientedBox;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidStructuralCopy;
@@ -179,5 +180,28 @@ class SetOpContractTest
         assertThat(new SolidOperationFailedException("x", new RuntimeException()))
             .isInstanceOf(PolyhedralBoundedSolidOperationException.class)
             .hasCauseInstanceOf(RuntimeException.class);
+        assertThat(new InvalidOperandException("x"))
+            .isInstanceOf(PolyhedralBoundedSolidOperationException.class);
+    }
+
+    /**
+    An operand that is not a valid boundary model stops the operation before
+    the pipeline runs: a cube with one vertex lifted has non-planar faces.
+    */
+    @Test
+    void given_operandWithNonPlanarFaces_when_setOp_then_invalidOperand()
+    {
+        PolyhedralBoundedSolid warped = new OrientedBox(1, 1, 1,
+            translation(0, 0, 0)).toSolid();
+        PolyhedralBoundedSolid box = new OrientedBox(1, 1, 1,
+            translation(0.3, 0.2, 0.1)).toSolid();
+
+        warped.getVerticesList().get(0).position =
+            warped.getVerticesList().get(0).position.add(
+                new Vector3Dd(0.1, 0.2, 0.3));
+
+        assertThatThrownBy(() -> PolyhedralBoundedSolidModeler.setOp(
+            warped, box, PolyhedralBoundedSolidModeler.UNION))
+            .isInstanceOf(InvalidOperandException.class);
     }
 }

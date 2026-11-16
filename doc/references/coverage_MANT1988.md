@@ -45,16 +45,16 @@ Defect ids (B-, S-, E-, L-, C-) refer to
 | Ch. 13.3, Integral properties | Not in production. Volume exists only in the test oracle. | 10% | `PolyhedralBoundedSolidVolumeOracle` (test helper). |
 | Ch. 14.1–14.3, Splitting outline | `_PolyhedralBoundedSolidSplitter.split` follows Program 14.1, with its state in a per-call context. | 85% | `…SplitterMantylaRegressionTest`, `…SplitterDegeneratePlaneTest`, `SplitterOracleFuzzTest`. |
 | Ch. 14.4, `splitgenerate` | Implemented. | 85% | Split tests and split fuzz. |
-| Ch. 14.5, Neighbourhood classification | Implemented with one documented sector convention. Planes through vertices work (S-01 fixed). ON edges between same-class sectors are reclassified only at reflex edges. | 80% | 8 cutting and 6 non-cutting planes; split fuzz 252 / 256. |
+| Ch. 14.5, Neighbourhood classification | Implemented with one documented sector convention. Planes through vertices work (S-01 fixed). ON edges between same-class sectors are reclassified only at reflex edges. The neighbourhood is built by `_PolyhedralBoundedSolidVertexNeighborhood`, shared with the vertex/face classifier (Problem 15.4). | 85% | 8 cutting and 6 non-cutting planes; split fuzz 256 / 256. |
 | Ch. 14.6, Null-edge insertion | `insertNullEdges`, with `head` advanced between runs (Program 14.7) and struts oriented in connect. | 80% | Split fuzz. |
-| Ch. 14.7, Joining | `splitConnect`, `canJoin`, `join`, `cut` with lexicographic sort. A section pinched at a reflex vertex comes out as one self-touching loop (4 fuzz cases). | 70% | Split fuzz. |
+| Ch. 14.7, Joining | `splitConnect`, `canJoin`, `join`, `cut` with lexicographic sort. A section pinched at a reflex vertex is split into simple loops by `resolvePinchedLoops`. | 80% | Split fuzz, `…SplitterDegeneratePlaneTest`. |
 | Ch. 14.8, Finish | `splitFinish`. Runs on a copy, so the input is unchanged; pieces go to the list of their side of the plane. | 80% | Volume, side and strict checks on every plane. |
 | Ch. 14.9, Slicing | Not implemented as a separate operator. | 15% | None. |
 | Ch. 15.1–15.4, Statement and classification | Five-phase algorithm for `UNION`, `INTERSECTION`, `SUBTRACT`. Face contact is glued; a union touching only along edges or at vertices is rejected as non-manifold (B-04, by decision). | 80% | Set-operator tests, strict set-op tests, oracle rows, oracle fuzz gates. |
 | Ch. 15.5, `setopgenerate` | `_PolyhedralBoundedSolidSetIntersector` with a worklist, weld of coincident vertices, split of self-touching loops and edge/face box rejection. Edges lying in a face are handled (B-03 fixed). | 85% | `IntersectorWeldTest`, `IntersectorParametricOrderingTest`, oracle fuzz. |
-| Ch. 15.6.1, Vertex/face classification | `_PolyhedralBoundedSolidSetVertexFaceClassifier`. A ring inside a face is finished correctly (B-01 fixed). | 80% | `VertexFaceClassifierCoplanarTest`, oracle rows, rotated fuzz families. |
-| Ch. 15.6.2, Vertex/vertex classification | Sector search, reclassification of "on" sectors and edges, null-edge insertion. Coplanar faces with crossing edges work (B-02 fixed). | 75% | `SectoroverlapTraceDiagnosticTest`, coplanar predicate tests, `VertexVertexEndpointRecoveryTest`, coplanar fuzz family. |
-| Ch. 15.7, `setopconnect` | `_PolyhedralBoundedSolidSetNullEdgesConnector`, ordered by the intersection curve builder. Ring ownership fixed (B-01). Still keeps static scratch state. | 75% | `SetOpConnectScanJoinTest`, `SetOpConnectNoLooseInvariantTest`, `IntersectionCurveBuilderTest`. |
+| Ch. 15.6.1, Vertex/face classification | `_PolyhedralBoundedSolidSetVertexFaceClassifier`, on the neighbourhood shared with the splitter; a reflex sector is split by its bisector. A ring inside a face is finished correctly (B-01 fixed). | 80% | `VertexFaceClassifierCoplanarTest`, oracle rows, rotated fuzz families. |
+| Ch. 15.6.2, Vertex/vertex classification | Sector search, reclassification of "on" sectors and edges, null-edge insertion. Coplanar faces with crossing edges work (B-02 fixed). `sectoroverlap` tests both ends of the angular intervals. | 75% | `SectoroverlapTraceDiagnosticTest`, coplanar predicate tests, `VertexVertexEndpointRecoveryTest`, coplanar fuzz family. |
+| Ch. 15.7, `setopconnect` | `_PolyhedralBoundedSolidSetNullEdgesConnector`, ordered by the intersection curve builder, with its state per instance. Ring ownership fixed (B-01); rings follow the half that clearly contains them after both divisions of `join`. Isolated struts are dropped, so no loose end is left on the corpus. Non-convex faces in general position still fail in part (composite oracle). | 70% | `SetOpConnectScanJoinTest`, `SetOpConnectNoLooseInvariantTest` (no pending case), `IntersectionCurveBuilderTest`, `SetOpReentrancyTest`, `BooleanCompositeOracleFuzzGateTest`. |
 | Ch. 15.8, `setopfinish` | `_PolyhedralBoundedSolidSetFinisher`: pair sanitising, `lmfkrh`, `revert`, `movefac`, `lkfmrh`, `loopGlue`, triangulation of non-planar faces. | 70% | `SetOpFinishInvariantsTest`, reference pairs. |
 | Ch. 15.4, "no intersections found" | Preflights for touching, identity, containment and partial coplanar area, with one containment predicate based on interior witness points (B-02 b, B-03 fixed). Two blocks sharing a face give a lamina for ∩, not the empty set (open). | 70% | `PolyhedralBoundedSolidPreflightTest`, set-operator tests, oracle rows. |
 | Ch. 15 problems | 15.1, 15.2, 15.3, 15.4, 15.5, 15.6 implemented; 15.9 partly tested; 15.7 and 15.8 missing. | 65% | See the backlog in `vitralCadKernel.md`. |
@@ -85,9 +85,9 @@ quantitative invisibility for the Appel hidden-line renderer ([APPE1967]).
 | Boolean finish | `_…SetFinisher` | `SetOpFinishInvariantsTest`, `…StrictSetOpTest` | Medium-high. |
 | Public contract | `PolyhedralBoundedSolidModeler`, `PolyhedralBoundedSolidStructuralCopy`, typed exceptions | `SetOpContractTest`, `PolyhedralBoundedSolidStructuralCopyTest` | High: operands intact, typed failures, no silent empty result. |
 | Reference corpus | `SimpleTestGeometryLibrary`, `CsgSampleCorpus` | `BooleansFromReferenceObjectPairsTest`, `AlgebraicIdentityRegressionTest`, `Mant1988Section15_2UnionDiagnostic`, `RigidMotionInvarianceGateTest` | High for these fixtures; 33 of 36 operations come from the pipeline (the other 3 from the partial-coplanar preflight, `CROSS_PAIR` A−B rejected as non-manifold), and all 36 are invariant under a rigid motion. |
-| Kurlander bowl | `CsgKurlanderBowlFixture` | `KurlanderBowlStarInvariantTest`, `KurlanderBowlMotifSweepRegressionTest`, `KurlanderMotif4OperationMatrixTest`, `CsgKurlanderBowl…RegressionTest`, `CsgMoonCylinderDifferenceDegeneracyTest`, `Stage6FaceSubdivisionDiagnosticTest` | High for A−B on 40 motifs; baselines are kernel snapshots. |
+| Kurlander bowl | `CsgKurlanderBowlFixture` | `KurlanderBowlStarInvariantTest`, `KurlanderBowlMotifSweepRegressionTest`, `KurlanderMotif4OperationMatrixTest`, `CsgKurlanderBowl…RegressionTest`, `CsgMoonCylinderDifferenceDegeneracyTest`, `Stage6FaceSubdivisionDiagnosticTest` | High: the 4 operations on all 40 motifs, and the whole bowl (82 booleans, genus 40, `CsgKurlanderBowlFullModelTest`, slow); baselines are kernel snapshots. |
 | Applied models | `StepperMotorGuideCsgFixture` | `StepperMotorGuideStrictValidationTest` | High for this model. |
-| Independent oracle | `PolyhedralBoundedSolidVolumeOracle` (test) | `BooleanVolumeOracleTest` (no disabled rows), `BooleanOracleFuzzGateTest` (560 cases, slow) | The only correctness check that does not depend on kernel output; all cases correct. |
+| Independent oracle | `PolyhedralBoundedSolidVolumeOracle`, `CompositeShapeOracle` (tests) | `BooleanVolumeOracleTest` (no disabled rows), `BooleanOracleFuzzGateTest` (560 cases, slow), `BooleanCompositeOracleFuzzGateTest` (non-convex, scales, chains) | The only correctness checks that do not depend on kernel output; all box cases correct; non-convex cases about two thirds (ratchet). |
 
 ## Known alignment gaps
 
@@ -102,9 +102,10 @@ quantitative invisibility for the Appel hidden-line renderer ([APPE1967]).
   empty set. This is policy (2026-11-16): laminae are valid results because
   they are topologically sound and easy to display; only a collapsed
   lamina, with area below EPSILON, is rejected (`LaminaPolicyTest`).
-- Split: a section pinched at a reflex vertex is one self-touching loop.
-- Static state in the connector and the debug flags; the public operations
-  are serialized on a lock.
+- Non-convex operands in general position: the composite oracle finds
+  connect failures (about a third of the rotated checks).
+- Global state (numeric context, id namespace, debug flags, id counters);
+  the public operations are serialized on a lock.
 - Integral properties (§13.3), slicing (§14.9), simultaneous results
   (Problem 15.7), two-dimensional set operations (Problem 15.8) and undo
   (Ch. 16) are not implemented.

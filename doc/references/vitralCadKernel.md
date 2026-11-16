@@ -29,10 +29,11 @@ Scope decision kept from the previous audit: lack of curved-surface support
 is excluded from the gap analysis.
 
 Method: source reading, the stage plans 1–10, the full test suite
-(`gradle :base:test`: 1109 tests, 0 failures, 38 skipped; 712 tests in the
-previous version), the slow gates (`gradle :base:slowTest`: oracle fuzz and
-rigid-motion invariance), and an independent volume oracle run on box pairs
-and splitting planes that are not part of the fixture corpus.
+(`gradle :base:test`: 1114 tests, 0 failures, 0 skipped; 712 tests in the
+previous version), the slow gates (`gradle :base:slowTest`: box-pair oracle fuzz,
+rigid-motion invariance, the whole Kurlander bowl), and two independent
+volume oracles, for box pairs and splitting planes and for non-convex
+operands and chains of booleans, that are not part of the fixture corpus.
 
 ## 2) MANT1988 baseline used for comparison
 
@@ -78,18 +79,16 @@ Strengths:
   its side of the plane, and a plane that does not cut sends a copy to the
   side the solid lies on.
 - A seeded fuzz splits every corpus solid by planes through its vertices:
-  252 / 256 correct.
+  256 / 256 correct. A section pinched at a reflex vertex is split into
+  simple loops, and pieces that touch come out as separate solids.
+- The splitter and the vertex/face classifier build their neighbourhood
+  with one implementation (`_PolyhedralBoundedSolidVertexNeighborhood`,
+  Problem 15.4); only the reclassification rules differ.
 
 Weaknesses:
-- A section pinched at a reflex vertex (two section regions meeting at one
-  vertex inside a face) comes out as a single self-touching loop: right
-  volume, strict-invalid (4 fuzz cases).
-- The splitter and the vertex/face classifier remain two implementations
-  (Problem 15.4).
 - A slicing-only variant (§14.9, Problem 14.3) does not exist.
 
-Assessment: general in the sense of §14.1 except for the pinched-section
-case.
+Assessment: general in the sense of §14.1.
 
 ### 3.3 Set operations (`booleans/`)
 
@@ -101,6 +100,10 @@ Strengths:
   glued by the pipeline (B-04).
 - All 560 cases of the oracle fuzz are correct, including rotated operands,
   translation to 1000 and coplanar faces after a 45° rotation.
+- Tolerances follow the size of the model down to 10⁻⁹: the non-convex
+  oracle gives the same answers at 10⁻³, 1 and 10³.
+- The whole Kurlander bowl (82 booleans, genus 40) is one strict-valid
+  shell.
 - Contract: `setOp` leaves its operands intact (`setOpDestructive` keeps the
   book's behaviour). Failures are typed under
   `PolyhedralBoundedSolidOperationException`. An empty result that the
@@ -119,10 +122,15 @@ Weaknesses:
 - Two blocks sharing a face give a zero-volume lamina for ∩, not the
   regularised empty set. This is policy (2026-11-16): a lamina is valid and
   easy to display; a collapsed lamina (area below EPSILON) is rejected.
-- Static mutable state remains in the connector (scratch and counters), the
-  debug flags and the id counters. The public operations are serialized on
-  one lock: thread-safe, not concurrent.
-- A failed input validation is still only a warning.
+- Non-convex operands in general position: 47 of 72 rotated checks and
+  23 of 36 chain checks are correct (`BooleanCompositeOracleFuzzGateTest`).
+  The failures come from the connect stage on non-convex faces: loose
+  pairs joined across the wrong chords, strut rings on a dividing chord
+  (the ring rescue is still needed there).
+- Global state remains in the numeric context, the id namespace, the
+  debug flags and the id counters; the connector itself is per instance.
+  The public operations are serialized on one lock: thread-safe, not
+  concurrent.
 
 Assessment: correct on every box-pair family measured, including rotated
 and coplanar ones, with every answer from the Chapter 15 pipeline or its
@@ -179,10 +187,13 @@ Closed by the Fable 5.2 plan:
 - Oracle fuzz, rigid-motion and split fuzz gates.
 
 Still open:
-- Static state in the connector, validation mixed with repair, input
-  validation as a warning, the pinched split section, the
-  `STACKED_BLOCKS` preflight. (B-05 closed: fallbacks retired; `CROSS_PAIR`
+- Validation mixed with repair, the `STACKED_BLOCKS` preflight, the
+  remaining global state. (B-05 closed: fallbacks retired; `CROSS_PAIR`
   A−B rejected as non-manifold; the lamina kept by policy.)
+- Second pass (2026-11-16, Fable5.2Analysis.md 10.4): the pinched split
+  section, input validation as an error, the connector's static state and
+  the shared neighbourhood are closed; the non-convex oracle is in place
+  and shows the open connect defects.
 
 ### Earlier: comparison of the 2026-11-14 version with the April 2026 version
 
@@ -212,8 +223,9 @@ Maturity: robust research prototype, close to usable for polyhedral models
 built from boxes, prisms and sweeps.
 
 Why not production yet:
-- The independent oracle covers box pairs only.
-- Static state limits concurrency to one operation at a time.
+- Non-convex operands in general position fail in about a third of the
+  oracle checks.
+- Global state limits concurrency to one operation at a time.
 - The kernel has not been measured on models with thousands of faces.
 
 ## 6) What is missing
@@ -226,13 +238,14 @@ Priority P0:
   preflight.
 
 Priority P1:
-- Split pinched sections into separate loops (reuse
-  `splitSelfTouchingLoops`).
-- An oracle for non-convex operands and chains of booleans.
-- Remove the static state of the connector; then lift the lock.
+- Connect on non-convex faces: the failures of the composite oracle
+  (rotated families, chains, coplanar bottoms); then retire the ring
+  rescue.
+- Thread the numeric context and the id namespace through the
+  operations; then lift the lock.
 
 Priority P2:
-- Validation separated from repair; failed input validation as an error.
+- Validation separated from repair.
 - Spatial index for larger models; measure on thousands of faces.
 - Volume and other integral properties (§13.3) in production code.
 
@@ -246,8 +259,8 @@ important addition of its own (the explicit intersection curve). Measured
 outside its corpus with an independent oracle, it is correct on every
 box-pair family tried, including rotated and coplanar operands, and its
 splitter handles planes through vertices. The shape-specific fallbacks are
-gone; the open work is concurrency, the remaining preflight and an oracle
-beyond box pairs.
+gone. The oracle for non-convex operands shows the open work: the connect
+stage on non-convex faces, then concurrency and the remaining preflight.
 
 ## 8) MANT1988 problems backlog
 
@@ -262,7 +275,7 @@ beyond box pairs.
 | 13.1 (face equation at origin) | Newell plane on the face | Implemented | — |
 | 13.2 (`dropcoord`) | face projection | Implemented | — |
 | 13.3 (`contfv`) | `testPointInside` | Implemented | — |
-| 13.5 (ring moving) | `laringmv`, ring rescue | Implemented | Check whether the ring rescue still fires |
+| 13.5 (ring moving) | `laringmv`, `clearRingSide` in `join` | Implemented | The ring rescue no longer fires on the corpus and the box fuzz; still needed for non-convex faces |
 | 13.6 (wide sector) | `checkWideness` (signed angle) | Implemented | Tolerance-boundary tests |
 | 13.3 text (volume) | only in the test oracle | Missing in production | A kernel utility |
 | 14.1 (`bisector`) | operator base | Implemented | Near-colinear case |
@@ -271,8 +284,8 @@ beyond box pairs.
 | 15.1 (containment) | non-intersecting classifier, preflights | Implemented | — |
 | 15.2 (`maximize_faces`) | `maximizeFaces` | Implemented | Test for a face inside another |
 | 15.3 (no recursion) | worklist in the intersector | Implemented | — |
-| 15.4 (vertex/face classifier) | `_SetVertexFaceClassifier` | Implemented | Sharing code with the splitter |
-| 15.5 (`sectoroverlap`) | predicate processor | Implemented | — |
+| 15.4 (vertex/face classifier) | `_SetVertexFaceClassifier`, `_PolyhedralBoundedSolidVertexNeighborhood` | Implemented | — (neighbourhood shared with the splitter) |
+| 15.5 (`sectoroverlap`) | predicate processor | Implemented | — (both interval ends tested since 2026-11-16) |
 | 15.6 (`revert`) | solid core | Implemented | — |
 | 15.7 (both results at once) | — | Missing | Operand copy now exists |
 | 15.8 (2D set operations) | Weiler–Atherton clipper exists separately | Missing in the kernel | Use it for coplanar faces |
@@ -286,12 +299,12 @@ beyond box pairs.
 | Workstream | Current state | Target | Outcome |
 |---|---|---|---|
 | Container and Euler operators | Fixed; preconditions checked; O(1) half-edge neighbours | Intrusive links in the other ports | A trustworthy foundation |
-| Ring ownership in connect | B-01 closed | Remove the ring rescue if it no longer fires | Simpler connect |
+| Ring ownership in connect | B-01 closed; rings follow the half that clearly contains them after both divisions of `join`; the rescue fires only on non-convex faces | Correct connect on non-convex faces, then remove the rescue | Simpler connect |
 | Coplanar faces | B-02, B-04 and B-05 closed; fallbacks retired, rigid-motion gate 36 / 36 | Answer `STACKED_BLOCKS` without the preflight | Every answer from the pipeline |
 | No-intersection decisions | One predicate set with interior witness points; B-03 closed; laminae allowed by policy | Reject only collapsed laminae (done) | Laminae as displayable results |
-| Splitter | Context object, S-01 closed, 252 / 256 fuzz | Split pinched sections; share the classifier | General splitting |
+| Splitter | Context object, S-01 closed, pinched sections split, neighbourhood shared with the vertex/face classifier, 256 / 256 fuzz | — | General splitting (done) |
 | Operand contract | Copy on entry; `setOpDestructive`; typed failures | — | Safe failure (done) |
-| Static state | Connector scratch, debug flags, id counters; public operations behind a lock; tests parallel across JVMs | None outside constants | Concurrent operations |
-| Validation | Back-pointer checks; non-manifold unions rejected | No repair in validators; input validation as an error | Fail-fast, diagnosable |
-| Tests | Oracle fuzz, rigid-motion and split gates, contract tests, result paths | Oracle for non-convex operands and chains | Errors detected, not only changes |
+| Static state | Connector per instance; numeric context, id namespace, debug flags, id counters still global; public operations behind a lock; tests parallel across JVMs | None outside constants | Concurrent operations |
+| Validation | Back-pointer checks; non-manifold unions rejected; invalid operands throw `InvalidOperandException` | No repair in validators | Fail-fast, diagnosable |
+| Tests | Box and non-convex oracle fuzz (with scales and chains), rigid-motion and split gates, reentrancy, contract tests, result paths; no disabled kernel test | Raise the non-convex ratchets | Errors detected, not only changes |
 | Efficiency | Box rejection in generate and strict validation; planes once per pass | Spatial index; measurements on large models | Larger models |

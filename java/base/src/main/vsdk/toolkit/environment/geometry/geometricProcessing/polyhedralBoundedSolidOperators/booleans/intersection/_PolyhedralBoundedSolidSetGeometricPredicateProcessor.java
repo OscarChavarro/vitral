@@ -46,23 +46,23 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         boolean decision;
     }
 
-    private static ArrayList<SectoroverlapTraceEntry> sectoroverlapTrace = null;
-    private static int sectoroverlapCallCounter = 0;
+    /** Diagnostic trace of sectoroverlap calls, per thread; null when off. */
+    private static final ThreadLocal<ArrayList<SectoroverlapTraceEntry>>
+        sectoroverlapTrace = new ThreadLocal<>();
 
     static void enableSectoroverlapTrace()
     {
-        sectoroverlapTrace = new ArrayList<SectoroverlapTraceEntry>();
-        sectoroverlapCallCounter = 0;
+        sectoroverlapTrace.set(new ArrayList<SectoroverlapTraceEntry>());
     }
 
     static void disableSectoroverlapTrace()
     {
-        sectoroverlapTrace = null;
+        sectoroverlapTrace.remove();
     }
 
     static ArrayList<SectoroverlapTraceEntry> getSectoroverlapTrace()
     {
-        return sectoroverlapTrace;
+        return sectoroverlapTrace.get();
     }
 
     private static void recordSectoroverlapCall(
@@ -70,11 +70,12 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb,
         double a1, double a2, double b1, double b2, boolean decision)
     {
-        if ( sectoroverlapTrace == null ) {
+        ArrayList<SectoroverlapTraceEntry> trace = sectoroverlapTrace.get();
+        if ( trace == null ) {
             return;
         }
         SectoroverlapTraceEntry entry = new SectoroverlapTraceEntry();
-        entry.callIndex = sectoroverlapCallCounter++;
+        entry.callIndex = trace.size();
         entry.faceA = (na != null && na.he != null && na.he.parentLoop != null
                        && na.he.parentLoop.parentFace != null)
             ? na.he.parentLoop.parentFace.id : -1;
@@ -104,7 +105,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         entry.boundaryRayContact = Math.abs(entry.diffA2B1) < 1.0e-12
             || Math.abs(entry.diffB2A1) < 1.0e-12;
         entry.decision = decision;
-        sectoroverlapTrace.add(entry);
+        trace.add(entry);
     }
 
     private static final class CoplanarAngleBasis
@@ -271,9 +272,22 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             ref2, dir, numericContext) ) {
             return (ref2.dotProduct(dir) > 0.0);
         }
-        t1 = compareToZero(c1.dotProduct(ref12));
-        t2 = compareToZero(c2.dotProduct(ref12));
+        // Signs of unit quantities: the raw products grow with the cube of
+        // the model size while the tolerance grows linearly, so at 10^-3
+        // they were noise.
+        t1 = PolyhedralBoundedSolidNumericPolicy.compare(
+            unit(c1).dotProduct(unit(ref12)), 0.0,
+            PolyhedralBoundedSolidNumericPolicy.BREP_EPSILON);
+        t2 = PolyhedralBoundedSolidNumericPolicy.compare(
+            unit(c2).dotProduct(unit(ref12)), 0.0,
+            PolyhedralBoundedSolidNumericPolicy.BREP_EPSILON);
         return ( t1 < 0.0 && t2 < 0.0 );
+    }
+
+    private static Vector3Dd unit(Vector3Dd v)
+    {
+        double length = v.length();
+        return length > 0.0 ? v.multiply(1.0 / length) : v;
     }
 
     /**
@@ -336,13 +350,14 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             b2 = t;
         }
 
-        // Closed-set (epsilon-tolerant) interval-overlap check.
-        // Intentionally returns true for touching sectors (a2 ≈ b1) because the
-        // setop pipeline requires a null-edge strut even at coplanar boundary-ray
-        // contact — a strict open-set check breaks MANT1988 §15.1 reference geometry.
-        // The symmetric disjoint case (B entirely left of A) is not yet fixed here;
-        // that requires a deeper restructuring of the coplanar V/V path.
-        boolean decision = (a2 + VSDK.EPSILON > b1 - VSDK.EPSILON);
+        // Closed-set (epsilon-tolerant) interval-overlap check on signed
+        // angles. Intentionally returns true for touching sectors (a2 ≈ b1
+        // or b2 ≈ a1) because the setop pipeline requires a null-edge strut
+        // even at coplanar boundary-ray contact — a strict open-set check
+        // breaks MANT1988 §15.1 reference geometry. Both ends are tested:
+        // the check used to miss B entirely on the negative side of A.
+        boolean decision = (a2 + VSDK.EPSILON > b1 - VSDK.EPSILON) &&
+                           (b2 + VSDK.EPSILON > a1 - VSDK.EPSILON);
         if ( decision && touchOnlyAlongConcaveEdge(na, nb) ) {
             decision = false;
         }

@@ -1,6 +1,5 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,7 +11,6 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
 40x4 diagnostic of the Kurlander sweep: for the 40 motifs x 4 operations
@@ -22,12 +20,11 @@ result is valid.
 
 <p>See {@code doc/plan-csg-boolean-fix-stage3.md} §6 for the full workflow.</p>
 
-<p>The permanent regression test for motif 0 is in
-{@link #given_kurlanderBowlAndMotif0_when_allFourOps_then_topologyMatchesBaseline()}.
-The diagnostic test is marked {@code @Disabled}
-so it does not run as part of the regular suite; enable it explicitly with:
-{@code gradle :base:test --tests "*KurlanderMotif4OperationMatrixTest.diagnose*"}.
-</p>
+<p>Every motif must give OK in the four operations (all 40 since
+2026-11-16; the per-motif switch that skipped the failing ones was
+removed). Motifs 0, 1, 2, 5, 7, 10, 12, 14, 15, 21 and 23 also have their
+topology summaries pinned. The printed matrix is a utility, not a test:
+run {@link #main} with the test classpath.</p>
 */
 class KurlanderMotif4OperationMatrixTest
 {
@@ -35,33 +32,17 @@ class KurlanderMotif4OperationMatrixTest
 
     private static final String[] OP_NAMES = { "A-B", "B-A", "AiB", "A+B" };
 
-    /**
-    Execution control for the parameterized test: one boolean per motif (index 0-39).
-    {@code true} = the motif is known to be 4-OK and the assertion runs.
-    {@code false} = the motif still fails in some operation; it is skipped with assumeTrue.
-
-    Current 4-OK motifs (plan-csg-boolean-fix-stage3 §14.2):
-      ✅ shellCount=2: 0, 2, 10, 15, 21
-      ⚠️ shellCount=1: 1, 5, 7, 12, 14, 23
-    */
-    static final boolean[] ENABLED = {
-    //   0      1      2      3      4      5      6      7      8      9
-        true,  true,  true,  false, false, true,  false, true,  false, false,
-    //  10     11     12     13     14     15     16     17     18     19
-        true,  false, true,  false, true,  true,  false, false, false, false,
-    //  20     21     22     23     24     25     26     27     28     29
-        false, true,  false, true,  false, false, false, false, false, false,
-    //  30     31     32     33     34     35     36     37     38     39
-        false, false, false, false, false, false, false, false, false, false
-    };
-
     // -----------------------------------------------------------------------
     // Step 1.1 - 40x4 diagnostic test (plan-csg-boolean-fix-stage3 §6.1)
     // -----------------------------------------------------------------------
 
-    @Test
-    @Disabled("40x4 diagnostic - run manually: gradle :base:test --tests '*KurlanderMotif4OperationMatrixTest.diagnose*'")
-    void diagnose_allMotifsAllOps_printTopologicalSummaryMatrix()
+    /** Prints the 40 x 4 status matrix with the topology summaries. */
+    public static void main(String[] args)
+    {
+        diagnose_allMotifsAllOps_printTopologicalSummaryMatrix();
+    }
+
+    private static void diagnose_allMotifsAllOps_printTopologicalSummaryMatrix()
     {
         int total = CsgKurlanderBowlFixture.getSingleMotifCount();
         int[][] statusCounts = new int[OP_NAMES.length][OpStatus.values().length];
@@ -134,7 +115,7 @@ class KurlanderMotif4OperationMatrixTest
     }
 
     // -----------------------------------------------------------------------
-    // Parameterized test controlled by ENABLED[40]
+    // Parameterized test over the 40 motifs
     // -----------------------------------------------------------------------
 
     static IntStream allMotifIndices()
@@ -143,18 +124,14 @@ class KurlanderMotif4OperationMatrixTest
     }
 
     /**
-    For each motif enabled in {@link #ENABLED}, run the 4 boolean operations
-    and verify that all of them produce {@link OpStatus#OK}.
-    For each operation, print the trace of vertices created during the intersection.
-    Motifs with {@code ENABLED[motif] == false} are skipped with {@code assumeTrue}.
+    For each motif, run the 4 boolean operations and verify that all of them
+    produce {@link OpStatus#OK}. For each operation, print the trace of
+    vertices created during the intersection.
     */
     @ParameterizedTest(name = "motif[{0}]")
     @MethodSource("allMotifIndices")
     void given_kurlanderBowlAndMotifN_when_allFourOps_then_allClassifyOK(int motif)
     {
-        assumeTrue(ENABLED[motif],
-            "motif " + motif + " disabled in ENABLED - it is not 4-OK yet");
-
         String motifDesc = CsgKurlanderBowlFixture.describeSingleMotif(motif);
         System.out.printf("%n[PARAM] motif=%2d %s%n", motif, motifDesc);
 
@@ -882,20 +859,4 @@ class KurlanderMotif4OperationMatrixTest
         return BooleansFromReferenceObjectPairsTest.TopologicalSummary.of(1, 274, 627, 356, 275, 1, 3, new int[] {274}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2}, new int[] {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 9, 9, 10, 10, 11, 11, 11, 11, 16, 16, 16, 16, 24, 30, 32}, new long[] {-1000000L, -1000000L, 0L, 1000000L, 1000000L, 1650000L});
     }
 
-    @Test
-    void zzTempPrintMoonBaselines()
-    {
-        int[] motifs = { 21, 23 };
-        for ( int motif : motifs ) {
-            for ( int opIdx = 0; opIdx < 4; opIdx++ ) {
-                PolyhedralBoundedSolid[] ops =
-                    CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(motif);
-                PolyhedralBoundedSolid result = executeOp(ops[0], ops[1], opIdx);
-                BooleansFromReferenceObjectPairsTest.TopologicalSummary summary =
-                    BooleansFromReferenceObjectPairsTest.TopologicalSummary.from(result);
-                System.out.println("MOTIF" + motif + "_OP" + opIdx + "=" +
-                    summary.toLiteral());
-            }
-        }
-    }
 }

@@ -43,12 +43,28 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     {
         private final ArrayList<_PolyhedralBoundedSolidFace> sonfa;
         private final ArrayList<_PolyhedralBoundedSolidFace> sonfb;
+        private final _PolyhedralBoundedSolidSetNullEdgesConnector connector;
 
         private ConnectResult(ArrayList<_PolyhedralBoundedSolidFace> sonfa,
-                              ArrayList<_PolyhedralBoundedSolidFace> sonfb)
+                              ArrayList<_PolyhedralBoundedSolidFace> sonfb,
+                              _PolyhedralBoundedSolidSetNullEdgesConnector
+                                  connector)
         {
             this.sonfa = sonfa;
             this.sonfb = sonfb;
+            this.connector = connector;
+        }
+
+        /** Pair index of a null face of A, or -1 (used by finish). */
+        int pairIndexA(_PolyhedralBoundedSolidFace face)
+        {
+            return connector.getSonfaPairIndex(face);
+        }
+
+        /** Pair index of a null face of B, or -1 (used by finish). */
+        int pairIndexB(_PolyhedralBoundedSolidFace face)
+        {
+            return connector.getSonfbPairIndex(face);
         }
 
         ArrayList<_PolyhedralBoundedSolidFace> sonfa()
@@ -75,42 +91,58 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     }
 
     private static int debugFlags;
-    private static int operation;
+    private int operation;
     private int nextNullEdgeIndex;
     private ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
     private ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
-    private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa;
-    private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsb;
+    private ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa;
+    private ArrayList<_PolyhedralBoundedSolidHalfEdge> endsb;
     private ArrayList<_PolyhedralBoundedSolidFace> sonfa;
     private ArrayList<_PolyhedralBoundedSolidFace> sonfb;
-    private static Map<Integer, Integer> sonfaPairIndexByFaceId;
-    private static Map<Integer, Integer> sonfbPairIndexByFaceId;
-    private static int lastLooseACount;
-    private static int lastLooseBCount;
-    private static int lastSonfaCount;
-    private static int lastSonfbCount;
-    private static int lastPairCount;
-    private static int currentConnectPairIndex;
-    private static int nextSyntheticPairIndex;
+    private Map<Integer, Integer> sonfaPairIndexByFaceId;
+    private Map<Integer, Integer> sonfbPairIndexByFaceId;
+    /**
+    Counters of the most recent {@link #connect} on the calling thread, for
+    tests and diagnostics. The connector itself keeps all its working state
+    in the instance (Fable5.2Analysis.md pending item 9).
+    */
+    private static final class Diagnostics
+    {
+        int looseA;
+        int looseB;
+        int sonfaCount;
+        int sonfbCount;
+        int pairCount;
+        int ringRescueCount;
+        _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report curveReport;
+    }
+
+    private static final ThreadLocal<Diagnostics> LAST =
+        ThreadLocal.withInitial(Diagnostics::new);
+    private int currentConnectPairIndex;
+    private int nextSyntheticPairIndex;
 
     /**
     Structural report of the intersection curves reconstructed from the
-    sonea/soneb pairs of the most recent {@link #connect} call. Captured
-    unconditionally (the reconstruction is cheap) so tests and diagnostics
-    can audit curve closure without enabling pipeline traces.
+    sonea/soneb pairs of this connect. Captured unconditionally (the
+    reconstruction is cheap) so tests and diagnostics can audit curve
+    closure without enabling pipeline traces; see {@link #getLastCurveReport}.
     */
-    static _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
-        lastCurveReport;
+    private _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
+        curveReport;
 
-    /**
-    Test-only injection point: when non-null and matching the pair count,
-    {@link #sortNullEdges()} reorders sonea/soneb by this permutation
-    (entry {@code position -> originalIndex}) instead of the production
-    ordering. Lets contract tests probe the connect stage's sensitivity to
-    processing order without any production flag. Always null in production;
-    cleared by the caller after use.
-    */
-    static int[] testOnlyForcedConnectOrder;
+    /** Curve report of the most recent connect on the calling thread. */
+    static _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
+        getLastCurveReport()
+    {
+        return LAST.get().curveReport;
+    }
+
+    static void clearLastCurveReport()
+    {
+        LAST.get().curveReport = null;
+    }
+
 
     /**
     True when {@link #sortNullEdges()} already oriented every strut along
@@ -119,7 +151,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     vertex-id comparison (the legacy rule, which encodes classifier emission
     order and breaks when that order is not the curve order).
     */
-    private static boolean curveOrientationApplied;
+    private boolean curveOrientationApplied;
 
     /**
     Junction adjacency in processing-position space when the curve order is
@@ -128,13 +160,13 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     otherwise. Used to restrict the near-miss ring rescue to true curve
     neighbors.
     */
-    private static int[][] curveNeighborPositions;
+    private int[][] curveNeighborPositions;
 
     /**
     Processing pair index that pushed each loose entry, parallel to
     {@code endsa}/{@code endsb}.
     */
-    private static ArrayList<Integer> endsPairIndex;
+    private ArrayList<Integer> endsPairIndex;
 
     private static boolean isPipelineSummaryTraceEnabled()
     {
@@ -208,12 +240,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             summarizeHalfEdge(edge.e.leftHalf);
     }
 
-    private static void setCurrentConnectContext(int pairIndex)
+    private void setCurrentConnectContext(int pairIndex)
     {
         currentConnectPairIndex = pairIndex;
     }
 
-    private static int allocateSyntheticPairIndex()
+    private int allocateSyntheticPairIndex()
     {
         int pairIndex;
 
@@ -222,7 +254,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return pairIndex;
     }
 
-    static int getSonfaPairIndex(_PolyhedralBoundedSolidFace face)
+    int getSonfaPairIndex(_PolyhedralBoundedSolidFace face)
     {
         Integer pairIndex;
 
@@ -233,7 +265,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return pairIndex != null ? pairIndex.intValue() : -1;
     }
 
-    static int getSonfbPairIndex(_PolyhedralBoundedSolidFace face)
+    int getSonfbPairIndex(_PolyhedralBoundedSolidFace face)
     {
         Integer pairIndex;
 
@@ -423,7 +455,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
     }
 
-    private static void removeLoosePair(int index)
+    private void removeLoosePair(int index)
     {
         endsa.remove(index);
         endsb.remove(index);
@@ -434,44 +466,43 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     Times the curve-neighbour ring rescue re-parented a strut ring during
     the last connect (Fable5.2Analysis.md Stage C step 4).
     */
-    private static int lastRingRescueCount = 0;
-
     static int getLastRingRescueCount()
     {
-        return lastRingRescueCount;
+        return LAST.get().ringRescueCount;
     }
 
     static int getLastLooseACount()
     {
-        return lastLooseACount;
+        return LAST.get().looseA;
     }
 
     static int getLastLooseBCount()
     {
-        return lastLooseBCount;
+        return LAST.get().looseB;
     }
 
     static int getLastSonfaCount()
     {
-        return lastSonfaCount;
+        return LAST.get().sonfaCount;
     }
 
     static int getLastSonfbCount()
     {
-        return lastSonfbCount;
+        return LAST.get().sonfbCount;
     }
 
     static int getLastPairCount()
     {
-        return lastPairCount;
+        return LAST.get().pairCount;
     }
 
     private void updateLastSnapshot()
     {
-        lastLooseACount = (endsa != null) ? endsa.size() : 0;
-        lastLooseBCount = (endsb != null) ? endsb.size() : 0;
-        lastSonfaCount = (sonfa != null) ? sonfa.size() : 0;
-        lastSonfbCount = (sonfb != null) ? sonfb.size() : 0;
+        Diagnostics last = LAST.get();
+        last.looseA = (endsa != null) ? endsa.size() : 0;
+        last.looseB = (endsb != null) ? endsb.size() : 0;
+        last.sonfaCount = (sonfa != null) ? sonfa.size() : 0;
+        last.sonfbCount = (sonfb != null) ? sonfb.size() : 0;
     }
 
     private static boolean isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
@@ -606,7 +637,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             .pointInFace(targetFace, point) == Geometry.INSIDE;
     }
 
-    private static void rebindClassicCurrentNullEdgeIfNeeded(
+    private void rebindClassicCurrentNullEdgeIfNeeded(
         _PolyhedralBoundedSolidHalfEdge currentTargetFirst,
         _PolyhedralBoundedSolidHalfEdge currentTargetSecond,
         _PolyhedralBoundedSolidHalfEdge currentReferenceFirst,
@@ -660,7 +691,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             summarizeHalfEdge(currentTargetFirst));
     }
 
-    private static void rebindClassicCurrentNullEdgesIfNeeded(
+    private void rebindClassicCurrentNullEdgesIfNeeded(
         _PolyhedralBoundedSolidHalfEdge currentARight,
         _PolyhedralBoundedSolidHalfEdge currentALeft,
         _PolyhedralBoundedSolidHalfEdge currentBLeft,
@@ -687,36 +718,22 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         debugFlags = flags;
         sonea = inSonea;
         soneb = inSoneb;
-        lastPairCount = Math.min(sonea.size(), soneb.size());
-        lastLooseACount = 0;
-        lastLooseBCount = 0;
-        lastSonfaCount = 0;
-        lastSonfbCount = 0;
-        lastRingRescueCount = 0;
-        nextSyntheticPairIndex = lastPairCount;
+        Diagnostics last = new Diagnostics();
+        LAST.set(last);
+        last.pairCount = Math.min(sonea.size(), soneb.size());
+        nextSyntheticPairIndex = last.pairCount;
         // [MANT1988] §15.7 Program 15.14: single Connect implementation.
         // The "flexibleEndpointChains" alternative path was removed in §6.1
         // of plan-csg-boolean-fix-stage2 because it duplicated setOpConnect
         // with extra heuristics that the book does not require.
         setOpConnect();
-        return new ConnectResult(sonfa, sonfb);
+        return new ConnectResult(sonfa, sonfb, this);
     }
 
     private void sortNullEdges()
     {
         curveOrientationApplied = false;
         curveNeighborPositions = null;
-        if ( testOnlyForcedConnectOrder != null &&
-             testOnlyForcedConnectOrder.length == sonea.size() &&
-             testOnlyForcedConnectOrder.length == soneb.size() ) {
-            applyOrderPermutation(testOnlyForcedConnectOrder);
-            lastCurveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
-                .build(sonea, soneb,
-                    PolyhedralBoundedSolidNumericPolicy.defaultContext()
-                        .unitVectorTolerance());
-            tracePipelineSummary("connect TEST-ONLY forced order applied");
-            return;
-        }
 
         // Always group null-edges by topological ring before any further
         // processing. Without this, the connect loop pairs null-edges from
@@ -839,11 +856,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         // Reconstruct the intersection curves for diagnosis (§5 of
         // doc/mythosPlan.md). The report is captured before any reordering
         // decision so it always describes the classifier's raw emission.
-        lastCurveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
+        curveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
             .build(sonea, soneb,
                 PolyhedralBoundedSolidNumericPolicy.defaultContext()
                     .unitVectorTolerance());
-        tracePipelineSummary("connect " + lastCurveReport.summarize());
+        LAST.get().curveReport = curveReport;
+        tracePipelineSummary("connect " + curveReport.summarize());
 
         int n = Math.min(sonea.size(), soneb.size());
         if ( n != sonea.size() || n != soneb.size() || n < 2 ) {
@@ -861,19 +879,18 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         // _PolyhedralBoundedSolidSetIntersectionCurveBuilder.applyCurveOrientation).
         // On any anomaly (open chain, isolated node, pinch, odd/degenerate
         // face-pair group) fall through to the legacy ordering below.
-        if ( lastCurveReport.isCleanlyClosed() ) {
+        if ( curveReport.isCleanlyClosed() ) {
+            int[][][] neighbors = new int[1][][];
             int[] curveOrder =
                 _PolyhedralBoundedSolidSetIntersectionCurveBuilder
-                    .orderAndOrientAlongCurves(lastCurveReport.cycles, n,
-                        sonea, soneb);
+                    .orderAndOrientAlongCurves(curveReport.cycles, n,
+                        sonea, soneb, neighbors);
             if ( curveOrder != null ) {
                 applyOrderPermutation(curveOrder);
                 curveOrientationApplied = true;
-                curveNeighborPositions =
-                    _PolyhedralBoundedSolidSetIntersectionCurveBuilder
-                        .lastTraversalNeighborPositions;
+                curveNeighborPositions = neighbors[0];
                 tracePipelineSummary("connect curve-order applied: cycles="
-                    + lastCurveReport.cycles.size());
+                    + curveReport.cycles.size());
                 return;
             }
         }
@@ -1230,7 +1247,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 "connect ring-rescue re-parent did not complete the match");
             return null;
         }
-        lastRingRescueCount++;
+        LAST.get().ringRescueCount++;
         tracePipelineSummary("connect ring-rescue applied: ring v="
             + (ringSide.startingVertex == null ? "?"
                : Integer.toString(ringSide.startingVertex.id))
@@ -1247,7 +1264,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return ret;
     }
 
-    private static boolean isLooseA(_PolyhedralBoundedSolidHalfEdge he)
+    private boolean isLooseA(_PolyhedralBoundedSolidHalfEdge he)
     {
         int i;
 
@@ -1258,7 +1275,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return false;
     }
 
-    private static boolean isLooseB(_PolyhedralBoundedSolidHalfEdge he)
+    private boolean isLooseB(_PolyhedralBoundedSolidHalfEdge he)
     {
         int i;
 
@@ -1581,15 +1598,16 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             " sonfb=" + sonfb.size() +
             " looseA=" + endsa.size() +
             " looseB=" + endsb.size());
-        // §6.1-B: post-loop safety nets removed.
-        // Per [MANT1988] Program 15.14, the main loop must leave
-        // looseA == looseB == 0 by itself. Any survivor for
-        // MANT1988_15_1 INTERSECTION/SUBTRACT (looseA=4) is the
-        // visible symptom of the §5.2 deferred sectoroverlap fix
-        // upstream — see plan §6.1-C analysis. A post-pass closure
-        // (pairLatentLooseEnds) was attempted but turned out to fuse
-        // legitimately-separate shells in cases like HOLLOW_BRICK, so
-        // it was retired. The right fix is upstream, not here.
+        // Per [MANT1988] Program 15.14 the main loop must leave
+        // looseA == looseB == 0. The only survivors left are isolated
+        // struts: both halves of one null edge still loose on A and on B.
+        // The vertex/vertex classifier emits them at a coplanar contact
+        // along a boundary ray (sectoroverlap is closed, see its comment)
+        // where the curve does not pass, e.g. MANT1988_15_1 ∩ and −. Such
+        // a strut bounds no null face; killing it restores the vertex it
+        // split. It never joins anything, so it cannot fuse shells (the
+        // retired pairLatentLooseEnds closure did, on HOLLOW_BRICK).
+        dropIsolatedStruts();
         tracePipelineSummary(
             "connect post-pass sonfa=" + sonfa.size() +
             " sonfb=" + sonfb.size() +
@@ -1601,6 +1619,46 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             tracePipelineSummary(
                 "connect loose[" + i + "] A=" + summarizeHalfEdge(endsa.get(i)) +
                 " B=" + summarizeHalfEdge(endsb.get(i)));
+        }
+    }
+
+    /**
+    Removes the null edges whose two halves are both loose, on A and on B
+    at the same loose positions (see the call site). Each is killed with
+    lkev, which merges its two coincident vertices back into one.
+    */
+    private void dropIsolatedStruts()
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < endsa.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge a = endsa.get(i);
+            _PolyhedralBoundedSolidHalfEdge b = endsb.get(i);
+            for ( j = i + 1; j < endsa.size(); j++ ) {
+                if ( endsa.get(j) != a.mirrorHalfEdge() ||
+                     endsb.get(j) != b.mirrorHalfEdge() ) {
+                    continue;
+                }
+                tracePipelineSummary("connect drop isolated strut A="
+                    + summarizeHalfEdge(a) + " B=" + summarizeHalfEdge(b));
+                PolyhedralBoundedSolidEulerOperators.lkev(
+                    a.parentLoop.parentFace.parentSolid, a,
+                    a.mirrorHalfEdge());
+                PolyhedralBoundedSolidEulerOperators.lkev(
+                    b.parentLoop.parentFace.parentSolid, b,
+                    b.mirrorHalfEdge());
+                removeLoosePair(j);
+                removeLoosePair(i);
+                if ( j < endsPairIndex.size() ) {
+                    endsPairIndex.remove(j);
+                }
+                if ( i < endsPairIndex.size() ) {
+                    endsPairIndex.remove(i);
+                }
+                i--;
+                break;
+            }
         }
     }
 }

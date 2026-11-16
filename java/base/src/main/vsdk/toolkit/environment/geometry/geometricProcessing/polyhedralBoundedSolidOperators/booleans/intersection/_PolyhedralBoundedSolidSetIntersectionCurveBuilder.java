@@ -137,14 +137,6 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
         }
     }
 
-    /**
-    For each processing position of the most recent
-    {@link #orderAndOrientAlongCurves} result, the two processing positions
-    of its cycle-adjacent pairs (its junction partners along the curve).
-    Lets the connect stage restrict junction-repair logic to true curve
-    neighbors. Null until an order is computed.
-    */
-    static int[][] lastTraversalNeighborPositions;
 
     /** Internal carrier for one face-pair point group. */
     private static final class FacePairGroup
@@ -221,8 +213,10 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
         if ( from == null || to == null ) {
             return false;
         }
-        tolerance = PolyhedralBoundedSolidNumericPolicy.defaultContext()
-            .bigEpsilon();
+        // Scale of the operands, not of the unit model: at 10^-3 a unit
+        // tolerance would be a tenth of the features.
+        tolerance = PolyhedralBoundedSolidNumericPolicy.forSolids(
+            group.faceA.parentSolid, group.faceB.parentSolid).bigEpsilon();
         middle = from.add(to).multiply(0.5);
         return group.faceA.testPointInside(middle, tolerance) !=
                    Geometry.OUTSIDE &&
@@ -526,6 +520,9 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
     @param cycles disjoint closed cycles in traversal order, expected to
            cover every index in {@code [0, nodeCount)} exactly once
     @param nodeCount total number of null-edge pairs
+    @param neighborsOut receives, in element 0, for each processing position
+           the two processing positions of its cycle-adjacent pairs (its
+           junction partners along the curve), or null
     @return permutation where {@code result[position] = originalIndex}, or
             null when the cycles do not cover the index range exactly
     */
@@ -630,6 +627,9 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
            be flipped in place
     @param soneb null edges on solid B, index-aligned with sonea; struts may
            be flipped in place
+    @param neighborsOut receives, in element 0, for each processing position
+           the two processing positions of its cycle-adjacent pairs (its
+           junction partners along the curve), or null
     @return permutation where {@code result[position] = originalIndex}, or
             null when the cycles do not cover the index range exactly (in
             which case nothing is mutated)
@@ -637,12 +637,13 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
     static int[] orderAndOrientAlongCurves(ArrayList<int[]> cycles,
         int nodeCount,
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea,
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb)
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb,
+        int[][][] neighborsOut)
     {
         int c;
         int j;
 
-        lastTraversalNeighborPositions = null;
+        neighborsOut[0] = null;
         if ( computeTraversalOrder(cycles, nodeCount) == null ||
              sonea == null || soneb == null ) {
             return null;
@@ -798,7 +799,7 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
                 };
             }
         }
-        lastTraversalNeighborPositions = neighborPositions;
+        neighborsOut[0] = neighborPositions;
         return permutation;
     }
 

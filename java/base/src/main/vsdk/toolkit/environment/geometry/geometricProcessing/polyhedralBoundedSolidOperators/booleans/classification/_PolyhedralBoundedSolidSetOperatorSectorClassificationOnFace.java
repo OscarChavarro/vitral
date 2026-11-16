@@ -16,12 +16,8 @@ operation algorithm as proposed on section [MANT1988].15..1. and problem
 [MANT1988].15.4.
 */
 public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-    extends _PolyhedralBoundedSolidOperator
+    extends _PolyhedralBoundedSolidSectorClassification
 {
-    public static final int ABOVE = 1;
-    public static final int BELOW = -1;
-    public static final int ON = 0;
-
     public static final int AinB = 11;
     public static final int AoutB = 12;
     public static final int BinA = 13;
@@ -31,25 +27,15 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     public static final int BonAplus = 17;
     public static final int BonAminus = 18;
 
-    public static final int COPLANAR_FACE = 10;
-    public static final int INPLANE_EDGE = 20;
-    public static final int CROSSING_EDGE = 30;
-    public static final int UNDEFINED = 40;
-
     public static final int COPLANAR_UNKNOWN = 0;
     public static final int COPLANAR_DISJOINT = 1;
     public static final int COPLANAR_TOUCHING = 2;
     public static final int COPLANAR_OVERLAP = 3;
 
-    public _PolyhedralBoundedSolidHalfEdge sector;
     public InfinitePlane referencePlane;
-    public int cl;
 
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
-    public boolean isWide = false;
-    public Vector3Dd position;
-    public int situation = UNDEFINED;
     public boolean reverse = false;
     public int coplanarRelation = COPLANAR_UNKNOWN;
 

@@ -10,6 +10,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.VSDKFatalException;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
@@ -1084,8 +1085,8 @@ public final class PolyhedralBoundedSolidTopologyEditing
                     if ( nedges > 2 ) break;
 
                     if ( he == null ) {
-                        Logger.reportMessage(solid, VSDK.FATAL_ERROR, "maximizeFaces",
-                            "Inconsistent model! Null HalfEdge. Check.");
+                        throw new VSDKFatalException(
+                "maximizeFaces: Inconsistent model! Null HalfEdge. Check.");
                     }
 
                     heMirror = he.mirrorHalfEdge();
@@ -1096,8 +1097,8 @@ public final class PolyhedralBoundedSolidTopologyEditing
 
                     he = heMirror.next();
                     if ( he == null ) {
-                        Logger.reportMessage(solid, VSDK.FATAL_ERROR, "maximizeFaces",
-                            "Inconsistent model! HalfEdge without next. Check.");
+                        throw new VSDKFatalException(
+                "maximizeFaces: Inconsistent model! HalfEdge without next. Check.");
                     }
                     j++;
                 } while ( he != heStart );

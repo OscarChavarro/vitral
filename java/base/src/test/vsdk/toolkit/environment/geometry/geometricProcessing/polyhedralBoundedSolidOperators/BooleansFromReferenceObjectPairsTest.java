@@ -1,16 +1,11 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.environment.geometry.volume.Cone;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -102,30 +97,19 @@ class BooleansFromReferenceObjectPairsTest
         assertThat(actual).isEqualTo(expected);
     }
 
-    @Disabled("`CSG_KURLANDER_BOWL` is marked as failing (❌) in the current legacy matrix and remains pending explicit revalidation")
-    @Test
-    void given_csgKurlanderBowl_when_buildingReferenceSolid_then_topologySummaryMatchesReference()
+    /**
+    Prints the summaries of every reference pair and single object as Java
+    literals, to refresh the hardcoded expectations after an intentional
+    baseline change. Not a test: run it with the test classpath.
+    */
+    public static void main(String[] args)
     {
-        // Arrange
-
-        // Action
-        PolyhedralBoundedSolid result = createCsgKurlanderBowlReference();
-        TopologicalSummary actual = TopologicalSummary.from(result);
-        TopologicalSummary expected = expectedKurlanderBowlSummary();
-
-        // Assert
-        assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateIntermediate(result)).isTrue();
-        assertThat(actual).isEqualTo(expected);
+        new BooleansFromReferenceObjectPairsTest()
+            .dumpReferenceSummariesForBaselineRefresh();
     }
 
-    @Disabled("Utility snapshot for refreshing hardcoded expected summaries after intentional baseline updates")
-    @Test
-    void dumpReferenceSummariesForBaselineRefresh()
+    private void dumpReferenceSummariesForBaselineRefresh()
     {
-        // Arrange
-
-        // Action
         legacyPassingReferencePairs().forEach(arguments -> {
             Object[] args = arguments.get();
             CsgSampleCorpus sample = (CsgSampleCorpus)args[0];
@@ -141,17 +125,11 @@ class BooleansFromReferenceObjectPairsTest
         PolyhedralBoundedSolid lamp = createCsgLampShellReference();
         PolyhedralBoundedSolid featured =
             SimpleTestGeometryLibrary.createTestObjectAPPE1967_3();
-        PolyhedralBoundedSolid kurlander = createCsgKurlanderBowlReference();
 
         System.out.println("CSG_LAMP_SHELL => " +
             TopologicalSummary.from(lamp).toLiteral());
         System.out.println("FEATURED_OBJECT => " +
             TopologicalSummary.from(featured).toLiteral());
-        System.out.println("CSG_KURLANDER_BOWL => " +
-            TopologicalSummary.from(kurlander).toLiteral());
-
-        // Assert
-        // TODO: Add assertions once this utility test is converted into a deterministic baseline check.
     }
 
     private PolyhedralBoundedSolid
@@ -339,7 +317,6 @@ class BooleansFromReferenceObjectPairsTest
     private static TopologicalSummary expectedMANT1988_3DifferenceBA() { return TopologicalSummary.of(1, 8, 18, 12, 8, 0, 2, new int[] {8}, new int[] {1, 1, 1, 1, 1, 1, 1, 1}, new int[] {4, 4, 4, 4, 4, 4, 6, 6}, new long[] {390000L, -160000L, 230000L, 970000L, 260000L, 410000L}); }
     private static TopologicalSummary expectedLampShellSummary() { return TopologicalSummary.of(1, 13, 24, 14, 14, 1, 3, new int[] {13}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2}, new int[] {3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4}, new long[] {300000L, 116987L, 50000L, 1050000L, 983013L, 850000L}); }
     private static TopologicalSummary expectedFeaturedObjectSummary() { return TopologicalSummary.of(2, 32, 84, 54, 34, 2, 2, new int[] {16, 16}, new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2}, new int[] {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 8, 8, 8, 8, 10, 10}, new long[] {0L, 0L, 0L, 1000000L, 1000000L, 1000000L}); }
-    private static TopologicalSummary expectedKurlanderBowlSummary() { return TopologicalSummary.placeholder("CSG_KURLANDER_BOWL"); }
 
     // -----------------------------------------------------------------
     // Local builders for reference single objects
@@ -387,10 +364,6 @@ class BooleansFromReferenceObjectPairsTest
         return solid;
     }
 
-    private static PolyhedralBoundedSolid createCsgKurlanderBowlReference()
-    {
-        return KurlanderBowlBuilder.create();
-    }
 
     private enum ReferenceBooleanOperation
     {
@@ -409,7 +382,6 @@ class BooleansFromReferenceObjectPairsTest
 
     static final class TopologicalSummary
     {
-        private final String placeholderLabel;
         final int shellCount;
         private final int faceCount;
         private final int edgeCount;
@@ -421,22 +393,6 @@ class BooleansFromReferenceObjectPairsTest
         private final int[] loopsPerFaceSorted;
         private final int[] verticesPerLoopSorted;
         private final long[] minMaxMicrounits;
-
-        private TopologicalSummary(String placeholderLabel)
-        {
-            this.placeholderLabel = placeholderLabel;
-            shellCount = -1;
-            faceCount = -1;
-            edgeCount = -1;
-            vertexCount = -1;
-            loopCount = -1;
-            multiLoopFaceCount = -1;
-            eulerCharacteristic = -1;
-            shellFaceCountsSorted = new int[0];
-            loopsPerFaceSorted = new int[0];
-            verticesPerLoopSorted = new int[0];
-            minMaxMicrounits = new long[0];
-        }
 
         private TopologicalSummary(int shellCount,
                                    int faceCount,
@@ -450,7 +406,6 @@ class BooleansFromReferenceObjectPairsTest
                                    int[] verticesPerLoopSorted,
                                    long[] minMaxMicrounits)
         {
-            placeholderLabel = null;
             this.shellCount = shellCount;
             this.faceCount = faceCount;
             this.edgeCount = edgeCount;
@@ -462,11 +417,6 @@ class BooleansFromReferenceObjectPairsTest
             this.loopsPerFaceSorted = loopsPerFaceSorted;
             this.verticesPerLoopSorted = verticesPerLoopSorted;
             this.minMaxMicrounits = minMaxMicrounits;
-        }
-
-        static TopologicalSummary placeholder(String label)
-        {
-            return new TopologicalSummary(label);
         }
 
         static TopologicalSummary of(int shellCount,
@@ -633,13 +583,6 @@ class BooleansFromReferenceObjectPairsTest
 
             TopologicalSummary that = (TopologicalSummary)other;
 
-            if ( this.placeholderLabel != null || that.placeholderLabel != null ) {
-                throw new IllegalStateException(
-                    "Missing hardcoded reference summary: " +
-                    (this.placeholderLabel != null ? this.placeholderLabel
-                        : that.placeholderLabel));
-            }
-
             return shellCount == that.shellCount &&
                 faceCount == that.faceCount &&
                 edgeCount == that.edgeCount &&
@@ -656,10 +599,6 @@ class BooleansFromReferenceObjectPairsTest
         @Override
         public int hashCode()
         {
-            if ( placeholderLabel != null ) {
-                return placeholderLabel.hashCode();
-            }
-
             int result = shellCount;
             result = 31 * result + faceCount;
             result = 31 * result + edgeCount;
@@ -677,10 +616,6 @@ class BooleansFromReferenceObjectPairsTest
         @Override
         public String toString()
         {
-            if ( placeholderLabel != null ) {
-                return "TopologicalSummary{placeholder=" + placeholderLabel + "}";
-            }
-
             return "TopologicalSummary{" +
                 "shellCount=" + shellCount +
                 ", faceCount=" + faceCount +
@@ -694,167 +629,6 @@ class BooleansFromReferenceObjectPairsTest
                 ", verticesPerLoopSorted=" + Arrays.toString(verticesPerLoopSorted) +
                 ", minMaxMicrounits=" + Arrays.toString(minMaxMicrounits) +
                 '}';
-        }
-    }
-
-    private static final class KurlanderBowlBuilder
-    {
-        private static final int CYLINDER_SIDES = 30;
-        private static final double OBJECT_SCALE = 0.1;
-
-        private KurlanderBowlBuilder()
-        {
-        }
-
-        private static double s(double value)
-        {
-            return value * OBJECT_SCALE;
-        }
-
-        private static PolyhedralBoundedSolid booleanOp(
-            PolyhedralBoundedSolid a, PolyhedralBoundedSolid b, int op)
-        {
-            return PolyhedralBoundedSolidModeler.setOp(a, b, op, false);
-        }
-
-        private static PolyhedralBoundedSolid createSphere(double radius,
-                                                           Vector3Dd center)
-        {
-            PolyhedralBoundedSolid solid = new Sphere(radius)
-                .exportToPolyhedralBoundedSolid();
-            Matrix4x4d t = new Matrix4x4d();
-            t = t.translation(center);
-            PolyhedralBoundedSolidModeler.applyTransformation(solid, t);
-            return solid;
-        }
-
-        private static PolyhedralBoundedSolid createCylinder(double radius,
-                                                             double height,
-                                                             Vector3Dd translation)
-        {
-            Cone cylinder = new Cone(radius, radius, height);
-            PolyhedralBoundedSolid solid =
-                cylinder.exportToPolyhedralBoundedSolid(CYLINDER_SIDES, 1);
-
-            Matrix4x4d move = new Matrix4x4d();
-            move = move.translation(translation);
-            PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
-            return solid;
-        }
-
-        private static PolyhedralBoundedSolid createExtrudedPolygon(
-            Vector3Dd[] points, double thickness)
-        {
-            PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
-            int i;
-            PolyhedralBoundedSolidEulerOperators.mvfs(solid, points[0], 1, 1);
-            for ( i = 1; i < points.length; i++ ) {
-                PolyhedralBoundedSolidEulerOperators.smev(solid, 1, i, i + 1, points[i]);
-            }
-            PolyhedralBoundedSolidEulerOperators.smef(solid, 1, points.length, 1, 2);
-
-            Matrix4x4d t = new Matrix4x4d();
-            t = t.translation(0.0, 0.0, thickness);
-            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
-                solid, solid.findFace(1), t);
-            return solid;
-        }
-
-        private static PolyhedralBoundedSolid createStar()
-        {
-            int n = 10;
-            double outerR = s(2.0);
-            double innerR = s(0.77);
-            double start = Math.toRadians(-90.0);
-            Vector3Dd[] points = new Vector3Dd[n];
-            int i;
-
-            for ( i = 0; i < n; i++ ) {
-                double a = start + i * Math.PI / 5.0;
-                double r = (i % 2 == 0) ? outerR : innerR;
-                points[i] = new Vector3Dd(r * Math.cos(a), r * Math.sin(a), 0.0);
-            }
-
-            return createExtrudedPolygon(points, s(5.5));
-        }
-
-        private static PolyhedralBoundedSolid createMoon()
-        {
-            PolyhedralBoundedSolid a = createCylinder(
-                s(1.5), s(5.0), new Vector3Dd(0, 0, 0));
-            PolyhedralBoundedSolid b = createCylinder(
-                s(1.5), s(5.0), new Vector3Dd(s(1.1), 0, s(0.6)));
-            return booleanOp(a, b, PolyhedralBoundedSolidModeler.SUBTRACT);
-        }
-
-        private static PolyhedralBoundedSolid placeMotif(
-            PolyhedralBoundedSolid motif, double z, double azimuthDeg)
-        {
-            Matrix4x4d t = new Matrix4x4d();
-            Matrix4x4d ry = new Matrix4x4d();
-            Matrix4x4d rz = new Matrix4x4d();
-            Matrix4x4d m;
-
-            t = t.translation(s(6.0), 0.0, s(z));
-            ry = ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
-            rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
-            m = rz.multiply(ry.multiply(t));
-            PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
-            return motif;
-        }
-
-        private static PolyhedralBoundedSolid create()
-        {
-            PolyhedralBoundedSolid outer = createSphere(
-                s(10.0), new Vector3Dd(0, 0, s(10.0)));
-            PolyhedralBoundedSolid inner = createSphere(
-                s(9.5), new Vector3Dd(0, 0, s(10.0)));
-            PolyhedralBoundedSolid shell = booleanOp(
-                outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
-
-            int i;
-            for ( i = 1; i <= 4; i++ ) {
-                double base = -90.0 * i;
-                shell = booleanOp(shell,
-                    placeMotif(createMoon(), 4.0, base),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createMoon(), 14.0, base),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createMoon(), 11.5, base - 22.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createMoon(), 9.0, base - 45.0),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createMoon(), 6.5, base - 67.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-            }
-
-            for ( i = 1; i <= 4; i++ ) {
-                double base = -90.0 * i;
-                shell = booleanOp(shell,
-                    placeMotif(createStar(), 9.0, base),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createStar(), 6.5, base - 22.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createStar(), 14.0, base - 45.0),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createStar(), 4.0, base - 45.0),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-                shell = booleanOp(shell,
-                    placeMotif(createStar(), 11.5, base - 67.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT);
-            }
-
-            PolyhedralBoundedSolid guide = createCylinder(
-                s(10.5), s(16.5), new Vector3Dd(0, 0, 0));
-            return booleanOp(shell, guide,
-                PolyhedralBoundedSolidModeler.INTERSECTION);
         }
     }
 }

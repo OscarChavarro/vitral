@@ -84,7 +84,7 @@ class KurlanderBowlMotifSweepRegressionTest
 
             try {
                 _PolyhedralBoundedSolidSetNullEdgesConnector
-                    .lastCurveReport = null;
+                    .clearLastCurveReport();
                 result = PolyhedralBoundedSolidModeler.setOp(
                     operands[0], operands[1],
                     PolyhedralBoundedSolidModeler.SUBTRACT, false);
@@ -160,7 +160,7 @@ class KurlanderBowlMotifSweepRegressionTest
             }
             _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
                 curveReport = _PolyhedralBoundedSolidSetNullEdgesConnector
-                    .lastCurveReport;
+                    .getLastCurveReport();
             System.out.println("[SWEEP-" + status + "] " + tag +
                 " motif=" + motif + detail +
                 (curveReport == null ? "" : " | " + curveReport.summarize()));

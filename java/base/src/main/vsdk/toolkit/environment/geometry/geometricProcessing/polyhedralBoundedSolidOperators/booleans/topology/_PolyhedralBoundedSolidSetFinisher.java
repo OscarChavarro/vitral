@@ -31,19 +31,14 @@ final class _PolyhedralBoundedSolidSetFinisher
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_06_FINISH = 0x20;
 
-    /** §9.1 instrumentation: times the legacy-ordering fallback was taken. */
-    private static int lastLegacyFallbackCount = 0;
     /** §9.2 instrumentation: faces triangulated in the most recent finish(). */
-    private static int lastTriangulatedFaceCount = 0;
+    private static final ThreadLocal<int[]> lastTriangulatedFaceCount =
+        ThreadLocal.withInitial(() -> new int[1]);
 
-    static int getLastLegacyFallbackCount()
-    {
-        return lastLegacyFallbackCount;
-    }
 
     static int getLastTriangulatedFaceCount()
     {
-        return lastTriangulatedFaceCount;
+        return lastTriangulatedFaceCount.get()[0];
     }
 
     private static boolean isPipelineSummaryTraceEnabled()
@@ -147,7 +142,8 @@ final class _PolyhedralBoundedSolidSetFinisher
     }
 
     private static String integrationRingSummary(
-        _PolyhedralBoundedSolidFace face)
+        _PolyhedralBoundedSolidFace face,
+        _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult pairs)
     {
         if ( face == null ) {
             return "null";
@@ -163,24 +159,21 @@ final class _PolyhedralBoundedSolidSetFinisher
             " usable=" + hasUsableIntegrationRing(face) +
             " connected=" + hasCompleteHalfEdgeConnectivity(face) +
             " pair=" +
-            _PolyhedralBoundedSolidSetNullEdgesConnector
-                .getSonfaPairIndex(face) +
+            pairs.pairIndexA(face) +
             "/" +
-            _PolyhedralBoundedSolidSetNullEdgesConnector
-                .getSonfbPairIndex(face);
+            pairs.pairIndexB(face);
     }
 
     private static int sanitizePairedFaces(
         ArrayList<_PolyhedralBoundedSolidFace> sonfa,
-        ArrayList<_PolyhedralBoundedSolidFace> sonfb)
+        ArrayList<_PolyhedralBoundedSolidFace> sonfb,
+        _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult pairs)
     {
         ArrayList<_PolyhedralBoundedSolidFace> matchedA;
         ArrayList<_PolyhedralBoundedSolidFace> matchedB;
         boolean[] usedB;
         int i;
         int j;
-
-        lastLegacyFallbackCount = 0;
 
         if ( sonfa == null || sonfb == null ) {
             return 0;
@@ -199,12 +192,11 @@ final class _PolyhedralBoundedSolidSetFinisher
             if ( !validA ) {
                 tracePipelineSummary(
                     "finish sanitize skip A " +
-                    integrationRingSummary(faceA));
+                    integrationRingSummary(faceA, pairs));
                 continue;
             }
 
-            pairIndexA = _PolyhedralBoundedSolidSetNullEdgesConnector
-                .getSonfaPairIndex(faceA);
+            pairIndexA = pairs.pairIndexA(faceA);
             for ( j = 0; j < sonfb.size(); j++ ) {
                 _PolyhedralBoundedSolidFace faceB = sonfb.get(j);
                 int pairIndexB;
@@ -217,17 +209,16 @@ final class _PolyhedralBoundedSolidSetFinisher
                 if ( !validB ) {
                     tracePipelineSummary(
                         "finish sanitize skip B " +
-                        integrationRingSummary(faceB));
+                        integrationRingSummary(faceB, pairs));
                     continue;
                 }
-                pairIndexB = _PolyhedralBoundedSolidSetNullEdgesConnector
-                    .getSonfbPairIndex(faceB);
+                pairIndexB = pairs.pairIndexB(faceB);
                 if ( pairIndexA != -1 && pairIndexA == pairIndexB ) {
                     tracePipelineSummary(
                         "finish sanitize match A " +
-                        integrationRingSummary(faceA) +
+                        integrationRingSummary(faceA, pairs) +
                         " B " +
-                        integrationRingSummary(faceB));
+                        integrationRingSummary(faceB, pairs));
                     matchedA.add(faceA);
                     matchedB.add(faceB);
                     usedB[j] = true;
@@ -239,17 +230,13 @@ final class _PolyhedralBoundedSolidSetFinisher
 
         if ( matchedA.isEmpty() && !sonfa.isEmpty() &&
              sonfa.size() == sonfb.size() ) {
-            // §9.1 instrumentation: legacy ordering fallback — no pairIndex
-            // matches found. Per plan §9.1 this should not fire once Connect
-            // emits correct pairIndices. Count it so tests can assert it stays 0.
-            lastLegacyFallbackCount++;
-            Logger.reportMessage(null, VSDK.WARNING, "sanitizePairedFaces",
-                "Legacy ordering fallback taken (pairIndex matching found no "
-                + "pairs for sonfa=" + sonfa.size() + " sonfb=" + sonfb.size()
-                + "). This indicates Connect did not tag faces with pairIndex.");
-            tracePipelineSummary(
-                "finish sanitize kept legacy ordering");
-            return sonfa.size();
+            // [MANT1988] Program 15.15 pairs sonfa[i] with sonfb[i]. Connect
+            // tags every pair with its index; when none of them matches, the
+            // null faces cannot be paired and finish has nothing to glue.
+            // This used to fall back to list order; it is now an error.
+            throw new SolidOperationFailedException(
+                "finish: no null face pair matched by pair index (sonfa=" +
+                sonfa.size() + " sonfb=" + sonfb.size() + ")");
         }
 
         sonfa.clear();
@@ -425,7 +412,7 @@ final class _PolyhedralBoundedSolidSetFinisher
         int maxIterations;
         int initialCount;
 
-        lastTriangulatedFaceCount = 0;
+        lastTriangulatedFaceCount.get()[0] = 0;
         i = 0;
         safetyCount = 0;
         initialCount = solid.getPolygonsList().size();
@@ -567,7 +554,7 @@ final class _PolyhedralBoundedSolidSetFinisher
                     newFaceId) == null ) {
                 i++;
             } else {
-                lastTriangulatedFaceCount++;
+                lastTriangulatedFaceCount.get()[0]++;
             }
         }
     }
@@ -583,7 +570,8 @@ final class _PolyhedralBoundedSolidSetFinisher
         int op,
         int debugFlags,
         ArrayList<_PolyhedralBoundedSolidFace> sonfa,
-        ArrayList<_PolyhedralBoundedSolidFace> sonfb)
+        ArrayList<_PolyhedralBoundedSolidFace> sonfb,
+        _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult pairs)
     {
         int i;
         int inda;
@@ -603,10 +591,7 @@ final class _PolyhedralBoundedSolidSetFinisher
             " sonfa=" + sonfa.size() +
             " sonfb=" + sonfb.size());
 
-        int oldsize = sanitizePairedFaces(sonfa, sonfb);
-        // §11 fail-fast precondition failed: MANT1988_15_1 B-A fires the legacy
-        // fallback (count>0) while still producing a valid result. The throw was
-        // removed to preserve passing tests. Track via getLastLegacyFallbackCount().
+        int oldsize = sanitizePairedFaces(sonfa, sonfb, pairs);
         inda = (op == INTERSECTION) ? sonfa.size() : 0;
         indb = (op == UNION) ? 0 : sonfb.size();
 

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.VSDKFatalException;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -156,19 +157,16 @@ public final class PolyhedralBoundedSolidEulerOperators
     public static void kvfs(PolyhedralBoundedSolid solid)
     {
         if ( solid.getPolygonsList().size() != 1 ) {
-            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
-            "Not skeletal solid, not having exactly one loop!");
-            return;
+            throw new VSDKFatalException(
+                "kvfs: Not skeletal solid, not having exactly one loop!");
         }
         if ( solid.getEdgesList().size() != 0 ) {
-            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
-            "Not skeletal solid, having some edges!");
-            return;
+            throw new VSDKFatalException(
+                "kvfs: Not skeletal solid, having some edges!");
         }
         if ( solid.getVerticesList().size() != 1 ) {
-            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
-            "Not skeletal solid, not having exactly one vertex !");
-            return;
+            throw new VSDKFatalException(
+                "kvfs: Not skeletal solid, not having exactly one vertex !");
         }
         solid.getPolygonsList().remove(0);
         solid.getVerticesList().remove(0);
@@ -207,9 +205,8 @@ public final class PolyhedralBoundedSolidEulerOperators
         }
         if ( he1.startingVertex != he2.startingVertex ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lmev",
-            "Half-edges not starting at the same vertex. Not supported case!");
-            return;
+            throw new VSDKFatalException(
+                "lmev: Half-edges not starting at the same vertex. Not supported case!");
         }
         if ( he1 == he2 ) {
             PolyhedralBoundedSolidStatistics.recordHe1EqualsHe2Case();
@@ -376,15 +373,13 @@ public final class PolyhedralBoundedSolidEulerOperators
         PolyhedralBoundedSolidStatistics.recordLkefCall();
         if ( he1.parentEdge != he2.parentEdge ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkef",
-            "Given half-edges must lie over the same edge. Operation aborted.");
-            return;
+            throw new VSDKFatalException(
+                "lkef: Given half-edges must lie over the same edge. Operation aborted.");
         }
         if ( he1.parentLoop.parentFace == he2.parentLoop.parentFace ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkef",
-            "Given half-edges must belong to different faces. Operation aborted.");
-            return;
+            throw new VSDKFatalException(
+                "lkef: Given half-edges must belong to different faces. Operation aborted.");
         }
 
         _PolyhedralBoundedSolidEdge edgeToBeKilled;

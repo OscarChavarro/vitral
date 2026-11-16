@@ -57,7 +57,7 @@ comes from the Chapter 15 pipeline or from one of its preflights.
 | MANT1988_15_2_HOLED + B-A | ✅ | `normal-pipeline` |
 | CSG_LAMP_SHELL | ✅ | not measured (composite model) |
 | FEATURED_OBJECT | ✅ | not measured (composite model) |
-| CSG_KURLANDER_BOWL | ❌ | — |
+| CSG_KURLANDER_BOWL | ✅ | not measured (composite model: 82 booleans, one shell of genus 40; `CsgKurlanderBowlFullModelTest`, slow) |
 
 ⚠️ means the operation has no manifold answer and the default `setOp`
 rejects it. `CROSS_PAIR` A−B: the two remaining pieces of A touch B's

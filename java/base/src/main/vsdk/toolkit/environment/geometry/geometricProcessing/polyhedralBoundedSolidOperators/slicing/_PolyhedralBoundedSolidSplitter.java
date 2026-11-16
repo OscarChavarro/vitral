@@ -29,25 +29,9 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 This class is used to store vertex / halfedge neigborhood information, as presented
 in section [MANT1988].14.5, and program [MANT1988].14.3.
 */
-class _PolyhedralBoundedSolidSplitterSectorClassification extends _PolyhedralBoundedSolidOperator
+class _PolyhedralBoundedSolidSplitterSectorClassification
+    extends _PolyhedralBoundedSolidSectorClassification
 {
-    public static final int ABOVE = 1;
-    public static final int BELOW = -1;
-    public static final int ON = 0;
-
-    public static final int COPLANAR_FACE = 10;
-    public static final int INPLANE_EDGE = 20;
-    public static final int CROSSING_EDGE = 30;
-    public static final int UNDEFINED = 40;
-
-    public _PolyhedralBoundedSolidHalfEdge sector;
-    public int cl;
-
-    // Following attributes are not taken from [MANT1988], and all operations
-    // on them are fine tunning options aditional to original algorithm.
-    public boolean isWide = false;
-    public Vector3Dd position;
-    public int situation = UNDEFINED;
 
     @Override
     public String toString()
@@ -286,119 +270,9 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
     */
     private static ArrayList<_PolyhedralBoundedSolidSplitterSectorClassification> getNeighborhood(_PolyhedralBoundedSolidVertex vtx, InfinitePlane inSplittingPlane)
     {
-        _PolyhedralBoundedSolidHalfEdge he;
-        Vector3Dd bisect;
-        double d;
-        _PolyhedralBoundedSolidSplitterSectorClassification c;
-
-        ArrayList<_PolyhedralBoundedSolidSplitterSectorClassification> neighborSectorsInfo;
-        neighborSectorsInfo = new ArrayList<_PolyhedralBoundedSolidSplitterSectorClassification>();
-        he = vtx.emanatingHalfEdge;
-
-        do {
-            if ( checkSplitterSectorWideness(he) ) {
-                bisect = inwardReflexBisector(he);
-                c = new _PolyhedralBoundedSolidSplitterSectorClassification();
-                c.sector = he;
-                d = inSplittingPlane.pointDistance(bisect);
-                c.cl = compareToZero(d);
-                c.isWide = true;
-                c.position = new Vector3Dd(bisect);
-                c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.CROSSING_EDGE;
-                neighborSectorsInfo.add(c);
-            }
-            c = new _PolyhedralBoundedSolidSplitterSectorClassification();
-            c.sector = he;
-            d = inSplittingPlane.pointDistance((he.next()).startingVertex.position);
-            c.cl = compareToZero(d);
-            c.isWide = false;
-            c.position = new Vector3Dd((he.next()).startingVertex.position);
-            c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.UNDEFINED;
-            neighborSectorsInfo.add(c);
-            he = (he.mirrorHalfEdge()).next();
-        } while ( he != vtx.emanatingHalfEdge );
-
-        //-----------------------------------------------------------------
-        // Extra pass, not from original [MANT1988] code
-        int i;
-
-        for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
-            c = neighborSectorsInfo.get(i);
-            if ( c.cl == _PolyhedralBoundedSolidSplitterSectorClassification.ON && c.situation == _PolyhedralBoundedSolidSplitterSectorClassification.UNDEFINED ) {
-                c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.INPLANE_EDGE;
-            }
-        }
-
-        return neighborSectorsInfo;
-    }
-
-    /**
-    The splitter needs the oriented interior angle from [MANT1988].14.5.2.
-    Boolean set operations intentionally use the legacy cross-product
-    predicate inherited from `_PolyhedralBoundedSolidOperator`; that
-    predicate treats degenerate/straight sectors as wide and is not
-    interchangeable with the splitter classification.
-    */
-    private static boolean checkSplitterSectorWideness(
-        _PolyhedralBoundedSolidHalfEdge he)
-    {
-        if ( he == null || he.parentLoop == null ||
-             he.parentLoop.parentFace == null ||
-             he.parentLoop.parentFace.getContainingPlane() == null ||
-             he.previous() == null || he.next() == null ) {
-            return true;
-        }
-
-        Vector3Dd vertex = he.startingVertex.position;
-        Vector3Dd incoming = vertex.subtract(
-            he.previous().startingVertex.position);
-        Vector3Dd outgoing = he.next().startingVertex.position.subtract(vertex);
-        Vector3Dd faceNormal =
-            he.parentLoop.parentFace.getContainingPlane().getNormal();
-
-        if ( incoming.length() <= numericContext.unitVectorTolerance() ||
-             outgoing.length() <= numericContext.unitVectorTolerance() ||
-             faceNormal.length() <= numericContext.unitVectorTolerance() ) {
-            return true;
-        }
-
-        incoming = incoming.normalized();
-        outgoing = outgoing.normalized();
-        faceNormal = faceNormal.normalized();
-
-        double signedTurn = Math.atan2(
-            faceNormal.dotProduct(incoming.crossProduct(outgoing)),
-            incoming.dotProduct(outgoing));
-        double interiorAngle = signedTurn < 0.0
-            ? 2.0 * Math.PI + signedTurn
-            : signedTurn;
-
-        return interiorAngle >
-            Math.PI + numericContext.angleTolerance();
-    }
-
-    /**
-    A point on the bisector of the reflex face corner at
-    `he.startingVertex`, inside the face. For a reflex corner the sum of the
-    two unit edge directions points out of the face, so it is negated
-    (the plain `bisector` is only right for convex corners).
-    */
-    private static Vector3Dd inwardReflexBisector(
-        _PolyhedralBoundedSolidHalfEdge he)
-    {
-        Vector3Dd v = he.startingVertex.position;
-        Vector3Dd a = he.next().startingVertex.position.subtract(v)
-            .normalized();
-        Vector3Dd b = he.previous().startingVertex.position.subtract(v)
-            .normalized();
-        Vector3Dd sum = a.add(b);
-
-        if ( sum.length() <= numericContext.unitVectorTolerance() ) {
-            // Straight angle: any inward normal works.
-            sum = he.parentLoop.parentFace.getContainingPlane().getNormal()
-                .crossProduct(a).multiply(-1.0);
-        }
-        return v.subtract(sum.multiply(0.5));
+        return _PolyhedralBoundedSolidVertexNeighborhood.classify(vtx,
+            inSplittingPlane,
+            _PolyhedralBoundedSolidSplitterSectorClassification::new);
     }
 
     /**
@@ -931,8 +805,10 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         fixNullFaces(ctx.facesToFixAbove);
         fixNullFaces(ctx.facesToFixBelow);
         cleanup(first);
+        resolvePinchedLoops(first);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(first);
         cleanup(second);
+        resolvePinchedLoops(second);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(second);
         if ( sideOf(first, inSplittingPlane) < 0 ||
              sideOf(second, inSplittingPlane) > 0 ) {
@@ -942,6 +818,132 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         }
         outSolidsAbove.addAll(separateShells(first));
         outSolidsBelow.addAll(separateShells(second));
+    }
+
+    /**
+    A plane through a reflex vertex can cut a section made of two regions
+    that touch at that vertex. Connect then closes both regions in one
+    loop that passes twice through the contact point, and the section face
+    is self-touching. Two forms appear, and each is resolved with Euler
+    operators so that every face loop is simple:
+
+    <ul>
+    <li>The loop passes twice through the <em>same</em> vertex: the piece
+    is two regions joined only at that vertex. {@code lmev} splits the
+    vertex between the two half-edges (the new edge, of zero length, is a
+    bridge of the loop), {@code lkemr} removes the bridge leaving two
+    rings, and {@code lmfkrh} makes the second ring a face of its own. The
+    two regions become shells that touch at a vertex position, which
+    {@link #separateShells} returns as separate solids ([MANT1988] Sec.
+    14.5.1).</li>
+    <li>The loop passes through two <em>distinct</em> vertices at the same
+    position: the piece is one manifold solid whose section has two faces
+    sharing that point. {@code lmef} splits the face with a zero-length
+    edge between them and {@code lkev} merges the two vertices.</li>
+    </ul>
+    */
+    private static void resolvePinchedLoops(PolyhedralBoundedSolid piece)
+    {
+        boolean changed = true;
+
+        while ( changed ) {
+            changed = false;
+            int f;
+            for ( f = 0; f < piece.getPolygonsList().size() && !changed;
+                  f++ ) {
+                _PolyhedralBoundedSolidFace face =
+                    piece.getPolygonsList().get(f);
+                int l;
+                for ( l = 0; l < face.boundariesList.size() && !changed;
+                      l++ ) {
+                    changed = resolveOnePinch(piece,
+                        face.boundariesList.get(l));
+                }
+            }
+        }
+    }
+
+    private static boolean resolveOnePinch(PolyhedralBoundedSolid piece,
+        _PolyhedralBoundedSolidLoop loop)
+    {
+        int n = loop.halfEdgesList.size();
+        int a;
+        int b;
+
+        if ( n < 4 ) {
+            return false;
+        }
+        for ( a = 0; a < n; a++ ) {
+            for ( b = a + 2; b < n; b++ ) {
+                if ( a == 0 && b == n - 1 ) {
+                    continue;
+                }
+                _PolyhedralBoundedSolidHalfEdge ha = loop.halfEdgesList.get(a);
+                _PolyhedralBoundedSolidHalfEdge hb = loop.halfEdgesList.get(b);
+                _PolyhedralBoundedSolidVertex va = ha.startingVertex;
+                _PolyhedralBoundedSolidVertex vb = hb.startingVertex;
+
+                if ( va == vb ) {
+                    if ( !rotatesInto(ha, hb) ) {
+                        continue;
+                    }
+                    PolyhedralBoundedSolidEulerOperators.lmev(piece, ha, hb,
+                        piece.getMaxVertexId() + 1,
+                        new Vector3Dd(va.position));
+                    // lmev put the new edge before ha and before hb, both
+                    // in this loop: it is a bridge.
+                    _PolyhedralBoundedSolidHalfEdge bridgeA = ha.previous();
+                    _PolyhedralBoundedSolidHalfEdge bridgeB = hb.previous();
+                    PolyhedralBoundedSolidEulerOperators.lkemr(piece,
+                        bridgeA, bridgeB);
+                    _PolyhedralBoundedSolidFace face = loop.parentFace;
+                    PolyhedralBoundedSolidEulerOperators.lmfkrh(piece,
+                        face.boundariesList.get(
+                            face.boundariesList.size() - 1),
+                        piece.getMaxFaceId() + 1);
+                    return true;
+                }
+                if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                         va.position, vb.position, numericContext) ) {
+                    if ( PolyhedralBoundedSolidEulerOperators.lmef(piece, ha,
+                             hb, piece.getMaxFaceId() + 1) == null ) {
+                        continue;
+                    }
+                    // lmef put the half-edge from vb before ha and the one
+                    // from va before hb; lkev keeps va.
+                    PolyhedralBoundedSolidEulerOperators.lkev(piece,
+                        ha.previous(), hb.previous());
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+    True when turning around the vertex of {@code from} (mirror, then next,
+    as lmev does) reaches {@code to}.
+    */
+    private static boolean rotatesInto(_PolyhedralBoundedSolidHalfEdge from,
+        _PolyhedralBoundedSolidHalfEdge to)
+    {
+        _PolyhedralBoundedSolidHalfEdge he = from;
+        int steps;
+
+        for ( steps = 0; steps < 1000; steps++ ) {
+            if ( he == to ) {
+                return true;
+            }
+            _PolyhedralBoundedSolidHalfEdge mirror = he.mirrorHalfEdge();
+            if ( mirror == null ) {
+                return false;
+            }
+            he = mirror.next();
+            if ( he == from ) {
+                return false;
+            }
+        }
+        return false;
     }
 
     /**

@@ -38,4 +38,7 @@ final class _SetOperationContext
 
     /** Following variable `sonfb` from program [MANT1988].15.1. */
     ArrayList<_PolyhedralBoundedSolidFace> sonfb;
+
+    /** Pair indices of the null faces, as the connect stage matched them. */
+    _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult connected;
 }

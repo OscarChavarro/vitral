@@ -282,9 +282,15 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
 
         Vector3Dd normal = new Vector3Dd(nx, ny, nz);
-        if ( normal.length() <= tolerance ) {
+        double length = normal.length();
+        if ( length <= tolerance ) {
             return null;
         }
+        // The Newell normal measures twice the area. Vector3Dd.normalized()
+        // leaves vectors shorter than VSDK.EPSILON unchanged, so a face of a
+        // model at 10^-3 got a plane with a normal of length 10^-6 and every
+        // distance to it shrank a millionfold. Normalize explicitly.
+        normal = normal.multiply(1.0 / length);
 
         Vector3Dd centroid = new Vector3Dd(cx / count, cy / count, cz / count);
         return new InfinitePlane(normal, centroid);

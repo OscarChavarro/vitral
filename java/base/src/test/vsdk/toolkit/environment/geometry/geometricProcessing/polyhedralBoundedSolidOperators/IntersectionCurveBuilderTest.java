@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 Audits {@code _PolyhedralBoundedSolidSetIntersectionCurveBuilder} (§5 of
 doc/mythosPlan.md): the reconstruction of intersection curves from the
 classifier's paired null-edge lists, captured by the connect stage in
-{@code _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport}.
+{@code _PolyhedralBoundedSolidSetNullEdgesConnector.getLastCurveReport()}.
 
 <p>Traceability: [MANT1988] §15.7 — the connect stage implicitly requires
 null edges ordered along each intersection curve; these tests make the curve
@@ -27,9 +27,9 @@ public class IntersectionCurveBuilderTest
     private static _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
     runAndReport(PolyhedralBoundedSolid a, PolyhedralBoundedSolid b, int op)
     {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport = null;
+        _PolyhedralBoundedSolidSetNullEdgesConnector.clearLastCurveReport();
         PolyhedralBoundedSolidModeler.setOp(a, b, op, false);
-        return _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport;
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.getLastCurveReport();
     }
 
     private static _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report

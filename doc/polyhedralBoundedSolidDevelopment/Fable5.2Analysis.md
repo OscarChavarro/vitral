@@ -1207,10 +1207,11 @@ TypeScript and Turbo C ports are unchanged.
 | Coplanar top and bottom, B rotated 45° | 19 / 48 | 48 / 48 | 48 / 48 | 0 |
 
 - `BooleanVolumeOracleTest`: no disabled rows left.
-- Splitter fuzz: 252 / 256.
+- Splitter fuzz: 252 / 256, 256 / 256 after the second pass (10.4).
 - Rigid-motion invariance: 31 / 36 at stage D, 36 / 36 after stage H.
-- `gradle :base:test`: 1110 tests, 0 failures, 38 skipped. The skipped
-  tests are diagnostics and legacy rows unrelated to these defects.
+- `gradle :base:test`: 1110 tests, 0 failures, 38 skipped. After the
+  second pass (10.4): 1114 tests, 0 failures, 0 skipped; `slowTest`: 8
+  tests, 0 failures.
 - Wall time: from about 4 minutes in one JVM to 34 s. The test task now
   runs up to 8 forked JVMs (`-PtestForks=N` overrides the count). Stage G
   alone took the summed class time from 250 s to 81 s, and the slowest
@@ -1218,12 +1219,10 @@ TypeScript and Turbo C ports are unchanged.
 
 ### 10.3 Still open, and found on the way
 
-1. **Splitter: pinched section loop.** 4 of the 256 fuzz planes go through
-   a reflex vertex of the L-shaped brick, so that two section regions meet
-   at that vertex inside one face. The section face comes out as one
-   self-touching loop. The volume is right, but strict validation rejects
-   the result ("self-intersecting loop"). A possible fix is to reuse
-   `splitSelfTouchingLoops` from the set operator.
+1. **Splitter: pinched section loop — closed (10.4).** 4 of the 256 fuzz
+   planes go through a reflex vertex of the L-shaped brick, so that two
+   section regions meet at that vertex inside one face. The section face
+   came out as one self-touching loop that strict validation rejected.
 2. **`CROSS_PAIR` A−B — closed (stage H).** The two remaining pieces of A
    touch the removed bar of B along one edge, so the regularised result is
    non-manifold. Following the B-04 decision ("if the two shells touch,
@@ -1246,13 +1245,14 @@ TypeScript and Turbo C ports are unchanged.
    fallback. Only `fallbacks/_PolyhedralBoundedSolidIdNamespace` remains in
    that package. The TypeScript port still carries the fallbacks until it
    is updated from the Java port.
-6. **Static state remains.** The null-edge connector keeps about 13 static
-   fields, several classes keep `debugFlags`, and the id counters are
-   global. The public operations of `PolyhedralBoundedSolidModeler` are
-   serialized on one lock: they are thread-safe but not concurrent. Test
-   parallelism therefore comes from separate JVMs.
-7. **Input validation.** A failed `validateBooleanInputs` is still only a
-   warning.
+6. **Static state — reduced (10.4).** The null-edge connector keeps its
+   working state in the instance. The numeric context, the id namespace,
+   `debugFlags` and the element id counters are still global, so the
+   public operations of `PolyhedralBoundedSolidModeler` stay serialized on
+   one lock: thread-safe but not concurrent. Test parallelism comes from
+   separate JVMs.
+7. **Input validation — closed (10.4).** A failed `validateBooleanInputs`
+   throws `InvalidOperandException`.
 8. **Behaviour changes for callers.**
    - `split` no longer returns its input, and above/below were swapped
      before. Pieces on one side that touch each other come out as separate
@@ -1263,6 +1263,68 @@ TypeScript and Turbo C ports are unchanged.
 The fuzz harness, the oracle and the gates are what made items 1 to 5
 visible. In Section 1 the same defects would have been silent or masked by
 a fallback.
+
+### 10.4 Second pass: the eleven pending items (2026-11-16)
+
+| # | Item | Result |
+|---|---|---|
+| 1 | Splitter, pinched section | Closed. `resolvePinchedLoops` runs after the cleanup of each piece: a loop through the same vertex twice is split with `lmev`, `lkemr` and `lmfkrh`; two distinct coincident vertices with `lmef` and `lkev`. Then `separateShells` separates pieces that touch. Split fuzz 256 / 256. |
+| 2 | Oracle beyond boxes | Done. `CompositeShapeOracle` (exact volume of unions and differences of boxes, by inclusion-exclusion over convex cells) and `BooleanCompositeOracleFuzz`: L, U, stepped and genus-1 operands, axis-aligned, rotated, at 10⁻³ and 10³, with coplanar bottoms, and chains of three booleans. Ratchet: `BooleanCompositeOracleFuzzGateTest`. See below. |
+| 3 | Root cause of the ring rescue | Found. The second `lmef` of `join` never redistributed the rings of the face it divides, and `laringmv` moved every ring. A ring whose point lies clearly inside one half only (parity test, clearance above the tolerance) now goes to that half ([MANT1988] 13.5); ambiguous rings keep the legacy rule. The rescue fires 0 times over the corpus and the box fuzz (10 before). It is still needed for non-convex faces, where pending struts sit on the dividing chord. |
+| 4 | Legacy finish ordering | Removed. A null face without a pair throws. |
+| 5 | Invalid input | `InvalidOperandException` when `validateBooleanInputs` fails. |
+| 6 | `FATAL_ERROR` sites | The 11 reports throw `VSDKFatalException`, wrapped as `SolidOperationFailedException`. |
+| 7 | Disabled tests | 38 skipped → 0 (see below). |
+| 8 | `STACKED_BLOCKS` preflight | Kept, as the "no proper intersection" case of [MANT1988] 15.4 plus the lamina policy. |
+| 9 | Static state | Reduced. The connector's working state is per instance, its diagnostics per thread; the curve builder returns the curve neighbours instead of storing them; the unused test-only order injection was removed. `SetOpReentrancyTest`: a boolean that throws does not change the next one. The lock stays (item 6 of 10.3). |
+| 10 | 2D boolean for coplanar faces | Not implemented. The coplanar-bottoms family fails at the rate of the rotated family and on the same shapes (frames with a hole, L/U), so the dominant defect is the connect stage on non-convex faces, which a 2D boolean would not fix. |
+| 11 | Splitter and vertex/face classifier | Shared neighbourhood. `_PolyhedralBoundedSolidVertexNeighborhood` builds the classified neighbourhood for both ([MANT1988] 14.4, problem 15.4) with one reflex test and one bisector sample; `_PolyhedralBoundedSolidSectorClassification` holds the common fields. The reclassification rules stay separate: 14.5 for the splitter, table 15.3 for the set operations. |
+
+**Scale.** The non-convex oracle showed that tolerances were absolute
+below unit size: the 10⁻³ family gave 3 / 72. Fixed: the numeric policy
+scales down to 10⁻⁹ (`MIN_SCALE` was 1); face planes are normalized
+explicitly (`Vector3Dd.normalized()` leaves vectors shorter than
+`VSDK.EPSILON` alone, so a face at 10⁻³ had a normal of length 10⁻⁶);
+colinearity, the sector test of program 15.9, `checkWideness` and the 2D
+orientation tolerance compare angles, not products that grow with the
+cube of the size. The three rotated families now give the same answers
+(47 / 72 each).
+
+**Composite oracle, first ratchet.**
+
+| Family (6 checks per case) | Correct |
+|---|---:|
+| Non-convex, axis-aligned | 72 / 72 |
+| Non-convex, rotated (also at 10⁻³ and 10³) | 47 / 72 |
+| Chains `(A∪B)\C`, `(A∩B)∪C`, `A\(B∪C)` | 23 / 36 |
+| Non-convex, coplanar bottoms | 46 / 72 |
+
+In general position a non-manifold rejection counts as a failure: those
+results had coincident, unjoined vertices and volumes far from the
+oracle. The failures are open defects of the connect stage on non-convex
+faces (loose pairs that join the wrong chords; strut rings on a dividing
+chord).
+
+**Also fixed on the way.**
+
+- `sectoroverlap` tested one end of the angular intervals only; B entirely
+  on the negative side of A counted as overlap.
+- Connect left isolated struts loose (both halves of one null edge, at a
+  coplanar boundary-ray contact, MANT1988_15_1 ∩ and −); they are killed
+  with `lkev` before finish, so looseA = looseB = 0 on the whole matrix.
+- The reference test of the Kurlander bowl used a stale copy of the
+  fixture that composed the motif placement in the wrong order: the
+  motifs missed the bowl. `CsgKurlanderBowlFullModelTest` (slow, about
+  3 minutes) builds the real bowl: one strict-valid shell of genus 40.
+- All 40 Kurlander motifs give OK in the four operations, so the
+  per-motif switch was removed.
+
+**Remaining skips — removed.** Three ports of C++ tests could never run
+in Java and were deleted: `CsgPlacementTest` lost the rounding-mode test
+and the rounding-mode tail of the `CsgDyadic` contract test (Java cannot
+change the rounding mode), and `ReaderMitSceneCommandsTest` lost the
+cubemap test (no JPEG decoder on the `base` classpath). The suite runs
+with no skipped test.
 
 ---
 

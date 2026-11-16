@@ -1,12 +1,10 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
 /**
 §7.3.1 diagnostic harness — captures every {@code sectoroverlap}
@@ -126,59 +124,8 @@ class SectoroverlapTraceDiagnosticTest
                 }
             }
 
-            dumpEndsLists();
             System.out.println("================================\n");
         }
     }
 
-    private static void dumpEndsLists() throws Exception
-    {
-        Field endsaField = _PolyhedralBoundedSolidSetNullEdgesConnector.class
-            .getDeclaredField("endsa");
-        endsaField.setAccessible(true);
-        Field endsbField = _PolyhedralBoundedSolidSetNullEdgesConnector.class
-            .getDeclaredField("endsb");
-        endsbField.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa =
-            (ArrayList<_PolyhedralBoundedSolidHalfEdge>)endsaField.get(null);
-        @SuppressWarnings("unchecked")
-        ArrayList<_PolyhedralBoundedSolidHalfEdge> endsb =
-            (ArrayList<_PolyhedralBoundedSolidHalfEdge>)endsbField.get(null);
-        if ( endsa != null && !endsa.isEmpty() ) {
-            System.out.println("\n  --- endsa survivors ---");
-            for ( int i = 0; i < endsa.size(); i++ ) {
-                dumpHe("endsa[" + i + "]", endsa.get(i));
-            }
-        }
-        if ( endsb != null && !endsb.isEmpty() ) {
-            System.out.println("  --- endsb survivors ---");
-            for ( int i = 0; i < endsb.size(); i++ ) {
-                dumpHe("endsb[" + i + "]", endsb.get(i));
-            }
-        }
-    }
-
-    private static void dumpHe(String label,
-                               _PolyhedralBoundedSolidHalfEdge he)
-    {
-        if ( he == null ) {
-            System.out.println("  " + label + " = null");
-            return;
-        }
-        int face = (he.parentLoop != null && he.parentLoop.parentFace != null)
-            ? he.parentLoop.parentFace.id : -1;
-        int from = he.startingVertex != null ? he.startingVertex.id : -1;
-        int to = -1;
-        if ( he.next() != null && he.next().startingVertex != null ) {
-            to = he.next().startingVertex.id;
-        }
-        String side = "?";
-        if ( he.parentEdge != null ) {
-            if ( he == he.parentEdge.rightHalf ) side = "R";
-            else if ( he == he.parentEdge.leftHalf ) side = "L";
-        }
-        System.out.println("  " + label + " face=" + face + " v=" +
-            from + "->" + to + " side=" + side);
-    }
 }

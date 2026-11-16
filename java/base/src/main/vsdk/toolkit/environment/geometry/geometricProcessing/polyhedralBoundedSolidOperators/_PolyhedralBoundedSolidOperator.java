@@ -269,14 +269,13 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         _PolyhedralBoundedSolidLoop l;
         int i;
 
-        // It is supposed to move all (internal) rings from `f1` to `f2`
-        // using PolyhedralBoundedSolid.lringmv
-        // Legacy rule: move every ring. A geometric two-face containment
-        // rule was tried here (mythosPlan Phase 3) and regressed reference
-        // flows: mid-connect loops are not simple regions (bridge edges,
-        // spikes, half-built chains), so parity containment is unreliable
-        // at this point of the pipeline. The shadow trace below records
-        // what the geometric rule would have decided, for diagnosis only.
+        // [MANT1988].13.5 moves the rings that are not inside the outer loop
+        // of `f1`. A ring clearly inside `f1` only (clearRingSide) stays;
+        // every other ring follows the legacy rule and moves to `f2`. A
+        // containment test for every ring was tried (mythosPlan Phase 3) and
+        // regressed reference flows: mid-connect loops are not simple
+        // regions and pending strut rings usually sit on the dividing chord,
+        // so only unambiguous geometry overrides the legacy rule.
         for ( i = 1; i < f1.boundariesList.size(); i++ ) {
         l = f1.boundariesList.get(i);
             if ( l == keep ) {
@@ -286,6 +285,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
                 traceRingMoveShadowDecision(f1, f2, l,
                     "laringmv MOVE wouldMove="
                     + ringBelongsToOtherHalf(f1, f2, l));
+            }
+            if ( clearRingSide(f1, f2, l) == 1 ) {
+                continue;
             }
             if ( PolyhedralBoundedSolidEulerOperators.lringmv(f1.parentSolid, l, f2, false) ) {
                 i--;
@@ -355,6 +357,73 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         }
         // Outside both (on the dividing boundary or degenerate): legacy.
         return true;
+    }
+
+    /**
+    Side of a face division on which a ring clearly lies: 1 when its
+    representative point is inside the outer loop of `f1` only, 2 when
+    inside that of `f2` only, both times farther than the tolerance from
+    either outer loop; 0 otherwise (ambiguous: the caller keeps its legacy
+    rule). A ring clearly inside one region cannot belong to the other,
+    whatever the shape of the loops in the middle of the connect stage.
+    */
+    private static int clearRingSide(_PolyhedralBoundedSolidFace f1,
+        _PolyhedralBoundedSolidFace f2, _PolyhedralBoundedSolidLoop l)
+    {
+        if ( f1 == null || f2 == null || l == null ||
+             l.boundaryStartHalfEdge == null ||
+             l.boundaryStartHalfEdge.startingVertex == null ||
+             f1.boundariesList.size() == 0 ||
+             f2.boundariesList.size() == 0 ||
+             f1.boundariesList.get(0) == l ||
+             f2.boundariesList.get(0) == l ) {
+            return 0;
+        }
+        Vector3Dd point = l.boundaryStartHalfEdge.startingVertex.position;
+        double tolerance = PolyhedralBoundedSolidNumericPolicy
+            .forSolid(f1.parentSolid).bigEpsilon();
+        if ( outerLoopClearance(f1, point) <= tolerance ||
+             outerLoopClearance(f2, point) <= tolerance ) {
+            return 0;
+        }
+        Boolean in1 = outerLoopParityContains(f1, point);
+        Boolean in2 = outerLoopParityContains(f2, point);
+        if ( in1 == null || in2 == null ||
+             in1.booleanValue() == in2.booleanValue() ) {
+            return 0;
+        }
+        return in1.booleanValue() ? 1 : 2;
+    }
+
+    /** Distance from `point` to the outer loop of `f` (3D segments). */
+    private static double outerLoopClearance(_PolyhedralBoundedSolidFace f,
+        Vector3Dd point)
+    {
+        _PolyhedralBoundedSolidLoop outer = f.boundariesList.get(0);
+        _PolyhedralBoundedSolidHalfEdge start = outer.boundaryStartHalfEdge;
+        if ( start == null ) {
+            return 0.0;
+        }
+        double best = Double.MAX_VALUE;
+        _PolyhedralBoundedSolidHalfEdge he = start;
+        int guard = 0;
+        do {
+            _PolyhedralBoundedSolidHalfEdge next = he.next();
+            if ( next == null ) {
+                return 0.0;
+            }
+            Vector3Dd a = he.startingVertex.position;
+            Vector3Dd ab = next.startingVertex.position.subtract(a);
+            double len2 = ab.dotProduct(ab);
+            double t = len2 > 0.0 ?
+                point.subtract(a).dotProduct(ab) / len2 : 0.0;
+            t = Math.max(0.0, Math.min(1.0, t));
+            best = Math.min(best,
+                point.subtract(a.add(ab.multiply(t))).length());
+            he = next;
+            guard++;
+        } while ( he != start && guard < 100000 );
+        return best;
     }
 
     /**
@@ -706,11 +775,13 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
             int fid2 = (idNamespace != null)
                 ? idNamespace.nextFaceId(s)
                 : s.getMaxFaceId() + 1;
-            // Shadow diagnostics (mythosPlan Phase 3): capture which face
-            // the second division splits and the face it creates, so the
-            // rings that are never redistributed across this division stay
-            // observable. Applying laringmv here was tried and regressed
-            // MOON_BLOCK reference cases — behavior stays legacy.
+            // The second division used to leave every ring in the face it
+            // splits. That stranded strut rings far from their junction
+            // partners, which the connector then had to rescue (pending item
+            // 3 of Fable5.2Analysis.md). Moving every ring regressed
+            // MOON_BLOCK; moving only rings that clearly lie in the new half
+            // (below) removed every rescue of the reference corpus and the
+            // box fuzz.
             _PolyhedralBoundedSolidFace splitFace2 =
                 h2.parentLoop.parentFace;
             _PolyhedralBoundedSolidFace newFace2 =
@@ -730,6 +801,20 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
                         "lmef2 KEEP wouldMove=" + ringBelongsToOtherHalf(
                             splitFace2, newFace2,
                             splitFace2.boundariesList.get(shadowI)));
+                }
+            }
+            // Rings of the face divided by the second lmef that clearly lie
+            // in the new half follow it ([MANT1988].13.5).
+            if ( splitFace2 != null && newFace2 != null ) {
+                int k;
+                for ( k = 1; k < splitFace2.boundariesList.size(); k++ ) {
+                    _PolyhedralBoundedSolidLoop ring =
+                        splitFace2.boundariesList.get(k);
+                    if ( clearRingSide(splitFace2, newFace2, ring) == 2 &&
+                         PolyhedralBoundedSolidEulerOperators.lringmv(s,
+                             ring, newFace2, false) ) {
+                        k--;
+                    }
                 }
             }
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {
@@ -775,7 +860,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         ref2 = he.next().startingVertex.position.subtract(
             he.startingVertex.position);
         ref12 = ref1.crossProduct(ref2);
-        if ( ref12.length() < VSDK.EPSILON ) {
+        // Collinear edges: |ref1 x ref2| is |ref1| |ref2| sin(angle), so the
+        // test compares the sine, not an area that shrinks with the model.
+        if ( ref12.length() < VSDK.EPSILON * ref1.length() * ref2.length() ) {
             return true;
         }
         return ref12.dotProduct(

@@ -112,7 +112,8 @@ final class _PolyhedralBoundedSolidSetIntersector
             return null;
         }
 
-        tolerance = Math.max(numericContext.bigEpsilon() * 2.0, 1.0e-7);
+        tolerance = Math.max(numericContext.bigEpsilon() * 2.0,
+            1.0e-7 * numericContext.modelScale());
         for ( i = 0; i < face.boundariesList.size(); i++ ) {
             _PolyhedralBoundedSolidHalfEdge start;
             _PolyhedralBoundedSolidHalfEdge current;
