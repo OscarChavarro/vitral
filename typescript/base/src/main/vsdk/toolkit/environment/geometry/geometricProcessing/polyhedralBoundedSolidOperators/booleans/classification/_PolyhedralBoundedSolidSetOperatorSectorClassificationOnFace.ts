@@ -2,10 +2,9 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-import type { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
 import type { InfinitePlane } from "../../../../surface/InfinitePlane.js";
-import type { _PolyhedralBoundedSolidHalfEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
 import { _PolyhedralBoundedSolidOperator } from "../../_PolyhedralBoundedSolidOperator.js";
+import { _PolyhedralBoundedSolidSectorClassification } from "../../_PolyhedralBoundedSolidSectorClassification.js";
 
 /**
 This class is used to store vertex / halfedge neigborhood information for the
@@ -14,11 +13,7 @@ vertex/face classifier, in a similar fashion to as presented in section
 operation algorithm as proposed on section [MANT1988].15..1. and problem
 [MANT1988].15.4.
 */
-export class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extends _PolyhedralBoundedSolidOperator {
-    public static readonly ABOVE = 1;
-    public static readonly BELOW = -1;
-    public static readonly ON = 0;
-
+export class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extends _PolyhedralBoundedSolidSectorClassification {
     public static readonly AinB = 11;
     public static readonly AoutB = 12;
     public static readonly BinA = 13;
@@ -28,25 +23,15 @@ export class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extend
     public static readonly BonAplus = 17;
     public static readonly BonAminus = 18;
 
-    public static readonly COPLANAR_FACE = 10;
-    public static readonly INPLANE_EDGE = 20;
-    public static readonly CROSSING_EDGE = 30;
-    public static readonly UNDEFINED = 40;
-
     public static readonly COPLANAR_UNKNOWN = 0;
     public static readonly COPLANAR_DISJOINT = 1;
     public static readonly COPLANAR_TOUCHING = 2;
     public static readonly COPLANAR_OVERLAP = 3;
 
-    public sector: _PolyhedralBoundedSolidHalfEdge | null = null;
     public referencePlane: InfinitePlane | null = null;
-    public cl = 0;
 
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
-    public isWide = false;
-    public position: Vector3Dd | null = null;
-    public situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
     public reverse = false;
     public coplanarRelation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.COPLANAR_UNKNOWN;
 
@@ -55,7 +40,7 @@ export class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extend
         if (other !== undefined) {
             this.sector = other.sector;
             this.referencePlane = other.referencePlane;
-            this.cl = other.cl;
+            this.classification = other.classification;
             this.isWide = other.isWide;
             this.position = other.position;
             this.situation = other.situation;
@@ -72,48 +57,48 @@ export class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extend
     public applyRules(op: number): void {
         const C = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace;
         if (op === _PolyhedralBoundedSolidOperator.UNION) {
-            switch (this.cl) {
+            switch (this.classification) {
                 case C.AonBplus:
-                    this.cl = C.AoutB;
+                    this.classification = C.AoutB;
                     break;
                 case C.AonBminus:
-                    this.cl = C.AinB;
+                    this.classification = C.AinB;
                     break;
                 case C.BonAplus:
-                    this.cl = C.BinA;
+                    this.classification = C.BinA;
                     break;
                 case C.BonAminus:
-                    this.cl = C.BinA;
+                    this.classification = C.BinA;
                     break;
             }
         } else if (op === _PolyhedralBoundedSolidOperator.INTERSECTION) {
-            switch (this.cl) {
+            switch (this.classification) {
                 case C.AonBplus:
-                    this.cl = C.AinB;
+                    this.classification = C.AinB;
                     break;
                 case C.AonBminus:
-                    this.cl = C.AoutB;
+                    this.classification = C.AoutB;
                     break;
                 case C.BonAplus:
-                    this.cl = C.BoutA;
+                    this.classification = C.BoutA;
                     break;
                 case C.BonAminus:
-                    this.cl = C.BoutA;
+                    this.classification = C.BoutA;
                     break;
             }
         } else if (op === _PolyhedralBoundedSolidOperator.SUBTRACT) {
-            switch (this.cl) {
+            switch (this.classification) {
                 case C.AonBplus:
-                    this.cl = C.AinB;
+                    this.classification = C.AinB;
                     break;
                 case C.AonBminus:
-                    this.cl = C.AoutB;
+                    this.classification = C.AoutB;
                     break;
                 case C.BonAplus:
-                    this.cl = C.BoutA;
+                    this.classification = C.BoutA;
                     break;
                 case C.BonAminus:
-                    this.cl = C.BoutA;
+                    this.classification = C.BoutA;
                     break;
             }
         }
@@ -121,42 +106,42 @@ export class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extend
 
     public updateLabel(BvsA: number): void {
         const C = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace;
-        const a = this.sector!.parentLoop.parentFace.getContainingPlane()!;
+        const a = this.sector.parentLoop.parentFace.getContainingPlane()!;
         const b = this.referencePlane!;
 
         if (BvsA === 0) {
-            switch (this.cl) {
+            switch (this.classification) {
                 case C.ABOVE:
-                    this.cl = C.AoutB;
+                    this.classification = C.AoutB;
                     break;
                 case C.BELOW:
-                    this.cl = C.AinB;
+                    this.classification = C.AinB;
                     break;
                 case C.ON:
                     if (this.coplanarRelation !== C.COPLANAR_UNKNOWN && this.coplanarRelation !== C.COPLANAR_OVERLAP) {
-                        this.cl = C.AoutB;
+                        this.classification = C.AoutB;
                     } else if (a.overlapsWith(b, _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon())) {
-                        this.cl = C.AonBplus;
+                        this.classification = C.AonBplus;
                     } else {
-                        this.cl = C.AonBminus;
+                        this.classification = C.AonBminus;
                     }
                     break;
             }
         } else {
-            switch (this.cl) {
+            switch (this.classification) {
                 case C.ABOVE:
-                    this.cl = C.BoutA;
+                    this.classification = C.BoutA;
                     break;
                 case C.BELOW:
-                    this.cl = C.BinA;
+                    this.classification = C.BinA;
                     break;
                 case C.ON:
                     if (this.coplanarRelation !== C.COPLANAR_UNKNOWN && this.coplanarRelation !== C.COPLANAR_OVERLAP) {
-                        this.cl = C.BoutA;
+                        this.classification = C.BoutA;
                     } else if (a.overlapsWith(b, _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon())) {
-                        this.cl = C.BonAplus;
+                        this.classification = C.BonAplus;
                     } else {
-                        this.cl = C.BonAminus;
+                        this.classification = C.BonAminus;
                     }
                     break;
             }
@@ -167,7 +152,7 @@ export class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace extend
         const C = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace;
         let msg = "Sector(";
         msg = msg + this.sector + " | ";
-        switch (this.cl) {
+        switch (this.classification) {
             case C.ABOVE:
                 msg = msg + " ABOVE";
                 break;

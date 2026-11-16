@@ -18,7 +18,10 @@ export class HtmlImageRenderer {
     given
     @return the canvas with the image
     */
-    public static exportToCanvas(img: Image, canvas: HTMLCanvasElement = document.createElement("canvas")): HTMLCanvasElement {
+    public static exportToCanvas(
+        img: Image,
+        canvas: HTMLCanvasElement = document.createElement("canvas"),
+    ): HTMLCanvasElement {
         const width: number = img.getXSize();
         const height: number = img.getYSize();
 
@@ -50,8 +53,7 @@ export class HtmlImageRenderer {
                 const source: number = (height - 1 - y) * width * 4;
                 out.set(raw.subarray(source, source + width * 4), y * width * 4);
             }
-        }
-        else if (img instanceof RGBImageUncompressed) {
+        } else if (img instanceof RGBImageUncompressed) {
             for (let y: number = 0; y < height; y++) {
                 for (let x: number = 0; x < width; x++) {
                     const p = img.getPixel(x, y);
@@ -62,8 +64,7 @@ export class HtmlImageRenderer {
                     out[i + 3] = 255;
                 }
             }
-        }
-        else {
+        } else {
             for (let y: number = 0; y < height; y++) {
                 for (let x: number = 0; x < width; x++) {
                     const p = img.getPixelRgb(x, y);

@@ -42,10 +42,18 @@ describe("RayCrossings", () => {
             tangent = new RayCrossingTestCollector(),
             clipped = new RayCrossingTestCollector(),
             zero = new RayCrossingTestCollector();
-        sphere.emitRayCrossings(new Ray(new Vector3Dd(0, 0, 0), new Vector3Dd(1, 0, 0)), new RayCrossingQuery(0, 10), inside);
+        sphere.emitRayCrossings(
+            new Ray(new Vector3Dd(0, 0, 0), new Vector3Dd(1, 0, 0)),
+            new RayCrossingQuery(0, 10),
+            inside,
+        );
         expect(inside.roots.size()).toBe(1);
         expect(inside.roots.get(0)).toBe(1);
-        sphere.emitRayCrossings(new Ray(new Vector3Dd(-2, 1, 0), new Vector3Dd(1, 0, 0)), new RayCrossingQuery(0, 10), tangent);
+        sphere.emitRayCrossings(
+            new Ray(new Vector3Dd(-2, 1, 0), new Vector3Dd(1, 0, 0)),
+            new RayCrossingQuery(0, 10),
+            tangent,
+        );
         expect(tangent.roots.size()).toBe(1);
         expect(tangent.roots.get(0)).toBe(2);
         expect(tangent.kinds.get(0)).toBe(RayCrossingKind.Tangent);
@@ -65,7 +73,9 @@ describe("RayCrossings", () => {
         const sphere = new Sphere(1);
         const ray = new Ray(new Vector3Dd(3, 0, 0), new Vector3Dd(1, 0, 0));
         const hits = new RayCrossingTestCollector();
-        expect(unsupported.emitRayCrossings(ray, new RayCrossingQuery(0, 10), hits)).toBe(RayCrossingSupport.Unsupported);
+        expect(unsupported.emitRayCrossings(ray, new RayCrossingQuery(0, 10), hits)).toBe(
+            RayCrossingSupport.Unsupported,
+        );
         expect(sphere.emitRayCrossings(ray, new RayCrossingQuery(0, 10), hits)).toBe(RayCrossingSupport.Supported);
         expect(hits.roots.isEmpty()).toBe(true);
     });
@@ -119,7 +129,9 @@ describe("BoxContract", () => {
         expect(solid.insideSegments.get(0)).toBe(false);
         const alongFace = Ray.fromAffine(new Vector3Dd(-2, 1, 0), new Vector3Dd(1, 0, 0));
         const overlap = new RayCrossingTestCollector();
-        expect(box.emitRayCrossings(alongFace, new RayCrossingQuery(0, 4), overlap)).toBe(RayCrossingSupport.Indeterminate);
+        expect(box.emitRayCrossings(alongFace, new RayCrossingQuery(0, 4), overlap)).toBe(
+            RayCrossingSupport.Indeterminate,
+        );
         expect(box.classifyRay(alongFace, new RayCrossingQuery(0, 4), solid)).toBe(RaySolidQueryStatus.Indeterminate);
         expect(solid.insideSegments.isEmpty()).toBe(true);
         expect(
@@ -171,7 +183,17 @@ describe("BoxContract", () => {
             exit = [Double.POSITIVE_INFINITY];
         const overlap = [false];
         expect(
-            Box.intersectBounds(new Vector3Dd(-4, 0, 0), new Vector3Dd(1, 0, 0), minimum, maximum, 0, true, entry, exit, overlap),
+            Box.intersectBounds(
+                new Vector3Dd(-4, 0, 0),
+                new Vector3Dd(1, 0, 0),
+                minimum,
+                maximum,
+                0,
+                true,
+                entry,
+                exit,
+                overlap,
+            ),
         ).toBe(RayFirstHitStatus.Hit);
         expect(entry[0]).toBe(2);
         expect(exit[0]).toBe(8);
@@ -194,7 +216,17 @@ describe("BoxContract", () => {
         entry[0] = Double.NEGATIVE_INFINITY;
         exit[0] = Double.POSITIVE_INFINITY;
         expect(
-            Box.intersectBounds(new Vector3Dd(-4, 3, 0), new Vector3Dd(1, 0, 0), minimum, maximum, 0, true, entry, exit, overlap),
+            Box.intersectBounds(
+                new Vector3Dd(-4, 3, 0),
+                new Vector3Dd(1, 0, 0),
+                minimum,
+                maximum,
+                0,
+                true,
+                entry,
+                exit,
+                overlap,
+            ),
         ).toBe(RayFirstHitStatus.Hit);
         expect(overlap[0]).toBe(true);
     });
@@ -232,7 +264,9 @@ describe("InfinitePlaneContract", () => {
         const coincident = Ray.fromAffine(new Vector3Dd(), new Vector3Dd(0, 1, 0));
         expect(plane.emitRayCrossings(parallel, new RayCrossingQuery(0, 4), events)).toBe(RayCrossingSupport.Supported);
         expect(events.roots.isEmpty()).toBe(true);
-        expect(plane.emitRayCrossings(coincident, new RayCrossingQuery(0, 4), events)).toBe(RayCrossingSupport.Indeterminate);
+        expect(plane.emitRayCrossings(coincident, new RayCrossingQuery(0, 4), events)).toBe(
+            RayCrossingSupport.Indeterminate,
+        );
         const invalid = new InfinitePlane(0, 0, 0, 1);
         expect(invalid.queryFirstHit(parallel, new RayCrossingQuery(0, 4), null)).toBe(RayFirstHitStatus.InvalidInput);
         const tiny = new InfinitePlane(1e-200, 0, 0, 0);
@@ -293,7 +327,9 @@ describe("PlanarHalfSpaceContract", () => {
         const half = new PlanarHalfSpace(2, 0, 0, -2);
         const leaving = Ray.fromAffine(new Vector3Dd(-3, 0, 0), new Vector3Dd(2, 0, 0));
         const crossings = new RayCrossingTestCollector();
-        expect(half.emitRayCrossings(leaving, new RayCrossingQuery(0, 4), crossings)).toBe(RayCrossingSupport.Supported);
+        expect(half.emitRayCrossings(leaving, new RayCrossingQuery(0, 4), crossings)).toBe(
+            RayCrossingSupport.Supported,
+        );
         expect(crossings.roots.size()).toBe(1);
         expect(crossings.roots.get(0)).toBe(2);
         expect(crossings.kinds.get(0)).toBe(RayCrossingKind.Leaving);
@@ -312,7 +348,9 @@ describe("PlanarHalfSpaceContract", () => {
         expect(solid.insideSegments.get(1)).toBe(false);
         const entering = Ray.fromAffine(new Vector3Dd(3, 0, 0), new Vector3Dd(-2, 0, 0));
         const opposite = new RayCrossingTestCollector();
-        expect(half.emitRayCrossings(entering, new RayCrossingQuery(0, 4), opposite)).toBe(RayCrossingSupport.Supported);
+        expect(half.emitRayCrossings(entering, new RayCrossingQuery(0, 4), opposite)).toBe(
+            RayCrossingSupport.Supported,
+        );
         expect(opposite.roots.size()).toBe(1);
         expect(opposite.roots.get(0)).toBe(1);
         expect(opposite.kinds.get(0)).toBe(RayCrossingKind.Entering);
@@ -326,21 +364,37 @@ describe("PlanarHalfSpaceContract", () => {
         const half = new PlanarHalfSpace(1, 0, 0, 0);
         const solid = new RaySolidClassification();
         expect(
-            half.classifyRay(Ray.fromAffine(new Vector3Dd(-1, 0, 0), new Vector3Dd(0, 1, 0)), new RayCrossingQuery(0, 4), solid),
+            half.classifyRay(
+                Ray.fromAffine(new Vector3Dd(-1, 0, 0), new Vector3Dd(0, 1, 0)),
+                new RayCrossingQuery(0, 4),
+                solid,
+            ),
         ).toBe(RaySolidQueryStatus.Supported);
         expect(solid.insideSegments.size()).toBe(1);
         expect(solid.insideSegments.get(0)).toBe(true);
         expect(
-            half.classifyRay(Ray.fromAffine(new Vector3Dd(1, 0, 0), new Vector3Dd(0, 1, 0)), new RayCrossingQuery(0, 4), solid),
+            half.classifyRay(
+                Ray.fromAffine(new Vector3Dd(1, 0, 0), new Vector3Dd(0, 1, 0)),
+                new RayCrossingQuery(0, 4),
+                solid,
+            ),
         ).toBe(RaySolidQueryStatus.Supported);
         expect(solid.insideSegments.size()).toBe(1);
         expect(solid.insideSegments.get(0)).toBe(false);
         expect(
-            half.classifyRay(Ray.fromAffine(new Vector3Dd(), new Vector3Dd(0, 1, 0)), new RayCrossingQuery(0, 4), solid),
+            half.classifyRay(
+                Ray.fromAffine(new Vector3Dd(), new Vector3Dd(0, 1, 0)),
+                new RayCrossingQuery(0, 4),
+                solid,
+            ),
         ).toBe(RaySolidQueryStatus.Indeterminate);
         expect(solid.insideSegments.isEmpty()).toBe(true);
         expect(
-            half.classifyRay(Ray.fromAffine(new Vector3Dd(-3, 0, 0), new Vector3Dd(1, 0, 0)), new RayCrossingQuery(0, 2), solid),
+            half.classifyRay(
+                Ray.fromAffine(new Vector3Dd(-3, 0, 0), new Vector3Dd(1, 0, 0)),
+                new RayCrossingQuery(0, 2),
+                solid,
+            ),
         ).toBe(RaySolidQueryStatus.Supported);
         expect(solid.insideSegments.size()).toBe(1);
         expect(solid.insideSegments.get(0)).toBe(true);
@@ -461,7 +515,9 @@ describe("RaySolidClassification", () => {
         const tiny = new Sphere(1e-300);
         const ray = new Ray(new Vector3Dd(0, 0, 0), new Vector3Dd(1, 0, 0));
         const result = new RaySolidClassification();
-        expect(tiny.classifyRay(ray, new RayCrossingQuery(-1e-301, 1e-301), result)).toBe(RaySolidQueryStatus.Indeterminate);
+        expect(tiny.classifyRay(ray, new RayCrossingQuery(-1e-301, 1e-301), result)).toBe(
+            RaySolidQueryStatus.Indeterminate,
+        );
         expect(result.boundaries.isEmpty()).toBe(true);
         expect(result.insideSegments.isEmpty()).toBe(true);
     });

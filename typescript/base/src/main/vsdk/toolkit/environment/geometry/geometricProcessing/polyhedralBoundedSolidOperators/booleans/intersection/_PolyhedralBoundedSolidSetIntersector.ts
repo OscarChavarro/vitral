@@ -7,6 +7,7 @@ import type { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd
 import { Geometry } from "../../../../Geometry.js";
 import type { PolyhedralBoundedSolid } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
+import { PolyhedralBoundedSolidFaceGeometry } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFaceGeometry.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import type { _PolyhedralBoundedSolidEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.js";
 import type {
@@ -155,7 +156,10 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
             return null;
         }
 
-        const faceTolerance = Math.max(_PolyhedralBoundedSolidOperator.numericContext.bigEpsilon() * 10.0, 1.0e-7);
+        const faceTolerance = Math.max(
+            _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon() * 2.0,
+            1.0e-7 * _PolyhedralBoundedSolidOperator.numericContext.modelScale(),
+        );
         for (i = 0; i < face.boundariesList.size(); i++) {
             let current: _PolyhedralBoundedSolidHalfEdge | null;
             let guard: number;
@@ -359,8 +363,11 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
 
         const v1 = e.rightHalf!.startingVertex;
         const v2 = e.leftHalf!.startingVertex;
-        d1 = f.getContainingPlane()!.pointDistance(v1.position);
-        d2 = f.getContainingPlane()!.pointDistance(v2.position);
+        // Computed once per pair (Stage G): nothing below changes face f
+        // before its last use, the snaps move vertices of the edge solid.
+        const fPlane = f.getContainingPlane()!;
+        d1 = fPlane.pointDistance(v1.position);
+        d2 = fPlane.pointDistance(v2.position);
 
         // Snap vertices in the (epsilon, bigEpsilon] gap onto the face plane.
         // Without this, such a vertex triggers the crossing branch and produces
@@ -377,14 +384,14 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
         // falls outside the bounded face cannot contribute an intersection
         // inside that face, so skipping the snap there is always safe.
         if (_PolyhedralBoundedSolidSetIntersector.isZeroBig(d1) && !_PolyhedralBoundedSolidSetIntersector.isZero(d1)) {
-            const snapped1 = f.getContainingPlane()!.projectPoint(v1.position);
+            const snapped1 = fPlane.projectPoint(v1.position);
             if (_PolyhedralBoundedSolidSetIntersector.pointInFaceDetailed(f, snapped1).status() !== Geometry.OUTSIDE) {
                 v1.position = snapped1;
                 d1 = 0.0;
             }
         }
         if (_PolyhedralBoundedSolidSetIntersector.isZeroBig(d2) && !_PolyhedralBoundedSolidSetIntersector.isZero(d2)) {
-            const snapped2 = f.getContainingPlane()!.projectPoint(v2.position);
+            const snapped2 = fPlane.projectPoint(v2.position);
             if (_PolyhedralBoundedSolidSetIntersector.pointInFaceDetailed(f, snapped2).status() !== Geometry.OUTSIDE) {
                 v2.position = snapped2;
                 d2 = 0.0;
@@ -398,9 +405,9 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
             t = d1 / (d1 - d2);
             p = v1.position.add(v2.position.subtract(v1.position).multiply(t));
 
-            const d3 = f.getContainingPlane()!.pointDistance(p);
+            const d3 = fPlane.pointDistance(p);
             if (_PolyhedralBoundedSolidSetIntersector.compareToZero(d3) === 0) {
-                const facePlane = f.getContainingPlane()!;
+                const facePlane = fPlane;
                 p = facePlane.projectPoint(p);
 
                 // Snap p to the intersection line of f's plane and the edge's
@@ -558,6 +565,8 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
         e: _PolyhedralBoundedSolidEdge,
         edgeSolid: PolyhedralBoundedSolid,
         faceSolid: PolyhedralBoundedSolid,
+        faceBoxes: PolyhedralBoundedSolidFaceGeometry[],
+        boxMargin: number,
         BvsA: number,
         sonvv: ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex>,
         sonva: ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>,
@@ -568,6 +577,16 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
         let i: number;
 
         for (i = 0; i < faceSolid.getPolygonsList().size(); i++) {
+            if (
+                i < faceBoxes.length &&
+                faceBoxes[i]!.segmentSeparatedFrom(
+                    e.rightHalf!.startingVertex.position,
+                    e.leftHalf!.startingVertex.position,
+                    boxMargin,
+                )
+            ) {
+                continue;
+            }
             f = faceSolid.getPolygonsList().get(i)!;
             generatedEdge = _PolyhedralBoundedSolidSetIntersector.doSetOpGenerate(
                 e,
@@ -584,6 +603,8 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
                     generatedEdge,
                     edgeSolid,
                     faceSolid,
+                    faceBoxes,
+                    boxMargin,
                     BvsA,
                     sonvv,
                     sonva,
@@ -594,12 +615,41 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
     }
 
     /**
+    Box margin for the edge/face rejection of generate (Stage G). An
+    edge/face pair can only act when some point near the edge is accepted
+    by the point-in-face test of `f`: the crossing point, an endpoint on
+    the face plane, or a vertex snapped onto it. That point lies in the box
+    of the edge and, grown by the point-test tolerances, in the box of the
+    face. The margin also covers the snaps of doSetOpGenerate (a vertex
+    moves at most bigEpsilon; the crossing point moves along the face plane
+    at most bigEpsilon / sqrt(epsilon) toward the edge face line), the
+    boundary-hit radius (10 bigEpsilon) and the vertices that generate
+    itself adds to face boundaries during the pass.
+    */
+    private static generateBoxMargin(faceBoxes: PolyhedralBoundedSolidFaceGeometry[]): number {
+        let deviation = 0.0;
+        let i: number;
+
+        for (i = 0; i < faceBoxes.length; i++) {
+            deviation = Math.max(deviation, faceBoxes[i]!.getPlaneDeviation());
+        }
+        return (
+            32.0 * _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon() +
+            2.0 * deviation +
+            _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon() /
+                Math.sqrt(Math.max(_PolyhedralBoundedSolidOperator.numericContext.epsilon(), 1.0e-300))
+        );
+    }
+
+    /**
     Initial vertex intersection detector for the set operations algorithm
     (big phase 0).
     Following program [MANT1988].15.2.
     */
     public static setOpGenerate(inSolidA: PolyhedralBoundedSolid, inSolidB: PolyhedralBoundedSolid): GenerationResult {
         let e: _PolyhedralBoundedSolidEdge;
+        let faceBoxes: PolyhedralBoundedSolidFaceGeometry[];
+        let boxMargin: number;
         let i: number;
 
         _PolyhedralBoundedSolidSetIntersector.intersectionTrace.clear();
@@ -607,13 +657,40 @@ export class _PolyhedralBoundedSolidSetIntersector extends _PolyhedralBoundedSol
         const sonva = new ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>();
         const sonvb = new ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>();
 
+        // Face boxes are taken at the start of each pass: generate adds no
+        // faces, and the positions it changes in the face solid stay within
+        // generateBoxMargin of them.
+        faceBoxes = PolyhedralBoundedSolidFaceGeometry.of(inSolidB);
+        boxMargin = _PolyhedralBoundedSolidSetIntersector.generateBoxMargin(faceBoxes);
         for (i = 0; i < inSolidA.getEdgesList().size(); i++) {
             e = inSolidA.getEdgesList().get(i)!;
-            _PolyhedralBoundedSolidSetIntersector.processEdge(e, inSolidA, inSolidB, 0, sonvv, sonva, sonvb);
+            _PolyhedralBoundedSolidSetIntersector.processEdge(
+                e,
+                inSolidA,
+                inSolidB,
+                faceBoxes,
+                boxMargin,
+                0,
+                sonvv,
+                sonva,
+                sonvb,
+            );
         }
+        faceBoxes = PolyhedralBoundedSolidFaceGeometry.of(inSolidA);
+        boxMargin = _PolyhedralBoundedSolidSetIntersector.generateBoxMargin(faceBoxes);
         for (i = 0; i < inSolidB.getEdgesList().size(); i++) {
             e = inSolidB.getEdgesList().get(i)!;
-            _PolyhedralBoundedSolidSetIntersector.processEdge(e, inSolidB, inSolidA, 1, sonvv, sonva, sonvb);
+            _PolyhedralBoundedSolidSetIntersector.processEdge(
+                e,
+                inSolidB,
+                inSolidA,
+                faceBoxes,
+                boxMargin,
+                1,
+                sonvv,
+                sonva,
+                sonvb,
+            );
         }
 
         return new GenerationResult(sonvv, sonva, sonvb);

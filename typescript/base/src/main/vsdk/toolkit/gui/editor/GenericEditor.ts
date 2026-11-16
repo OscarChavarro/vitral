@@ -66,7 +66,12 @@ export abstract class GenericEditor implements EntityListener {
         this.specifications.length = 0;
 
         if (entity === null) {
-            Logger.reportMessage(this, VSDK.WARNING, "GenericEditor.build", "Null entity received, building an empty editor.");
+            Logger.reportMessage(
+                this,
+                VSDK.WARNING,
+                "GenericEditor.build",
+                "Null entity received, building an empty editor.",
+            );
             this.beginBuild("");
             this.showValidationMessage("No object to edit.");
             this.endBuild();
@@ -86,8 +91,13 @@ export abstract class GenericEditor implements EntityListener {
                     this,
                     VSDK.WARNING,
                     "GenericEditor.build",
-                    'Unsupported type "' + specification.getType() + '" in control specification "' + text +
-                        '" of class ' + GenericEditor.simpleClassName(entity) + ", control skipped.",
+                    'Unsupported type "' +
+                        specification.getType() +
+                        '" in control specification "' +
+                        text +
+                        '" of class ' +
+                        GenericEditor.simpleClassName(entity) +
+                        ", control skipped.",
                 );
                 continue;
             }
@@ -173,11 +183,19 @@ export abstract class GenericEditor implements EntityListener {
         try {
             value = getter.call(this.entity);
         } catch (e) {
-            Logger.reportMessage(this, VSDK.WARNING, "GenericEditor.readValue", "Cannot call get" + specification.getLabel() + ": " + String(e));
+            Logger.reportMessage(
+                this,
+                VSDK.WARNING,
+                "GenericEditor.readValue",
+                "Cannot call get" + specification.getLabel() + ": " + String(e),
+            );
             return null;
         }
         if (typeof value !== "number") {
-            this.reportMissingAccessor(specification, "get" + specification.getLabel() + "() returning " + specification.getType());
+            this.reportMissingAccessor(
+                specification,
+                "get" + specification.getLabel() + "() returning " + specification.getType(),
+            );
             return null;
         }
         return GenericEditor.valueToString(specification.getType(), value);
@@ -200,13 +218,17 @@ export abstract class GenericEditor implements EntityListener {
         try {
             value = GenericEditor.parseValue(specification.getType(), text.trim());
         } catch {
-            this.showValidationMessage(specification.getLabel() + ': "' + text + '" is not a valid ' + specification.getType() + ".");
+            this.showValidationMessage(
+                specification.getLabel() + ': "' + text + '" is not a valid ' + specification.getType() + ".",
+            );
             return false;
         }
 
         const numeric: number = value;
         if (!specification.contains(numeric)) {
-            this.showValidationMessage(specification.getLabel() + " must be in " + specification.getIntervalText() + ".");
+            this.showValidationMessage(
+                specification.getLabel() + " must be in " + specification.getIntervalText() + ".",
+            );
             return false;
         }
 
@@ -218,7 +240,12 @@ export abstract class GenericEditor implements EntityListener {
         try {
             setter.call(this.entity, value);
         } catch (e) {
-            Logger.reportMessage(this, VSDK.WARNING, "GenericEditor.updateValue", "Cannot call set" + specification.getLabel() + ": " + String(e));
+            Logger.reportMessage(
+                this,
+                VSDK.WARNING,
+                "GenericEditor.updateValue",
+                "Cannot call set" + specification.getLabel() + ": " + String(e),
+            );
             this.showValidationMessage(specification.getLabel() + " could not be changed.");
             return false;
         }
@@ -307,7 +334,8 @@ export abstract class GenericEditor implements EntityListener {
 
     private findGetter(specification: ControlSpecification): Accessor | null {
         const methodName: string = "get" + specification.getLabel();
-        const getter: unknown = this.entity === null ? undefined : (this.entity as unknown as Record<string, unknown>)[methodName];
+        const getter: unknown =
+            this.entity === null ? undefined : (this.entity as unknown as Record<string, unknown>)[methodName];
 
         if (typeof getter !== "function" || (getter as Accessor).length !== 0) {
             this.reportMissingAccessor(specification, methodName + "()");
@@ -318,7 +346,8 @@ export abstract class GenericEditor implements EntityListener {
 
     private findSetter(specification: ControlSpecification): Accessor | null {
         const methodName: string = "set" + specification.getLabel();
-        const setter: unknown = this.entity === null ? undefined : (this.entity as unknown as Record<string, unknown>)[methodName];
+        const setter: unknown =
+            this.entity === null ? undefined : (this.entity as unknown as Record<string, unknown>)[methodName];
 
         if (typeof setter !== "function") {
             this.reportMissingAccessor(specification, methodName + "(" + specification.getType() + ")");
@@ -332,8 +361,12 @@ export abstract class GenericEditor implements EntityListener {
             this,
             VSDK.WARNING,
             "GenericEditor",
-            "Class " + (this.entity === null ? "null" : GenericEditor.simpleClassName(this.entity)) +
-                ' declares control "' + specification.getName() + '" but has no public ' + accessor +
+            "Class " +
+                (this.entity === null ? "null" : GenericEditor.simpleClassName(this.entity)) +
+                ' declares control "' +
+                specification.getName() +
+                '" but has no public ' +
+                accessor +
                 "; add it or fix the control specification.",
         );
     }

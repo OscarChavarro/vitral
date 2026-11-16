@@ -75,10 +75,18 @@ export class PolyhedralBoundedSolidNumericPolicy {
     public static readonly BREP_EPSILON = VSDK.EPSILON;
     public static readonly BREP_BIG_EPSILON = 10.0 * PolyhedralBoundedSolidNumericPolicy.BREP_EPSILON;
 
-    private static readonly MIN_SCALE = 1.0;
+    /** Scale of an empty or degenerate model (no extent to measure). */
+    private static readonly DEFAULT_SCALE = 1.0;
+    /**
+    Smallest model scale. Tolerances follow the model down to this size, so
+    a part modelled in metres at 10^-3 gets 10^-3 times the tolerances of
+    the same part at unit size. They used to stop at scale 1: below it the
+    tolerances were absolute and, at 10^-3, a tenth of the features.
+    */
+    private static readonly MIN_SCALE = 1.0e-9;
     private static readonly MAX_UNIT_INTERVAL_TOLERANCE = 1.0e-3;
     private static readonly DEFAULT_CONTEXT = PolyhedralBoundedSolidNumericPolicy.fromScale(
-        PolyhedralBoundedSolidNumericPolicy.MIN_SCALE,
+        PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE,
     );
 
     private constructor() {}
@@ -130,8 +138,8 @@ export class PolyhedralBoundedSolidNumericPolicy {
     }
 
     private static sanitizeScale(scale: number): number {
-        if (!Number.isFinite(scale)) {
-            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        if (!Number.isFinite(scale) || scale <= 0.0) {
+            return PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE;
         }
         if (scale < PolyhedralBoundedSolidNumericPolicy.MIN_SCALE) {
             return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
@@ -141,12 +149,12 @@ export class PolyhedralBoundedSolidNumericPolicy {
 
     private static estimateSolidScale(solid: PolyhedralBoundedSolid | null): number {
         if (solid === null) {
-            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+            return PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE;
         }
 
         const minMax = solid.getMinMax();
         if (minMax === null || minMax.length < 6) {
-            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+            return PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE;
         }
         return PolyhedralBoundedSolidNumericPolicy.diagonalSize(
             minMax[0]!,
@@ -160,7 +168,7 @@ export class PolyhedralBoundedSolidNumericPolicy {
 
     private static estimateFaceScale(face: _PolyhedralBoundedSolidFace | null): number {
         if (face === null || face.boundariesList === null) {
-            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+            return PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE;
         }
 
         let minX = Number.POSITIVE_INFINITY;
@@ -198,14 +206,14 @@ export class PolyhedralBoundedSolidNumericPolicy {
         }
 
         if (!found) {
-            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+            return PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE;
         }
         return PolyhedralBoundedSolidNumericPolicy.diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     private static estimatePointsScale(points: readonly (Vector3Dd | null)[] | null): number {
         if (points === null || points.length < 2) {
-            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+            return PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE;
         }
 
         let minX = Number.POSITIVE_INFINITY;
@@ -232,7 +240,7 @@ export class PolyhedralBoundedSolidNumericPolicy {
         }
 
         if (!found) {
-            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+            return PolyhedralBoundedSolidNumericPolicy.DEFAULT_SCALE;
         }
         return PolyhedralBoundedSolidNumericPolicy.diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
     }
@@ -295,9 +303,13 @@ export class PolyhedralBoundedSolidNumericPolicy {
         return face.testPointInside(point, context.bigEpsilon());
     }
 
-    public static vectorsColinear(a: Vector3Dd, b: Vector3Dd, context: ToleranceContext): boolean {
-        const scale = Math.max(1.0, Math.max(a.length(), b.length()));
-        return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
+    public static vectorsColinear(a: Vector3Dd, b: Vector3Dd, _context: ToleranceContext): boolean {
+        // |a x b| = |a| |b| sin(angle): compare the sine, so that the test
+        // does not depend on the length of the vectors (it used to accept
+        // angles up to bigEpsilon / length, half a degree at 10^-3).
+        return (
+            a.crossProduct(b).length() <= PolyhedralBoundedSolidNumericPolicy.BREP_BIG_EPSILON * a.length() * b.length()
+        );
     }
 
     public static unitVectorsParallel(a: Vector3Dd, b: Vector3Dd, context: ToleranceContext): boolean {
@@ -316,7 +328,11 @@ export class PolyhedralBoundedSolidNumericPolicy {
     public static orientationTolerance2D(a: Vector2Dd, b: Vector2Dd, c: Vector2Dd, context: ToleranceContext): number {
         const lx = Math.max(Math.max(Math.abs(a.x - b.x), Math.abs(a.x - c.x)), Math.abs(b.x - c.x));
         const ly = Math.max(Math.max(Math.abs(a.y - b.y), Math.abs(a.y - c.y)), Math.abs(b.y - c.y));
-        const span = Math.max(1.0, Math.max(lx, ly));
+        // The orientation is a cross product, |b - a| times the distance of
+        // c from the line: a distance tolerance times the span. The span
+        // used to be at least 1, which below unit size made the tolerance
+        // an angle of bigEpsilon / span (half a degree at 10^-3).
+        const span = Math.max(lx, ly);
         return context.bigEpsilon() * span;
     }
 

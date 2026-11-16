@@ -17,9 +17,9 @@ export class Double {
     public static parseDouble(input: string): number {
         // Java trims the leading and trailing whitespace (`String.trim`: code
         // points up to U+0020) before parsing
+        // eslint-disable-next-line no-control-regex
         const text = input.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, "");
-        if (text.length === 0)
-            throw new IllegalArgumentException(`For input string: "${input}"`);
+        if (text.length === 0) throw new IllegalArgumentException(`For input string: "${input}"`);
         if (text === "NaN") return NaN;
         if (text === "Infinity" || text === "+Infinity") return Infinity;
         if (text === "-Infinity") return -Infinity;

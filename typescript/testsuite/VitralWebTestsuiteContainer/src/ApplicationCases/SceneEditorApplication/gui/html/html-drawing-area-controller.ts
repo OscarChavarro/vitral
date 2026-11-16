@@ -85,7 +85,11 @@ export class HtmlDrawingAreaController {
     );
     techniques.getViewportSetTechniques().setListener({
       projectionLocationMenuRequested: (viewport: Viewport, x: number, y: number): void => {
-        this.projectionLocationPopup.show(viewport, drawingArea.scaleXToCanvas(x), drawingArea.scaleYToCanvas(y));
+        this.projectionLocationPopup.show(
+          viewport,
+          drawingArea.scaleXToCanvas(x),
+          drawingArea.scaleYToCanvas(y),
+        );
       },
     });
 
@@ -152,7 +156,9 @@ export class HtmlDrawingAreaController {
         domType = 'pointerup';
         break;
       default:
-        throw new Error('Unknown mouse event type "' + type + '". Use move, press, drag or release');
+        throw new Error(
+          'Unknown mouse event type "' + type + '". Use move, press, drag or release',
+        );
     }
     const event: PointerEvent = new PointerEvent(domType, {
       bubbles: true,
@@ -201,7 +207,9 @@ export class HtmlDrawingAreaController {
       }
     } else {
       throw new Error(
-        'Unknown key "' + key + '". Use a single character, tab, enter, backspace, delete, escape, left, ' +
+        'Unknown key "' +
+          key +
+          '". Use a single character, tab, enter, backspace, delete, escape, left, ' +
           'right, up, down, pageup, pagedown, num0..num9, num/, num*, num-, num+, num. or numenter',
       );
     }
@@ -221,13 +229,20 @@ export class HtmlDrawingAreaController {
 
   private static codeOfSymbol(symbol: string): string {
     switch (symbol) {
-      case '-': return 'Minus';
-      case '=': return 'Equal';
-      case '.': return 'Period';
-      case ',': return 'Comma';
-      case ' ': return 'Space';
-      case '/': return 'Slash';
-      default: return '';
+      case '-':
+        return 'Minus';
+      case '=':
+        return 'Equal';
+      case '.':
+        return 'Period';
+      case ',':
+        return 'Comma';
+      case ' ':
+        return 'Space';
+      case '/':
+        return 'Slash';
+      default:
+        return '';
     }
   }
 
@@ -280,7 +295,9 @@ export class HtmlDrawingAreaController {
     if (this.canvas.hasPointerCapture(e.pointerId)) {
       this.canvas.releasePointerCapture(e.pointerId);
     }
-    const consumed: boolean = this.projectionLocationPopup.consumesMouseEvent(MouseEventKind.RELEASE);
+    const consumed: boolean = this.projectionLocationPopup.consumesMouseEvent(
+      MouseEventKind.RELEASE,
+    );
     const event: VitralMouseEvent = WebSystem.toVitralMouseEvent(e, this.canvas);
 
     if (!consumed) {
@@ -336,7 +353,10 @@ export class HtmlDrawingAreaController {
     if (!e.ctrlKey && !e.metaKey) {
       return false;
     }
-    return !(e.ctrlKey && (e.code === 'KeyZ' || e.code === 'KeyY' || (e.shiftKey && e.code === 'KeyF')));
+    return !(
+      e.ctrlKey &&
+      (e.code === 'KeyZ' || e.code === 'KeyY' || (e.shiftKey && e.code === 'KeyF'))
+    );
   }
 
   private keyPressed(e: KeyboardEvent): void {

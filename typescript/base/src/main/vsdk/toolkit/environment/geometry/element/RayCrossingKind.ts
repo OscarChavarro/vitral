@@ -1,1 +1,6 @@
-export enum RayCrossingKind { Entering, Leaving, Tangent, Unclassified }
+export enum RayCrossingKind {
+    Entering,
+    Leaving,
+    Tangent,
+    Unclassified,
+}

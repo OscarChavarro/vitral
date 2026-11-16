@@ -57,8 +57,18 @@ export class WebGLOffscreenFrameBuffer {
         }
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.frameBuffer);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-        gl.blitFramebuffer(0, 0, this.width, this.height, 0, 0, this.width, this.height,
-            gl.COLOR_BUFFER_BIT, gl.NEAREST);
+        gl.blitFramebuffer(
+            0,
+            0,
+            this.width,
+            this.height,
+            0,
+            0,
+            this.width,
+            this.height,
+            gl.COLOR_BUFFER_BIT,
+            gl.NEAREST,
+        );
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
@@ -127,8 +137,17 @@ export class WebGLOffscreenFrameBuffer {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, width, height, 0,
-            gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.DEPTH_COMPONENT24,
+            width,
+            height,
+            0,
+            gl.DEPTH_COMPONENT,
+            gl.UNSIGNED_INT,
+            null,
+        );
         gl.bindTexture(gl.TEXTURE_2D, null);
 
         this.frameBuffer = gl.createFramebuffer();

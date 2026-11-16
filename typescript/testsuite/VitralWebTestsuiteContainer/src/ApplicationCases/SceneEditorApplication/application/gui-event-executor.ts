@@ -153,7 +153,10 @@ export class GuiEventExecutor extends CommandListener {
     } else if (label === 'IDC_CREATE_TORUS') {
       this.scene().addThing(new Torus(2, 1));
     } else if (label === 'IDC_CREATE_PLANE') {
-      const plane: InfinitePlane = new InfinitePlane(new Vector3Dd(-0.2, 0, 1), new Vector3Dd(0, 0, -1));
+      const plane: InfinitePlane = new InfinitePlane(
+        new Vector3Dd(-0.2, 0, 1),
+        new Vector3Dd(0, 0, -1),
+      );
       console.log('' + plane);
       this.scene().addThing(plane);
 
@@ -176,7 +179,9 @@ export class GuiEventExecutor extends CommandListener {
     } else if (label === 'IDC_CREATE_PARAMETRICCUBICCURVE') {
       this.createParametricCubicCurve();
     } else if (label === 'IDC_CREATE_FUNCTIONALEXPLICITSURFACE') {
-      const functionalSurface: FunctionalExplicitSurface = new FunctionalExplicitSurface('cos((PI*x)/2)');
+      const functionalSurface: FunctionalExplicitSurface = new FunctionalExplicitSurface(
+        'cos((PI*x)/2)',
+      );
       functionalSurface.setBounds(-10, -10, -10, 10, 10, 10);
       functionalSurface.setTesselationHint(100, 100);
       const newThing: SimpleBody = this.scene().addThing(functionalSurface);
@@ -186,19 +191,30 @@ export class GuiEventExecutor extends CommandListener {
     } else if (label === 'IDC_CREATE_OMNILIGHT') {
       const light: Light | null = this.model.addNewLight();
       if (light === null) {
-        Logger.reportMessage(this, VSDK.WARNING, 'execute', 'No visible viewport where to create the light');
+        Logger.reportMessage(
+          this,
+          VSDK.WARNING,
+          'execute',
+          'No visible viewport where to create the light',
+        );
         return CommandResult.FAILED;
       }
     }
     //- RENDERING -----------------------------------------------------
     else if (label === 'IDC_RENDERING_OBTAINZBUFFERIMAGE') {
-      this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_PENDING_ZBUFFER_COLOR_IMAGE'));
+      this.presenter.showStatusMessage(
+        this.model.getI18nContext()!.getMessage('IDM_PENDING_ZBUFFER_COLOR_IMAGE'),
+      );
       this.model.getDrawingArea().setColorCaptureRequested(true);
     } else if (label === 'IDC_RENDERING_OBTAINZBUFFERDEPTHMAP') {
-      this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_PENDING_ZBUFFER_DEPTH'));
+      this.presenter.showStatusMessage(
+        this.model.getI18nContext()!.getMessage('IDM_PENDING_ZBUFFER_DEPTH'),
+      );
       this.model.getDrawingArea().setDepthCaptureRequested(true);
     } else if (label === 'IDC_RENDERING_OBTAINCONTOURNS') {
-      this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_PENDING_CONTOURNS'));
+      this.presenter.showStatusMessage(
+        this.model.getI18nContext()!.getMessage('IDM_PENDING_CONTOURNS'),
+      );
       this.model.getDrawingArea().setDepthCaptureRequested(true);
       this.model.getDrawingArea().setContoursRequested(true);
     }
@@ -221,13 +237,19 @@ export class GuiEventExecutor extends CommandListener {
       this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_CAMERA_MODE'));
       this.model.getDrawingArea().setInteractionMode(InteractionMode.CAMERA);
     } else if (label === 'IDC_TOOLS_SELECT') {
-      this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_SELECTION_MODE'));
+      this.presenter.showStatusMessage(
+        this.model.getI18nContext()!.getMessage('IDM_SELECTION_MODE'),
+      );
       this.model.getDrawingArea().setInteractionMode(InteractionMode.SELECT);
     } else if (label === 'IDC_TOOLS_TRANSLATE') {
-      this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_TRANSLATION_MODE'));
+      this.presenter.showStatusMessage(
+        this.model.getI18nContext()!.getMessage('IDM_TRANSLATION_MODE'),
+      );
       this.model.getDrawingArea().setInteractionMode(InteractionMode.TRANSLATE);
     } else if (label === 'IDC_TOOLS_ROTATE') {
-      this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_ROTATION_MODE'));
+      this.presenter.showStatusMessage(
+        this.model.getI18nContext()!.getMessage('IDM_ROTATION_MODE'),
+      );
       this.model.getDrawingArea().setInteractionMode(InteractionMode.ROTATE);
     } else if (label === 'IDC_TOOLS_SCALE') {
       this.presenter.showStatusMessage(this.model.getI18nContext()!.getMessage('IDM_SCALE_MODE'));
@@ -255,7 +277,11 @@ export class GuiEventExecutor extends CommandListener {
       referenceGeometry = voxelBody.getGeometry();
     }
 
-    if (referenceGeometry === null || !(referenceGeometry instanceof VoxelVolume) || voxelBody === null) {
+    if (
+      referenceGeometry === null ||
+      !(referenceGeometry instanceof VoxelVolume) ||
+      voxelBody === null
+    ) {
       this.presenter.showStatusMessage(
         'ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created',
       );
@@ -478,8 +504,11 @@ export class GuiEventExecutor extends CommandListener {
       if (file.path !== null) {
         await WebEnvironmentPersistence.importEnvironment(file.path, this.scene().scene);
       } else {
-        await WebEnvironmentPersistence.importEnvironmentFromBytes(file.name, await file.readBytes(),
-          this.scene().scene);
+        await WebEnvironmentPersistence.importEnvironmentFromBytes(
+          file.name,
+          await file.readBytes(),
+          this.scene().scene,
+        );
       }
     } finally {
       history.end('Import of ' + file.name, false);
@@ -517,10 +546,17 @@ export class GuiEventExecutor extends CommandListener {
    * @throws Error if the file can not be read
    */
   async loadPalette(file: ChosenFile): Promise<void> {
-    this.model.setPalette(RGBColorPalettePersistence.importGimpPalette(new StringReader(await file.readText())));
+    this.model.setPalette(
+      RGBColorPalettePersistence.importGimpPalette(new StringReader(await file.readText())),
+    );
   }
 
-  private addDebugSphere(voxelBody: SimpleBody, groupIndex: number, cm: Vector3Dd, averageDistance: number): SimpleBody {
+  private addDebugSphere(
+    voxelBody: SimpleBody,
+    groupIndex: number,
+    cm: Vector3Dd,
+    averageDistance: number,
+  ): SimpleBody {
     const r: number = (groupIndex / 31.0) * (2 * averageDistance);
     const vv: VoxelVolume = voxelBody.getGeometry() as VoxelVolume;
     let S: Matrix4x4d = new Matrix4x4d();

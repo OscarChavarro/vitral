@@ -13,7 +13,9 @@ export class FrameListener implements Partial<WebSocketListener> {
         private readonly onFailure: (event: Event) => void,
         private readonly onConnected?: () => void,
     ) {}
-    onOpen(_socket: WebSocket): void { this.onConnected?.(); }
+    onOpen(_socket: WebSocket): void {
+        this.onConnected?.();
+    }
     public onText(_socket: WebSocket, data: string): void {
         this.onMessage(data);
     }

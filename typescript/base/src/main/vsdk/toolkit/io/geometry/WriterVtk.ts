@@ -70,8 +70,7 @@ export class WriterVtk extends PersistenceElement {
         let bos: OutputStream;
         if (inOutputStream instanceof BufferedOutputStream) {
             bos = inOutputStream;
-        }
-        else {
+        } else {
             bos = new BufferedOutputStream(inOutputStream);
         }
 
@@ -85,19 +84,20 @@ export class WriterVtk extends PersistenceElement {
         const objs = inScene.getSimpleBodies();
 
         for (let i: number = 0; i < objs.size(); i++) {
-
             //-----------------------------------------------------------------
             const g: Geometry | null = objs.get(i).getGeometry();
             let mesh: TriangleMesh | null = null;
             if (g instanceof FunctionalExplicitSurface) {
                 mesh = g.getInternalTriangleMesh();
-            }
-            else if (g instanceof TriangleMesh) {
+            } else if (g instanceof TriangleMesh) {
                 mesh = g;
-            }
-            else {
-                Logger.reportMessage(null, VSDK.WARNING, "WriterVtk.exportEnvironment",
-                    "Current writer implementation only supports writing of triangle meshes. Object skipped.");
+            } else {
+                Logger.reportMessage(
+                    null,
+                    VSDK.WARNING,
+                    "WriterVtk.exportEnvironment",
+                    "Current writer implementation only supports writing of triangle meshes. Object skipped.",
+                );
             }
 
             //-----------------------------------------------------------------
@@ -105,10 +105,13 @@ export class WriterVtk extends PersistenceElement {
                 if (!exported) {
                     WriterVtk.exportMesh(bos, mesh);
                     exported = true;
-                }
-                else {
-                    Logger.reportMessage(null, VSDK.WARNING, "WriterVtk.exportEnvironment",
-                        "Current writer implementation only supports writing ONE triangle meshes. Only first mesh exported, remaining meshes skipped.");
+                } else {
+                    Logger.reportMessage(
+                        null,
+                        VSDK.WARNING,
+                        "WriterVtk.exportEnvironment",
+                        "Current writer implementation only supports writing ONE triangle meshes. Only first mesh exported, remaining meshes skipped.",
+                    );
                 }
             }
         }

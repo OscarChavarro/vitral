@@ -18,11 +18,14 @@ export class _TopologicalIntegrityStrategy implements _PolyhedralBoundedSolidVal
     representation in [MANT1988].10.2.1 and [MANT1988].10.2.2.
     */
     public validate(solid: PolyhedralBoundedSolid, _numericContext: ToleranceContext, msg: StringBuilder): boolean {
-        _PolyhedralBoundedSolidTopologicalValidator.remakeEmanatingHalfedgesReferences(solid);
+        // Validation only reads. A dangling pointer left by an operator is
+        // reported; repairing it is PolyhedralBoundedSolidRepair's job, on
+        // request (plan-stage11 Phase C).
+        const backPointersOk = _PolyhedralBoundedSolidTopologicalValidator.validateBackPointers(solid, msg);
         if (!_PolyhedralBoundedSolidTopologicalValidator.validateTopologicalIntegrity(solid)) {
             msg.append("  - Topological integrity test failed.\n");
             return false;
         }
-        return true;
+        return backPointersOk;
     }
 }

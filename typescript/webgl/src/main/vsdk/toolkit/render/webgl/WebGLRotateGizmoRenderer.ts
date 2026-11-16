@@ -82,17 +82,28 @@ export class WebGLRotateGizmoRenderer {
         }
     }
 
-    private static async drawArc(gl: WebGL2RenderingContext, mvp: Matrix4x4d, fan: Vector3Dd[],
-                                 c: ColorRgb): Promise<void> {
+    private static async drawArc(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        fan: Vector3Dd[],
+        c: ColorRgb,
+    ): Promise<void> {
         const positions: Float32Array = GizmoVertexArrayBuilder.buildPositions(fan);
-        const colors: Float32Array = GizmoVertexArrayBuilder.buildRgbaColors(fan.length, c,
-            WebGLRotateGizmoRenderer.ARC_OPACITY);
+        const colors: Float32Array = GizmoVertexArrayBuilder.buildRgbaColors(
+            fan.length,
+            c,
+            WebGLRotateGizmoRenderer.ARC_OPACITY,
+        );
 
         await WebGLColoredPrimitiveRenderer.draw(gl, mvp, gl.TRIANGLE_FAN, positions, colors);
     }
 
-    private static async drawRing(gl: WebGL2RenderingContext, mvp: Matrix4x4d, strip: Vector3Dd[],
-                                  c: ColorRgb): Promise<void> {
+    private static async drawRing(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        strip: Vector3Dd[],
+        c: ColorRgb,
+    ): Promise<void> {
         const positions: Float32Array = GizmoVertexArrayBuilder.buildPositions(strip);
         const colors: Float32Array = GizmoVertexArrayBuilder.buildRgbaColors(strip.length, c, 1.0);
 

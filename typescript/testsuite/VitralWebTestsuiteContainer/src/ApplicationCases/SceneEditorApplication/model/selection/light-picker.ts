@@ -1,4 +1,10 @@
-import { LightGizmoOmniBillboard, type Camera, type Light, type Ray, type Vector3Dd } from '@vitral/base';
+import {
+  LightGizmoOmniBillboard,
+  type Camera,
+  type Light,
+  type Ray,
+  type Vector3Dd,
+} from '@vitral/base';
 
 /**
  * Port of `model.selection.LightPicker`.

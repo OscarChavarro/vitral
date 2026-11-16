@@ -1,4 +1,10 @@
-import { Double, FunctionalExplicitSurface, Integer, StringTokenizer, type SimpleBody } from '@vitral/base';
+import {
+  Double,
+  FunctionalExplicitSurface,
+  Integer,
+  StringTokenizer,
+  type SimpleBody,
+} from '@vitral/base';
 
 /**
  * Editable parameters of the surface, in the order used by the predefined

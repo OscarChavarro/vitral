@@ -26,8 +26,7 @@ export class WriterGts extends PersistenceElement {
     private static addEdge(edges: _WriterGtsEdge[], from: number, to: number): number {
         for (let i: number = 0; i < edges.length; i++) {
             const e: _WriterGtsEdge = edges[i]!;
-            if ((e.from === from && e.to === to) ||
-                (e.from === to && e.to === from)) {
+            if ((e.from === from && e.to === to) || (e.from === to && e.to === from)) {
                 return i;
             }
         }
@@ -57,14 +56,22 @@ export class WriterGts extends PersistenceElement {
         }
 
         //- Write GTS header ----------------------------------------------
-        PersistenceElement.writeAsciiLine(inOutputStream, "" + nv + " " + edges.length + " " + triangles.length +
-            " GtsSurface GtsFace GtsEdge GtsVertex");
+        PersistenceElement.writeAsciiLine(
+            inOutputStream,
+            "" + nv + " " + edges.length + " " + triangles.length + " GtsSurface GtsFace GtsEdge GtsVertex",
+        );
 
         //- Write vertices ------------------------------------------------
         const v: Float64Array = mesh.getVertexPositions()!;
         for (let i: number = 0; i < nv; i++) {
-            PersistenceElement.writeAsciiLine(inOutputStream, Double.toString(v[3 * i]!) + " " +
-                Double.toString(v[3 * i + 1]!) + " " + Double.toString(v[3 * i + 2]!));
+            PersistenceElement.writeAsciiLine(
+                inOutputStream,
+                Double.toString(v[3 * i]!) +
+                    " " +
+                    Double.toString(v[3 * i + 1]!) +
+                    " " +
+                    Double.toString(v[3 * i + 2]!),
+            );
         }
 
         //- Write edges ---------------------------------------------------
@@ -74,8 +81,10 @@ export class WriterGts extends PersistenceElement {
 
         //- Write triangles -----------------------------------------------
         for (const tt of triangles) {
-            PersistenceElement.writeAsciiLine(inOutputStream, "" + (tt.point0 + 1) + " " + (tt.point1 + 1) + " " +
-                (tt.point2 + 1));
+            PersistenceElement.writeAsciiLine(
+                inOutputStream,
+                "" + (tt.point0 + 1) + " " + (tt.point1 + 1) + " " + (tt.point2 + 1),
+            );
         }
 
         return offset + nv;
@@ -86,14 +95,12 @@ export class WriterGts extends PersistenceElement {
         let baseVertexStart: number = 0;
 
         for (let i: number = 0; i < objs.size(); i++) {
-
             //-----------------------------------------------------------------
             const g: Geometry | null = objs.get(i).getGeometry();
             let mesh: TriangleMesh | null = null;
             if (g instanceof FunctionalExplicitSurface) {
                 mesh = g.getInternalTriangleMesh();
-            }
-            else if (g instanceof TriangleMesh) {
+            } else if (g instanceof TriangleMesh) {
                 mesh = g;
             }
 

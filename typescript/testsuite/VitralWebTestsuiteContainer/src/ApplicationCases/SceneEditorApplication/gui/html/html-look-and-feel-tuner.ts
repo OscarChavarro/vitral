@@ -53,7 +53,10 @@ export class HtmlLookAndFeelTuner {
       root.classList.remove(cssClass);
     }
     root.classList.add(theme[1]);
-    root.classList.toggle('scene-editor-compact-buttons', HtmlLookAndFeelTuner.isMotif(lookAndFeel));
+    root.classList.toggle(
+      'scene-editor-compact-buttons',
+      HtmlLookAndFeelTuner.isMotif(lookAndFeel),
+    );
     return true;
   }
 }

@@ -23,9 +23,15 @@ export class RendererConfigurationController extends Controller {
             // Java dereferences the missing configuration only for the keys
             // it handles; the same keys fail here
             switch (keyEvent.keycode) {
-                case KeyEvent.KEY_F1: case KeyEvent.KEY_F2: case KeyEvent.KEY_F3:
-                case KeyEvent.KEY_F4: case KeyEvent.KEY_F5: case KeyEvent.KEY_F6:
-                case KeyEvent.KEY_F7: case KeyEvent.KEY_F8: case KeyEvent.KEY_F9:
+                case KeyEvent.KEY_F1:
+                case KeyEvent.KEY_F2:
+                case KeyEvent.KEY_F3:
+                case KeyEvent.KEY_F4:
+                case KeyEvent.KEY_F5:
+                case KeyEvent.KEY_F6:
+                case KeyEvent.KEY_F7:
+                case KeyEvent.KEY_F8:
+                case KeyEvent.KEY_F9:
                     throw new TypeError("RendererConfigurationController has no RendererConfiguration");
                 default:
                     return false;

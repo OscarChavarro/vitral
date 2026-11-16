@@ -165,7 +165,10 @@ export class ApplicationModel {
    * @return the added light, or null if no viewport is visible
    */
   addNewLight(): PointLight | null {
-    const light: PointLight | null = this.lightFactory.createLight(this.getLights(), this.getActiveViewportSet());
+    const light: PointLight | null = this.lightFactory.createLight(
+      this.getLights(),
+      this.getActiveViewportSet(),
+    );
 
     if (light !== null) {
       this.getLights().add(light);

@@ -69,8 +69,7 @@ function createEditorScene(background: "simple" | "fixed"): SimpleScene {
         const simple: SimpleBackground = new SimpleBackground();
         simple.setColor(0.49, 0.49, 0.49);
         scene.addBackground(simple);
-    }
-    else {
+    } else {
         const image: RGBAImageUncompressed = new RGBAImageUncompressed();
         image.init(8, 8);
         scene.addBackground(new FixedBackground(camera, image));
@@ -105,10 +104,19 @@ function createEditorScene(background: "simple" | "fixed"): SimpleScene {
     scene.addBody(body(surface, new Vector3Dd(-4, 4, 0)));
 
     const contour: ParametricCurve = new ParametricCurve();
-    contour.addPoint([new Vector3Dd(0, 0, 0), new Vector3Dd(0, -1, 0), new Vector3Dd(1, 0, 0)], ParametricCurve.HERMITE);
+    contour.addPoint(
+        [new Vector3Dd(0, 0, 0), new Vector3Dd(0, -1, 0), new Vector3Dd(1, 0, 0)],
+        ParametricCurve.HERMITE,
+    );
     contour.addPoint([new Vector3Dd(1, 0, 0), new Vector3Dd(1, 0, 0), new Vector3Dd(0, 1, 0)], ParametricCurve.HERMITE);
-    contour.addPoint([new Vector3Dd(1, 1, 0.4), new Vector3Dd(0, 1, 0), new Vector3Dd(-1, 0, 0)], ParametricCurve.HERMITE);
-    contour.addPoint([new Vector3Dd(0, 1, 0), new Vector3Dd(-1, 0, 0), new Vector3Dd(0, -1, 0)], ParametricCurve.HERMITE);
+    contour.addPoint(
+        [new Vector3Dd(1, 1, 0.4), new Vector3Dd(0, 1, 0), new Vector3Dd(-1, 0, 0)],
+        ParametricCurve.HERMITE,
+    );
+    contour.addPoint(
+        [new Vector3Dd(0, 1, 0), new Vector3Dd(-1, 0, 0), new Vector3Dd(0, -1, 0)],
+        ParametricCurve.HERMITE,
+    );
     contour.addPoint(contour.getPoint(0), ParametricCurve.HERMITE);
     const patch: ParametricBiCubicPatch = new ParametricBiCubicPatch();
     patch.buildFergusonPatch(contour);
@@ -121,8 +129,12 @@ function createEditorScene(background: "simple" | "fixed"): SimpleScene {
 
     const volume: VoxelVolume = new VoxelVolume();
     volume.init(16, 16, 16);
-    Voxelization.doVoxelization(new Sphere(0.5), volume,
-        VoxelVolume.getTransformFromVoxelFrameToMinMax(Array.from(new Sphere(0.5).getMinMax())), null);
+    Voxelization.doVoxelization(
+        new Sphere(0.5),
+        volume,
+        VoxelVolume.getTransformFromVoxelFrameToMinMax(Array.from(new Sphere(0.5).getMinMax())),
+        null,
+    );
     scene.addBody(body(volume, new Vector3Dd(-6, 0, 0)));
 
     const ambient: AmbientLight = new AmbientLight(new ColorRgb(0.2, 0.2, 0.2));
@@ -148,7 +160,10 @@ describe("SimpleSceneSnapshotTransfer", () => {
             // Arrange
             const width = 64;
             const height = 48;
-            const snapshot: SimpleSceneSnapshot = createEditorScene(background).exportToSimpleSceneSnapshot(width, height);
+            const snapshot: SimpleSceneSnapshot = createEditorScene(background).exportToSimpleSceneSnapshot(
+                width,
+                height,
+            );
 
             // Act
             const descriptor = encodeSimpleSceneSnapshot(snapshot);
@@ -178,7 +193,9 @@ describe("SimpleSceneSnapshotTransfer", () => {
         const snapshot: SimpleSceneSnapshot = createEditorScene("simple").exportToSimpleSceneSnapshot(8, 8);
 
         // Act
-        const rebuilt: SimpleSceneSnapshot = decodeSimpleSceneSnapshot(structuredClone(encodeSimpleSceneSnapshot(snapshot)));
+        const rebuilt: SimpleSceneSnapshot = decodeSimpleSceneSnapshot(
+            structuredClone(encodeSimpleSceneSnapshot(snapshot)),
+        );
 
         // Assert: notifying the rebuilt body reaches nobody
         expect(() => rebuilt.getSimpleBodies().get(0).update()).not.toThrow();

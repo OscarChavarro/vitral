@@ -1,8 +1,4 @@
-import {
-  FunctionalExplicitSurface,
-  type Entity,
-  type SimpleBody,
-} from '@vitral/base';
+import { FunctionalExplicitSurface, type Entity, type SimpleBody } from '@vitral/base';
 import {
   FunctionalExplicitSurfaceEditor,
   FunctionalExplicitSurfaceParameter,
@@ -31,7 +27,8 @@ export class HtmlModifyPanel implements BodyEditFeedbackProvider {
   protected target: SimpleBody | null = null;
 
   // Implementations
-  private functionalExplicitSurfaceEditor: HtmlModifyPanelForFunctionalExplicitSurface | null = null;
+  private functionalExplicitSurfaceEditor: HtmlModifyPanelForFunctionalExplicitSurface | null =
+    null;
   /// Fallback editor, built from the control specifications of the geometry
   private genericEditor: HtmlGenericEditor | null = null;
   /// Editor for the current target, or null if there is none
@@ -61,7 +58,9 @@ export class HtmlModifyPanel implements BodyEditFeedbackProvider {
         this.genericEditor.detach();
       }
       if (this.functionalExplicitSurfaceEditor === null) {
-        this.functionalExplicitSurfaceEditor = new HtmlModifyPanelForFunctionalExplicitSurface(this.parent);
+        this.functionalExplicitSurfaceEditor = new HtmlModifyPanelForFunctionalExplicitSurface(
+          this.parent,
+        );
       }
       this.functionalExplicitSurfaceEditor.notifyTargetBeginEditIn(target, this.element);
       this.activeEditor = this.functionalExplicitSurfaceEditor;

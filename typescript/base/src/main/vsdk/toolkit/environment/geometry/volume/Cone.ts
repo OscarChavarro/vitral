@@ -19,8 +19,8 @@ export class Cone extends Solid {
     private static readonly NO_HIT = Number.POSITIVE_INFINITY;
 
     private bottomRadius: number; // Radius at the base
-    private topRadius: number;    // Radius at the top
-    private height: number;       // Height
+    private topRadius: number; // Radius at the top
+    private height: number; // Height
 
     private static readonly DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
     private static readonly DEFAULT_HEIGHT_DIVISIONS = 1;
@@ -453,7 +453,13 @@ export class Cone extends Solid {
     // Finite solid bounds: |x|,|y| <= max radius and 0 <= z <= height.
     public override getBounds(result: GeometryBounds): void {
         const r = this.bottomRadius > this.topRadius ? this.bottomRadius : this.topRadius;
-        if (!Double.isFinite(r) || !Double.isFinite(this.height) || this.height <= 0 || this.bottomRadius < 0 || this.topRadius < 0) {
+        if (
+            !Double.isFinite(r) ||
+            !Double.isFinite(this.height) ||
+            this.height <= 0 ||
+            this.bottomRadius < 0 ||
+            this.topRadius < 0
+        ) {
             result.setIndeterminate();
             return;
         }
@@ -581,7 +587,13 @@ export class Cone extends Solid {
         let S: Matrix4x4d;
         let M: Matrix4x4d;
 
-        const solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(0.0, 0.0, this.bottomRadius, 0.0, nsides);
+        const solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
+            0.0,
+            0.0,
+            this.bottomRadius,
+            0.0,
+            nsides,
+        );
 
         if (this.topRadius > VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
             let prevRadius = this.bottomRadius;
@@ -595,7 +607,11 @@ export class Cone extends Solid {
                 S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
+                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
+                    solid,
+                    solid.findFace(1),
+                    M,
+                );
                 prevRadius = nextRadius;
             }
         } else if (this.topRadius <= VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
@@ -611,7 +627,11 @@ export class Cone extends Solid {
                 S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
-                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
+                PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(
+                    solid,
+                    solid.findFace(1),
+                    M,
+                );
                 prevRadius = nextRadius;
             }
             Cone.closeTopFaceToApex(solid, this.height);

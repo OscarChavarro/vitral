@@ -190,7 +190,9 @@ export class ScaleGizmoInteractionTechnique {
 
         const distance: number = this.distanceToOrigin(e.getX(), e.getY());
         const ratio: number =
-            this.dragStartDistance >= ScaleGizmoInteractionTechnique.MIN_DRAG_DISTANCE ? distance / this.dragStartDistance : 1.0;
+            this.dragStartDistance >= ScaleGizmoInteractionTechnique.MIN_DRAG_DISTANCE
+                ? distance / this.dragStartDistance
+                : 1.0;
         const newScale = new Vector3Dd(
             this.scaledIfIncluded(0, ratio),
             this.scaledIfIncluded(1, ratio),

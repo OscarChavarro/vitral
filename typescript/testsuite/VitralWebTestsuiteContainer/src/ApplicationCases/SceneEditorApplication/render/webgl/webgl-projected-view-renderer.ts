@@ -32,7 +32,9 @@ export class WebGLProjectedViewRenderer implements ProjectedViewRenderer {
     ySize: number,
   ): Promise<ZBuffer> {
     const gl: WebGL2RenderingContext = this.gl;
-    const previousFrameBuffer: WebGLFramebuffer | null = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
+    const previousFrameBuffer: WebGLFramebuffer | null = gl.getParameter(
+      gl.FRAMEBUFFER_BINDING,
+    ) as WebGLFramebuffer | null;
     const previousViewport: Int32Array = gl.getParameter(gl.VIEWPORT) as Int32Array;
 
     try {
@@ -55,7 +57,12 @@ export class WebGLProjectedViewRenderer implements ProjectedViewRenderer {
       return await WebGLFrameBufferReader.readDepth(gl, this.target.getDepthTexture()!);
     } finally {
       gl.bindFramebuffer(gl.FRAMEBUFFER, previousFrameBuffer);
-      gl.viewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]);
+      gl.viewport(
+        previousViewport[0],
+        previousViewport[1],
+        previousViewport[2],
+        previousViewport[3],
+      );
     }
   }
 

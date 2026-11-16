@@ -196,7 +196,8 @@ export class ProjectedViewsDebugger {
     } else {
       console.log('Processing maps for view ' + cam + '... ');
       const side: number = ProjectedViewsDebugger.DISTANCE_FIELD_SIDE;
-      const distanceFieldIndexed: IndexedColorImageUncompressed = new IndexedColorImageUncompressed();
+      const distanceFieldIndexed: IndexedColorImageUncompressed =
+        new IndexedColorImageUncompressed();
       distanceFieldIndexed.init(side, side);
       ImageProcessing.processDistanceFieldWithArray(projectedView, distanceFieldIndexed, 1);
       ImageProcessing.gammaCorrection(distanceFieldIndexed, 2.0);

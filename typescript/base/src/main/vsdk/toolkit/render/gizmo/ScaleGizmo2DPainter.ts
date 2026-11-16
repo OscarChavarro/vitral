@@ -20,16 +20,14 @@ export class ScaleGizmo2DPainter {
     /// Depth bias (towards the viewer) of the contour of the flat handles
     private static readonly CONTOUR_DEPTH_BIAS = -0.0002;
 
-    private constructor() {
-    }
+    private constructor() {}
 
     /**
     @param out list receiving the primitives
     @param gizmo gizmo, with its camera, transformation matrix and scale set
     @param camera camera of the viewport, with its viewport size updated
     */
-    public static paint(out: Gizmo2DDrawList | null, gizmo: ScaleGizmo | null,
-                        camera: Camera | null): void {
+    public static paint(out: Gizmo2DDrawList | null, gizmo: ScaleGizmo | null, camera: Camera | null): void {
         if (out === null || gizmo === null || camera === null) {
             return;
         }
@@ -41,32 +39,48 @@ export class ScaleGizmo2DPainter {
 
             if (g instanceof Cone) {
                 const cone = g;
-                projector.addStrip(GizmoSolidTessellator.buildShaftStrip(local,
-                    cone.getBottomRadius(), cone.getTopRadius(), cone.getHeight()),
-                    element.getMaterial()!.getDiffuse(), 1.0);
-            }
-            else if (g instanceof Box) {
-                for (const face of GizmoSolidTessellator.buildBoxFaceStrips(
-                         local, g.getSize())) {
+                projector.addStrip(
+                    GizmoSolidTessellator.buildShaftStrip(
+                        local,
+                        cone.getBottomRadius(),
+                        cone.getTopRadius(),
+                        cone.getHeight(),
+                    ),
+                    element.getMaterial()!.getDiffuse(),
+                    1.0,
+                );
+            } else if (g instanceof Box) {
+                for (const face of GizmoSolidTessellator.buildBoxFaceStrips(local, g.getSize())) {
                     projector.addStrip(face, element.getMaterial()!.getDiffuse(), 1.0);
                 }
             }
         }
 
         for (const segment of gizmo.buildContourSegments()) {
-            projector.addSegment(segment.start(), segment.end(), segment.color(),
-                gizmo.getLineWidth(), ScaleGizmo2DPainter.CONTOUR_DEPTH_BIAS);
+            projector.addSegment(
+                segment.start(),
+                segment.end(),
+                segment.color(),
+                gizmo.getLineWidth(),
+                ScaleGizmo2DPainter.CONTOUR_DEPTH_BIAS,
+            );
         }
 
         for (const group of ScaleGizmo.BAND_GROUPS) {
             if (gizmo.isBandHighlighted(group)) {
-                projector.addStrip(gizmo.buildBandQuad(group),
-                    ScaleGizmo.HANDLE_FILL_COLOR, ScaleGizmo2DPainter.HANDLE_OPACITY);
+                projector.addStrip(
+                    gizmo.buildBandQuad(group),
+                    ScaleGizmo.HANDLE_FILL_COLOR,
+                    ScaleGizmo2DPainter.HANDLE_OPACITY,
+                );
             }
         }
         if (gizmo.isUniformHighlighted()) {
-            projector.addTriangles(gizmo.buildUniformTriangles(),
-                ScaleGizmo.HANDLE_FILL_COLOR, ScaleGizmo2DPainter.HANDLE_OPACITY);
+            projector.addTriangles(
+                gizmo.buildUniformTriangles(),
+                ScaleGizmo.HANDLE_FILL_COLOR,
+                ScaleGizmo2DPainter.HANDLE_OPACITY,
+            );
         }
     }
 }

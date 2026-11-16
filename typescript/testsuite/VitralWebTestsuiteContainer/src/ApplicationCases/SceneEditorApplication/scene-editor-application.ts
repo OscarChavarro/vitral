@@ -41,14 +41,11 @@ export class SceneEditorApplication implements AfterViewInit, OnDestroy {
     const args: string[] = new URLSearchParams(window.location.search).getAll('arg');
 
     try {
-      const application: HtmlWebGLSceneEditorApplication = await HtmlWebGLSceneEditorApplication.create(
-        this.rootRef.nativeElement,
-        args,
-        (): void => {
+      const application: HtmlWebGLSceneEditorApplication =
+        await HtmlWebGLSceneEditorApplication.create(this.rootRef.nativeElement, args, (): void => {
           this.application = null;
           this.deactivate.emit();
-        },
-      );
+        });
       if (this.destroyed) {
         application.closeApplication();
         return;

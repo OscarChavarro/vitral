@@ -13,6 +13,8 @@ import { Ray } from "../../../../element/Ray.js";
 import type { InfinitePlane } from "../../../../surface/InfinitePlane.js";
 import { PolyhedralBoundedSolid } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
+import { PolyhedralBoundedSolidFaceGeometry } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFaceGeometry.js";
+import { PolyhedralBoundedSolidGeometricValidator } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import { PolyhedralBoundedSolidTopologyEditing } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.js";
 import type { _PolyhedralBoundedSolidEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.js";
@@ -21,6 +23,8 @@ import type { _PolyhedralBoundedSolidHalfEdge } from "../../../../volume/polyhed
 import type { _PolyhedralBoundedSolidLoop } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.js";
 import type { _PolyhedralBoundedSolidVertex } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.js";
 import { _PolyhedralBoundedSolidOperator } from "../../_PolyhedralBoundedSolidOperator.js";
+import { NonManifoldBooleanResultException } from "../../NonManifoldBooleanResultException.js";
+import { _PolyhedralBoundedSolidInteriorOverlap } from "./_PolyhedralBoundedSolidInteriorOverlap.js";
 import { _PolyhedralBoundedSolidSetGeometricPredicateProcessor } from "../intersection/_PolyhedralBoundedSolidSetGeometricPredicateProcessor.js";
 
 /**
@@ -29,11 +33,11 @@ predicates. Within a single Boolean operation the operand solids are not
 mutated until the Mäntylä generate stage runs (after every preflight has
 either fired or declined), so each predicate is a pure function of
 `(a, b)` and may be computed once and reused across
-`runPartialCoplanarFaceAreaCase`, `runTouchingOnlyPreflightCase`,
+`runTouchingOnlyPreflightCase`,
 `runContainmentOnlyPreflightCase` and `runSetOpNoIntersectionCase`.
 
 <p>The cache only memoizes the heavy primitives (two
-`classifySolidAgainstSolid` scans, the interior-overlap grid test and
+`classifySolidAgainstSolid` scans, the interior-overlap test and
 the two edge/face intersection scans). It does not change any decision: a
 request that hits the cache returns exactly the value the uncached path
 would have recomputed.</p>
@@ -222,10 +226,6 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
             return false;
         }
 
-        if (cache.hasInteriorOverlap()) {
-            return false;
-        }
-
         if (cache.hasEdgeFaceIntersectionAB()) {
             return false;
         }
@@ -233,7 +233,10 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
             return false;
         }
 
-        if (_PolyhedralBoundedSolidSetNonIntersectingClassifier.hasPartialCoplanarFaceAreaOverlap(inSolidA, inSolidB)) {
+        // Solids that share part of a face and nothing else are a contact
+        // too (STACKED_BLOCKS): the interiors do not overlap. A union along
+        // such a face is glued by the pipeline; the caller keeps it out.
+        if (cache.hasInteriorOverlap()) {
             return false;
         }
 
@@ -261,16 +264,34 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB),
         );
 
-        const relation = _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyNoIntersectionRelation(
+        let relation = _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyNoIntersectionRelation(
             cache.aInB(),
             cache.bInA(),
         );
+
+        // Tangent containment (B-02 b): one solid inside the other with
+        // faces on the other's boundary. The vertex test cannot see it
+        // (every vertex is "on"), so it reports touching. Only the answers
+        // that need no cavity use it; B \ A-style cavities need the
+        // pipeline.
+        if (relation === _PolyhedralBoundedSolidSetNonIntersectingClassifier.NO_INT_RELATION_TOUCHING) {
+            if (_PolyhedralBoundedSolidSetNonIntersectingClassifier.isTangentlyContained(inSolidA, inSolidB)) {
+                relation = _PolyhedralBoundedSolidSetNonIntersectingClassifier.NO_INT_RELATION_A_IN_B;
+            } else if (
+                op !== _PolyhedralBoundedSolidOperator.SUBTRACT &&
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.isTangentlyContained(inSolidB, inSolidA)
+            ) {
+                relation = _PolyhedralBoundedSolidSetNonIntersectingClassifier.NO_INT_RELATION_B_IN_A;
+            }
+        }
 
         if (op === _PolyhedralBoundedSolidOperator.INTERSECTION) {
             if (relation === _PolyhedralBoundedSolidSetNonIntersectingClassifier.NO_INT_RELATION_A_IN_B) {
                 outRes.merge(inSolidA);
             } else if (relation === _PolyhedralBoundedSolidSetNonIntersectingClassifier.NO_INT_RELATION_B_IN_A) {
                 outRes.merge(inSolidB);
+            } else if (!cache.hasInteriorOverlap()) {
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.appendContactLaminae(inSolidA, inSolidB, outRes);
             }
             return outRes;
         }
@@ -280,6 +301,15 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
                 outRes.merge(inSolidB);
             } else if (relation === _PolyhedralBoundedSolidSetNonIntersectingClassifier.NO_INT_RELATION_B_IN_A) {
                 outRes.merge(inSolidA);
+            } else if (relation === _PolyhedralBoundedSolidSetNonIntersectingClassifier.NO_INT_RELATION_TOUCHING) {
+                // Two shells sharing only an edge or a vertex: a
+                // non-manifold result, rejected by design (B-04). Face
+                // contact never gets here: the pipeline glues it.
+                throw new NonManifoldBooleanResultException(
+                    "UNION of solids touching only along edges or at " +
+                        "vertices is non-manifold (two shells sharing a " +
+                        "boundary point); rejected",
+                );
             } else {
                 outRes.merge(inSolidA);
                 outRes.merge(inSolidB);
@@ -301,52 +331,39 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
         return outRes;
     }
 
-    public static runPartialCoplanarFaceAreaCase(
+    /**
+    Lamina policy for the intersection of solids that share part of a face
+    and nothing else (STACKED_BLOCKS): the shared part is returned as
+    laminae, zero volume, valid and easy to display, not as the regularised
+    empty set. A contact whose area is below the collapsed face threshold
+    gives no lamina: a collapsed lamina is not a valid result (see
+    _GeometricCollapsedLaminaStrategy).
+
+    <p>This is part of the "no intersections found" resolution of the
+    pipeline ([MANT1988] 15.4). Until plan-stage11 Phase E a preflight
+    answered these pairs before generate and classify ran.</p>
+    */
+    private static appendContactLaminae(
         inSolidA: PolyhedralBoundedSolid,
         inSolidB: PolyhedralBoundedSolid,
         outRes: PolyhedralBoundedSolid,
-        op: number,
-        cache?: _PreflightCache,
-    ): PolyhedralBoundedSolid | null {
-        if (cache === undefined) {
-            return _PolyhedralBoundedSolidSetNonIntersectingClassifier.runPartialCoplanarFaceAreaCase(
-                inSolidA,
-                inSolidB,
-                outRes,
-                op,
-                _PolyhedralBoundedSolidSetNonIntersectingClassifier.newPreflightCache(inSolidA, inSolidB),
-            );
-        }
-
-        let i: number;
-
-        if (op === _PolyhedralBoundedSolidOperator.UNION) {
-            return null;
-        }
-
-        _PolyhedralBoundedSolidOperator.setNumericContext(
-            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB),
-        );
-
-        if (cache.hasInteriorOverlap() || cache.hasEdgeFaceIntersectionAB() || cache.hasEdgeFaceIntersectionBA()) {
-            return null;
-        }
-
+    ): void {
         const contactPolygons =
             _PolyhedralBoundedSolidSetNonIntersectingClassifier.partialCoplanarFaceAreaOverlapPolygons(
                 inSolidA,
                 inSolidB,
             );
-        if (contactPolygons.isEmpty()) {
-            return null;
-        }
-
-        if (op === _PolyhedralBoundedSolidOperator.SUBTRACT) {
-            outRes.merge(inSolidA);
-            return outRes;
-        }
+        let i: number;
 
         for (i = 0; i < contactPolygons.size(); i++) {
+            if (
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.polygonArea(contactPolygons.get(i)) <
+                PolyhedralBoundedSolidGeometricValidator.collapsedFaceAreaThreshold(
+                    _PolyhedralBoundedSolidOperator.numericContext,
+                )
+            ) {
+                continue;
+            }
             const lamina = _PolyhedralBoundedSolidSetNonIntersectingClassifier.createLaminaFromPolygon(
                 contactPolygons.get(i),
             );
@@ -354,8 +371,6 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
                 outRes.merge(lamina);
             }
         }
-
-        return outRes;
     }
 
     private static compareToZero(value: number): number {
@@ -367,30 +382,25 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
     }
 
     /**
-    Precomputes the containing plane of every face of `solid`, indexed by
-    face position. Point classification tests many points against the same
-    unmutated solid, so computing each plane once (instead of once per point per
-    face) removes the dominant Newell/tolerance-context recompute from the hot
-    path. The returned array is only valid while `solid` is not mutated.
+    Precomputes the containing plane and the bounding box of every face of
+    `solid`, indexed by face position. Point classification tests many
+    points against the same unmutated solid, so computing each plane once
+    (instead of once per point per face) removes the dominant
+    Newell/tolerance-context recompute from the hot path, and the box skips
+    the point-in-face test for points far from the face (Stage G). The
+    returned array is only valid while `solid` is not mutated.
     */
-    private static precomputeFacePlanes(solid: PolyhedralBoundedSolid | null): (InfinitePlane | null)[] {
-        let n: number;
-        let i: number;
-
+    private static precomputeFacePlanes(solid: PolyhedralBoundedSolid | null): PolyhedralBoundedSolidFaceGeometry[] {
         if (solid === null) {
             return [];
         }
-        n = solid.getPolygonsList().size();
-        const planes = new Array<InfinitePlane | null>(n);
-        for (i = 0; i < n; i++) {
-            planes[i] = solid.getPolygonsList().get(i)!.getContainingPlane();
-        }
-        return planes;
+        return PolyhedralBoundedSolidFaceGeometry.of(solid);
     }
 
-    private static classifyPointAgainstSolid(
+    /** @internal Java package-private (the three-argument overload). */
+    public static classifyPointAgainstSolid(
         solid: PolyhedralBoundedSolid | null,
-        facePlanesOrPoint: (InfinitePlane | null)[] | Vector3Dd,
+        facePlanesOrPoint: PolyhedralBoundedSolidFaceGeometry[] | Vector3Dd,
         maybePoint?: Vector3Dd,
     ): number {
         if (maybePoint === undefined) {
@@ -401,7 +411,7 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
             );
         }
 
-        const facePlanes = facePlanesOrPoint as (InfinitePlane | null)[];
+        const facePlanes = facePlanesOrPoint as PolyhedralBoundedSolidFaceGeometry[];
         const point = maybePoint;
         let i: number;
         let j: number;
@@ -416,11 +426,11 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
 
         for (i = 0; i < solid.getPolygonsList().size(); i++) {
             face = solid.getPolygonsList().get(i)!;
-            const facePlane = facePlanes[i]!;
-            if (facePlane === null || facePlane === undefined) {
+            const facePlane = facePlanes[i]!.getPlane();
+            if (facePlane === null) {
                 continue;
             }
-            if (Math.abs(facePlane.pointDistance(point)) <= eps) {
+            if (Math.abs(facePlane.pointDistance(point)) <= eps && !facePlanes[i]!.projectionExcludes(point, eps)) {
                 if (face.testPointInside(point, eps, facePlane) !== Geometry.OUTSIDE) {
                     return Geometry.LIMIT;
                 }
@@ -441,8 +451,8 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
 
             for (i = 0; i < solid.getPolygonsList().size(); i++) {
                 face = solid.getPolygonsList().get(i)!;
-                const facePlane = facePlanes[i]!;
-                if (facePlane === null || facePlane === undefined) {
+                const facePlane = facePlanes[i]!.getPlane();
+                if (facePlane === null) {
                     ambiguous = true;
                     break;
                 }
@@ -456,6 +466,9 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
                 }
 
                 const pi = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
+                if (facePlanes[i]!.projectionExcludes(pi, eps)) {
+                    continue;
+                }
                 const status = face.testPointInside(pi, eps, facePlane);
                 if (status === Geometry.LIMIT) {
                     ambiguous = true;
@@ -495,314 +508,86 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
         return Geometry.LIMIT;
     }
 
-    private static overlappingBounds(solidA: PolyhedralBoundedSolid, solidB: PolyhedralBoundedSolid): number[] {
-        const a = solidA.getMinMax();
-        const b = solidB.getMinMax();
-
-        return [
-            Math.max(a[0]!, b[0]!),
-            Math.max(a[1]!, b[1]!),
-            Math.max(a[2]!, b[2]!),
-            Math.min(a[3]!, b[3]!),
-            Math.min(a[4]!, b[4]!),
-            Math.min(a[5]!, b[5]!),
-        ];
-    }
-
-    private static hasPositiveOverlapVolume(bounds: number[]): boolean {
-        const eps = _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon();
-
-        return bounds[3]! - bounds[0]! > eps && bounds[4]! - bounds[1]! > eps && bounds[5]! - bounds[2]! > eps;
+    /**
+    Witness test used to tell a right empty result from a lost solid
+    (Fable5.2Analysis.md Stage F step 4): true when some point is interior
+    to both solids, so their intersection cannot be empty. The operands
+    must be intact (not consumed by a set operation).
+    @internal Java package-private.
+    */
+    public static interiorsOverlap(solidA: PolyhedralBoundedSolid, solidB: PolyhedralBoundedSolid): boolean {
+        _PolyhedralBoundedSolidOperator.setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(solidA, solidB),
+        );
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier.hasConfirmedInteriorOverlap(solidA, solidB);
     }
 
     /**
-    Cheap, constant-size existence probe for a point interior to both solids.
-    Tests the 27 quarter/center/three-quarter combinations of the overlap AABB
-    `bounds` (a strict superset of the per-axis center samples the full
-    grid uses). Returns `true` only on a genuine INSIDE/INSIDE witness, so
-    a positive result is always exact; a negative result is inconclusive and the
-    caller must still run the exhaustive grid.
+    Witness test for A \ B: true when a vertex or a face interior witness
+    of `solidA` lies strictly outside `solidB`. A boundary point of A
+    outside B has interior points of A around it that are outside B, so
+    A \ B cannot be empty. (The converse does not hold, so a false answer
+    proves nothing.)
+    @internal Java package-private.
     */
-    private static hasInteriorOverlapWitnessInAabb(
-        bounds: number[],
-        solidA: PolyhedralBoundedSolid,
-        solidB: PolyhedralBoundedSolid,
-        planesA: (InfinitePlane | null)[],
-        planesB: (InfinitePlane | null)[],
-    ): boolean {
-        const sx = _PolyhedralBoundedSolidSetNonIntersectingClassifier.axisProbeCoordinates(bounds[0]!, bounds[3]!);
-        const sy = _PolyhedralBoundedSolidSetNonIntersectingClassifier.axisProbeCoordinates(bounds[1]!, bounds[4]!);
-        const sz = _PolyhedralBoundedSolidSetNonIntersectingClassifier.axisProbeCoordinates(bounds[2]!, bounds[5]!);
-        let i: number;
-        let j: number;
-        let k: number;
-
-        for (i = 0; i < sx.length; i++) {
-            for (j = 0; j < sy.length; j++) {
-                for (k = 0; k < sz.length; k++) {
-                    const sample = new Vector3Dd(sx[i]!, sy[j]!, sz[k]!);
-                    if (
-                        _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
-                            solidA,
-                            planesA,
-                            sample,
-                        ) === Geometry.INSIDE &&
-                        _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
-                            solidB,
-                            planesB,
-                            sample,
-                        ) === Geometry.INSIDE
-                    ) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private static axisProbeCoordinates(min: number, max: number): number[] {
-        const span = max - min;
-
-        return [min + span / 4.0, min + span / 2.0, max - span / 4.0];
-    }
-
-    private static vertexCoordinate(vertex: _PolyhedralBoundedSolidVertex, axis: number): number {
-        if (axis === 0) {
-            return vertex.position.x();
-        }
-        if (axis === 1) {
-            return vertex.position.y();
-        }
-        return vertex.position.z();
-    }
-
-    private static appendInteriorVertexCoordinates(
-        coords: ArrayList<number>,
-        solid: PolyhedralBoundedSolid | null,
-        axis: number,
-        min: number,
-        max: number,
-        eps: number,
-    ): void {
+    public static hasBoundaryPointOutside(solidA: PolyhedralBoundedSolid, solidB: PolyhedralBoundedSolid): boolean {
         let i: number;
 
-        if (solid === null) {
-            return;
-        }
-
-        for (i = 0; i < solid.getVerticesList().size(); i++) {
-            const c = _PolyhedralBoundedSolidSetNonIntersectingClassifier.vertexCoordinate(
-                solid.getVerticesList().get(i)!,
-                axis,
-            );
-            if (c > min + eps && c < max - eps) {
-                coords.add(c);
-            }
-        }
-    }
-
-    private static appendUniqueInteriorSample(
-        samples: ArrayList<number>,
-        value: number,
-        min: number,
-        max: number,
-        eps: number,
-    ): void {
-        let i: number;
-
-        if (value <= min + eps || value >= max - eps) {
-            return;
-        }
-
-        for (i = 0; i < samples.size(); i++) {
-            if (Math.abs(samples.get(i) - value) <= eps) {
-                return;
-            }
-        }
-        samples.add(value);
-    }
-
-    private static sampleCoordinates(
-        min: number,
-        max: number,
-        solidA: PolyhedralBoundedSolid,
-        solidB: PolyhedralBoundedSolid,
-        axis: number,
-    ): number[] {
-        const eps = _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon();
-        const center = (min + max) / 2.0;
-        const quarter = min + (max - min) / 4.0;
-        const threeQuarters = max - (max - min) / 4.0;
-        let i: number;
-
-        const coords = new ArrayList<number>();
-        coords.add(min);
-        coords.add(max);
-        _PolyhedralBoundedSolidSetNonIntersectingClassifier.appendInteriorVertexCoordinates(
-            coords,
-            solidA,
-            axis,
-            min,
-            max,
-            eps,
+        _PolyhedralBoundedSolidOperator.setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(solidA, solidB),
         );
-        _PolyhedralBoundedSolidSetNonIntersectingClassifier.appendInteriorVertexCoordinates(
-            coords,
-            solidB,
-            axis,
-            min,
-            max,
-            eps,
-        );
-        Collections.sort(coords);
-
-        const uniqueCoords = new ArrayList<number>();
-        for (i = 0; i < coords.size(); i++) {
-            const c = coords.get(i);
-            if (uniqueCoords.isEmpty() || Math.abs(uniqueCoords.get(uniqueCoords.size() - 1) - c) > eps) {
-                uniqueCoords.add(c);
-            }
-        }
-
-        const samples = new ArrayList<number>();
-        _PolyhedralBoundedSolidSetNonIntersectingClassifier.appendUniqueInteriorSample(samples, quarter, min, max, eps);
-        _PolyhedralBoundedSolidSetNonIntersectingClassifier.appendUniqueInteriorSample(samples, center, min, max, eps);
-        _PolyhedralBoundedSolidSetNonIntersectingClassifier.appendUniqueInteriorSample(
-            samples,
-            threeQuarters,
-            min,
-            max,
-            eps,
-        );
-
-        for (i = 0; i < uniqueCoords.size() - 1; i++) {
-            const left = uniqueCoords.get(i);
-            const right = uniqueCoords.get(i + 1);
-            if (right - left > eps) {
-                _PolyhedralBoundedSolidSetNonIntersectingClassifier.appendUniqueInteriorSample(
-                    samples,
-                    (left + right) / 2.0,
-                    min,
-                    max,
-                    eps,
-                );
-            }
-        }
-
-        Collections.sort(samples);
-        if (samples.isEmpty()) {
-            return [center];
-        }
-
-        const result = new Array<number>(samples.size());
-        for (i = 0; i < samples.size(); i++) {
-            result[i] = samples.get(i);
-        }
-        return result;
-    }
-
-    public static hasConfirmedInteriorOverlap(
-        solidA: PolyhedralBoundedSolid | null,
-        solidB: PolyhedralBoundedSolid | null,
-    ): boolean {
-        let bounds: number[];
-        let xs: number[];
-        let ys: number[];
-        let zs: number[];
-        let i: number;
-        let j: number;
-        let k: number;
-
-        if (solidA === null || solidB === null) {
-            return false;
-        }
-
-        bounds = _PolyhedralBoundedSolidSetNonIntersectingClassifier.overlappingBounds(solidA, solidB);
-        if (!_PolyhedralBoundedSolidSetNonIntersectingClassifier.hasPositiveOverlapVolume(bounds)) {
-            return false;
-        }
-
-        // Precompute each solid's face planes once; every probe/grid point is
-        // classified against the same unmutated solids, so this removes the
-        // per-point Newell/tolerance-context recompute (P2 scoped cache).
-        const planesA = _PolyhedralBoundedSolidSetNonIntersectingClassifier.precomputeFacePlanes(solidA);
         const planesB = _PolyhedralBoundedSolidSetNonIntersectingClassifier.precomputeFacePlanes(solidB);
-
-        // P1.2 — cheap early-positive pass. hasConfirmedInteriorOverlap is an
-        // existence test ("is there a point interior to both solids"); any
-        // witness gives the same answer. Probe a constant-size set of likely
-        // interior candidates (the 27 quarter/center/three-quarter combinations
-        // of the overlap AABB) before paying for the full vertex-derived grid,
-        // which can reach 10^4-10^6 points for the bowl. This only returns true
-        // on a genuine INSIDE/INSIDE witness; the exhaustive grid below remains
-        // the exact fallback for the negative case.
-        if (
-            _PolyhedralBoundedSolidSetNonIntersectingClassifier.hasInteriorOverlapWitnessInAabb(
-                bounds,
-                solidA,
-                solidB,
-                planesA,
-                planesB,
-            )
-        ) {
-            return true;
-        }
-
-        xs = _PolyhedralBoundedSolidSetNonIntersectingClassifier.sampleCoordinates(
-            bounds[0]!,
-            bounds[3]!,
-            solidA,
-            solidB,
-            0,
-        );
-        ys = _PolyhedralBoundedSolidSetNonIntersectingClassifier.sampleCoordinates(
-            bounds[1]!,
-            bounds[4]!,
-            solidA,
-            solidB,
-            1,
-        );
-        zs = _PolyhedralBoundedSolidSetNonIntersectingClassifier.sampleCoordinates(
-            bounds[2]!,
-            bounds[5]!,
-            solidA,
-            solidB,
-            2,
-        );
-
-        for (i = 0; i < xs.length; i++) {
-            for (j = 0; j < ys.length; j++) {
-                for (k = 0; k < zs.length; k++) {
-                    const sample = new Vector3Dd(xs[i]!, ys[j]!, zs[k]!);
-                    if (
-                        _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
-                            solidA,
-                            planesA,
-                            sample,
-                        ) === Geometry.INSIDE &&
-                        _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
-                            solidB,
-                            planesB,
-                            sample,
-                        ) === Geometry.INSIDE
-                    ) {
-                        return true;
-                    }
-                }
+        for (i = 0; i < solidA.getVerticesList().size(); i++) {
+            if (
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+                    solidB,
+                    planesB,
+                    solidA.getVerticesList().get(i)!.position,
+                ) === Geometry.OUTSIDE
+            ) {
+                return true;
             }
         }
-
-        return false;
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier.someFaceWitnessIsOutside(solidA, solidB, planesB);
     }
 
+    /**
+    True when some point is strictly inside both solids. Decided from the
+    boundaries by `_PolyhedralBoundedSolidInteriorOverlap`, without
+    sampling.
+    @internal Java private; public here because `_PreflightCache` is a
+    module-level class.
+    */
+    public static hasConfirmedInteriorOverlap(solidA: PolyhedralBoundedSolid, solidB: PolyhedralBoundedSolid): boolean {
+        return _PolyhedralBoundedSolidInteriorOverlap.interiorsOverlap(solidA, solidB);
+    }
+
+    /**
+    Classifies solid A against solid B for the "no proper intersection"
+    preflights (Fable5.2Analysis.md Stage D step 1, defect B-03).
+    - INSIDE: A is contained in B. No vertex of A is outside B, at least
+      one is strictly inside, and a witness point interior to every face of
+      A is not outside B. The witness test separates tangent containment
+      from a solid whose edges lie in a face of B while part of it sticks
+      out (B-03): there every vertex is in or on B, yet a face is not.
+    - LIMIT: A touches B, or straddles its boundary (vertices on both
+      sides, or a face witness outside). Callers must not take LIMIT as
+      containment; the touching preflight additionally requires that the
+      interiors do not overlap.
+    - OUTSIDE: every vertex of A is outside B.
+    Before this rule the first vertex found inside made A "contained", even
+    with other vertices outside.
+    @internal Java private; public here because `_PreflightCache` is a
+    module-level class.
+    */
     public static classifySolidAgainstSolid(
         solidA: PolyhedralBoundedSolid | null,
         solidB: PolyhedralBoundedSolid | null,
     ): number {
         let i: number;
-        let sawLimit = false;
-        let sawOutside = false;
+        let inside = 0;
+        let limit = 0;
+        let outside = 0;
 
         if (solidA === null || solidA.getVerticesList().size() < 1) {
             return Geometry.OUTSIDE;
@@ -817,22 +602,171 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
                 v.position,
             );
             if (status === Geometry.INSIDE) {
-                return Geometry.INSIDE;
-            }
-            if (status === Geometry.LIMIT) {
-                sawLimit = true;
+                inside++;
+            } else if (status === Geometry.LIMIT) {
+                limit++;
             } else {
-                sawOutside = true;
+                outside++;
             }
         }
 
-        if (sawLimit) {
+        if (outside > 0) {
+            return inside > 0 || limit > 0 ? Geometry.LIMIT : Geometry.OUTSIDE;
+        }
+        if (inside === 0) {
             return Geometry.LIMIT;
         }
-        if (sawOutside) {
-            return Geometry.OUTSIDE;
+        if (_PolyhedralBoundedSolidSetNonIntersectingClassifier.someFaceWitnessIsOutside(solidA, solidB!, planesB)) {
+            return Geometry.LIMIT;
         }
-        return Geometry.OUTSIDE;
+        return Geometry.INSIDE;
+    }
+
+    /**
+    True when no vertex and no face witness of `inner` is outside
+    `outer`, and at least one face witness is strictly inside it:
+    containment with boundary contact.
+    */
+    private static isTangentlyContained(inner: PolyhedralBoundedSolid, outer: PolyhedralBoundedSolid): boolean {
+        let i: number;
+        let someInside = false;
+        const planes = _PolyhedralBoundedSolidSetNonIntersectingClassifier.precomputeFacePlanes(outer);
+
+        for (i = 0; i < inner.getVerticesList().size(); i++) {
+            if (
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+                    outer,
+                    planes,
+                    inner.getVerticesList().get(i)!.position,
+                ) === Geometry.OUTSIDE
+            ) {
+                return false;
+            }
+        }
+        for (i = 0; i < inner.getPolygonsList().size(); i++) {
+            const witness = _PolyhedralBoundedSolidSetNonIntersectingClassifier.faceInteriorWitness(
+                inner.getPolygonsList().get(i)!,
+            );
+            if (witness === null) {
+                continue;
+            }
+            const status = _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+                outer,
+                planes,
+                witness,
+            );
+            if (status === Geometry.OUTSIDE) {
+                return false;
+            }
+            if (status === Geometry.INSIDE) {
+                someInside = true;
+            }
+        }
+        return someInside;
+    }
+
+    /**
+    True when some vertex of `inner`, or a point inside one of its faces,
+    lies on the boundary of `outer`. Meant for a solid already known to be
+    contained in `outer`.
+    @internal Java package-private.
+    */
+    public static touchesBoundaryFromInside(inner: PolyhedralBoundedSolid, outer: PolyhedralBoundedSolid): boolean {
+        let i: number;
+
+        _PolyhedralBoundedSolidOperator.setNumericContext(PolyhedralBoundedSolidNumericPolicy.forSolids(inner, outer));
+        const planes = _PolyhedralBoundedSolidSetNonIntersectingClassifier.precomputeFacePlanes(outer);
+        for (i = 0; i < inner.getVerticesList().size(); i++) {
+            if (
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+                    outer,
+                    planes,
+                    inner.getVerticesList().get(i)!.position,
+                ) === Geometry.LIMIT
+            ) {
+                return true;
+            }
+        }
+        for (i = 0; i < inner.getPolygonsList().size(); i++) {
+            const witness = _PolyhedralBoundedSolidSetNonIntersectingClassifier.faceInteriorWitness(
+                inner.getPolygonsList().get(i)!,
+            );
+            if (
+                witness !== null &&
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+                    outer,
+                    planes,
+                    witness,
+                ) === Geometry.LIMIT
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static someFaceWitnessIsOutside(
+        solidA: PolyhedralBoundedSolid,
+        solidB: PolyhedralBoundedSolid,
+        planesB: PolyhedralBoundedSolidFaceGeometry[],
+    ): boolean {
+        let i: number;
+
+        for (i = 0; i < solidA.getPolygonsList().size(); i++) {
+            const witness = _PolyhedralBoundedSolidSetNonIntersectingClassifier.faceInteriorWitness(
+                solidA.getPolygonsList().get(i)!,
+            );
+            if (
+                witness !== null &&
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+                    solidB,
+                    planesB,
+                    witness,
+                ) === Geometry.OUTSIDE
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+    A point strictly inside the face: the centroid of the first triangle of
+    consecutive outer-loop vertices whose centroid the face classifies as
+    INSIDE (holes and concave corners are rejected by that test).
+    @return the witness, or null when no such triangle exists
+    @internal Java package-private.
+    */
+    public static faceInteriorWitness(face: _PolyhedralBoundedSolidFace | null): Vector3Dd | null {
+        let loop: _PolyhedralBoundedSolidLoop | null;
+        let he: _PolyhedralBoundedSolidHalfEdge;
+        let plane: InfinitePlane | null;
+        const eps = _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon();
+
+        if (face === null || face.boundariesList.size() < 1) {
+            return null;
+        }
+        plane = face.getContainingPlane();
+        loop = face.boundariesList.get(0);
+        if (plane === null || loop === null || loop.boundaryStartHalfEdge === null) {
+            return null;
+        }
+        he = loop.boundaryStartHalfEdge;
+        do {
+            const n1 = he.next();
+            if (n1 === null || n1.next() === null) {
+                return null;
+            }
+            const c = he.startingVertex.position
+                .add(n1.startingVertex.position)
+                .add(n1.next()!.startingVertex.position)
+                .multiply(1.0 / 3.0);
+            if (face.testPointInside(c, eps, plane) === Geometry.INSIDE) {
+                return c;
+            }
+            he = n1;
+        } while (he !== loop.boundaryStartHalfEdge);
+        return null;
     }
 
     private static classifyNoIntersectionRelation(aInB: number, bInA: number): number {
@@ -865,11 +799,13 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
         let s1: number;
         let s2: number;
         let p: Vector3Dd;
+        let otherFaces: PolyhedralBoundedSolidFaceGeometry[];
 
         if (current === null || other === null) {
             return false;
         }
 
+        otherFaces = _PolyhedralBoundedSolidSetNonIntersectingClassifier.precomputeFacePlanes(other);
         for (i = 0; i < current.getEdgesList().size(); i++) {
             edge = current.getEdgesList().get(i)!;
             if (edge === null || edge.rightHalf === null || edge.leftHalf === null) {
@@ -886,7 +822,7 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
                 if (face === null) {
                     continue;
                 }
-                const facePlane = face.getContainingPlane();
+                const facePlane = otherFaces[j]!.getPlane();
                 if (facePlane === null) {
                     continue;
                 }
@@ -915,31 +851,57 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
         return false;
     }
 
-    private static hasPartialCoplanarFaceAreaOverlap(
-        solidA: PolyhedralBoundedSolid | null,
-        solidB: PolyhedralBoundedSolid | null,
+    /**
+    True when a face of A and a face of B lie on the same plane with
+    opposite orientation and share a region of positive area: the solids
+    touch along a face (Fable5.2Analysis.md B-04). Two cubes sharing a whole
+    face are detected through the interior witness of one face, since none
+    of their vertices or edge midpoints is inside the other face.
+    @internal Java package-private.
+    */
+    public static hasOppositeCoplanarFaceAreaContact(
+        solidA: PolyhedralBoundedSolid,
+        solidB: PolyhedralBoundedSolid,
     ): boolean {
         let i: number;
         let j: number;
 
-        if (solidA === null || solidB === null) {
-            return false;
-        }
-
+        _PolyhedralBoundedSolidOperator.setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(solidA, solidB),
+        );
         for (i = 0; i < solidA.getPolygonsList().size(); i++) {
             const faceA = solidA.getPolygonsList().get(i)!;
             for (j = 0; j < solidB.getPolygonsList().size(); j++) {
                 const faceB = solidB.getPolygonsList().get(j)!;
                 if (
-                    _PolyhedralBoundedSolidSetNonIntersectingClassifier.coplanarFaces(faceA, faceB) &&
-                    _PolyhedralBoundedSolidSetNonIntersectingClassifier.partialCoplanarFaceAreaOverlap(faceA, faceB)
+                    !_PolyhedralBoundedSolidSetNonIntersectingClassifier.coplanarFaces(faceA, faceB) ||
+                    faceA.getContainingPlane()!.getNormal().dotProduct(faceB.getContainingPlane()!.getNormal()) >= 0.0
+                ) {
+                    continue;
+                }
+                if (
+                    _PolyhedralBoundedSolidSetNonIntersectingClassifier.partialCoplanarFaceAreaOverlap(faceA, faceB) ||
+                    _PolyhedralBoundedSolidSetNonIntersectingClassifier.witnessInsideFace(faceA, faceB) ||
+                    _PolyhedralBoundedSolidSetNonIntersectingClassifier.witnessInsideFace(faceB, faceA)
                 ) {
                     return true;
                 }
             }
         }
-
         return false;
+    }
+
+    private static witnessInsideFace(
+        source: _PolyhedralBoundedSolidFace,
+        target: _PolyhedralBoundedSolidFace,
+    ): boolean {
+        const witness = _PolyhedralBoundedSolidSetNonIntersectingClassifier.faceInteriorWitness(source);
+
+        return (
+            witness !== null &&
+            target.testPointInside(witness, _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon()) ===
+                Geometry.INSIDE
+        );
     }
 
     private static partialCoplanarFaceAreaOverlapPolygons(
@@ -1260,6 +1222,22 @@ export class _PolyhedralBoundedSolidSetNonIntersectingClassifier extends _Polyhe
         }
 
         return Math.abs(accumulator.dotProduct(normal.normalized())) * 0.5;
+    }
+
+    private static polygonArea(points: ArrayList<Vector3Dd>): number {
+        let nx = 0.0;
+        let ny = 0.0;
+        let nz = 0.0;
+        let i: number;
+
+        for (i = 0; i < points.size(); i++) {
+            const p = points.get(i);
+            const q = points.get((i + 1) % points.size());
+            nx += (p.y() - q.y()) * (p.z() + q.z());
+            ny += (p.z() - q.z()) * (p.x() + q.x());
+            nz += (p.x() - q.x()) * (p.y() + q.y());
+        }
+        return 0.5 * Math.sqrt(nx * nx + ny * ny + nz * nz);
     }
 
     private static createLaminaFromPolygon(points: ArrayList<Vector3Dd>): PolyhedralBoundedSolid {

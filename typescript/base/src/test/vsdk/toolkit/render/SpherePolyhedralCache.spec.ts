@@ -19,23 +19,27 @@ describe("SpherePolyhedralCache", () => {
         const p: Float32Array = entry.getPositions();
         const n: Float32Array = entry.getNormals();
         for (let i: number = 0; i < entry.getVertexCount(); i++) {
-            const length: number = Math.sqrt(p[3*i]!*p[3*i]! + p[3*i+1]!*p[3*i+1]! + p[3*i+2]!*p[3*i+2]!);
+            const length: number = Math.sqrt(
+                p[3 * i]! * p[3 * i]! + p[3 * i + 1]! * p[3 * i + 1]! + p[3 * i + 2]! * p[3 * i + 2]!,
+            );
 
             expect(length).toBeCloseTo(2.0, 5);
             // The normal of the parametric surface is the radial direction
-            expect(n[3*i]!).toBeCloseTo(p[3*i]! / length, 5);
-            expect(n[3*i+1]!).toBeCloseTo(p[3*i+1]! / length, 5);
-            expect(n[3*i+2]!).toBeCloseTo(p[3*i+2]! / length, 5);
+            expect(n[3 * i]!).toBeCloseTo(p[3 * i]! / length, 5);
+            expect(n[3 * i + 1]!).toBeCloseTo(p[3 * i + 1]! / length, 5);
+            expect(n[3 * i + 2]!).toBeCloseTo(p[3 * i + 2]! / length, 5);
         }
         for (let t: number = 0; t < entry.getVertexCount(); t += 3) {
-            const ux: number = p[3*t+3]! - p[3*t]!;
-            const uy: number = p[3*t+4]! - p[3*t+1]!;
-            const uz: number = p[3*t+5]! - p[3*t+2]!;
-            const vx: number = p[3*t+6]! - p[3*t]!;
-            const vy: number = p[3*t+7]! - p[3*t+1]!;
-            const vz: number = p[3*t+8]! - p[3*t+2]!;
-            const outward: number = (uy*vz - uz*vy) * p[3*t]! + (uz*vx - ux*vz) * p[3*t+1]! +
-                (ux*vy - uy*vx) * p[3*t+2]!;
+            const ux: number = p[3 * t + 3]! - p[3 * t]!;
+            const uy: number = p[3 * t + 4]! - p[3 * t + 1]!;
+            const uz: number = p[3 * t + 5]! - p[3 * t + 2]!;
+            const vx: number = p[3 * t + 6]! - p[3 * t]!;
+            const vy: number = p[3 * t + 7]! - p[3 * t + 1]!;
+            const vz: number = p[3 * t + 8]! - p[3 * t + 2]!;
+            const outward: number =
+                (uy * vz - uz * vy) * p[3 * t]! +
+                (uz * vx - ux * vz) * p[3 * t + 1]! +
+                (ux * vy - uy * vx) * p[3 * t + 2]!;
 
             expect(outward).toBeGreaterThan(0.0);
         }
@@ -48,8 +52,8 @@ describe("SpherePolyhedralCache", () => {
 
         // Act / Assert
         for (let t: number = 0; t < entry.getVertexCount(); t += 3) {
-            const min: number = Math.min(uv[2*t]!, uv[2*t+2]!, uv[2*t+4]!);
-            const max: number = Math.max(uv[2*t]!, uv[2*t+2]!, uv[2*t+4]!);
+            const min: number = Math.min(uv[2 * t]!, uv[2 * t + 2]!, uv[2 * t + 4]!);
+            const max: number = Math.max(uv[2 * t]!, uv[2 * t + 2]!, uv[2 * t + 4]!);
 
             expect(max - min).toBeLessThanOrEqual(1.0 / 16 + 1e-5);
         }

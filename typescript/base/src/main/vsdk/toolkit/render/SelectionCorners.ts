@@ -81,7 +81,11 @@ export class SelectionCorners {
             const atMaxX: boolean = (corner & 1) !== 0;
             const atMaxY: boolean = (corner & 2) !== 0;
             const atMaxZ: boolean = (corner & 4) !== 0;
-            const origin = new Vector3Dd(atMaxX ? max.x() : min.x(), atMaxY ? max.y() : min.y(), atMaxZ ? max.z() : min.z());
+            const origin = new Vector3Dd(
+                atMaxX ? max.x() : min.x(),
+                atMaxY ? max.y() : min.y(),
+                atMaxZ ? max.z() : min.z(),
+            );
             const sx: number = atMaxX ? -line.x() : line.x();
             const sy: number = atMaxY ? -line.y() : line.y();
             const sz: number = atMaxZ ? -line.z() : line.z();

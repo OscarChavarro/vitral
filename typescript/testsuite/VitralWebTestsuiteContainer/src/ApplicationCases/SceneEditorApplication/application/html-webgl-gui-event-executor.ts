@@ -48,7 +48,10 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
     if (result === CommandResult.FAILED) {
       return false;
     }
-    if (result === CommandResult.NOT_HANDLED && !(await this.executeHtmlCommand(label, mainWindowWidget))) {
+    if (
+      result === CommandResult.NOT_HANDLED &&
+      !(await this.executeHtmlCommand(label, mainWindowWidget))
+    ) {
       return false;
     }
 
@@ -61,7 +64,10 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
    * Executes the commands that need the browser.
    * @return false if the command failed
    */
-  private async executeHtmlCommand(label: string, _mainWindowWidget: HTMLElement | null): Promise<boolean> {
+  private async executeHtmlCommand(
+    label: string,
+    _mainWindowWidget: HTMLElement | null,
+  ): Promise<boolean> {
     //- FILE ----------------------------------------------------------
     if (label === 'IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT') {
       this.showTangibleInterfaceDialog();
@@ -69,8 +75,12 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
       this.parent.closeApplication();
     } else if (label === 'IDC_IMPORT_OBJECTS_FROM_FILE') {
       const jfc: HtmlFileChooser = new HtmlFileChooser(this.guiState().getReadFolder());
-      jfc.addChoosableFileFilter(new HtmlFileFilter('3ds', '3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file'));
-      jfc.addChoosableFileFilter(new HtmlFileFilter('vtk', 'vtk Kitware vtk legacy binary file (mesh only)'));
+      jfc.addChoosableFileFilter(
+        new HtmlFileFilter('3ds', '3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file'),
+      );
+      jfc.addChoosableFileFilter(
+        new HtmlFileFilter('vtk', 'vtk Kitware vtk legacy binary file (mesh only)'),
+      );
       jfc.addChoosableFileFilter(new HtmlFileFilter('gts', 'gts Gts mesh ASCII file'));
       jfc.addChoosableFileFilter(new HtmlFileFilter('obj', 'obj Alias/Wavefront text mesh'));
       jfc.addChoosableFileFilter(new HtmlFileFilter('ply', 'ply Ply mesh'));
@@ -85,7 +95,12 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
             this.guiState().setReadFolder(parentPath);
           }
         } catch (ex) {
-          Logger.reportMessage(this, VSDK.WARNING, 'executeCommand', 'Failed to read file...\n' + ex);
+          Logger.reportMessage(
+            this,
+            VSDK.WARNING,
+            'executeCommand',
+            'Failed to read file...\n' + ex,
+          );
           return false;
         }
       }
@@ -97,7 +112,10 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
       return this.exportObjects(ExportFormat.VTK);
     }
     //- RENDERING -----------------------------------------------------
-    else if (label === 'Select palette for depthmap display' || label === 'IDC_RENDERING_SELECTPALETTEDEPTH') {
+    else if (
+      label === 'Select palette for depthmap display' ||
+      label === 'IDC_RENDERING_SELECTPALETTEDEPTH'
+    ) {
       const jfc: HtmlFileChooser = new HtmlFileChooser('./etc/palettes');
       jfc.addChoosableFileFilter(new HtmlFileFilter('gpl', 'gpl Gimp Palettes'));
       const file: HtmlChosenFile | null = await jfc.showOpenDialog();
@@ -110,7 +128,9 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
         }
       }
     } else if (label === 'IDC_RENDERING_RAYTRACING') {
-      this.showStatusMessage(this.parent.getApplicationModel().getI18nContext()!.getMessage('IDM_COMPUTING_RAYTRACING'));
+      this.showStatusMessage(
+        this.parent.getApplicationModel().getI18nContext()!.getMessage('IDM_COMPUTING_RAYTRACING'),
+      );
       await this.parent.doRaytracingImage();
       const htmlModel = this.parent.getHtmlModel();
       if (htmlModel.getImageControlWindow() === null) {
@@ -122,7 +142,9 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
           ),
         );
       } else {
-        htmlModel.getImageControlWindow()!.setImage(this.parent.getApplicationModel().getRaytracedImage());
+        htmlModel
+          .getImageControlWindow()!
+          .setImage(this.parent.getApplicationModel().getRaytracedImage());
       }
       htmlModel.getImageControlWindow()!.redrawImage();
     }
@@ -149,13 +171,19 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
     const definition = messages.getDialogById('tangible.connect');
     if (definition === null) throw new Error('Missing tangible.connect dialog');
     const session = new DialogSession(definition);
-    const dialog = new HtmlWindow(messages.getMessage(definition.getTitleKey() ?? definition.getId() ?? 'Connect'));
+    const dialog = new HtmlWindow(
+      messages.getMessage(definition.getTitleKey() ?? definition.getId() ?? 'Connect'),
+    );
     const form = document.createElement('form');
     form.className = 'scene-editor-tangible-dialog';
     const label = document.createElement('label');
-    label.textContent = messages.getMessage(definition.getElements()[0]?.labelKey ?? 'IDM_TANGIBLE_INTERFACE_SERVER_PROMPT');
+    label.textContent = messages.getMessage(
+      definition.getElements()[0]?.labelKey ?? 'IDM_TANGIBLE_INTERFACE_SERVER_PROMPT',
+    );
     const input = document.createElement('input');
-    input.type = 'url'; input.required = true; input.value = this.parent.getTangibleServiceUrl();
+    input.type = 'url';
+    input.required = true;
+    input.value = this.parent.getTangibleServiceUrl();
     label.appendChild(input);
     const buttons = document.createElement('div');
     for (const element of definition.getElements().flatMap((entry) => entry.children)) {
@@ -163,19 +191,30 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
       const button = document.createElement('button');
       button.type = element.action === 'connect' ? 'submit' : 'button';
       button.textContent = messages.getMessage(element.labelKey ?? element.action);
-      if (element.action === 'cancel') button.onclick = () => { session.close(); dialog.dispose(); };
+      if (element.action === 'cancel')
+        button.onclick = () => {
+          session.close();
+          dialog.dispose();
+        };
       buttons.appendChild(button);
     }
-    form.append(label, buttons); dialog.content.appendChild(form); dialog.setVisible(true);
+    form.append(label, buttons);
+    dialog.content.appendChild(form);
+    dialog.setVisible(true);
     form.onsubmit = (event): void => {
       event.preventDefault();
-      const endpoint = input.value.trim(); session.setDraft('serviceUrl', endpoint);
-      const request = session.beginAction(); if (request < 0 || endpoint === '') return;
+      const endpoint = input.value.trim();
+      session.setDraft('serviceUrl', endpoint);
+      const request = session.beginAction();
+      if (request < 0 || endpoint === '') return;
       const connect = buttons.querySelector<HTMLButtonElement>('button[type="submit"]')!;
       connect.disabled = true;
       this.parent.connectTangibleInterface(endpoint, (connected): void => {
         if (!session.completeAction(request)) return;
-        if (connected) { dialog.dispose(); return; }
+        if (connected) {
+          dialog.dispose();
+          return;
+        }
         connect.disabled = false;
         connect.textContent = messages.getMessage('IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY');
       });

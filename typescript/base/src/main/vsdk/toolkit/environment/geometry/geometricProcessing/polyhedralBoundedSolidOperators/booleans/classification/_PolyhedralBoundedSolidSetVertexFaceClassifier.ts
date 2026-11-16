@@ -14,6 +14,7 @@ import type { _PolyhedralBoundedSolidFace } from "../../../../volume/polyhedralB
 import type { _PolyhedralBoundedSolidHalfEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
 import type { _PolyhedralBoundedSolidVertex } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.js";
 import { _PolyhedralBoundedSolidOperator } from "../../_PolyhedralBoundedSolidOperator.js";
+import { _PolyhedralBoundedSolidVertexNeighborhood } from "../../_PolyhedralBoundedSolidVertexNeighborhood.js";
 import { _PolyhedralBoundedSolidSetGeometricPredicateProcessor } from "../intersection/_PolyhedralBoundedSolidSetGeometricPredicateProcessor.js";
 import { _PolyhedralBoundedSolidSetOperatorNullEdge } from "../topology/_PolyhedralBoundedSolidSetOperatorNullEdge.js";
 import { _PolyhedralBoundedSolidSetClassifier } from "./_PolyhedralBoundedSolidSetClassifier.js";
@@ -125,22 +126,26 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
             d = localFace.getContainingPlane()!.getNormal().dotProduct(referencePlane.getNormal());
             if (_PolyhedralBoundedSolidSetVertexFaceClassifier.compareToZero(d) === 1) {
                 if (BvsA !== 0) {
-                    nbr.get(i).cl = op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get(i).classification =
+                        op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
+                    nbr.get((i + 1) % nnbr).classification =
                         op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
                 } else {
-                    nbr.get(i).cl = op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.OUT : OnSector.IN;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get(i).classification =
+                        op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.OUT : OnSector.IN;
+                    nbr.get((i + 1) % nnbr).classification =
                         op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.OUT : OnSector.IN;
                 }
             } else {
                 if (BvsA !== 0) {
-                    nbr.get(i).cl = op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get(i).classification =
+                        op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
+                    nbr.get((i + 1) % nnbr).classification =
                         op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
                 } else {
-                    nbr.get(i).cl = op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get(i).classification =
+                        op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
+                    nbr.get((i + 1) % nnbr).classification =
                         op === _PolyhedralBoundedSolidSetClassifier.UNION ? OnSector.IN : OnSector.OUT;
                 }
             }
@@ -157,14 +162,14 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
                     " sectorIndex=" +
                     i +
                     " class=" +
-                    nbr.get(i).cl,
+                    nbr.get(i).classification,
             );
         }
 
         let ins = 0;
         let outs = 0;
         for (i = 0; i < nnbr; i++) {
-            if (nbr.get(i).cl === OnSector.OUT) {
+            if (nbr.get(i).classification === OnSector.OUT) {
                 outs++;
             } else {
                 ins++;
@@ -172,7 +177,7 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
         }
         if (outs === nnbr || ins === nnbr) {
             for (i = 0; i < nnbr; i++) {
-                nbr.get(i).cl = backup.get(i).cl;
+                nbr.get(i).classification = backup.get(i).classification;
             }
         }
     }
@@ -189,30 +194,6 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
     }
 
     /**
-    Constructs a vector along the bisector of the sector defined by `he`.
-    This is the inward-oriented variant of the bisector from problem
-    [MANT1988].14.1 used by the vertex/face classifier.
-    */
-    private static inside(he: _PolyhedralBoundedSolidHalfEdge): Vector3Dd {
-        let middle: Vector3Dd;
-        let a: Vector3Dd;
-        // Java names this local `b`; it is computed but unused there too.
-        let _b: Vector3Dd;
-
-        a = he.next()!.startingVertex.position.subtract(he.startingVertex.position);
-        _b = he.previous()!.startingVertex.position.subtract(he.startingVertex.position);
-        a = a.normalized();
-        _b = _b.normalized();
-
-        const n = he.parentLoop.parentFace.getContainingPlane()!.getNormal();
-
-        middle = n.crossProduct(a);
-        middle = middle.normalized();
-
-        return middle;
-    }
-
-    /**
     Current method is the first step for the initial vertex/face
     classification of sectors (vertex neighborhood) for `vtx`, as indicated on
     section [MANT1988].14.5.2 and program [MANT1988].14.4, but biased towards
@@ -224,50 +205,14 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
         referencePlane: InfinitePlane,
         _BvsA: number,
     ): ArrayList<OnFace> {
-        let he: _PolyhedralBoundedSolidHalfEdge;
-        let bisect: Vector3Dd;
-        let d: number;
-        let c: OnFace;
-
-        const neighborSectorsInfo = new ArrayList<OnFace>();
-
-        he = vtx.emanatingHalfEdge!;
-        do {
-            c = new OnFace();
-            c.sector = he;
-            d = referencePlane.pointDistance(he.next()!.startingVertex.position);
-            c.cl = _PolyhedralBoundedSolidSetVertexFaceClassifier.compareToZero(d);
-            c.isWide = false;
-            c.position = new Vector3Dd(he.next()!.startingVertex.position);
-            c.situation = OnFace.UNDEFINED;
+        const neighborSectorsInfo = _PolyhedralBoundedSolidVertexNeighborhood.classify(
+            vtx,
+            referencePlane,
+            () => new OnFace(),
+        );
+        for (const c of neighborSectorsInfo) {
             c.referencePlane = referencePlane;
-            neighborSectorsInfo.add(c);
-            if (_PolyhedralBoundedSolidOperator.checkWideness(he)) {
-                bisect = _PolyhedralBoundedSolidSetVertexFaceClassifier.inside(he).add(vtx.position);
-                c.situation = OnFace.CROSSING_EDGE;
-
-                c = new OnFace();
-                c.sector = he;
-                d = referencePlane.pointDistance(bisect);
-                c.cl = _PolyhedralBoundedSolidSetVertexFaceClassifier.compareToZero(d);
-                c.isWide = true;
-                c.position = new Vector3Dd(bisect);
-                c.situation = OnFace.CROSSING_EDGE;
-                c.referencePlane = referencePlane;
-                neighborSectorsInfo.add(c);
-            }
-            he = he.mirrorHalfEdge()!.next()!;
-        } while (he !== vtx.emanatingHalfEdge);
-
-        let i: number;
-
-        for (i = 0; i < neighborSectorsInfo.size(); i++) {
-            c = neighborSectorsInfo.get(i);
-            if (c.cl === OnFace.ON && c.situation === OnFace.UNDEFINED) {
-                c.situation = OnFace.INPLANE_EDGE;
-            }
         }
-
         return neighborSectorsInfo;
     }
 
@@ -361,8 +306,9 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
 
         i = 0;
         while (!(
-            (nbr.get(i).cl === OnFace.AinB || nbr.get(i).cl === OnFace.BinA) &&
-            (nbr.get((i + 1) % nnbr).cl === OnFace.AoutB || nbr.get((i + 1) % nnbr).cl === OnFace.BoutA)
+            (nbr.get(i).classification === OnFace.AinB || nbr.get(i).classification === OnFace.BinA) &&
+            (nbr.get((i + 1) % nnbr).classification === OnFace.AoutB ||
+                nbr.get((i + 1) % nnbr).classification === OnFace.BoutA)
         )) {
             i++;
             if (i >= nnbr) {
@@ -370,16 +316,17 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
             }
         }
         start = i;
-        head = nbr.get(i).sector!;
+        head = nbr.get(i).sector;
 
         while (true) {
             while (!(
-                (nbr.get(i).cl === OnFace.AoutB || nbr.get(i).cl === OnFace.BoutA) &&
-                (nbr.get((i + 1) % nnbr).cl === OnFace.AinB || nbr.get((i + 1) % nnbr).cl === OnFace.BinA)
+                (nbr.get(i).classification === OnFace.AoutB || nbr.get(i).classification === OnFace.BoutA) &&
+                (nbr.get((i + 1) % nnbr).classification === OnFace.AinB ||
+                    nbr.get((i + 1) % nnbr).classification === OnFace.BinA)
             )) {
                 i = (i + 1) % nnbr;
             }
-            tail = nbr.get(i).sector!;
+            tail = nbr.get(i).sector;
 
             if (
                 (debugFlags & _PolyhedralBoundedSolidSetVertexFaceClassifier.DEBUG_03_VERTEX_FACE_CLASSIFIER) !==
@@ -417,14 +364,20 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
             this.makeRing(f, v, BvsA, inSolidA, inSolidB);
 
             while (!(
-                (nbr.get(i).cl === OnFace.AinB || nbr.get(i).cl === OnFace.BinA) &&
-                (nbr.get((i + 1) % nnbr).cl === OnFace.AoutB || nbr.get((i + 1) % nnbr).cl === OnFace.BoutA)
+                (nbr.get(i).classification === OnFace.AinB || nbr.get(i).classification === OnFace.BinA) &&
+                (nbr.get((i + 1) % nnbr).classification === OnFace.AoutB ||
+                    nbr.get((i + 1) % nnbr).classification === OnFace.BoutA)
             )) {
                 i = (i + 1) % nnbr;
                 if (i === start) {
                     return;
                 }
             }
+            // Next in->out transition: its sector heads the next null
+            // edge. The previous lmev moved the old head to the new
+            // vertex, so reusing it would split the wrong vertex when the
+            // neighbourhood alternates more than once (B-03).
+            head = nbr.get(i).sector;
         }
     }
 

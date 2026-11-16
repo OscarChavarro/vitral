@@ -90,7 +90,11 @@ export class Sphere extends Solid {
         return RayCrossingSupport.Supported;
     }
 
-    public override classifyRay(ray: Ray, query: RayCrossingQuery, result: RaySolidClassification): RaySolidQueryStatus {
+    public override classifyRay(
+        ray: Ray,
+        query: RayCrossingQuery,
+        result: RaySolidClassification,
+    ): RaySolidQueryStatus {
         result.clear();
         const origin = ray.getOrigin();
         const direction = ray.getDirection();
@@ -425,7 +429,8 @@ export class Sphere extends Solid {
             else if (range.getUpper() < 0) nearest = nearest.add(FloatingInterval.exact(range.getUpper()).square());
         }
         const squaredRadius = FloatingInterval.exact(this.radius).square();
-        if (!farthest.isValid() || !nearest.isValid() || !squaredRadius.isValid()) return GeometryContainment.Indeterminate;
+        if (!farthest.isValid() || !nearest.isValid() || !squaredRadius.isValid())
+            return GeometryContainment.Indeterminate;
         if (farthest.getUpper() < squaredRadius.getLower()) return GeometryContainment.Inside;
         if (nearest.getLower() > squaredRadius.getUpper()) return GeometryContainment.Outside;
         return GeometryContainment.Indeterminate;

@@ -30,15 +30,19 @@ export class WriterObj extends PersistenceElement {
         for (let i: number = 0; i < nv; i++) {
             const vpi: Vector3Dd = new Vector3Dd(vp[3 * i]!, vp[3 * i + 1]!, vp[3 * i + 2]!);
             const p: Vector3Dd = R.multiply(vpi);
-            PersistenceElement.writeAsciiLine(inOutputStream, "v " + Double.toString(p.x()) + " " +
-                Double.toString(p.y()) + " " + Double.toString(p.z()));
+            PersistenceElement.writeAsciiLine(
+                inOutputStream,
+                "v " + Double.toString(p.x()) + " " + Double.toString(p.y()) + " " + Double.toString(p.z()),
+            );
         }
 
         //-----------------------------------------------------------------
         PersistenceElement.writeAsciiLine(inOutputStream, "# " + nv + " vertex texture coordinates");
         for (let i: number = 0; i < nv && vuv !== null; i++) {
-            PersistenceElement.writeAsciiLine(inOutputStream, "vt " + Double.toString(vuv[2 * i]!) + " " +
-                Double.toString(vuv[2 * i + 1]!));
+            PersistenceElement.writeAsciiLine(
+                inOutputStream,
+                "vt " + Double.toString(vuv[2 * i]!) + " " + Double.toString(vuv[2 * i + 1]!),
+            );
         }
 
         //-----------------------------------------------------------------
@@ -46,8 +50,10 @@ export class WriterObj extends PersistenceElement {
         for (let i: number = 0; i < nv && vn !== null; i++) {
             const vni: Vector3Dd = new Vector3Dd(vn[3 * i]!, vn[3 * i + 1]!, vn[3 * i + 2]!);
             const n: Vector3Dd = R.multiply(vni);
-            PersistenceElement.writeAsciiLine(inOutputStream, "vn " + Double.toString(n.x()) + " " +
-                Double.toString(n.y()) + " " + Double.toString(n.z()));
+            PersistenceElement.writeAsciiLine(
+                inOutputStream,
+                "vn " + Double.toString(n.x()) + " " + Double.toString(n.y()) + " " + Double.toString(n.z()),
+            );
         }
 
         //-----------------------------------------------------------------
@@ -60,16 +66,12 @@ export class WriterObj extends PersistenceElement {
             const n1: number = t[3 * i + 1]! + offset + 1;
             const n2: number = t[3 * i + 2]! + offset + 1;
             if (vuv !== null && vn !== null) {
-                PersistenceElement.writeAsciiLine(inOutputStream, "f " +
-                    n0 + "/" + n0 + "/" + n0 + " " +
-                    n1 + "/" + n1 + "/" + n1 + " " +
-                    n2 + "/" + n2 + "/" + n2);
-            }
-            else {
-                PersistenceElement.writeAsciiLine(inOutputStream, "f " +
-                    n0 + " " +
-                    n1 + " " +
-                    n2);
+                PersistenceElement.writeAsciiLine(
+                    inOutputStream,
+                    "f " + n0 + "/" + n0 + "/" + n0 + " " + n1 + "/" + n1 + "/" + n1 + " " + n2 + "/" + n2 + "/" + n2,
+                );
+            } else {
+                PersistenceElement.writeAsciiLine(inOutputStream, "f " + n0 + " " + n1 + " " + n2);
             }
         }
 
@@ -85,14 +87,12 @@ export class WriterObj extends PersistenceElement {
         let baseVertexStart: number = 0;
 
         for (let i: number = 0; i < objs.size(); i++) {
-
             //-----------------------------------------------------------------
             const g: Geometry | null = objs.get(i).getGeometry();
             let mesh: TriangleMesh | null = null;
             if (g instanceof FunctionalExplicitSurface) {
                 mesh = g.getInternalTriangleMesh();
-            }
-            else if (g instanceof TriangleMesh) {
+            } else if (g instanceof TriangleMesh) {
                 mesh = g;
             }
 

@@ -11,6 +11,7 @@ import { _PolyhedralBoundedSolidSetVertexFaceClassifier } from "vsdk/toolkit/env
 import { PolyhedralBoundedSolidTestFixtures } from "../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTestFixtures.js";
 import { CsgSampleCorpus } from "./CsgSampleCorpus.js";
 import { CsgSampleCorpusFixtures } from "./CsgSampleCorpusFixtures.js";
+import { PolyhedralBoundedSolidVolumeOracle } from "./PolyhedralBoundedSolidVolumeOracle.js";
 
 /**
 Acceptance tests for the V/F classifier after removal of the "borrowed
@@ -74,11 +75,12 @@ describe("VertexFaceClassifierCoplanarTest", () => {
         expect(vertexFaceClassifyMethod).not.toBeUndefined();
     });
 
-    it("given_touchingBoxes_when_runningUnion_then_resultIsValidTwoShellPair", () => {
-        // Two unit cubes sharing only a single face produce a touching-only
-        // result: the pipeline correctly preserves both shells (Euler=4)
-        // because the V/F classifier classifies the shared face as boundary
-        // rather than interior.
+    it("given_touchingBoxes_when_runningUnion_then_resultIsOneGluedBox", () => {
+        // Two unit cubes sharing a whole face. The regularised union is one
+        // 2 x 1 x 1 box glued along the AonB- faces ([MANT1988] Eq. 15.2).
+        // Until Stage D (Fable5.2Analysis.md B-04) the touching-only
+        // preflight returned the two shells (Euler 4), which strict
+        // validation rejects; this test used to assert that.
         const pair = PolyhedralBoundedSolidTestFixtures.createTouchingBoxPair();
 
         const result = PolyhedralBoundedSolidModeler.setOp(
@@ -90,11 +92,12 @@ describe("VertexFaceClassifierCoplanarTest", () => {
             false,
         );
 
-        expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(result)).toBe(true);
+        expect(PolyhedralBoundedSolidValidationEngine.validateStrict(result)).toBe(true);
         expect(
             result.getVerticesList().size() - result.getEdgesList().size() + result.getPolygonsList().size(),
-            "Euler characteristic for two-shell union",
-        ).toBe(4);
+            "Euler characteristic of the glued box",
+        ).toBe(2);
+        expect(Math.abs(PolyhedralBoundedSolidVolumeOracle.solidVolume(result) - 2.0)).toBeLessThanOrEqual(1e-12);
         const minmax = result.getMinMax();
         expect(minmax[0]).toBe(-0.5);
         expect(minmax[3]).toBe(1.5);

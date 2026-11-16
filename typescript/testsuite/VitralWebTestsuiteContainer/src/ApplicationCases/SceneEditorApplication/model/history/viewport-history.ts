@@ -76,8 +76,12 @@ export class ViewportHistory {
     let recorded = 0;
 
     if (this.depth === 0) {
-      Logger.reportMessage(this, VSDK.WARNING, 'end',
-        'Viewport history end() without begin(): the action is not recorded');
+      Logger.reportMessage(
+        this,
+        VSDK.WARNING,
+        'end',
+        'Viewport history end() without begin(): the action is not recorded',
+      );
       return 0;
     }
     this.depth--;

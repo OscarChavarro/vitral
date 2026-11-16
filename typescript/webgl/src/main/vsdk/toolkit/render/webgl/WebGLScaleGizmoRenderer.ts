@@ -76,8 +76,7 @@ export class WebGLScaleGizmoRenderer {
 
             if (g instanceof Cone) {
                 await WebGLScaleGizmoRenderer.drawShaft(gl, mvp, element, g);
-            }
-            else if (g instanceof Box) {
+            } else if (g instanceof Box) {
                 await WebGLScaleGizmoRenderer.drawBox(gl, mvp, element, g);
             }
         }
@@ -93,8 +92,14 @@ export class WebGLScaleGizmoRenderer {
             if (gizmo.isBandHighlighted(group)) {
                 const quad: Vector3Dd[] = gizmo.buildBandQuad(group);
 
-                await WebGLScaleGizmoRenderer.drawStrip(gl, mvp, quad, ScaleGizmo.HANDLE_FILL_COLOR,
-                    WebGLScaleGizmoRenderer.HANDLE_OPACITY, gl.TRIANGLE_STRIP);
+                await WebGLScaleGizmoRenderer.drawStrip(
+                    gl,
+                    mvp,
+                    quad,
+                    ScaleGizmo.HANDLE_FILL_COLOR,
+                    WebGLScaleGizmoRenderer.HANDLE_OPACITY,
+                    gl.TRIANGLE_STRIP,
+                );
             }
         }
         if (gizmo.isUniformHighlighted()) {
@@ -130,16 +135,26 @@ export class WebGLScaleGizmoRenderer {
         }
         // Slightly towards the viewer, so the translucent interior of a
         // selected handle does not z-fight with its own outline
-        await WebGLLineRenderer.drawLines(gl, mvp, positions, colors,
-            Math.fround(gizmo.getLineWidth()), WebGLScaleGizmoRenderer.CONTOUR_DEPTH_BIAS);
+        await WebGLLineRenderer.drawLines(
+            gl,
+            mvp,
+            positions,
+            colors,
+            Math.fround(gizmo.getLineWidth()),
+            WebGLScaleGizmoRenderer.CONTOUR_DEPTH_BIAS,
+        );
     }
 
     /**
     Draws the lateral surface of a shaft: a cylinder (equal base and top
     radius) from the local origin of `element`, growing along its local +Z.
     */
-    private static async drawShaft(gl: WebGL2RenderingContext, mvp: Matrix4x4d, element: SimpleBody,
-                                   cone: Cone): Promise<void> {
+    private static async drawShaft(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        element: SimpleBody,
+        cone: Cone,
+    ): Promise<void> {
         const material: SimpleMaterial | null = element.getMaterial();
 
         if (material === null) {
@@ -148,7 +163,11 @@ export class WebGLScaleGizmoRenderer {
         const c: ColorRgb = material.getDiffuse();
         const local: Matrix4x4d = GizmoSolidTessellator.localTransform(element);
         const strip: Vector3Dd[] = GizmoSolidTessellator.buildShaftStrip(
-            local, cone.getBottomRadius(), cone.getTopRadius(), cone.getHeight());
+            local,
+            cone.getBottomRadius(),
+            cone.getTopRadius(),
+            cone.getHeight(),
+        );
 
         await WebGLScaleGizmoRenderer.drawStrip(gl, mvp, strip, c, 1.0, gl.TRIANGLE_STRIP);
     }
@@ -156,8 +175,12 @@ export class WebGLScaleGizmoRenderer {
     /**
     Draws a box as 6 solid quads, centered at the local origin of `element`.
     */
-    private static async drawBox(gl: WebGL2RenderingContext, mvp: Matrix4x4d, element: SimpleBody,
-                                 box: Box): Promise<void> {
+    private static async drawBox(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        element: SimpleBody,
+        box: Box,
+    ): Promise<void> {
         const material: SimpleMaterial | null = element.getMaterial();
 
         if (material === null) {
@@ -172,8 +195,14 @@ export class WebGLScaleGizmoRenderer {
         }
     }
 
-    private static async drawStrip(gl: WebGL2RenderingContext, mvp: Matrix4x4d, points: Vector3Dd[], c: ColorRgb,
-                                   alpha: number, primitiveType: number): Promise<void> {
+    private static async drawStrip(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        points: Vector3Dd[],
+        c: ColorRgb,
+        alpha: number,
+        primitiveType: number,
+    ): Promise<void> {
         const positions: Float32Array = GizmoVertexArrayBuilder.buildPositions(points);
         const colors: Float32Array = GizmoVertexArrayBuilder.buildRgbaColors(points.length, c, alpha);
 
@@ -185,11 +214,20 @@ export class WebGLScaleGizmoRenderer {
     `ScaleGizmo.buildUniformTriangles`), one in each coordinate plane of the
     frame of the gizmo.
     */
-    private static async drawUniformHandle(gl: WebGL2RenderingContext, mvp: Matrix4x4d,
-                                           gizmo: ScaleGizmo): Promise<void> {
+    private static async drawUniformHandle(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        gizmo: ScaleGizmo,
+    ): Promise<void> {
         const triangles: Vector3Dd[] = gizmo.buildUniformTriangles();
 
-        await WebGLScaleGizmoRenderer.drawStrip(gl, mvp, triangles, ScaleGizmo.HANDLE_FILL_COLOR,
-            WebGLScaleGizmoRenderer.HANDLE_OPACITY, gl.TRIANGLES);
+        await WebGLScaleGizmoRenderer.drawStrip(
+            gl,
+            mvp,
+            triangles,
+            ScaleGizmo.HANDLE_FILL_COLOR,
+            WebGLScaleGizmoRenderer.HANDLE_OPACITY,
+            gl.TRIANGLES,
+        );
     }
 }

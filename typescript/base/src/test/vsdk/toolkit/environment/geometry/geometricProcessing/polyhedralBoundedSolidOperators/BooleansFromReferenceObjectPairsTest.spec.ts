@@ -1,15 +1,11 @@
-import { PolyhedralBoundedSolidEulerConstructions } from "../../../../../../../main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { Matrix4x4d } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { Box } from "vsdk/toolkit/environment/geometry/volume/Box.js";
 import { Sphere } from "vsdk/toolkit/environment/geometry/volume/Sphere.js";
-import { Math as JavaMath } from "java/lang/Math.js";
 import { PolyhedralBoundedSolid } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
-import { PolyhedralBoundedSolidEulerOperators } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidValidationEngine } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
-import { Cone } from "vsdk/toolkit/environment/geometry/volume/Cone.js";
 import { PolyhedralBoundedSolidModeler } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
 import { SimpleTestGeometryLibrary } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.js";
 import { CsgSampleCorpus } from "./CsgSampleCorpus.js";
@@ -462,18 +458,21 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
         );
     }
 
+    // Refreshed 2026-11-16 (Fable5.2Analysis.md B-01): the wedge pierces the
+    // block through two faces; the old snapshot kept two zero-area ring
+    // faces. Exact volume 0.04125 is asserted in PolyhedralBoundedSolidSetOperatorTest.
     function expectedMANT1988_15_2HoledIntersection(): TopologicalSummary {
         return TopologicalSummary.of(
             1,
-            7,
-            15,
-            12,
+            5,
             9,
+            6,
+            5,
+            0,
             2,
-            4,
-            [7],
-            [1, 1, 1, 1, 1, 2, 2],
-            [3, 3, 3, 3, 3, 3, 4, 4, 4],
+            [5],
+            [1, 1, 1, 1, 1],
+            [3, 3, 4, 4, 4],
             [137500, 225000, 250000, 637500, 775000, 550000],
         );
     }
@@ -494,18 +493,19 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
         );
     }
 
+    // Refreshed 2026-11-16 (B-01): two prism stubs, no zero-area rings.
     function expectedMANT1988_15_2HoledDifferenceBA(): TopologicalSummary {
         return TopologicalSummary.of(
             2,
-            12,
-            24,
+            10,
             18,
-            14,
-            2,
-            6,
-            [6, 6],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2],
-            [3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
+            12,
+            10,
+            0,
+            4,
+            [5, 5],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [3, 3, 3, 3, 4, 4, 4, 4, 4, 4],
             [0, 225000, 250000, 775000, 775000, 550000],
         );
     }
@@ -670,14 +670,6 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
         );
     }
 
-    function expectedKurlanderBowlSummary(): TopologicalSummary {
-        return TopologicalSummary.placeholder("CSG_KURLANDER_BOWL");
-    }
-
-    // -----------------------------------------------------------------
-    // Local builders for reference single objects
-    // -----------------------------------------------------------------
-
     function createSphere(radius: number, subdivisionsC: number, subdivisionsH: number): PolyhedralBoundedSolid {
         let move = new Matrix4x4d();
         move = move.translation(0.55, 0.55, 0.55);
@@ -714,179 +706,6 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
             PolyhedralBoundedSolidModeler.INTERSECTION,
             false,
         );
-    }
-
-    /** Java's private nested `KurlanderBowlBuilder`. */
-    const KurlanderBowlBuilder = {
-        CYLINDER_SIDES: 30,
-        OBJECT_SCALE: 0.1,
-
-        s(value: number): number {
-            return value * KurlanderBowlBuilder.OBJECT_SCALE;
-        },
-
-        booleanOp(a: PolyhedralBoundedSolid, b: PolyhedralBoundedSolid, op: number): PolyhedralBoundedSolid {
-            return PolyhedralBoundedSolidModeler.setOp(a, b, op, false);
-        },
-
-        createSphere(radius: number, center: Vector3Dd): PolyhedralBoundedSolid {
-            const solid = new Sphere(radius).exportToPolyhedralBoundedSolid();
-            let t = new Matrix4x4d();
-            t = t.translation(center);
-            PolyhedralBoundedSolidModeler.applyTransformation(solid, t);
-            return solid;
-        },
-
-        createCylinder(radius: number, height: number, translation: Vector3Dd): PolyhedralBoundedSolid {
-            const cylinder = new Cone(radius, radius, height);
-            const solid = cylinder.exportToPolyhedralBoundedSolid(KurlanderBowlBuilder.CYLINDER_SIDES, 1);
-            let move = new Matrix4x4d();
-            move = move.translation(translation);
-            PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
-            return solid;
-        },
-
-        createExtrudedPolygon(points: Vector3Dd[], thickness: number): PolyhedralBoundedSolid {
-            const solid = new PolyhedralBoundedSolid();
-            let i: number;
-            PolyhedralBoundedSolidEulerOperators.mvfs(solid, points[0]!, 1, 1);
-            for (i = 1; i < points.length; i++) {
-                PolyhedralBoundedSolidEulerOperators.smev(solid, 1, i, i + 1, points[i]!);
-            }
-            PolyhedralBoundedSolidEulerOperators.smef(solid, 1, points.length, 1, 2);
-
-            let t = new Matrix4x4d();
-            t = t.translation(0.0, 0.0, thickness);
-            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1)!, t);
-            return solid;
-        },
-
-        createStar(): PolyhedralBoundedSolid {
-            const n = 10;
-            const outerR = KurlanderBowlBuilder.s(2.0);
-            const innerR = KurlanderBowlBuilder.s(0.77);
-            const start = JavaMath.toRadians(-90.0);
-            const points = new Array<Vector3Dd>(n);
-            let i: number;
-
-            for (i = 0; i < n; i++) {
-                const a = start + (i * Math.PI) / 5.0;
-                const r = i % 2 === 0 ? outerR : innerR;
-                points[i] = new Vector3Dd(r * Math.cos(a), r * Math.sin(a), 0.0);
-            }
-
-            return KurlanderBowlBuilder.createExtrudedPolygon(points, KurlanderBowlBuilder.s(5.5));
-        },
-
-        createMoon(): PolyhedralBoundedSolid {
-            const a = KurlanderBowlBuilder.createCylinder(
-                KurlanderBowlBuilder.s(1.5),
-                KurlanderBowlBuilder.s(5.0),
-                new Vector3Dd(0, 0, 0),
-            );
-            const b = KurlanderBowlBuilder.createCylinder(
-                KurlanderBowlBuilder.s(1.5),
-                KurlanderBowlBuilder.s(5.0),
-                new Vector3Dd(KurlanderBowlBuilder.s(1.1), 0, KurlanderBowlBuilder.s(0.6)),
-            );
-            return KurlanderBowlBuilder.booleanOp(a, b, PolyhedralBoundedSolidModeler.SUBTRACT);
-        },
-
-        placeMotif(motif: PolyhedralBoundedSolid, z: number, azimuthDeg: number): PolyhedralBoundedSolid {
-            let t = new Matrix4x4d();
-            let ry = new Matrix4x4d();
-            let rz = new Matrix4x4d();
-            let m: Matrix4x4d;
-
-            t = t.translation(KurlanderBowlBuilder.s(6.0), 0.0, KurlanderBowlBuilder.s(z));
-            ry = ry.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
-            rz = rz.axisRotation(JavaMath.toRadians(azimuthDeg), 0, 0, 1);
-            m = rz.multiply(ry.multiply(t));
-            PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
-            return motif;
-        },
-
-        create(): PolyhedralBoundedSolid {
-            const outer = KurlanderBowlBuilder.createSphere(
-                KurlanderBowlBuilder.s(10.0),
-                new Vector3Dd(0, 0, KurlanderBowlBuilder.s(10.0)),
-            );
-            const inner = KurlanderBowlBuilder.createSphere(
-                KurlanderBowlBuilder.s(9.5),
-                new Vector3Dd(0, 0, KurlanderBowlBuilder.s(10.0)),
-            );
-            let shell = KurlanderBowlBuilder.booleanOp(outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
-
-            let i: number;
-            for (i = 1; i <= 4; i++) {
-                const base = -90.0 * i;
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createMoon(), 4.0, base),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createMoon(), 14.0, base),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createMoon(), 11.5, base - 22.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createMoon(), 9.0, base - 45.0),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createMoon(), 6.5, base - 67.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-            }
-
-            for (i = 1; i <= 4; i++) {
-                const base = -90.0 * i;
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createStar(), 9.0, base),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createStar(), 6.5, base - 22.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createStar(), 14.0, base - 45.0),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createStar(), 4.0, base - 45.0),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-                shell = KurlanderBowlBuilder.booleanOp(
-                    shell,
-                    KurlanderBowlBuilder.placeMotif(KurlanderBowlBuilder.createStar(), 11.5, base - 67.5),
-                    PolyhedralBoundedSolidModeler.SUBTRACT,
-                );
-            }
-
-            const guide = KurlanderBowlBuilder.createCylinder(
-                KurlanderBowlBuilder.s(10.5),
-                KurlanderBowlBuilder.s(16.5),
-                new Vector3Dd(0, 0, 0),
-            );
-            return KurlanderBowlBuilder.booleanOp(shell, guide, PolyhedralBoundedSolidModeler.INTERSECTION);
-        },
-    };
-
-    function createCsgKurlanderBowlReference(): PolyhedralBoundedSolid {
-        return KurlanderBowlBuilder.create();
     }
 
     function pairCase(
@@ -1114,27 +933,12 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
         REFERENCE_TIMEOUT_MS,
     );
 
-    // Java: @Disabled("`CSG_KURLANDER_BOWL` is marked as failing (❌) in the
-    // current legacy matrix and remains pending explicit revalidation")
-    it.skip("given_csgKurlanderBowl_when_buildingReferenceSolid_then_topologySummaryMatchesReference", () => {
-        // Arrange
-
-        // Action
-        const result = createCsgKurlanderBowlReference();
-        const actual = TopologicalSummary.from(result);
-        const expected = expectedKurlanderBowlSummary();
-
-        // Assert
-        expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(result)).toBe(true);
-        expect(actual.equals(expected)).toBe(true);
-    });
-
-    // Java: @Disabled("Utility snapshot for refreshing hardcoded expected
-    // summaries after intentional baseline updates")
+    // Java: public static void main(String[]) — "Prints the summaries of
+    // every reference pair and single object as Java literals, to refresh the
+    // hardcoded expectations after an intentional baseline change. Not a
+    // test: run it with the test classpath." Vitest has no main entry point,
+    // so the utility stays skipped; un-skip it locally to print the literals.
     it.skip("dumpReferenceSummariesForBaselineRefresh", () => {
-        // Arrange
-
-        // Action
         for (const args of legacyPassingReferencePairs()) {
             const sample = args[0];
             const op = args[1];
@@ -1147,13 +951,8 @@ describe("BooleansFromReferenceObjectPairsTest", () => {
 
         const lamp = createCsgLampShellReference();
         const featured = SimpleTestGeometryLibrary.createTestObjectAPPE1967_3();
-        const kurlander = createCsgKurlanderBowlReference();
 
         console.log("CSG_LAMP_SHELL => " + TopologicalSummary.from(lamp).toLiteral());
         console.log("FEATURED_OBJECT => " + TopologicalSummary.from(featured).toLiteral());
-        console.log("CSG_KURLANDER_BOWL => " + TopologicalSummary.from(kurlander).toLiteral());
-
-        // Assert
-        // TODO: Add assertions once this utility test is converted into a deterministic baseline check.
     });
 });

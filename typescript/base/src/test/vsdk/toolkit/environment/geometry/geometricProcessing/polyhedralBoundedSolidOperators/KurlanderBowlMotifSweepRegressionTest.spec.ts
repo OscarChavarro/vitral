@@ -33,9 +33,10 @@ describe("KurlanderBowlMotifSweepRegressionTest", () => {
     /**
     Minimum number of motifs that must classify as OK.
     Observed after mythosPlan Phase 3 (2026-06-11): 40/40 — all stars and
-    all moons (curve-ordered connect + curve-neighbor ring rescue; see
-    _PolyhedralBoundedSolidSetIntersectionCurveBuilder and
-    _PolyhedralBoundedSolidSetNullEdgesConnector.rescueRingFaceNearMiss).
+    all moons (curve-ordered connect; see
+    _PolyhedralBoundedSolidSetIntersectionCurveBuilder). The ring rescue
+    that this needed until plan-stage11 was removed once rings were
+    distributed on both solids for every operation.
     */
     const MINIMUM_OK_COUNT = 40;
 
@@ -86,7 +87,7 @@ describe("KurlanderBowlMotifSweepRegressionTest", () => {
                 }
 
                 try {
-                    _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport = null;
+                    _PolyhedralBoundedSolidSetNullEdgesConnector.clearLastCurveReport();
                     result = PolyhedralBoundedSolidModeler.setOp(
                         operands[0]!,
                         operands[1]!,
@@ -160,7 +161,7 @@ describe("KurlanderBowlMotifSweepRegressionTest", () => {
                         }
                     }
                 }
-                const curveReport = _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport;
+                const curveReport = _PolyhedralBoundedSolidSetNullEdgesConnector.getLastCurveReport();
                 console.log(
                     "[SWEEP-" +
                         status +

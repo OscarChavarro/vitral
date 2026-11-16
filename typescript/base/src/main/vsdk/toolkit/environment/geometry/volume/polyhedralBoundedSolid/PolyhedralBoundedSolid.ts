@@ -8,7 +8,7 @@
 import { VSDK } from "../../../../common/VSDK.js";
 import { Vertex2D } from "../../element/Vertex2D.js";
 import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
-import { CircularDoubleLinkedList } from "../../../../common/dataStructures/CircularDoubleLinkedList.js";
+import { CircularArrayList } from "../../../../common/dataStructures/CircularArrayList.js";
 import { Ray } from "../../element/Ray.js";
 import { Geometry } from "../../Geometry.js";
 import { RayHit } from "../../element/RayHit.js";
@@ -45,7 +45,7 @@ structure, consisting of:
   - _PolyhedralBoundedSolidVertex
 Current class forms the root element (Facade) that gives access to faces,
 edges and vertices of the model through aggregations in
-CircularDoubleLinkedList's.
+CircularArrayList's.
 
 Note that this is a quite complex data-structure. Its implementation follows
 the strategies outlined on book [MANT1988]. For the sake of clarity, it
@@ -62,9 +62,9 @@ export class PolyhedralBoundedSolid extends Solid {
     private static readonly SOLID_WITH_MESSAGE = "Solid with ";
 
     //= Main boundary representation solid data structure =============
-    private polygonsList: CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>;
-    private edgesList: CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>;
-    private verticesList: CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>;
+    private polygonsList: CircularArrayList<_PolyhedralBoundedSolidFace>;
+    private edgesList: CircularArrayList<_PolyhedralBoundedSolidEdge>;
+    private verticesList: CircularArrayList<_PolyhedralBoundedSolidVertex>;
     private maxVertexId: number;
     private maxFaceId: number;
     private modelIsValid: boolean;
@@ -72,9 +72,9 @@ export class PolyhedralBoundedSolid extends Solid {
     //=================================================================
     public constructor() {
         super();
-        this.polygonsList = new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
-        this.edgesList = new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
-        this.verticesList = new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
+        this.polygonsList = new CircularArrayList<_PolyhedralBoundedSolidFace>();
+        this.edgesList = new CircularArrayList<_PolyhedralBoundedSolidEdge>();
+        this.verticesList = new CircularArrayList<_PolyhedralBoundedSolidVertex>();
         this.maxVertexId = -1;
         this.maxFaceId = -1;
         this.modelIsValid = false;
@@ -124,7 +124,7 @@ export class PolyhedralBoundedSolid extends Solid {
     Returns the list of faces stored in this solid.
     @return internal face list.
     */
-    public getPolygonsList(): CircularDoubleLinkedList<_PolyhedralBoundedSolidFace> {
+    public getPolygonsList(): CircularArrayList<_PolyhedralBoundedSolidFace> {
         return this.polygonsList;
     }
 
@@ -132,7 +132,7 @@ export class PolyhedralBoundedSolid extends Solid {
     Replaces the internal face list.
     @param polygonsList new face list.
     */
-    public setPolygonsList(polygonsList: CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>): void {
+    public setPolygonsList(polygonsList: CircularArrayList<_PolyhedralBoundedSolidFace>): void {
         this.polygonsList = polygonsList;
     }
 
@@ -140,7 +140,7 @@ export class PolyhedralBoundedSolid extends Solid {
     Returns the list of edges stored in this solid.
     @return internal edge list.
     */
-    public getEdgesList(): CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> {
+    public getEdgesList(): CircularArrayList<_PolyhedralBoundedSolidEdge> {
         return this.edgesList;
     }
 
@@ -148,7 +148,7 @@ export class PolyhedralBoundedSolid extends Solid {
     Replaces the internal edge list.
     @param edgesList new edge list.
     */
-    public setEdgesList(edgesList: CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>): void {
+    public setEdgesList(edgesList: CircularArrayList<_PolyhedralBoundedSolidEdge>): void {
         this.edgesList = edgesList;
     }
 
@@ -156,7 +156,7 @@ export class PolyhedralBoundedSolid extends Solid {
     Returns the list of vertices stored in this solid.
     @return internal vertex list.
     */
-    public getVerticesList(): CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> {
+    public getVerticesList(): CircularArrayList<_PolyhedralBoundedSolidVertex> {
         return this.verticesList;
     }
 
@@ -164,7 +164,7 @@ export class PolyhedralBoundedSolid extends Solid {
     Replaces the internal vertex list.
     @param verticesList new vertex list.
     */
-    public setVerticesList(verticesList: CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>): void {
+    public setVerticesList(verticesList: CircularArrayList<_PolyhedralBoundedSolidVertex>): void {
         this.verticesList = verticesList;
     }
 

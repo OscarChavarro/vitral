@@ -298,7 +298,7 @@ export class InputGizmo extends Gizmo {
     @return the text typed in the box, or null if it is not being edited
     */
     public getEditText(field: number): string | null {
-        return (this.editTexts[InputGizmo.checkIndex(field, this.editTexts.length)] ?? null);
+        return this.editTexts[InputGizmo.checkIndex(field, this.editTexts.length)] ?? null;
     }
 
     /**
@@ -426,7 +426,7 @@ export class InputGizmo extends Gizmo {
         const result: number[] = this.values.slice();
 
         for (let i = 0; i < result.length; i++) {
-            const value: number | null = InputGizmo.parse((this.editTexts[i] ?? null));
+            const value: number | null = InputGizmo.parse(this.editTexts[i] ?? null);
 
             if (value !== null) {
                 result[i] = value;
@@ -525,7 +525,7 @@ export class InputGizmo extends Gizmo {
     (so any other box being edited is accepted too).
     */
     private stepSelected(step: number): void {
-        const typed: number | null = InputGizmo.parse((this.editTexts[this.selectedField] ?? null));
+        const typed: number | null = InputGizmo.parse(this.editTexts[this.selectedField] ?? null);
         const current: number = typed !== null ? typed : this.values[this.selectedField]!;
         const next: number = this.valueChangeRules.applyStep(current, step);
 
@@ -535,7 +535,7 @@ export class InputGizmo extends Gizmo {
     }
 
     private appendToSelected(character: string): void {
-        let text: string | null = (this.editTexts[this.selectedField] ?? null);
+        let text: string | null = this.editTexts[this.selectedField] ?? null;
 
         if (text === null) {
             text = "";
@@ -554,7 +554,7 @@ export class InputGizmo extends Gizmo {
     }
 
     private appendDecimalPoint(): void {
-        let text: string | null = (this.editTexts[this.selectedField] ?? null);
+        let text: string | null = this.editTexts[this.selectedField] ?? null;
 
         if (text === null) {
             text = "";
@@ -575,7 +575,7 @@ export class InputGizmo extends Gizmo {
     Over a box that is not being edited, it starts a negative number.
     */
     private toggleSignOfSelected(): void {
-        let text: string | null = (this.editTexts[this.selectedField] ?? null);
+        let text: string | null = this.editTexts[this.selectedField] ?? null;
 
         if (text === null) {
             text = "";

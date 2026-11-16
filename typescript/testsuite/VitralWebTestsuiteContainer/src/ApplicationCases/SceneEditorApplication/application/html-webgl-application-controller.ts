@@ -49,7 +49,10 @@ export class HtmlWebGLApplicationController {
     canvas.className = 'scene-editor-canvas';
     canvas.style.minWidth = '8px';
     canvas.style.minHeight = '8px';
-    const gl: WebGL2RenderingContext | null = canvas.getContext('webgl2', { depth: true, antialias: false });
+    const gl: WebGL2RenderingContext | null = canvas.getContext('webgl2', {
+      depth: true,
+      antialias: false,
+    });
     if (gl === null) {
       throw new Error('The scene editor requires WebGL2 support.');
     }
@@ -70,8 +73,11 @@ export class HtmlWebGLApplicationController {
       this.model,
       this.htmlFeedback,
       {
-        createLabelImage: (text: string, color: ColorRgb, fontSize: number): RGBAImageUncompressed =>
-          WebSystem.calculateLabelImage(text, color, fontSize),
+        createLabelImage: (
+          text: string,
+          color: ColorRgb,
+          fontSize: number,
+        ): RGBAImageUncompressed => WebSystem.calculateLabelImage(text, color, fontSize),
       },
       (viewport: Viewport): void => techniques.activateViewport(viewport),
       techniques.getTranslationGizmo(),
@@ -81,7 +87,12 @@ export class HtmlWebGLApplicationController {
     this.renderer.init();
 
     //-----------------------------------------------------------------
-    this.htmlController = new HtmlDrawingAreaController(canvas, drawingArea, techniques, this.htmlFeedback);
+    this.htmlController = new HtmlDrawingAreaController(
+      canvas,
+      drawingArea,
+      techniques,
+      this.htmlFeedback,
+    );
 
     this.resizeObserver = new ResizeObserver((): void => this.reshape());
     this.resizeObserver.observe(canvas);

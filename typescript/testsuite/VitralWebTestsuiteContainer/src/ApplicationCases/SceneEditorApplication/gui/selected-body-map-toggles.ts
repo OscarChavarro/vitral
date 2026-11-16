@@ -1,4 +1,12 @@
-import { Logger, NormalMap, Vector3Dd, VSDK, type Image, type IndexedColorImageUncompressed, type SimpleBody } from '@vitral/base';
+import {
+  Logger,
+  NormalMap,
+  Vector3Dd,
+  VSDK,
+  type Image,
+  type IndexedColorImageUncompressed,
+  type SimpleBody,
+} from '@vitral/base';
 import { ImageFiles } from '../io/image-files';
 
 /**

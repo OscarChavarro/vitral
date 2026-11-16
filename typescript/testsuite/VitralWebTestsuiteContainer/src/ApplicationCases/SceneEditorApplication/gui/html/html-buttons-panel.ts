@@ -37,7 +37,9 @@ export class HtmlButtonsPanel implements HtmlActionListener {
       case 1:
         // The two creation groups one below the other (the Java GUI shows
         // them as collapsible sections)
-        this.element.appendChild(HtmlGuiRenderer.buildButtonGroup(context, 'CREATION_GEOMETRY', this));
+        this.element.appendChild(
+          HtmlGuiRenderer.buildButtonGroup(context, 'CREATION_GEOMETRY', this),
+        );
         internal = HtmlGuiRenderer.buildButtonGroup(context, 'CREATION_OTHER', this);
         break;
       case 2:
@@ -70,6 +72,9 @@ export class HtmlButtonsPanel implements HtmlActionListener {
     if (source instanceof HTMLButtonElement) {
       label = source.name;
     }
-    void this.guiEventExecutor.executeCommand(label, this.parent.getHtmlModel().getMainWindowWidget());
+    void this.guiEventExecutor.executeCommand(
+      label,
+      this.parent.getHtmlModel().getMainWindowWidget(),
+    );
   }
 }

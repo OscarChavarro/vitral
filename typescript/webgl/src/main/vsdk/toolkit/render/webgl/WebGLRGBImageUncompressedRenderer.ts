@@ -80,8 +80,8 @@ export class WebGLRGBImageUncompressedRenderer {
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
         // WebGL 2 requires OES_texture_float_linear to filter RGB32F.
         // RGB16F retains linear filtering on contexts without the extension.
-        const normalFormat = img instanceof NormalMapTexture && gl.getExtension("OES_texture_float_linear")
-            ? gl.RGB32F : gl.RGB16F;
+        const normalFormat =
+            img instanceof NormalMapTexture && gl.getExtension("OES_texture_float_linear") ? gl.RGB32F : gl.RGB16F;
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
@@ -95,8 +95,16 @@ export class WebGLRGBImageUncompressedRenderer {
         );
         if (!(img instanceof NormalMapTexture)) gl.generateMipmap(gl.TEXTURE_2D);
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, img instanceof NormalMapTexture ? gl.LINEAR : WebGLImageRenderer.magFilterParam(gl));
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, img instanceof NormalMapTexture ? gl.LINEAR : WebGLImageRenderer.minFilterParam(gl));
+        gl.texParameteri(
+            gl.TEXTURE_2D,
+            gl.TEXTURE_MAG_FILTER,
+            img instanceof NormalMapTexture ? gl.LINEAR : WebGLImageRenderer.magFilterParam(gl),
+        );
+        gl.texParameteri(
+            gl.TEXTURE_2D,
+            gl.TEXTURE_MIN_FILTER,
+            img instanceof NormalMapTexture ? gl.LINEAR : WebGLImageRenderer.minFilterParam(gl),
+        );
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 

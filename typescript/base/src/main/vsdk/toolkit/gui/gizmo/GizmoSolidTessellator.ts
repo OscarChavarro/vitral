@@ -30,7 +30,12 @@ export class GizmoSolidTessellator {
     /// ((sx+1)/2)*4 + ((sy+1)/2)*2 + (sz+1)/2; each row is a face, given as a
     /// valid (non self-intersecting) strip of 4 corner indexes
     private static readonly BOX_FACES: readonly (readonly number[])[] = [
-        [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 4, 5], [2, 3, 6, 7], [0, 2, 4, 6], [1, 3, 5, 7],
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [0, 1, 4, 5],
+        [2, 3, 6, 7],
+        [0, 2, 4, 6],
+        [1, 3, 5, 7],
     ];
 
     static {
@@ -63,7 +68,12 @@ export class GizmoSolidTessellator {
     @param height length of the shaft, along the local +Z axis
     @return strip with the lateral surface
     */
-    public static buildShaftStrip(local: Matrix4x4d, baseRadius: number, topRadius: number, height: number): Vector3Dd[] {
+    public static buildShaftStrip(
+        local: Matrix4x4d,
+        baseRadius: number,
+        topRadius: number,
+        height: number,
+    ): Vector3Dd[] {
         const strip: Vector3Dd[] = new Array<Vector3Dd>((GizmoSolidTessellator.SLICES + 1) * 2);
         const cos: number[] = GizmoSolidTessellator.SLICE_COS;
         const sin: number[] = GizmoSolidTessellator.SLICE_SIN;

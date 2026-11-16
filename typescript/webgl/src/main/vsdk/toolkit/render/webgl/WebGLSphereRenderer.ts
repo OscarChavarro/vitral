@@ -81,11 +81,16 @@ export class WebGLSphereRenderer {
         let mesh: WebGLMesh | undefined = WebGLSphereRenderer.MESHES.get(key);
 
         if (mesh === undefined) {
-            const entry: SpherePolyhedralCacheEntry =
-                SpherePolyhedralCache.obtain(sphere, slices, stacks - 1);
+            const entry: SpherePolyhedralCacheEntry = SpherePolyhedralCache.obtain(sphere, slices, stacks - 1);
 
-            mesh = new WebGLMesh(entry.getPositions(), entry.getNormals(), entry.getUvs(),
-                entry.getTangents(), entry.getBiNormals(), sphere.getRadius());
+            mesh = new WebGLMesh(
+                entry.getPositions(),
+                entry.getNormals(),
+                entry.getUvs(),
+                entry.getTangents(),
+                entry.getBiNormals(),
+                sphere.getRadius(),
+            );
             WebGLSphereRenderer.MESHES.set(key, mesh);
         }
         return mesh;

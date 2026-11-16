@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 import { Boolean as JavaBoolean } from "../../../../../../../../java/lang/Boolean.js";
+import { Double as JavaDouble } from "../../../../../../../../java/lang/Double.js";
 import { platformPrint } from "../../../../../../../../java/lang/_PlatformConsole.js";
 import { VSDK } from "../../../../../../common/VSDK.js";
 import { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
@@ -66,12 +67,15 @@ export class _PolyhedralBoundedSolidSetGeometricPredicateProcessor extends _Poly
     private static readonly TWO_PI = 2.0 * Math.PI;
     private static readonly TRACE_COPLANAR_TANGENTIAL_PROPERTY = "vsdk.setop.traceCoplanarTangential";
 
+    /**
+    Diagnostic trace of sectoroverlap calls, per thread; null when off.
+    Java keeps it in a `ThreadLocal`; this runtime is single-threaded, so a
+    static field holds the same per-caller value.
+    */
     private static sectoroverlapTrace: SectoroverlapTraceEntry[] | null = null;
-    private static sectoroverlapCallCounter = 0;
 
     public static enableSectoroverlapTrace(): void {
         _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sectoroverlapTrace = [];
-        _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sectoroverlapCallCounter = 0;
     }
 
     public static disableSectoroverlapTrace(): void {
@@ -96,7 +100,7 @@ export class _PolyhedralBoundedSolidSetGeometricPredicateProcessor extends _Poly
             return;
         }
         const entry = new SectoroverlapTraceEntry();
-        entry.callIndex = _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sectoroverlapCallCounter++;
+        entry.callIndex = trace.length;
         entry.faceA =
             na !== null && na.he !== null && na.he.parentLoop !== null && na.he.parentLoop.parentFace !== null
                 ? na.he.parentLoop.parentFace.id
@@ -276,9 +280,29 @@ export class _PolyhedralBoundedSolidSetGeometricPredicateProcessor extends _Poly
         ) {
             return ref2.dotProduct(dir) > 0.0;
         }
-        const t1 = _PolyhedralBoundedSolidSetGeometricPredicateProcessor.compareToZero(c1.dotProduct(ref12));
-        const t2 = _PolyhedralBoundedSolidSetGeometricPredicateProcessor.compareToZero(c2.dotProduct(ref12));
+        // Signs of unit quantities: the raw products grow with the cube of
+        // the model size while the tolerance grows linearly, so at 10^-3
+        // they were noise.
+        const t1 = PolyhedralBoundedSolidNumericPolicy.compare(
+            _PolyhedralBoundedSolidSetGeometricPredicateProcessor
+                .unit(c1)
+                .dotProduct(_PolyhedralBoundedSolidSetGeometricPredicateProcessor.unit(ref12)),
+            0.0,
+            PolyhedralBoundedSolidNumericPolicy.BREP_EPSILON,
+        );
+        const t2 = PolyhedralBoundedSolidNumericPolicy.compare(
+            _PolyhedralBoundedSolidSetGeometricPredicateProcessor
+                .unit(c2)
+                .dotProduct(_PolyhedralBoundedSolidSetGeometricPredicateProcessor.unit(ref12)),
+            0.0,
+            PolyhedralBoundedSolidNumericPolicy.BREP_EPSILON,
+        );
         return t1 < 0.0 && t2 < 0.0;
+    }
+
+    private static unit(v: Vector3Dd): Vector3Dd {
+        const length = v.length();
+        return length > 0.0 ? v.multiply(1.0 / length) : v;
     }
 
     /**
@@ -336,18 +360,169 @@ export class _PolyhedralBoundedSolidSetGeometricPredicateProcessor extends _Poly
             b2 = t;
         }
 
-        // Closed-set (epsilon-tolerant) interval-overlap check.
-        // Intentionally returns true for touching sectors (a2 ≈ b1) because the
-        // setop pipeline requires a null-edge strut even at coplanar boundary-ray
-        // contact — a strict open-set check breaks MANT1988 §15.1 reference geometry.
-        // The symmetric disjoint case (B entirely left of A) is not yet fixed here;
-        // that requires a deeper restructuring of the coplanar V/V path.
-        const decision = a2 + VSDK.EPSILON > b1 - VSDK.EPSILON;
+        // Closed-set (epsilon-tolerant) interval-overlap check on signed
+        // angles. Intentionally returns true for touching sectors (a2 ≈ b1
+        // or b2 ≈ a1) because the setop pipeline requires a null-edge strut
+        // even at coplanar boundary-ray contact — a strict open-set check
+        // breaks MANT1988 §15.1 reference geometry. Both ends are tested:
+        // the check used to miss B entirely on the negative side of A.
+        let decision = a2 + VSDK.EPSILON > b1 - VSDK.EPSILON && b2 + VSDK.EPSILON > a1 - VSDK.EPSILON;
+        if (decision && _PolyhedralBoundedSolidSetGeometricPredicateProcessor.touchOnlyAlongConcaveEdge(na, nb)) {
+            decision = false;
+        }
         _PolyhedralBoundedSolidSetGeometricPredicateProcessor.recordSectoroverlapCall(na, nb, a1, a2, b1, b2, decision);
         if (withDebug) {
             platformPrint(decision ? " <TRUE>" : " <FALSE>");
         }
         return decision;
+    }
+
+    /**
+    True when two coplanar sectors meet only along a boundary ray that is an
+    edge of both faces, and that edge is concave in at least one of the two
+    solids: a concave edge of one solid lying on an edge of the other, as at
+    the shared corner of two bars. The sectors lie on opposite sides of the
+    edge and share no area, so treating them as an "on" pair would propagate
+    a coplanar class across a face that does not touch the other solid.
+    Contact along a convex edge of both solids (blocks glued face to face)
+    and contact along the bisector that splits a wide sector keep the
+    closed-set behavior of [MANT1988].15.6.2.
+    */
+    private static touchOnlyAlongConcaveEdge(
+        na: _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex,
+        nb: _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex,
+    ): boolean {
+        const firstA = [true, false];
+        const firstB = [true, false];
+
+        if (_PolyhedralBoundedSolidSetGeometricPredicateProcessor.sectorsShareInteriorDirection(na, nb)) {
+            return false;
+        }
+        for (const fa of firstA) {
+            for (const fb of firstB) {
+                const ra = fa ? na.ref1! : na.ref2!;
+                const rb = fb ? nb.ref1! : nb.ref2!;
+                if (!_PolyhedralBoundedSolidSetGeometricPredicateProcessor.sameDirection(ra, rb)) {
+                    continue;
+                }
+                if (
+                    !_PolyhedralBoundedSolidSetGeometricPredicateProcessor.isFaceEdgeRay(na, ra) ||
+                    !_PolyhedralBoundedSolidSetGeometricPredicateProcessor.isFaceEdgeRay(nb, rb)
+                ) {
+                    return false;
+                }
+                return (
+                    _PolyhedralBoundedSolidSetGeometricPredicateProcessor.isConcaveEdgeRay(na, fa) ||
+                    _PolyhedralBoundedSolidSetGeometricPredicateProcessor.isConcaveEdgeRay(nb, fb)
+                );
+            }
+        }
+        return false;
+    }
+
+    private static sameDirection(a: Vector3Dd, b: Vector3Dd): boolean {
+        const na = new Vector3Dd(a).normalized();
+        const nb = new Vector3Dd(b).normalized();
+        return na.dotProduct(nb) > 1.0 - VSDK.EPSILON;
+    }
+
+    private static isFaceEdgeRay(
+        n: _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex,
+        ray: Vector3Dd,
+    ): boolean {
+        const origin = n.he!.startingVertex.position;
+        return (
+            _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sameDirection(
+                ray,
+                n.he!.previous()!.startingVertex.position.subtract(origin),
+            ) ||
+            _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sameDirection(
+                ray,
+                n.he!.next()!.startingVertex.position.subtract(origin),
+            )
+        );
+    }
+
+    /**
+    Whether the edge along the sector's first (ref1, edge he.previous()) or
+    second (ref2, edge he) ray is concave: the sector's face, next to the
+    edge, lies in front of the plane of the face across the edge.
+    */
+    private static isConcaveEdgeRay(
+        n: _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex,
+        firstRay: boolean,
+    ): boolean {
+        let edgeHalf: _PolyhedralBoundedSolidHalfEdge;
+        let ray: Vector3Dd;
+        let other: Vector3Dd;
+        let inside: Vector3Dd;
+        let acrossNormal: Vector3Dd;
+
+        edgeHalf = firstRay ? n.he!.previous()! : n.he!;
+        ray = firstRay ? n.ref1! : n.ref2!;
+        other = firstRay ? n.ref2! : n.ref1!;
+        if (edgeHalf.mirrorHalfEdge() === null || edgeHalf.mirrorHalfEdge()!.parentLoop === null) {
+            return false;
+        }
+        acrossNormal = edgeHalf.mirrorHalfEdge()!.parentLoop.parentFace.getContainingPlane()!.getNormal();
+        inside = new Vector3Dd(ray).normalized().add(new Vector3Dd(other).normalized().multiply(1.0e-3));
+        return inside.dotProduct(acrossNormal) > VSDK.EPSILON * 1.0e-3;
+    }
+
+    /**
+    Two coplanar sectors overlap when some direction lies strictly inside
+    both. Every sector is the minor arc from ref1 to ref2 (wide sectors are
+    split at their bisector by the neighborhood preprocessing), so it is
+    enough to test the middle direction of each gap between consecutive
+    boundary rays.
+    @internal Java package-private.
+    */
+    public static sectorsShareInteriorDirection(
+        na: _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex,
+        nb: _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex,
+    ): boolean {
+        const n = na.he!.parentLoop.parentFace.getContainingPlane()!.getNormal();
+        const u = new Vector3Dd(na.ref1!).normalized();
+        const v = n.crossProduct(u).normalized();
+        const angles = new Array<number>(4);
+        const rays = [na.ref1!, na.ref2!, nb.ref1!, nb.ref2!];
+        let i: number;
+
+        for (i = 0; i < 4; i++) {
+            const r = new Vector3Dd(rays[i]!).normalized();
+            angles[i] = Math.atan2(r.dotProduct(v), r.dotProduct(u));
+        }
+        // Java's `Arrays.sort(double[])` total order.
+        angles.sort(JavaDouble.compare);
+        for (i = 0; i < 4; i++) {
+            const from = angles[i]!;
+            const to = i === 3 ? angles[0]! + 2.0 * Math.PI : angles[i + 1]!;
+            let middle: number;
+            let dir: Vector3Dd;
+
+            if (to - from < VSDK.EPSILON) {
+                continue;
+            }
+            middle = (from + to) / 2.0;
+            dir = u.multiply(Math.cos(middle)).add(v.multiply(Math.sin(middle)));
+            if (
+                _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sctrwitthinProper(
+                    dir,
+                    na.ref1!,
+                    na.ref2!,
+                    na.ref12!,
+                ) &&
+                _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sctrwitthinProper(
+                    dir,
+                    nb.ref1!,
+                    nb.ref2!,
+                    nb.ref12!,
+                )
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static angleFromVectors(u: Vector3Dd, v: Vector3Dd, a: Vector3Dd): number {
@@ -473,8 +648,8 @@ export class _PolyhedralBoundedSolidSetGeometricPredicateProcessor extends _Poly
                         " class=" +
                         resolvedClass,
                 );
-                nbr[i]!.cl = resolvedClass;
-                nbr[(i + 1) % nnbr]!.cl = resolvedClass;
+                nbr[i]!.classification = resolvedClass;
+                nbr[(i + 1) % nnbr]!.classification = resolvedClass;
             }
         }
     }

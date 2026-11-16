@@ -8,9 +8,10 @@ import { PolyhedralBoundedSolidTestFixtures } from "../../volume/polyhedralBound
 /**
 §9 regression guard for the Finisher invariants:
 <ul>
-<li>§9.1 — `sanitizePairedFaces` must never fall back to legacy
-    index ordering. If Connect tags faces correctly, pairIndex matching
-    always succeeds and the fallback counter stays at 0.</li>
+<li>§9.1 — `sanitizePairedFaces` pairs null faces by the index
+    connect gave them. The old fallback to list order is gone: an unpaired
+    set of null faces throws `SolidOperationFailedException`, so the
+    baseline fixtures must finish without it.</li>
 <li>§9.2 — `triangulateNonPlanarFaces` must not triangulate any
     face in the baseline fixtures that already pass validation. A non-zero
     count indicates the loopGlue produced a non-planar face, which is a
@@ -46,14 +47,12 @@ describe("SetOpFinishInvariantsTest", () => {
     }
 
     it.each(baselineFixtures())(
-        "§9.1 no legacy fallback: %s",
+        "§9.1 null faces paired by index: %s",
         (label: string, solidA: PolyhedralBoundedSolid, solidB: PolyhedralBoundedSolid, op: number) => {
-            PolyhedralBoundedSolidModeler.setOp(solidA, solidB, op, false, true, false);
-
             expect(
-                _PolyhedralBoundedSolidSetFinisher.getLastLegacyFallbackCount(),
-                `[${label}] sanitizePairedFaces must not use legacy ordering fallback`,
-            ).toBe(0);
+                () => PolyhedralBoundedSolidModeler.setOp(solidA, solidB, op, false, true, false),
+                `[${label}] finish must pair every null face by index`,
+            ).not.toThrow();
         },
     );
 

@@ -43,8 +43,14 @@ export class WebSceneRaytracingBackend implements SceneRaytracingBackend {
     snapshot: SimpleSceneSnapshot,
     interactiveReport: boolean,
   ): Promise<void> {
-    await this.raytracer.execute(image, depth, depthMode, quality, encodeSimpleSceneSnapshot(snapshot),
-      interactiveReport);
+    await this.raytracer.execute(
+      image,
+      depth,
+      depthMode,
+      quality,
+      encodeSimpleSceneSnapshot(snapshot),
+      interactiveReport,
+    );
   }
 
   /**

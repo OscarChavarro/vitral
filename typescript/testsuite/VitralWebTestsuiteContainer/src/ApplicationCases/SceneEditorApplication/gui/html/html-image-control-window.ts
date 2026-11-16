@@ -51,7 +51,11 @@ export class HtmlImageControlWindow {
   private readonly workArea: ImageDisplayPanel;
   private readonly menubar: HtmlMenuBar;
 
-  constructor(image: RGBImageUncompressed | null, gui: Widget | null, executor: HtmlActionListener) {
+  constructor(
+    image: RGBImageUncompressed | null,
+    gui: Widget | null,
+    executor: HtmlActionListener,
+  ) {
     this.controlledImage = image;
 
     this.windowWidget = new HtmlWindow('Image control tool');

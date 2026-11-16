@@ -4,6 +4,8 @@ export class Random {
     private static readonly MASK = (1n << 48n) - 1n;
 
     private seed: bigint;
+    private nextNextGaussian = 0.0;
+    private haveNextNextGaussian = false;
 
     public constructor(seed: number = Date.now()) {
         this.seed = 0n;
@@ -12,6 +14,7 @@ export class Random {
 
     public setSeed(seed: number): void {
         this.seed = (BigInt(globalThis.Math.trunc(seed)) ^ Random.MULTIPLIER) & Random.MASK;
+        this.haveNextNextGaussian = false;
     }
 
     protected next(bits: number): number {
@@ -47,5 +50,34 @@ export class Random {
         const low = BigInt(this.next(27));
         const combined = (high << 27n) + low;
         return Number(combined) / Number(1n << 53n);
+    }
+
+    /** `Random.nextBoolean()`. */
+    public nextBoolean(): boolean {
+        return this.next(1) !== 0;
+    }
+
+    /**
+    `Random.nextGaussian()`: Java's polar method, so the same seed gives the
+    same sequence. Java uses `StrictMath.log`/`StrictMath.sqrt`; V8's
+    `Math.log` is the same fdlibm algorithm and `Math.sqrt` is exact.
+    */
+    public nextGaussian(): number {
+        if (this.haveNextNextGaussian) {
+            this.haveNextNextGaussian = false;
+            return this.nextNextGaussian;
+        }
+        let v1: number;
+        let v2: number;
+        let s: number;
+        do {
+            v1 = 2 * this.nextDouble() - 1;
+            v2 = 2 * this.nextDouble() - 1;
+            s = v1 * v1 + v2 * v2;
+        } while (s >= 1 || s === 0);
+        const multiplier = globalThis.Math.sqrt((-2 * globalThis.Math.log(s)) / s);
+        this.nextNextGaussian = v2 * multiplier;
+        this.haveNextNextGaussian = true;
+        return v1 * multiplier;
     }
 }

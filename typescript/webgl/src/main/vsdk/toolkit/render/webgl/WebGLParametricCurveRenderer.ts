@@ -50,14 +50,21 @@ export class WebGLParametricCurveRenderer {
         localTransform: Matrix4x4d | null,
         color?: ColorRgb,
     ): Promise<void> {
-        const c: ColorRgb = color !== undefined
-            ? color
-            : (quality !== null && quality.getWireColor() !== null
-                ? quality.getWireColor()
-                : new ColorRgb(1, 1, 1));
+        const c: ColorRgb =
+            color !== undefined
+                ? color
+                : quality !== null && quality.getWireColor() !== null
+                  ? quality.getWireColor()
+                  : new ColorRgb(1, 1, 1);
 
-        if (gl === null || curve === null || camera === null || quality === null ||
-            curve.types === null || curve.types.length < 2) {
+        if (
+            gl === null ||
+            curve === null ||
+            camera === null ||
+            quality === null ||
+            curve.types === null ||
+            curve.types.length < 2
+        ) {
             return;
         }
         const local: Matrix4x4d = localTransform !== null ? localTransform : Matrix4x4d.identityMatrix();
@@ -68,9 +75,13 @@ export class WebGLParametricCurveRenderer {
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
         if (positions.length > 0) {
-            await WebGLLineRenderer.drawLines(gl, mvp, positions,
+            await WebGLLineRenderer.drawLines(
+                gl,
+                mvp,
+                positions,
                 WebGLParametricCurveRenderer.buildUniformColors(positions.length / 3, c.r(), c.g(), c.b()),
-                1.0);
+                1.0,
+            );
         }
         if (quality.isPointsSet() && vertices.length > 0) {
             await WebGLParametricCurveRenderer.drawPoints(gl, mvp, vertices);
@@ -124,8 +135,10 @@ export class WebGLParametricCurveRenderer {
     */
     private static async drawPoints(gl: WebGL2RenderingContext, mvp: Matrix4x4d, vertices: Vector3Dd[]): Promise<void> {
         const minmax: number[] = WebGLParametricCurveRenderer.boundsOf(vertices);
-        const size: number = Math.max(minmax[3]! - minmax[0]!,
-            Math.max(minmax[4]! - minmax[1]!, minmax[5]! - minmax[2]!));
+        const size: number = Math.max(
+            minmax[3]! - minmax[0]!,
+            Math.max(minmax[4]! - minmax[1]!, minmax[5]! - minmax[2]!),
+        );
         const h: number = Math.fround(Math.max(size, 1e-6) * 0.01);
         const positions: Float32Array = new Float32Array(vertices.length * 6 * 3);
         let k: number = 0;
@@ -134,7 +147,11 @@ export class WebGLParametricCurveRenderer {
             const x: number = v.x();
             const y: number = v.y();
             const z: number = v.z();
-            const axes: number[][] = [[h, 0, 0], [0, h, 0], [0, 0, h]];
+            const axes: number[][] = [
+                [h, 0, 0],
+                [0, h, 0],
+                [0, 0, h],
+            ];
 
             for (const a of axes) {
                 positions[k++] = x - a[0]!;
@@ -146,15 +163,23 @@ export class WebGLParametricCurveRenderer {
             }
         }
         const rgb: readonly number[] = WebGLParametricCurveRenderer.POINT_RGB;
-        await WebGLLineRenderer.drawLines(gl, mvp, positions,
+        await WebGLLineRenderer.drawLines(
+            gl,
+            mvp,
+            positions,
             WebGLParametricCurveRenderer.buildUniformColors(positions.length / 3, rgb[0]!, rgb[1]!, rgb[2]!),
-            Math.max(1.0, WebGLParametricCurveRenderer.POINT_SIZE / 2));
+            Math.max(1.0, WebGLParametricCurveRenderer.POINT_SIZE / 2),
+        );
     }
 
     private static boundsOf(vertices: Vector3Dd[]): number[] {
         const minmax: number[] = [
-            Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE,
-            -Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE,
+            Number.MAX_VALUE,
+            Number.MAX_VALUE,
+            Number.MAX_VALUE,
+            -Number.MAX_VALUE,
+            -Number.MAX_VALUE,
+            -Number.MAX_VALUE,
         ];
 
         for (const v of vertices) {

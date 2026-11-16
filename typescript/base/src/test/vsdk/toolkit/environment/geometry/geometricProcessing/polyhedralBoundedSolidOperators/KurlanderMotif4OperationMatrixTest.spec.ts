@@ -25,10 +25,12 @@ result is valid.
 
 <p>See `doc/plan-csg-boolean-fix-stage3.md` §6 for the full workflow.</p>
 
-<p>The permanent regression test for motif 0 is in
-`given_kurlanderBowlAndMotif0_when_allFourOps_then_topologyMatchesBaseline`.
-The diagnostic test is skipped (Java `@Disabled`) so it does not run as part
-of the regular suite; enable it explicitly by un-skipping it.</p>
+<p>Every motif must give OK in the four operations (all 40 since
+2026-11-16; the per-motif switch that skipped the failing ones was
+removed). Motifs 0, 1, 2, 5, 7, 10, 12, 14, 15, 21 and 23 also have their
+topology summaries pinned. The printed matrix is a utility, not a test:
+Java runs it from `main` with the test classpath; here it stays skipped
+(Vitest has no main entry point), un-skip it locally to print it.</p>
 */
 describe("KurlanderMotif4OperationMatrixTest", () => {
     /** Java's private `OpStatus` enum. */
@@ -41,62 +43,6 @@ describe("KurlanderMotif4OperationMatrixTest", () => {
     }
 
     const OP_NAMES = ["A-B", "B-A", "AiB", "A+B"];
-
-    /**
-    Execution control for the parameterized test: one boolean per motif (index 0-39).
-    `true` = the motif is known to be 4-OK and the assertion runs.
-    `false` = the motif still fails in some operation; it is skipped.
-
-    Current 4-OK motifs (plan-csg-boolean-fix-stage3 §14.2):
-      ✅ shellCount=2: 0, 2, 10, 15, 21
-      ⚠️ shellCount=1: 1, 5, 7, 12, 14, 23
-    */
-    const ENABLED = [
-        //   0      1      2      3      4      5      6      7      8      9
-        true,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        true,
-        false,
-        false,
-        //  10     11     12     13     14     15     16     17     18     19
-        true,
-        false,
-        true,
-        false,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        //  20     21     22     23     24     25     26     27     28     29
-        false,
-        true,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        //  30     31     32     33     34     35     36     37     38     39
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-    ];
 
     /**
     Execute the operation indicated by `opIdx`:
@@ -1613,7 +1559,7 @@ describe("KurlanderMotif4OperationMatrixTest", () => {
         );
     }
 
-    // Java: @Disabled("40x4 diagnostic - run manually")
+    /** Prints the 40 x 4 status matrix with the topology summaries (Java `main`). */
     it.skip("diagnose_allMotifsAllOps_printTopologicalSummaryMatrix", () => {
         const total = CsgKurlanderBowlFixture.getSingleMotifCount();
         const statusCounts: number[][] = [];
@@ -1676,20 +1622,14 @@ describe("KurlanderMotif4OperationMatrixTest", () => {
     });
 
     /**
-    For each motif enabled in `ENABLED`, run the 4 boolean operations
-    and verify that all of them produce `OpStatus.OK`.
-    For each operation, print the trace of vertices created during the intersection.
-    Motifs with `ENABLED[motif] === false` are skipped.
+    For each motif, run the 4 boolean operations and verify that all of them
+    produce `OpStatus.OK`. For each operation, print the trace of
+    vertices created during the intersection.
     */
     it.each(allMotifIndices())(
         "motif[%i]",
         async (motif: number) => {
             await yieldToEventLoop();
-            if (!ENABLED[motif]) {
-                // Java: assumeTrue(ENABLED[motif], "motif N disabled in ENABLED - it is not 4-OK yet")
-                return;
-            }
-
             const motifDesc = CsgKurlanderBowlFixture.describeSingleMotif(motif);
             console.log(`\n[PARAM] motif=${motif} ${motifDesc}`);
 
@@ -1708,23 +1648,6 @@ describe("KurlanderMotif4OperationMatrixTest", () => {
 
                 const status = classify(motifResult);
                 expect(status, `motif ${motif} op ${OP_NAMES[opIdx]}`).toBe(OpStatus.OK);
-            }
-        },
-        KURLANDER_TIMEOUT_MS,
-    );
-
-    it(
-        "zzTempPrintMoonBaselines",
-        async () => {
-            const motifs = [21, 23];
-            for (const motif of motifs) {
-                for (let opIdx = 0; opIdx < 4; opIdx++) {
-                    await yieldToEventLoop();
-                    const baselineOps = CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(motif);
-                    const baselineResult = executeOp(baselineOps[0]!, baselineOps[1]!, opIdx);
-                    const baselineSummary = TopologicalSummary.from(baselineResult);
-                    console.log("MOTIF" + motif + "_OP" + opIdx + "=" + baselineSummary.toLiteral());
-                }
             }
         },
         KURLANDER_TIMEOUT_MS,

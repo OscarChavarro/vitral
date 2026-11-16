@@ -115,7 +115,13 @@ export class WebGLColoredPrimitiveRenderer {
         });
     }
 
-    private static upload(gl: WebGL2RenderingContext, vbo: WebGLBuffer, attribute: number, size: number, data: Float32Array): void {
+    private static upload(
+        gl: WebGL2RenderingContext,
+        vbo: WebGLBuffer,
+        attribute: number,
+        size: number,
+        data: Float32Array,
+    ): void {
         gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
         gl.enableVertexAttribArray(attribute);

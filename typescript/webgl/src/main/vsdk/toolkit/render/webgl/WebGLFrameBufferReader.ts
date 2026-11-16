@@ -28,8 +28,10 @@ export class WebGLFrameBufferReader {
     private static readonly FRAGMENT_SHADER_FILE: string = "depthPackPixelShader.glsl";
     private static readonly MAX_DEPTH_CODE: number = 16777215;
 
-    private static readonly resources: WeakMap<WebGL2RenderingContext, Promise<DepthPackResources>> =
-        new WeakMap<WebGL2RenderingContext, Promise<DepthPackResources>>();
+    private static readonly resources: WeakMap<WebGL2RenderingContext, Promise<DepthPackResources>> = new WeakMap<
+        WebGL2RenderingContext,
+        Promise<DepthPackResources>
+    >();
 
     private constructor() {}
 
@@ -74,8 +76,9 @@ export class WebGLFrameBufferReader {
         const width: number = view[2]!;
         const height: number = view[3]!;
         const r: DepthPackResources = await WebGLFrameBufferReader.ensureInitialized(gl);
-        const previousFrameBuffer: WebGLFramebuffer | null =
-            gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
+        const previousFrameBuffer: WebGLFramebuffer | null = gl.getParameter(
+            gl.FRAMEBUFFER_BINDING,
+        ) as WebGLFramebuffer | null;
         const depthTestEnabled: boolean = gl.isEnabled(gl.DEPTH_TEST);
         const blendEnabled: boolean = gl.isEnabled(gl.BLEND);
 
@@ -153,7 +156,8 @@ export class WebGLFrameBufferReader {
         let pending: Promise<DepthPackResources> | undefined = WebGLFrameBufferReader.resources.get(gl);
 
         if (pending === undefined) {
-            pending = WebGLShaderProgramUtil.createProgramFromFiles(gl,
+            pending = WebGLShaderProgramUtil.createProgramFromFiles(
+                gl,
                 WebGLFrameBufferReader.VERTEX_SHADER_FILE,
                 WebGLFrameBufferReader.FRAGMENT_SHADER_FILE,
             ).then((program: WebGLProgram): DepthPackResources => {

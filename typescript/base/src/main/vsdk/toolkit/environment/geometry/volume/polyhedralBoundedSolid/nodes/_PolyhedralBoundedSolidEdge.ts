@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 import { FundamentalEntity } from "../../../../../common/FundamentalEntity.js";
+import type { ArrayLinkable } from "../../../../../common/dataStructures/ArrayLinkable.js";
 import { ColorRgb } from "../../../../../common/color/ColorRgb.js";
 import type { PolyhedralBoundedSolid } from "../PolyhedralBoundedSolid.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "./_PolyhedralBoundedSolidHalfEdge.js";
@@ -20,7 +21,25 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-export class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
+export class _PolyhedralBoundedSolidEdge extends FundamentalEntity implements ArrayLinkable {
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    private listOwner: object | null = null;
+    private listIndex = -1;
+
+    public getListOwner(): object | null {
+        return this.listOwner;
+    }
+
+    public getListIndex(): number {
+        return this.listIndex;
+    }
+
+    public setListSlot(owner: object | null, index: number): void {
+        this.listOwner = owner;
+        this.listIndex = index;
+    }
+
     /// Reference to `right` half edge, as defined in [MANT1988].10.2.2.
     /// Note that half edge in this side is considered positively oriented.
     public rightHalf!: _PolyhedralBoundedSolidHalfEdge | null;

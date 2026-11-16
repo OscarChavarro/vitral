@@ -51,8 +51,17 @@ export class WebGLFunctionalExplicitSurfaceRenderer {
         normalMap: RGBImageUncompressed | null,
         localTransform: Matrix4x4d | null,
     ): Promise<void> {
-        await WebGLGeometryRenderer.draw(gl, surface, camera, lights, material, quality,
-            textureMap, normalMap, localTransform);
+        await WebGLGeometryRenderer.draw(
+            gl,
+            surface,
+            camera,
+            lights,
+            material,
+            quality,
+            textureMap,
+            normalMap,
+            localTransform,
+        );
     }
 
     /**
@@ -61,8 +70,12 @@ export class WebGLFunctionalExplicitSurfaceRenderer {
     mesh is replaced by the surface whenever it changes
     */
     public static meshKey(surface: FunctionalExplicitSurface): string {
-        return "functionalexplicitsurface/" + identityHashCode(surface) + "/" +
-            identityHashCode(surface.getInternalTriangleMesh());
+        return (
+            "functionalexplicitsurface/" +
+            identityHashCode(surface) +
+            "/" +
+            identityHashCode(surface.getInternalTriangleMesh())
+        );
     }
 
     /**
@@ -87,7 +100,8 @@ export class WebGLFunctionalExplicitSurfaceRenderer {
         const sizeY: number = surface.getMaxYBound() - surface.getMinYBound();
         const sizeZ: number = surface.getMaxZBound() - surface.getMinZBound();
         const builder: WebGLMeshBuilder = new WebGLMeshBuilder(
-            Math.max(Math.abs(sizeX), Math.max(Math.abs(sizeY), Math.abs(sizeZ))));
+            Math.max(Math.abs(sizeX), Math.max(Math.abs(sizeY), Math.abs(sizeZ))),
+        );
         const pos: Vector3Dd[] = new Array<Vector3Dd>(3);
         const nor: (Vector3Dd | null)[] = new Array<Vector3Dd | null>(3);
         const u: number[] = [0, 0, 0];
@@ -99,9 +113,8 @@ export class WebGLFunctionalExplicitSurfaceRenderer {
                 const i: number = idx[t + k]!;
 
                 pos[k] = new Vector3Dd(p[3 * i]!, p[3 * i + 1]!, p[3 * i + 2]!);
-                nor[k] = (n !== null && n.length >= 3 * i + 3)
-                    ? new Vector3Dd(n[3 * i]!, n[3 * i + 1]!, n[3 * i + 2]!)
-                    : null;
+                nor[k] =
+                    n !== null && n.length >= 3 * i + 3 ? new Vector3Dd(n[3 * i]!, n[3 * i + 1]!, n[3 * i + 2]!) : null;
                 u[k] = sizeX !== 0 ? (pos[k]!.x() - surface.getMinXBound()) / sizeX : 0;
                 v[k] = sizeY !== 0 ? (pos[k]!.y() - surface.getMinYBound()) / sizeY : 0;
             }
@@ -121,12 +134,9 @@ export class WebGLFunctionalExplicitSurfaceRenderer {
             const n2: Vector3Dd = nor[2]!;
             // The front side is the one the normals point to
             if (n0.add(n1).add(n2).dotProduct(face) >= 0) {
-                builder.addTriangle(pos[0]!, n0, u[0]!, v[0]!, pos[1]!, n1, u[1]!, v[1]!,
-                    pos[2]!, n2, u[2]!, v[2]!);
-            }
-            else {
-                builder.addTriangle(pos[2]!, n2, u[2]!, v[2]!, pos[1]!, n1, u[1]!, v[1]!,
-                    pos[0]!, n0, u[0]!, v[0]!);
+                builder.addTriangle(pos[0]!, n0, u[0]!, v[0]!, pos[1]!, n1, u[1]!, v[1]!, pos[2]!, n2, u[2]!, v[2]!);
+            } else {
+                builder.addTriangle(pos[2]!, n2, u[2]!, v[2]!, pos[1]!, n1, u[1]!, v[1]!, pos[0]!, n0, u[0]!, v[0]!);
             }
         }
         return builder.build();

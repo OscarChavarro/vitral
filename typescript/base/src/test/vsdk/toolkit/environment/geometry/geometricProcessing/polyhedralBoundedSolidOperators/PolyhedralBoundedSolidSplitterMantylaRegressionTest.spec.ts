@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { VSDK } from "vsdk/toolkit/common/VSDK.js";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { InfinitePlane } from "vsdk/toolkit/environment/geometry/surface/InfinitePlane.js";
 import { PolyhedralBoundedSolid } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
@@ -14,16 +13,6 @@ Regression coverage for the solid/plane split used by
 PolyhedralBoundedSolidExample SPLIT_TEST_PART_2 and SPLIT_TEST_PART_3.
  */
 describe("PolyhedralBoundedSolidSplitterMantylaRegressionTest", () => {
-    beforeEach(() => {
-        VSDK.setWithSystemExit(false);
-        VSDK.setWithFatalExceptions(true);
-    });
-
-    afterEach(() => {
-        VSDK.setWithSystemExit(true);
-        VSDK.setWithFatalExceptions(true);
-    });
-
     function assertValidSolid(solid: PolyhedralBoundedSolid, side: string): void {
         const topology = PolyhedralBoundedSolidTopologySummary.from(solid);
 

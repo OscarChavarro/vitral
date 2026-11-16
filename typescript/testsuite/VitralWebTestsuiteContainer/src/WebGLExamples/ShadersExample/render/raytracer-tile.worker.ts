@@ -199,7 +199,10 @@ const renderer = new ParallelRaytracerTileRenderer(
   },
 );
 
-const handler = createWorkerMessageHandler<ParallelRaytracerTileRequest, ParallelRaytracerTileResult>(
+const handler = createWorkerMessageHandler<
+  ParallelRaytracerTileRequest,
+  ParallelRaytracerTileResult
+>(
   (request, _signal, notify) => renderer.renderTile(request, notify),
   (response) => {
     self.postMessage(response);

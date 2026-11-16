@@ -99,21 +99,22 @@ export class HtmlGuiRenderer {
 
         if (menu === null) {
             widgetPopup.popup.addItem("Popup menu not found on GUI", "\0", (): void => {});
-        }
-        else {
+        } else {
             const children: WidgetMenuElement[] = menu.getChildren();
 
             for (let i: number = 0; i < children.length; i++) {
                 const element: WidgetMenuElement = children[i]!;
                 if (element instanceof WidgetMenu) {
-                    const widgetSubmenu: HtmlMenu = HtmlGuiRenderer.buildPopupMenu(context, element.getName(), executor);
+                    const widgetSubmenu: HtmlMenu = HtmlGuiRenderer.buildPopupMenu(
+                        context,
+                        element.getName(),
+                        executor,
+                    );
                     widgetPopup.popup.addSubmenu(widgetSubmenu.text, widgetSubmenu.mnemonic, widgetSubmenu.popup);
-                }
-                else if (element instanceof WidgetMenuItem) {
+                } else if (element instanceof WidgetMenuItem) {
                     if (element.isSeparator()) {
                         widgetPopup.popup.addSeparator();
-                    }
-                    else {
+                    } else {
                         const commandName: string = element.getCommandName();
                         const mnemonic: string = HtmlGuiRenderer.convertMnemonic2Swing(element.getMnemonic());
                         widgetPopup.popup.addItem(element.getName(), mnemonic, (): void => {
@@ -135,15 +136,14 @@ export class HtmlGuiRenderer {
         if (group === null) {
             frame.classList.add("vitral-button-group-error");
             const l: HTMLSpanElement = document.createElement("span");
-            l.textContent = "No ButtonGroup \"" + name + "\" found in GUI";
+            l.textContent = 'No ButtonGroup "' + name + '" found in GUI';
             frame.appendChild(l);
             return frame;
         }
 
         if (group.getDirection() === WidgetButtonGroup.HORIZONTAL) {
             frame.classList.add("vitral-button-group-horizontal");
-        }
-        else {
+        } else {
             frame.classList.add("vitral-button-group-vertical");
         }
 
@@ -160,8 +160,7 @@ export class HtmlGuiRenderer {
 
             if (img === null || !group.isShowIconsSet()) {
                 b.textContent = element.getName() ?? "";
-            }
-            else {
+            } else {
                 b.classList.add("vitral-button-icon");
                 const primaryIcon: string = HtmlImageRenderer.exportToDataUrl(img);
                 const icon: HTMLImageElement = document.createElement("img");
@@ -218,14 +217,17 @@ export class HtmlGuiRenderer {
     @param executor receives the commands of the items
     @return the menu bar
     */
-    public static buildMenubar(context: Widget | null, _name: string | null, executor: HtmlActionListener): HtmlMenuBar {
+    public static buildMenubar(
+        context: Widget | null,
+        _name: string | null,
+        executor: HtmlActionListener,
+    ): HtmlMenuBar {
         let menubar: WidgetMenu | null = null;
         let errorMenu: string | null = null;
 
         if (context !== null) {
             menubar = context.getMenubar();
-        }
-        else {
+        } else {
             errorMenu = "No Widget specified!";
         }
         if (menubar === null) {
@@ -240,8 +242,7 @@ export class HtmlGuiRenderer {
                 executor.actionPerformed(new HtmlActionEvent(widgetPopup, 1, "IDC_FILE_QUIT"));
             });
             widgetMenubar.addMenu(errorMenu ?? "", "\0", widgetPopup);
-        }
-        else {
+        } else {
             const children: WidgetMenuElement[] = menubar.getChildren();
 
             for (let i: number = 0; i < children.length; i++) {
@@ -362,23 +363,17 @@ export class HtmlGuiRenderer {
 
         if (v instanceof WidgetBooleanVariable) {
             containingPanelWidget = HtmlGuiRenderer.buildBooleanVariable(v, executor);
-        }
-        else if (v instanceof WidgetVector3DVariable) {
+        } else if (v instanceof WidgetVector3DVariable) {
             containingPanelWidget = HtmlGuiRenderer.buildVector3DVariable(v, executor);
-        }
-        else if (v instanceof WidgetColorRgbVariable) {
+        } else if (v instanceof WidgetColorRgbVariable) {
             containingPanelWidget = HtmlGuiRenderer.buildColorRgbVariable(v, executor);
-        }
-        else if (v instanceof WidgetDoubleVariable) {
+        } else if (v instanceof WidgetDoubleVariable) {
             containingPanelWidget = HtmlGuiRenderer.buildDoubleVariable(v, executor);
-        }
-        else if (v instanceof WidgetIntegerVariable) {
+        } else if (v instanceof WidgetIntegerVariable) {
             containingPanelWidget = HtmlGuiRenderer.buildIntegerVariable(v, executor);
-        }
-        else if (v instanceof WidgetStringVariable) {
+        } else if (v instanceof WidgetStringVariable) {
             containingPanelWidget = HtmlGuiRenderer.buildStringVariable(v, executor);
-        }
-        else {
+        } else {
             const l: HTMLSpanElement = document.createElement("span");
             l.textContent = "Variable of type " + v.constructor.name + " not supported yet";
             containingPanelWidget.appendChild(l);
@@ -387,8 +382,8 @@ export class HtmlGuiRenderer {
     }
 
     private static place(panel: HTMLElement, component: HTMLElement, cons: HtmlGridConstraints): void {
-        component.style.gridColumn = (cons.gridx + 1) + " / span " + cons.gridwidth;
-        component.style.gridRow = (cons.gridy + 1) + " / span " + cons.gridheight;
+        component.style.gridColumn = cons.gridx + 1 + " / span " + cons.gridwidth;
+        component.style.gridRow = cons.gridy + 1 + " / span " + cons.gridheight;
         if (cons.center) {
             component.style.justifySelf = "center";
             component.style.alignSelf = "center";
@@ -396,8 +391,14 @@ export class HtmlGuiRenderer {
         panel.appendChild(component);
     }
 
-    private static placeAt(panel: HTMLElement, component: HTMLElement, cons: HtmlGridConstraints,
-                           gridx: number, gridy: number, center: boolean = false): void {
+    private static placeAt(
+        panel: HTMLElement,
+        component: HTMLElement,
+        cons: HtmlGridConstraints,
+        gridx: number,
+        gridy: number,
+        center: boolean = false,
+    ): void {
         cons.gridx = gridx;
         cons.gridy = gridy;
         cons.gridwidth = 1;
@@ -408,8 +409,13 @@ export class HtmlGuiRenderer {
         HtmlGuiRenderer.place(panel, component, cons);
     }
 
-    public static buildGuiCommandConfiguration(panel: HTMLElement, aux: string, cons: HtmlGridConstraints,
-                                               c: WidgetCommand, executor: HtmlActionListener): void {
+    public static buildGuiCommandConfiguration(
+        panel: HTMLElement,
+        aux: string,
+        cons: HtmlGridConstraints,
+        c: WidgetCommand,
+        executor: HtmlActionListener,
+    ): void {
         const name: string | null = c.getName();
         const button = (): HTMLButtonElement => HtmlGuiRenderer.buildCommandButton(c, executor);
         panel.classList.add("vitral-grid-panel");
@@ -417,69 +423,61 @@ export class HtmlGuiRenderer {
         if (aux === "Camera Rotations") {
             if (name === "UP") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 1, 0, true);
-            }
-            else if (name === "DOWN") {
+            } else if (name === "DOWN") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 1, 1);
-            }
-            else if (name === "LEFT") {
+            } else if (name === "LEFT") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 0, 1);
-            }
-            else if (name === "RIGHT") {
+            } else if (name === "RIGHT") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 2, 1);
             }
-        }
-        else if (aux === "Camera Position Movements" || aux === "Terrain Position" ||
-                 aux === "Terrain Visualization") {
+        } else if (
+            aux === "Camera Position Movements" ||
+            aux === "Terrain Position" ||
+            aux === "Terrain Visualization"
+        ) {
             if (name === "UP") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 1, 0, true);
-            }
-            else if (name === "DOWN") {
+            } else if (name === "DOWN") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 1, 1);
-            }
-            else if (name === "LEFT") {
+            } else if (name === "LEFT") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 0, 1);
-            }
-            else if (name === "RIGHT") {
+            } else if (name === "RIGHT") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 2, 1);
-            }
-            else if (name === "BACK") {
+            } else if (name === "BACK") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 0, 0);
-            }
-            else if (name === "FORWARD") {
+            } else if (name === "FORWARD") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 2, 0);
             }
-        }
-        else if (aux === "Lines Visualization") {
+        } else if (aux === "Lines Visualization") {
             if (name === "LEFT") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 0, 1);
-            }
-            else if (name === "RIGHT") {
+            } else if (name === "RIGHT") {
                 HtmlGuiRenderer.placeAt(panel, button(), cons, 2, 1);
             }
         }
     }
 
-    public static buildGuiVariableConfiguration(panel: HTMLElement, aux: string, cons: HtmlGridConstraints,
-                                                gui: Widget, executor: HtmlActionListener): void {
+    public static buildGuiVariableConfiguration(
+        panel: HTMLElement,
+        aux: string,
+        cons: HtmlGridConstraints,
+        gui: Widget,
+        executor: HtmlActionListener,
+    ): void {
         const variable = (): HTMLDivElement => HtmlGuiRenderer.buildVariable(gui.getVariableByName(aux), executor);
         panel.classList.add("vitral-grid-panel");
 
         if (aux === "MODE_1") {
             HtmlGuiRenderer.placeAt(panel, variable(), cons, 0, 0);
-        }
-        else if (aux === "MODE_2") {
+        } else if (aux === "MODE_2") {
             HtmlGuiRenderer.placeAt(panel, variable(), cons, 10, 11);
-        }
-        else if (aux === "MODE_3") {
+        } else if (aux === "MODE_3") {
             HtmlGuiRenderer.placeAt(panel, variable(), cons, 0, 2);
-        }
-        else if (aux === "color") {
+        } else if (aux === "color") {
             HtmlGuiRenderer.placeAt(panel, variable(), cons, 0, 2);
-        }
-        else if (aux === "TYPE_LINES") {
+        } else if (aux === "TYPE_LINES") {
             HtmlGuiRenderer.placeAt(panel, variable(), cons, 0, 0);
-        }
-        else if (aux === "TOGGLE") {
+        } else if (aux === "TOGGLE") {
             HtmlGuiRenderer.placeAt(panel, variable(), cons, 2, 0);
         }
     }
@@ -497,7 +495,8 @@ export class HtmlGuiRenderer {
         panel.title = "Test dialog: " + d.getId();
 
         //- Define geometry management for panel ---------------------------
-        const count: number = d.getPendingVariableNames().length +
+        const count: number =
+            d.getPendingVariableNames().length +
             d.getPendingCommandNames().length +
             d.getPendingDialogRefNames().length;
         let ncols: number;
@@ -505,8 +504,7 @@ export class HtmlGuiRenderer {
         if (d.getOrientation() === WidgetDialog.ORIENTATION_HORIZONTAL) {
             ncols = count;
             nrows = 1;
-        }
-        else {
+        } else {
             ncols = 1;
             nrows = count;
         }

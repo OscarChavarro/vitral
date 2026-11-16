@@ -67,11 +67,20 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
    * @param onClose called when the application closes itself
    * @return the application, with its GUI built
    */
-  static async create(root: HTMLElement, args: readonly string[], onClose: () => void): Promise<HtmlWebGLSceneEditorApplication> {
-    const application: HtmlWebGLSceneEditorApplication = new HtmlWebGLSceneEditorApplication(root, onClose);
+  static async create(
+    root: HTMLElement,
+    args: readonly string[],
+    onClose: () => void,
+  ): Promise<HtmlWebGLSceneEditorApplication> {
+    const application: HtmlWebGLSceneEditorApplication = new HtmlWebGLSceneEditorApplication(
+      root,
+      onClose,
+    );
 
     // Editor titles use Java's class names, which a production bundle renames
-    GenericEditor.setSimpleClassNameResolver((entity: object): string => javaSimpleClassName(entity));
+    GenericEditor.setSimpleClassNameResolver((entity: object): string =>
+      javaSimpleClassName(entity),
+    );
 
     await application.createModel();
     await application.createGUI();
@@ -145,19 +154,28 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
     const paletteResponse: Response = await fetch('./etc/palettes/Cranes.gpl');
     if (!paletteResponse.ok) {
       // Java ends the program (System.exit) without its palette
-      throw new Error('Can not read the palette ./etc/palettes/Cranes.gpl: HTTP ' + paletteResponse.status);
+      throw new Error(
+        'Can not read the palette ./etc/palettes/Cranes.gpl: HTTP ' + paletteResponse.status,
+      );
     }
     this.applicationModel.setPalette(
       RGBColorPalettePersistence.importGimpPalette(new StringReader(await paletteResponse.text())),
     );
 
-    this.applicationModel.setVisualDebugRay(new Ray(new Vector3Dd(0, -3, 0), new Vector3Dd(0, 1, 0)));
+    this.applicationModel.setVisualDebugRay(
+      new Ray(new Vector3Dd(0, -3, 0), new Vector3Dd(0, 1, 0)),
+    );
     this.applicationModel.setVisualDebugRayLevels(2);
     this.applicationModel.setWithVisualDebugRay(false);
     this.webglController = new HtmlWebGLApplicationController(this.applicationModel);
     this.htmlModel = new HtmlApplicationModel();
     this.htmlModel.setLookAndFeel('com.sun.java.swing.plaf.motif.MotifLookAndFeel');
-    this.htmlGuiController = new HtmlWebGLGuiController(this, this.htmlModel, this.webglController, this.root);
+    this.htmlGuiController = new HtmlWebGLGuiController(
+      this,
+      this.htmlModel,
+      this.webglController,
+      this.root,
+    );
   }
 
   /**
@@ -175,10 +193,15 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
     await this.htmlGuiController.createGUI();
   }
 
-  getTangibleServiceUrl(): string { return this.tangibleServiceUrl; }
+  getTangibleServiceUrl(): string {
+    return this.tangibleServiceUrl;
+  }
 
   /** Connects the browser-native WebSocket client used by the tangible dialog. */
-  connectTangibleInterface(serviceUrl: string, connectionListener: (connected: boolean) => void): void {
+  connectTangibleInterface(
+    serviceUrl: string,
+    connectionListener: (connected: boolean) => void,
+  ): void {
     const endpoint = serviceUrl.trim();
     if (endpoint !== '') this.tangibleServiceUrl = endpoint;
     this.tangibleInterfaceClient?.disconnect();
@@ -206,10 +229,16 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
   private prepareRaytracedImage(): void {
     this.applicationModel
       .getRaytracedImage()
-      .init(this.applicationModel.getRaytracedImageWidth(), this.applicationModel.getRaytracedImageHeight());
+      .init(
+        this.applicationModel.getRaytracedImageWidth(),
+        this.applicationModel.getRaytracedImageHeight(),
+      );
     const scene: Scene = this.applicationModel.getScene();
     if (scene.selectedBackground === 1 && scene.fixedBackground !== null) {
-      ImageProcessing.resize(scene.fixedBackground.getImage(), this.applicationModel.getRaytracedImage());
+      ImageProcessing.resize(
+        scene.fixedBackground.getImage(),
+        this.applicationModel.getRaytracedImage(),
+      );
     }
   }
 
@@ -222,7 +251,11 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
     this.prepareRaytracedImage();
     let depth: ZBuffer | null = this.applicationModel.getRaytracedDepth();
     const image: RGBImageUncompressed = this.applicationModel.getRaytracedImage();
-    if (depth === null || depth.getXSize() !== image.getXSize() || depth.getYSize() !== image.getYSize()) {
+    if (
+      depth === null ||
+      depth.getXSize() !== image.getXSize() ||
+      depth.getYSize() !== image.getYSize()
+    ) {
       depth = new ZBuffer(image.getXSize(), image.getYSize());
       this.applicationModel.setRaytracedDepth(depth);
     }

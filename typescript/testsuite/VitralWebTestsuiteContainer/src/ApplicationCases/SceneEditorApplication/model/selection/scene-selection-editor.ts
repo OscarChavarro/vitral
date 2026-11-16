@@ -1,4 +1,12 @@
-import { Entity, Matrix4x4d, SimpleBody, Vector3Dd, type ArrayList, type Geometry, type Light } from '@vitral/base';
+import {
+  Entity,
+  Matrix4x4d,
+  SimpleBody,
+  Vector3Dd,
+  type ArrayList,
+  type Geometry,
+  type Light,
+} from '@vitral/base';
 import { javaClassName } from '../java-class-name';
 import type { Scene } from '../scene';
 

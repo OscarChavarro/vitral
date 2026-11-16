@@ -1,4 +1,11 @@
-import { JavaMath, MouseEvent, Viewport, type Camera, type Vector3Dd, type ViewportSet } from '@vitral/base';
+import {
+  JavaMath,
+  MouseEvent,
+  Viewport,
+  type Camera,
+  type Vector3Dd,
+  type ViewportSet,
+} from '@vitral/base';
 import { InteractionMode } from './interaction-mode';
 
 /**

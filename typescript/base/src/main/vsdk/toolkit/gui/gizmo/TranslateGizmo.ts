@@ -99,7 +99,11 @@ export class TranslateGizmo extends Gizmo {
 
         // Total arrow length = 0.2 empty + 0.5 base + 0.3 head
         this.arrowModel = new Arrow(0.5 * TranslateGizmo.ARROW_LENGTH, 0.3 * TranslateGizmo.ARROW_LENGTH, 0.025, 0.05);
-        this.cylinderModel = new Cone(TranslateGizmo.SEGMENT_WIDTH, TranslateGizmo.SEGMENT_WIDTH, TranslateGizmo.SEGMENT_LENGTH);
+        this.cylinderModel = new Cone(
+            TranslateGizmo.SEGMENT_WIDTH,
+            TranslateGizmo.SEGMENT_WIDTH,
+            TranslateGizmo.SEGMENT_LENGTH,
+        );
         this.boxModel = new Box(TranslateGizmo.BOX_SIDE, TranslateGizmo.BOX_SIDE, TranslateGizmo.BOX_HEIGHT);
         this.coneModel = new Cone(0.05, 0, 0.3 * TranslateGizmo.ARROW_LENGTH);
 
@@ -318,7 +322,13 @@ export class TranslateGizmo extends Gizmo {
         const lineModel: ParametricCurve = CurveModeler.createLine(0, 0, 0, 0, 0, this.currentScale * 0.7);
 
         const segmentModel: ParametricCurve = CurveModeler.createLine(
-            0, 0, 0, 0, 0, this.currentScale * TranslateGizmo.SEGMENT_LENGTH);
+            0,
+            0,
+            0,
+            0,
+            0,
+            this.currentScale * TranslateGizmo.SEGMENT_LENGTH,
+        );
 
         //-----------------------------------------------------------------
         for (i = 0; i < this.elements.length; i++) {
@@ -479,7 +489,11 @@ export class TranslateGizmo extends Gizmo {
         this.cylinderModel.setBottomRadius(scale * TranslateGizmo.SEGMENT_WIDTH);
         this.cylinderModel.setTopRadius(scale * TranslateGizmo.SEGMENT_WIDTH);
         this.cylinderModel.setHeight(scale * TranslateGizmo.SEGMENT_LENGTH);
-        this.boxModel.setSize(scale * TranslateGizmo.BOX_SIDE, scale * TranslateGizmo.BOX_SIDE, scale * TranslateGizmo.BOX_HEIGHT);
+        this.boxModel.setSize(
+            scale * TranslateGizmo.BOX_SIDE,
+            scale * TranslateGizmo.BOX_SIDE,
+            scale * TranslateGizmo.BOX_HEIGHT,
+        );
 
         //-----------------------------------------------------------------
         const front: Vector3Dd = camera.getFront();
@@ -497,291 +511,300 @@ export class TranslateGizmo extends Gizmo {
             const r: SimpleBody = this.elements[i]!;
             r.setGeometry(null);
             switch (index) {
-              case TranslateGizmo.X_AXIS_ELEMENT:
-                if (!(orthogonalCamera && iPar)) {
+                case TranslateGizmo.X_AXIS_ELEMENT:
+                    if (!(orthogonalCamera && iPar)) {
+                        // Basic model
+                        r.setGeometry(this.arrowModel);
+                        if (
+                            currentSelection === TranslateGizmo.X_AXIS_GROUP ||
+                            currentSelection === TranslateGizmo.XY_PLANE_GROUP ||
+                            currentSelection === TranslateGizmo.XZ_PLANE_GROUP
+                        ) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(red);
+                        }
+                        // Rotation
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(0, 0, scale * 0.2 * TranslateGizmo.ARROW_LENGTH);
+                        eleP = eleR.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
+                    }
+                    break;
+                case TranslateGizmo.Y_AXIS_ELEMENT:
+                    if (!(orthogonalCamera && jPar)) {
+                        // Basic model
+                        r.setGeometry(this.arrowModel);
+                        if (
+                            currentSelection === TranslateGizmo.Y_AXIS_GROUP ||
+                            currentSelection === TranslateGizmo.XY_PLANE_GROUP ||
+                            currentSelection === TranslateGizmo.YZ_PLANE_GROUP
+                        ) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(green);
+                        }
+                        // Rotation
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), -1, 0, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(0, 0, scale * 0.2 * TranslateGizmo.ARROW_LENGTH);
+                        eleP = eleR.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
+                    }
+                    break;
+                case TranslateGizmo.Z_AXIS_ELEMENT:
+                    if (!(orthogonalCamera && kPar)) {
+                        // Basic model
+                        r.setGeometry(this.arrowModel);
+                        if (
+                            currentSelection === TranslateGizmo.Z_AXIS_GROUP ||
+                            currentSelection === TranslateGizmo.YZ_PLANE_GROUP ||
+                            currentSelection === TranslateGizmo.XZ_PLANE_GROUP
+                        ) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(blue);
+                        }
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(0, 0, scale * 0.2 * TranslateGizmo.ARROW_LENGTH);
+                        eleP = eleR.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
+                    }
+                    break;
+                case TranslateGizmo.XYY_SEGMENT_ELEMENT:
+                    if (!(orthogonalCamera && (iPar || jPar))) {
+                        // Basic model
+                        r.setGeometry(this.cylinderModel);
+                        if (currentSelection === TranslateGizmo.XY_PLANE_GROUP) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(green);
+                        }
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(0, scale * TranslateGizmo.SEGMENT_LENGTH, 0);
+                        eleP = eleR.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
+                    }
+                    break;
+                case TranslateGizmo.XYX_SEGMENT_ELEMENT:
+                    if (!(orthogonalCamera && (iPar || jPar))) {
+                        // Basic model
+                        r.setGeometry(this.cylinderModel);
+                        if (currentSelection === TranslateGizmo.XY_PLANE_GROUP) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(red);
+                        }
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), -1, 0, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(scale * TranslateGizmo.SEGMENT_LENGTH, 0, 0);
+                        eleP = eleR.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
+                    }
+                    break;
+                case TranslateGizmo.YZZ_SEGMENT_ELEMENT:
                     // Basic model
-                    r.setGeometry(this.arrowModel);
-                    if (currentSelection === TranslateGizmo.X_AXIS_GROUP ||
-                         currentSelection === TranslateGizmo.XY_PLANE_GROUP ||
-                         currentSelection === TranslateGizmo.XZ_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
+                    if (!(orthogonalCamera && (jPar || kPar))) {
+                        r.setGeometry(this.cylinderModel);
+                        if (currentSelection === TranslateGizmo.YZ_PLANE_GROUP) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(blue);
+                        }
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), -1, 0, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(0, 0, scale * TranslateGizmo.SEGMENT_LENGTH);
+                        eleP = R.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
                     }
-                    else {
-                        r.setMaterial(red);
+                    break;
+                case TranslateGizmo.YZY_SEGMENT_ELEMENT:
+                    if (!(orthogonalCamera && (jPar || kPar))) {
+                        // Basic model
+                        r.setGeometry(this.cylinderModel);
+                        if (currentSelection === TranslateGizmo.YZ_PLANE_GROUP) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(green);
+                        }
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(0, scale * TranslateGizmo.SEGMENT_LENGTH, 0);
+                        eleP = R.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
                     }
-                    // Rotation
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, 0, scale*0.2* TranslateGizmo.ARROW_LENGTH);
-                    eleP = eleR.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.Y_AXIS_ELEMENT:
-                  if (!(orthogonalCamera && jPar)) {
-                    // Basic model
-                    r.setGeometry(this.arrowModel);
-                    if (currentSelection === TranslateGizmo.Y_AXIS_GROUP ||
-                         currentSelection === TranslateGizmo.XY_PLANE_GROUP ||
-                         currentSelection === TranslateGizmo.YZ_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
+                    break;
+                case TranslateGizmo.XZZ_SEGMENT_ELEMENT:
+                    if (!(orthogonalCamera && (iPar || kPar))) {
+                        // Basic model
+                        r.setGeometry(this.cylinderModel);
+                        if (currentSelection === TranslateGizmo.XZ_PLANE_GROUP) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(blue);
+                        }
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(0, 0, scale * TranslateGizmo.SEGMENT_LENGTH);
+                        eleP = R.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
                     }
-                    else {
-                        r.setMaterial(green);
+                    break;
+                case TranslateGizmo.XZX_SEGMENT_ELEMENT:
+                    if (!(orthogonalCamera && (iPar || kPar))) {
+                        // Basic model
+                        r.setGeometry(this.cylinderModel);
+                        if (currentSelection === TranslateGizmo.XZ_PLANE_GROUP) {
+                            r.setMaterial(yellow);
+                        } else {
+                            r.setMaterial(red);
+                        }
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(scale * TranslateGizmo.SEGMENT_LENGTH, 0, 0);
+                        eleP = R.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
                     }
-                    // Rotation
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), -1, 0, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, 0, scale*0.2* TranslateGizmo.ARROW_LENGTH);
-                    eleP = eleR.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.Z_AXIS_ELEMENT:
-                if (!(orthogonalCamera && kPar)) {
-                    // Basic model
-                    r.setGeometry(this.arrowModel);
-                    if (currentSelection === TranslateGizmo.Z_AXIS_GROUP ||
-                         currentSelection === TranslateGizmo.YZ_PLANE_GROUP ||
-                         currentSelection === TranslateGizmo.XZ_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
+                    break;
+                case TranslateGizmo.XY_BOX_ELEMENT:
+                    if (!(orthogonalCamera && (iPar || jPar))) {
+                        // Basic model
+                        r.setGeometry(null);
+                        if (currentSelection !== TranslateGizmo.XY_PLANE_GROUP) {
+                            break;
+                        }
+                        r.setGeometry(this.boxModel);
+                        r.setMaterial(yellowTransparent);
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(
+                            (scale * TranslateGizmo.BOX_SIDE) / 2,
+                            (scale * TranslateGizmo.BOX_SIDE) / 2,
+                            0,
+                        );
+                        eleP = R.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
                     }
-                    else {
-                        r.setMaterial(blue);
+                    break;
+                case TranslateGizmo.YZ_BOX_ELEMENT:
+                    if (!(orthogonalCamera && (jPar || kPar))) {
+                        // Basic model
+                        r.setGeometry(null);
+                        if (currentSelection !== TranslateGizmo.YZ_PLANE_GROUP) {
+                            break;
+                        }
+                        r.setGeometry(this.boxModel);
+                        r.setMaterial(yellowTransparent);
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(
+                            0,
+                            (scale * TranslateGizmo.BOX_SIDE) / 2,
+                            (scale * TranslateGizmo.BOX_SIDE) / 2,
+                        );
+                        eleP = R.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
                     }
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, 0, scale*0.2* TranslateGizmo.ARROW_LENGTH);
-                    eleP = eleR.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.XYY_SEGMENT_ELEMENT:
-                if (!(orthogonalCamera && (iPar || jPar))) {
-                    // Basic model
-                    r.setGeometry(this.cylinderModel);
-                    if (currentSelection === TranslateGizmo.XY_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
+                    break;
+                case TranslateGizmo.XZ_BOX_ELEMENT:
+                    if (!(orthogonalCamera && (iPar || kPar))) {
+                        // Basic model
+                        r.setGeometry(null);
+                        if (currentSelection !== TranslateGizmo.XZ_PLANE_GROUP) {
+                            break;
+                        }
+                        r.setGeometry(this.boxModel);
+                        r.setMaterial(yellowTransparent);
+                        // Rotation
+                        subR = new Matrix4x4d();
+                        subR = subR.axisRotation(JavaMath.toRadians(90.0), 1, 0, 0);
+                        eleR = R.multiply(subR);
+                        r.setRotation(eleR);
+                        eleRi = new Matrix4x4d(eleR);
+                        eleRi = eleRi.invert();
+                        r.setRotationInverse(eleRi);
+                        // Translation
+                        subP = new Vector3Dd(
+                            (scale * TranslateGizmo.BOX_SIDE) / 2,
+                            0,
+                            (scale * TranslateGizmo.BOX_SIDE) / 2,
+                        );
+                        eleP = R.multiply(subP).add(this.getPosition());
+                        r.setPosition(eleP);
                     }
-                    else {
-                        r.setMaterial(green);
-                    }
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, scale* TranslateGizmo.SEGMENT_LENGTH, 0);
-                    eleP = eleR.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.XYX_SEGMENT_ELEMENT:
-                if (!(orthogonalCamera && (iPar || jPar))) {
-                    // Basic model
-                    r.setGeometry(this.cylinderModel);
-                    if (currentSelection === TranslateGizmo.XY_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
-                    }
-                    else {
-                        r.setMaterial(red);
-                    }
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), -1, 0, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(scale* TranslateGizmo.SEGMENT_LENGTH, 0, 0);
-                    eleP = eleR.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.YZZ_SEGMENT_ELEMENT:
-                // Basic model
-                if (!(orthogonalCamera && (jPar || kPar))) {
-                    r.setGeometry(this.cylinderModel);
-                    if (currentSelection === TranslateGizmo.YZ_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
-                    }
-                    else {
-                        r.setMaterial(blue);
-                    }
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), -1, 0, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, 0, scale* TranslateGizmo.SEGMENT_LENGTH);
-                    eleP = R.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.YZY_SEGMENT_ELEMENT:
-                if (!(orthogonalCamera && (jPar || kPar))) {
-                    // Basic model
-                    r.setGeometry(this.cylinderModel);
-                    if (currentSelection === TranslateGizmo.YZ_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
-                    }
-                    else {
-                        r.setMaterial(green);
-                    }
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, scale* TranslateGizmo.SEGMENT_LENGTH, 0);
-                    eleP = R.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.XZZ_SEGMENT_ELEMENT:
-                if (!(orthogonalCamera && (iPar || kPar))) {
-                    // Basic model
-                    r.setGeometry(this.cylinderModel);
-                    if (currentSelection === TranslateGizmo.XZ_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
-                    }
-                    else {
-                        r.setMaterial(blue);
-                    }
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, 0, scale* TranslateGizmo.SEGMENT_LENGTH);
-                    eleP = R.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.XZX_SEGMENT_ELEMENT:
-                if (!(orthogonalCamera && (iPar || kPar))) {
-                    // Basic model
-                    r.setGeometry(this.cylinderModel);
-                    if (currentSelection === TranslateGizmo.XZ_PLANE_GROUP) {
-                        r.setMaterial(yellow); 
-                    }
-                    else {
-                        r.setMaterial(red);
-                    }
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(scale* TranslateGizmo.SEGMENT_LENGTH, 0, 0);
-                    eleP = R.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.XY_BOX_ELEMENT:
-                if (!(orthogonalCamera && (iPar || jPar))) {
-                    // Basic model
-                    r.setGeometry(null);
-                    if (currentSelection !== TranslateGizmo.XY_PLANE_GROUP) {
-                        break;
-                    }
-                    r.setGeometry(this.boxModel);
-                    r.setMaterial(yellowTransparent); 
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(scale*TranslateGizmo.BOX_SIDE/2, scale*TranslateGizmo.BOX_SIDE/2, 0);
-                    eleP = R.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.YZ_BOX_ELEMENT:
-                if (!(orthogonalCamera && (jPar || kPar))) {
-                    // Basic model
-                    r.setGeometry(null);
-                    if (currentSelection !== TranslateGizmo.YZ_PLANE_GROUP) {
-                        break;
-                    }
-                    r.setGeometry(this.boxModel);
-                    r.setMaterial(yellowTransparent); 
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), 0, 1, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(0, scale*TranslateGizmo.BOX_SIDE/2, scale*TranslateGizmo.BOX_SIDE/2);
-                    eleP = R.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
-              case TranslateGizmo.XZ_BOX_ELEMENT:
-                if (!(orthogonalCamera && (iPar || kPar))) {
-                    // Basic model
-                    r.setGeometry(null);
-                    if (currentSelection !== TranslateGizmo.XZ_PLANE_GROUP) {
-                        break;
-                    }
-                    r.setGeometry(this.boxModel);
-                    r.setMaterial(yellowTransparent); 
-                    // Rotation
-                    subR = new Matrix4x4d();
-                    subR = subR.axisRotation(JavaMath.toRadians(90.0), 1, 0, 0);
-                    eleR = R.multiply(subR);
-                    r.setRotation(eleR);
-                    eleRi = new Matrix4x4d(eleR);
-                    eleRi = eleRi.invert();
-                    r.setRotationInverse(eleRi);
-                    // Translation
-                    subP = new Vector3Dd(scale*TranslateGizmo.BOX_SIDE/2, 0, scale*TranslateGizmo.BOX_SIDE/2);
-                    eleP = R.multiply(subP).add(this.getPosition());
-                    r.setPosition(eleP);
-                }
-                break;
+                    break;
             }
         }
     }
@@ -798,7 +821,13 @@ export class TranslateGizmo extends Gizmo {
         this.transformationMatrix = transformationMatrix;
 
         const R: Matrix4x4d = new Matrix4x4d(transformationMatrix).withoutTranslation();
-        this.calculateGeometryState(this.getPosition(), R, this.selectedResizing, this.apparentSizeInPixels, this.camera);
+        this.calculateGeometryState(
+            this.getPosition(),
+            R,
+            this.selectedResizing,
+            this.apparentSizeInPixels,
+            this.camera,
+        );
     }
 
     public getTransformationMatrix(): Matrix4x4d | null {
@@ -825,7 +854,13 @@ export class TranslateGizmo extends Gizmo {
     public updateGeometryState(): void {
         const R: Matrix4x4d = new Matrix4x4d(this.requireTransformationMatrix()).withoutTranslation();
 
-        this.calculateGeometryState(this.getPosition(), R, this.selectedResizing, this.apparentSizeInPixels, this.camera);
+        this.calculateGeometryState(
+            this.getPosition(),
+            R,
+            this.selectedResizing,
+            this.apparentSizeInPixels,
+            this.camera,
+        );
     }
 
     /**

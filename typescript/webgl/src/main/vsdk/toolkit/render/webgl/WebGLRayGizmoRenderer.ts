@@ -88,9 +88,10 @@ export class WebGLRayGizmoRenderer {
         if (!gizmo.isVisible()) {
             return;
         }
-        const activeLights: readonly (Light | null)[] = (lights === null || lights.length === 0) ?
-            [new PointLight(camera.getPosition(), new ColorRgb(1, 1, 1))] :
-            lights;
+        const activeLights: readonly (Light | null)[] =
+            lights === null || lights.length === 0
+                ? [new PointLight(camera.getPosition(), new ColorRgb(1, 1, 1))]
+                : lights;
 
         const indicator: IndicatorResources = WebGLRayGizmoRenderer.ensureMesh(gl);
 
@@ -108,7 +109,16 @@ export class WebGLRayGizmoRenderer {
             const material: SimpleMaterial | null = body.getMaterial();
 
             if (geom instanceof Arrow) {
-                await WebGLArrowRenderer.draw(gl, geom, modelMatrix, projection, camera, activeLights, material, quality);
+                await WebGLArrowRenderer.draw(
+                    gl,
+                    geom,
+                    modelMatrix,
+                    projection,
+                    camera,
+                    activeLights,
+                    material,
+                    quality,
+                );
             } else if (geom instanceof Sphere) {
                 await WebGLSphereRenderer.draw(
                     gl,
@@ -128,8 +138,14 @@ export class WebGLRayGizmoRenderer {
 
         if (gizmo.isRollIndicatorEnabled()) {
             await WebGLRayGizmoRenderer.drawIndicator(
-                gl, indicator, gizmo.getRotationAngleInRadians(), primaryModelMatrix,
-                projection, camera, activeLights, quality,
+                gl,
+                indicator,
+                gizmo.getRotationAngleInRadians(),
+                primaryModelMatrix,
+                projection,
+                camera,
+                activeLights,
+                quality,
             );
         }
 

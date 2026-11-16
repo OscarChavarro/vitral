@@ -82,21 +82,27 @@ export class WebGLViewportWindow {
     private rotateGizmoArcLabelFontSize: number = 0;
     private readonly inputGizmoRenderer: WebGLInputGizmoRenderer;
 
-    public constructor(viewportSet: ViewportSet,
-                       viewport: Viewport,
-                       labelImageProvider: WebGLLabelImageProvider) {
+    public constructor(viewportSet: ViewportSet, viewport: Viewport, labelImageProvider: WebGLLabelImageProvider) {
         this.viewportSet = viewportSet;
         this.viewport = viewport;
         this.labelImageProvider = labelImageProvider;
-        this.inputGizmoRenderer = new WebGLInputGizmoRenderer({
-            createLabelImage: (text: string, color: ColorRgb, fontSize: number): RGBAImageUncompressed =>
-                this.labelImageProvider.createLabelImage(text, color, fontSize),
-            drawLabelImage: (gl: WebGL2RenderingContext, image: RGBAImageUncompressed, x: number, y: number): Promise<void> =>
-                this.drawLabelImageInViewport(gl, image, x, y),
-            discardLabelImage: (image: RGBAImageUncompressed): void => {
-                this.discardedLabelImages.push(image);
+        this.inputGizmoRenderer = new WebGLInputGizmoRenderer(
+            {
+                createLabelImage: (text: string, color: ColorRgb, fontSize: number): RGBAImageUncompressed =>
+                    this.labelImageProvider.createLabelImage(text, color, fontSize),
+                drawLabelImage: (
+                    gl: WebGL2RenderingContext,
+                    image: RGBAImageUncompressed,
+                    x: number,
+                    y: number,
+                ): Promise<void> => this.drawLabelImageInViewport(gl, image, x, y),
+                discardLabelImage: (image: RGBAImageUncompressed): void => {
+                    this.discardedLabelImages.push(image);
+                },
             },
-        }, viewportSet, viewport);
+            viewportSet,
+            viewport,
+        );
 
         this.updateTitleImage();
     }
@@ -153,14 +159,22 @@ export class WebGLViewportWindow {
         this.updateReferenceFrameLabelImages(elementScaler);
         const labels: RGBAImageUncompressed[] = this.referenceFrameLabelImages!;
 
-        await WebGLReferenceFrameGizmoRenderer.draw(gl, this.referenceFrameGizmo,
+        await WebGLReferenceFrameGizmoRenderer.draw(
+            gl,
+            this.referenceFrameGizmo,
             this.viewport.getActiveCamera().getRotation(),
-            this.viewport.getPixelStartX(), this.viewport.getPixelStartY(),
+            this.viewport.getPixelStartX(),
+            this.viewport.getPixelStartY(),
             {
-                drawLabel: (glContext: WebGL2RenderingContext, axis: number, _label: string,
-                            windowX: number, windowY: number): Promise<void> =>
-                    this.drawLabelImage(glContext, labels[axis]!, windowX, windowY),
-            });
+                drawLabel: (
+                    glContext: WebGL2RenderingContext,
+                    axis: number,
+                    _label: string,
+                    windowX: number,
+                    windowY: number,
+                ): Promise<void> => this.drawLabelImage(glContext, labels[axis]!, windowX, windowY),
+            },
+        );
     }
 
     /**
@@ -168,11 +182,11 @@ export class WebGLViewportWindow {
     so they are regenerated when the font size they need changes.
     */
     private updateReferenceFrameLabelImages(elementScaler: ViewportElementScaler): void {
-        const currentFontSize: number =
-            elementScaler.scaleSize(WebGLViewportWindow.BASE_REFERENCE_FRAME_LABEL_FONT_SIZE);
+        const currentFontSize: number = elementScaler.scaleSize(
+            WebGLViewportWindow.BASE_REFERENCE_FRAME_LABEL_FONT_SIZE,
+        );
 
-        if (this.referenceFrameLabelImages !== null &&
-            currentFontSize === this.referenceFrameLabelFontSize) {
+        if (this.referenceFrameLabelImages !== null && currentFontSize === this.referenceFrameLabelFontSize) {
             return;
         }
         if (this.referenceFrameLabelImages !== null) {
@@ -183,10 +197,13 @@ export class WebGLViewportWindow {
         this.referenceFrameLabelFontSize = currentFontSize;
         this.referenceFrameLabelImages = [];
         for (let axis: number = 0; axis < ReferenceFrameGizmo.NUMBER_OF_AXES; axis++) {
-            this.referenceFrameLabelImages.push(this.labelImageProvider.createLabelImage(
-                this.referenceFrameGizmo.getAxisLabel(axis),
-                this.referenceFrameGizmo.getAxisColor(axis),
-                currentFontSize));
+            this.referenceFrameLabelImages.push(
+                this.labelImageProvider.createLabelImage(
+                    this.referenceFrameGizmo.getAxisLabel(axis),
+                    this.referenceFrameGizmo.getAxisColor(axis),
+                    currentFontSize,
+                ),
+            );
         }
     }
 
@@ -195,11 +212,11 @@ export class WebGLViewportWindow {
     so they are regenerated when the font size they need changes.
     */
     private updateTranslateGizmoLabelImages(elementScaler: ViewportElementScaler): void {
-        const currentFontSize: number =
-            elementScaler.scaleSize(WebGLViewportWindow.BASE_TRANSLATE_GIZMO_LABEL_FONT_SIZE);
+        const currentFontSize: number = elementScaler.scaleSize(
+            WebGLViewportWindow.BASE_TRANSLATE_GIZMO_LABEL_FONT_SIZE,
+        );
 
-        if (this.translateGizmoLabelImages !== null &&
-            currentFontSize === this.translateGizmoLabelFontSize) {
+        if (this.translateGizmoLabelImages !== null && currentFontSize === this.translateGizmoLabelFontSize) {
             return;
         }
         if (this.translateGizmoLabelImages !== null && this.translateGizmoSelectedLabelImages !== null) {
@@ -212,14 +229,20 @@ export class WebGLViewportWindow {
         this.translateGizmoLabelImages = [];
         this.translateGizmoSelectedLabelImages = [];
         for (let axis: number = 0; axis < ReferenceFrameGizmo.NUMBER_OF_AXES; axis++) {
-            this.translateGizmoLabelImages.push(this.labelImageProvider.createLabelImage(
-                this.referenceFrameGizmo.getAxisLabel(axis),
-                this.referenceFrameGizmo.getAxisColor(axis),
-                currentFontSize));
-            this.translateGizmoSelectedLabelImages.push(this.labelImageProvider.createLabelImage(
-                this.referenceFrameGizmo.getAxisLabel(axis),
-                new ColorRgb(1, 1, 0),
-                currentFontSize));
+            this.translateGizmoLabelImages.push(
+                this.labelImageProvider.createLabelImage(
+                    this.referenceFrameGizmo.getAxisLabel(axis),
+                    this.referenceFrameGizmo.getAxisColor(axis),
+                    currentFontSize,
+                ),
+            );
+            this.translateGizmoSelectedLabelImages.push(
+                this.labelImageProvider.createLabelImage(
+                    this.referenceFrameGizmo.getAxisLabel(axis),
+                    new ColorRgb(1, 1, 0),
+                    currentFontSize,
+                ),
+            );
         }
     }
 
@@ -230,13 +253,14 @@ export class WebGLViewportWindow {
         const yaw: number = JavaMath.toDegrees(R.obtainEulerYawAngle());
         const pitch: number = JavaMath.toDegrees(R.obtainEulerPitchAngle());
 
-        if (this.viewport.getActiveCamera().getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL &&
-            (pitch > -45 && pitch < 45)) {
-            if ((yaw > 45 && yaw < 135) ||
-                (yaw < -45 && yaw > -135)) {
+        if (
+            this.viewport.getActiveCamera().getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL &&
+            pitch > -45 &&
+            pitch < 45
+        ) {
+            if ((yaw > 45 && yaw < 135) || (yaw < -45 && yaw > -135)) {
                 gridTransform = new Matrix4x4d().axisRotation(JavaMath.toRadians(90), 1, 0, 0);
-            }
-            else {
+            } else {
                 gridTransform = new Matrix4x4d().axisRotation(JavaMath.toRadians(90), 0, 1, 0);
             }
         }
@@ -262,19 +286,44 @@ export class WebGLViewportWindow {
             if (y === ny / 2) continue;
             WebGLViewportWindow.addGridLine(p, c, minx, minx + y * dy, maxx, minx + y * dy, 0.37);
         }
-        WebGLViewportWindow.addGridLine(p, c, minx + Math.trunc(nx / 2) * dx, miny,
-            minx + Math.trunc(nx / 2) * dx, maxy, 0.0);
-        WebGLViewportWindow.addGridLine(p, c, minx, minx + Math.trunc(ny / 2) * dy,
-            maxx, minx + Math.trunc(ny / 2) * dy, 0.0);
+        WebGLViewportWindow.addGridLine(
+            p,
+            c,
+            minx + Math.trunc(nx / 2) * dx,
+            miny,
+            minx + Math.trunc(nx / 2) * dx,
+            maxy,
+            0.0,
+        );
+        WebGLViewportWindow.addGridLine(
+            p,
+            c,
+            minx,
+            minx + Math.trunc(ny / 2) * dy,
+            maxx,
+            minx + Math.trunc(ny / 2) * dy,
+            0.0,
+        );
 
         gl.enable(gl.DEPTH_TEST);
-        await WebGLLineRenderer.drawLines(gl,
+        await WebGLLineRenderer.drawLines(
+            gl,
             this.viewport.getActiveCamera().calculateProjectionMatrix().multiply(gridTransform),
-            new Float32Array(p), new Float32Array(c), 1.0);
+            new Float32Array(p),
+            new Float32Array(c),
+            1.0,
+        );
     }
 
-    private static addGridLine(p: number[], c: number[],
-                               x0: number, y0: number, x1: number, y1: number, gray: number): void {
+    private static addGridLine(
+        p: number[],
+        c: number[],
+        x0: number,
+        y0: number,
+        x1: number,
+        y1: number,
+        gray: number,
+    ): void {
         p.push(x0, y0, 0.0);
         p.push(x1, y1, 0.0);
         for (let i: number = 0; i < 2; i++) {
@@ -295,11 +344,18 @@ export class WebGLViewportWindow {
     Draws a label image with its upper left corner at a position of the
     viewport, measured in pixels from its upper left corner.
     */
-    public async drawTextureString2D(gl: WebGL2RenderingContext, x: number, y: number,
-                                     i: RGBAImageUncompressed): Promise<void> {
-        await this.drawLabelImage(gl, i,
+    public async drawTextureString2D(
+        gl: WebGL2RenderingContext,
+        x: number,
+        y: number,
+        i: RGBAImageUncompressed,
+    ): Promise<void> {
+        await this.drawLabelImage(
+            gl,
+            i,
             this.viewport.getPixelStartX() + x,
-            this.viewport.getPixelStartY() + (this.viewport.getPixelSizeY() - y));
+            this.viewport.getPixelStartY() + (this.viewport.getPixelSizeY() - y),
+        );
     }
 
     /**
@@ -320,8 +376,12 @@ export class WebGLViewportWindow {
     @param windowX horizontal position of the lower left corner
     @param windowY vertical position of the lower left corner, from the bottom
     */
-    private async drawLabelImage(gl: WebGL2RenderingContext, image: RGBAImageUncompressed,
-                                 windowX: number, windowY: number): Promise<void> {
+    private async drawLabelImage(
+        gl: WebGL2RenderingContext,
+        image: RGBAImageUncompressed,
+        windowX: number,
+        windowY: number,
+    ): Promise<void> {
         const currentViewport: Int32Array = gl.getParameter(gl.VIEWPORT) as Int32Array;
 
         let surfaceWidth: number = this.viewportSet.getSizeXInPixels();
@@ -340,28 +400,43 @@ export class WebGLViewportWindow {
 
         // Window coordinates to clip space
         const toClip: Matrix4x4d = Matrix4x4d.identityMatrix()
-            .withVal(0, 0, 2.0 / surfaceWidth).withVal(0, 3, -1.0)
-            .withVal(1, 1, 2.0 / surfaceHeight).withVal(1, 3, -1.0);
+            .withVal(0, 0, 2.0 / surfaceWidth)
+            .withVal(0, 3, -1.0)
+            .withVal(1, 1, 2.0 / surfaceHeight)
+            .withVal(1, 3, -1.0);
         const positions: Float32Array = new Float32Array([
-            x0, y0, 0,
-            x1, y0, 0,
-            x1, y1, 0,
-            x0, y0, 0,
-            x1, y1, 0,
-            x0, y1, 0,
+            x0,
+            y0,
+            0,
+            x1,
+            y0,
+            0,
+            x1,
+            y1,
+            0,
+            x0,
+            y0,
+            0,
+            x1,
+            y1,
+            0,
+            x0,
+            y1,
+            0,
         ]);
-        const uvs: Float32Array = new Float32Array([
-            0, 0,  1, 0,  1, 1,
-            0, 0,  1, 1,  0, 1,
-        ]);
+        const uvs: Float32Array = new Float32Array([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1]);
 
         const scissorWasEnabled: boolean = gl.isEnabled(gl.SCISSOR_TEST);
         const previousScissor: Int32Array = gl.getParameter(gl.SCISSOR_BOX) as Int32Array;
 
         gl.viewport(0, 0, surfaceWidth, surfaceHeight);
         gl.enable(gl.SCISSOR_TEST);
-        gl.scissor(this.viewport.getPixelStartX(), this.viewport.getPixelStartY(),
-            this.viewport.getPixelSizeX(), this.viewport.getPixelSizeY());
+        gl.scissor(
+            this.viewport.getPixelStartX(),
+            this.viewport.getPixelStartY(),
+            this.viewport.getPixelSizeX(),
+            this.viewport.getPixelSizeY(),
+        );
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.CULL_FACE);
         gl.enable(gl.BLEND);
@@ -382,8 +457,12 @@ export class WebGLViewportWindow {
     Draws a label image with its lower left corner at a position of the
     viewport, measured in pixels from its lower left corner.
     */
-    private async drawLabelImageInViewport(gl: WebGL2RenderingContext, image: RGBAImageUncompressed,
-                                           x: number, y: number): Promise<void> {
+    private async drawLabelImageInViewport(
+        gl: WebGL2RenderingContext,
+        image: RGBAImageUncompressed,
+        x: number,
+        y: number,
+    ): Promise<void> {
         await this.drawLabelImage(gl, image, this.viewport.getPixelStartX() + x, this.viewport.getPixelStartY() + y);
     }
 
@@ -442,8 +521,7 @@ export class WebGLViewportWindow {
 
         // The area of the title (its border included, so it can be easily
         // pointed) is informed to the model, for interaction
-        this.viewport.setTitleArea(0, 0,
-            titleImage.getXSize() + 2 * borderx, titleImage.getYSize() + 2 * bordery);
+        this.viewport.setTitleArea(0, 0, titleImage.getXSize() + 2 * borderx, titleImage.getYSize() + 2 * bordery);
 
         await this.drawTextureString2D(gl, borderx, titleImage.getYSize() + bordery, titleImage);
     }
@@ -458,12 +536,16 @@ export class WebGLViewportWindow {
     private updateTitleImage(): void {
         const currentTitle: string = this.viewportSet.getTitleFor(this.viewport);
         const currentColor: ColorRgb = this.viewportSet.getTitleColorFor(this.viewport);
-        const currentFontSize: number =
-            this.viewportSet.getElementScaler().scaleSize(WebGLViewportWindow.BASE_TITLE_FONT_SIZE);
+        const currentFontSize: number = this.viewportSet
+            .getElementScaler()
+            .scaleSize(WebGLViewportWindow.BASE_TITLE_FONT_SIZE);
 
-        if (this.titleImage === null || currentTitle !== this.title ||
+        if (
+            this.titleImage === null ||
+            currentTitle !== this.title ||
             !currentColor.equals(this.titleColor) ||
-            currentFontSize !== this.titleFontSize) {
+            currentFontSize !== this.titleFontSize
+        ) {
             this.title = currentTitle;
             this.titleColor = currentColor;
             this.titleFontSize = currentFontSize;
@@ -476,10 +558,12 @@ export class WebGLViewportWindow {
 
     public async drawLabelsForTranslateGizmo(gl: WebGL2RenderingContext, gizmo: TranslateGizmo): Promise<void> {
         const elementScaler: ViewportElementScaler = this.viewportSet.getElementScaler();
-        const offsetX: number =
-            JavaMath.round(elementScaler.scaleLength(WebGLViewportWindow.BASE_TRANSLATE_GIZMO_LABEL_OFFSET_X));
-        const offsetY: number =
-            JavaMath.round(elementScaler.scaleLength(WebGLViewportWindow.BASE_TRANSLATE_GIZMO_LABEL_OFFSET_Y));
+        const offsetX: number = JavaMath.round(
+            elementScaler.scaleLength(WebGLViewportWindow.BASE_TRANSLATE_GIZMO_LABEL_OFFSET_X),
+        );
+        const offsetY: number = JavaMath.round(
+            elementScaler.scaleLength(WebGLViewportWindow.BASE_TRANSLATE_GIZMO_LABEL_OFFSET_Y),
+        );
 
         this.updateTranslateGizmoLabelImages(elementScaler);
 
@@ -495,8 +579,7 @@ export class WebGLViewportWindow {
                 lv = new Vector3Dd(0, 0, lv.z());
                 if (g instanceof Arrow) {
                     lv = lv.withZ((g.getHeadLength() + g.getBaseLength()) * 1.1);
-                }
-                else {
+                } else {
                     lv = lv.withZ(1);
                 }
 
@@ -509,10 +592,12 @@ export class WebGLViewportWindow {
                 if (tp !== null) {
                     const yellow: boolean = ColorRgb.distance(c, r.getMaterial()!.getDiffuse()) < VSDK.EPSILON;
 
-                    await this.drawTextureString2D(gl,
+                    await this.drawTextureString2D(
+                        gl,
                         Math.trunc(tp.x()) + offsetX,
                         Math.trunc(tp.y()) + offsetY,
-                        yellow ? this.translateGizmoSelectedLabelImages![i]! : this.translateGizmoLabelImages![i]!);
+                        yellow ? this.translateGizmoSelectedLabelImages![i]! : this.translateGizmoLabelImages![i]!,
+                    );
                 }
             }
         }
@@ -538,13 +623,18 @@ export class WebGLViewportWindow {
         }
 
         const projected: Vector3Dd | null = this.viewport.getActiveCamera().projectPointUsingRayMethodResult(anchor);
-        const fontSize: number =
-            this.viewportSet.getElementScaler().scaleSize(WebGLViewportWindow.BASE_ROTATE_GIZMO_ARC_LABEL_FONT_SIZE);
+        const fontSize: number = this.viewportSet
+            .getElementScaler()
+            .scaleSize(WebGLViewportWindow.BASE_ROTATE_GIZMO_ARC_LABEL_FONT_SIZE);
         const text: string = InputGizmo.format(gizmo.getArcSweepInDegrees(), RotateGizmo.ANGLE_DECIMALS) + "°";
         const color: ColorRgb = gizmo.getArcColor();
 
-        if (this.rotateGizmoArcLabelImage === null || fontSize !== this.rotateGizmoArcLabelFontSize ||
-            text !== this.rotateGizmoArcLabelText || !color.equals(this.rotateGizmoArcLabelColor)) {
+        if (
+            this.rotateGizmoArcLabelImage === null ||
+            fontSize !== this.rotateGizmoArcLabelFontSize ||
+            text !== this.rotateGizmoArcLabelText ||
+            !color.equals(this.rotateGizmoArcLabelColor)
+        ) {
             if (this.rotateGizmoArcLabelImage !== null) {
                 this.discardedLabelImages.push(this.rotateGizmoArcLabelImage);
             }
@@ -556,10 +646,12 @@ export class WebGLViewportWindow {
         if (projected !== null) {
             const label: RGBAImageUncompressed = this.rotateGizmoArcLabelImage;
             // Centered at the projected point
-            await this.drawTextureString2D(gl,
+            await this.drawTextureString2D(
+                gl,
                 Math.trunc(projected.x()) - Math.trunc(label.getXSize() / 2),
                 Math.trunc(projected.y()) + Math.trunc(label.getYSize() / 2),
-                label);
+                label,
+            );
         }
     }
 

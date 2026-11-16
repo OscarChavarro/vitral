@@ -33,8 +33,8 @@ export class LightGizmoOmniBillboard {
         viewportWidth: number,
         viewportHeight: number,
     ): number {
-        const targetPixels: number = LightGizmoOmniBillboard.VIEWPORT_FRACTION
-            * Math.min(viewportWidth, viewportHeight);
+        const targetPixels: number =
+            LightGizmoOmniBillboard.VIEWPORT_FRACTION * Math.min(viewportWidth, viewportHeight);
 
         if (camera === null) {
             return Math.max(0.05, targetPixels / Math.max(viewportHeight, 1));

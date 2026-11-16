@@ -118,9 +118,13 @@ export class Scene {
     this.camera.setRotation(R);
 
     this.activeCamera = this.camera;
-    this.selectedThings = new SelectionSet(this.scene.getSimpleBodies() as unknown as ArrayList<unknown>);
+    this.selectedThings = new SelectionSet(
+      this.scene.getSimpleBodies() as unknown as ArrayList<unknown>,
+    );
     this.selectedLights = new SelectionSet(this.scene.getLights() as unknown as ArrayList<unknown>);
-    this.selectedDebugThingGroups = new SelectionSet(this.debugThingGroups as unknown as ArrayList<unknown>);
+    this.selectedDebugThingGroups = new SelectionSet(
+      this.debugThingGroups as unknown as ArrayList<unknown>,
+    );
 
     //-----------------------------------------------------------------
     this.simpleBackground = new SimpleBackground();
@@ -172,7 +176,15 @@ export class Scene {
       const up: RGBAImageUncompressed = await files.importRGBA(folder + 'entorno5.jpg');
       console.log(progress + ' OK!');
 
-      this.cubemapBackground = new CubemapBackground(this.camera, front, right, back, left, down, up);
+      this.cubemapBackground = new CubemapBackground(
+        this.camera,
+        front,
+        right,
+        back,
+        left,
+        down,
+        up,
+      );
     } catch (e) {
       console.error(e);
       return false;
@@ -230,7 +242,9 @@ export class Scene {
     return thing;
   }
 
-  isHidden(body: SimpleBody): boolean { return this.hiddenBodies.has(body); }
+  isHidden(body: SimpleBody): boolean {
+    return this.hiddenBodies.has(body);
+  }
   setHidden(body: SimpleBody, hidden: boolean): void {
     if (hidden) this.hiddenBodies.add(body);
     else this.hiddenBodies.delete(body);
@@ -311,7 +325,9 @@ export class Scene {
     console.log('Things in scene: ' + things.size());
     for (let i = 0; i < things.size(); i++) {
       const geometry: Geometry | null = things.get(i).getGeometry();
-      console.log('  - Thing[' + i + ']: ' + (geometry !== null ? geometry.constructor.name : 'null'));
+      console.log(
+        '  - Thing[' + i + ']: ' + (geometry !== null ? geometry.constructor.name : 'null'),
+      );
     }
     console.log('= END OF REPORT ===========================================================');
   }
@@ -334,7 +350,10 @@ export class Scene {
    * space depth values in [0, 1], so the image can be composited with
    * rasterized elements (grid, gizmos...); or null
    */
-  async raytraceViewport(outViewport: RGBImageUncompressed, outDepth: ZBuffer | null = null): Promise<void> {
+  async raytraceViewport(
+    outViewport: RGBImageUncompressed,
+    outDepth: ZBuffer | null = null,
+  ): Promise<void> {
     await this.raytraceWith(outViewport, outDepth, false);
   }
 
@@ -369,13 +388,15 @@ export class Scene {
         if (this.cubemapBackground === null) {
           await this.buildCubemap();
         }
-        activeBackground = this.cubemapBackground !== null ? this.cubemapBackground : this.simpleBackground;
+        activeBackground =
+          this.cubemapBackground !== null ? this.cubemapBackground : this.simpleBackground;
         break;
       case 1:
         if (this.fixedBackground === null) {
           await this.buildFixedmap();
         }
-        activeBackground = this.fixedBackground !== null ? this.fixedBackground : this.simpleBackground;
+        activeBackground =
+          this.fixedBackground !== null ? this.fixedBackground : this.simpleBackground;
         break;
       case 0:
       default:

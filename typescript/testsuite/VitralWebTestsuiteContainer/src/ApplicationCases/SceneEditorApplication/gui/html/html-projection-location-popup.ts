@@ -90,9 +90,15 @@ export class HtmlProjectionLocationPopup {
 
     const popup: HtmlPopupMenu = new HtmlPopupMenu();
     this.popup = popup;
-    const current: HtmlMenuItem | null = this.fillMenu(popup, definition, viewport,
-      viewport.getProjectionLocationCommand());
-    const renderModeDefinition: WidgetMenu | null = context.getPopup(ViewportSetCommands.POPUP_RENDER_MODE);
+    const current: HtmlMenuItem | null = this.fillMenu(
+      popup,
+      definition,
+      viewport,
+      viewport.getProjectionLocationCommand(),
+    );
+    const renderModeDefinition: WidgetMenu | null = context.getPopup(
+      ViewportSetCommands.POPUP_RENDER_MODE,
+    );
     if (renderModeDefinition !== null) {
       popup.addSeparator();
       this.fillMenu(popup, renderModeDefinition, viewport, viewport.getRenderModeCommand());
@@ -141,11 +147,15 @@ export class HtmlProjectionLocationPopup {
 
       const command: string = element.getCommandName();
       const mnemonic: string = element.getMnemonic();
-      const item: HtmlMenuItem = popup.addRadioItem(element.getName(), mnemonic, command === currentCommand,
+      const item: HtmlMenuItem = popup.addRadioItem(
+        element.getName(),
+        mnemonic,
+        command === currentCommand,
         (): void => {
           this.techniques.processViewportCommand(command, viewport);
           this.repaint();
-        });
+        },
+      );
       if (command === currentCommand) {
         currentItem = item;
       }

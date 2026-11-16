@@ -78,8 +78,7 @@ export class ParallelRaytracerTileRenderer {
             this.snapshot = this.loadScene(request.sceneDescriptor, request.xSize, request.ySize);
             this.sceneVersion = request.sceneVersion;
         }
-        if (this.image === null || this.image.getXSize() !== request.xSize ||
-            this.image.getYSize() !== request.ySize) {
+        if (this.image === null || this.image.getXSize() !== request.xSize || this.image.getYSize() !== request.ySize) {
             this.image = new RGBImageUncompressed();
             this.image.initNoFill(request.xSize, request.ySize);
         }
@@ -98,8 +97,11 @@ export class ParallelRaytracerTileRenderer {
                 request.openGlDepthRangeNear,
                 request.openGlDepthRangeFar,
             );
-            if (this.depth === null || this.depth.getXSize() !== request.xSize ||
-                this.depth.getYSize() !== request.ySize) {
+            if (
+                this.depth === null ||
+                this.depth.getXSize() !== request.xSize ||
+                this.depth.getYSize() !== request.ySize
+            ) {
                 this.depth = new ZBuffer(request.xSize, request.ySize);
             }
         }
@@ -127,9 +129,12 @@ export class ParallelRaytracerTileRenderer {
         const end: number = (request.ySize - request.startY) * rowStride;
 
         // The depth buffer stores row `y` at `y * xSize`, top row first
-        const depth: Float32Array | null = depthEncoder !== null && this.depth !== null
-            ? this.depth.getZBuffer().slice(request.startY * request.xSize, (request.startY + request.height) * request.xSize)
-            : null;
+        const depth: Float32Array | null =
+            depthEncoder !== null && this.depth !== null
+                ? this.depth
+                      .getZBuffer()
+                      .slice(request.startY * request.xSize, (request.startY + request.height) * request.xSize)
+                : null;
 
         return { startY: request.startY, height: request.height, bytes: raw.slice(start, end), depth };
     }

@@ -2,8 +2,7 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-import { VSDK } from "../../../../../../common/VSDK.js";
-import { Logger } from "../../../../../../common/logging/Logger.js";
+import { VSDKFatalException } from "../../../../../../common/VSDKFatalException.js";
 import type { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
 import type { PolyhedralBoundedSolid } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
@@ -446,18 +445,13 @@ export class _PolyhedralBoundedSolidSetClassifier extends _PolyhedralBoundedSoli
         }
 
         if (from === null || to === null) {
-            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", "Unexpected case: null halfedges!");
+            throw new VSDKFatalException("separateEdgeSequence: Unexpected case: null halfedges!");
         }
 
         const s = from!.parentLoop.parentFace.parentSolid;
 
         if (s !== to!.parentLoop.parentFace.parentSolid) {
-            Logger.reportMessage(
-                null,
-                VSDK.FATAL_ERROR,
-                "separateEdgeSequence",
-                "Unexpected case: halfedges on different solids!",
-            );
+            throw new VSDKFatalException("separateEdgeSequence: Unexpected case: halfedges on different solids!");
         }
 
         //-----------------------------------------------------------------
@@ -534,13 +528,9 @@ export class _PolyhedralBoundedSolidSetClassifier extends _PolyhedralBoundedSoli
         } while (changed);
 
         if (from!.startingVertex !== to!.startingVertex) {
-            Logger.reportMessage(
-                null,
-                VSDK.FATAL_ERROR,
-                "separateEdgeSequence",
-                "Unable to recover endpoint pairing after A-E normalization.",
+            throw new VSDKFatalException(
+                "separateEdgeSequence: Unable to recover endpoint pairing after A-E normalization.",
             );
-            return;
         }
 
         //-----------------------------------------------------------------

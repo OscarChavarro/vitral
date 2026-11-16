@@ -43,7 +43,10 @@ export class WebGLSceneRenderer {
     editor: BodyEditFeedbackProvider | null,
   ): Promise<void> {
     //- Draw scene background -----------------------------------------
-    await WebGLBackgroundRenderer.draw(gl, s.scene.getBackgrounds().get(s.scene.getActiveBackgroundIndex()));
+    await WebGLBackgroundRenderer.draw(
+      gl,
+      s.scene.getBackgrounds().get(s.scene.getActiveBackgroundIndex()),
+    );
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthMask(true);
@@ -59,7 +62,13 @@ export class WebGLSceneRenderer {
 
       await WebGLSceneRenderer.drawBody(gl, gi, s.activeCamera, lights, quality);
       if (editor !== null && editor.getTarget() === gi) {
-        await WebGLRenderPrimitiveRenderer.drawAll(gl, editor.buildEditFeedback(), s.activeCamera, lights, quality);
+        await WebGLRenderPrimitiveRenderer.drawAll(
+          gl,
+          editor.buildEditFeedback(),
+          s.activeCamera,
+          lights,
+          quality,
+        );
       }
     }
   }
@@ -86,7 +95,8 @@ export class WebGLSceneRenderer {
     const transform: Matrix4x4d = parentTransform.multiply(body.getTransformationMatrix());
     const geometry: Geometry | null = body.getGeometry();
     const texture: Image | null = body.getTexture();
-    const textureMap: RGBImageUncompressed | null = texture instanceof RGBImageUncompressed ? texture : null;
+    const textureMap: RGBImageUncompressed | null =
+      texture instanceof RGBImageUncompressed ? texture : null;
 
     await WebGLGeometryRenderer.draw(
       gl,
@@ -124,13 +134,30 @@ export class WebGLSceneRenderer {
     memberQuality.setBoundingVolume(false);
 
     for (const body of group.getBodies()) {
-      await WebGLSceneRenderer.drawBody(gl, body, camera, lights, memberQuality, group.getTransformationMatrix());
+      await WebGLSceneRenderer.drawBody(
+        gl,
+        body,
+        camera,
+        lights,
+        memberQuality,
+        group.getTransformationMatrix(),
+      );
     }
     if (quality.isBoundingVolumeSet()) {
-      await WebGLMinMaxRenderer.drawMinMax(gl, group.getMinMax(), camera, group.getTransformationMatrix());
+      await WebGLMinMaxRenderer.drawMinMax(
+        gl,
+        group.getMinMax(),
+        camera,
+        group.getTransformationMatrix(),
+      );
     }
     if (quality.isSelectionCornersSet()) {
-      await WebGLSelectionCornersRenderer.drawMinMax(gl, group.getMinMax(), camera, group.getTransformationMatrix());
+      await WebGLSelectionCornersRenderer.drawMinMax(
+        gl,
+        group.getMinMax(),
+        camera,
+        group.getTransformationMatrix(),
+      );
     }
   }
 
@@ -141,7 +168,11 @@ export class WebGLSceneRenderer {
    * @param editor editor of the selected body, whose feedback is drawn over
    * it, or null if there is none
    */
-  static async draw(gl: WebGL2RenderingContext, s: Scene, editor: BodyEditFeedbackProvider | null): Promise<void> {
+  static async draw(
+    gl: WebGL2RenderingContext,
+    s: Scene,
+    editor: BodyEditFeedbackProvider | null,
+  ): Promise<void> {
     await s.activateSelectedBackground();
 
     await WebGLSceneRenderer.drawBase(gl, s, editor);
@@ -189,7 +220,13 @@ export class WebGLSceneRenderer {
         await WebGLSceneRenderer.drawBody(gl, gi, s.activeCamera, lights, quality);
       }
       if (editor !== null && editor.getTarget() === gi) {
-        await WebGLRenderPrimitiveRenderer.drawAll(gl, editor.buildEditFeedback(), s.activeCamera, lights, quality);
+        await WebGLRenderPrimitiveRenderer.drawAll(
+          gl,
+          editor.buildEditFeedback(),
+          s.activeCamera,
+          lights,
+          quality,
+        );
       }
     }
 
@@ -199,14 +236,22 @@ export class WebGLSceneRenderer {
   /**
    * Draws the light gizmos and the visual debug entities of the scene.
    */
-  private static async drawLightsAndDebugEntities(gl: WebGL2RenderingContext, s: Scene): Promise<void> {
+  private static async drawLightsAndDebugEntities(
+    gl: WebGL2RenderingContext,
+    s: Scene,
+  ): Promise<void> {
     //- Draw 3D Gizmos ------------------------------------------------
     s.selectedLights.sync();
     // The model owns the gizmo size, so picking matches what is drawn
     WebGLLightRenderer.setScale(s.getLightGizmoScale());
     for (let i = 0; i < s.scene.getLights().size(); i++) {
-      await WebGLLightRenderer.draw(gl, s.scene.getLights().get(i), s.activeCamera,
-        LightGizmoStyle.OMNI_BILLBOARD, s.selectedLights.isSelected(i));
+      await WebGLLightRenderer.draw(
+        gl,
+        s.scene.getLights().get(i),
+        s.activeCamera,
+        LightGizmoStyle.OMNI_BILLBOARD,
+        s.selectedLights.isSelected(i),
+      );
     }
 
     //- Draw visual debug entities (usually transparent) --------------

@@ -14,7 +14,8 @@ export class DialogPersistence {
         root.dialogs.forEach((node, index) => {
             if (!DialogPersistence.isObject(node)) throw new Error(`dialogs[${index}]: expected object`);
             const id = DialogPersistence.required(node, "id", `dialogs[${index}]`);
-            if (ids.has(id) || widget.getDialogById(id) !== null) throw new Error(`dialogs[${index}]: duplicate dialog id ${id}`);
+            if (ids.has(id) || widget.getDialogById(id) !== null)
+                throw new Error(`dialogs[${index}]: duplicate dialog id ${id}`);
             ids.add(id);
             const dialog = new WidgetDialog();
             dialog.setId(id);
@@ -22,9 +23,11 @@ export class DialogPersistence {
             dialog.setModal(node.modal === true);
             if (!Array.isArray(node.content)) throw new Error(`dialogs[${index}].content: expected array`);
             const elementIds = new Set<string>();
-            node.content.forEach((element, elementIndex) => dialog.addElement(
-                DialogPersistence.element(element, `dialogs[${index}].content[${elementIndex}]`, elementIds),
-            ));
+            node.content.forEach((element, elementIndex) =>
+                dialog.addElement(
+                    DialogPersistence.element(element, `dialogs[${index}].content[${elementIndex}]`, elementIds),
+                ),
+            );
             widget.addDialog(dialog);
         });
     }
@@ -32,16 +35,35 @@ export class DialogPersistence {
     private static element(value: unknown, path: string, ids: Set<string>): WidgetDialogElement {
         if (!DialogPersistence.isObject(value)) throw new Error(`${path}: expected object`);
         const kind = DialogPersistence.required(value, "kind", path);
-        const allowed = new Set(["column", "row", "textInput", "button", "tree", "action", "fileChooser", "fileFilter"]);
+        const allowed = new Set([
+            "column",
+            "row",
+            "textInput",
+            "button",
+            "tree",
+            "action",
+            "fileChooser",
+            "fileFilter",
+        ]);
         if (!allowed.has(kind)) throw new Error(`${path}: unsupported kind ${kind}`);
         const id = DialogPersistence.optional(value, "id");
         if (id !== null && (ids.has(id) || !ids.add(id))) throw new Error(`${path}: duplicate element id ${id}`);
         const binding = DialogPersistence.optional(value, "binding");
         const action = DialogPersistence.optional(value, "action");
-        if (["textInput", "tree", "fileFilter"].includes(kind) && binding === null) throw new Error(`${path}: missing binding`);
+        if (["textInput", "tree", "fileFilter"].includes(kind) && binding === null)
+            throw new Error(`${path}: missing binding`);
         if (["button", "action"].includes(kind) && action === null) throw new Error(`${path}: missing action`);
-        const children = Array.isArray(value.children) ? value.children.map((child, index) => DialogPersistence.element(child, `${path}.children[${index}]`, ids)) : [];
-        return new WidgetDialogElement(kind, id, DialogPersistence.optional(value, "labelKey"), binding, action, children);
+        const children = Array.isArray(value.children)
+            ? value.children.map((child, index) => DialogPersistence.element(child, `${path}.children[${index}]`, ids))
+            : [];
+        return new WidgetDialogElement(
+            kind,
+            id,
+            DialogPersistence.optional(value, "labelKey"),
+            binding,
+            action,
+            children,
+        );
     }
 
     private static required(value: JsonObject, field: string, path: string): string {

@@ -23,7 +23,7 @@ const KURLANDER_TIMEOUT_MS = 600_000;
 Audits `_PolyhedralBoundedSolidSetIntersectionCurveBuilder` (§5 of
 doc/mythosPlan.md): the reconstruction of intersection curves from the
 classifier's paired null-edge lists, captured by the connect stage in
-`_PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport`.
+`_PolyhedralBoundedSolidSetNullEdgesConnector.getLastCurveReport()`.
 
 <p>Traceability: [MANT1988] §15.7 — the connect stage implicitly requires
 null edges ordered along each intersection curve; these tests make the curve
@@ -37,9 +37,9 @@ problem in connect, not a missing-geometry problem in generate.</p>
 */
 describe("IntersectionCurveBuilderTest", () => {
     function runAndReport(a: PolyhedralBoundedSolid, b: PolyhedralBoundedSolid, op: number): Report | null {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport = null;
+        _PolyhedralBoundedSolidSetNullEdgesConnector.clearLastCurveReport();
         PolyhedralBoundedSolidModeler.setOp(a, b, op, false);
-        return _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport;
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.getLastCurveReport();
     }
 
     function reportForCorpus(sample: CsgSampleCorpus, op: number): Report | null {

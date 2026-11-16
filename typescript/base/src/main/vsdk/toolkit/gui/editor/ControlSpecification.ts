@@ -52,14 +52,25 @@ export class ControlSpecification {
         }
 
         if (parts.length === 2 || parts[2]!.trim().length === 0) {
-            return new ControlSpecification(type, name, "", Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, false, false);
+            return new ControlSpecification(
+                type,
+                name,
+                "",
+                Number.NEGATIVE_INFINITY,
+                Number.POSITIVE_INFINITY,
+                false,
+                false,
+            );
         }
 
         const interval: string = parts[2]!.trim();
         const open: string = interval.charAt(0);
         const close: string = interval.charAt(interval.length - 1);
         if ((open !== "[" && open !== "(") || (close !== "]" && close !== ")")) {
-            ControlSpecification.reportMalformed(specification, "interval must start with '[' or '(' and end with ']' or ')'");
+            ControlSpecification.reportMalformed(
+                specification,
+                "interval must start with '[' or '(' and end with ']' or ')'",
+            );
             return null;
         }
 
@@ -111,7 +122,10 @@ export class ControlSpecification {
             null,
             VSDK.WARNING,
             "ControlSpecification.parse",
-            'Ignoring malformed control specification "' + specification + '": ' + reason +
+            'Ignoring malformed control specification "' +
+                specification +
+                '": ' +
+                reason +
                 '. Expected format is "type;name;interval", for example "double;radius;(0, INFINITE)".',
         );
     }

@@ -506,6 +506,182 @@ export class _PolyhedralBoundedSolidSetVertexVertexClassifier extends _Polyhedra
     }
 
     /**
+    Resolves "on" edge classes from the local geometry of both vertex
+    neighborhoods before the operation-biased rules of figures
+    [MANT1988].15.10 to 15.12 are applied.
+
+    <p>A sector edge is classified "on" when it lies in the plane of the
+    other sector. The biased rules assume that the surface crosses the other
+    solid along that edge. When the surface on both sides of the edge has
+    the same class with respect to the other solid (for instance a concave
+    edge of one solid lying on a convex edge of the other, with the faces
+    interleaved), there is no crossing and the edge takes that class. When
+    the two sides differ, the curve runs along the edge and it stays "on"
+    for the biased rules.</p>
+    */
+    private resolveOnEdgesByLocalNeighborhood(): void {
+        const ON = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON;
+
+        for (const s of this.sectors!) {
+            if (!s.intersect) {
+                continue;
+            }
+            if (s.s1a === ON) {
+                s.s1a = this.classifyRayWithoutCrossing(this.nba!, s.secta, true, this.nbb!);
+            }
+            if (s.s2a === ON) {
+                s.s2a = this.classifyRayWithoutCrossing(this.nba!, s.secta, false, this.nbb!);
+            }
+            if (s.s1b === ON) {
+                s.s1b = this.classifyRayWithoutCrossing(this.nbb!, s.sectb, true, this.nba!);
+            }
+            if (s.s2b === ON) {
+                s.s2b = this.classifyRayWithoutCrossing(this.nbb!, s.sectb, false, this.nba!);
+            }
+            if ((s.s1a === s.s2a && s.s1a !== ON) || (s.s1b === s.s2b && s.s1b !== ON)) {
+                s.intersect = false;
+            }
+        }
+    }
+
+    /**
+    Class of the surface next to a boundary ray of sector `index` in `own`,
+    measured against the `other` neighborhood on both sides of the ray (in
+    this sector and in the adjacent one that shares the ray). ON when the
+    sides differ or either side lies on the other solid's surface.
+    */
+    private classifyRayWithoutCrossing(
+        own: ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>,
+        index: number,
+        firstRay: boolean,
+        other: ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>,
+    ): number {
+        const ON = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON;
+        let adjacent: _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex;
+        let ray: Vector3Dd;
+        let adjacentRay: Vector3Dd;
+        let adjacentOther: Vector3Dd;
+        let here: number;
+
+        const n = own.get(index);
+        if (firstRay) {
+            adjacent = own.get(index === 0 ? own.size() - 1 : index - 1);
+            ray = n.ref1!;
+            here = this.classifyDirectionInNeighborhood(
+                _PolyhedralBoundedSolidSetVertexVertexClassifier.directionNextToRay(n.ref1!, n.ref2!),
+                other,
+            );
+            adjacentRay = adjacent.ref2!;
+            adjacentOther = adjacent.ref1!;
+        } else {
+            adjacent = own.get(index === own.size() - 1 ? 0 : index + 1);
+            ray = n.ref2!;
+            here = this.classifyDirectionInNeighborhood(
+                _PolyhedralBoundedSolidSetVertexVertexClassifier.directionNextToRay(n.ref2!, n.ref1!),
+                other,
+            );
+            adjacentRay = adjacent.ref1!;
+            adjacentOther = adjacent.ref2!;
+        }
+        if (
+            here === ON ||
+            new Vector3Dd(ray).normalized().dotProduct(new Vector3Dd(adjacentRay).normalized()) < 1.0 - VSDK.EPSILON
+        ) {
+            return ON;
+        }
+        const there = this.classifyDirectionInNeighborhood(
+            _PolyhedralBoundedSolidSetVertexVertexClassifier.directionNextToRay(adjacentRay, adjacentOther),
+            other,
+        );
+        return there === here ? here : ON;
+    }
+
+    /**
+    A direction inside a (minor arc) sector, next to its boundary ray.
+    */
+    private static directionNextToRay(ray: Vector3Dd, otherRay: Vector3Dd): Vector3Dd {
+        const r = new Vector3Dd(ray).normalized();
+        const o = new Vector3Dd(otherRay).normalized();
+        return r.add(o.multiply(1.0e-3)).normalized();
+    }
+
+    private static readonly PROBE_RAYS: Vector3Dd[] = [
+        new Vector3Dd(0.5773, 0.3341, 0.7452).normalized(),
+        new Vector3Dd(-0.2311, 0.8817, 0.4113).normalized(),
+        new Vector3Dd(0.7061, -0.6129, 0.3549).normalized(),
+    ];
+
+    /**
+    Classifies a direction leaving the common vertex against the cone that
+    the given neighborhood sectors bound: IN, OUT, or ON when the direction
+    lies on one of those sectors or no probe ray gives an unambiguous count.
+    Ray parity over the sectors, each a planar minor arc through the vertex.
+    */
+    private classifyDirectionInNeighborhood(
+        d: Vector3Dd,
+        nb: ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>,
+    ): number {
+        const ON = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON;
+        const planeTolerance = 1.0e-9;
+
+        for (const n of nb) {
+            const normal = n.he!.parentLoop.parentFace.getContainingPlane()!.getNormal();
+            if (
+                Math.abs(d.dotProduct(normal)) < planeTolerance &&
+                _PolyhedralBoundedSolidSetVertexVertexClassifier.sctrwitthin(d, n.ref1!, n.ref2!, n.ref12!)
+            ) {
+                return ON;
+            }
+        }
+
+        for (const w of _PolyhedralBoundedSolidSetVertexVertexClassifier.PROBE_RAYS) {
+            let crossings = 0;
+            let ambiguous = false;
+
+            for (const n of nb) {
+                const normal = n.he!.parentLoop.parentFace.getContainingPlane()!.getNormal();
+                const denominator = w.dotProduct(normal);
+                let t: number;
+                let q: Vector3Dd;
+
+                if (Math.abs(denominator) < 1.0e-9) {
+                    continue;
+                }
+                t = -d.dotProduct(normal) / denominator;
+                if (t <= 0.0) {
+                    continue;
+                }
+                q = d.add(w.multiply(t));
+                if (
+                    q.length() < 1.0e-9 ||
+                    PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+                        q,
+                        n.ref1!,
+                        _PolyhedralBoundedSolidOperator.numericContext,
+                    ) ||
+                    PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+                        q,
+                        n.ref2!,
+                        _PolyhedralBoundedSolidOperator.numericContext,
+                    )
+                ) {
+                    ambiguous = true;
+                    break;
+                }
+                if (_PolyhedralBoundedSolidSetVertexVertexClassifier.sctrwitthin(q, n.ref1!, n.ref2!, n.ref12!)) {
+                    crossings++;
+                }
+            }
+            if (!ambiguous) {
+                return crossings % 2 === 1
+                    ? _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN
+                    : _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+            }
+        }
+        return ON;
+    }
+
+    /**
     Reclassification procedure for "on"-edges on the vertex/vertex classifier,
     as expected from the high-level description of section [MANT1988].15.6.2
     and the case structures of figures [MANT1988].15.10, [MANT1988].15.11,
@@ -523,6 +699,8 @@ export class _PolyhedralBoundedSolidSetVertexVertexClassifier extends _Polyhedra
         const nba = this.nba!;
         const nbb = this.nbb!;
         const sectors = this.sectors!;
+
+        this.resolveOnEdgesByLocalNeighborhood();
 
         for (i = 0; i < sectors.size(); i++) {
             if (sectors.get(i).intersect && sectors.get(i).s1a === ON && sectors.get(i).s1b === ON) {

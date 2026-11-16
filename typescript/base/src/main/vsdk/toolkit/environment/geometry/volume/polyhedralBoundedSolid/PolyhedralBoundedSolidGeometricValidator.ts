@@ -2,7 +2,9 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
+import { Double } from "../../../../../../java/lang/Double.js";
 import type { StringBuilder } from "../../../../../../java/lang/StringBuilder.js";
+import { VSDK } from "../../../../common/VSDK.js";
 import { Vector2Dd } from "../../../../common/linealAlgebra/Vector2Dd.js";
 import type { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
 import { Geometry } from "../../Geometry.js";
@@ -12,6 +14,7 @@ import type { _PolyhedralBoundedSolidHalfEdge } from "./nodes/_PolyhedralBounded
 import type { _PolyhedralBoundedSolidLoop } from "./nodes/_PolyhedralBoundedSolidLoop.js";
 import type { _PolyhedralBoundedSolidVertex } from "./nodes/_PolyhedralBoundedSolidVertex.js";
 import type { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
+import { PolyhedralBoundedSolidFaceGeometry } from "./PolyhedralBoundedSolidFaceGeometry.js";
 import { PolyhedralBoundedSolidNumericPolicy, type ToleranceContext } from "./PolyhedralBoundedSolidNumericPolicy.js";
 
 /**
@@ -74,8 +77,14 @@ export class PolyhedralBoundedSolidGeometricValidator {
         let j: number;
         let k: number;
 
-        for (i = 0; i < points.length; i++) {
-            for (j = 0; j < points.length; j++) {
+        // The plane is the one of the last pair (i, j), in ascending
+        // order, whose first admissible third point k is not collinear
+        // with it. The pairs are visited from the last one backwards and
+        // the search stops at the first that gives a plane: the same
+        // plane as visiting every pair and keeping the last one, which
+        // took a time cubic in the number of points (performance.md).
+        for (i = points.length - 1; i >= 0 && facePlane === null; i--) {
+            for (j = points.length - 1; j >= 0 && facePlane === null; j--) {
                 for (k = 0; k < points.length; k++) {
                     if (i === j || i === k || j === k) {
                         continue;
@@ -658,15 +667,17 @@ export class PolyhedralBoundedSolidGeometricValidator {
 
     private static facesAreCoplanar(
         faceA: _PolyhedralBoundedSolidFace,
-        faceB: _PolyhedralBoundedSolidFace,
+        _faceB: _PolyhedralBoundedSolidFace,
+        planeA: InfinitePlane | null,
+        planeB: InfinitePlane | null,
         numericContext: ToleranceContext,
     ): boolean {
-        if (faceA.getContainingPlane() === null || faceB.getContainingPlane() === null) {
+        if (planeA === null || planeB === null) {
             return false;
         }
 
-        let nA = faceA.getContainingPlane()!.getNormal().multiply(1.0);
-        let nB = faceB.getContainingPlane()!.getNormal().multiply(1.0);
+        let nA = planeA.getNormal().multiply(1.0);
+        let nB = planeB.getNormal().multiply(1.0);
         nA = nA.normalized();
         nB = nB.normalized();
         if (Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) > numericContext.coplanarDotTolerance()) {
@@ -677,7 +688,7 @@ export class PolyhedralBoundedSolidGeometricValidator {
             const loop = faceA.boundariesList.get(i)!;
             if (loop.halfEdgesList.size() > 0) {
                 const p = loop.halfEdgesList.get(0)!.startingVertex.position;
-                return Math.abs(faceB.getContainingPlane()!.pointDistance(p)) <= numericContext.bigEpsilon();
+                return Math.abs(planeB.pointDistance(p)) <= numericContext.bigEpsilon();
             }
         }
         return false;
@@ -702,30 +713,35 @@ export class PolyhedralBoundedSolidGeometricValidator {
     private static vertexStrictlyInsideFace(
         v: _PolyhedralBoundedSolidVertex,
         face: _PolyhedralBoundedSolidFace,
+        faceGeometry: PolyhedralBoundedSolidFaceGeometry,
         numericContext: ToleranceContext,
     ): boolean {
-        if (face.getContainingPlane()!.doContainmentTest(v.position, numericContext.bigEpsilon()) !== Geometry.LIMIT) {
+        const plane = faceGeometry.getPlane()!;
+        if (plane.doContainmentTest(v.position, numericContext.bigEpsilon()) !== Geometry.LIMIT) {
             return false;
         }
-        return (
-            PolyhedralBoundedSolidNumericPolicy.testPointInside(face, v.position, numericContext) === Geometry.INSIDE
-        );
+        if (faceGeometry.projectionExcludes(v.position, numericContext.bigEpsilon())) {
+            return false;
+        }
+        return face.testPointInside(v.position, numericContext.bigEpsilon(), plane) === Geometry.INSIDE;
     }
 
     private static edgePiercesFaceInterior(
         he: _PolyhedralBoundedSolidHalfEdge,
         face: _PolyhedralBoundedSolidFace,
+        faceGeometry: PolyhedralBoundedSolidFaceGeometry,
         numericContext: ToleranceContext,
     ): boolean {
         const next = he.next();
-        if (next === null || face.getContainingPlane() === null) {
+        const plane = faceGeometry.getPlane();
+        if (next === null || plane === null) {
             return false;
         }
 
         const p0 = he.startingVertex.position;
         const p1 = next.startingVertex.position;
-        const d0 = face.getContainingPlane()!.pointDistance(p0);
-        const d1 = face.getContainingPlane()!.pointDistance(p1);
+        const d0 = plane.pointDistance(p0);
+        const d1 = plane.pointDistance(p1);
 
         if (Math.abs(d0) <= numericContext.bigEpsilon() && Math.abs(d1) <= numericContext.bigEpsilon()) {
             return false;
@@ -744,12 +760,17 @@ export class PolyhedralBoundedSolidGeometricValidator {
         }
 
         const p = p0.add(p1.subtract(p0).multiply(t));
-        return PolyhedralBoundedSolidNumericPolicy.testPointInside(face, p, numericContext) === Geometry.INSIDE;
+        if (faceGeometry.projectionExcludes(p, numericContext.bigEpsilon())) {
+            return false;
+        }
+        return face.testPointInside(p, numericContext.bigEpsilon(), plane) === Geometry.INSIDE;
     }
 
     private static facesHaveImproperIntersection(
         faceA: _PolyhedralBoundedSolidFace,
         faceB: _PolyhedralBoundedSolidFace,
+        geometryA: PolyhedralBoundedSolidFaceGeometry,
+        geometryB: PolyhedralBoundedSolidFaceGeometry,
         numericContext: ToleranceContext,
         msg: StringBuilder,
     ): boolean {
@@ -763,9 +784,11 @@ export class PolyhedralBoundedSolidGeometricValidator {
             for (j = 0; j < loop.halfEdgesList.size(); j++) {
                 he = loop.halfEdgesList.get(j)!;
                 if (
+                    geometryB.getPlane() !== null &&
                     PolyhedralBoundedSolidGeometricValidator.vertexStrictlyInsideFace(
                         he.startingVertex,
                         faceB,
+                        geometryB,
                         numericContext,
                     )
                 ) {
@@ -776,7 +799,14 @@ export class PolyhedralBoundedSolidGeometricValidator {
                         .append("] intersect improperly.\n");
                     return true;
                 }
-                if (PolyhedralBoundedSolidGeometricValidator.edgePiercesFaceInterior(he, faceB, numericContext)) {
+                if (
+                    PolyhedralBoundedSolidGeometricValidator.edgePiercesFaceInterior(
+                        he,
+                        faceB,
+                        geometryB,
+                        numericContext,
+                    )
+                ) {
                     msg.append("  - Faces [")
                         .append(String(faceA.id))
                         .append("] and [")
@@ -792,9 +822,11 @@ export class PolyhedralBoundedSolidGeometricValidator {
             for (j = 0; j < loop.halfEdgesList.size(); j++) {
                 he = loop.halfEdgesList.get(j)!;
                 if (
+                    geometryA.getPlane() !== null &&
                     PolyhedralBoundedSolidGeometricValidator.vertexStrictlyInsideFace(
                         he.startingVertex,
                         faceA,
+                        geometryA,
                         numericContext,
                     )
                 ) {
@@ -805,7 +837,14 @@ export class PolyhedralBoundedSolidGeometricValidator {
                         .append("] intersect improperly.\n");
                     return true;
                 }
-                if (PolyhedralBoundedSolidGeometricValidator.edgePiercesFaceInterior(he, faceA, numericContext)) {
+                if (
+                    PolyhedralBoundedSolidGeometricValidator.edgePiercesFaceInterior(
+                        he,
+                        faceA,
+                        geometryA,
+                        numericContext,
+                    )
+                ) {
                     msg.append("  - Faces [")
                         .append(String(faceA.id))
                         .append("] and [")
@@ -816,7 +855,15 @@ export class PolyhedralBoundedSolidGeometricValidator {
             }
         }
 
-        if (PolyhedralBoundedSolidGeometricValidator.facesAreCoplanar(faceA, faceB, numericContext)) {
+        if (
+            PolyhedralBoundedSolidGeometricValidator.facesAreCoplanar(
+                faceA,
+                faceB,
+                geometryA.getPlane(),
+                geometryB.getPlane(),
+                numericContext,
+            )
+        ) {
             const dominantCoordinate = PolyhedralBoundedSolidGeometricValidator.dominantCoordinateForFace(faceA);
             for (i = 0; i < faceA.boundariesList.size(); i++) {
                 const loopA = faceA.boundariesList.get(i)!;
@@ -911,14 +958,40 @@ export class PolyhedralBoundedSolidGeometricValidator {
         const msg = maybeMsg;
         let i: number;
         let j: number;
-        for (i = 0; i < solid.getPolygonsList().size(); i++) {
-            const faceA = solid.getPolygonsList().get(i)!;
-            for (j = i + 1; j < solid.getPolygonsList().size(); j++) {
-                const faceB = solid.getPolygonsList().get(j)!;
+        const n = solid.getPolygonsList().size();
+        const faces: _PolyhedralBoundedSolidFace[] = new Array<_PolyhedralBoundedSolidFace>(n);
+        let geometry: PolyhedralBoundedSolidFaceGeometry[];
+        const margin: number[] = new Array<number>(n).fill(0.0);
+        let coplanarSlack: number;
+
+        // Stage G (Fable5.2Analysis.md): planes are computed once per pass
+        // instead of once per face pair and per point, and face pairs whose
+        // grown boxes are apart are skipped. Every improper intersection has
+        // a witness point that lies in both grown boxes: a vertex of one face
+        // inside the other, the point where an edge pierces a face, or a
+        // crossing of two coplanar edges. For the last one the faces may be
+        // tilted by up to acos(1 - coplanarDotTolerance), which coplanarSlack
+        // bounds over the whole solid.
+        geometry = PolyhedralBoundedSolidFaceGeometry.of(solid);
+        coplanarSlack =
+            2.0 *
+            Math.sqrt(2.0 * numericContext.coplanarDotTolerance()) *
+            PolyhedralBoundedSolidGeometricValidator.solidDiagonal(solid);
+        for (i = 0; i < n; i++) {
+            faces[i] = solid.getPolygonsList().get(i)!;
+            margin[i] = geometry[i]!.containmentMargin(numericContext.bigEpsilon());
+        }
+        for (i = 0; i < n; i++) {
+            for (j = i + 1; j < n; j++) {
+                if (geometry[i]!.boxSeparatedFrom(geometry[j]!, margin[i]! + margin[j]! + coplanarSlack)) {
+                    continue;
+                }
                 if (
                     PolyhedralBoundedSolidGeometricValidator.facesHaveImproperIntersection(
-                        faceA,
-                        faceB,
+                        faces[i]!,
+                        faces[j]!,
+                        geometry[i]!,
+                        geometry[j]!,
                         numericContext,
                         msg,
                     )
@@ -928,6 +1001,131 @@ export class PolyhedralBoundedSolidGeometricValidator {
             }
         }
         return true;
+    }
+
+    private static solidDiagonal(solid: PolyhedralBoundedSolid): number {
+        const box = solid.getMinMax();
+        return Math.sqrt(
+            (box[3]! - box[0]!) * (box[3]! - box[0]!) +
+                (box[4]! - box[1]!) * (box[4]! - box[1]!) +
+                (box[5]! - box[2]!) * (box[5]! - box[2]!),
+        );
+    }
+
+    /**
+    Area below which a face is collapsed: VSDK.EPSILON scaled by the square
+    of the model scale, so that it equals EPSILON for models of unit size and
+    is invariant under a uniform change of units.
+    */
+    public static collapsedFaceAreaThreshold(numericContext: ToleranceContext): number {
+        return VSDK.EPSILON * numericContext.modelScale() * numericContext.modelScale();
+    }
+
+    /**
+    Area of a face: half the length of the Newell vector summed over all its
+    loops, so inner loops (holes, oriented the other way) are subtracted.
+    */
+    public static faceArea(face: _PolyhedralBoundedSolidFace): number {
+        let nx = 0.0;
+        let ny = 0.0;
+        let nz = 0.0;
+        let i: number;
+
+        for (i = 0; i < face.boundariesList.size(); i++) {
+            const loop = face.boundariesList.get(i);
+            let start: _PolyhedralBoundedSolidHalfEdge;
+            let he: _PolyhedralBoundedSolidHalfEdge;
+            if (loop === null || loop.boundaryStartHalfEdge === null) {
+                continue;
+            }
+            start = loop.boundaryStartHalfEdge;
+            he = start;
+            do {
+                const next = he.next();
+                if (next === null) {
+                    break;
+                }
+                const p = he.startingVertex.position;
+                const q = next.startingVertex.position;
+                nx += (p.y() - q.y()) * (p.z() + q.z());
+                ny += (p.z() - q.z()) * (p.x() + q.x());
+                nz += (p.x() - q.x()) * (p.y() + q.y());
+                he = next;
+            } while (he !== start);
+        }
+        return 0.5 * Math.sqrt(nx * nx + ny * ny + nz * nz);
+    }
+
+    /**
+    Rejects collapsed laminae. A lamina is a shell made of exactly two faces
+    (which then share all their edges, back to back); it has zero volume and
+    is a valid result. It is collapsed when its area is below
+    collapsedFaceAreaThreshold. Small faces of shells that enclose volume
+    (slivers of a tessellation) are not judged by this rule.
+    */
+    public static validateNoCollapsedLaminae(
+        solid: PolyhedralBoundedSolid,
+        numericContext: ToleranceContext,
+        msg: StringBuilder,
+    ): boolean {
+        const threshold = PolyhedralBoundedSolidGeometricValidator.collapsedFaceAreaThreshold(numericContext);
+        const shellOf = new Map<_PolyhedralBoundedSolidFace, number>();
+        const shells: _PolyhedralBoundedSolidFace[][] = [];
+        let ok = true;
+        let i: number;
+
+        for (i = 0; i < solid.getPolygonsList().size(); i++) {
+            const seed = solid.getPolygonsList().get(i)!;
+            if (shellOf.has(seed)) {
+                continue;
+            }
+            const shell: _PolyhedralBoundedSolidFace[] = [];
+            const pending: _PolyhedralBoundedSolidFace[] = [];
+            let pendingHead = 0;
+            shellOf.set(seed, shells.length);
+            pending.push(seed);
+            while (pendingHead < pending.length) {
+                const face = pending[pendingHead++]!;
+                shell.push(face);
+                for (let j = 0; j < face.boundariesList.size(); j++) {
+                    const loop = face.boundariesList.get(j)!;
+                    for (let k = 0; k < loop.halfEdgesList.size(); k++) {
+                        const he = loop.halfEdgesList.get(k)!;
+                        const mate = he.parentEdge === null ? null : he.mirrorHalfEdge();
+                        if (mate === null || mate.parentLoop === null) {
+                            continue;
+                        }
+                        const other = mate.parentLoop.parentFace;
+                        if (other !== null && !shellOf.has(other)) {
+                            shellOf.set(other, shells.length);
+                            pending.push(other);
+                        }
+                    }
+                }
+            }
+            shells.push(shell);
+        }
+
+        for (i = 0; i < shells.length; i++) {
+            const shell = shells[i]!;
+            if (shell.length !== 2) {
+                continue;
+            }
+            const area = PolyhedralBoundedSolidGeometricValidator.faceArea(shell[0]!);
+            if (area < threshold) {
+                msg.append("  - Lamina of faces [")
+                    .append(String(shell[0]!.id))
+                    .append("] and [")
+                    .append(String(shell[1]!.id))
+                    .append("] is collapsed: area ")
+                    .append(Double.toString(area))
+                    .append(" < ")
+                    .append(Double.toString(threshold))
+                    .append(".\n");
+                ok = false;
+            }
+        }
+        return ok;
     }
 
     /**

@@ -130,8 +130,8 @@ export { ArrayListOfBytes } from "./vsdk/toolkit/common/dataStructures/ArrayList
 export { ArrayListOfDoubles } from "./vsdk/toolkit/common/dataStructures/ArrayListOfDoubles.js";
 export { ArrayListOfInts } from "./vsdk/toolkit/common/dataStructures/ArrayListOfInts.js";
 export { ArrayListOfLongs } from "./vsdk/toolkit/common/dataStructures/ArrayListOfLongs.js";
-export { _CircularDoubleLinkedListNode } from "./vsdk/toolkit/common/dataStructures/_CircularDoubleLinkedListNode.js";
-export { CircularDoubleLinkedList } from "./vsdk/toolkit/common/dataStructures/CircularDoubleLinkedList.js";
+export type { ArrayLinkable } from "./vsdk/toolkit/common/dataStructures/ArrayLinkable.js";
+export { CircularArrayList } from "./vsdk/toolkit/common/dataStructures/CircularArrayList.js";
 export { _NAryTreeNode } from "./vsdk/toolkit/common/dataStructures/_NAryTreeNode.js";
 export { _NAryTreeIntermediateNode } from "./vsdk/toolkit/common/dataStructures/_NAryTreeIntermediateNode.js";
 export { _NAryTreeLeafNode } from "./vsdk/toolkit/common/dataStructures/_NAryTreeLeafNode.js";
@@ -542,7 +542,10 @@ export { InputGizmoValueChangeRules } from "./vsdk/toolkit/gui/gizmo/InputGizmoV
 export { ReferenceFrameGizmo } from "./vsdk/toolkit/gui/gizmo/ReferenceFrameGizmo.js";
 export { TranslateGizmoLineSegment } from "./vsdk/toolkit/gui/gizmo/TranslateGizmoLineSegment.js";
 export { TranslateGizmo } from "./vsdk/toolkit/gui/gizmo/TranslateGizmo.js";
-export { TranslateGizmoInteractionTechnique, CursorWarp } from "./vsdk/toolkit/gui/gizmo/TranslateGizmoInteractionTechnique.js";
+export {
+    TranslateGizmoInteractionTechnique,
+    CursorWarp,
+} from "./vsdk/toolkit/gui/gizmo/TranslateGizmoInteractionTechnique.js";
 export { RotateGizmo } from "./vsdk/toolkit/gui/gizmo/RotateGizmo.js";
 export { RotateGizmoInteractionTechnique } from "./vsdk/toolkit/gui/gizmo/RotateGizmoInteractionTechnique.js";
 export { ScaleGizmo, ContourSegment } from "./vsdk/toolkit/gui/gizmo/ScaleGizmo.js";
@@ -564,7 +567,10 @@ export { WriterGts } from "./vsdk/toolkit/io/geometry/WriterGts.js";
 export { WriterVtk } from "./vsdk/toolkit/io/geometry/WriterVtk.js";
 export { EnvironmentPersistence } from "./vsdk/toolkit/io/geometry/EnvironmentPersistence.js";
 export { ObjectGraphTransfer, type TransferableClass } from "./java/concurrent/ObjectGraphTransfer.js";
-export { decodeSimpleSceneSnapshot, encodeSimpleSceneSnapshot } from "./vsdk/toolkit/render/raytracing/SimpleSceneSnapshotTransfer.js";
+export {
+    decodeSimpleSceneSnapshot,
+    encodeSimpleSceneSnapshot,
+} from "./vsdk/toolkit/render/raytracing/SimpleSceneSnapshotTransfer.js";
 
 export { Dithering, DitheringMethod, DitheringPalette } from "./vsdk/toolkit/render/dithering/Dithering.js";
 

@@ -10,7 +10,6 @@
 
 // Java classes
 import { Double } from "../../../../../../../java/lang/Double.js";
-import { IllegalStateException } from "../../../../../../../java/lang/IllegalStateException.js";
 import { StringBuilder } from "../../../../../../../java/lang/StringBuilder.js";
 import { ArrayList } from "../../../../../../../java/util/ArrayList.js";
 import { HashSet } from "../../../../../../../java/util/HashSet.js";
@@ -21,24 +20,24 @@ import { Logger } from "../../../../../common/logging/Logger.js";
 import type { Vector3Dd } from "../../../../../common/linealAlgebra/Vector3Dd.js";
 import { Vector3Dd as Vector3DdClass } from "../../../../../common/linealAlgebra/Vector3Dd.js";
 import { PolyhedralBoundedSolid } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
+import { PolyhedralBoundedSolidStructuralCopy } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidStructuralCopy.js";
+import { PolyhedralBoundedSolidGeometricValidator } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import { PolyhedralBoundedSolidTopologyEditing } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.js";
 import { PolyhedralBoundedSolidTopologySummary } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologySummary.js";
 import { PolyhedralBoundedSolidValidationEngine } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
-import { _PolyhedralBoundedSolidEdge } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.js";
-import { _PolyhedralBoundedSolidFace } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
-import { _PolyhedralBoundedSolidHalfEdge } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
-import { _PolyhedralBoundedSolidLoop } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.js";
-import { _PolyhedralBoundedSolidVertex } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.js";
+import type { _PolyhedralBoundedSolidEdge } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.js";
+import type { _PolyhedralBoundedSolidFace } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
+import type { _PolyhedralBoundedSolidHalfEdge } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
+import type { _PolyhedralBoundedSolidLoop } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { _PolyhedralBoundedSolidOperator } from "../_PolyhedralBoundedSolidOperator.js";
-import { _PolyhedralBoundedSolidAxisAlignedCellFallback } from "../fallbacks/_PolyhedralBoundedSolidAxisAlignedCellFallback.js";
-import { _PolyhedralBoundedSolidFallbackGeometry } from "../fallbacks/_PolyhedralBoundedSolidFallbackGeometry.js";
+import { InvalidOperandException } from "../InvalidOperandException.js";
+import { InvalidSolidResultException } from "../InvalidSolidResultException.js";
+import { NonManifoldBooleanResultException } from "../NonManifoldBooleanResultException.js";
+import { SolidOperationFailedException } from "../SolidOperationFailedException.js";
 import { _PolyhedralBoundedSolidIdNamespace } from "../fallbacks/_PolyhedralBoundedSolidIdNamespace.js";
-import { _PolyhedralBoundedSolidOffsetCylinderFallback } from "../fallbacks/_PolyhedralBoundedSolidOffsetCylinderFallback.js";
-import { _PolyhedralBoundedSolidOrthogonalProfileFallback } from "../construction/_PolyhedralBoundedSolidOrthogonalProfileFallback.js";
-import { _PolyhedralBoundedSolidProfileDifferenceFallback } from "../construction/_PolyhedralBoundedSolidProfileDifferenceFallback.js";
-import type { _PolyhedralBoundedSolidProfileDifferenceFallbackSpec } from "../construction/_PolyhedralBoundedSolidProfileDifferenceFallbackSpec.js";
+import { _PolyhedralBoundedSolidSetOperandAligner } from "./_PolyhedralBoundedSolidSetOperandAligner.js";
 import { _SetOperationContext } from "./_SetOperationContext.js";
 import { _SetOperationTrace } from "./_SetOperationTrace.js";
 import { _PolyhedralBoundedSolidSetClassifier } from "./classification/_PolyhedralBoundedSolidSetClassifier.js";
@@ -52,11 +51,6 @@ import { _PolyhedralBoundedSolidSetFinisher } from "./topology/_PolyhedralBounde
 import { _PolyhedralBoundedSolidSetNullEdgesConnector } from "./topology/_PolyhedralBoundedSolidSetNullEdgesConnector.js";
 import { _PolyhedralBoundedSolidSetOperatorNullEdge } from "./topology/_PolyhedralBoundedSolidSetOperatorNullEdge.js";
 
-const boundsMatch = (a: readonly number[] | Float64Array | null, b: readonly number[] | Float64Array | null): boolean =>
-    _PolyhedralBoundedSolidFallbackGeometry.boundsMatch(
-        a === null ? null : Array.from(a),
-        b === null ? null : Array.from(b),
-    );
 const isPipelineSummaryTraceEnabled = (): boolean => _SetOperationTrace.isPipelineSummaryTraceEnabled();
 const tracePipelineSummary = (message: string): void => _SetOperationTrace.tracePipelineSummary(message);
 
@@ -735,6 +729,7 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         );
         ctx.sonfa = result.sonfa();
         ctx.sonfb = result.sonfb();
+        ctx.connected = result;
     }
 
     /**
@@ -756,7 +751,20 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             _PolyhedralBoundedSolidSetOperator.debugFlags,
             ctx.sonfa!,
             ctx.sonfb!,
+            ctx.connected,
         );
+    }
+
+    private static weldCoincidentVerticesOfOperand(solid: PolyhedralBoundedSolid, name: string): void {
+        const context = PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+
+        if (
+            PolyhedralBoundedSolidGeometricValidator.validateNoCoincidentVertices(solid, context, new StringBuilder())
+        ) {
+            return;
+        }
+        const welded = PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices(solid, context);
+        tracePipelineSummary("setOp operand " + name + " had coincident vertices; welded " + welded + " pair(s)");
     }
 
     private static isTouchingOnlyPreflightCase(
@@ -806,21 +814,29 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         op: number,
         cache?: _PolyhedralBoundedSolidSetNonIntersectingClassifier._PreflightCache,
     ): PolyhedralBoundedSolid {
-        if (cache === undefined) {
+        try {
+            if (cache === undefined) {
+                return _PolyhedralBoundedSolidSetNonIntersectingClassifier.runSetOpNoIntersectionCase(
+                    inSolidA,
+                    inSolidB,
+                    outRes,
+                    op,
+                );
+            }
             return _PolyhedralBoundedSolidSetNonIntersectingClassifier.runSetOpNoIntersectionCase(
                 inSolidA,
                 inSolidB,
                 outRes,
                 op,
+                cache,
             );
+        } catch (e) {
+            if (e instanceof NonManifoldBooleanResultException) {
+                _PolyhedralBoundedSolidSetOperator.lastResultPath =
+                    _PolyhedralBoundedSolidSetOperator.REJECTED_NON_MANIFOLD_PATH;
+            }
+            throw e;
         }
-        return _PolyhedralBoundedSolidSetNonIntersectingClassifier.runSetOpNoIntersectionCase(
-            inSolidA,
-            inSolidB,
-            outRes,
-            op,
-            cache,
-        );
     }
 
     private static debugSolid(solid: PolyhedralBoundedSolid, pattern: string): void {
@@ -852,6 +868,231 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
     }
 
+    /**
+    Name of the path that produced the last setOp result on the calling
+    thread: "normal-pipeline" for the [MANT1988] Ch. 15 pipeline, or the name
+    of the preflight that answered instead. Recorded before the
+    strict postcondition runs, so it is also available after a strict
+    validation failure. Fable5.2Analysis.md Stage A step 4.
+    */
+    /**
+    Result path recorded when the operation is rejected with
+    `NonManifoldBooleanResultException`.
+    */
+    public static readonly REJECTED_NON_MANIFOLD_PATH = "rejected-non-manifold-union";
+
+    /**
+    Java keeps this in a `ThreadLocal`; this runtime is single-threaded, so a
+    static field holds the same per-caller value.
+    */
+    private static lastResultPath: string | null = null;
+
+    public static getLastResultPath(): string | null {
+        return _PolyhedralBoundedSolidSetOperator.lastResultPath;
+    }
+
+    /**
+    Violations of the post-connect invariant found on the last setOp of the
+    calling thread that reached connect (empty list: none; null: connect was
+    not reached). See `checkConnectInvariant`. Java keeps this in a
+    `ThreadLocal`; see `lastResultPath`.
+    */
+    private static lastConnectInvariantViolations: ArrayList<string> | null = null;
+
+    /** @internal Java package-private. */
+    public static getLastConnectInvariantViolations(): ArrayList<string> | null {
+        return _PolyhedralBoundedSolidSetOperator.lastConnectInvariantViolations;
+    }
+
+    /**
+    Post-connect invariant ([MANT1988] Sec. 14.7 and 15.7; Fable5.2Analysis.md
+    Stage C step 1), checked when connect left no loose ends:
+    - every null face recorded for finish (sonfa, sonfb) has exactly two
+      loops, the two copies of its section curve;
+    - no other face carries two loops that coincide vertex by vertex. A
+      section ring strictly inside a face must leave that face with the
+      ring as a hole and the disk as a separate face; two coincident
+      loops in one face mean the hole was moved into the disk (B-01).
+    */
+    private static checkConnectInvariant(
+        inSolidA: PolyhedralBoundedSolid,
+        inSolidB: PolyhedralBoundedSolid,
+        ctx: _SetOperationContext,
+    ): ArrayList<string> {
+        const violations = new ArrayList<string>();
+
+        if (_PolyhedralBoundedSolidSetOperator.hasIncompleteConnectState()) {
+            return violations;
+        }
+        _PolyhedralBoundedSolidSetOperator.collectNullFaceViolations("A", ctx.sonfa, violations);
+        _PolyhedralBoundedSolidSetOperator.collectNullFaceViolations("B", ctx.sonfb, violations);
+        _PolyhedralBoundedSolidSetOperator.collectCoincidentLoopViolations("A", inSolidA, ctx.sonfa, violations);
+        _PolyhedralBoundedSolidSetOperator.collectCoincidentLoopViolations("B", inSolidB, ctx.sonfb, violations);
+        return violations;
+    }
+
+    private static collectNullFaceViolations(
+        label: string,
+        nullFaces: ArrayList<_PolyhedralBoundedSolidFace> | null,
+        violations: ArrayList<string>,
+    ): void {
+        let i: number;
+
+        if (nullFaces === null) {
+            return;
+        }
+        for (i = 0; i < nullFaces.size(); i++) {
+            const f = nullFaces.get(i);
+            // A null face collapsed to a single point (only zero-length
+            // strut rings, left where the section curve runs straight
+            // through a vertex of one face) bounds no section and is
+            // discarded by finish; it is not a section-curve face.
+            if (f.boundariesList.size() !== 2 && !_PolyhedralBoundedSolidSetOperator.isPointLikeFace(f)) {
+                violations.add(
+                    label + ": null face " + f.id + " has " + f.boundariesList.size() + " loops instead of 2",
+                );
+            }
+        }
+    }
+
+    private static isPointLikeFace(f: _PolyhedralBoundedSolidFace): boolean {
+        let first: Vector3Dd | null = null;
+        let i: number;
+
+        for (i = 0; i < f.boundariesList.size(); i++) {
+            const start = f.boundariesList.get(i)!.boundaryStartHalfEdge;
+            let he = start;
+            if (start === null) {
+                continue;
+            }
+            do {
+                const p = he!.startingVertex.position;
+                if (first === null) {
+                    first = p;
+                } else if (
+                    Vector3DdClass.distance(first, p) > _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon()
+                ) {
+                    return false;
+                }
+                he = he!.next();
+            } while (he !== start);
+        }
+        return true;
+    }
+
+    private static collectCoincidentLoopViolations(
+        label: string,
+        solid: PolyhedralBoundedSolid,
+        nullFaces: ArrayList<_PolyhedralBoundedSolidFace> | null,
+        violations: ArrayList<string>,
+    ): void {
+        let i: number;
+        let j: number;
+        let k: number;
+
+        for (i = 0; i < solid.getPolygonsList().size(); i++) {
+            const f = solid.getPolygonsList().get(i)!;
+            if (f.boundariesList.size() < 2 || (nullFaces !== null && nullFaces.contains(f))) {
+                continue;
+            }
+            for (j = 0; j < f.boundariesList.size(); j++) {
+                for (k = j + 1; k < f.boundariesList.size(); k++) {
+                    if (
+                        _PolyhedralBoundedSolidSetOperator.loopsCoincide(
+                            f.boundariesList.get(j)!,
+                            f.boundariesList.get(k)!,
+                        )
+                    ) {
+                        violations.add(label + ": face " + f.id + " has coincident loops " + j + " and " + k);
+                    }
+                }
+            }
+        }
+    }
+
+    private static loopsCoincide(a: _PolyhedralBoundedSolidLoop, b: _PolyhedralBoundedSolidLoop): boolean {
+        let i: number;
+        let j: number;
+
+        if (a.halfEdgesList.size() !== b.halfEdgesList.size() || a.halfEdgesList.size() < 3) {
+            return false;
+        }
+        for (i = 0; i < a.halfEdgesList.size(); i++) {
+            const p = a.halfEdgesList.get(i)!.startingVertex.position;
+            let found = false;
+            for (j = 0; j < b.halfEdgesList.size() && !found; j++) {
+                found = PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                    p,
+                    b.halfEdgesList.get(j)!.startingVertex.position,
+                    _PolyhedralBoundedSolidOperator.numericContext,
+                );
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+    Detects result pieces that touch only along an edge or at a vertex: two
+    distinct vertices at the same point, or two distinct edges joining the
+    same two points. A manifold boundary has neither. Returns a short
+    description of the first contact found, or null.
+    @internal Java package-private.
+    */
+    public static findNonManifoldContact(result: PolyhedralBoundedSolid): string | null {
+        const tolerance = _PolyhedralBoundedSolidOperator.numericContext.bigEpsilon();
+        const nv = result.getVerticesList().size();
+        const ne = result.getEdgesList().size();
+        let i: number;
+        let j: number;
+
+        for (i = 0; i < nv; i++) {
+            const p = result.getVerticesList().get(i)!.position;
+            for (j = i + 1; j < nv; j++) {
+                if (Vector3DdClass.distance(p, result.getVerticesList().get(j)!.position) <= tolerance) {
+                    return (
+                        "vertices " +
+                        result.getVerticesList().get(i)!.id +
+                        " and " +
+                        result.getVerticesList().get(j)!.id +
+                        " coincide at " +
+                        p
+                    );
+                }
+            }
+        }
+        for (i = 0; i < ne; i++) {
+            const e = result.getEdgesList().get(i)!;
+            for (j = i + 1; j < ne; j++) {
+                const f = result.getEdgesList().get(j)!;
+                if (_PolyhedralBoundedSolidSetOperator.sameEndpoints(e, f)) {
+                    return (
+                        "edges " +
+                        e.id +
+                        " and " +
+                        f.id +
+                        " join the same points " +
+                        e.rightHalf!.startingVertex.position +
+                        " - " +
+                        e.leftHalf!.startingVertex.position
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
+    private static sameEndpoints(e: _PolyhedralBoundedSolidEdge, f: _PolyhedralBoundedSolidEdge): boolean {
+        const e1 = e.rightHalf!.startingVertex;
+        const e2 = e.leftHalf!.startingVertex;
+        const f1 = f.rightHalf!.startingVertex;
+        const f2 = f.leftHalf!.startingVertex;
+
+        return (e1 === f1 && e2 === f2) || (e1 === f2 && e2 === f1);
+    }
+
     private static completeSetOpResult(
         result: PolyhedralBoundedSolid | null,
         operandADiagnostics: string,
@@ -861,8 +1102,9 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         maximizeResultFaces: boolean,
         doStrictValidation: boolean,
     ): PolyhedralBoundedSolid {
+        _PolyhedralBoundedSolidSetOperator.lastResultPath = resultPath;
         if (result === null) {
-            throw new IllegalStateException(
+            throw new SolidOperationFailedException(
                 "Boolean operation returned null: op=" +
                     _PolyhedralBoundedSolidSetOperator.operationName(op) +
                     ", path=" +
@@ -872,11 +1114,24 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         if (result.getPolygonsList().size() > 0) {
             _PolyhedralBoundedSolidSetOperator.postProcessResult(result, maximizeResultFaces);
         }
+        const contact = _PolyhedralBoundedSolidSetOperator.findNonManifoldContact(result);
+        if (contact !== null) {
+            // Same policy as B-04: pieces of the result that touch only
+            // along an edge or at a vertex form a non-manifold solid.
+            throw new NonManifoldBooleanResultException(
+                _PolyhedralBoundedSolidSetOperator.operationName(op) +
+                    " result is non-manifold (" +
+                    contact +
+                    "); rejected (path=" +
+                    resultPath +
+                    ")",
+            );
+        }
         if (doStrictValidation) {
             const strictMessage = new StringBuilder();
             if (!PolyhedralBoundedSolidValidationEngine.validateStrict(result, strictMessage)) {
                 const topology = PolyhedralBoundedSolidTopologySummary.from(result);
-                throw new IllegalStateException(
+                throw new InvalidSolidResultException(
                     "Strict boolean result validation failed: op=" +
                         _PolyhedralBoundedSolidSetOperator.operationName(op) +
                         ", path=" +
@@ -932,172 +1187,20 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
     }
 
     /**
-    Runtime boundary: Java deep-clones the operand through object
-    serialization (`ObjectOutputStream`/`ObjectInputStream`). There is no
-    serialization runtime here, so the half-edge graph is copied node by node
-    through an identity map, preserving ids, positions and the exact ordering
-    of every list, which is what the serialized round trip produced.
+    Independent copy of `solid` for the recovery paths. It used to be a
+    Java serialization round trip, which recursed over the linked structure
+    and could overflow the stack on large solids; it is now the linear
+    structural copy of [MANT1988] Sec. 15.8 (`scopy`, Stage F). The label
+    is kept for the callers' diagnostics.
     */
-    private static deepCloneSolid(
-        solid: PolyhedralBoundedSolid | null,
-        solidLabel: string,
-    ): PolyhedralBoundedSolid | null {
-        if (solid === null) {
-            return null;
-        }
-
-        try {
-            const clone = new PolyhedralBoundedSolid();
-            const vertices = new Map<_PolyhedralBoundedSolidVertex, _PolyhedralBoundedSolidVertex>();
-            const halfEdges = new Map<_PolyhedralBoundedSolidHalfEdge, _PolyhedralBoundedSolidHalfEdge>();
-            let i: number;
-            let j: number;
-            let k: number;
-
-            for (i = 0; i < solid.getVerticesList().size(); i++) {
-                const source = solid.getVerticesList().get(i)!;
-                vertices.set(
-                    source,
-                    new _PolyhedralBoundedSolidVertex(clone, new Vector3DdClass(source.position), source.id),
-                );
-            }
-
-            for (i = 0; i < solid.getPolygonsList().size(); i++) {
-                const sourceFace = solid.getPolygonsList().get(i)!;
-                const cloneFace = new _PolyhedralBoundedSolidFace(clone, sourceFace.id);
-                for (j = 0; j < sourceFace.boundariesList.size(); j++) {
-                    const sourceLoop = sourceFace.boundariesList.get(j)!;
-                    const cloneLoop = new _PolyhedralBoundedSolidLoop(cloneFace);
-                    for (k = 0; k < sourceLoop.halfEdgesList.size(); k++) {
-                        const sourceHalfEdge = sourceLoop.halfEdgesList.get(k)!;
-                        const cloneHalfEdge = new _PolyhedralBoundedSolidHalfEdge(
-                            vertices.get(sourceHalfEdge.startingVertex)!,
-                            cloneLoop,
-                            clone,
-                        );
-                        cloneLoop.halfEdgesList.add(cloneHalfEdge);
-                        halfEdges.set(sourceHalfEdge, cloneHalfEdge);
-                    }
-                    if (sourceLoop.boundaryStartHalfEdge !== null) {
-                        cloneLoop.boundaryStartHalfEdge = halfEdges.get(sourceLoop.boundaryStartHalfEdge)!;
-                    }
-                }
-            }
-
-            for (i = 0; i < solid.getEdgesList().size(); i++) {
-                const sourceEdge = solid.getEdgesList().get(i)!;
-                const cloneEdge = new _PolyhedralBoundedSolidEdge(clone);
-                cloneEdge.id = sourceEdge.id;
-                if (sourceEdge.rightHalf !== null) {
-                    cloneEdge.rightHalf = halfEdges.get(sourceEdge.rightHalf)!;
-                    cloneEdge.rightHalf.parentEdge = cloneEdge;
-                }
-                if (sourceEdge.leftHalf !== null) {
-                    cloneEdge.leftHalf = halfEdges.get(sourceEdge.leftHalf)!;
-                    cloneEdge.leftHalf.parentEdge = cloneEdge;
-                }
-            }
-
-            for (i = 0; i < solid.getVerticesList().size(); i++) {
-                const source = solid.getVerticesList().get(i)!;
-                if (source.emanatingHalfEdge !== null) {
-                    vertices.get(source)!.emanatingHalfEdge = halfEdges.get(source.emanatingHalfEdge)!;
-                }
-            }
-
-            clone.setMaxVertexId(solid.getMaxVertexId());
-            clone.setMaxFaceId(solid.getMaxFaceId());
-
-            return clone;
-        } catch (e) {
-            Logger.reportMessage(
-                _PolyhedralBoundedSolidSetOperator,
-                VSDK.WARNING,
-                "deepCloneSolid",
-                "Unable to clone " +
-                    solidLabel +
-                    " for subtract connect recovery: " +
-                    (e as Error).constructor.name +
-                    ": " +
-                    (e as Error).message,
-            );
-            return null;
-        }
-    }
-
-    private static hasDegenerateFace(solid: PolyhedralBoundedSolid | null): boolean {
-        let i: number;
-
-        if (solid === null) {
-            return true;
-        }
-        for (i = 0; i < solid.getPolygonsList().size(); i++) {
-            const face = solid.getPolygonsList().get(i)!;
-            if (
-                face.boundariesList.size() < 1 ||
-                face.boundariesList.get(0)!.halfEdgesList.size() < 3 ||
-                face.getContainingPlane() === null
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static shouldUseAxisAlignedCellBooleanFallback(
-        fallback: PolyhedralBoundedSolid | null,
-        result: PolyhedralBoundedSolid | null,
-    ): boolean {
-        if (fallback === null || fallback.getPolygonsList().size() <= 0) {
-            return false;
-        }
-        if (result === null || result.getPolygonsList().size() <= 0) {
-            return true;
-        }
-        if (_PolyhedralBoundedSolidSetOperator.hasDegenerateFace(result)) {
-            return true;
-        }
-        return false;
+    private static deepCloneSolid(solid: PolyhedralBoundedSolid, _solidLabel: string): PolyhedralBoundedSolid {
+        return PolyhedralBoundedSolidStructuralCopy.copy(solid);
     }
 
     private static hasIncompleteConnectState(): boolean {
         return (
             _PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseACount() > 0 ||
             _PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseBCount() > 0
-        );
-    }
-
-    public static isStructurallyUsableSetOpResult(result: PolyhedralBoundedSolid | null): boolean {
-        if (
-            result === null ||
-            result.getPolygonsList().size() <= 0 ||
-            _PolyhedralBoundedSolidSetOperator.hasDegenerateFace(result)
-        ) {
-            return false;
-        }
-        return PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
-    }
-
-    private static hasBasicSetOpShapeData(result: PolyhedralBoundedSolid | null): boolean {
-        return (
-            result !== null &&
-            result.getPolygonsList().size() > 0 &&
-            result.getEdgesList().size() > 0 &&
-            result.getVerticesList().size() > 0
-        );
-    }
-
-    private static hasSameShapeData(
-        first: PolyhedralBoundedSolid | null,
-        second: PolyhedralBoundedSolid | null,
-    ): boolean {
-        return (
-            _PolyhedralBoundedSolidSetOperator.hasBasicSetOpShapeData(first) &&
-            _PolyhedralBoundedSolidSetOperator.hasBasicSetOpShapeData(second) &&
-            first!.getPolygonsList().size() === second!.getPolygonsList().size() &&
-            first!.getEdgesList().size() === second!.getEdgesList().size() &&
-            first!.getVerticesList().size() === second!.getVerticesList().size() &&
-            boundsMatch(first!.getMinMax(), second!.getMinMax())
         );
     }
 
@@ -1119,6 +1222,8 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         maximizeResultFaces = true,
         doStrictValidation = true,
     ): PolyhedralBoundedSolid {
+        _PolyhedralBoundedSolidSetOperator.lastResultPath = null;
+        _PolyhedralBoundedSolidSetOperator.lastConnectInvariantViolations = null;
         _PolyhedralBoundedSolidOperator.setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB),
         );
@@ -1156,12 +1261,6 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
 
         //-----------------------------------------------------------------
         let res: PolyhedralBoundedSolid = new PolyhedralBoundedSolid();
-        let profileDifferenceFallback: _PolyhedralBoundedSolidProfileDifferenceFallbackSpec | null;
-        let offsetCylinderDifferenceFallbackSpec: _PolyhedralBoundedSolidOffsetCylinderFallback.OffsetCylinderDifferenceFallbackSpec | null;
-        let offsetCylinderDifferenceFallback: PolyhedralBoundedSolid | null;
-        let axisAlignedCellBooleanFallback: PolyhedralBoundedSolid | null;
-        let orthogonalProfileBooleanFallback: PolyhedralBoundedSolid | null;
-        let fallbackProvidedResult: boolean;
         let resultPath: string;
         let operandADiagnostics: string;
         let operandBDiagnostics: string;
@@ -1169,8 +1268,6 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         const ctx = new _SetOperationContext();
         ctx.sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         ctx.soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
-        offsetCylinderDifferenceFallback = null;
-        fallbackProvidedResult = false;
         resultPath = "normal-pipeline";
         operandADiagnostics = _PolyhedralBoundedSolidSetOperator.cardinalitiesAndBounds(inSolidA);
         operandBDiagnostics = _PolyhedralBoundedSolidSetOperator.cardinalitiesAndBounds(inSolidB);
@@ -1187,10 +1284,29 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidB);
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
+        // Operand preparation, on the copies this operation owns: edges
+        // shorter than the tolerance are collapsed, so that generate does
+        // not meet two vertices at one point. Validation, below, only
+        // reads (plan-stage11 Phase C).
+        _PolyhedralBoundedSolidSetOperator.weldCoincidentVerticesOfOperand(inSolidA, "A");
+        _PolyhedralBoundedSolidSetOperator.weldCoincidentVerticesOfOperand(inSolidB, "B");
+        // Faces of B inside the tolerance band of a parallel face of A are
+        // put on its plane, so that every stage below takes the same
+        // decision about them (see the aligner).
+        const alignment = _PolyhedralBoundedSolidSetOperandAligner.align(inSolidA, inSolidB);
+        if (alignment !== null) {
+            tracePipelineSummary("setOp operand B moved by " + alignment + " to align faces inside the tolerance band");
+        }
         const booleanInputMsg = new StringBuilder();
-        if (!PolyhedralBoundedSolidValidationEngine.validateBooleanInputs(inSolidA, inSolidB, booleanInputMsg)) {
-            Logger.reportMessage(null, VSDK.WARNING, "setOp", "Boolean input validation failed:\n" + booleanInputMsg);
-        } else if (booleanInputMsg.length() > 0) {
+        const validInputs = PolyhedralBoundedSolidValidationEngine.validateBooleanInputs(
+            inSolidA,
+            inSolidB,
+            booleanInputMsg,
+        );
+        if (!validInputs) {
+            throw new InvalidOperandException("Boolean operands are not valid solids:\n" + booleanInputMsg);
+        }
+        if (booleanInputMsg.length() > 0) {
             Logger.reportMessage(null, VSDK.DEBUG, "setOp", "Boolean input pre-processing:\n" + booleanInputMsg);
         }
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
@@ -1201,27 +1317,6 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB),
         );
         _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(_PolyhedralBoundedSolidOperator.numericContext);
-        profileDifferenceFallback =
-            _PolyhedralBoundedSolidProfileDifferenceFallback.prepareProfileDifferenceFallbackSpec(
-                inSolidA,
-                inSolidB,
-                op,
-            );
-        offsetCylinderDifferenceFallbackSpec =
-            _PolyhedralBoundedSolidOffsetCylinderFallback.prepareOffsetCylinderDifferenceFallbackSpec(
-                inSolidA,
-                inSolidB,
-                op,
-            );
-        axisAlignedCellBooleanFallback =
-            _PolyhedralBoundedSolidAxisAlignedCellFallback.buildAxisAlignedCellBooleanFallback(inSolidA, inSolidB, op);
-        orthogonalProfileBooleanFallback =
-            _PolyhedralBoundedSolidOrthogonalProfileFallback.buildOrthogonalProfileBooleanFallback(
-                inSolidA,
-                inSolidB,
-                op,
-            );
-
         if (withDebug) {
             _PolyhedralBoundedSolidSetOperator.debugSolid(inSolidA, "outputA_stage01");
             _PolyhedralBoundedSolidSetOperator.debugSolid(inSolidB, "outputB_stage01");
@@ -1236,28 +1331,17 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             inSolidB,
         );
 
-        const coplanarAreaContactResult =
-            _PolyhedralBoundedSolidSetNonIntersectingClassifier.runPartialCoplanarFaceAreaCase(
-                inSolidA,
-                inSolidB,
-                res,
-                op,
-                preflightCache,
-            );
-        if (coplanarAreaContactResult !== null) {
-            res = coplanarAreaContactResult;
-            return _PolyhedralBoundedSolidSetOperator.completeSetOpResult(
-                res,
-                operandADiagnostics,
-                operandBDiagnostics,
-                op,
-                "partial-coplanar-area-preflight",
-                maximizeResultFaces,
-                doStrictValidation,
-            );
-        }
-
-        if (_PolyhedralBoundedSolidSetOperator.isTouchingOnlyPreflightCase(inSolidA, inSolidB, preflightCache)) {
+        // A union of solids that touch along a face is one solid, glued
+        // along the AonB- faces ([MANT1988] Eq. 15.2): leave it to the
+        // pipeline. Edge or vertex contact would leave two shells sharing
+        // a boundary point: rejected as non-manifold (B-04).
+        const unionGluesAlongAFace =
+            op === _PolyhedralBoundedSolidOperator.UNION &&
+            _PolyhedralBoundedSolidSetNonIntersectingClassifier.hasOppositeCoplanarFaceAreaContact(inSolidA, inSolidB);
+        if (
+            !unionGluesAlongAFace &&
+            _PolyhedralBoundedSolidSetOperator.isTouchingOnlyPreflightCase(inSolidA, inSolidB, preflightCache)
+        ) {
             res = _PolyhedralBoundedSolidSetOperator.setOpNoIntersectionCase(
                 inSolidA,
                 inSolidB,
@@ -1293,8 +1377,10 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         ) {
             tracePipelineSummary("setOp identity-preflight A≡B op=" + op);
             if (op === _PolyhedralBoundedSolidOperator.UNION || op === _PolyhedralBoundedSolidOperator.INTERSECTION) {
-                const cloned = _PolyhedralBoundedSolidSetOperator.deepCloneSolid(inSolidA, "identity-preflight clone");
-                res = cloned === null ? new PolyhedralBoundedSolid() : cloned;
+                res = _PolyhedralBoundedSolidSetOperator.deepCloneSolid(inSolidA, "identity-preflight clone");
+                if (res === null) {
+                    res = new PolyhedralBoundedSolid();
+                }
             }
             // SUBTRACT case: A − A = ∅; res remains the empty PolyhedralBoundedSolid
             // already initialised at function entry.
@@ -1315,7 +1401,17 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         // second step of absorption identities A ∪ (A ∩ B) where
         // A ∩ B ⊂ A), the regular pipeline produces ∅. Dispatch to a
         // dedicated containment table per Mäntylä Ch.15.1.
-        if (_PolyhedralBoundedSolidSetOperator.isContainmentOnlyPreflightCase(inSolidA, inSolidB, preflightCache)) {
+        // A solid inside the other and touching its boundary is not a
+        // plain containment for the difference: A - B is then A with a
+        // pocket open to the outside, not A with a cavity, and only the
+        // pipeline builds it.
+        if (
+            _PolyhedralBoundedSolidSetOperator.isContainmentOnlyPreflightCase(inSolidA, inSolidB, preflightCache) &&
+            !(
+                op === _PolyhedralBoundedSolidOperator.SUBTRACT &&
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.touchesBoundaryFromInside(inSolidB, inSolidA)
+            )
+        ) {
             res = _PolyhedralBoundedSolidSetOperator.setOpNoIntersectionCase(
                 inSolidA,
                 inSolidB,
@@ -1333,6 +1429,15 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                 doStrictValidation,
             );
         }
+
+        // Generate and classify edit the operands (vertices on edges and
+        // faces, null edges). When they find no intersection the answer is
+        // one of the operands, or their contact: it is taken from these
+        // copies, made before any edit (plan-stage11 Phase E). Taken from
+        // the edited operands it carried their extra vertices, and failed
+        // strict validation for contacts inside the tolerance band.
+        const untouchedA = PolyhedralBoundedSolidStructuralCopy.copy(inSolidA);
+        const untouchedB = PolyhedralBoundedSolidStructuralCopy.copy(inSolidB);
 
         _PolyhedralBoundedSolidSetOperator.setOpGenerate(ctx, inSolidA, inSolidB);
 
@@ -1356,9 +1461,15 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         // flag those normal struts. Genuine self-touch is only meaningful
         // after Generate (above), so we deliberately do not scan post-Classify.
 
-        if (ctx.sonea!.isEmpty() && ctx.sonvv!.isEmpty()) {
+        // [MANT1988] Sec. 15.4: what matters is whether classification
+        // produced null edges. Vertex/vertex contacts that yield none (a
+        // solid tangent inside the other along whole faces, for instance)
+        // leave nothing to connect, so the result follows from containment
+        // as in the no-intersection case; running connect and finish on
+        // them returned an empty solid.
+        if (ctx.sonea!.isEmpty() && ctx.soneb!.isEmpty()) {
             // No intersections found
-            res = _PolyhedralBoundedSolidSetOperator.setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+            res = _PolyhedralBoundedSolidSetOperator.setOpNoIntersectionCase(untouchedA, untouchedB, res, op);
             return _PolyhedralBoundedSolidSetOperator.completeSetOpResult(
                 res,
                 operandADiagnostics,
@@ -1376,124 +1487,51 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         }
 
         _PolyhedralBoundedSolidSetOperator.setOpConnect(ctx, op);
+        _PolyhedralBoundedSolidSetOperator.lastConnectInvariantViolations =
+            _PolyhedralBoundedSolidSetOperator.checkConnectInvariant(inSolidA, inSolidB, ctx);
+        // [MANT1988] Program 15.14: connect ends with every null edge
+        // joined. Loose ends mean that part of the intersection curve was
+        // not cut: a crossing was missed or misclassified, or two ends that
+        // belong together sat in different faces. The null faces found so
+        // far then describe only part of the result. Finishing with them
+        // returned a solid with a piece missing and no error (plan-stage11
+        // Phase B, near-degenerate fuzz), or a solid with coincident,
+        // unjoined vertices that the non-manifold check rejected for the
+        // wrong reason.
+        const looseA = _PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseACount();
+        const looseB = _PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseBCount();
+        const curveReport = _PolyhedralBoundedSolidSetNullEdgesConnector.getLastCurveReport();
+        if (looseA > 0 || looseB > 0) {
+            _PolyhedralBoundedSolidSetOperator.lastResultPath = "normal-pipeline";
+            throw new SolidOperationFailedException(
+                "Boolean operation could not close the intersection curve: " +
+                    "op=" +
+                    _PolyhedralBoundedSolidSetOperator.operationName(op) +
+                    ", " +
+                    looseA +
+                    " loose null edge end(s) on A and " +
+                    looseB +
+                    " on B " +
+                    "after connect (" +
+                    curveReport +
+                    ")",
+            );
+        }
 
         if (withDebug) {
             _PolyhedralBoundedSolidSetOperator.debugSolid(inSolidA, "outputA_stage05");
             _PolyhedralBoundedSolidSetOperator.debugSolid(inSolidB, "outputB_stage05");
         }
 
-        if (
-            _PolyhedralBoundedSolidSetOperator.hasIncompleteConnectState() &&
-            offsetCylinderDifferenceFallbackSpec !== null
-        ) {
-            offsetCylinderDifferenceFallback =
-                _PolyhedralBoundedSolidOffsetCylinderFallback.buildOffsetCylinderDifferenceFallback(
-                    offsetCylinderDifferenceFallbackSpec,
-                );
-            if (offsetCylinderDifferenceFallback !== null) {
-                tracePipelineSummary("offset cylinder fallback replacing incomplete connect");
-                res = offsetCylinderDifferenceFallback;
-                offsetCylinderDifferenceFallback = null;
-                fallbackProvidedResult = true;
-                resultPath = "offset-cylinder-fallback-incomplete-connect";
-            }
-        }
-
-        if (
-            !fallbackProvidedResult &&
-            axisAlignedCellBooleanFallback !== null &&
-            (_PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseACount() > 0 ||
-                _PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseBCount() > 0)
-        ) {
-            tracePipelineSummary("axis-aligned cell fallback replacing incomplete connect");
-            res = axisAlignedCellBooleanFallback;
-            axisAlignedCellBooleanFallback = null;
-            fallbackProvidedResult = true;
-            resultPath = "axis-aligned-cell-fallback-incomplete-connect";
-        } else if (
-            !fallbackProvidedResult &&
-            orthogonalProfileBooleanFallback !== null &&
-            (_PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseACount() > 0 ||
-                _PolyhedralBoundedSolidSetNullEdgesConnector.getLastLooseBCount() > 0)
-        ) {
-            tracePipelineSummary("orthogonal profile fallback replacing incomplete connect");
-            res = orthogonalProfileBooleanFallback;
-            orthogonalProfileBooleanFallback = null;
-            fallbackProvidedResult = true;
-            resultPath = "orthogonal-profile-fallback-incomplete-connect";
-        }
-        if (!fallbackProvidedResult) {
-            try {
-                _PolyhedralBoundedSolidSetOperator.setOpFinish(ctx, inSolidA, inSolidB, res, op);
-            } catch (e) {
-                const offsetCylinderExceptionFallback =
-                    _PolyhedralBoundedSolidOffsetCylinderFallback.buildOffsetCylinderDifferenceFallback(
-                        offsetCylinderDifferenceFallbackSpec,
-                    );
-                if (
-                    _PolyhedralBoundedSolidSetOperator.isStructurallyUsableSetOpResult(offsetCylinderExceptionFallback)
-                ) {
-                    tracePipelineSummary(
-                        "offset cylinder fallback replacing finish exception: " + (e as Error).constructor.name,
-                    );
-                    res = offsetCylinderExceptionFallback!;
-                    axisAlignedCellBooleanFallback = null;
-                    orthogonalProfileBooleanFallback = null;
-                    resultPath = "offset-cylinder-fallback-finish-exception";
-                } else if (axisAlignedCellBooleanFallback === null && orthogonalProfileBooleanFallback === null) {
-                    throw e;
-                } else if (axisAlignedCellBooleanFallback !== null) {
-                    tracePipelineSummary(
-                        "axis-aligned cell fallback replacing finish exception: " + (e as Error).constructor.name,
-                    );
-                    res = axisAlignedCellBooleanFallback;
-                    axisAlignedCellBooleanFallback = null;
-                    resultPath = "axis-aligned-cell-fallback-finish-exception";
-                } else {
-                    tracePipelineSummary(
-                        "orthogonal profile fallback replacing finish exception: " + (e as Error).constructor.name,
-                    );
-                    res = orthogonalProfileBooleanFallback!;
-                    orthogonalProfileBooleanFallback = null;
-                    resultPath = "orthogonal-profile-fallback-finish-exception";
-                }
-            }
-        }
+        // [MANT1988] Sec. 15.8: finish builds the result from the null
+        // faces. Every answer comes from this pipeline; there is no
+        // shape-specific fallback behind it.
+        _PolyhedralBoundedSolidSetOperator.setOpFinish(ctx, inSolidA, inSolidB, res, op);
 
         if (withDebug) {
             _PolyhedralBoundedSolidSetOperator.debugSolid(inSolidA, "outputA_stage06");
             _PolyhedralBoundedSolidSetOperator.debugSolid(inSolidB, "outputB_stage06");
             _PolyhedralBoundedSolidSetOperator.debugSolid(res, "outputR_stage06");
-        }
-
-        if (
-            _PolyhedralBoundedSolidSetOperator.shouldUseAxisAlignedCellBooleanFallback(
-                axisAlignedCellBooleanFallback,
-                res,
-            )
-        ) {
-            tracePipelineSummary("axis-aligned cell fallback replacing incomplete result");
-            res = axisAlignedCellBooleanFallback!;
-            resultPath = "axis-aligned-cell-fallback-incomplete-result";
-        }
-        if (
-            _PolyhedralBoundedSolidSetOperator.shouldUseAxisAlignedCellBooleanFallback(
-                orthogonalProfileBooleanFallback,
-                res,
-            )
-        ) {
-            tracePipelineSummary("orthogonal profile fallback replacing incomplete result");
-            res = orthogonalProfileBooleanFallback!;
-            resultPath = "orthogonal-profile-fallback-incomplete-result";
-        }
-
-        const resultBeforeProfileFallback = res;
-        res = _PolyhedralBoundedSolidProfileDifferenceFallback.applyProfileDifferenceFallbackIfNeeded(
-            profileDifferenceFallback,
-            res,
-        )!;
-        if (res !== resultBeforeProfileFallback) {
-            resultPath = "profile-difference-fallback";
         }
 
         res = _PolyhedralBoundedSolidSetOperator.completeSetOpResult(

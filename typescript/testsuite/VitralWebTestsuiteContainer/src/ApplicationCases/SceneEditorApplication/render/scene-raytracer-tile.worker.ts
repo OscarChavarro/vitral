@@ -31,7 +31,10 @@ const renderer = new ParallelRaytracerTileRenderer(
     decodeSimpleSceneSnapshot(sceneDescriptor),
 );
 
-const handler = createWorkerMessageHandler<ParallelRaytracerTileRequest, ParallelRaytracerTileResult>(
+const handler = createWorkerMessageHandler<
+  ParallelRaytracerTileRequest,
+  ParallelRaytracerTileResult
+>(
   (request, _signal, notify) => renderer.renderTile(request, notify),
   (response) => {
     self.postMessage(response);

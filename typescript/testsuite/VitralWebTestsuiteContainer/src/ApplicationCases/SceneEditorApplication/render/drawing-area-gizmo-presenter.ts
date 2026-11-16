@@ -106,18 +106,24 @@ export class DrawingAreaGizmoPresenter {
       const centroid: Vector3Dd | null = this.selectionEditor.computeSelectionCentroid();
 
       if (centroid !== null) {
-        this.translationGizmo.setTransformationMatrix(SceneSelectionEditor.createTranslationGizmoMatrix(centroid));
+        this.translationGizmo.setTransformationMatrix(
+          SceneSelectionEditor.createTranslationGizmoMatrix(centroid),
+        );
         this.inputGizmo = this.translationGizmo.getInputGizmo();
         return GizmoKind.TRANSLATE;
       }
     } else if (mode === InteractionMode.ROTATE) {
       if (selectedBody !== null) {
-        this.rotateGizmo.setTransformationMatrix(SceneSelectionEditor.createRotationGizmoMatrix(selectedBody));
+        this.rotateGizmo.setTransformationMatrix(
+          SceneSelectionEditor.createRotationGizmoMatrix(selectedBody),
+        );
         this.inputGizmo = this.rotateGizmo.getInputGizmo();
         return GizmoKind.ROTATE;
       }
     } else if (mode === InteractionMode.SCALE && selectedBody !== null) {
-      this.scaleGizmo.setTransformationMatrix(SceneSelectionEditor.createRotationGizmoMatrix(selectedBody));
+      this.scaleGizmo.setTransformationMatrix(
+        SceneSelectionEditor.createRotationGizmoMatrix(selectedBody),
+      );
       this.scaleGizmo.setScale(selectedBody.getScale());
       this.inputGizmo = this.scaleGizmo.getInputGizmo();
       return GizmoKind.SCALE;

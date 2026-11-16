@@ -1,9 +1,4 @@
-import {
-    KeyEvent,
-    MouseEvent as VitralMouseEvent,
-    RGBAImageUncompressed,
-    type ColorRgb,
-} from "@vitral/base";
+import { KeyEvent, MouseEvent as VitralMouseEvent, RGBAImageUncompressed, type ColorRgb } from "@vitral/base";
 
 export interface WebKeyEvent {
     keycode: string;
@@ -189,15 +184,24 @@ export class WebSystem {
     1 left, 2 middle, 3 right
     */
     public static awtButton(event: MouseEvent): number {
-        if (event.type === "pointermove" || event.type === "mousemove" || event.type === "wheel" ||
-            event.type === "pointerenter" || event.type === "pointerleave") {
+        if (
+            event.type === "pointermove" ||
+            event.type === "mousemove" ||
+            event.type === "wheel" ||
+            event.type === "pointerenter" ||
+            event.type === "pointerleave"
+        ) {
             return 0;
         }
         switch (event.button) {
-            case 0: return 1;
-            case 1: return 2;
-            case 2: return 3;
-            default: return 0;
+            case 0:
+                return 1;
+            case 1:
+                return 2;
+            case 2:
+                return 3;
+            default:
+                return 0;
         }
     }
 
@@ -254,11 +258,16 @@ export class WebSystem {
             return (event.shiftKey ? letter : letter.toLowerCase()).charCodeAt(0);
         }
         switch (event.key) {
-            case "Enter": return 10;
-            case "Backspace": return 8;
-            case "Tab": return 9;
-            case "Escape": return 27;
-            case "Delete": return 127;
+            case "Enter":
+                return 10;
+            case "Backspace":
+                return 8;
+            case "Tab":
+                return 9;
+            case "Escape":
+                return 27;
+            case "Delete":
+                return 127;
             default:
                 break;
         }
@@ -339,8 +348,7 @@ export class WebSystem {
         }
         if (code === "Equal") {
             evsdk.keycode = KeyEvent.KEY_EQUALS;
-        }
-        else if (code === "Minus") {
+        } else if (code === "Minus") {
             evsdk.keycode = KeyEvent.KEY_MINUS;
         }
 
@@ -352,36 +360,60 @@ export class WebSystem {
                 evsdk.keycode = KeyEvent.KEY_F1 + (Number(f[1]) - 1);
             }
             switch (event.key) {
-                case "ArrowUp": evsdk.keycode = KeyEvent.KEY_UP; break;
-                case "ArrowDown": evsdk.keycode = KeyEvent.KEY_DOWN; break;
-                case "ArrowLeft": evsdk.keycode = KeyEvent.KEY_LEFT; break;
-                case "ArrowRight": evsdk.keycode = KeyEvent.KEY_RIGHT; break;
-                case "PageUp": evsdk.keycode = KeyEvent.KEY_PAGEUP; break;
-                case "PageDown": evsdk.keycode = KeyEvent.KEY_PAGEDOWN; break;
-                case "Alt": evsdk.keycode = KeyEvent.KEY_LALT; break;
-                case "Control": evsdk.keycode = KeyEvent.KEY_LCTRL; break;
-                default: break;
+                case "ArrowUp":
+                    evsdk.keycode = KeyEvent.KEY_UP;
+                    break;
+                case "ArrowDown":
+                    evsdk.keycode = KeyEvent.KEY_DOWN;
+                    break;
+                case "ArrowLeft":
+                    evsdk.keycode = KeyEvent.KEY_LEFT;
+                    break;
+                case "ArrowRight":
+                    evsdk.keycode = KeyEvent.KEY_RIGHT;
+                    break;
+                case "PageUp":
+                    evsdk.keycode = KeyEvent.KEY_PAGEUP;
+                    break;
+                case "PageDown":
+                    evsdk.keycode = KeyEvent.KEY_PAGEDOWN;
+                    break;
+                case "Alt":
+                    evsdk.keycode = KeyEvent.KEY_LALT;
+                    break;
+                case "Control":
+                    evsdk.keycode = KeyEvent.KEY_LCTRL;
+                    break;
+                default:
+                    break;
             }
-        }
-        else {
+        } else {
             const c: string = String.fromCharCode(unicodeId);
             if (c >= "A" && c <= "Z") {
                 evsdk.keycode = KeyEvent.KEY_A + (unicodeId - 65);
-            }
-            else if (c >= "a" && c <= "z") {
+            } else if (c >= "a" && c <= "z") {
                 evsdk.keycode = KeyEvent.KEY_a + (unicodeId - 97);
-            }
-            else if (c >= "0" && c <= "9") {
+            } else if (c >= "0" && c <= "9") {
                 evsdk.keycode = KeyEvent.KEY_0 + (unicodeId - 48);
-            }
-            else {
+            } else {
                 switch (c) {
-                    case ",": evsdk.keycode = KeyEvent.KEY_COMMA; break;
-                    case ".": evsdk.keycode = KeyEvent.KEY_PERIOD; break;
-                    case " ": evsdk.keycode = KeyEvent.KEY_SPACE; break;
-                    case "\n": evsdk.keycode = KeyEvent.KEY_ENTER; break;
-                    case "\b": evsdk.keycode = KeyEvent.KEY_BACKSPACE; break;
-                    default: break;
+                    case ",":
+                        evsdk.keycode = KeyEvent.KEY_COMMA;
+                        break;
+                    case ".":
+                        evsdk.keycode = KeyEvent.KEY_PERIOD;
+                        break;
+                    case " ":
+                        evsdk.keycode = KeyEvent.KEY_SPACE;
+                        break;
+                    case "\n":
+                        evsdk.keycode = KeyEvent.KEY_ENTER;
+                        break;
+                    case "\b":
+                        evsdk.keycode = KeyEvent.KEY_BACKSPACE;
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -426,8 +458,14 @@ export class WebSystem {
             return labelImage;
         }
         context.font = font;
-        context.fillStyle = "rgb(" + Math.round(color.r() * 255) + "," + Math.round(color.g() * 255) + "," +
-            Math.round(color.b() * 255) + ")";
+        context.fillStyle =
+            "rgb(" +
+            Math.round(color.r() * 255) +
+            "," +
+            Math.round(color.g() * 255) +
+            "," +
+            Math.round(color.b() * 255) +
+            ")";
         context.fillText(label, 0, up);
 
         const pixels: Uint8ClampedArray = context.getImageData(0, 0, width, height).data;

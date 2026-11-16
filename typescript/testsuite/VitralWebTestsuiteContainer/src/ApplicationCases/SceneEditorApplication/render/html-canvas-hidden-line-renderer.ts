@@ -1,4 +1,10 @@
-import { Calligraphic2DBuffer, Camera, HiddenLineRenderer, type ArrayList, type SimpleBody } from '@vitral/base';
+import {
+  Calligraphic2DBuffer,
+  Camera,
+  HiddenLineRenderer,
+  type ArrayList,
+  type SimpleBody,
+} from '@vitral/base';
 
 /**
  * CPU/Appel hidden-line presentation for an HTML5 2D canvas.  It deliberately
@@ -37,8 +43,14 @@ export class HtmlCanvasHiddenLineRenderer {
     context.beginPath();
     for (let i = 0; i < lines.getNumLines(); i++) {
       const [a, b] = lines.get2DLine(i);
-      context.moveTo((a.x() + 1) * context.canvas.width / 2, (1 - a.y()) * context.canvas.height / 2);
-      context.lineTo((b.x() + 1) * context.canvas.width / 2, (1 - b.y()) * context.canvas.height / 2);
+      context.moveTo(
+        ((a.x() + 1) * context.canvas.width) / 2,
+        ((1 - a.y()) * context.canvas.height) / 2,
+      );
+      context.lineTo(
+        ((b.x() + 1) * context.canvas.width) / 2,
+        ((1 - b.y()) * context.canvas.height) / 2,
+      );
     }
     context.stroke();
     context.restore();

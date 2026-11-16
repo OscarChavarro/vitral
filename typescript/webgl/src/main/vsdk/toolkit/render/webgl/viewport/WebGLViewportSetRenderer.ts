@@ -33,9 +33,11 @@ export class WebGLViewportSetRenderer {
     private readonly labelImageProvider: WebGLLabelImageProvider;
     private readonly windows: Map<Viewport, WebGLViewportWindow>;
 
-    public constructor(viewportSet: ViewportSet,
-                       labelImageProvider: WebGLLabelImageProvider,
-                       viewRenderer: WebGLViewRenderer) {
+    public constructor(
+        viewportSet: ViewportSet,
+        labelImageProvider: WebGLLabelImageProvider,
+        viewRenderer: WebGLViewRenderer,
+    ) {
         this.viewportSet = viewportSet;
         this.labelImageProvider = labelImageProvider;
         this.viewRenderer = viewRenderer;
@@ -82,8 +84,7 @@ export class WebGLViewportSetRenderer {
 
         if (this.viewportSet.countActiveViewports() === 1 && fullScreenGuiMode) {
             await this.drawSelectedViewFullScreen(gl);
-        }
-        else {
+        } else {
             await this.drawMultipleViews(gl);
         }
     }
@@ -157,8 +158,12 @@ export class WebGLViewportSetRenderer {
 
     private activateViewport(gl: WebGL2RenderingContext, viewport: Viewport): void {
         viewport.updatePixelArea(this.viewportSet.getSizeXInPixels(), this.viewportSet.getSizeYInPixels());
-        gl.viewport(viewport.getPixelStartX(), viewport.getPixelStartY(),
-            viewport.getPixelSizeX(), viewport.getPixelSizeY());
+        gl.viewport(
+            viewport.getPixelStartX(),
+            viewport.getPixelStartY(),
+            viewport.getPixelSizeX(),
+            viewport.getPixelSizeY(),
+        );
     }
 
     /**
@@ -178,22 +183,44 @@ export class WebGLViewportSetRenderer {
         const y1: number = viewport.getStartYPercent() * 2 - 1;
         const x2: number = x1 + viewport.getSizeXPercent() * 2;
         const y2: number = y1 + viewport.getSizeYPercent() * 2;
-        const outer: number[] = this.viewportSet.isSelected(viewport)
-            ? [1.0, 0.96, 0.0]
-            : [0.21, 0.25, 0.29];
+        const outer: number[] = this.viewportSet.isSelected(viewport) ? [1.0, 0.96, 0.0] : [0.21, 0.25, 0.29];
         const positions: Float32Array = new Float32Array([
-            x1, y1, 0,
-            x2, y1, 0,
-            x2, y2, 0,
-            x1, y1, 0,
-            x2, y2, 0,
-            x1, y2, 0,
-            x1 + 2 * dx, y1 + 2 * dy, 0,
-            x2 - 2 * dx, y1 + 2 * dy, 0,
-            x2 - 2 * dx, y2 - 2 * dy, 0,
-            x1 + 2 * dx, y1 + 2 * dy, 0,
-            x2 - 2 * dx, y2 - 2 * dy, 0,
-            x1 + 2 * dx, y2 - 2 * dy, 0,
+            x1,
+            y1,
+            0,
+            x2,
+            y1,
+            0,
+            x2,
+            y2,
+            0,
+            x1,
+            y1,
+            0,
+            x2,
+            y2,
+            0,
+            x1,
+            y2,
+            0,
+            x1 + 2 * dx,
+            y1 + 2 * dy,
+            0,
+            x2 - 2 * dx,
+            y1 + 2 * dy,
+            0,
+            x2 - 2 * dx,
+            y2 - 2 * dy,
+            0,
+            x1 + 2 * dx,
+            y1 + 2 * dy,
+            0,
+            x2 - 2 * dx,
+            y2 - 2 * dy,
+            0,
+            x1 + 2 * dx,
+            y2 - 2 * dy,
+            0,
         ]);
         const colors: Float32Array = new Float32Array(12 * 4);
 
@@ -206,8 +233,7 @@ export class WebGLViewportSetRenderer {
         }
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.CULL_FACE);
-        await WebGLColoredPrimitiveRenderer.draw(gl, Matrix4x4d.identityMatrix(),
-            gl.TRIANGLES, positions, colors);
+        await WebGLColoredPrimitiveRenderer.draw(gl, Matrix4x4d.identityMatrix(), gl.TRIANGLES, positions, colors);
         gl.enable(gl.DEPTH_TEST);
     }
 }

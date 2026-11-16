@@ -23,9 +23,18 @@ export class WebGLMeshBuilder {
     the normals point to.
     */
     public addTriangle(
-        p0: Vector3Dd, n0: Vector3Dd, u0: number, v0: number,
-        p1: Vector3Dd, n1: Vector3Dd, u1: number, v1: number,
-        p2: Vector3Dd, n2: Vector3Dd, u2: number, v2: number,
+        p0: Vector3Dd,
+        n0: Vector3Dd,
+        u0: number,
+        v0: number,
+        p1: Vector3Dd,
+        n1: Vector3Dd,
+        u1: number,
+        v1: number,
+        p2: Vector3Dd,
+        n2: Vector3Dd,
+        u2: number,
+        v2: number,
     ): void {
         this.addVertex(p0, n0, u0, v0);
         this.addVertex(p1, n1, u1, v1);
@@ -37,10 +46,22 @@ export class WebGLMeshBuilder {
     the side the normals point to.
     */
     public addQuad(
-        p0: Vector3Dd, n0: Vector3Dd, u0: number, v0: number,
-        p1: Vector3Dd, n1: Vector3Dd, u1: number, v1: number,
-        p2: Vector3Dd, n2: Vector3Dd, u2: number, v2: number,
-        p3: Vector3Dd, n3: Vector3Dd, u3: number, v3: number,
+        p0: Vector3Dd,
+        n0: Vector3Dd,
+        u0: number,
+        v0: number,
+        p1: Vector3Dd,
+        n1: Vector3Dd,
+        u1: number,
+        v1: number,
+        p2: Vector3Dd,
+        n2: Vector3Dd,
+        u2: number,
+        v2: number,
+        p3: Vector3Dd,
+        n3: Vector3Dd,
+        u3: number,
+        v3: number,
     ): void {
         this.addTriangle(p0, n0, u0, v0, p1, n1, u1, v1, p2, n2, u2, v2);
         this.addTriangle(p0, n0, u0, v0, p2, n2, u2, v2, p3, n3, u3, v3);
@@ -82,16 +103,37 @@ export class WebGLMeshBuilder {
                 const apex = new Vector3Dd(0, 0, z1);
                 const nApex = new Vector3Dd(nr * Math.cos((a0 + a1) / 2), nr * Math.sin((a0 + a1) / 2), nz);
                 this.addTriangle(
-                    new Vector3Dd(r0 * c0, r0 * s0, z0), n0, u0, 0,
-                    new Vector3Dd(r0 * c1, r0 * s1, z0), n1, u1, 0,
-                    apex, nApex, (u0 + u1) / 2, 1,
+                    new Vector3Dd(r0 * c0, r0 * s0, z0),
+                    n0,
+                    u0,
+                    0,
+                    new Vector3Dd(r0 * c1, r0 * s1, z0),
+                    n1,
+                    u1,
+                    0,
+                    apex,
+                    nApex,
+                    (u0 + u1) / 2,
+                    1,
                 );
             } else {
                 this.addQuad(
-                    new Vector3Dd(r0 * c0, r0 * s0, z0), n0, u0, 0,
-                    new Vector3Dd(r0 * c1, r0 * s1, z0), n1, u1, 0,
-                    new Vector3Dd(r1 * c1, r1 * s1, z1), n1, u1, 1,
-                    new Vector3Dd(r1 * c0, r1 * s0, z1), n0, u0, 1,
+                    new Vector3Dd(r0 * c0, r0 * s0, z0),
+                    n0,
+                    u0,
+                    0,
+                    new Vector3Dd(r0 * c1, r0 * s1, z0),
+                    n1,
+                    u1,
+                    0,
+                    new Vector3Dd(r1 * c1, r1 * s1, z1),
+                    n1,
+                    u1,
+                    1,
+                    new Vector3Dd(r1 * c0, r1 * s0, z1),
+                    n0,
+                    u0,
+                    1,
                 );
             }
         }
@@ -151,11 +193,20 @@ export class WebGLMeshBuilder {
 
         this.vertices.push(
             new Float32Array([
-                p.x(), p.y(), p.z(),
-                normal.x(), normal.y(), normal.z(),
-                u, v,
-                tangent.x(), tangent.y(), tangent.z(),
-                binormal.x(), binormal.y(), binormal.z(),
+                p.x(),
+                p.y(),
+                p.z(),
+                normal.x(),
+                normal.y(),
+                normal.z(),
+                u,
+                v,
+                tangent.x(),
+                tangent.y(),
+                tangent.z(),
+                binormal.x(),
+                binormal.y(),
+                binormal.z(),
             ]),
         );
     }

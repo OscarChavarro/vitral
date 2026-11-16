@@ -351,12 +351,6 @@ test("AffineToleranceMap_EnclosesSamplesAcrossScalesAndShears", () => {
         }
 });
 
-// ECMAScript has no fesetround: this is the C++ GTEST_SKIP path taken when
-// the rounding mode cannot be changed.
-test("AffineToleranceMap_RejectsUnsupportedRoundingWithoutChangingOutputs", (context) => {
-    context.skip("Rounding mode cannot be changed");
-});
-
 test("CsgPlacedComposition_RotatedBoundaryKeepsItsWitness", () => {
     const sphere = new SimpleBody();
     sphere.setGeometry(new Sphere(1));
@@ -16837,7 +16831,7 @@ test("CsgDyadicContract_IndependentRationalMultiProductFixtures", () => {
     }
 });
 
-test("CsgDyadicContract_CapacityAndRoundingFailuresAreAtomic", (context) => {
+test("CsgDyadicContract_CapacityAndRoundingFailuresAreAtomic", () => {
     const high = new CsgDyadic();
     const one = new CsgDyadic();
     const sentinel = new CsgDyadic();
@@ -16857,9 +16851,6 @@ test("CsgDyadicContract_CapacityAndRoundingFailuresAreAtomic", (context) => {
     expectTrue(CsgDyadic.multiply(dense, dense, square));
     expectFalse(CsgDyadic.multiply(square, square, result));
     expectTrue(result.equals(sentinel));
-    // ECMAScript has no fesetround: this is the C++ GTEST_SKIP path taken
-    // when the rounding mode cannot be changed.
-    context.skip("Rounding mode cannot be changed");
 });
 
 test("CsgSolidEquivalenceContract_DyadicGramHandlesRoundedRadiusProducts", () => {

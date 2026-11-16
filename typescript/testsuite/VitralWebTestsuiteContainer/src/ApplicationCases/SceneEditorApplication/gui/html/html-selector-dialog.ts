@@ -10,7 +10,10 @@ import { SceneSelectionEditor } from '../../model/selection/scene-selection-edit
 export class HtmlSelectorDialog {
   private readonly dialog: HtmlWindow;
 
-  constructor(private readonly model: ApplicationModel, private readonly repaintRequested: () => void) {
+  constructor(
+    private readonly model: ApplicationModel,
+    private readonly repaintRequested: () => void,
+  ) {
     this.dialog = new HtmlWindow('');
 
     //-----------------------------------------------------------------
@@ -40,14 +43,17 @@ export class HtmlSelectorDialog {
         const option = document.createElement('option');
         option.value = String(i);
         option.selected = scene.selectedThings.isSelected(i);
-        option.textContent = body.getName() || `${body.getGeometry()?.constructor.name ?? 'Geometry'} ${i + 1}` +
-          (scene.isHidden(body) ? ' (hidden)' : '');
+        option.textContent =
+          body.getName() ||
+          `${body.getGeometry()?.constructor.name ?? 'Geometry'} ${i + 1}` +
+            (scene.isHidden(body) ? ' (hidden)' : '');
         tree.appendChild(option);
       }
     };
     tree.onchange = (): void => {
       const selected = new Set(Array.from(tree.selectedOptions, (option) => Number(option.value)));
-      const scene = this.model.getScene(); scene.selectedThings.unselectAll();
+      const scene = this.model.getScene();
+      scene.selectedThings.unselectAll();
       for (const index of selected) scene.selectedThings.select(index);
       this.repaintRequested();
     };
@@ -55,7 +61,11 @@ export class HtmlSelectorDialog {
     b.type = 'button';
     b.className = 'vitral-button';
     b.textContent = 'Delete selected';
-    b.onclick = (): void => { new SceneSelectionEditor(this.model.getScene()).deleteSelected(); rebuild(); this.repaintRequested(); };
+    b.onclick = (): void => {
+      new SceneSelectionEditor(this.model.getScene()).deleteSelected();
+      rebuild();
+      this.repaintRequested();
+    };
     bottomAreaWidget.appendChild(b);
 
     b = document.createElement('button');
@@ -64,9 +74,13 @@ export class HtmlSelectorDialog {
     b.textContent = 'Hide / show selected';
     b.onclick = (): void => {
       const scene = this.model.getScene();
-      const selected = Array.from(tree.selectedOptions, (option) => scene.scene.getSimpleBodies().get(Number(option.value)));
+      const selected = Array.from(tree.selectedOptions, (option) =>
+        scene.scene.getSimpleBodies().get(Number(option.value)),
+      );
       const hide = !selected.some((body) => scene.isHidden(body));
-      selected.forEach((body) => scene.setHidden(body, hide)); rebuild(); this.repaintRequested();
+      selected.forEach((body) => scene.setHidden(body, hide));
+      rebuild();
+      this.repaintRequested();
     };
     centralAreaWidget.appendChild(b);
 

@@ -7,6 +7,9 @@ import { StringBuilder } from "../../../../../../../../java/lang/StringBuilder.j
 import { ArrayList } from "../../../../../../../../java/util/ArrayList.js";
 import { Collections } from "../../../../../../../../java/util/Collections.js";
 import type { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
+import { Vector3Dd as Vector3DdClass } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
+import { Geometry } from "../../../../Geometry.js";
+import { PolyhedralBoundedSolidNumericPolicy } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import type { _PolyhedralBoundedSolidFace } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
 import type { _PolyhedralBoundedSolidSetOperatorNullEdge } from "../topology/_PolyhedralBoundedSolidSetOperatorNullEdge.js";
@@ -145,15 +148,6 @@ close: missing intersection point or unwelded coincidence), isolated nodes
 pinch nodes (figure-8 cusps where the curve touches itself).</p>
 */
 export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
-    /**
-    For each processing position of the most recent
-    {@link #orderAndOrientAlongCurves} result, the two processing positions
-    of its cycle-adjacent pairs (its junction partners along the curve).
-    Lets the connect stage restrict junction-repair logic to true curve
-    neighbors. Null until an order is computed.
-    */
-    public static lastTraversalNeighborPositions: number[][] | null = null;
-
     private constructor() {}
 
     private static halfEdgeFace(he: _PolyhedralBoundedSolidHalfEdge | null): _PolyhedralBoundedSolidFace | null {
@@ -197,6 +191,26 @@ export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
             return null;
         }
         return plane.getNormal();
+    }
+
+    private static segmentOnBothFaces(group: FacePairGroup, from: Vector3Dd | null, to: Vector3Dd | null): boolean {
+        let tolerance: number;
+        let middle: Vector3Dd;
+
+        if (from === null || to === null) {
+            return false;
+        }
+        // Scale of the operands, not of the unit model: at 10^-3 a unit
+        // tolerance would be a tenth of the features.
+        tolerance = PolyhedralBoundedSolidNumericPolicy.forSolids(
+            group.faceA!.parentSolid,
+            group.faceB!.parentSolid,
+        ).bigEpsilon();
+        middle = from.add(to).multiply(0.5);
+        return (
+            group.faceA!.testPointInside(middle, tolerance) !== Geometry.OUTSIDE &&
+            group.faceB!.testPointInside(middle, tolerance) !== Geometry.OUTSIDE
+        );
     }
 
     private static link(neighbors: ArrayList<Set<number>>, i: number, j: number): void {
@@ -327,7 +341,41 @@ export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
             });
 
             if (m % 2 !== 0) {
-                oddGroups++;
+                // An odd group is a chord that runs through a vertex of one
+                // face (the intersection line enters the next chord where
+                // the previous one ends, e.g. along the reflex corner of an
+                // L-shaped face). Parity cannot pair such points; link two
+                // consecutive points when the segment between them lies on
+                // both faces, which is exactly the chord definition.
+                // The group counts as odd (unresolved) only when some
+                // point is left without a chord.
+                const linked: boolean[] = new Array<boolean>(m).fill(false);
+                for (i = 0; i + 1 < m; i++) {
+                    if (
+                        _PolyhedralBoundedSolidSetIntersectionCurveBuilder.segmentOnBothFaces(
+                            group,
+                            _PolyhedralBoundedSolidSetIntersectionCurveBuilder.nodePosition(aList.get(sorted.get(i))),
+                            _PolyhedralBoundedSolidSetIntersectionCurveBuilder.nodePosition(
+                                aList.get(sorted.get(i + 1)),
+                            ),
+                        )
+                    ) {
+                        _PolyhedralBoundedSolidSetIntersectionCurveBuilder.link(
+                            neighbors,
+                            sorted.get(i),
+                            sorted.get(i + 1),
+                        );
+                        linked[i] = true;
+                        linked[i + 1] = true;
+                    }
+                }
+                for (i = 0; i < m; i++) {
+                    if (!linked[i]) {
+                        oddGroups++;
+                        break;
+                    }
+                }
+                continue;
             }
             // Entry/exit parity along the intersection line: chord
             // endpoints pair as (0,1), (2,3), ... — linking consecutive
@@ -570,6 +618,9 @@ export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
            be flipped in place
     @param soneb null edges on solid B, index-aligned with sonea; struts may
            be flipped in place
+    @param neighborsOut receives, in element 0, for each processing position
+           the two processing positions of its cycle-adjacent pairs (its
+           junction partners along the curve), or null
     @return permutation where {@code result[position] = originalIndex}, or
             null when the cycles do not cover the index range exactly (in
             which case nothing is mutated)
@@ -579,11 +630,12 @@ export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
         nodeCount: number,
         sonea: ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> | null,
         soneb: ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> | null,
+        neighborsOut: (number[][] | null)[],
     ): number[] | null {
         let c: number;
         let j: number;
 
-        _PolyhedralBoundedSolidSetIntersectionCurveBuilder.lastTraversalNeighborPositions = null;
+        neighborsOut[0] = null;
         if (
             _PolyhedralBoundedSolidSetIntersectionCurveBuilder.computeTraversalOrder(cycles, nodeCount) === null ||
             sonea === null ||
@@ -666,6 +718,20 @@ export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
                 );
             }
 
+            // Same-face struts (both halves in one face, e.g. at the reflex
+            // vertex of an L-shaped face) carry no face-sharing role, but
+            // the join toward one neighbor divides that face and only one
+            // half stays on the side where the other neighbor lies.
+            for (j = 0; j < len; j++) {
+                const current = directedCycle[j]!;
+                const predecessor = directedCycle[(j - 1 + len) % len]!;
+                const successor = directedCycle[(j + 1) % len]!;
+                const p = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.nodePosition(sonea.get(predecessor));
+                const q = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.nodePosition(sonea.get(successor));
+                _PolyhedralBoundedSolidSetIntersectionCurveBuilder.orientSameFaceStrut(sonea.get(current), p, q, true);
+                _PolyhedralBoundedSolidSetIntersectionCurveBuilder.orientSameFaceStrut(soneb.get(current), p, q, false);
+            }
+
             // Rotation: the first cycle starts at its minimum member index;
             // later cycles start at the node geometrically closest to the
             // first cycle's start, so the proximity merge below begins in
@@ -740,7 +806,7 @@ export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
                 neighborPositions[positionOf[original]!] = [positionOf[previousOriginal]!, positionOf[nextOriginal]!];
             }
         }
-        _PolyhedralBoundedSolidSetIntersectionCurveBuilder.lastTraversalNeighborPositions = neighborPositions;
+        neighborsOut[0] = neighborPositions;
         return permutation;
     }
 
@@ -804,6 +870,105 @@ export class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
             current.e.rightHalf = current.e.leftHalf;
             current.e.leftHalf = tmp;
         }
+    }
+
+    /**
+    Orients a strut whose two halves lie in the same loop of one face.
+
+    <p>In that loop the strut appears as `first` (vertex v to v') followed
+    by its mirror `second` (v' to v), between the face edges entering and
+    leaving v. The face sector at v runs counterclockwise (around the face
+    normal) from the leaving edge to the entering edge. The join toward one
+    curve neighbor divides that sector; the neighbor that lies further along
+    it must be reached through `first`, the other through `second`, so that
+    the remaining half stays in the part of the face where its neighbor
+    is. On A the predecessor is joined through the right half; on B through
+    the left half (Program [MANT1988].15.14).</p>
+    */
+    private static orientSameFaceStrut(
+        current: _PolyhedralBoundedSolidSetOperatorNullEdge | null,
+        predecessor: Vector3Dd | null,
+        successor: Vector3Dd | null,
+        predecessorHalfIsRight: boolean,
+    ): void {
+        let r: _PolyhedralBoundedSolidHalfEdge | null;
+        let l: _PolyhedralBoundedSolidHalfEdge | null;
+        let first: _PolyhedralBoundedSolidHalfEdge;
+        let second: _PolyhedralBoundedSolidHalfEdge;
+        let predecessorHalf: _PolyhedralBoundedSolidHalfEdge;
+        let successorHalf: _PolyhedralBoundedSolidHalfEdge;
+
+        if (current === null || current.e === null || predecessor === null || successor === null) {
+            return;
+        }
+        r = current.e.rightHalf;
+        l = current.e.leftHalf;
+        if (r === null || l === null || r.parentLoop === null || r.parentLoop !== l.parentLoop) {
+            return;
+        }
+        if (r.next() === l) {
+            first = r;
+        } else if (l.next() === r) {
+            first = l;
+        } else {
+            return;
+        }
+        second = first.mirrorHalfEdge()!;
+
+        const v = first.startingVertex.position;
+        const dIn = first.previous()!.startingVertex.position.subtract(v);
+        const dOut = second.next()!.next()!.startingVertex.position.subtract(v);
+        const n = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.faceNormal(
+            _PolyhedralBoundedSolidSetIntersectionCurveBuilder.halfEdgeFace(first),
+        );
+        const dP = predecessor.subtract(v);
+        const dS = successor.subtract(v);
+        const tiny = 1.0e-12;
+
+        if (n === null || dIn.length() < tiny || dOut.length() < tiny || dP.length() < tiny || dS.length() < tiny) {
+            return;
+        }
+        const sectorEnd = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.ccwAngle(dOut, dIn, n);
+        const thetaP = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.clampToSector(
+            _PolyhedralBoundedSolidSetIntersectionCurveBuilder.ccwAngle(dOut, dP, n),
+            sectorEnd,
+        );
+        const thetaS = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.clampToSector(
+            _PolyhedralBoundedSolidSetIntersectionCurveBuilder.ccwAngle(dOut, dS, n),
+            sectorEnd,
+        );
+        if (Math.abs(thetaP - thetaS) < 1.0e-9) {
+            return;
+        }
+        predecessorHalf = thetaP > thetaS ? first : second;
+        successorHalf = predecessorHalf === first ? second : first;
+        if (predecessorHalfIsRight) {
+            current.e.rightHalf = predecessorHalf;
+            current.e.leftHalf = successorHalf;
+        } else {
+            current.e.leftHalf = predecessorHalf;
+            current.e.rightHalf = successorHalf;
+        }
+    }
+
+    /** Counterclockwise angle around n from `from` to `to`, in [0, 2pi). */
+    private static ccwAngle(from: Vector3Dd, to: Vector3Dd, n: Vector3Dd): number {
+        const u = new Vector3DdClass(from).normalized();
+        const w = n.crossProduct(u).normalized();
+        const angle = Math.atan2(to.dotProduct(w), to.dotProduct(u));
+        return angle < 0.0 ? angle + 2.0 * Math.PI : angle;
+    }
+
+    /**
+    A neighbor lies on the face, so its angle belongs to [0, sectorEnd].
+    Rounding can put a neighbor on the leaving edge at 2pi; such angles go
+    to the nearest end of the sector.
+    */
+    private static clampToSector(angle: number, sectorEnd: number): number {
+        if (angle <= sectorEnd) {
+            return angle;
+        }
+        return 2.0 * Math.PI - angle < angle - sectorEnd ? 0.0 : sectorEnd;
     }
 
     private static minOf(values: readonly number[]): number {

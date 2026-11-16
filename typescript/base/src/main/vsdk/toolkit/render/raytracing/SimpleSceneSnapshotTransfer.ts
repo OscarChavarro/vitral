@@ -3,8 +3,7 @@ import type { WorkerTransferValue } from "../../../../java/concurrent/WorkerProt
 import { ArrayList } from "../../../../java/util/ArrayList.js";
 import { Collections } from "../../../../java/util/Collections.js";
 import { ColorRgb } from "../../common/color/ColorRgb.js";
-import { CircularDoubleLinkedList } from "../../common/dataStructures/CircularDoubleLinkedList.js";
-import { _CircularDoubleLinkedListNode } from "../../common/dataStructures/_CircularDoubleLinkedListNode.js";
+import { CircularArrayList } from "../../common/dataStructures/CircularArrayList.js";
 import { Matrix4x4d } from "../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 import { CubemapBackground } from "../../environment/background/CubemapBackground.js";
@@ -88,8 +87,8 @@ let transfer: ObjectGraphTransfer | null = null;
 
 function sceneTransfer(): ObjectGraphTransfer {
     if (transfer === null) {
-        const unmodifiableList: TransferableClass =
-            (Collections.unmodifiableList(new ArrayList<unknown>()) as object).constructor as TransferableClass;
+        const unmodifiableList: TransferableClass = (Collections.unmodifiableList(new ArrayList<unknown>()) as object)
+            .constructor as TransferableClass;
         const classes: TransferableClass[] = [
             // java.util
             ArrayList,
@@ -160,8 +159,7 @@ function sceneTransfer(): ObjectGraphTransfer {
             _PolyhedralBoundedSolidHalfEdge,
             _PolyhedralBoundedSolidEdge,
             _PolyhedralBoundedSolidVertex,
-            CircularDoubleLinkedList,
-            _CircularDoubleLinkedListNode,
+            CircularArrayList,
             _AlgebraicExpressionVariableNode,
             _AlgebraicExpressionConstantNode,
             RGBColorPalette,

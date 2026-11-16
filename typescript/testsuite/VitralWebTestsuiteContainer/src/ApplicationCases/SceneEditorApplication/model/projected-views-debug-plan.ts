@@ -74,7 +74,11 @@ export class ProjectedViewsDebugPlan {
       case 1:
         return new ViewPlacement(new Vector3Dd(0, -2, 0), unit, r(90, 1, 0, 0));
       case 2:
-        return new ViewPlacement(new Vector3Dd(-2, 0, 0), unit, c(r(90, 0, 0, -1), r(90, 0, -1, 0)));
+        return new ViewPlacement(
+          new Vector3Dd(-2, 0, 0),
+          unit,
+          c(r(90, 0, 0, -1), r(90, 0, -1, 0)),
+        );
       case 3:
         return new ViewPlacement(new Vector3Dd(0, 0, -2), unit, r(180, 0, 1, 0));
       case 4:

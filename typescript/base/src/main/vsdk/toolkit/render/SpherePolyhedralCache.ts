@@ -154,8 +154,10 @@ export class SpherePolyhedralCache {
     /// Relative distance to a pole under which a vertex is taken as a pole
     private static readonly POLE_TOLERANCE: number = 1.0e-9;
 
-    private static readonly ENTRIES: Map<string, SpherePolyhedralCacheEntry> =
-        new Map<string, SpherePolyhedralCacheEntry>();
+    private static readonly ENTRIES: Map<string, SpherePolyhedralCacheEntry> = new Map<
+        string,
+        SpherePolyhedralCacheEntry
+    >();
 
     private constructor() {}
 
@@ -231,8 +233,17 @@ export class SpherePolyhedralCache {
                 uvs[2 * i + 1] = (phi[k]! + Math.PI / 2) / Math.PI;
             }
         }
-        return new SpherePolyhedralCacheEntry(radius, meridians, parallels, solid, positions,
-            normals, uvs, tangents, biNormals);
+        return new SpherePolyhedralCacheEntry(
+            radius,
+            meridians,
+            parallels,
+            solid,
+            positions,
+            normals,
+            uvs,
+            tangents,
+            biNormals,
+        );
     }
 
     /**
@@ -311,8 +322,7 @@ export class SpherePolyhedralCache {
 
                 if (normal.dotProduct(center) >= 0) {
                     triangles.push(a, b, c);
-                }
-                else {
+                } else {
                     triangles.push(a, c, b);
                 }
             }

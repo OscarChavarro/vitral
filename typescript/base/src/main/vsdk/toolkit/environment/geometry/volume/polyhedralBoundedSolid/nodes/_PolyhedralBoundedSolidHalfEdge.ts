@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 import { FundamentalEntity } from "../../../../../common/FundamentalEntity.js";
+import type { ArrayLinkable } from "../../../../../common/dataStructures/ArrayLinkable.js";
 import { Vector3Dd } from "../../../../../common/linealAlgebra/Vector3Dd.js";
 import type { PolyhedralBoundedSolid } from "../PolyhedralBoundedSolid.js";
 import type { _PolyhedralBoundedSolidEdge } from "./_PolyhedralBoundedSolidEdge.js";
@@ -22,7 +23,7 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-export class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
+export class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity implements ArrayLinkable {
     public static readonly LEFT_SIDE = 1;
     public static readonly RIGHT_SIDE = 2;
     public static readonly NO_SIDE = 3;
@@ -41,6 +42,26 @@ export class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     //
     public id: number;
     private static currentId = 1;
+
+    /// Place of this half-edge in `parentLoop.halfEdgesList`. It plays the
+    /// role of the intrusive `nxt`/`prv` links of [MANT1988] Program 10.1:
+    /// `next()` and `previous()` are O(1) through it. The list keeps it up
+    /// to date (see `ArrayLinkable`).
+    private listOwner: object | null = null;
+    private listIndex = -1;
+
+    public getListOwner(): object | null {
+        return this.listOwner;
+    }
+
+    public getListIndex(): number {
+        return this.listIndex;
+    }
+
+    public setListSlot(owner: object | null, index: number): void {
+        this.listOwner = owner;
+        this.listIndex = index;
+    }
 
     //=================================================================
     public constructor(

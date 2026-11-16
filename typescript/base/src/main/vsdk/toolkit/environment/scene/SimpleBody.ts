@@ -141,7 +141,8 @@ export class SimpleBody extends SceneSolid {
     }
 
     public setRotation(r: Matrix4x4d): void {
-        if (this.explicitAffinePlacement) throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
+        if (this.explicitAffinePlacement)
+            throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
         const sanitized = r.withoutTranslation();
         this.rotationQuaternion = sanitized.exportToQuaternion().normalized();
         this.rotation = sanitized;
@@ -159,7 +160,8 @@ export class SimpleBody extends SceneSolid {
     }
 
     public setRotationInverse(ri: Matrix4x4d): void {
-        if (this.explicitAffinePlacement) throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
+        if (this.explicitAffinePlacement)
+            throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
         const sanitized = ri.withoutTranslation();
         this.rotationInverseQuaternion = sanitized.exportToQuaternion().normalized();
         this.rotationInverse = sanitized;
@@ -320,7 +322,8 @@ export class SimpleBody extends SceneSolid {
     }
 
     public setScale(s: Vector3Dd): void {
-        if (this.explicitAffinePlacement) throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
+        if (this.explicitAffinePlacement)
+            throw new IllegalStateException("Cannot decompose an arbitrary affine placement");
         this.scale = s;
         this.hasInvertibleScale =
             Math.abs(this.scale.x()) > VSDK.EPSILON &&
@@ -376,7 +379,11 @@ export class SimpleBody extends SceneSolid {
 
         const requestedDetailMask = outHit !== null ? outHit.getRequiredDetailMask() : RayHit.DETAIL_NONE;
 
-        if (this.hasTranslationOnlyTransform && requestedDetailMask === RayHit.DETAIL_NONE && this.hasSphereGeometry()) {
+        if (
+            this.hasTranslationOnlyTransform &&
+            requestedDetailMask === RayHit.DETAIL_NONE &&
+            this.hasSphereGeometry()
+        ) {
             return this.doIntersectionWithTranslationOnlySphereFastPath(inOutRay, outHit);
         }
 
@@ -540,7 +547,11 @@ export class SimpleBody extends SceneSolid {
         hit.setRay(ray.withT(t));
     }
 
-    private doIntersectionWithTranslationOnly(inOutRay: Ray, outHit: RayHit | null, requiredDetailMask: number): boolean {
+    private doIntersectionWithTranslationOnly(
+        inOutRay: Ray,
+        outHit: RayHit | null,
+        requiredDetailMask: number,
+    ): boolean {
         const localRay = inOutRay.withOrigin(inOutRay.getOrigin().subtract(this.position));
 
         const localHitStorage = outHit !== null ? null : new RayHit();

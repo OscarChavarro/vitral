@@ -2,7 +2,6 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-import { IllegalArgumentException } from "../../../../../../java/lang/IllegalArgumentException.js";
 import { StringBuilder } from "../../../../../../java/lang/StringBuilder.js";
 import { AtomicLong } from "../../../../../../java/util/concurrent/atomic/AtomicLong.js";
 import { VSDK } from "../../../../common/VSDK.js";
@@ -10,8 +9,8 @@ import { Logger } from "../../../../common/logging/Logger.js";
 import type { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidGeometricValidator } from "./PolyhedralBoundedSolidGeometricValidator.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "./PolyhedralBoundedSolidNumericPolicy.js";
-import { PolyhedralBoundedSolidTopologyEditing } from "./PolyhedralBoundedSolidTopologyEditing.js";
 import { PolyhedralBoundedSolidTopologySummary } from "./PolyhedralBoundedSolidTopologySummary.js";
+import { _GeometricCollapsedLaminaStrategy } from "./_GeometricCollapsedLaminaStrategy.js";
 import { _GeometricPlanarityStrategy } from "./_GeometricPlanarityStrategy.js";
 import { _GeometricStrictFaceIntersectionsStrategy } from "./_GeometricStrictFaceIntersectionsStrategy.js";
 import { _GeometricStrictLoopsStrategy } from "./_GeometricStrictLoopsStrategy.js";
@@ -62,23 +61,23 @@ export class PolyhedralBoundedSolidValidationEngine {
     }
 
     /**
-    Validates both operands of a boolean operation before the pipeline starts.
-    Runs validateIntermediate on each solid, checks for coincident vertices and
-    for ID uniqueness.  Attempts to weld any coincident vertices found, then
-    re-validates.  Returns true only when both solids pass all checks.
-    Throws {@link IllegalArgumentException} when a solid remains invalid after
-    the automated repair.
+    Validates both operands of a boolean operation before the pipeline
+    starts: validateIntermediate on each solid, no coincident vertices, and
+    unique face and vertex ids. Returns true only when both solids pass all
+    checks; the reasons go to `msg`.
+
+    <p>It only reads. Until plan-stage11 Phase C it welded the coincident
+    vertices it found and validated again, so validating could change the
+    operands. The set operator now prepares its own copies of the operands
+    before calling this (see
+    {@link PolyhedralBoundedSolidTopologyEditing#weldCoincidentVertices}).</p>
     */
     public static validateBooleanInputs(
         solidA: PolyhedralBoundedSolid,
         solidB: PolyhedralBoundedSolid,
         msg: StringBuilder,
     ): boolean {
-        let ok: boolean;
-        let welded: number;
-
-        ok = true;
-        const sub = new StringBuilder();
+        let ok = true;
 
         if (!PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidA)) {
             msg.append("solidA failed validateIntermediate\n");
@@ -91,45 +90,25 @@ export class PolyhedralBoundedSolidValidationEngine {
         if (!ok) {
             return false;
         }
+        ok = PolyhedralBoundedSolidValidationEngine.validateBooleanInput("solidA", solidA, msg) && ok;
+        ok = PolyhedralBoundedSolidValidationEngine.validateBooleanInput("solidB", solidB, msg) && ok;
+        return ok;
+    }
 
-        const ctxA = PolyhedralBoundedSolidNumericPolicy.forSolid(solidA);
-        const ctxB = PolyhedralBoundedSolidNumericPolicy.forSolid(solidB);
+    private static validateBooleanInput(name: string, solid: PolyhedralBoundedSolid, msg: StringBuilder): boolean {
+        const context = PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+        const sub = new StringBuilder();
+        let ok = true;
 
-        sub.clear();
-        if (!PolyhedralBoundedSolidGeometricValidator.validateNoCoincidentVertices(solidA, ctxA, sub)) {
-            welded = PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices(solidA, ctxA);
-            msg.append("solidA had coincident vertices; welded ").append(String(welded)).append(" pair(s)\n");
-            if (!PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidA)) {
-                msg.append("solidA failed validateIntermediate after weld\n");
-                throw new IllegalArgumentException(
-                    "solidA is topologically invalid after coincident-vertex weld:\n" + msg.toString(),
-                );
-            }
-        }
-
-        sub.clear();
-        if (!PolyhedralBoundedSolidGeometricValidator.validateNoCoincidentVertices(solidB, ctxB, sub)) {
-            welded = PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices(solidB, ctxB);
-            msg.append("solidB had coincident vertices; welded ").append(String(welded)).append(" pair(s)\n");
-            if (!PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidB)) {
-                msg.append("solidB failed validateIntermediate after weld\n");
-                throw new IllegalArgumentException(
-                    "solidB is topologically invalid after coincident-vertex weld:\n" + msg.toString(),
-                );
-            }
-        }
-
-        sub.clear();
-        if (!PolyhedralBoundedSolidGeometricValidator.validateUniqueFaceAndVertexIds(solidA, sub)) {
-            msg.append("solidA has ID violations:\n").append(sub.toString());
+        if (!PolyhedralBoundedSolidGeometricValidator.validateNoCoincidentVertices(solid, context, sub)) {
+            msg.append(name).append(" has coincident vertices:\n").append(sub.toString());
             ok = false;
         }
         sub.clear();
-        if (!PolyhedralBoundedSolidGeometricValidator.validateUniqueFaceAndVertexIds(solidB, sub)) {
-            msg.append("solidB has ID violations:\n").append(sub.toString());
+        if (!PolyhedralBoundedSolidGeometricValidator.validateUniqueFaceAndVertexIds(solid, sub)) {
+            msg.append(name).append(" has ID violations:\n").append(sub.toString());
             ok = false;
         }
-
         return ok;
     }
 
@@ -156,6 +135,7 @@ export class PolyhedralBoundedSolidValidationEngine {
         strategies.push(new _GeometricPlanarityStrategy());
         strategies.push(new _TopologicalIntegrityStrategy());
         strategies.push(new _GeometricStrictLoopsStrategy());
+        strategies.push(new _GeometricCollapsedLaminaStrategy());
         strategies.push(new _GeometricStrictFaceIntersectionsStrategy());
 
         let i: number;

@@ -15,11 +15,23 @@ export class PointerCursor {
   /** Normal pointer over the title of a viewport (feedback that it can be clicked) */
   static readonly VIEWPORT_TITLE = new PointerCursor('VIEWPORT_TITLE', null, 'ViewportTitle');
   /** Camera rotation gesture */
-  static readonly CAMERA_ROTATE = new PointerCursor('CAMERA_ROTATE', 'cursor_camrotate.gif', 'CameraRotation');
+  static readonly CAMERA_ROTATE = new PointerCursor(
+    'CAMERA_ROTATE',
+    'cursor_camrotate.gif',
+    'CameraRotation',
+  );
   /** Camera translation gesture */
-  static readonly CAMERA_TRANSLATE = new PointerCursor('CAMERA_TRANSLATE', 'cursor_camtranslate.gif', 'CameraTranslation');
+  static readonly CAMERA_TRANSLATE = new PointerCursor(
+    'CAMERA_TRANSLATE',
+    'cursor_camtranslate.gif',
+    'CameraTranslation',
+  );
   /** Camera advance gesture */
-  static readonly CAMERA_ADVANCE = new PointerCursor('CAMERA_ADVANCE', 'cursor_camadvance.gif', 'CameraAdvance');
+  static readonly CAMERA_ADVANCE = new PointerCursor(
+    'CAMERA_ADVANCE',
+    'cursor_camadvance.gif',
+    'CameraAdvance',
+  );
   /** Selected things can be translated (translation mode with a selection) */
   static readonly TRANSLATE = new PointerCursor('TRANSLATE', 'cursor_translate.png', 'Translation');
   /** Selected things can be rotated (rotation mode with a selection) */

@@ -2,6 +2,7 @@ import { PolyhedralBoundedSolidEulerOperators } from "../../volume/polyhedralBou
 
 // Vitral classes
 import { VSDK } from "../../../../common/VSDK.js";
+import { VSDKFatalException } from "../../../../common/VSDKFatalException.js";
 import { Logger } from "../../../../common/logging/Logger.js";
 import { Matrix4x4d } from "../../../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
@@ -10,6 +11,7 @@ import { ParametricCurve } from "../../curve/ParametricCurve.js";
 import { PolyhedralBoundedSolid } from "../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import { PolyhedralBoundedSolidValidationEngine } from "../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
+import { PolyhedralBoundedSolidStructuralCopy } from "../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidStructuralCopy.js";
 import type { _PolyhedralBoundedSolidFace } from "../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
 import type { _PolyhedralBoundedSolidLoop } from "../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.js";
@@ -19,6 +21,9 @@ import { PolyhedralBoundedSolidTopologyEditing } from "../../volume/polyhedralBo
 import { _BoundaryRepresentationFromCurveBuildState } from "./construction/_BoundaryRepresentationFromCurveBuildState.js";
 import { _PolyhedralBoundedSolidSplitter } from "./slicing/_PolyhedralBoundedSolidSplitter.js";
 import { _PolyhedralBoundedSolidSetOperator } from "./booleans/_PolyhedralBoundedSolidSetOperator.js";
+import { _PolyhedralBoundedSolidSetOperandAligner } from "./booleans/_PolyhedralBoundedSolidSetOperandAligner.js";
+import { _PolyhedralBoundedSolidSetNonIntersectingClassifier } from "./booleans/classification/_PolyhedralBoundedSolidSetNonIntersectingClassifier.js";
+import { SolidOperationFailedException } from "./SolidOperationFailedException.js";
 import { PolyhedralBoundedSolidStatistics } from "../../../../common/statistics/PolyhedralBoundedSolidStatistics.js";
 
 /**
@@ -32,6 +37,11 @@ export class PolyhedralBoundedSolidModeler extends ProcessingElement {
     public static readonly UNION = 1;
     public static readonly INTERSECTION = 2;
     public static readonly SUBTRACT = 3;
+
+    // Java serializes the public set operations and splits on a static
+    // KERNEL_LOCK, because the kernel keeps per-call state in static fields
+    // (Fable5.2Analysis.md Stage F step 3). A JavaScript realm runs one call
+    // at a time and workers share no statics, so no lock is needed here.
 
     // Weld tolerance for glyph/poly-line simplification, expressed as a
     // fraction of the contour bounding-box diagonal.
@@ -381,23 +391,52 @@ export class PolyhedralBoundedSolidModeler extends ProcessingElement {
         outSolidsAbove: PolyhedralBoundedSolid[],
         outSolidsBelow: PolyhedralBoundedSolid[],
     ): void {
-        _PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane, outSolidsAbove, outSolidsBelow);
+        try {
+            _PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane, outSolidsAbove, outSolidsBelow);
+        } catch (e) {
+            if (e instanceof VSDKFatalException) {
+                throw new SolidOperationFailedException("Split failed: " + (e.getMessage() ?? "null"), e);
+            }
+            throw e;
+        }
     }
 
     /**
-    Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp` with
-    configurable strict result validation. Java declares four overloads
-    (`op`; `op, withDebug`; `op, withDebug, maximizeResultFaces`; and the full
-    form); the shorter ones enable final face maximization and strict
-    validation.
+    Regularized set operation ([MANT1988] Ch. 15) with configurable strict
+    result validation. Java declares four overloads (`op`; `op, withDebug`;
+    `op, withDebug, maximizeResultFaces`; and the full form); the shorter
+    ones enable final face maximization and strict validation.
+
+    <p>The operands are not modified: the operation runs on structural
+    copies of them ([MANT1988] Sec. 15.8, `scopy`). Use
+    {@link #setOpDestructive} to skip the copies when the operands are no
+    longer needed; it consumes them as the book's algorithm does.</p>
 
     <p>Strict validation performs global shell/Euler analysis and an
     all-face-pairs intersection scan. It is enabled by default by the shorter
     overloads; callers can pass `false` here for an explicit
     performance/legacy-compatibility opt-out.</p>
 
-    @throws IllegalStateException when a completed boolean result fails the
-        strict B-Rep postcondition
+    <p>Empty results. A solid with no faces is returned when the regularized
+    result is empty (A \ A, the intersection of disjoint or touching
+    solids, A \ B with A inside B); {@link #isEmptyResult} tells it apart.
+    When the operands prove that the result cannot be empty (a union of
+    non-empty solids, an intersection of solids whose interiors overlap,
+    A \ B with a point of A strictly outside B) and the pipeline returned
+    nothing, {@link SolidOperationFailedException} is raised instead of
+    silently returning an empty solid.</p>
+
+    <p>The public operations of this class are serialized on one lock in
+    Java: the kernel still keeps per-call state in static fields, so
+    concurrent calls from several threads run one after the other.</p>
+
+    @throws NonManifoldBooleanResultException when the result would be
+        non-manifold (a union of solids touching only along edges or at
+        vertices); raised even when `doStrictValidation` is false
+    @throws InvalidSolidResultException when a completed boolean result
+        fails the strict B-Rep postcondition
+    @throws SolidOperationFailedException when the operation fails or lost
+        the solid
     */
     public static setOp(
         inSolidA: PolyhedralBoundedSolid,
@@ -407,8 +446,51 @@ export class PolyhedralBoundedSolidModeler extends ProcessingElement {
         maximizeResultFaces = true,
         doStrictValidation = true,
     ): PolyhedralBoundedSolid {
+        let result: PolyhedralBoundedSolid;
+
         PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
-        return _PolyhedralBoundedSolidSetOperator.setOp(
+        result = PolyhedralBoundedSolidModeler.runSetOp(
+            PolyhedralBoundedSolidStructuralCopy.copy(inSolidA),
+            PolyhedralBoundedSolidStructuralCopy.copy(inSolidB),
+            op,
+            withDebug,
+            maximizeResultFaces,
+            doStrictValidation,
+        );
+        if (
+            PolyhedralBoundedSolidModeler.isEmptyResult(result) &&
+            PolyhedralBoundedSolidModeler.resultCannotBeEmpty(inSolidA, inSolidB, op)
+        ) {
+            throw new SolidOperationFailedException(
+                "Boolean operation lost the solid: op=" +
+                    PolyhedralBoundedSolidModeler.operationName(op) +
+                    " returned an empty solid but " +
+                    "the operands prove the result is not empty (path=" +
+                    PolyhedralBoundedSolidModeler.getLastSetOpResultPath() +
+                    ")",
+            );
+        }
+        return result;
+    }
+
+    /**
+    Destructive form of {@link #setOp}: no copies are
+    made and the operands are consumed ([MANT1988] Sec. 15.8: "the parts of
+    A and B not required in the final result will remain in the original
+    solids"). After the call the operands hold fragments and must not be
+    used. The empty-result witness check is not done, since it needs intact
+    operands.
+    */
+    public static setOpDestructive(
+        inSolidA: PolyhedralBoundedSolid,
+        inSolidB: PolyhedralBoundedSolid,
+        op: number,
+        withDebug: boolean,
+        maximizeResultFaces: boolean,
+        doStrictValidation: boolean,
+    ): PolyhedralBoundedSolid {
+        PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
+        return PolyhedralBoundedSolidModeler.runSetOp(
             inSolidA,
             inSolidB,
             op,
@@ -416,5 +498,112 @@ export class PolyhedralBoundedSolidModeler extends ProcessingElement {
             maximizeResultFaces,
             doStrictValidation,
         );
+    }
+
+    /**
+    True for the empty solid a set operation or a split returns when the
+    regularized result is empty: no faces at all.
+    */
+    public static isEmptyResult(result: PolyhedralBoundedSolid | null): boolean {
+        return result !== null && result.getPolygonsList().size() === 0;
+    }
+
+    private static runSetOp(
+        inSolidA: PolyhedralBoundedSolid,
+        inSolidB: PolyhedralBoundedSolid,
+        op: number,
+        withDebug: boolean,
+        maximizeResultFaces: boolean,
+        doStrictValidation: boolean,
+    ): PolyhedralBoundedSolid {
+        try {
+            return _PolyhedralBoundedSolidSetOperator.setOp(
+                inSolidA,
+                inSolidB,
+                op,
+                withDebug,
+                maximizeResultFaces,
+                doStrictValidation,
+            );
+        } catch (e) {
+            if (e instanceof VSDKFatalException) {
+                throw new SolidOperationFailedException(
+                    "Boolean operation failed: op=" +
+                        PolyhedralBoundedSolidModeler.operationName(op) +
+                        " (path=" +
+                        PolyhedralBoundedSolidModeler.getLastSetOpResultPath() +
+                        "): " +
+                        (e.getMessage() ?? "null"),
+                    e,
+                );
+            }
+            throw e;
+        }
+    }
+
+    /**
+    Witnesses that the regularized result of `op` on the intact operands
+    is not empty. Only sufficient conditions are used, so false means
+    "could be empty", never "is empty".
+    */
+    private static resultCannotBeEmpty(
+        inSolidA: PolyhedralBoundedSolid | null,
+        inSolidB: PolyhedralBoundedSolid | null,
+        op: number,
+    ): boolean {
+        const emptyA = inSolidA === null || PolyhedralBoundedSolidModeler.isEmptyResult(inSolidA);
+        const emptyB = inSolidB === null || PolyhedralBoundedSolidModeler.isEmptyResult(inSolidB);
+
+        if (op === PolyhedralBoundedSolidModeler.UNION) {
+            return !emptyA || !emptyB;
+        }
+        if (emptyA || (emptyB && op === PolyhedralBoundedSolidModeler.INTERSECTION)) {
+            return false;
+        }
+        if (!emptyB) {
+            // The operation aligned B with A inside the tolerance band
+            // before deciding anything; the witnesses are looked for in
+            // the same operands, on copies. Judged on the operands as
+            // given, a solid that sticks out of the other by one tolerance
+            // "proved" that an empty difference was wrong.
+            inSolidA = PolyhedralBoundedSolidStructuralCopy.copy(inSolidA);
+            inSolidB = PolyhedralBoundedSolidStructuralCopy.copy(inSolidB);
+            _PolyhedralBoundedSolidSetOperandAligner.align(inSolidA!, inSolidB!);
+        }
+        if (op === PolyhedralBoundedSolidModeler.INTERSECTION) {
+            return _PolyhedralBoundedSolidSetNonIntersectingClassifier.interiorsOverlap(inSolidA!, inSolidB!);
+        }
+        if (op === PolyhedralBoundedSolidModeler.SUBTRACT) {
+            return (
+                emptyB ||
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier.hasBoundaryPointOutside(inSolidA!, inSolidB!)
+            );
+        }
+        return false;
+    }
+
+    private static operationName(op: number): string {
+        switch (op) {
+            case PolyhedralBoundedSolidModeler.UNION:
+                return "UNION";
+            case PolyhedralBoundedSolidModeler.INTERSECTION:
+                return "INTERSECTION";
+            case PolyhedralBoundedSolidModeler.SUBTRACT:
+                return "SUBTRACT";
+            default:
+                return "op#" + op;
+        }
+    }
+
+    /**
+    Reports which path produced the last `setOp` result on the calling
+    thread: "normal-pipeline" when the [MANT1988] Ch. 15 pipeline answered,
+    otherwise the name of the preflight that did (for example
+    "touching-only-preflight" or "no-intersection-after-classify").
+    Returns null before the first call or when the last call failed before
+    producing a result.
+    */
+    public static getLastSetOpResultPath(): string | null {
+        return _PolyhedralBoundedSolidSetOperator.getLastResultPath();
     }
 }

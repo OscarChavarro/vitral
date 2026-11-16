@@ -44,8 +44,7 @@ export class InputGizmo2DPainter {
     private static readonly BASE_UNDERLINE_DISTANCE = 2;
     private static readonly BASE_UNDERLINE_THICKNESS = 2;
 
-    private constructor() {
-    }
+    private constructor() {}
 
     /**
     @param out list receiving the primitives
@@ -55,10 +54,14 @@ export class InputGizmo2DPainter {
     @param scaler sizes of the elements for the resolution of the screen
     @param measurer measures the texts as the backend draws them
     */
-    public static paint(out: Gizmo2DDrawList | null, gizmo: InputGizmo | null,
-                        viewportWidth: number, viewportHeight: number,
-                        scaler: ViewportElementScaler,
-                        measurer: InputGizmo2DPainterTextMeasurer): void {
+    public static paint(
+        out: Gizmo2DDrawList | null,
+        gizmo: InputGizmo | null,
+        viewportWidth: number,
+        viewportHeight: number,
+        scaler: ViewportElementScaler,
+        measurer: InputGizmo2DPainterTextMeasurer,
+    ): void {
         if (out === null || gizmo === null || gizmo.getNumberOfFields() <= 0) {
             return;
         }
@@ -86,36 +89,50 @@ export class InputGizmo2DPainter {
             // An empty text (i.e. all its characters deleted) is a blank box
             texts[i] = gizmo.getDisplayText(i).length === 0 ? " " : gizmo.getDisplayText(i);
             textWidths[i] = measurer.getTextWidth(texts[i]!, fontSize);
-            frameWidths[i] = Math.max(referenceWidth, textWidths[i]!) +
-                2*(paddingX + frameThickness);
+            frameWidths[i] = Math.max(referenceWidth, textWidths[i]!) + 2 * (paddingX + frameThickness);
             totalWidth += frameWidths[i]!;
         }
 
-        const frameHeight = textHeight + 2*(paddingY + frameThickness);
+        const frameHeight = textHeight + 2 * (paddingY + frameThickness);
         let x = viewportWidth - margin - totalWidth;
         const top = viewportHeight - margin - frameHeight;
 
         for (let i = 0; i < count; i++) {
-            InputGizmo2DPainter.addFrame(out, x, top, frameWidths[i]!, frameHeight,
-                frameThickness, colors[i]!);
+            InputGizmo2DPainter.addFrame(out, x, top, frameWidths[i]!, frameHeight, frameThickness, colors[i]!);
             if (i === gizmo.getSelectedField()) {
-                out.addOverlayRectangle(x, top + frameHeight + underlineDistance,
-                    frameWidths[i]!, underlineThickness, colors[i]!);
+                out.addOverlayRectangle(
+                    x,
+                    top + frameHeight + underlineDistance,
+                    frameWidths[i]!,
+                    underlineThickness,
+                    colors[i]!,
+                );
             }
-            out.addOverlayLabel(x + Math.trunc((frameWidths[i]! - textWidths[i]!) / 2),
-                top + frameHeight - frameThickness - paddingY, texts[i]!, colors[i]!,
-                fontSize, Gizmo2DDrawList.Alignment.LOWER_LEFT);
+            out.addOverlayLabel(
+                x + Math.trunc((frameWidths[i]! - textWidths[i]!) / 2),
+                top + frameHeight - frameThickness - paddingY,
+                texts[i]!,
+                colors[i]!,
+                fontSize,
+                Gizmo2DDrawList.Alignment.LOWER_LEFT,
+            );
             x += frameWidths[i]! + gap;
         }
     }
 
-    private static addFrame(out: Gizmo2DDrawList, x: number, y: number, width: number,
-                            height: number, thickness: number, c: ColorRgb): void {
+    private static addFrame(
+        out: Gizmo2DDrawList,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        thickness: number,
+        c: ColorRgb,
+    ): void {
         out.addOverlayRectangle(x, y, width, thickness, c);
         out.addOverlayRectangle(x, y + height - thickness, width, thickness, c);
-        out.addOverlayRectangle(x, y + thickness, thickness, height - 2*thickness, c);
-        out.addOverlayRectangle(x + width - thickness, y + thickness, thickness,
-            height - 2*thickness, c);
+        out.addOverlayRectangle(x, y + thickness, thickness, height - 2 * thickness, c);
+        out.addOverlayRectangle(x + width - thickness, y + thickness, thickness, height - 2 * thickness, c);
     }
 }
 

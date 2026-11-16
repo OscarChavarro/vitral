@@ -1,8 +1,6 @@
 import { describe, it } from "vitest";
 
-import type { ArrayList } from "java/util/ArrayList.js";
 import type { PolyhedralBoundedSolid } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
-import type { _PolyhedralBoundedSolidHalfEdge } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
 import { PolyhedralBoundedSolidModeler } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
 import { SimpleTestGeometryLibrary } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.js";
 import { _PolyhedralBoundedSolidSetGeometricPredicateProcessor } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetGeometricPredicateProcessor.js";
@@ -27,15 +25,7 @@ case?</li>
 loose survivors that end up unmatched?</li>
 </ul>
 
-<p>Runtime boundary: Java reads the connector's static `endsa`/`endsb`
-through reflection; TypeScript erases `private`, so the same fields are read
-through a structural cast.</p>
  */
-interface ConnectorStatics {
-    endsa: ArrayList<_PolyhedralBoundedSolidHalfEdge> | null;
-    endsb: ArrayList<_PolyhedralBoundedSolidHalfEdge> | null;
-}
-
 describe("SectoroverlapTraceDiagnosticTest", () => {
     function pad(text: string, width: number): string {
         return text.length >= width ? text : text + " ".repeat(width - text.length);
@@ -47,43 +37,6 @@ describe("SectoroverlapTraceDiagnosticTest", () => {
 
     function signed(value: number): string {
         return (value >= 0 ? "+" : "") + value.toFixed(5);
-    }
-
-    function dumpHe(label: string, he: _PolyhedralBoundedSolidHalfEdge | null): void {
-        if (he === null) {
-            console.log("  " + label + " = null");
-            return;
-        }
-        const face = he.parentLoop !== null && he.parentLoop.parentFace !== null ? he.parentLoop.parentFace.id : -1;
-        const from = he.startingVertex !== null ? he.startingVertex.id : -1;
-        let to = -1;
-        if (he.next() !== null && he.next()!.startingVertex !== null) {
-            to = he.next()!.startingVertex.id;
-        }
-        let side = "?";
-        if (he.parentEdge !== null) {
-            if (he === he.parentEdge.rightHalf) side = "R";
-            else if (he === he.parentEdge.leftHalf) side = "L";
-        }
-        console.log("  " + label + " face=" + face + " v=" + from + "->" + to + " side=" + side);
-    }
-
-    function dumpEndsLists(): void {
-        const connectorStatics = _PolyhedralBoundedSolidSetNullEdgesConnector as unknown as ConnectorStatics;
-        const endsa = connectorStatics.endsa;
-        const endsb = connectorStatics.endsb;
-        if (endsa !== null && !endsa.isEmpty()) {
-            console.log("\n  --- endsa survivors ---");
-            for (let i = 0; i < endsa.size(); i++) {
-                dumpHe("endsa[" + i + "]", endsa.get(i));
-            }
-        }
-        if (endsb !== null && !endsb.isEmpty()) {
-            console.log("  --- endsb survivors ---");
-            for (let i = 0; i < endsb.size(); i++) {
-                dumpHe("endsb[" + i + "]", endsb.get(i));
-            }
-        }
     }
 
     function runDiagnostic(label: string, pair: PolyhedralBoundedSolid[], op: number): void {
@@ -159,7 +112,6 @@ describe("SectoroverlapTraceDiagnosticTest", () => {
                 }
             }
 
-            dumpEndsLists();
             console.log("================================\n");
         }
     }

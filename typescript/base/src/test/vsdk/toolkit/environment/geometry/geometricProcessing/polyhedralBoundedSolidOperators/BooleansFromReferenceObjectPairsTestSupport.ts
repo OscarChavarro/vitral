@@ -1,4 +1,3 @@
-import { IllegalStateException } from "java/lang/IllegalStateException.js";
 import { Math as JavaMath } from "java/lang/Math.js";
 import { ArrayList } from "java/util/ArrayList.js";
 import { Collections } from "java/util/Collections.js";
@@ -13,7 +12,6 @@ sibling module because `KurlanderMotif4OperationMatrixTest` reuses it and
 importing a `.spec.ts` file would re-run that file's tests.</p>
  */
 export class TopologicalSummary {
-    private readonly placeholderLabel: string | null;
     public readonly shellCount: number;
     private readonly faceCount: number;
     private readonly edgeCount: number;
@@ -27,7 +25,6 @@ export class TopologicalSummary {
     private readonly minMaxMicrounits: number[];
 
     private constructor(
-        placeholderLabel: string | null,
         shellCount: number,
         faceCount: number,
         edgeCount: number,
@@ -40,7 +37,6 @@ export class TopologicalSummary {
         verticesPerLoopSorted: number[],
         minMaxMicrounits: number[],
     ) {
-        this.placeholderLabel = placeholderLabel;
         this.shellCount = shellCount;
         this.faceCount = faceCount;
         this.edgeCount = edgeCount;
@@ -52,10 +48,6 @@ export class TopologicalSummary {
         this.loopsPerFaceSorted = loopsPerFaceSorted;
         this.verticesPerLoopSorted = verticesPerLoopSorted;
         this.minMaxMicrounits = minMaxMicrounits;
-    }
-
-    public static placeholder(label: string): TopologicalSummary {
-        return new TopologicalSummary(label, -1, -1, -1, -1, -1, -1, -1, [], [], [], []);
     }
 
     public static of(
@@ -72,7 +64,6 @@ export class TopologicalSummary {
         minMaxMicrounits: number[],
     ): TopologicalSummary {
         return new TopologicalSummary(
-            null,
             shellCount,
             faceCount,
             edgeCount,
@@ -119,7 +110,6 @@ export class TopologicalSummary {
         const shellCount = shellFaceCountsSorted.length;
 
         return new TopologicalSummary(
-            null,
             shellCount,
             faceCount,
             edgeCount,
@@ -227,13 +217,6 @@ export class TopologicalSummary {
             return true;
         }
 
-        if (this.placeholderLabel !== null || other.placeholderLabel !== null) {
-            throw new IllegalStateException(
-                "Missing hardcoded reference summary: " +
-                    (this.placeholderLabel !== null ? this.placeholderLabel : other.placeholderLabel),
-            );
-        }
-
         return (
             this.shellCount === other.shellCount &&
             this.faceCount === other.faceCount &&
@@ -262,10 +245,6 @@ export class TopologicalSummary {
     }
 
     public toString(): string {
-        if (this.placeholderLabel !== null) {
-            return "TopologicalSummary{placeholder=" + this.placeholderLabel + "}";
-        }
-
         return (
             "TopologicalSummary{" +
             "shellCount=" +

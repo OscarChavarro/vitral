@@ -361,7 +361,12 @@ export class Viewport {
     /**
     Assigns the percent-based area of this viewport inside its container.
     */
-    public setPercentArea(startXPercent: number, startYPercent: number, sizeXPercent: number, sizeYPercent: number): void {
+    public setPercentArea(
+        startXPercent: number,
+        startYPercent: number,
+        sizeXPercent: number,
+        sizeYPercent: number,
+    ): void {
         this.startXPercent = startXPercent;
         this.startYPercent = startYPercent;
         this.sizeXPercent = sizeXPercent;

@@ -20,7 +20,11 @@ export class _BinnedSahBox {
     }
 
     public isEmpty(): boolean {
-        return this.minimum[0]! > this.maximum[0]! || this.minimum[1]! > this.maximum[1]! || this.minimum[2]! > this.maximum[2]!;
+        return (
+            this.minimum[0]! > this.maximum[0]! ||
+            this.minimum[1]! > this.maximum[1]! ||
+            this.minimum[2]! > this.maximum[2]!
+        );
     }
 
     public enclose(other: _BinnedSahBox): void {

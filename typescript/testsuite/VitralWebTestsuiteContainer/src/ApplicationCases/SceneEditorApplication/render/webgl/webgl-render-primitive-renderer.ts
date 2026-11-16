@@ -27,8 +27,17 @@ export class WebGLRenderPrimitiveRenderer {
     lights: Iterable<Light | null> | null,
     quality: RendererConfiguration,
   ): Promise<void> {
-    await WebGLGeometryRenderer.draw(gl, primitive.getGeometry(), camera, lights,
-      primitive.getMaterial(), quality, null, null, primitive.getTransform());
+    await WebGLGeometryRenderer.draw(
+      gl,
+      primitive.getGeometry(),
+      camera,
+      lights,
+      primitive.getMaterial(),
+      quality,
+      null,
+      null,
+      primitive.getTransform(),
+    );
   }
 
   /**

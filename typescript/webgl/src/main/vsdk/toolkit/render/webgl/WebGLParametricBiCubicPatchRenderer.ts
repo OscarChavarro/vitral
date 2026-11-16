@@ -51,8 +51,17 @@ export class WebGLParametricBiCubicPatchRenderer {
         normalMap: RGBImageUncompressed | null,
         localTransform: Matrix4x4d | null,
     ): Promise<void> {
-        await WebGLGeometryRenderer.draw(gl, patch, camera, lights, material, quality,
-            textureMap, normalMap, localTransform);
+        await WebGLGeometryRenderer.draw(
+            gl,
+            patch,
+            camera,
+            lights,
+            material,
+            quality,
+            textureMap,
+            normalMap,
+            localTransform,
+        );
     }
 
     /**
@@ -61,10 +70,20 @@ export class WebGLParametricBiCubicPatchRenderer {
     and its number of approximation steps
     */
     public static meshKey(patch: ParametricBiCubicPatch): string {
-        return "parametricbicubicpatch/" + identityHashCode(patch) + "/" +
-            patch.getType() + "/" + patch.getApproximationSteps() + "/" +
-            patch.geometryMatrixX.hashCode() + "/" + patch.geometryMatrixY.hashCode() + "/" +
-            patch.geometryMatrixZ.hashCode();
+        return (
+            "parametricbicubicpatch/" +
+            identityHashCode(patch) +
+            "/" +
+            patch.getType() +
+            "/" +
+            patch.getApproximationSteps() +
+            "/" +
+            patch.geometryMatrixX.hashCode() +
+            "/" +
+            patch.geometryMatrixY.hashCode() +
+            "/" +
+            patch.geometryMatrixZ.hashCode()
+        );
     }
 
     /**
@@ -94,8 +113,10 @@ export class WebGLParametricBiCubicPatchRenderer {
         const minmax: ArrayLike<number> | null = patch.getMinMax();
         let size: number = 1.0;
         if (minmax !== null && minmax.length >= 6) {
-            size = Math.max(Math.abs(minmax[3]! - minmax[0]!),
-                Math.max(Math.abs(minmax[4]! - minmax[1]!), Math.abs(minmax[5]! - minmax[2]!)));
+            size = Math.max(
+                Math.abs(minmax[3]! - minmax[0]!),
+                Math.max(Math.abs(minmax[4]! - minmax[1]!), Math.abs(minmax[5]! - minmax[2]!)),
+            );
         }
         const builder: WebGLMeshBuilder = new WebGLMeshBuilder(size);
 
@@ -142,12 +163,9 @@ export class WebGLParametricBiCubicPatchRenderer {
         const average: Vector3Dd = n00.add(n10).add(n11).add(n01);
 
         if (average.dotProduct(face) >= 0) {
-            builder.addQuad(p00, n00, u0, v0, p10, n10, u1, v0,
-                p11, n11, u1, v1, p01, n01, u0, v1);
-        }
-        else {
-            builder.addQuad(p01, n01, u0, v1, p11, n11, u1, v1,
-                p10, n10, u1, v0, p00, n00, u0, v0);
+            builder.addQuad(p00, n00, u0, v0, p10, n10, u1, v0, p11, n11, u1, v1, p01, n01, u0, v1);
+        } else {
+            builder.addQuad(p01, n01, u0, v1, p11, n11, u1, v1, p10, n10, u1, v0, p00, n00, u0, v0);
         }
     }
 

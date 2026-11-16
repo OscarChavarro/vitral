@@ -90,13 +90,11 @@ export class Gizmo2DProjector {
     */
     public addStrip(strip: Vector3Dd[], color: ColorRgb, opacity: number): void {
         for (let i = 0; i + 3 < strip.length; i += 2) {
-            this.addPolygon([strip[i]!, strip[i + 1]!, strip[i + 3]!,
-                strip[i + 2]!], color, opacity);
+            this.addPolygon([strip[i]!, strip[i + 1]!, strip[i + 3]!, strip[i + 2]!], color, opacity);
         }
         if (strip.length % 2 === 1 && strip.length >= 3) {
             const last = strip.length - 1;
-            this.addPolygon([strip[last - 2]!, strip[last - 1]!,
-                strip[last]!], color, opacity);
+            this.addPolygon([strip[last - 2]!, strip[last - 1]!, strip[last]!], color, opacity);
         }
     }
 
@@ -125,8 +123,7 @@ export class Gizmo2DProjector {
     */
     public addTriangles(triangles: Vector3Dd[], color: ColorRgb, opacity: number): void {
         for (let i = 0; i + 2 < triangles.length; i += 3) {
-            this.addPolygon([triangles[i]!, triangles[i + 1]!,
-                triangles[i + 2]!], color, opacity);
+            this.addPolygon([triangles[i]!, triangles[i + 1]!, triangles[i + 2]!], color, opacity);
         }
     }
 
@@ -136,8 +133,7 @@ export class Gizmo2DProjector {
     Adds a segment.
     @param depthBias added to its depth (negative is towards the viewer)
     */
-    public addSegment(p0: Vector3Dd, p1: Vector3Dd, color: ColorRgb,
-                      lineWidth: number, depthBias: number): void {
+    public addSegment(p0: Vector3Dd, p1: Vector3Dd, color: ColorRgb, lineWidth: number, depthBias: number): void {
         let start = this.projection.multiply(new Vector4Dd(p0));
         let end = this.projection.multiply(new Vector4Dd(p1));
 
@@ -156,16 +152,22 @@ export class Gizmo2DProjector {
                 const intersection = Gizmo2DProjector.interpolate(start, end, d0 / denominator);
                 if (d0 < 0.0) {
                     start = intersection;
-                }
-                else {
+                } else {
                     end = intersection;
                 }
             }
         }
         const a = start.dividedByW();
         const b = end.dividedByW();
-        this.gizmo2DDrawList.addLine(this.toPixelX(a.x()), this.toPixelY(a.y()), this.toPixelX(b.x()),
-            this.toPixelY(b.y()), (a.z() + b.z()) / 2 + depthBias, color, lineWidth);
+        this.gizmo2DDrawList.addLine(
+            this.toPixelX(a.x()),
+            this.toPixelY(a.y()),
+            this.toPixelX(b.x()),
+            this.toPixelY(b.y()),
+            (a.z() + b.z()) / 2 + depthBias,
+            color,
+            lineWidth,
+        );
     }
 
     /**
@@ -187,11 +189,11 @@ export class Gizmo2DProjector {
     //=====================================================================
 
     private toPixelX(ndcX: number): number {
-        return (ndcX + 1.0) / 2.0 * this.width;
+        return ((ndcX + 1.0) / 2.0) * this.width;
     }
 
     private toPixelY(ndcY: number): number {
-        return (1.0 - ndcY) / 2.0 * this.height;
+        return ((1.0 - ndcY) / 2.0) * this.height;
     }
 
     /**
@@ -211,7 +213,7 @@ export class Gizmo2DProjector {
             if (dc >= 0.0) {
                 result.push(current);
             }
-            if ((dc >= 0.0) !== (dn >= 0.0)) {
+            if (dc >= 0.0 !== dn >= 0.0) {
                 result.push(Gizmo2DProjector.interpolate(current, next, dc / (dc - dn)));
             }
         }
@@ -223,7 +225,6 @@ export class Gizmo2DProjector {
     }
 
     private static evaluate(plane: readonly number[], point: Vector4Dd): number {
-        return plane[0]! * point.x() + plane[1]! * point.y() +
-            plane[2]! * point.z() + plane[3]! * point.w();
+        return plane[0]! * point.x() + plane[1]! * point.y() + plane[2]! * point.z() + plane[3]! * point.w();
     }
 }

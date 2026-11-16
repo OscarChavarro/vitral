@@ -3,12 +3,14 @@
 //=     Computer Science Press, 1988.                                       =
 
 import { Boolean as JavaBoolean } from "../../../../../../../../java/lang/Boolean.js";
-import type { ArrayList } from "../../../../../../../../java/util/ArrayList.js";
+import { ArrayList } from "../../../../../../../../java/util/ArrayList.js";
 import { VSDK } from "../../../../../../common/VSDK.js";
 import { Logger } from "../../../../../../common/logging/Logger.js";
 import type { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
+import { Geometry } from "../../../../Geometry.js";
 import type { PolyhedralBoundedSolid } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
+import { PolyhedralBoundedSolidFaceGeometry } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFaceGeometry.js";
 import { PolyhedralBoundedSolidGeometricValidator } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import type { ToleranceContext } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
@@ -17,6 +19,8 @@ import type { _PolyhedralBoundedSolidFace } from "../../../../volume/polyhedralB
 import type { _PolyhedralBoundedSolidHalfEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
 import type { _PolyhedralBoundedSolidLoop } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.js";
 import { _PolyhedralBoundedSolidOperator } from "../../_PolyhedralBoundedSolidOperator.js";
+import { SolidOperationFailedException } from "../../SolidOperationFailedException.js";
+import { _PolyhedralBoundedSolidSetNonIntersectingClassifier } from "../classification/_PolyhedralBoundedSolidSetNonIntersectingClassifier.js";
 import { _PolyhedralBoundedSolidSetNullEdgesConnector } from "./_PolyhedralBoundedSolidSetNullEdgesConnector.js";
 
 /**
@@ -28,14 +32,11 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
     private static readonly DEBUG_01_STRUCTURE = 0x01;
     private static readonly DEBUG_06_FINISH = 0x20;
 
-    /** §9.1 instrumentation: times the legacy-ordering fallback was taken. */
-    private static lastLegacyFallbackCount = 0;
-    /** §9.2 instrumentation: faces triangulated in the most recent finish(). */
+    /**
+    §9.2 instrumentation: faces triangulated in the most recent finish().
+    Java keeps it in a `ThreadLocal`; this runtime is single-threaded.
+    */
     private static lastTriangulatedFaceCount = 0;
-
-    public static getLastLegacyFallbackCount(): number {
-        return _PolyhedralBoundedSolidSetFinisher.lastLegacyFallbackCount;
-    }
 
     public static getLastTriangulatedFaceCount(): number {
         return _PolyhedralBoundedSolidSetFinisher.lastTriangulatedFaceCount;
@@ -139,7 +140,10 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
         return true;
     }
 
-    private static integrationRingSummary(face: _PolyhedralBoundedSolidFace | null): string {
+    private static integrationRingSummary(
+        face: _PolyhedralBoundedSolidFace | null,
+        pairs: _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult,
+    ): string {
         if (face === null) {
             return "null";
         }
@@ -160,20 +164,19 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
             " connected=" +
             _PolyhedralBoundedSolidSetFinisher.hasCompleteHalfEdgeConnectivity(face) +
             " pair=" +
-            _PolyhedralBoundedSolidSetNullEdgesConnector.getSonfaPairIndex(face) +
+            pairs.pairIndexA(face) +
             "/" +
-            _PolyhedralBoundedSolidSetNullEdgesConnector.getSonfbPairIndex(face)
+            pairs.pairIndexB(face)
         );
     }
 
     private static sanitizePairedFaces(
         sonfa: ArrayList<_PolyhedralBoundedSolidFace> | null,
         sonfb: ArrayList<_PolyhedralBoundedSolidFace> | null,
+        pairs: _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult,
     ): number {
         let i: number;
         let j: number;
-
-        _PolyhedralBoundedSolidSetFinisher.lastLegacyFallbackCount = 0;
 
         if (sonfa === null || sonfb === null) {
             return 0;
@@ -190,12 +193,12 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
 
             if (!validA) {
                 _PolyhedralBoundedSolidSetFinisher.tracePipelineSummary(
-                    "finish sanitize skip A " + _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceA),
+                    "finish sanitize skip A " + _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceA, pairs),
                 );
                 continue;
             }
 
-            pairIndexA = _PolyhedralBoundedSolidSetNullEdgesConnector.getSonfaPairIndex(faceA);
+            pairIndexA = pairs.pairIndexA(faceA);
             for (j = 0; j < sonfb.size(); j++) {
                 const faceB = sonfb.get(j);
                 let pairIndexB: number;
@@ -207,17 +210,18 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
                 validB = _PolyhedralBoundedSolidSetFinisher.hasUsableIntegrationRing(faceB);
                 if (!validB) {
                     _PolyhedralBoundedSolidSetFinisher.tracePipelineSummary(
-                        "finish sanitize skip B " + _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceB),
+                        "finish sanitize skip B " +
+                            _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceB, pairs),
                     );
                     continue;
                 }
-                pairIndexB = _PolyhedralBoundedSolidSetNullEdgesConnector.getSonfbPairIndex(faceB);
+                pairIndexB = pairs.pairIndexB(faceB);
                 if (pairIndexA !== -1 && pairIndexA === pairIndexB) {
                     _PolyhedralBoundedSolidSetFinisher.tracePipelineSummary(
                         "finish sanitize match A " +
-                            _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceA) +
+                            _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceA, pairs) +
                             " B " +
-                            _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceB),
+                            _PolyhedralBoundedSolidSetFinisher.integrationRingSummary(faceB, pairs),
                     );
                     matchedA.push(faceA);
                     matchedB.push(faceB);
@@ -228,22 +232,17 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
         }
 
         if (matchedA.length === 0 && !sonfa.isEmpty() && sonfa.size() === sonfb.size()) {
-            // §9.1 instrumentation: legacy ordering fallback — no pairIndex
-            // matches found. Per plan §9.1 this should not fire once Connect
-            // emits correct pairIndices. Count it so tests can assert it stays 0.
-            _PolyhedralBoundedSolidSetFinisher.lastLegacyFallbackCount++;
-            Logger.reportMessage(
-                null,
-                VSDK.WARNING,
-                "sanitizePairedFaces",
-                "Legacy ordering fallback taken (pairIndex matching found no pairs for sonfa=" +
+            // [MANT1988] Program 15.15 pairs sonfa[i] with sonfb[i]. Connect
+            // tags every pair with its index; when none of them matches, the
+            // null faces cannot be paired and finish has nothing to glue.
+            // This used to fall back to list order; it is now an error.
+            throw new SolidOperationFailedException(
+                "finish: no null face pair matched by pair index (sonfa=" +
                     sonfa.size() +
                     " sonfb=" +
                     sonfb.size() +
-                    "). This indicates Connect did not tag faces with pairIndex.",
+                    ")",
             );
-            _PolyhedralBoundedSolidSetFinisher.tracePipelineSummary("finish sanitize kept legacy ordering");
-            return sonfa.size();
         }
 
         sonfa.clear();
@@ -565,6 +564,261 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
     Answer integrator for the set-operations pipeline.
     Following program [MANT1988].15.15.
     */
+    private static exchange(faces: ArrayList<_PolyhedralBoundedSolidFace>, i: number, j: number): void {
+        const exchanged = faces.get(i);
+
+        faces.set(i, faces.get(j));
+        faces.set(j, exchanged);
+    }
+
+    /**
+    Adds to `counts` the answer for one face: element 0 when a point of its
+    interior is strictly inside `other`, element 1 when strictly outside.
+    A face without such a point, or with it on the boundary of `other`,
+    adds nothing.
+    */
+    private static countSide(
+        face: _PolyhedralBoundedSolidFace,
+        other: PolyhedralBoundedSolid,
+        otherFaces: PolyhedralBoundedSolidFaceGeometry[],
+        counts: number[],
+    ): void {
+        const witness = _PolyhedralBoundedSolidSetNonIntersectingClassifier.faceInteriorWitness(face);
+
+        if (witness === null) {
+            return;
+        }
+        const status = _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+            other,
+            otherFaces,
+            witness,
+        );
+        if (status === Geometry.INSIDE) {
+            counts[0]!++;
+        } else if (status === Geometry.OUTSIDE) {
+            counts[1]!++;
+        }
+    }
+
+    /**
+    `countSide` over the faces across the half-edges of `loop`, each
+    face once.
+    */
+    private static sidesAcross(
+        loop: _PolyhedralBoundedSolidLoop,
+        other: PolyhedralBoundedSolid,
+        otherFaces: PolyhedralBoundedSolidFaceGeometry[],
+    ): number[] {
+        const counts = [0, 0];
+        // Java's IdentityHashMap: JavaScript Map keys compare by identity.
+        const counted = new Map<_PolyhedralBoundedSolidFace, boolean>();
+        const start = loop.boundaryStartHalfEdge;
+        let he = start;
+        let guard = loop.halfEdgesList.size();
+
+        if (start === null) {
+            return counts;
+        }
+        do {
+            const mate = he!.mirrorHalfEdge();
+            if (
+                mate !== null &&
+                mate.parentLoop !== null &&
+                mate.parentLoop.parentFace !== loop.parentFace &&
+                !counted.has(mate.parentLoop.parentFace)
+            ) {
+                counted.set(mate.parentLoop.parentFace, true);
+                _PolyhedralBoundedSolidSetFinisher.countSide(mate.parentLoop.parentFace, other, otherFaces, counts);
+            }
+            he = he!.next();
+            guard--;
+        } while (he !== null && he !== start && guard >= 0);
+        return counts;
+    }
+
+    /**
+    True when the outer loop of `face` runs through the points of its ring
+    and no others: the face is the null face between the two copies of a
+    cut, without area of its own.
+    */
+    private static isBand(face: _PolyhedralBoundedSolidFace): boolean {
+        const outer = face.boundariesList.get(0)!;
+        const ring = face.boundariesList.get(1)!;
+        const context = PolyhedralBoundedSolidNumericPolicy.forFace(face);
+        let i: number;
+        let j: number;
+
+        for (i = 0; i < outer.halfEdgesList.size(); i++) {
+            let found = false;
+            for (j = 0; j < ring.halfEdgesList.size() && !found; j++) {
+                found = PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                    outer.halfEdgesList.get(i)!.startingVertex.position,
+                    ring.halfEdgesList.get(j)!.startingVertex.position,
+                    context,
+                );
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+    `face` is a null face of connect: its ring is one copy of a cut. By
+    convention the faces across the ring are the part of the solid inside
+    `other`, and what lies on the side of the outer loop (the faces across
+    it for a band, the face itself otherwise) is the part outside. True
+    when both sides say the opposite and neither has a face that says
+    otherwise.
+    */
+    private static sidesAreSwapped(
+        face: _PolyhedralBoundedSolidFace,
+        other: PolyhedralBoundedSolid,
+        otherFaces: PolyhedralBoundedSolidFaceGeometry[],
+        cut: number,
+        name: string,
+    ): boolean {
+        const inside = _PolyhedralBoundedSolidSetFinisher.sidesAcross(face.boundariesList.get(1)!, other, otherFaces);
+        let outside: number[];
+
+        if (_PolyhedralBoundedSolidSetFinisher.isBand(face)) {
+            outside = _PolyhedralBoundedSolidSetFinisher.sidesAcross(face.boundariesList.get(0)!, other, otherFaces);
+        } else {
+            outside = [0, 0];
+            _PolyhedralBoundedSolidSetFinisher.countSide(face, other, otherFaces, outside);
+        }
+        const swapped = inside[0] === 0 && outside[1] === 0 && inside[1]! > 0 && outside[0]! > 0;
+        _PolyhedralBoundedSolidSetFinisher.tracePipelineSummary(
+            "finish sides of cut " +
+                cut +
+                " on " +
+                name +
+                ": the part taken for inside has " +
+                inside[0] +
+                " faces inside and " +
+                inside[1] +
+                " outside; the part taken for outside " +
+                outside[0] +
+                " and " +
+                outside[1] +
+                (swapped ? "; exchanged" : ""),
+        );
+        return swapped;
+    }
+
+    /** Adds to `reached` every face connected to `seed` through edges. */
+    private static flood(
+        seed: _PolyhedralBoundedSolidFace | null,
+        reached: Map<_PolyhedralBoundedSolidFace, boolean>,
+        component: ArrayList<_PolyhedralBoundedSolidFace> | null,
+    ): void {
+        const pending = new ArrayList<_PolyhedralBoundedSolidFace>();
+        let i: number;
+
+        if (seed === null || reached.has(seed)) {
+            return;
+        }
+        reached.set(seed, true);
+        pending.add(seed);
+        while (!pending.isEmpty()) {
+            const face = pending.remove(pending.size() - 1);
+            if (component !== null) {
+                component.add(face);
+            }
+            for (i = 0; i < face.boundariesList.size(); i++) {
+                const loop = face.boundariesList.get(i)!;
+                const start = loop.boundaryStartHalfEdge;
+                let he = start;
+                let guard = loop.halfEdgesList.size();
+                if (start === null) {
+                    continue;
+                }
+                do {
+                    const mate = he!.mirrorHalfEdge();
+                    if (
+                        mate !== null &&
+                        mate.parentLoop !== null &&
+                        mate.parentLoop.parentFace !== null &&
+                        !reached.has(mate.parentLoop.parentFace)
+                    ) {
+                        reached.set(mate.parentLoop.parentFace, true);
+                        pending.add(mate.parentLoop.parentFace);
+                    }
+                    he = he!.next();
+                    guard--;
+                } while (he !== null && he !== start && guard >= 0);
+            }
+        }
+    }
+
+    /**
+    One face of every shell of `solid` that no cut reaches and that lies on
+    the wanted side of `other`: inside when `keepInside`, outside
+    otherwise. The side is the one of the first vertex of the shell that is
+    not on the boundary of `other`; a shell with every vertex on that
+    boundary is left out.
+    @param cutFaces the null faces of `solid` and the faces made from their
+           rings: every cut part of the solid is connected to one of them
+    */
+    private static untouchedShellsToKeep(
+        solid: PolyhedralBoundedSolid,
+        cutFaces: ArrayList<_PolyhedralBoundedSolidFace>,
+        other: PolyhedralBoundedSolid,
+        keepInside: boolean,
+    ): ArrayList<_PolyhedralBoundedSolidFace> {
+        const seeds = new ArrayList<_PolyhedralBoundedSolidFace>();
+        const reached = new Map<_PolyhedralBoundedSolidFace, boolean>();
+        let otherFaces: PolyhedralBoundedSolidFaceGeometry[] | null = null;
+        let i: number;
+        let j: number;
+        let k: number;
+
+        for (i = 0; i < cutFaces.size(); i++) {
+            _PolyhedralBoundedSolidSetFinisher.flood(cutFaces.get(i), reached, null);
+        }
+        for (i = 0; i < solid.getPolygonsList().size(); i++) {
+            const face = solid.getPolygonsList().get(i)!;
+            if (reached.has(face)) {
+                continue;
+            }
+            const shell = new ArrayList<_PolyhedralBoundedSolidFace>();
+            _PolyhedralBoundedSolidSetFinisher.flood(face, reached, shell);
+            if (otherFaces === null) {
+                _PolyhedralBoundedSolidOperator.setNumericContext(
+                    PolyhedralBoundedSolidNumericPolicy.forSolids(solid, other),
+                );
+                otherFaces = PolyhedralBoundedSolidFaceGeometry.of(other);
+            }
+            let side = Geometry.LIMIT;
+            for (j = 0; j < shell.size() && side === Geometry.LIMIT; j++) {
+                const member = shell.get(j);
+                for (k = 0; k < member.boundariesList.size() && side === Geometry.LIMIT; k++) {
+                    const he = member.boundariesList.get(k)!.boundaryStartHalfEdge;
+                    if (he === null || he.startingVertex === null) {
+                        continue;
+                    }
+                    side = _PolyhedralBoundedSolidSetNonIntersectingClassifier.classifyPointAgainstSolid(
+                        other,
+                        otherFaces,
+                        he.startingVertex.position,
+                    );
+                }
+            }
+            if ((keepInside && side === Geometry.INSIDE) || (!keepInside && side === Geometry.OUTSIDE)) {
+                seeds.add(face);
+                _PolyhedralBoundedSolidSetFinisher.tracePipelineSummary(
+                    "finish keeps a whole shell of " +
+                        shell.size() +
+                        " faces, " +
+                        (keepInside ? "inside" : "outside") +
+                        " the other solid",
+                );
+            }
+        }
+        return seeds;
+    }
+
     public static finish(
         inSolidA: PolyhedralBoundedSolid,
         inSolidB: PolyhedralBoundedSolid,
@@ -573,6 +827,7 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
         debugFlags: number,
         sonfa: ArrayList<_PolyhedralBoundedSolidFace>,
         sonfb: ArrayList<_PolyhedralBoundedSolidFace>,
+        pairs: _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult | null,
     ): void {
         let i: number;
         let inda: number;
@@ -593,12 +848,45 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
             "finish start op=" + op + " sonfa=" + sonfa.size() + " sonfb=" + sonfb.size(),
         );
 
-        const oldsize = _PolyhedralBoundedSolidSetFinisher.sanitizePairedFaces(sonfa, sonfb);
-        // §11 fail-fast precondition failed: MANT1988_15_1 B-A fires the legacy
-        // fallback (count>0) while still producing a valid result. The throw was
-        // removed to preserve passing tests. Track via getLastLegacyFallbackCount().
+        const oldsize = _PolyhedralBoundedSolidSetFinisher.sanitizePairedFaces(sonfa, sonfb, pairs!);
         inda = op === _PolyhedralBoundedSolidOperator.INTERSECTION ? sonfa.size() : 0;
         indb = op === _PolyhedralBoundedSolidOperator.UNION ? 0 : sonfb.size();
+
+        // [MANT1988] Program 15.15 takes sonf[i] for the part of the solid
+        // outside the other one and the face lmfkrh makes from its ring
+        // for the part inside. That rests on the orientation every null
+        // edge got on its way here. The parts themselves say which is
+        // which: a point of the faces on each side of the cut is inside
+        // the other solid or outside it. When they say the opposite of the
+        // convention for a whole cut, the two faces are exchanged
+        // (plan-stage11 Phase F).
+        const swappedA: boolean[] = new Array<boolean>(oldsize).fill(false);
+        const swappedB: boolean[] = new Array<boolean>(oldsize).fill(false);
+        if (oldsize > 0) {
+            // Nothing edits the two solids while the sides are read, so
+            // their face planes and boxes are computed once.
+            _PolyhedralBoundedSolidOperator.setNumericContext(
+                PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB),
+            );
+            const facesOfA = PolyhedralBoundedSolidFaceGeometry.of(inSolidA);
+            const facesOfB = PolyhedralBoundedSolidFaceGeometry.of(inSolidB);
+            for (i = 0; i < oldsize; i++) {
+                swappedA[i] = _PolyhedralBoundedSolidSetFinisher.sidesAreSwapped(
+                    sonfa.get(i),
+                    inSolidB,
+                    facesOfB,
+                    i,
+                    "A",
+                );
+                swappedB[i] = _PolyhedralBoundedSolidSetFinisher.sidesAreSwapped(
+                    sonfb.get(i),
+                    inSolidA,
+                    facesOfA,
+                    i,
+                    "B",
+                );
+            }
+        }
 
         for (i = 0; i < oldsize; i++) {
             f = PolyhedralBoundedSolidEulerOperators.lmfkrh(
@@ -616,6 +904,37 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
             sonfb.add(f!);
         }
 
+        for (i = 0; i < oldsize; i++) {
+            if (swappedA[i]) {
+                _PolyhedralBoundedSolidSetFinisher.exchange(sonfa, i, i + oldsize);
+            }
+            if (swappedB[i]) {
+                _PolyhedralBoundedSolidSetFinisher.exchange(sonfb, i, i + oldsize);
+            }
+        }
+
+        // Shells that no intersection curve reaches are not connected to
+        // any null face, so the moves below never see them. Each one lies
+        // wholly inside or wholly outside the other solid and belongs to
+        // the result on the same terms as the cut parts: A outside B for
+        // the union and the difference, A inside B for the intersection;
+        // B outside A for the union, B inside A otherwise. They used to be
+        // left behind without an error (plan-stage11 Phase F): the union
+        // of a two-piece solid with a solid that crosses only one of the
+        // pieces lost the other piece.
+        const wholeShellsOfA = _PolyhedralBoundedSolidSetFinisher.untouchedShellsToKeep(
+            inSolidA,
+            sonfa,
+            inSolidB,
+            op === _PolyhedralBoundedSolidOperator.INTERSECTION,
+        );
+        const wholeShellsOfB = _PolyhedralBoundedSolidSetFinisher.untouchedShellsToKeep(
+            inSolidB,
+            sonfb,
+            inSolidA,
+            op !== _PolyhedralBoundedSolidOperator.UNION,
+        );
+
         if (op === _PolyhedralBoundedSolidOperator.SUBTRACT) {
             inSolidB.revert();
         }
@@ -623,6 +942,12 @@ export class _PolyhedralBoundedSolidSetFinisher extends _PolyhedralBoundedSolidO
         for (i = 0; i < oldsize; i++) {
             _PolyhedralBoundedSolidOperator.movefac(sonfa.get(i + inda), outRes);
             _PolyhedralBoundedSolidOperator.movefac(sonfb.get(i + indb), outRes);
+        }
+        for (i = 0; i < wholeShellsOfA.size(); i++) {
+            _PolyhedralBoundedSolidOperator.movefac(wholeShellsOfA.get(i), outRes);
+        }
+        for (i = 0; i < wholeShellsOfB.size(); i++) {
+            _PolyhedralBoundedSolidOperator.movefac(wholeShellsOfB.get(i), outRes);
         }
 
         _PolyhedralBoundedSolidOperator.cleanup(outRes);

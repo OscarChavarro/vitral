@@ -9,11 +9,21 @@ export class DialogSession {
 
     public constructor(private readonly definition: WidgetDialog) {}
 
-    public getDefinition(): WidgetDialog { return this.definition; }
-    public setDraft(binding: string, value: string): void { this.drafts.set(binding, value); }
-    public getDraft(binding: string): string | undefined { return this.drafts.get(binding); }
-    public isOpen(): boolean { return this.open; }
-    public isBusy(): boolean { return this.busy; }
+    public getDefinition(): WidgetDialog {
+        return this.definition;
+    }
+    public setDraft(binding: string, value: string): void {
+        this.drafts.set(binding, value);
+    }
+    public getDraft(binding: string): string | undefined {
+        return this.drafts.get(binding);
+    }
+    public isOpen(): boolean {
+        return this.open;
+    }
+    public isBusy(): boolean {
+        return this.busy;
+    }
     public beginAction(): number {
         if (!this.open || this.busy) return -1;
         this.busy = true;
@@ -24,5 +34,9 @@ export class DialogSession {
         this.busy = false;
         return true;
     }
-    public close(): void { this.open = false; this.busy = false; ++this.generation; }
+    public close(): void {
+        this.open = false;
+        this.busy = false;
+        ++this.generation;
+    }
 }

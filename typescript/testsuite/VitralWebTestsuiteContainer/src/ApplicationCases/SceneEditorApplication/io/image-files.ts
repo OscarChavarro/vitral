@@ -1,4 +1,9 @@
-import type { Image, IndexedColorImageUncompressed, RGBAImageUncompressed, RGBImageUncompressed } from '@vitral/base';
+import type {
+  Image,
+  IndexedColorImageUncompressed,
+  RGBAImageUncompressed,
+  RGBImageUncompressed,
+} from '@vitral/base';
 
 /**
  * How the application reads and writes files (mostly images). Java calls the

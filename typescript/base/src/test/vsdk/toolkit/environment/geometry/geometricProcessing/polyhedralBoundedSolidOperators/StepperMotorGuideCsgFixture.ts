@@ -149,8 +149,11 @@ export class StepperMotorGuideCsgFixture {
         let move = new Matrix4x4d();
         move = move.translation(x, y, z);
         PolyhedralBoundedSolidModeler.applyTransformation(probe, move);
+        // setOp leaves its operands intact (Stage F), so the solid is not
+        // cloned first. The serialization clone used here before needed
+        // more than 1 MB of stack on the 131-face guide.
         const intersection = PolyhedralBoundedSolidModeler.setOp(
-            StepperMotorGuideCsgFixture.deepClone(solid),
+            solid,
             probe,
             PolyhedralBoundedSolidModeler.INTERSECTION,
             false,
@@ -295,74 +298,5 @@ export class StepperMotorGuideCsgFixture {
 
     private static point(xMm: number, yMm: number, zMm: number): Vector3Dd {
         return new Vector3Dd(mm(xMm), mm(yMm), mm(zMm));
-    }
-
-    /**
-    Runtime boundary: Java clones the solid through object serialization;
-    there is no serialization runtime here, so the half-edge graph is copied
-    node by node through identity maps, preserving ids, positions and the
-    exact ordering of every list (the same adapter the production
-    `_PolyhedralBoundedSolidSetOperator.deepCloneSolid` uses).
-    */
-    private static deepClone(solid: PolyhedralBoundedSolid): PolyhedralBoundedSolid {
-        const clone = new PolyhedralBoundedSolid();
-        const vertices = new Map<_PolyhedralBoundedSolidVertex, _PolyhedralBoundedSolidVertex>();
-        const halfEdges = new Map<_PolyhedralBoundedSolidHalfEdge, _PolyhedralBoundedSolidHalfEdge>();
-        let i: number;
-        let j: number;
-        let k: number;
-
-        for (i = 0; i < solid.getVerticesList().size(); i++) {
-            const source = solid.getVerticesList().get(i)!;
-            vertices.set(source, new _PolyhedralBoundedSolidVertex(clone, new Vector3Dd(source.position), source.id));
-        }
-
-        for (i = 0; i < solid.getPolygonsList().size(); i++) {
-            const sourceFace = solid.getPolygonsList().get(i)!;
-            const cloneFace = new _PolyhedralBoundedSolidFace(clone, sourceFace.id);
-            for (j = 0; j < sourceFace.boundariesList.size(); j++) {
-                const sourceLoop = sourceFace.boundariesList.get(j)!;
-                const cloneLoop = new _PolyhedralBoundedSolidLoop(cloneFace);
-                for (k = 0; k < sourceLoop.halfEdgesList.size(); k++) {
-                    const sourceHalfEdge = sourceLoop.halfEdgesList.get(k)!;
-                    const cloneHalfEdge = new _PolyhedralBoundedSolidHalfEdge(
-                        vertices.get(sourceHalfEdge.startingVertex)!,
-                        cloneLoop,
-                        clone,
-                    );
-                    cloneLoop.halfEdgesList.add(cloneHalfEdge);
-                    halfEdges.set(sourceHalfEdge, cloneHalfEdge);
-                }
-                if (sourceLoop.boundaryStartHalfEdge !== null) {
-                    cloneLoop.boundaryStartHalfEdge = halfEdges.get(sourceLoop.boundaryStartHalfEdge)!;
-                }
-            }
-        }
-
-        for (i = 0; i < solid.getEdgesList().size(); i++) {
-            const sourceEdge = solid.getEdgesList().get(i)!;
-            const cloneEdge = new _PolyhedralBoundedSolidEdge(clone);
-            cloneEdge.id = sourceEdge.id;
-            if (sourceEdge.rightHalf !== null) {
-                cloneEdge.rightHalf = halfEdges.get(sourceEdge.rightHalf)!;
-                cloneEdge.rightHalf.parentEdge = cloneEdge;
-            }
-            if (sourceEdge.leftHalf !== null) {
-                cloneEdge.leftHalf = halfEdges.get(sourceEdge.leftHalf)!;
-                cloneEdge.leftHalf.parentEdge = cloneEdge;
-            }
-        }
-
-        for (i = 0; i < solid.getVerticesList().size(); i++) {
-            const source = solid.getVerticesList().get(i)!;
-            if (source.emanatingHalfEdge !== null) {
-                vertices.get(source)!.emanatingHalfEdge = halfEdges.get(source.emanatingHalfEdge)!;
-            }
-        }
-
-        clone.setMaxVertexId(solid.getMaxVertexId());
-        clone.setMaxFaceId(solid.getMaxFaceId());
-
-        return clone;
     }
 }

@@ -34,8 +34,7 @@ export class TranslateGizmo2DPainter {
     private static readonly BASE_LABEL_OFFSET_Y = 12;
     private static readonly AXES = new ReferenceFrameGizmo();
 
-    private constructor() {
-    }
+    private constructor() {}
 
     /**
     @param out list receiving the primitives
@@ -43,8 +42,12 @@ export class TranslateGizmo2DPainter {
     @param camera camera of the viewport, with its viewport size updated
     @param scaler sizes of the elements for the resolution of the screen
     */
-    public static paint(out: Gizmo2DDrawList | null, gizmo: TranslateGizmo | null,
-                        camera: Camera | null, scaler: ViewportElementScaler): void {
+    public static paint(
+        out: Gizmo2DDrawList | null,
+        gizmo: TranslateGizmo | null,
+        camera: Camera | null,
+        scaler: ViewportElementScaler,
+    ): void {
         if (out === null || gizmo === null || camera === null) {
             return;
         }
@@ -72,36 +75,33 @@ export class TranslateGizmo2DPainter {
                 const box = g;
                 const quad = GizmoSolidTessellator.buildPlaneQuad(
                     GizmoSolidTessellator.localTransform(element),
-                    box.getSize().x(), box.getSize().y());
-                projector.addStrip(quad, element.getMaterial()!.getDiffuse(),
-                    element.getMaterial()!.getOpacity());
+                    box.getSize().x(),
+                    box.getSize().y(),
+                );
+                projector.addStrip(quad, element.getMaterial()!.getDiffuse(), element.getMaterial()!.getOpacity());
             }
         }
 
         TranslateGizmo2DPainter.addLabels(projector, gizmo, scaler);
     }
 
-    private static addCone(projector: Gizmo2DProjector, element: SimpleBody,
-                           cone: Cone): void {
+    private static addCone(projector: Gizmo2DProjector, element: SimpleBody, cone: Cone): void {
         const radius = cone.getBottomRadius();
         const c = element.getMaterial()!.getDiffuse();
         const local = GizmoSolidTessellator.localTransform(element);
         const shade = TranslateGizmo2DPainter.CONE_BASE_SHADE;
-        const dark = new ColorRgb(c.r()*shade, c.g()*shade, c.b()*shade);
+        const dark = new ColorRgb(c.r() * shade, c.g() * shade, c.b() * shade);
         const baseFan = GizmoSolidTessellator.buildConeBaseFan(local, radius);
         const perimeter = baseFan.slice(1);
 
         projector.addPolygon(perimeter, dark, 1.0);
-        projector.addFanTriangles(GizmoSolidTessellator.buildConeSideFan(
-            local, radius, cone.getHeight()), c, 1.0);
+        projector.addFanTriangles(GizmoSolidTessellator.buildConeSideFan(local, radius, cone.getHeight()), c, 1.0);
     }
 
     /**
     Labels of the axes, a little beyond the tip of each one.
     */
-    private static addLabels(projector: Gizmo2DProjector,
-                             gizmo: TranslateGizmo,
-                             scaler: ViewportElementScaler): void {
+    private static addLabels(projector: Gizmo2DProjector, gizmo: TranslateGizmo, scaler: ViewportElementScaler): void {
         const fontSize = scaler.scaleSize(TranslateGizmo2DPainter.BASE_LABEL_FONT_SIZE);
         const offsetX = JavaMath.round(scaler.scaleLength(TranslateGizmo2DPainter.BASE_LABEL_OFFSET_X));
         const offsetY = JavaMath.round(scaler.scaleLength(TranslateGizmo2DPainter.BASE_LABEL_OFFSET_Y));
@@ -119,19 +119,25 @@ export class TranslateGizmo2DPainter {
                 const a = g;
                 tip = (a.getHeadLength() + a.getBaseLength()) * 1.1;
             }
-            const R = new Matrix4x4d().translation(r.getPosition())
-                .multiply(r.getRotation());
+            const R = new Matrix4x4d().translation(r.getPosition()).multiply(r.getRotation());
             const p = projector.projectPoint(R.multiply(new Vector3Dd(0, 0, tip)));
 
             if (p !== null) {
-                const highlighted = ColorRgb.distance(TranslateGizmo2DPainter.HIGHLIGHT_COLOR,
-                    r.getMaterial()!.getDiffuse()) < VSDK.EPSILON;
-                projector.getGizmo2DDrawList().addOverlayLabel(
-                    Math.trunc(p[0]!) + offsetX, Math.trunc(p[1]!) + offsetY,
-                    TranslateGizmo2DPainter.AXES.getAxisLabel(i),
-                    highlighted ? TranslateGizmo2DPainter.HIGHLIGHT_COLOR
-                        : TranslateGizmo2DPainter.AXES.getAxisColor(i),
-                    fontSize, Gizmo2DDrawList.Alignment.LOWER_LEFT);
+                const highlighted =
+                    ColorRgb.distance(TranslateGizmo2DPainter.HIGHLIGHT_COLOR, r.getMaterial()!.getDiffuse()) <
+                    VSDK.EPSILON;
+                projector
+                    .getGizmo2DDrawList()
+                    .addOverlayLabel(
+                        Math.trunc(p[0]!) + offsetX,
+                        Math.trunc(p[1]!) + offsetY,
+                        TranslateGizmo2DPainter.AXES.getAxisLabel(i),
+                        highlighted
+                            ? TranslateGizmo2DPainter.HIGHLIGHT_COLOR
+                            : TranslateGizmo2DPainter.AXES.getAxisColor(i),
+                        fontSize,
+                        Gizmo2DDrawList.Alignment.LOWER_LEFT,
+                    );
             }
         }
     }

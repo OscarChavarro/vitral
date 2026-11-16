@@ -62,12 +62,16 @@ export class FrameCaptureService {
     }
 
     if (this.drawingArea.isContoursRequested()) {
-      const zbuffer: IndexedColorImageUncompressed = (await source.readDepth()).exportIndexedColorImage();
+      const zbuffer: IndexedColorImageUncompressed = (
+        await source.readDepth()
+      ).exportIndexedColorImage();
       const nm: NormalMap = new NormalMap();
       nm.importBumpMap(zbuffer, new Vector3Dd(1, 1, 0.1));
       this.model.setZbufferImage(nm.exportToRgbImageGradient());
     } else {
-      this.model.setZbufferImage((await source.readDepth()).exportRGBImage(this.model.getPalette()!));
+      this.model.setZbufferImage(
+        (await source.readDepth()).exportRGBImage(this.model.getPalette()!),
+      );
     }
 
     this.host.showImage(this.model.getZbufferImage());

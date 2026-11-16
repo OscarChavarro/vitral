@@ -34,6 +34,14 @@ export class Logger {
         console.error(Logger.header(origin, method, `Exception message:\n${message}`) + Logger.footer(level));
         Logger.fatal(level, method, message, null);
     }
+    /**
+    Java also reads the `vsdk.withSystemExit` system property in its static
+    initializer; this runtime has no system properties, so the default
+    (`true`) of `VSDKRuntimeSettings` applies.
+    */
+    public static isWithSystemExit(): boolean {
+        return getWithSystemExit();
+    }
     public static setWithSystemExit(flag: boolean): void {
         setWithSystemExit(flag);
     }

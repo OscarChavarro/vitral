@@ -144,7 +144,11 @@ export class UndoRedoInteractionTechnique {
         ? this.history.getSceneHistory().undo()
         : this.history.getSceneHistory().redo();
     }
-    return new UndoRedoResult(command, operation, UndoRedoInteractionTechnique.describe(command, operation, queue, target));
+    return new UndoRedoResult(
+      command,
+      operation,
+      UndoRedoInteractionTechnique.describe(command, operation, queue, target),
+    );
   }
 
   private static describe(

@@ -77,8 +77,14 @@ export class SceneLightFactory {
         new ColorRgb(1, 1, 1),
       );
     }
-    const u: number = this.randomInRange(-SceneLightFactory.MAX_SCREEN_OFFSET, SceneLightFactory.MAX_SCREEN_OFFSET);
-    const v: number = this.randomInRange(-SceneLightFactory.MAX_SCREEN_OFFSET, SceneLightFactory.MAX_SCREEN_OFFSET);
+    const u: number = this.randomInRange(
+      -SceneLightFactory.MAX_SCREEN_OFFSET,
+      SceneLightFactory.MAX_SCREEN_OFFSET,
+    );
+    const v: number = this.randomInRange(
+      -SceneLightFactory.MAX_SCREEN_OFFSET,
+      SceneLightFactory.MAX_SCREEN_OFFSET,
+    );
     const focal: number = this.calculateFocalDistance(camera);
     const depth: number = this.randomInRange(
       this.clampDepth(camera, focal * SceneLightFactory.MIN_DEPTH_FACTOR),

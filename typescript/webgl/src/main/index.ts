@@ -79,4 +79,9 @@ export {
 export { HtmlGridConstraints, HtmlGuiRenderer, HtmlMenu } from "./vsdk/toolkit/render/html/HtmlGuiRenderer.js";
 export { HtmlSplitPane, HtmlTabbedPane, HtmlWindow } from "./vsdk/toolkit/render/html/HtmlContainers.js";
 export { HtmlGenericEditor } from "./vsdk/toolkit/gui/editor/HtmlGenericEditor.js";
-export { HtmlChosenFile, HtmlFileChooser, HtmlFileFilter, downloadFile } from "./vsdk/toolkit/render/html/HtmlFileChooser.js";
+export {
+    HtmlChosenFile,
+    HtmlFileChooser,
+    HtmlFileFilter,
+    downloadFile,
+} from "./vsdk/toolkit/render/html/HtmlFileChooser.js";

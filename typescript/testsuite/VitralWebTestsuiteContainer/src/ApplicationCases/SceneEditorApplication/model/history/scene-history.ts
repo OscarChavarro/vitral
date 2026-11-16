@@ -88,7 +88,11 @@ export class SceneHistory {
       // The whole scene was replaced: the action can not be undone
       return false;
     }
-    const operation: UndoableOperation | null = start.operationTo(SceneSnapshot.capture(scene), name, mergeable);
+    const operation: UndoableOperation | null = start.operationTo(
+      SceneSnapshot.capture(scene),
+      name,
+      mergeable,
+    );
     if (operation === null) {
       return false;
     }

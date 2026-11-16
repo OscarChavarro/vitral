@@ -87,7 +87,11 @@ export class SceneSnapshot {
    * with the ones of a following action over the same elements
    * @return the operation done by the action, or null if nothing changed
    */
-  operationTo(later: SceneSnapshot | null, name: string, mergeable: boolean): UndoableOperation | null {
+  operationTo(
+    later: SceneSnapshot | null,
+    name: string,
+    mergeable: boolean,
+  ): UndoableOperation | null {
     const operations: UndoableOperation[] = [];
 
     if (later === null || later.scene !== this.scene) {
@@ -117,7 +121,11 @@ export class SceneSnapshot {
    * @return the placement changes of the elements present in both states, or
    * null if there are none
    */
-  private transformationTo(later: SceneSnapshot, name: string, mergeable: boolean): UndoableOperation | null {
+  private transformationTo(
+    later: SceneSnapshot,
+    name: string,
+    mergeable: boolean,
+  ): UndoableOperation | null {
     const before: EntityTransformState[] = [];
     const after: EntityTransformState[] = [];
 
@@ -142,7 +150,11 @@ export class SceneSnapshot {
    * @return the creation and deletion of elements of a kind, or null if the
    * same elements are present in both states
    */
-  private membershipTo(later: SceneSnapshot, kind: SceneElementKind, name: string): UndoableOperation | null {
+  private membershipTo(
+    later: SceneSnapshot,
+    kind: SceneElementKind,
+    name: string,
+  ): UndoableOperation | null {
     const removed: SceneMembershipEntry[] = this.entriesMissingIn(later, kind);
     const inserted: SceneMembershipEntry[] = later.entriesMissingIn(this, kind);
 

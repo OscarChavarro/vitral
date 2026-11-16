@@ -211,7 +211,10 @@ export class HtmlWindow {
     @param title title of the window
     @param modal true to block the page while the window is shown
     */
-    public constructor(title: string, private readonly modal: boolean = false) {
+    public constructor(
+        title: string,
+        private readonly modal: boolean = false,
+    ) {
         this.element = document.createElement("div");
         this.element.className = "vitral-window vitral-gui";
         this.element.setAttribute("role", modal ? "dialog" : "region");
@@ -314,8 +317,7 @@ export class HtmlWindow {
                 const box: DOMRect = this.element.getBoundingClientRect();
                 this.setLocation((window.innerWidth - box.width) / 2, (window.innerHeight - box.height) / 3);
             }
-        }
-        else {
+        } else {
             detachFromOverlayHost(this.element);
             if (this.backdrop !== null) {
                 detachFromOverlayHost(this.backdrop);

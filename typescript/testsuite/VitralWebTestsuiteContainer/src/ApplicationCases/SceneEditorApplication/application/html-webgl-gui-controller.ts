@@ -1,4 +1,12 @@
-import { DialogPersistence, GuiPersistence, Logger, VSDK, type RGBAImageUncompressed, type RGBImageUncompressed, type Widget } from '@vitral/base';
+import {
+  DialogPersistence,
+  GuiPersistence,
+  Logger,
+  VSDK,
+  type RGBAImageUncompressed,
+  type RGBImageUncompressed,
+  type Widget,
+} from '@vitral/base';
 import { HtmlGuiRenderer, HtmlSplitPane, HtmlTabbedPane, type HtmlMenuBar } from '@vitral/webgl';
 import { HtmlApplicationModel } from '../gui/html/html-application-model';
 import { HtmlButtonsPanel } from '../gui/html/html-buttons-panel';
@@ -87,23 +95,41 @@ export class HtmlWebGLGuiController {
     const container: HtmlTabbedPane = new HtmlTabbedPane();
     const tabListener: HtmlModifyTabChangeListener = new HtmlModifyTabChangeListener(this.parent);
 
-    container.addChangeListener((selectedIndex: number): void => tabListener.stateChanged(selectedIndex));
+    container.addChangeListener((selectedIndex: number): void =>
+      tabListener.stateChanged(selectedIndex),
+    );
 
     let panel: HtmlButtonsPanel = new HtmlButtonsPanel(this.parent, 1, this.model.getExecutor()!);
-    container.addTab(this.i18n().getMessage('IDM_CREATION_TAB'), panel.element, 'Object creation operations');
+    container.addTab(
+      this.i18n().getMessage('IDM_CREATION_TAB'),
+      panel.element,
+      'Object creation operations',
+    );
 
     const modifyPanel: HtmlModifyPanel = new HtmlModifyPanel(this.parent);
     this.model.setModifyPanel(modifyPanel);
-    container.addTab(this.i18n().getMessage('IDM_MODIFY_TAB'), modifyPanel.element, 'Modify selected body');
+    container.addTab(
+      this.i18n().getMessage('IDM_MODIFY_TAB'),
+      modifyPanel.element,
+      'Modify selected body',
+    );
 
     panel = new HtmlButtonsPanel(this.parent, 2, this.model.getExecutor()!);
     container.addTab(this.i18n().getMessage('IDM_GUI_TAB'), panel.element, 'GUI Control');
 
     panel = new HtmlButtonsPanel(this.parent, 3, this.model.getExecutor()!);
-    container.addTab(this.i18n().getMessage('IDM_OTHERS_TAB'), panel.element, 'Control the scene components');
+    container.addTab(
+      this.i18n().getMessage('IDM_OTHERS_TAB'),
+      panel.element,
+      'Control the scene components',
+    );
 
     panel = new HtmlButtonsPanel(this.parent, 4, this.model.getExecutor()!);
-    container.addTab(this.i18n().getMessage('IDM_RENDER_TAB'), panel.element, 'Control the scene components');
+    container.addTab(
+      this.i18n().getMessage('IDM_RENDER_TAB'),
+      panel.element,
+      'Control the scene components',
+    );
 
     return container;
   }
@@ -117,10 +143,10 @@ export class HtmlWebGLGuiController {
     const files = ImageFiles.get();
     // The presentation of the viewport sets follows the language
     const context = await GuiPersistence.importAquynzaGui(await response.text(), '.', {
-        importRGBA: (path: string): Promise<RGBAImageUncompressed> => files.importRGBA(path),
-        importRGB: async (path: string): Promise<RGBImageUncompressed> =>
-          (await files.importRGB(path)) as RGBImageUncompressed,
-      });
+      importRGBA: (path: string): Promise<RGBAImageUncompressed> => files.importRGBA(path),
+      importRGB: async (path: string): Promise<RGBImageUncompressed> =>
+        (await files.importRGB(path)) as RGBImageUncompressed,
+    });
     const dialogsResponse = await fetch('./etc/gui/dialogs.json');
     if (!dialogsResponse.ok) throw new Error('Fatal error: can not open GUI dialog definitions');
     DialogPersistence.importDialogs(await dialogsResponse.text(), context);
@@ -156,8 +182,12 @@ export class HtmlWebGLGuiController {
     const mainWindowWidget: HTMLDivElement = document.createElement('div');
     mainWindowWidget.className = 'vitral-gui scene-editor-main-window';
     if (!HtmlLookAndFeelTuner.apply(mainWindowWidget, this.model.getLookAndFeel())) {
-      Logger.reportMessage(this, VSDK.WARNING, 'createGUIWindowed',
-        'Warning: Can not set ' + this.model.getLookAndFeel() + ' look and feel');
+      Logger.reportMessage(
+        this,
+        VSDK.WARNING,
+        'createGUIWindowed',
+        'Warning: Can not set ' + this.model.getLookAndFeel() + ' look and feel',
+      );
     }
     this.model.setMainWindowWidget(mainWindowWidget);
 

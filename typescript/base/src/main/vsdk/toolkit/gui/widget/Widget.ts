@@ -158,7 +158,11 @@ export class Widget extends PresentationElement {
 
     public override toString(): string {
         let msg = "= Widget report =========================================================\n";
-        msg = msg + "Widget cache structure contains " + this.popupMenuList.length + " popup submenu structures registered\n";
+        msg =
+            msg +
+            "Widget cache structure contains " +
+            this.popupMenuList.length +
+            " popup submenu structures registered\n";
         msg = msg + "Widget cache structure contains " + this.commandList.length + " commands registered\n";
 
         let i: number;

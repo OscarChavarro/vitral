@@ -56,8 +56,17 @@ export class WebGLInfinitePlaneRenderer {
         normalMap: RGBImageUncompressed | null,
         localTransform: Matrix4x4d | null,
     ): Promise<void> {
-        await WebGLGeometryRenderer.draw(gl, plane, camera, lights, material, quality,
-            textureMap, normalMap, localTransform);
+        await WebGLGeometryRenderer.draw(
+            gl,
+            plane,
+            camera,
+            lights,
+            material,
+            quality,
+            textureMap,
+            normalMap,
+            localTransform,
+        );
     }
 
     /**
@@ -65,8 +74,7 @@ export class WebGLInfinitePlaneRenderer {
     @return a string that identifies the square shown for the plane
     */
     public static meshKey(plane: InfinitePlane): string {
-        return "infiniteplane/" + plane.getA() + "/" + plane.getB() + "/" +
-            plane.getC() + "/" + plane.getD();
+        return "infiniteplane/" + plane.getA() + "/" + plane.getB() + "/" + plane.getC() + "/" + plane.getD();
     }
 
     /**
@@ -77,8 +85,12 @@ export class WebGLInfinitePlaneRenderer {
     public static calculateShownMinMax(plane: InfinitePlane): number[] {
         const frame: Vector3Dd[] = WebGLInfinitePlaneRenderer.calculateFrame(plane);
         const minmax: number[] = [
-            Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE,
-            -Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE,
+            Number.MAX_VALUE,
+            Number.MAX_VALUE,
+            Number.MAX_VALUE,
+            -Number.MAX_VALUE,
+            -Number.MAX_VALUE,
+            -Number.MAX_VALUE,
         ];
         const h: number = WebGLInfinitePlaneRenderer.SIZE / 2;
 
@@ -122,14 +134,23 @@ export class WebGLInfinitePlaneRenderer {
 
                 // (u, v, n) is right handed: counterclockwise seen from n
                 builder.addQuad(
-                    center.add(u.multiply(a0)).add(v.multiply(b0)), n,
-                    i / tiles, j / tiles,
-                    center.add(u.multiply(a1)).add(v.multiply(b0)), n,
-                    (i + 1) / tiles, j / tiles,
-                    center.add(u.multiply(a1)).add(v.multiply(b1)), n,
-                    (i + 1) / tiles, (j + 1) / tiles,
-                    center.add(u.multiply(a0)).add(v.multiply(b1)), n,
-                    i / tiles, (j + 1) / tiles);
+                    center.add(u.multiply(a0)).add(v.multiply(b0)),
+                    n,
+                    i / tiles,
+                    j / tiles,
+                    center.add(u.multiply(a1)).add(v.multiply(b0)),
+                    n,
+                    (i + 1) / tiles,
+                    j / tiles,
+                    center.add(u.multiply(a1)).add(v.multiply(b1)),
+                    n,
+                    (i + 1) / tiles,
+                    (j + 1) / tiles,
+                    center.add(u.multiply(a0)).add(v.multiply(b1)),
+                    n,
+                    i / tiles,
+                    (j + 1) / tiles,
+                );
             }
         }
         return builder.build();
@@ -141,8 +162,9 @@ export class WebGLInfinitePlaneRenderer {
     */
     private static calculateFrame(plane: InfinitePlane): Vector3Dd[] {
         const n: Vector3Dd = plane.getNormal();
-        const length: number = Math.sqrt(plane.getA() * plane.getA() +
-            plane.getB() * plane.getB() + plane.getC() * plane.getC());
+        const length: number = Math.sqrt(
+            plane.getA() * plane.getA() + plane.getB() * plane.getB() + plane.getC() * plane.getC(),
+        );
         // The plane is a x + b y + c z + d = 0; (a, b, c) may not be unitary
         const center: Vector3Dd = n.multiply(length > 0 ? -plane.getD() / length : 0);
         const reference: Vector3Dd = Math.abs(n.z()) < 0.9 ? new Vector3Dd(0, 0, 1) : new Vector3Dd(1, 0, 0);

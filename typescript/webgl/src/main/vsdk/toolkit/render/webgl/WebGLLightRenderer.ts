@@ -160,8 +160,13 @@ export class WebGLLightRenderer {
 
         const colors: Float32Array = WebGLLightRenderer.buildUniformColorArray(c, positions.length / 3);
 
-        await WebGLLineRenderer.drawLines(gl, modelViewProjection, positions, colors,
-            selected ? WebGLLightRenderer.SELECTED_LINE_WIDTH : WebGLLightRenderer.LINE_WIDTH);
+        await WebGLLineRenderer.drawLines(
+            gl,
+            modelViewProjection,
+            positions,
+            colors,
+            selected ? WebGLLightRenderer.SELECTED_LINE_WIDTH : WebGLLightRenderer.LINE_WIDTH,
+        );
     }
 
     private static async drawOmniBillboard(
@@ -231,8 +236,13 @@ export class WebGLLightRenderer {
             selected ? WebGLLightRenderer.SELECTED_COLOR : light.getEmission(),
             positions.length / 3,
         );
-        await WebGLLineRenderer.drawLines(gl, modelViewProjection, positions, colors,
-            selected ? WebGLLightRenderer.SELECTED_LINE_WIDTH : WebGLLightRenderer.LINE_WIDTH);
+        await WebGLLineRenderer.drawLines(
+            gl,
+            modelViewProjection,
+            positions,
+            colors,
+            selected ? WebGLLightRenderer.SELECTED_LINE_WIDTH : WebGLLightRenderer.LINE_WIDTH,
+        );
     }
 
     private static mapPatternPointToWorld(
@@ -272,8 +282,12 @@ export class WebGLLightRenderer {
         viewportWidth: number,
         viewportHeight: number,
     ): number {
-        return LightGizmoOmniBillboard.calculateWorldHalfSize(camera,
-            light.getPosition(), viewportWidth, viewportHeight);
+        return LightGizmoOmniBillboard.calculateWorldHalfSize(
+            camera,
+            light.getPosition(),
+            viewportWidth,
+            viewportHeight,
+        );
     }
 
     private static defaultLight(): Light {

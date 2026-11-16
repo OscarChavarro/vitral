@@ -70,7 +70,8 @@ export class SceneTransformationOperation implements UndoableOperation {
       !this.mergeable ||
       !next.mergeable ||
       this.name !== next.name ||
-      next.lastChangeTime - this.lastChangeTime > SceneTransformationOperation.MERGE_INTERVAL_MILLISECONDS ||
+      next.lastChangeTime - this.lastChangeTime >
+        SceneTransformationOperation.MERGE_INTERVAL_MILLISECONDS ||
       !this.sameElements(next)
     ) {
       return false;

@@ -22,9 +22,7 @@ export class WebGLBackgroundRenderer {
             return;
         }
         const c: ColorRgb = background.colorInDireccion(new Vector3Dd(1, 0, 0));
-        const positions: Float32Array = new Float32Array([
-            -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0,
-        ]);
+        const positions: Float32Array = new Float32Array([-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0]);
         const colors: Float32Array = new Float32Array(16);
 
         for (let i: number = 0; i < 4; i++) {
@@ -36,8 +34,7 @@ export class WebGLBackgroundRenderer {
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.BLEND);
         gl.disable(gl.CULL_FACE);
-        await WebGLColoredPrimitiveRenderer.draw(gl, Matrix4x4d.identityMatrix(),
-            gl.TRIANGLE_STRIP, positions, colors);
+        await WebGLColoredPrimitiveRenderer.draw(gl, Matrix4x4d.identityMatrix(), gl.TRIANGLE_STRIP, positions, colors);
         gl.enable(gl.DEPTH_TEST);
     }
 }

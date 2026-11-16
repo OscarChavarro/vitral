@@ -128,13 +128,42 @@ export class GuiPersistence extends PersistenceElement {
                 }
             }
 
-            await GuiPersistence.loadCommandImage(command, commandNode, "icon", globalDataPath, true, false, imageReader);
             await GuiPersistence.loadCommandImage(
-                command, commandNode, "secondaryIcon", globalDataPath, false, false, imageReader);
+                command,
+                commandNode,
+                "icon",
+                globalDataPath,
+                true,
+                false,
+                imageReader,
+            );
             await GuiPersistence.loadCommandImage(
-                command, commandNode, "iconTransparency", globalDataPath, true, true, imageReader);
+                command,
+                commandNode,
+                "secondaryIcon",
+                globalDataPath,
+                false,
+                false,
+                imageReader,
+            );
             await GuiPersistence.loadCommandImage(
-                command, commandNode, "secondaryIconTransparency", globalDataPath, false, true, imageReader);
+                command,
+                commandNode,
+                "iconTransparency",
+                globalDataPath,
+                true,
+                true,
+                imageReader,
+            );
+            await GuiPersistence.loadCommandImage(
+                command,
+                commandNode,
+                "secondaryIconTransparency",
+                globalDataPath,
+                false,
+                true,
+                imageReader,
+            );
             command.applyTransparency();
             command.applySecondTransparency();
 

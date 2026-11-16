@@ -9,7 +9,10 @@ function hash(values: ArrayLike<number>): number {
 
 describe("Dithering", () => {
     it("matches the C++ palette and conversion results", () => {
-        const width = 47, height = 19, rgb = new Uint8Array(width * height * 3), indices = new Uint8Array(width * height);
+        const width = 47,
+            height = 19,
+            rgb = new Uint8Array(width * height * 3),
+            indices = new Uint8Array(width * height);
         for (let i = 0; i < rgb.length; i++) rgb[i] = (i * 73 + Math.floor(i / 7) * 19 + 11) % 256;
         const expected = [
             [0x82e89bfe, 0x20ce637d, 0xe6e355b9, 0x6476640c],
@@ -30,7 +33,9 @@ describe("Dithering", () => {
     });
     it("rejects invalid palettes and undersized images", () => {
         const palette = new DitheringPalette();
-        expect(Dithering.convert(DitheringMethod.Nearest, new Uint8Array(3), 1, 1, palette, new Uint8Array(1))).toBe(false);
+        expect(Dithering.convert(DitheringMethod.Nearest, new Uint8Array(3), 1, 1, palette, new Uint8Array(1))).toBe(
+            false,
+        );
         expect(Dithering.optimizePalette(new Uint8Array(2), 1, 1, 2, palette)).toBe(false);
     });
 });

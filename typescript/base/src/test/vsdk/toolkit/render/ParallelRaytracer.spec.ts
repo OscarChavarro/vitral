@@ -107,8 +107,11 @@ describe("ParallelRaytracer", () => {
                 if (expected.r !== actual.r || expected.g !== actual.g || expected.b !== actual.b) {
                     differentPixels++;
                 }
-                if (expected.r !== backgroundPixel.r || expected.g !== backgroundPixel.g ||
-                    expected.b !== backgroundPixel.b) {
+                if (
+                    expected.r !== backgroundPixel.r ||
+                    expected.g !== backgroundPixel.g ||
+                    expected.b !== backgroundPixel.b
+                ) {
                     objectPixels++;
                 }
             }

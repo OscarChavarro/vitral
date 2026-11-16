@@ -60,5 +60,4 @@ export class WidgetMenu extends WidgetMenuElement {
     public getMnemonic(): string {
         return this.mnemonic;
     }
-
 }

@@ -712,7 +712,9 @@ export class RotateGizmo extends Gizmo {
 
         for (let i = 0; i <= n; i++) {
             const angle: number = (2 * Math.PI * (i % n)) / n;
-            const point: Vector3Dd = center.add(u.multiply(radius * Math.cos(angle))).add(v.multiply(radius * Math.sin(angle)));
+            const point: Vector3Dd = center
+                .add(u.multiply(radius * Math.cos(angle)))
+                .add(v.multiply(radius * Math.sin(angle)));
 
             points[i] = point;
             metrics[i] = this.visibilityMetric(point, center);
@@ -876,7 +878,10 @@ export class RotateGizmo extends Gizmo {
 
             const hitPoint: Vector3Dd = ray.getOrigin().add(ray.getDirection().multiply(hit.getT()));
 
-            if (this.needsHemisphereClipping(this.getAxisDirection(ring), center) && !this.isPointOnVisibleHemisphere(hitPoint)) {
+            if (
+                this.needsHemisphereClipping(this.getAxisDirection(ring), center) &&
+                !this.isPointOnVisibleHemisphere(hitPoint)
+            ) {
                 continue;
             }
             nearestDistance = hit.getT();
@@ -1167,15 +1172,20 @@ export class RotateGizmo extends Gizmo {
 
     private static checkRing(ring: number): void {
         if (ring < 0 || ring >= RotateGizmo.RING_COUNT) {
-            throw new IllegalArgumentException("Invalid ring: " + ring + ". It must be 0, 1 or 2 for the X, Y or Z axis.");
+            throw new IllegalArgumentException(
+                "Invalid ring: " + ring + ". It must be 0, 1 or 2 for the X, Y or Z axis.",
+            );
         }
     }
 
     private static checkRingOrCamera(ring: number): void {
         if (ring < 0 || ring > RotateGizmo.RING_COUNT) {
             throw new IllegalArgumentException(
-                "Invalid ring: " + ring + ". It must be 0, 1 or 2 for the X, Y or Z axis, or " +
-                    RotateGizmo.CAMERA_RING_INDEX + " for the camera ring.",
+                "Invalid ring: " +
+                    ring +
+                    ". It must be 0, 1 or 2 for the X, Y or Z axis, or " +
+                    RotateGizmo.CAMERA_RING_INDEX +
+                    " for the camera ring.",
             );
         }
     }

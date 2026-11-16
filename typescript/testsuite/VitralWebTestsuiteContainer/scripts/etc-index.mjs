@@ -4,15 +4,19 @@
 // sorted by name.
 //
 // usage: node etc-index.mjs <folder>
+/* global process, console */
 import { readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 function list(folder) {
-  const entries = readdirSync(folder, { withFileTypes: true })
-    .filter((entry) => !entry.name.startsWith('.') && entry.name !== 'index.json');
-  const folders = entries.filter((entry) => entry.isDirectory())
+  const entries = readdirSync(folder, { withFileTypes: true }).filter(
+    (entry) => !entry.name.startsWith('.') && entry.name !== 'index.json',
+  );
+  const folders = entries
+    .filter((entry) => entry.isDirectory())
     .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
-  const files = entries.filter((entry) => entry.isFile())
+  const files = entries
+    .filter((entry) => entry.isFile())
     .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
   return [
     ...folders.map((entry) => ({ name: entry.name, children: list(join(folder, entry.name)) })),

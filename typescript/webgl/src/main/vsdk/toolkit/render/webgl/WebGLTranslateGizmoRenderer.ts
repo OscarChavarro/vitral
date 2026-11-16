@@ -107,8 +107,12 @@ export class WebGLTranslateGizmoRenderer {
     Draws a cone whose base is at the position of the element, pointing to the
     local +Z direction of the element.
     */
-    private static async drawCone(gl: WebGL2RenderingContext, mvp: Matrix4x4d, element: SimpleBody,
-                                  cone: Cone): Promise<void> {
+    private static async drawCone(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        element: SimpleBody,
+        cone: Cone,
+    ): Promise<void> {
         const radius: number = cone.getBottomRadius();
         const height: number = cone.getHeight();
         const material: SimpleMaterial | null = element.getMaterial();
@@ -135,8 +139,12 @@ export class WebGLTranslateGizmoRenderer {
     Draws the translucent square that shows a selected plane handle, centered
     at the position of the element and over its local XY plane.
     */
-    private static async drawPlaneHandle(gl: WebGL2RenderingContext, mvp: Matrix4x4d, element: SimpleBody,
-                                         box: Box): Promise<void> {
+    private static async drawPlaneHandle(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        element: SimpleBody,
+        box: Box,
+    ): Promise<void> {
         const material: SimpleMaterial | null = element.getMaterial();
 
         if (material === null) {
@@ -144,15 +152,19 @@ export class WebGLTranslateGizmoRenderer {
         }
         const c: ColorRgb = material.getDiffuse();
         const local: Matrix4x4d = GizmoSolidTessellator.localTransform(element);
-        const quad: Vector3Dd[] = GizmoSolidTessellator.buildPlaneQuad(
-            local, box.getSize().x(), box.getSize().y());
+        const quad: Vector3Dd[] = GizmoSolidTessellator.buildPlaneQuad(local, box.getSize().x(), box.getSize().y());
 
-        await WebGLTranslateGizmoRenderer.drawStrip(gl, mvp, quad, c, material.getOpacity(),
-            gl.TRIANGLE_STRIP);
+        await WebGLTranslateGizmoRenderer.drawStrip(gl, mvp, quad, c, material.getOpacity(), gl.TRIANGLE_STRIP);
     }
 
-    private static async drawStrip(gl: WebGL2RenderingContext, mvp: Matrix4x4d, points: Vector3Dd[], c: ColorRgb,
-                                   alpha: number, primitiveType: number): Promise<void> {
+    private static async drawStrip(
+        gl: WebGL2RenderingContext,
+        mvp: Matrix4x4d,
+        points: Vector3Dd[],
+        c: ColorRgb,
+        alpha: number,
+        primitiveType: number,
+    ): Promise<void> {
         const positions: Float32Array = GizmoVertexArrayBuilder.buildPositions(points);
         const colors: Float32Array = GizmoVertexArrayBuilder.buildRgbaColors(points.length, c, alpha);
 

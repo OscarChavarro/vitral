@@ -127,13 +127,25 @@ export class WebGLDrawingAreaRenderer {
 
     switch (this.gizmoDrawn) {
       case GizmoKind.TRANSLATE:
-        await WebGLTranslateGizmoRenderer.draw(gl, this.gizmoPresenter.getTranslationGizmo(), this.theScene.activeCamera);
+        await WebGLTranslateGizmoRenderer.draw(
+          gl,
+          this.gizmoPresenter.getTranslationGizmo(),
+          this.theScene.activeCamera,
+        );
         break;
       case GizmoKind.ROTATE:
-        await WebGLRotateGizmoRenderer.draw(gl, this.gizmoPresenter.getRotateGizmo(), this.theScene.activeCamera);
+        await WebGLRotateGizmoRenderer.draw(
+          gl,
+          this.gizmoPresenter.getRotateGizmo(),
+          this.theScene.activeCamera,
+        );
         break;
       case GizmoKind.SCALE:
-        await WebGLScaleGizmoRenderer.draw(gl, this.gizmoPresenter.getScaleGizmo(), this.theScene.activeCamera);
+        await WebGLScaleGizmoRenderer.draw(
+          gl,
+          this.gizmoPresenter.getScaleGizmo(),
+          this.theScene.activeCamera,
+        );
         break;
       default:
         break;
@@ -161,15 +173,27 @@ export class WebGLDrawingAreaRenderer {
       // The raytraced image comes with its OpenGL depth: after this,
       // what is rasterized (grid, gizmos, selection) is depth tested
       // against the raytraced bodies as against rasterized ones
-      await WebGLColorDepthImageRenderer.draw(gl, this.model.getRaytracedImage(), this.model.getRaytracedDepth());
-      await WebGLSceneRenderer.drawEditorOverlays(gl, this.theScene, this.host.getBodyEditFeedbackProvider());
+      await WebGLColorDepthImageRenderer.draw(
+        gl,
+        this.model.getRaytracedImage(),
+        this.model.getRaytracedDepth(),
+      );
+      await WebGLSceneRenderer.drawEditorOverlays(
+        gl,
+        this.theScene,
+        this.host.getBodyEditFeedbackProvider(),
+      );
     }
 
     //-----------------------------------------------------------------
     const rayGizmo = this.model.getRayGizmo()!;
     rayGizmo.acquireSnapshot();
-    await WebGLRayGizmoRenderer.draw(gl, rayGizmo, this.theScene.activeCamera,
-      this.theScene.scene.getLights().toArray());
+    await WebGLRayGizmoRenderer.draw(
+      gl,
+      rayGizmo,
+      this.theScene.activeCamera,
+      this.theScene.scene.getLights().toArray(),
+    );
 
     await view.drawGrid(gl);
 
@@ -207,7 +231,11 @@ export class WebGLDrawingAreaRenderer {
    * @param surfaceWidth width of the drawing buffer, in physical pixels
    * @param surfaceHeight height of the drawing buffer, in physical pixels
    */
-  async display(gl: WebGL2RenderingContext, surfaceWidth: number, surfaceHeight: number): Promise<void> {
+  async display(
+    gl: WebGL2RenderingContext,
+    surfaceWidth: number,
+    surfaceHeight: number,
+  ): Promise<void> {
     const target: WebGLOffscreenFrameBuffer = this.obtainFrameBuffer(gl);
 
     // Text size and viewport state follow the component showing the surface

@@ -109,8 +109,10 @@ export class WebGLInputGizmoRenderer {
         const paddingY: number = scaler.scaleSize(WebGLInputGizmoRenderer.BASE_PADDING_Y);
         const frameThickness: number = Math.max(1, scaler.scaleSize(WebGLInputGizmoRenderer.BASE_FRAME_THICKNESS));
         const underlineDistance: number = scaler.scaleSize(WebGLInputGizmoRenderer.BASE_UNDERLINE_DISTANCE);
-        const underlineThickness: number =
-            Math.max(1, scaler.scaleSize(WebGLInputGizmoRenderer.BASE_UNDERLINE_THICKNESS));
+        const underlineThickness: number = Math.max(
+            1,
+            scaler.scaleSize(WebGLInputGizmoRenderer.BASE_UNDERLINE_THICKNESS),
+        );
 
         if (this.images === null || this.images.length !== count) {
             this.discardImages();
@@ -119,12 +121,16 @@ export class WebGLInputGizmoRenderer {
             this.imageColors = new Array<ColorRgb | null>(count).fill(null);
         }
         // The frames have at least the width of the reference text of the gizmo
-        if (fontSize !== this.imageFontSize || this.referenceTextWidth === 0 ||
-            gizmo.getReferenceText() !== this.referenceText) {
+        if (
+            fontSize !== this.imageFontSize ||
+            this.referenceTextWidth === 0 ||
+            gizmo.getReferenceText() !== this.referenceText
+        ) {
             // The reference image is only measured, it is never drawn
             this.referenceText = gizmo.getReferenceText();
-            this.referenceTextWidth = this.host.createLabelImage(
-                this.referenceText, InputGizmo.HIGHLIGHT_COLOR, fontSize).getXSize();
+            this.referenceTextWidth = this.host
+                .createLabelImage(this.referenceText, InputGizmo.HIGHLIGHT_COLOR, fontSize)
+                .getXSize();
         }
 
         //-----------------------------------------------------------------
@@ -136,8 +142,9 @@ export class WebGLInputGizmoRenderer {
         for (let i: number = 0; i < count; i++) {
             colors.push(gizmo.getFieldDisplayColor(i));
             this.updateImage(i, gizmo.getDisplayText(i), colors[i]!, fontSize);
-            frameWidths.push(Math.max(this.referenceTextWidth, images[i]!.getXSize())
-                + 2 * (paddingX + frameThickness));
+            frameWidths.push(
+                Math.max(this.referenceTextWidth, images[i]!.getXSize()) + 2 * (paddingX + frameThickness),
+            );
             totalWidth += frameWidths[i]!;
         }
         this.imageFontSize = fontSize;
@@ -151,13 +158,26 @@ export class WebGLInputGizmoRenderer {
 
         for (let i: number = 0; i < count; i++) {
             frameStarts.push(x);
-            WebGLInputGizmoRenderer.addFrame(rectangles, x, y, frameWidths[i]!, frameHeight,
-                frameThickness, colors[i]!);
+            WebGLInputGizmoRenderer.addFrame(
+                rectangles,
+                x,
+                y,
+                frameWidths[i]!,
+                frameHeight,
+                frameThickness,
+                colors[i]!,
+            );
             if (i === gizmo.getSelectedField()) {
                 const underlineY: number = y - underlineDistance - underlineThickness;
 
-                WebGLInputGizmoRenderer.addRectangle(rectangles, x, underlineY, x + frameWidths[i]!,
-                    underlineY + underlineThickness, colors[i]!);
+                WebGLInputGizmoRenderer.addRectangle(
+                    rectangles,
+                    x,
+                    underlineY,
+                    x + frameWidths[i]!,
+                    underlineY + underlineThickness,
+                    colors[i]!,
+                );
             }
             x += frameWidths[i]! + gap;
         }
@@ -205,8 +225,12 @@ export class WebGLInputGizmoRenderer {
         const current: RGBAImageUncompressed | null = images[field]!;
         const currentColor: ColorRgb | null = this.imageColors[field]!;
 
-        if (current !== null && fontSize === this.imageFontSize &&
-            text === this.imageTexts[field] && color.equals(currentColor)) {
+        if (
+            current !== null &&
+            fontSize === this.imageFontSize &&
+            text === this.imageTexts[field] &&
+            color.equals(currentColor)
+        ) {
             return;
         }
         if (current !== null) {
@@ -223,18 +247,37 @@ export class WebGLInputGizmoRenderer {
     // Rectangles are {x0, y0, x1, y1, r, g, b}, in pixels of the viewport,
     // measured from its lower left corner
 
-    private static addRectangle(rectangles: number[][],
-                                x0: number, y0: number, x1: number, y1: number, c: ColorRgb): void {
+    private static addRectangle(
+        rectangles: number[][],
+        x0: number,
+        y0: number,
+        x1: number,
+        y1: number,
+        c: ColorRgb,
+    ): void {
         rectangles.push([x0, y0, x1, y1, c.r(), c.g(), c.b()]);
     }
 
-    private static addFrame(rectangles: number[][], x: number, y: number,
-                            width: number, height: number, thickness: number, c: ColorRgb): void {
+    private static addFrame(
+        rectangles: number[][],
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        thickness: number,
+        c: ColorRgb,
+    ): void {
         WebGLInputGizmoRenderer.addRectangle(rectangles, x, y, x + width, y + thickness, c);
         WebGLInputGizmoRenderer.addRectangle(rectangles, x, y + height - thickness, x + width, y + height, c);
         WebGLInputGizmoRenderer.addRectangle(rectangles, x, y + thickness, x + thickness, y + height - thickness, c);
-        WebGLInputGizmoRenderer.addRectangle(rectangles, x + width - thickness, y + thickness, x + width,
-            y + height - thickness, c);
+        WebGLInputGizmoRenderer.addRectangle(
+            rectangles,
+            x + width - thickness,
+            y + thickness,
+            x + width,
+            y + height - thickness,
+            c,
+        );
     }
 
     /**
@@ -266,11 +309,11 @@ export class WebGLInputGizmoRenderer {
             const y0: number = this.viewport.getPixelStartY() + r[1]!;
             const x1: number = this.viewport.getPixelStartX() + r[2]!;
             const y1: number = this.viewport.getPixelStartY() + r[3]!;
-            const corners: number[] = [x0, y0,  x1, y0,  x1, y1,  x0, y0,  x1, y1,  x0, y1];
+            const corners: number[] = [x0, y0, x1, y0, x1, y1, x0, y0, x1, y1, x0, y1];
 
             for (let k: number = 0; k < 6; k++) {
-                positions[3 * vertex] = 2.0 * corners[2 * k]! / surfaceWidth - 1.0;
-                positions[3 * vertex + 1] = 2.0 * corners[2 * k + 1]! / surfaceHeight - 1.0;
+                positions[3 * vertex] = (2.0 * corners[2 * k]!) / surfaceWidth - 1.0;
+                positions[3 * vertex + 1] = (2.0 * corners[2 * k + 1]!) / surfaceHeight - 1.0;
                 positions[3 * vertex + 2] = 0;
                 colors[4 * vertex] = r[4]!;
                 colors[4 * vertex + 1] = r[5]!;
@@ -285,13 +328,16 @@ export class WebGLInputGizmoRenderer {
 
         gl.viewport(0, 0, surfaceWidth, surfaceHeight);
         gl.enable(gl.SCISSOR_TEST);
-        gl.scissor(this.viewport.getPixelStartX(), this.viewport.getPixelStartY(),
-            this.viewport.getPixelSizeX(), this.viewport.getPixelSizeY());
+        gl.scissor(
+            this.viewport.getPixelStartX(),
+            this.viewport.getPixelStartY(),
+            this.viewport.getPixelSizeX(),
+            this.viewport.getPixelSizeY(),
+        );
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.CULL_FACE);
 
-        await WebGLColoredPrimitiveRenderer.draw(gl, Matrix4x4d.identityMatrix(),
-            gl.TRIANGLES, positions, colors);
+        await WebGLColoredPrimitiveRenderer.draw(gl, Matrix4x4d.identityMatrix(), gl.TRIANGLES, positions, colors);
 
         gl.enable(gl.DEPTH_TEST);
         gl.scissor(previousScissor[0]!, previousScissor[1]!, previousScissor[2]!, previousScissor[3]!);

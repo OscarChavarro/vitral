@@ -1,4 +1,4 @@
-import { NormalMapTexture } from "@vitral/base";
+import { NormalMapTexture } from '@vitral/base';
 import {
   IndexedColorImageUncompressed,
   NormalMap,

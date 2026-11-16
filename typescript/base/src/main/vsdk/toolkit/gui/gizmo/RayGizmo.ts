@@ -259,8 +259,12 @@ export class RayGizmo extends Gizmo {
         this.visible = visible;
     }
 
-    public isRollIndicatorEnabled(): boolean { return this.rollIndicatorEnabled; }
-    public setRollIndicatorEnabled(rollIndicatorEnabled: boolean): void { this.rollIndicatorEnabled = rollIndicatorEnabled; }
+    public isRollIndicatorEnabled(): boolean {
+        return this.rollIndicatorEnabled;
+    }
+    public setRollIndicatorEnabled(rollIndicatorEnabled: boolean): void {
+        this.rollIndicatorEnabled = rollIndicatorEnabled;
+    }
 
     public getDisableAfterElapsedSeconds(): number {
         return this.disableAfterElapsedSeconds;
@@ -348,13 +352,38 @@ export class RayGizmo extends Gizmo {
         // Source ray (index 0)
         const sourceRay: Ray = this.currentSnapshot.rays[0]!;
         const sourceIntersection: Intersection | null = this.currentSnapshot.intersections[0]!;
-        const sourceLength = sourceIntersection === null ? RayGizmo.calculateMissingRayLength(camera, sourceRay.getOrigin()) : arrowTotalLength;
-        scene.addBody(this.buildRayBody(sourceRay, sourceIntersection, this.sourceRayColor, arrowTotalLength, sourceLength, thicknessScale));
+        const sourceLength =
+            sourceIntersection === null
+                ? RayGizmo.calculateMissingRayLength(camera, sourceRay.getOrigin())
+                : arrowTotalLength;
+        scene.addBody(
+            this.buildRayBody(
+                sourceRay,
+                sourceIntersection,
+                this.sourceRayColor,
+                arrowTotalLength,
+                sourceLength,
+                thicknessScale,
+            ),
+        );
 
         if (sourceIntersection === null) {
-            this.addDotBodies(scene, sourceRay, camera, sourceLength, RayGizmo.calculateVisibleNormalLength(camera, sourceRay.getOrigin()), this.sourceRayColor);
+            this.addDotBodies(
+                scene,
+                sourceRay,
+                camera,
+                sourceLength,
+                RayGizmo.calculateVisibleNormalLength(camera, sourceRay.getOrigin()),
+                this.sourceRayColor,
+            );
         } else {
-            this.addNormalBody(scene, sourceIntersection, normalColors[0 % normalColors.length]!, camera, thicknessScale);
+            this.addNormalBody(
+                scene,
+                sourceIntersection,
+                normalColors[0 % normalColors.length]!,
+                camera,
+                thicknessScale,
+            );
         }
 
         // Reflection bounces (index 1+)
@@ -362,13 +391,38 @@ export class RayGizmo extends Gizmo {
             const reflRay: Ray = this.currentSnapshot.rays[i]!;
             const reflIntersection: Intersection | null = this.currentSnapshot.intersections[i]!;
             const reflColor: ColorRgb = this.reflectedRayColors[(i - 1) % this.reflectedRayColors.length]!;
-            const reflectedLength = reflIntersection === null ? RayGizmo.calculateMissingRayLength(camera, reflRay.getOrigin()) : arrowTotalLength;
-            scene.addBody(this.buildRayBody(reflRay, reflIntersection, reflColor, arrowTotalLength, reflectedLength, thicknessScale));
+            const reflectedLength =
+                reflIntersection === null
+                    ? RayGizmo.calculateMissingRayLength(camera, reflRay.getOrigin())
+                    : arrowTotalLength;
+            scene.addBody(
+                this.buildRayBody(
+                    reflRay,
+                    reflIntersection,
+                    reflColor,
+                    arrowTotalLength,
+                    reflectedLength,
+                    thicknessScale,
+                ),
+            );
 
             if (reflIntersection === null) {
-                this.addDotBodies(scene, reflRay, camera, reflectedLength, RayGizmo.calculateVisibleNormalLength(camera, reflRay.getOrigin()), reflColor);
+                this.addDotBodies(
+                    scene,
+                    reflRay,
+                    camera,
+                    reflectedLength,
+                    RayGizmo.calculateVisibleNormalLength(camera, reflRay.getOrigin()),
+                    reflColor,
+                );
             } else {
-                this.addNormalBody(scene, reflIntersection, normalColors[i % normalColors.length]!, camera, thicknessScale);
+                this.addNormalBody(
+                    scene,
+                    reflIntersection,
+                    normalColors[i % normalColors.length]!,
+                    camera,
+                    thicknessScale,
+                );
             }
         }
 
@@ -401,11 +455,21 @@ export class RayGizmo extends Gizmo {
 
     private static buildRayArrow(requestedLength: number): Arrow {
         const totalLength = Math.max(requestedLength, RayGizmo.ARROW_HEAD_LENGTH);
-        return new Arrow(Math.max(0, totalLength - RayGizmo.ARROW_HEAD_LENGTH), RayGizmo.ARROW_HEAD_LENGTH,
-            RayGizmo.ARROW_BASE_RADIUS, RayGizmo.ARROW_HEAD_RADIUS);
+        return new Arrow(
+            Math.max(0, totalLength - RayGizmo.ARROW_HEAD_LENGTH),
+            RayGizmo.ARROW_HEAD_LENGTH,
+            RayGizmo.ARROW_BASE_RADIUS,
+            RayGizmo.ARROW_HEAD_RADIUS,
+        );
     }
 
-    private addNormalBody(scene: SimpleScene, intersection: Intersection, color: ColorRgb, camera: Camera | null, thicknessScale: number): void {
+    private addNormalBody(
+        scene: SimpleScene,
+        intersection: Intersection,
+        color: ColorRgb,
+        camera: Camera | null,
+        thicknessScale: number,
+    ): void {
         // Java returns early when either accessor answers null. `Intersection`
         // declares both non-nullable in TypeScript, so that guard is
         // unreachable here and is left out rather than written as dead code.
@@ -415,13 +479,26 @@ export class RayGizmo extends Gizmo {
         b.setGeometry(this.arrow);
         b.setPosition(hitPoint);
         b.setRotation(RayGizmo.rotationFromZToDirection(normal));
-        b.setScale(new Vector3Dd(0.5 * thicknessScale, 0.5 * thicknessScale,
-            RayGizmo.calculateVisibleNormalLength(camera, hitPoint) / (RayGizmo.ARROW_BASE_LENGTH + RayGizmo.ARROW_HEAD_LENGTH)));
+        b.setScale(
+            new Vector3Dd(
+                0.5 * thicknessScale,
+                0.5 * thicknessScale,
+                RayGizmo.calculateVisibleNormalLength(camera, hitPoint) /
+                    (RayGizmo.ARROW_BASE_LENGTH + RayGizmo.ARROW_HEAD_LENGTH),
+            ),
+        );
         b.setMaterial(RayGizmo.materialFromColor(color));
         scene.addBody(b);
     }
 
-    private addDotBodies(scene: SimpleScene, ray: Ray, camera: Camera | null, rayLength: number, normalLength: number, rayColor: ColorRgb): void {
+    private addDotBodies(
+        scene: SimpleScene,
+        ray: Ray,
+        camera: Camera | null,
+        rayLength: number,
+        normalLength: number,
+        rayColor: ColorRgb,
+    ): void {
         const len: number = ray.getDirection().length();
         if (len < VSDK.EPSILON) {
             return;
@@ -446,9 +523,12 @@ export class RayGizmo extends Gizmo {
 
     public static calculateViewThicknessScale(camera: Camera | null): number {
         if (camera === null) return 1.0;
-        if (camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL) return 1.0 / Math.max(camera.getOrthogonalZoom(), VSDK.EPSILON);
-        return Math.max(Math.tan(JavaMath.toRadians(camera.getFov()) / 2.0), VSDK.EPSILON) /
-            Math.tan(JavaMath.toRadians(RayGizmo.REFERENCE_VERTICAL_FOV_DEGREES) / 2.0);
+        if (camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL)
+            return 1.0 / Math.max(camera.getOrthogonalZoom(), VSDK.EPSILON);
+        return (
+            Math.max(Math.tan(JavaMath.toRadians(camera.getFov()) / 2.0), VSDK.EPSILON) /
+            Math.tan(JavaMath.toRadians(RayGizmo.REFERENCE_VERTICAL_FOV_DEGREES) / 2.0)
+        );
     }
 
     public static calculateVisibleNormalLength(camera: Camera | null, position: Vector3Dd | null): number {
@@ -459,8 +539,13 @@ export class RayGizmo extends Gizmo {
         if (camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL) {
             worldPerPixel = 2.0 / Math.max(Math.abs(camera.getOrthogonalZoom()), VSDK.EPSILON) / viewportHeight;
         } else {
-            const depth = Math.max(Math.abs(position.subtract(camera.getPosition()).dotProduct(camera.getFront())), camera.getNearPlaneDistance());
-            worldPerPixel = 2.0 * depth * Math.max(Math.tan(JavaMath.toRadians(camera.getFov()) / 2.0), VSDK.EPSILON) / viewportHeight;
+            const depth = Math.max(
+                Math.abs(position.subtract(camera.getPosition()).dotProduct(camera.getFront())),
+                camera.getNearPlaneDistance(),
+            );
+            worldPerPixel =
+                (2.0 * depth * Math.max(Math.tan(JavaMath.toRadians(camera.getFov()) / 2.0), VSDK.EPSILON)) /
+                viewportHeight;
         }
         return RayGizmo.NORMAL_VIEWPORT_HEIGHT_FRACTION * viewportHeight * worldPerPixel;
     }

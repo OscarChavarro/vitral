@@ -31,7 +31,10 @@ describe("StepperMotorGuideStrictValidationTest", () => {
             expect(message).toContain("op=UNION");
             expect(message).toContain("path=normal-pipeline");
             expect(message).toContain("TopologySummary{");
-            expect(message).toContain("Face [4] has a loop with fewer than 3 edges");
+            // The face id depends on processing order (it moved from 4 to 3
+            // when lkemr stopped leaving the bridge half in the ring); the
+            // defect is the short loop, whatever face carries it.
+            expect(message).toMatch(/^[\s\S]*Face \[\d+\] has a loop with fewer than 3 edges[\s\S]*$/);
         },
         GUIDE_TIMEOUT_MS,
     );

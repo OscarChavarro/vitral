@@ -24,7 +24,10 @@ import { SceneSelectionEditor } from '../model/selection/scene-selection-editor'
 import type { DrawingAreaInteractionListener } from './drawing-area-interaction-listener';
 import { InteractionEditRecorder } from './history/interaction-edit-recorder';
 import type { UndoRedoCommand } from './history/undo-redo-command';
-import { UndoRedoInteractionTechnique, type UndoRedoResult } from './history/undo-redo-interaction-technique';
+import {
+  UndoRedoInteractionTechnique,
+  type UndoRedoResult,
+} from './history/undo-redo-interaction-technique';
 import { PointerCursor } from './pointer-cursor';
 import { SelectedBodyMapToggles } from './selected-body-map-toggles';
 
@@ -100,7 +103,10 @@ export class DrawingAreaInteractionTechniques {
     this.selectionEditor = new SceneSelectionEditor(this.scene);
     this.scenePicker = new ScenePicker(this.scene);
     this.qualitySelection = this.scene.qualityTemplate;
-    this.interactionTechniques = new ViewportInteractionTechniques(this.scene.camera, this.qualitySelection);
+    this.interactionTechniques = new ViewportInteractionTechniques(
+      this.scene.camera,
+      this.qualitySelection,
+    );
     this.viewportSetTechniques = new ViewportSetInteractionTechniques(this.viewportSet);
     this.rayGizmoTechniques = new RayGizmoInteractionTechniques(model.getRayGizmo()!);
     this.mapToggles = new SelectedBodyMapToggles();
@@ -240,7 +246,10 @@ export class DrawingAreaInteractionTechniques {
   }
 
   private toViewportEvent(event: MouseEvent, viewport: Viewport): MouseEvent {
-    return this.viewportSetTechniques.toViewportEvent(this.drawingArea.toSurfaceEvent(event), viewport);
+    return this.viewportSetTechniques.toViewportEvent(
+      this.drawingArea.toSurfaceEvent(event),
+      viewport,
+    );
   }
 
   /**
@@ -276,9 +285,14 @@ export class DrawingAreaInteractionTechniques {
       return false;
     }
     this.translationGizmo.setCamera(viewport.getActiveCamera());
-    this.translationGizmo.setTransformationMatrix(SceneSelectionEditor.createTranslationGizmoMatrix(centroid));
+    this.translationGizmo.setTransformationMatrix(
+      SceneSelectionEditor.createTranslationGizmoMatrix(centroid),
+    );
     if (technique(this.toViewportEvent(event, viewport))) {
-      this.selectionEditor.applyTranslationToSelectedObjects(centroid, this.translationGizmo.getPosition());
+      this.selectionEditor.applyTranslationToSelectedObjects(
+        centroid,
+        this.translationGizmo.getPosition(),
+      );
       this.listener.repaintRequested();
     }
     return true;
@@ -347,7 +361,9 @@ export class DrawingAreaInteractionTechniques {
    * @param body first selected body
    */
   private applyRotationGizmoToBody(body: SimpleBody): void {
-    body.setRotation(new Matrix4x4d(this.rotateGizmo.getTransformationMatrix()).withoutTranslation());
+    body.setRotation(
+      new Matrix4x4d(this.rotateGizmo.getTransformationMatrix()).withoutTranslation(),
+    );
   }
 
   /**
@@ -401,7 +417,10 @@ export class DrawingAreaInteractionTechniques {
     this.requestCursorForPointer(event, cursor);
 
     //-----------------------------------------------------------------
-    if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraMousePressedEvent(event)) {
+    if (
+      mode === InteractionMode.CAMERA &&
+      this.interactionTechniques.processCameraMousePressedEvent(event)
+    ) {
       // The camera technique took the press
     } else if (mode !== InteractionMode.CAMERA) {
       const composite: boolean = (m & MouseEvent.CTRL_DOWN_MASK) !== 0;
@@ -439,7 +458,11 @@ export class DrawingAreaInteractionTechniques {
         // IDC_TOOLS_RAY command (or the keypad) shows or hides it
         const rayVisible: boolean = this.model.isWithVisualDebugRay();
         this.rayGizmoTechniques.setRay(
-          this.scenePicker.selectObjectWithMouse(viewportEvent.getX(), viewportEvent.getY(), composite),
+          this.scenePicker.selectObjectWithMouse(
+            viewportEvent.getX(),
+            viewportEvent.getY(),
+            composite,
+          ),
         );
         this.model.setWithVisualDebugRay(rayVisible);
       }
@@ -448,7 +471,9 @@ export class DrawingAreaInteractionTechniques {
 
       if (centroid !== null) {
         this.translationGizmo.setCamera(mouseView.getActiveCamera());
-        this.translationGizmo.setTransformationMatrix(SceneSelectionEditor.createTranslationGizmoMatrix(centroid));
+        this.translationGizmo.setTransformationMatrix(
+          SceneSelectionEditor.createTranslationGizmoMatrix(centroid),
+        );
         // Only the translation gizmo has mouse interaction (a gesture
         // started in other mode would never be ended)
         if (mode === InteractionMode.TRANSLATE) {
@@ -483,7 +508,10 @@ export class DrawingAreaInteractionTechniques {
 
     this.updateModeCursor(event);
 
-    if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraMouseReleasedEvent(event)) {
+    if (
+      mode === InteractionMode.CAMERA &&
+      this.interactionTechniques.processCameraMouseReleasedEvent(event)
+    ) {
       this.listener.repaintRequested();
     } else if (mode === InteractionMode.TRANSLATE && centroid !== null) {
       this.processTranslationEvent(event, mouseView, centroid, (e: MouseEvent): boolean =>
@@ -520,7 +548,10 @@ export class DrawingAreaInteractionTechniques {
 
     const centroid: Vector3Dd | null = this.selectionEditor.computeSelectionCentroid();
 
-    if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraMouseClickedEvent(event)) {
+    if (
+      mode === InteractionMode.CAMERA &&
+      this.interactionTechniques.processCameraMouseClickedEvent(event)
+    ) {
       this.listener.repaintRequested();
     } else if (mode === InteractionMode.TRANSLATE && centroid !== null) {
       this.processTranslationEvent(event, mouseView, centroid, (e: MouseEvent): boolean =>
@@ -554,7 +585,10 @@ export class DrawingAreaInteractionTechniques {
     //-----------------------------------------------------------------
     const centroid: Vector3Dd | null = this.selectionEditor.computeSelectionCentroid();
 
-    if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraMouseMovedEvent(event)) {
+    if (
+      mode === InteractionMode.CAMERA &&
+      this.interactionTechniques.processCameraMouseMovedEvent(event)
+    ) {
       this.listener.repaintRequested();
     } else if (mode === InteractionMode.TRANSLATE && centroid !== null) {
       this.processTranslationEvent(event, mouseView, centroid, (e: MouseEvent): boolean =>
@@ -585,7 +619,10 @@ export class DrawingAreaInteractionTechniques {
 
     const centroid: Vector3Dd | null = this.selectionEditor.computeSelectionCentroid();
 
-    if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraMouseDraggedEvent(event)) {
+    if (
+      mode === InteractionMode.CAMERA &&
+      this.interactionTechniques.processCameraMouseDraggedEvent(event)
+    ) {
       this.listener.repaintRequested();
     } else if (mode === InteractionMode.TRANSLATE && centroid !== null) {
       if (
@@ -629,7 +666,10 @@ export class DrawingAreaInteractionTechniques {
 
     this.editRecorder.beginAction();
     try {
-      if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraMouseWheelEvent(event)) {
+      if (
+        mode === InteractionMode.CAMERA &&
+        this.interactionTechniques.processCameraMouseWheelEvent(event)
+      ) {
         this.listener.repaintRequested();
       }
     } finally {
@@ -662,7 +702,10 @@ export class DrawingAreaInteractionTechniques {
     try {
       this.processEditionKeyPressedEvent(event);
     } finally {
-      this.editRecorder.endAction(DrawingAreaInteractionTechniques.keyOperationName(mode, event), true);
+      this.editRecorder.endAction(
+        DrawingAreaInteractionTechniques.keyOperationName(mode, event),
+        true,
+      );
     }
   }
 
@@ -675,14 +718,19 @@ export class DrawingAreaInteractionTechniques {
     }
 
     if (
-      (mode === InteractionMode.TRANSLATE || mode === InteractionMode.ROTATE || mode === InteractionMode.SCALE) &&
+      (mode === InteractionMode.TRANSLATE ||
+        mode === InteractionMode.ROTATE ||
+        mode === InteractionMode.SCALE) &&
       this.processInputGizmoKeyPressedEvent(mode, event)
     ) {
       this.listener.repaintRequested();
       return;
     }
 
-    if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraKeyPressedEvent(event)) {
+    if (
+      mode === InteractionMode.CAMERA &&
+      this.interactionTechniques.processCameraKeyPressedEvent(event)
+    ) {
       // The camera technique took the key
     } else {
       this.processModeKeyPressedEvent(mode, event);
@@ -773,12 +821,17 @@ export class DrawingAreaInteractionTechniques {
     if (centroid === null) {
       return false;
     }
-    this.translationGizmo.setTransformationMatrix(SceneSelectionEditor.createTranslationGizmoMatrix(centroid));
+    this.translationGizmo.setTransformationMatrix(
+      SceneSelectionEditor.createTranslationGizmoMatrix(centroid),
+    );
     if (!this.interactionTechniques.isTranslationInputGizmoKey(event)) {
       return false;
     }
     if (this.interactionTechniques.processTranslationKeyPressedEvent(event)) {
-      this.selectionEditor.applyTranslationToSelectedObjects(centroid, this.translationGizmo.getPosition());
+      this.selectionEditor.applyTranslationToSelectedObjects(
+        centroid,
+        this.translationGizmo.getPosition(),
+      );
     }
     return true;
   }
@@ -807,9 +860,14 @@ export class DrawingAreaInteractionTechniques {
         const centroid: Vector3Dd | null = this.selectionEditor.computeSelectionCentroid();
 
         if (centroid !== null) {
-          this.translationGizmo.setTransformationMatrix(SceneSelectionEditor.createTranslationGizmoMatrix(centroid));
+          this.translationGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createTranslationGizmoMatrix(centroid),
+          );
           if (this.interactionTechniques.processTranslationKeyPressedEvent(event)) {
-            this.selectionEditor.applyTranslationToSelectedObjects(centroid, this.translationGizmo.getPosition());
+            this.selectionEditor.applyTranslationToSelectedObjects(
+              centroid,
+              this.translationGizmo.getPosition(),
+            );
           }
         }
         break;
@@ -817,7 +875,9 @@ export class DrawingAreaInteractionTechniques {
       case InteractionMode.ROTATE:
         body = this.selectionEditor.getFirstSelectedBody();
         if (body !== null) {
-          this.rotateGizmo.setTransformationMatrix(SceneSelectionEditor.createRotationGizmoMatrix(body));
+          this.rotateGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createRotationGizmoMatrix(body),
+          );
           if (this.interactionTechniques.processRotateKeyPressedEvent(event)) {
             this.applyRotationGizmoToBody(body);
           }
@@ -826,7 +886,9 @@ export class DrawingAreaInteractionTechniques {
       case InteractionMode.SCALE:
         body = this.selectionEditor.getFirstSelectedBody();
         if (body !== null) {
-          this.scaleGizmo.setTransformationMatrix(SceneSelectionEditor.createRotationGizmoMatrix(body));
+          this.scaleGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createRotationGizmoMatrix(body),
+          );
           this.scaleGizmo.setScale(body.getScale());
           if (this.interactionTechniques.processScaleKeyPressedEvent(event)) {
             body.setScale(this.scaleGizmo.getScale());
@@ -890,13 +952,17 @@ export class DrawingAreaInteractionTechniques {
       case KeyEvent.charCode('T'):
         body = this.selectionEditor.getFirstSelectedBody();
         if (body !== null) {
-          void this.mapToggles.toggleTexture(body).then((): void => this.listener.repaintRequested());
+          void this.mapToggles
+            .toggleTexture(body)
+            .then((): void => this.listener.repaintRequested());
         }
         break;
       case KeyEvent.charCode('B'):
         body = this.selectionEditor.getFirstSelectedBody();
         if (body !== null) {
-          void this.mapToggles.toggleNormalMap(body).then((): void => this.listener.repaintRequested());
+          void this.mapToggles
+            .toggleNormalMap(body)
+            .then((): void => this.listener.repaintRequested());
         }
         break;
       case KeyEvent.charCode('h'):
@@ -974,7 +1040,10 @@ export class DrawingAreaInteractionTechniques {
     }
     this.editRecorder.beginAction();
     try {
-      if (mode === InteractionMode.CAMERA && this.interactionTechniques.processCameraKeyReleasedEvent(event)) {
+      if (
+        mode === InteractionMode.CAMERA &&
+        this.interactionTechniques.processCameraKeyReleasedEvent(event)
+      ) {
         this.listener.repaintRequested();
       }
     } finally {

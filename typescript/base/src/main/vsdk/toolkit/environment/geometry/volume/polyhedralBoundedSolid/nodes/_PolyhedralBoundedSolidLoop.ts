@@ -2,8 +2,9 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-import { CircularDoubleLinkedList } from "../../../../../common/dataStructures/CircularDoubleLinkedList.js";
+import { CircularArrayList } from "../../../../../common/dataStructures/CircularArrayList.js";
 import { FundamentalEntity } from "../../../../../common/FundamentalEntity.js";
+import type { ArrayLinkable } from "../../../../../common/dataStructures/ArrayLinkable.js";
 import type { _PolyhedralBoundedSolidEdge } from "./_PolyhedralBoundedSolidEdge.js";
 import type { _PolyhedralBoundedSolidFace } from "./_PolyhedralBoundedSolidFace.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "./_PolyhedralBoundedSolidHalfEdge.js";
@@ -20,7 +21,25 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-export class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
+export class _PolyhedralBoundedSolidLoop extends FundamentalEntity implements ArrayLinkable {
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    private listOwner: object | null = null;
+    private listIndex = -1;
+
+    public getListOwner(): object | null {
+        return this.listOwner;
+    }
+
+    public getListIndex(): number {
+        return this.listIndex;
+    }
+
+    public setListSlot(owner: object | null, index: number): void {
+        this.listOwner = owner;
+        this.listIndex = index;
+    }
+
     /// Defined as presented in [MANT1988].10.2.1
     public parentFace!: _PolyhedralBoundedSolidFace;
 
@@ -29,7 +48,7 @@ export class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     /// reference.
     public boundaryStartHalfEdge: _PolyhedralBoundedSolidHalfEdge | null = null;
 
-    public halfEdgesList!: CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge>;
+    public halfEdgesList!: CircularArrayList<_PolyhedralBoundedSolidHalfEdge>;
 
     //=================================================================
     public constructor(parent: _PolyhedralBoundedSolidFace) {
@@ -40,7 +59,7 @@ export class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     private init(parent: _PolyhedralBoundedSolidFace): void {
         this.parentFace = parent;
         this.parentFace.boundariesList.add(this);
-        this.halfEdgesList = new CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge>();
+        this.halfEdgesList = new CircularArrayList<_PolyhedralBoundedSolidHalfEdge>();
     }
 
     public unlistHalfEdge(he: _PolyhedralBoundedSolidHalfEdge): void {

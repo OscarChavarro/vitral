@@ -165,10 +165,13 @@ describe("PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest", () => {
         expect(relation).toBe(true);
     });
 
-    // Java: @Disabled("Legacy sectoroverlap intentionally treats boundary-ray
-    // contact as overlap; fixing requires null-edge strut logic that knows the
-    // touching case from the coplanar V/V path — deferred to future rework")
-    it.skip("given_coplanarNeighborSectors_when_theyOnlyShareBoundaryRay_then_sectoroverlapReturnsFalse", () => {
+    /**
+    Closed-set decision: sectors that share only a boundary ray overlap.
+    The vertex/vertex path needs a null-edge strut at a coplanar
+    boundary-ray contact; an open-set test breaks the [MANT1988] Fig. 15.1
+    reference geometry (see the comment in sectoroverlap).
+    */
+    it("given_coplanarNeighborSectors_when_theyOnlyShareBoundaryRay_then_sectoroverlapReturnsTrue", () => {
         // Arrange
         const solid = PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         const he = findFaceWithNormal(solid, new Vector3Dd(0.0, 0.0, 1.0))!.boundariesList.get(
@@ -181,13 +184,10 @@ describe("PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest", () => {
         const relation = invokeSectorOverlap(createSector(he, 0.0, 60.0), createSector(he, 60.0, 120.0));
 
         // Assert
-        expect(relation).toBe(false);
+        expect(relation).toBe(true);
     });
 
-    // Java: @Disabled("Legacy sectoroverlap is deliberately permissive
-    // (epsilon-tolerant); fixing the B-left-of-A disjoint case without breaking
-    // touching-sector classification requires a restructured coplanar V/V path")
-    it.skip("given_coplanarDisjointSectorsOnSameAngularSide_when_intervalsDoNotIntersect_then_sectoroverlapReturnsFalse", () => {
+    it("given_coplanarDisjointSectorsOnSameAngularSide_when_intervalsDoNotIntersect_then_sectoroverlapReturnsFalse", () => {
         // Arrange
         const solid = PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         const he = findFaceWithNormal(solid, new Vector3Dd(0.0, 0.0, 1.0))!.boundariesList.get(

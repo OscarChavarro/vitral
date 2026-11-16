@@ -1,10 +1,4 @@
-import {
-    GizmoVertexArrayBuilder,
-    Matrix4x4d,
-    ReferenceFrameGizmo,
-    type ColorRgb,
-    type Vector3Dd,
-} from "@vitral/base";
+import { GizmoVertexArrayBuilder, Matrix4x4d, ReferenceFrameGizmo, type ColorRgb, type Vector3Dd } from "@vitral/base";
 import { WebGLColoredPrimitiveRenderer } from "./WebGLColoredPrimitiveRenderer.js";
 
 /**
@@ -93,8 +87,8 @@ export class WebGLReferenceFrameGizmoRenderer {
                 const p: Vector3Dd = orientation.multiply(gizmo.getLabelPosition(axis));
 
                 // Canonical space [-1, 1] covers the area of the gizmo
-                const windowX: number = pixelStartX + (p.x() + 1) * size / 2;
-                const windowY: number = pixelStartY + (p.y() + 1) * size / 2;
+                const windowX: number = pixelStartX + ((p.x() + 1) * size) / 2;
+                const windowY: number = pixelStartY + ((p.y() + 1) * size) / 2;
 
                 await labelPainter.drawLabel(gl, axis, gizmo.getAxisLabel(axis), windowX, windowY);
             }
@@ -108,13 +102,11 @@ export class WebGLReferenceFrameGizmoRenderer {
             const positions: Float32Array = GizmoVertexArrayBuilder.buildPositions(strip);
             const colors: Float32Array = GizmoVertexArrayBuilder.buildRgbaColors(strip.length, c, 1.0);
 
-            await WebGLColoredPrimitiveRenderer.draw(gl, identity, gl.TRIANGLE_STRIP,
-                positions, colors);
+            await WebGLColoredPrimitiveRenderer.draw(gl, identity, gl.TRIANGLE_STRIP, positions, colors);
         }
 
         //-----------------------------------------------------------------
-        gl.viewport(previousViewport[0]!, previousViewport[1]!, previousViewport[2]!,
-            previousViewport[3]!);
+        gl.viewport(previousViewport[0]!, previousViewport[1]!, previousViewport[2]!, previousViewport[3]!);
         gl.enable(gl.DEPTH_TEST);
     }
 }

@@ -65,6 +65,12 @@ export class WebGLSelectionCornersRenderer {
         }
         const local: Matrix4x4d = localTransform !== null ? localTransform : Matrix4x4d.identityMatrix();
 
-        await WebGLLineRenderer.drawLines(gl, camera.calculateProjectionMatrix().multiply(local), positions, colors, 1.0);
+        await WebGLLineRenderer.drawLines(
+            gl,
+            camera.calculateProjectionMatrix().multiply(local),
+            positions,
+            colors,
+            1.0,
+        );
     }
 }

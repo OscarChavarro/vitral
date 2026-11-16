@@ -323,11 +323,8 @@ describe("CsgKurlanderBowlFirstStarRegressionTest", () => {
             expect(result.getPolygonsList().size()).toBeGreaterThan(0);
             expect(result.getEdgesList().size()).toBeGreaterThan(0);
             expect(result.getVerticesList().size()).toBeGreaterThan(0);
-            // §9.1: pairIndex matching must work for the curved-surface case
-            expect(
-                _PolyhedralBoundedSolidSetFinisher.getLastLegacyFallbackCount(),
-                "§9.1: sanitizePairedFaces must not fall back to legacy ordering for star 5",
-            ).toBe(0);
+            // §9.1: pairIndex matching worked for the curved-surface case;
+            // otherwise finish would have thrown SolidOperationFailedException.
             // §9.2: triangulateNonPlanarFaces fires for curved surfaces (expected)
             // — the bowl is tessellated; adjacent faces have different normals.
             // The counter merely records how many lmef splits were needed; it is

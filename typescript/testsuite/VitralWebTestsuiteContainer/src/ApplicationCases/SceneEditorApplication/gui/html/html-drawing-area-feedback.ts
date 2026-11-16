@@ -50,7 +50,9 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
       this.createCursor(cursor);
     }
 
-    this.elementScaler = new HtmlViewportElementScaler(this.drawingArea.getViewportSet().getElementScaler());
+    this.elementScaler = new HtmlViewportElementScaler(
+      this.drawingArea.getViewportSet().getElementScaler(),
+    );
     this.elementScaler.updateFromDefaultScreen();
   }
 
@@ -72,7 +74,12 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
       this.cursors.set(cursor, 'url("' + filename + '") ' + x + ' ' + y + ', default');
     };
     image.onerror = (): void => {
-      Logger.reportMessage(this, VSDK.WARNING, 'createCursor', 'Cannot load cursor image ' + filename);
+      Logger.reportMessage(
+        this,
+        VSDK.WARNING,
+        'createCursor',
+        'Cannot load cursor image ' + filename,
+      );
     };
     image.src = filename;
   }
@@ -126,8 +133,11 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
   }
 
   cursorWarpRequested(surfaceX: number, surfaceY: number): void {
-    this.cursorWarper.warp(this.canvas, this.drawingArea.scaleXToCanvas(surfaceX),
-      this.drawingArea.scaleYToCanvas(surfaceY));
+    this.cursorWarper.warp(
+      this.canvas,
+      this.drawingArea.scaleXToCanvas(surfaceX),
+      this.drawingArea.scaleYToCanvas(surfaceY),
+    );
   }
 
   repaintRequested(): void {
@@ -143,7 +153,12 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
   }
 
   raytracingRequested(): void {
-    this.setStatusText(this.application.getApplicationModel().getI18nContext()!.getMessage('IDM_COMPUTING_RAYTRACING'));
+    this.setStatusText(
+      this.application
+        .getApplicationModel()
+        .getI18nContext()!
+        .getMessage('IDM_COMPUTING_RAYTRACING'),
+    );
     void this.application.doRaytracingImage().then((): void => {
       this.showImage(this.application.getApplicationModel().getRaytracedImage());
     });
@@ -153,7 +168,11 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
     const htmlModel: HtmlApplicationModel = this.application.getHtmlModel();
 
     if (htmlModel.getSelectorDialog() === null) {
-      htmlModel.setSelectorDialog(new HtmlSelectorDialog(this.application.getApplicationModel(), () => this.application.repaintDrawingArea()));
+      htmlModel.setSelectorDialog(
+        new HtmlSelectorDialog(this.application.getApplicationModel(), () =>
+          this.application.repaintDrawingArea(),
+        ),
+      );
     }
     htmlModel.getSelectorDialog()!.setVisible(true);
     htmlModel.getSelectorDialog()!.repaint();

@@ -34,25 +34,80 @@ export class ViewportSet {
 
     // Each layout has one {startX, startY, sizeX, sizeY} row per viewport
     private static readonly LAYOUTS_2: readonly (readonly (readonly number[])[])[] = [
-        [[0, 0, ViewportSet.H, 1], [ViewportSet.H, 0, ViewportSet.H, 1]],
-        [[0, ViewportSet.H, 1, ViewportSet.H], [0, 0, 1, ViewportSet.H]],
+        [
+            [0, 0, ViewportSet.H, 1],
+            [ViewportSet.H, 0, ViewportSet.H, 1],
+        ],
+        [
+            [0, ViewportSet.H, 1, ViewportSet.H],
+            [0, 0, 1, ViewportSet.H],
+        ],
     ];
 
     private static readonly LAYOUTS_3: readonly (readonly (readonly number[])[])[] = [
-        [[0, 0, ViewportSet.H, ViewportSet.H], [0, ViewportSet.H, ViewportSet.H, ViewportSet.H], [ViewportSet.H, 0, ViewportSet.H, 1]],
-        [[0, 0, ViewportSet.H, 1], [ViewportSet.H, 0, ViewportSet.H, ViewportSet.H], [ViewportSet.H, ViewportSet.H, ViewportSet.H, ViewportSet.H]],
-        [[0, 0, ViewportSet.H, ViewportSet.H], [ViewportSet.H, 0, ViewportSet.H, ViewportSet.H], [0, ViewportSet.H, 1, ViewportSet.H]],
-        [[0, 0, 1, ViewportSet.H], [0, ViewportSet.H, ViewportSet.H, ViewportSet.H], [ViewportSet.H, ViewportSet.H, ViewportSet.H, ViewportSet.H]],
-        [[0, 0, ViewportSet.T1, 1], [ViewportSet.T1, 0, ViewportSet.T1, 1], [ViewportSet.T2, 0, ViewportSet.T1, 1]],
-        [[0, 0, 1, ViewportSet.T1], [0, ViewportSet.T1, 1, ViewportSet.T1], [0, ViewportSet.T2, 1, ViewportSet.T1]],
+        [
+            [0, 0, ViewportSet.H, ViewportSet.H],
+            [0, ViewportSet.H, ViewportSet.H, ViewportSet.H],
+            [ViewportSet.H, 0, ViewportSet.H, 1],
+        ],
+        [
+            [0, 0, ViewportSet.H, 1],
+            [ViewportSet.H, 0, ViewportSet.H, ViewportSet.H],
+            [ViewportSet.H, ViewportSet.H, ViewportSet.H, ViewportSet.H],
+        ],
+        [
+            [0, 0, ViewportSet.H, ViewportSet.H],
+            [ViewportSet.H, 0, ViewportSet.H, ViewportSet.H],
+            [0, ViewportSet.H, 1, ViewportSet.H],
+        ],
+        [
+            [0, 0, 1, ViewportSet.H],
+            [0, ViewportSet.H, ViewportSet.H, ViewportSet.H],
+            [ViewportSet.H, ViewportSet.H, ViewportSet.H, ViewportSet.H],
+        ],
+        [
+            [0, 0, ViewportSet.T1, 1],
+            [ViewportSet.T1, 0, ViewportSet.T1, 1],
+            [ViewportSet.T2, 0, ViewportSet.T1, 1],
+        ],
+        [
+            [0, 0, 1, ViewportSet.T1],
+            [0, ViewportSet.T1, 1, ViewportSet.T1],
+            [0, ViewportSet.T2, 1, ViewportSet.T1],
+        ],
     ];
 
     private static readonly LAYOUTS_4: readonly (readonly (readonly number[])[])[] = [
-        [[0, 0, ViewportSet.T1, ViewportSet.T1], [ViewportSet.T1, 0, ViewportSet.T2, 1], [0, ViewportSet.T2, ViewportSet.T1, ViewportSet.T1], [0, ViewportSet.T1, ViewportSet.T1, ViewportSet.T1]],
-        [[0, 0, ViewportSet.H, ViewportSet.H], [ViewportSet.H, 0, ViewportSet.H, ViewportSet.H], [0, ViewportSet.H, ViewportSet.H, ViewportSet.H], [ViewportSet.H, ViewportSet.H, ViewportSet.H, ViewportSet.H]],
-        [[0, 0, ViewportSet.H, 1], [ViewportSet.H, 0, ViewportSet.H, ViewportSet.T1], [ViewportSet.H, ViewportSet.T1, ViewportSet.H, ViewportSet.T1], [ViewportSet.H, ViewportSet.T2, ViewportSet.H, ViewportSet.T1]],
-        [[0, 0, ViewportSet.T1, ViewportSet.H], [ViewportSet.T1, 0, ViewportSet.T1, ViewportSet.H], [ViewportSet.T2, 0, ViewportSet.T1, ViewportSet.H], [0, ViewportSet.H, 1, ViewportSet.H]],
-        [[0, 0, 1, ViewportSet.H], [0, ViewportSet.H, ViewportSet.T1, ViewportSet.H], [ViewportSet.T1, ViewportSet.H, ViewportSet.T1, ViewportSet.H], [ViewportSet.T2, ViewportSet.H, ViewportSet.T1, ViewportSet.H]],
+        [
+            [0, 0, ViewportSet.T1, ViewportSet.T1],
+            [ViewportSet.T1, 0, ViewportSet.T2, 1],
+            [0, ViewportSet.T2, ViewportSet.T1, ViewportSet.T1],
+            [0, ViewportSet.T1, ViewportSet.T1, ViewportSet.T1],
+        ],
+        [
+            [0, 0, ViewportSet.H, ViewportSet.H],
+            [ViewportSet.H, 0, ViewportSet.H, ViewportSet.H],
+            [0, ViewportSet.H, ViewportSet.H, ViewportSet.H],
+            [ViewportSet.H, ViewportSet.H, ViewportSet.H, ViewportSet.H],
+        ],
+        [
+            [0, 0, ViewportSet.H, 1],
+            [ViewportSet.H, 0, ViewportSet.H, ViewportSet.T1],
+            [ViewportSet.H, ViewportSet.T1, ViewportSet.H, ViewportSet.T1],
+            [ViewportSet.H, ViewportSet.T2, ViewportSet.H, ViewportSet.T1],
+        ],
+        [
+            [0, 0, ViewportSet.T1, ViewportSet.H],
+            [ViewportSet.T1, 0, ViewportSet.T1, ViewportSet.H],
+            [ViewportSet.T2, 0, ViewportSet.T1, ViewportSet.H],
+            [0, ViewportSet.H, 1, ViewportSet.H],
+        ],
+        [
+            [0, 0, 1, ViewportSet.H],
+            [0, ViewportSet.H, ViewportSet.T1, ViewportSet.H],
+            [ViewportSet.T1, ViewportSet.H, ViewportSet.T1, ViewportSet.H],
+            [ViewportSet.T2, ViewportSet.H, ViewportSet.T1, ViewportSet.H],
+        ],
     ];
 
     private name: string;

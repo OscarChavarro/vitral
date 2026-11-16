@@ -3,7 +3,6 @@ import type { WorkerTransferValue } from "./WorkerProtocol.js";
 /**
 A class whose instances an `ObjectGraphTransfer` can carry.
 */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TransferableClass = abstract new (...args: any[]) => object;
 
 type EncodedValue = WorkerTransferValue;
@@ -35,7 +34,7 @@ An object of a class that is not listed, or a function, can not be carried:
 encoding fails naming it, so the list can be completed.
 */
 export class ObjectGraphTransfer {
-    private readonly classIndex: Map<Function, number>;
+    private readonly classIndex: Map<TransferableClass, number>;
 
     /**
     @param classes classes whose objects can be carried; both sides must use
@@ -46,7 +45,7 @@ export class ObjectGraphTransfer {
         private readonly classes: readonly TransferableClass[],
         private readonly transientFields: ReadonlySet<string> = new Set<string>(),
     ) {
-        this.classIndex = new Map<Function, number>();
+        this.classIndex = new Map<TransferableClass, number>();
         classes.forEach((type: TransferableClass, index: number): void => {
             this.classIndex.set(type, index);
         });
@@ -113,7 +112,9 @@ export class ObjectGraphTransfer {
             return { t: object as ArrayBufferView | ArrayBuffer };
         }
         if (Array.isArray(object)) {
-            return { a: object.map((item: unknown, i: number): EncodedValue => encodeValue(item, path + "[" + i + "]")) };
+            return {
+                a: object.map((item: unknown, i: number): EncodedValue => encodeValue(item, path + "[" + i + "]")),
+            };
         }
         if (object instanceof Map) {
             const entries: EncodedValue[] = [];
@@ -142,11 +143,16 @@ export class ObjectGraphTransfer {
         if (prototype === Object.prototype || prototype === null) {
             return { o: fields };
         }
-        const type: Function = (prototype as { constructor: Function }).constructor;
+        const type: TransferableClass = (prototype as { constructor: TransferableClass }).constructor;
         const index: number | undefined = this.classIndex.get(type);
         if (index === undefined) {
-            throw new Error("ObjectGraphTransfer: objects of class " + type.name +
-                " can not be carried (at " + path + "): add it to the list of classes");
+            throw new Error(
+                "ObjectGraphTransfer: objects of class " +
+                    type.name +
+                    " can not be carried (at " +
+                    path +
+                    "): add it to the list of classes",
+            );
         }
         return { c: index, f: fields };
     }
@@ -165,20 +171,15 @@ export class ObjectGraphTransfer {
             const n = node as Record<string, unknown>;
             if ("t" in n) {
                 objects[i] = n["t"];
-            }
-            else if ("a" in n) {
+            } else if ("a" in n) {
                 objects[i] = [];
-            }
-            else if ("m" in n) {
+            } else if ("m" in n) {
                 objects[i] = new Map<unknown, unknown>();
-            }
-            else if ("s" in n) {
+            } else if ("s" in n) {
                 objects[i] = new Set<unknown>();
-            }
-            else if ("o" in n) {
+            } else if ("o" in n) {
                 objects[i] = {};
-            }
-            else {
+            } else {
                 const type: TransferableClass | undefined = this.classes[n["c"] as number];
                 if (type === undefined) {
                     throw new Error("ObjectGraphTransfer: unknown class index " + String(n["c"]));

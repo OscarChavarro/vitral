@@ -4,8 +4,9 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-import { CircularDoubleLinkedList } from "../../../../../common/dataStructures/CircularDoubleLinkedList.js";
+import { CircularArrayList } from "../../../../../common/dataStructures/CircularArrayList.js";
 import { FundamentalEntity } from "../../../../../common/FundamentalEntity.js";
+import type { ArrayLinkable } from "../../../../../common/dataStructures/ArrayLinkable.js";
 import { Vector3Dd } from "../../../../../common/linealAlgebra/Vector3Dd.js";
 import { ArrayListOfDoubles } from "../../../../../common/dataStructures/ArrayListOfDoubles.js";
 import { Geometry } from "../../../Geometry.js";
@@ -37,7 +38,25 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-export class _PolyhedralBoundedSolidFace extends FundamentalEntity {
+export class _PolyhedralBoundedSolidFace extends FundamentalEntity implements ArrayLinkable {
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    private listOwner: object | null = null;
+    private listIndex = -1;
+
+    public getListOwner(): object | null {
+        return this.listOwner;
+    }
+
+    public getListIndex(): number {
+        return this.listIndex;
+    }
+
+    public setListSlot(owner: object | null, index: number): void {
+        this.listOwner = owner;
+        this.listIndex = index;
+    }
+
     /// Defined as presented in [MANT1988].10.2.1
     public id!: number;
 
@@ -47,7 +66,7 @@ export class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /// Each face should have at least one loop, corresponding to the
     /// external boundary. Each subsequent loop will be interpreted as a ring.
     /// Defined as presented in [MANT1988].10.2.1
-    public boundariesList!: CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>;
+    public boundariesList!: CircularArrayList<_PolyhedralBoundedSolidLoop>;
 
     //=================================================================
 
@@ -60,7 +79,7 @@ export class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         this.id = id;
         this.parentSolid = parent;
         this.parentSolid.getPolygonsList().add(this);
-        this.boundariesList = new CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>();
+        this.boundariesList = new CircularArrayList<_PolyhedralBoundedSolidLoop>();
     }
 
     private static boundaryLoopAreaMagnitude(loop: _PolyhedralBoundedSolidLoop | null): number {
@@ -220,10 +239,16 @@ export class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             return null;
         }
 
-        const normal = new Vector3Dd(nx, ny, nz);
-        if (normal.length() <= tolerance) {
+        let normal = new Vector3Dd(nx, ny, nz);
+        const length = normal.length();
+        if (length <= tolerance) {
             return null;
         }
+        // The Newell normal measures twice the area. Vector3Dd.normalized()
+        // leaves vectors shorter than VSDK.EPSILON unchanged, so a face of a
+        // model at 10^-3 got a plane with a normal of length 10^-6 and every
+        // distance to it shrank a millionfold. Normalize explicitly.
+        normal = normal.multiply(1.0 / length);
 
         const centroid = new Vector3Dd(cx / count, cy / count, cz / count);
         return new InfinitePlane(normal, centroid);

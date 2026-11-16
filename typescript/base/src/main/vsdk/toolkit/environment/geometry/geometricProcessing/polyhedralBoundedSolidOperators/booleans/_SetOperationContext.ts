@@ -1,5 +1,6 @@
 import { ArrayList } from "../../../../../../../java/util/ArrayList.js";
 import type { _PolyhedralBoundedSolidFace } from "../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
+import type { _PolyhedralBoundedSolidSetNullEdgesConnector } from "./topology/_PolyhedralBoundedSolidSetNullEdgesConnector.js";
 import type { _PolyhedralBoundedSolidSetOperatorNullEdge } from "./topology/_PolyhedralBoundedSolidSetOperatorNullEdge.js";
 import type { _PolyhedralBoundedSolidSetOperatorVertexFace } from "./classification/_PolyhedralBoundedSolidSetOperatorVertexFace.js";
 import type { _PolyhedralBoundedSolidSetOperatorVertexVertex } from "./classification/_PolyhedralBoundedSolidSetOperatorVertexVertex.js";
@@ -13,4 +14,7 @@ export class _SetOperationContext {
     public soneb: ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> | null = null;
     public sonfa: ArrayList<_PolyhedralBoundedSolidFace> | null = null;
     public sonfb: ArrayList<_PolyhedralBoundedSolidFace> | null = null;
+
+    /** Pair indices of the null faces, as the connect stage matched them. */
+    public connected: _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult | null = null;
 }

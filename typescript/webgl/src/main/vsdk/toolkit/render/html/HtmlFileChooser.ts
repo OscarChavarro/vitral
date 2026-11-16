@@ -19,7 +19,10 @@ export class HtmlFileFilter {
     @param suffix accepted suffix, without the dot and in lower case
     @param description description of the kind of files, as shown to the user
     */
-    public constructor(public readonly suffix: string, public readonly description: string) {}
+    public constructor(
+        public readonly suffix: string,
+        public readonly description: string,
+    ) {}
 
     /**
     @param name name of a file
@@ -68,7 +71,7 @@ export class HtmlChosenFile {
         }
         const response: Response = await fetch(this.path!);
         if (!response.ok) {
-            throw new Error("Cannot read \"" + this.path + "\": HTTP " + response.status);
+            throw new Error('Cannot read "' + this.path + '": HTTP ' + response.status);
         }
         return new Uint8Array(await response.arrayBuffer());
     }
@@ -92,8 +95,10 @@ computer with the browser's own file chooser. Saving gives a file name: the
 application hands the written file to the user as a download.
 */
 export class HtmlFileChooser {
-    private static readonly indexes: Map<string, Promise<HtmlFileIndexEntry | null>> =
-        new Map<string, Promise<HtmlFileIndexEntry | null>>();
+    private static readonly indexes: Map<string, Promise<HtmlFileIndexEntry | null>> = new Map<
+        string,
+        Promise<HtmlFileIndexEntry | null>
+    >();
 
     private readonly filters: HtmlFileFilter[] = [];
     private currentDirectory: string;
@@ -166,7 +171,8 @@ export class HtmlFileChooser {
         if (pending === undefined) {
             pending = fetch(this.indexPath)
                 .then((response: Response): Promise<HtmlFileIndexEntry | null> =>
-                    response.ok ? response.json() as Promise<HtmlFileIndexEntry> : Promise.resolve(null))
+                    response.ok ? (response.json() as Promise<HtmlFileIndexEntry>) : Promise.resolve(null),
+                )
                 .catch((): null => null);
             HtmlFileChooser.indexes.set(this.indexPath, pending);
         }
@@ -182,8 +188,9 @@ export class HtmlFileChooser {
         }
         let folder: HtmlFileIndexEntry | undefined = index;
         for (const part of path.substring(this.rootPath.length + 1).split("/")) {
-            folder = folder?.children?.find((entry: HtmlFileIndexEntry): boolean =>
-                entry.name === part && entry.children !== undefined);
+            folder = folder?.children?.find(
+                (entry: HtmlFileIndexEntry): boolean => entry.name === part && entry.children !== undefined,
+            );
             if (folder === undefined) {
                 return null;
             }
@@ -268,13 +275,14 @@ export class HtmlFileChooser {
 
             const currentFilter = (): HtmlFileFilter | null => {
                 const index: number = Number(filterSelect.value);
-                return index >= 0 ? this.filters[index] ?? null : null;
+                return index >= 0 ? (this.filters[index] ?? null) : null;
             };
             const render = async (): Promise<void> => {
                 const index: HtmlFileIndexEntry | null = await this.loadIndex();
                 pathLabel.textContent = this.currentDirectory;
                 list.replaceChildren();
-                const folder: HtmlFileIndexEntry | null = index !== null ? this.folderAt(index, this.currentDirectory) : null;
+                const folder: HtmlFileIndexEntry | null =
+                    index !== null ? this.folderAt(index, this.currentDirectory) : null;
                 if (folder === null) {
                     const empty: HTMLDivElement = document.createElement("div");
                     empty.textContent = "(this folder can not be browsed)";
@@ -283,32 +291,51 @@ export class HtmlFileChooser {
                 }
                 const filter: HtmlFileFilter | null = currentFilter();
                 if (this.currentDirectory !== this.rootPath) {
-                    list.appendChild(this.entryElement("..", true, (): void => {
-                        this.currentDirectory = HtmlFileChooser.normalize(this.currentDirectory + "/..");
-                        void render();
-                    }, null));
+                    list.appendChild(
+                        this.entryElement(
+                            "..",
+                            true,
+                            (): void => {
+                                this.currentDirectory = HtmlFileChooser.normalize(this.currentDirectory + "/..");
+                                void render();
+                            },
+                            null,
+                        ),
+                    );
                 }
                 for (const entry of folder.children ?? []) {
                     const isFolder: boolean = entry.children !== undefined;
                     if (!isFolder && filter !== null && !filter.accept(entry.name)) {
                         continue;
                     }
-                    list.appendChild(this.entryElement(entry.name, isFolder, (): void => {
-                        if (isFolder) {
-                            this.currentDirectory = this.currentDirectory + "/" + entry.name;
-                            void render();
-                        }
-                        else {
-                            nameField.value = entry.name;
-                            if (!save) {
-                                finish(new HtmlChosenFile(entry.name, this.currentDirectory + "/" + entry.name, null));
-                            }
-                        }
-                    }, (): void => {
-                        if (!isFolder) {
-                            nameField.value = entry.name;
-                        }
-                    }));
+                    list.appendChild(
+                        this.entryElement(
+                            entry.name,
+                            isFolder,
+                            (): void => {
+                                if (isFolder) {
+                                    this.currentDirectory = this.currentDirectory + "/" + entry.name;
+                                    void render();
+                                } else {
+                                    nameField.value = entry.name;
+                                    if (!save) {
+                                        finish(
+                                            new HtmlChosenFile(
+                                                entry.name,
+                                                this.currentDirectory + "/" + entry.name,
+                                                null,
+                                            ),
+                                        );
+                                    }
+                                }
+                            },
+                            (): void => {
+                                if (!isFolder) {
+                                    nameField.value = entry.name;
+                                }
+                            },
+                        ),
+                    );
                 }
             };
             filterSelect.addEventListener("change", (): void => {
@@ -337,8 +364,7 @@ export class HtmlFileChooser {
                 event.stopPropagation();
                 if (event.key === "Enter") {
                     accept.click();
-                }
-                else if (event.key === "Escape") {
+                } else if (event.key === "Escape") {
                     finish(null);
                 }
             });
@@ -362,8 +388,7 @@ export class HtmlFileChooser {
             element.classList.add("vitral-file-chooser-entry-selected");
             if (folder) {
                 open();
-            }
-            else if (select !== null) {
+            } else if (select !== null) {
                 select();
             }
         });
@@ -386,7 +411,11 @@ desktop application writes a file of its file system.
 @param data contents of the file
 @param mimeType type of the contents
 */
-export function downloadFile(name: string, data: Uint8Array | string, mimeType: string = "application/octet-stream"): void {
+export function downloadFile(
+    name: string,
+    data: Uint8Array | string,
+    mimeType: string = "application/octet-stream",
+): void {
     const blob: Blob = new Blob([data as BlobPart], { type: mimeType });
     const url: string = URL.createObjectURL(blob);
     const anchor: HTMLAnchorElement = document.createElement("a");

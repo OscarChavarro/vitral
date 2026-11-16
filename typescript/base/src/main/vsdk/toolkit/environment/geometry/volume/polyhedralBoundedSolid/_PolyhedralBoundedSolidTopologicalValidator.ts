@@ -2,6 +2,7 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
+import type { StringBuilder } from "../../../../../../java/lang/StringBuilder.js";
 import { VSDK } from "../../../../common/VSDK.js";
 import { Logger } from "../../../../common/logging/Logger.js";
 import type { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
@@ -9,6 +10,7 @@ import type { _PolyhedralBoundedSolidEdge } from "./nodes/_PolyhedralBoundedSoli
 import type { _PolyhedralBoundedSolidFace } from "./nodes/_PolyhedralBoundedSolidFace.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "./nodes/_PolyhedralBoundedSolidHalfEdge.js";
 import type { _PolyhedralBoundedSolidLoop } from "./nodes/_PolyhedralBoundedSolidLoop.js";
+import type { _PolyhedralBoundedSolidVertex } from "./nodes/_PolyhedralBoundedSolidVertex.js";
 
 /**
 Topological validation helpers for the half-edge representation described in
@@ -106,45 +108,67 @@ export class _PolyhedralBoundedSolidTopologicalValidator {
     }
 
     /**
-    Rebuilds the vertex-to-emanating-halfedge links required by the vertex node
-    definition of [MANT1988].10.2.1 and used throughout the Euler-operator
-    programs of chapter [MANT1988].11.
+    Back-pointer invariants of the half-edge structure ([MANT1988] Sec.
+    10.2; Fable5.2Analysis.md Stage B step 3):
+    - every loop's `boundaryStartHalfEdge` is a member of the loop, and every
+      member half-edge names that loop as `parentLoop`;
+    - every vertex has a non-null emanating half-edge that starts at the
+      vertex and is a member of its loop (for the lone vertex of an empty
+      loop, that is the loop's edge-less half-edge).
+    Validation never repairs them: see
+    {@link PolyhedralBoundedSolidRepair#remakeEmanatingHalfEdgeReferences}.
+    @return true when all hold; violations are appended to `msg`.
     */
-    public static remakeEmanatingHalfedgesReferences(solid: PolyhedralBoundedSolid): void {
+    public static validateBackPointers(solid: PolyhedralBoundedSolid, msg: StringBuilder): boolean {
+        let ok = true;
         let i: number;
         let j: number;
-
-        for (i = 0; i < solid.getVerticesList().size(); i++) {
-            solid.getVerticesList().get(i)!.emanatingHalfEdge = null;
-        }
+        let k: number;
 
         for (i = 0; i < solid.getPolygonsList().size(); i++) {
             const face = solid.getPolygonsList().get(i)!;
             for (j = 0; j < face.boundariesList.size(); j++) {
-                let he: _PolyhedralBoundedSolidHalfEdge | null;
-
                 const loop = face.boundariesList.get(j)!;
-                he = loop.boundaryStartHalfEdge;
-                if (he === null) {
-                    continue;
+                if (loop.boundaryStartHalfEdge === null || !loop.halfEdgesList.contains(loop.boundaryStartHalfEdge)) {
+                    msg.append("  - Face [")
+                        .append(String(face.id))
+                        .append("] has a loop whose start half-edge is not")
+                        .append(" a member of the loop.\n");
+                    ok = false;
                 }
-                const heStart = he;
-                do {
-                    he!.startingVertex.emanatingHalfEdge = he;
-                    he = he!.next();
-                    if (he === null) {
+                for (k = 0; k < loop.halfEdgesList.size(); k++) {
+                    if (loop.halfEdgesList.get(k)!.parentLoop !== loop) {
+                        msg.append("  - Face [")
+                            .append(String(face.id))
+                            .append("] has a half-edge whose parent loop")
+                            .append(" is another loop.\n");
+                        ok = false;
                         break;
                     }
-                } while (he !== heStart);
+                }
             }
         }
 
         for (i = 0; i < solid.getVerticesList().size(); i++) {
-            if (solid.getVerticesList().get(i)!.emanatingHalfEdge === null) {
-                solid.getVerticesList().locateWindowAtElem(solid.getVerticesList().get(i)!);
-                solid.getVerticesList().removeElemAtWindow();
-                i--;
+            const v: _PolyhedralBoundedSolidVertex = solid.getVerticesList().get(i)!;
+            const he: _PolyhedralBoundedSolidHalfEdge | null = v.emanatingHalfEdge;
+            if (he === null) {
+                msg.append("  - Vertex [").append(String(v.id)).append("] has no emanating half-edge.\n");
+                ok = false;
+            } else if (he.startingVertex !== v) {
+                msg.append("  - Vertex [")
+                    .append(String(v.id))
+                    .append("] emanating half-edge starts at another")
+                    .append(" vertex.\n");
+                ok = false;
+            } else if (he.parentLoop === null || !he.parentLoop.halfEdgesList.contains(he)) {
+                msg.append("  - Vertex [")
+                    .append(String(v.id))
+                    .append("] emanating half-edge is not a member of its")
+                    .append(" loop.\n");
+                ok = false;
             }
         }
+        return ok;
     }
 }

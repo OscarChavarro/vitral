@@ -205,7 +205,8 @@ export class WebGLMeshRenderer {
         const normalMapId: WebGLTexture | null =
             hasNormalMap && quality.isBumpMapSet() ? WebGLImageRenderer.activate(gl, normalMap) : null;
 
-        const localTransformNotNull: Matrix4x4d = localTransform !== null ? localTransform : Matrix4x4d.identityMatrix();
+        const localTransformNotNull: Matrix4x4d =
+            localTransform !== null ? localTransform : Matrix4x4d.identityMatrix();
         await WebGLMeshRenderer.drawPasses(
             gl,
             mesh,
@@ -279,7 +280,10 @@ export class WebGLMeshRenderer {
             gl.depthMask(true);
             gl.depthFunc(gl.LESS);
             gl.enable(gl.POLYGON_OFFSET_FILL);
-            gl.polygonOffset(WebGLMeshRenderer.SURFACE_POLYGON_OFFSET_FACTOR, WebGLMeshRenderer.SURFACE_POLYGON_OFFSET_UNITS);
+            gl.polygonOffset(
+                WebGLMeshRenderer.SURFACE_POLYGON_OFFSET_FACTOR,
+                WebGLMeshRenderer.SURFACE_POLYGON_OFFSET_UNITS,
+            );
             gl.enable(gl.CULL_FACE);
             gl.cullFace(gl.BACK);
             WebGLMeshRenderer.renderMesh(gl, mesh, resources);
@@ -337,12 +341,13 @@ export class WebGLMeshRenderer {
             pointQuality.setUseVertexColors(false);
             pointQuality.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
 
-            const pointsProgram: WebGLProgram = await WebGLRendererConfigurationShaderSelector.selectSurfaceShaderProgram(
-                gl,
-                pointQuality,
-                false,
-                false,
-            );
+            const pointsProgram: WebGLProgram =
+                await WebGLRendererConfigurationShaderSelector.selectSurfaceShaderProgram(
+                    gl,
+                    pointQuality,
+                    false,
+                    false,
+                );
 
             let pointMaterial = new SimpleMaterial(material);
             pointMaterial = pointMaterial.withAmbient(new ColorRgb(0, 0, 0));
@@ -464,7 +469,15 @@ export class WebGLMeshRenderer {
         normalMapId: WebGLTexture | null,
     ): void {
         const kd: ColorRgb = material.getDiffuse();
-        WebGLRendererConfigurationShaderSelector.activateShader(gl, program, modelViewProjection, quality, kd.r(), kd.g(), kd.b());
+        WebGLRendererConfigurationShaderSelector.activateShader(
+            gl,
+            program,
+            modelViewProjection,
+            quality,
+            kd.r(),
+            kd.g(),
+            kd.b(),
+        );
 
         WebGLMeshRenderer.setMatrix(gl, program, "modelViewLocal", modelViewLocal);
         WebGLMeshRenderer.setMatrix(gl, program, "modelViewITLocal", modelViewITLocal);
@@ -504,7 +517,12 @@ export class WebGLMeshRenderer {
         }
     }
 
-    private static setMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, name: string, matrix: Matrix4x4d): void {
+    private static setMatrix(
+        gl: WebGL2RenderingContext,
+        program: WebGLProgram,
+        name: string,
+        matrix: Matrix4x4d,
+    ): void {
         const loc = gl.getUniformLocation(program, name);
         if (loc !== null) {
             gl.uniformMatrix4fv(loc, false, matrix.exportToFloatArrayColumnOrder());
@@ -539,7 +557,11 @@ export class WebGLMeshRenderer {
         }
     }
 
-    private static configureMicroFacetUniforms(gl: WebGL2RenderingContext, program: WebGLProgram, material: SimpleMaterial): void {
+    private static configureMicroFacetUniforms(
+        gl: WebGL2RenderingContext,
+        program: WebGLProgram,
+        material: SimpleMaterial,
+    ): void {
         let roughness = 0.35;
         let alpha: number = roughness * roughness;
         let fresnelF0: ColorRgb = material.getSpecular();
@@ -669,7 +691,11 @@ export class WebGLMeshRenderer {
             if (mesh.vertexNormalLinePositions === null || mesh.vertexNormalLineColors === null) {
                 const length: number = Math.fround(size * WebGLMeshRenderer.VERTEX_NORMAL_SCALE);
                 const epsilon: number = Math.fround(size * WebGLMeshRenderer.NORMAL_START_EPSILON);
-                mesh.vertexNormalLinePositions = WebGLMeshRenderer.buildVertexNormalLinePositions(mesh, length, epsilon);
+                mesh.vertexNormalLinePositions = WebGLMeshRenderer.buildVertexNormalLinePositions(
+                    mesh,
+                    length,
+                    epsilon,
+                );
                 mesh.vertexNormalLineColors = WebGLMeshRenderer.buildUniformColors(
                     mesh.vertexNormalLinePositions.length / 3,
                     WebGLMeshRenderer.VERTEX_NORMAL_COLOR,
@@ -689,7 +715,11 @@ export class WebGLMeshRenderer {
             if (mesh.triangleNormalLinePositions === null || mesh.triangleNormalLineColors === null) {
                 const length: number = Math.fround(size * WebGLMeshRenderer.TRIANGLE_NORMAL_SCALE);
                 const epsilon: number = Math.fround(size * WebGLMeshRenderer.NORMAL_START_EPSILON);
-                mesh.triangleNormalLinePositions = WebGLMeshRenderer.buildTriangleNormalLinePositions(mesh, length, epsilon);
+                mesh.triangleNormalLinePositions = WebGLMeshRenderer.buildTriangleNormalLinePositions(
+                    mesh,
+                    length,
+                    epsilon,
+                );
                 mesh.triangleNormalLineColors = WebGLMeshRenderer.buildUniformColors(
                     mesh.triangleNormalLinePositions.length / 3,
                     WebGLMeshRenderer.TRIANGLE_NORMAL_COLOR,

@@ -133,8 +133,7 @@ export class ParallelRaytracer {
     available both in browsers and in Node), or 1 if it reports none
     */
     public static availableProcessors(): number {
-        const count: number | undefined =
-            typeof navigator !== "undefined" ? navigator.hardwareConcurrency : undefined;
+        const count: number | undefined = typeof navigator !== "undefined" ? navigator.hardwareConcurrency : undefined;
         return count !== undefined && count > 0 ? count : 1;
     }
 
@@ -252,9 +251,11 @@ export class ParallelRaytracer {
             if (outDepth === null) {
                 depthMode = DepthBufferMode.NONE;
             }
-            if (depthMode !== DepthBufferMode.NONE && outDepth !== null &&
-                (outDepth.getXSize() !== resultingImage.getXSize() ||
-                 outDepth.getYSize() !== resultingImage.getYSize())) {
+            if (
+                depthMode !== DepthBufferMode.NONE &&
+                outDepth !== null &&
+                (outDepth.getXSize() !== resultingImage.getXSize() || outDepth.getYSize() !== resultingImage.getYSize())
+            ) {
                 throw new IllegalArgumentException("Depth buffer size must match the image size");
             }
         } else {
@@ -263,11 +264,12 @@ export class ParallelRaytracer {
             reportProgress = args[2] as boolean;
             depthMode = this.depthBufferMode;
             outDepth = null;
-            if (depthMode !== DepthBufferMode.NONE && resultingImage.getXSize() > 0 &&
-                resultingImage.getYSize() > 0) {
-                if (this.depthBuffer === null ||
+            if (depthMode !== DepthBufferMode.NONE && resultingImage.getXSize() > 0 && resultingImage.getYSize() > 0) {
+                if (
+                    this.depthBuffer === null ||
                     this.depthBuffer.getXSize() !== resultingImage.getXSize() ||
-                    this.depthBuffer.getYSize() !== resultingImage.getYSize()) {
+                    this.depthBuffer.getYSize() !== resultingImage.getYSize()
+                ) {
                     this.depthBuffer = new ZBuffer(resultingImage.getXSize(), resultingImage.getYSize());
                 }
                 outDepth = this.depthBuffer;

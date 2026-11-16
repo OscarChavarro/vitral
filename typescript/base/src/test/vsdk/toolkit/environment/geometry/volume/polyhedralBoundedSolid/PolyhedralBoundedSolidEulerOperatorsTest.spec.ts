@@ -7,7 +7,9 @@ import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { PolyhedralBoundedSolid } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidValidationEngine } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
+import type { _PolyhedralBoundedSolidFace } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
+import type { _PolyhedralBoundedSolidLoop } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.js";
 import { PolyhedralBoundedSolidTestFixtures } from "./PolyhedralBoundedSolidTestFixtures.js";
 
 /**
@@ -337,6 +339,82 @@ describe("PolyhedralBoundedSolidEulerOperatorsTest", () => {
         expect(solid.getEdgesList().size()).toBe(edgeCount + 1);
         expect(face.boundariesList.size()).toBe(1);
     });
+
+    /**
+    lmekr removes the loop of its second half-edge. When that loop is the
+    outer loop of the face (the first half-edge is on a ring), the merged
+    loop is the outer boundary and must come first. It used to stay in the
+    place of the ring, so that in a face with another ring that other ring
+    was taken for the outer loop. The connect stage of the set operations
+    does exactly this when a face is crossed by several chords that pass
+    through vertices inside the face (plan-stage11 Phase F): every later
+    decision about where a pending ring belongs was then taken against the
+    wrong loop.
+    */
+    it("given_faceWithTwoRings_when_lmekrMergesTheOuterLoopIntoARing_then_mergedLoopIsTheOuterLoop", () => {
+        // Arrange: a square face with two strut rings, {5,6} and {7,8}.
+        const solid = createPlanarFaceWithBridgeToHoleSeed();
+        const face = solid.findFace(1)!;
+        PolyhedralBoundedSolidEulerOperators.lmev(
+            solid,
+            solid.findVertex(5)!.emanatingHalfEdge,
+            solid.findVertex(5)!.emanatingHalfEdge,
+            6,
+            new Vector3Dd(0.4, 0.3, 0.0),
+        );
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, face.findHalfEdge(1, 5), face.findHalfEdge(5, 1));
+        PolyhedralBoundedSolidEulerOperators.lmev(
+            solid,
+            face.findHalfEdge(3),
+            face.findHalfEdge(3),
+            7,
+            new Vector3Dd(0.75, 0.75, 0.0),
+        );
+        PolyhedralBoundedSolidEulerOperators.lmev(
+            solid,
+            solid.findVertex(7)!.emanatingHalfEdge,
+            solid.findVertex(7)!.emanatingHalfEdge,
+            8,
+            new Vector3Dd(0.6, 0.7, 0.0),
+        );
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, face.findHalfEdge(3, 7), face.findHalfEdge(7, 3));
+        expect(face.boundariesList.size()).toBe(3);
+        const outer = face.boundariesList.get(0)!;
+        const firstRing = loopThrough(face, 5);
+        const secondRing = loopThrough(face, 7);
+        expect(firstRing).not.toBe(outer);
+        expect(firstRing).not.toBe(secondRing);
+
+        // Action: the ring half-edge first, the outer half-edge second.
+        PolyhedralBoundedSolidEulerOperators.lmekr(
+            solid,
+            firstRing!.boundaryStartHalfEdge!,
+            outer.boundaryStartHalfEdge!,
+        );
+
+        // Assert
+        expect(face.boundariesList.size()).toBe(2);
+        expect(face.boundariesList.get(0)).toBe(firstRing);
+        expect(face.boundariesList.get(1)).toBe(secondRing);
+        expect(loopThrough(face, 1)).toBe(face.boundariesList.get(0));
+        expect(loopThrough(face, 3)).toBe(face.boundariesList.get(0));
+        expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid)).toBe(true);
+    });
+
+    function loopThrough(face: _PolyhedralBoundedSolidFace, vertexId: number): _PolyhedralBoundedSolidLoop | null {
+        let i: number;
+        let j: number;
+
+        for (i = 0; i < face.boundariesList.size(); i++) {
+            const loop = face.boundariesList.get(i)!;
+            for (j = 0; j < loop.halfEdgesList.size(); j++) {
+                if (loop.halfEdgesList.get(j)!.startingVertex.id === vertexId) {
+                    return loop;
+                }
+            }
+        }
+        return null;
+    }
 
     it("given_faceWithRing_when_lringmvReordersOuterLoop_then_keepsSameFace", () => {
         // Arrange

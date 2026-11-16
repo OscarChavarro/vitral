@@ -14,9 +14,11 @@ import { LinkedHashMap } from "../../../../../../../../java/util/LinkedHashMap.j
 import { PolyhedralBoundedSolidStatistics } from "../../../../../../common/statistics/PolyhedralBoundedSolidStatistics.js";
 import type { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
 import { Geometry } from "../../../../Geometry.js";
+import type { InfinitePlane } from "../../../../surface/InfinitePlane.js";
 import type { PolyhedralBoundedSolid } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
+import type { ToleranceContext } from "../../../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
 import type { _PolyhedralBoundedSolidEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.js";
 import type { _PolyhedralBoundedSolidFace } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "../../../../volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
@@ -29,10 +31,26 @@ import type { _PolyhedralBoundedSolidSetOperatorNullEdge } from "./_PolyhedralBo
 class ConnectResult {
     private readonly sonfaList: ArrayList<_PolyhedralBoundedSolidFace>;
     private readonly sonfbList: ArrayList<_PolyhedralBoundedSolidFace>;
+    private readonly connector: _PolyhedralBoundedSolidSetNullEdgesConnector;
 
-    public constructor(sonfa: ArrayList<_PolyhedralBoundedSolidFace>, sonfb: ArrayList<_PolyhedralBoundedSolidFace>) {
+    public constructor(
+        sonfa: ArrayList<_PolyhedralBoundedSolidFace>,
+        sonfb: ArrayList<_PolyhedralBoundedSolidFace>,
+        connector: _PolyhedralBoundedSolidSetNullEdgesConnector,
+    ) {
         this.sonfaList = sonfa;
         this.sonfbList = sonfb;
+        this.connector = connector;
+    }
+
+    /** Pair index of a null face of A, or -1 (used by finish). */
+    public pairIndexA(face: _PolyhedralBoundedSolidFace | null): number {
+        return this.connector.getSonfaPairIndex(face);
+    }
+
+    /** Pair index of a null face of B, or -1 (used by finish). */
+    public pairIndexB(face: _PolyhedralBoundedSolidFace | null): number {
+        return this.connector.getSonfbPairIndex(face);
     }
 
     public sonfa(): ArrayList<_PolyhedralBoundedSolidFace> {
@@ -42,6 +60,20 @@ class ConnectResult {
     public sonfb(): ArrayList<_PolyhedralBoundedSolidFace> {
         return this.sonfbList;
     }
+}
+
+/**
+Counters of the most recent `connect` on the calling thread, for
+tests and diagnostics. The connector itself keeps all its working state
+in the instance (Fable5.2Analysis.md pending item 9).
+*/
+class Diagnostics {
+    public looseA = 0;
+    public looseB = 0;
+    public sonfaCount = 0;
+    public sonfbCount = 0;
+    public pairCount = 0;
+    public curveReport: _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report | null = null;
 }
 
 /**
@@ -70,41 +102,40 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
     private static readonly ENDPOINT_SOLID_B = 1;
 
     private static debugFlags = 0;
-    private static operation = 0;
+    private operation = 0;
     private nextNullEdgeIndex = 0;
     private sonea: ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> | null = null;
     private soneb: ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> | null = null;
-    private static endsa: ArrayList<_PolyhedralBoundedSolidHalfEdge> | null = null;
-    private static endsb: ArrayList<_PolyhedralBoundedSolidHalfEdge> | null = null;
+    private endsa: ArrayList<_PolyhedralBoundedSolidHalfEdge> | null = null;
+    private endsb: ArrayList<_PolyhedralBoundedSolidHalfEdge> | null = null;
     private sonfa: ArrayList<_PolyhedralBoundedSolidFace> | null = null;
     private sonfb: ArrayList<_PolyhedralBoundedSolidFace> | null = null;
-    private static sonfaPairIndexByFaceId: HashMap<number, number> | null = null;
-    private static sonfbPairIndexByFaceId: HashMap<number, number> | null = null;
-    private static lastLooseACount = 0;
-    private static lastLooseBCount = 0;
-    private static lastSonfaCount = 0;
-    private static lastSonfbCount = 0;
-    private static lastPairCount = 0;
-    private static currentConnectPairIndex = 0;
-    private static nextSyntheticPairIndex = 0;
+    private sonfaPairIndexByFaceId: HashMap<number, number> | null = null;
+    private sonfbPairIndexByFaceId: HashMap<number, number> | null = null;
+    /**
+    Java keeps the diagnostics in a `ThreadLocal`; this runtime is
+    single-threaded, so a static field holds the same per-caller value.
+    */
+    private static LAST: Diagnostics = new Diagnostics();
+    private currentConnectPairIndex = 0;
+    private nextSyntheticPairIndex = 0;
 
     /**
     Structural report of the intersection curves reconstructed from the
-    sonea/soneb pairs of the most recent `connect` call. Captured
-    unconditionally (the reconstruction is cheap) so tests and diagnostics
-    can audit curve closure without enabling pipeline traces.
+    sonea/soneb pairs of this connect. Captured unconditionally (the
+    reconstruction is cheap) so tests and diagnostics can audit curve
+    closure without enabling pipeline traces; see `getLastCurveReport`.
     */
-    public static lastCurveReport: _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report | null = null;
+    private curveReport: _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report | null = null;
 
-    /**
-    Test-only injection point: when non-null and matching the pair count,
-    `sortNullEdges()` reorders sonea/soneb by this permutation
-    (entry `position -> originalIndex`) instead of the production
-    ordering. Lets contract tests probe the connect stage's sensitivity to
-    processing order without any production flag. Always null in production;
-    cleared by the caller after use.
-    */
-    public static testOnlyForcedConnectOrder: number[] | null = null;
+    /** Curve report of the most recent connect on the calling thread. */
+    public static getLastCurveReport(): _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report | null {
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.curveReport;
+    }
+
+    public static clearLastCurveReport(): void {
+        _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.curveReport = null;
+    }
 
     /**
     True when `sortNullEdges()` already oriented every strut along
@@ -113,22 +144,22 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
     vertex-id comparison (the legacy rule, which encodes classifier emission
     order and breaks when that order is not the curve order).
     */
-    private static curveOrientationApplied = false;
+    private curveOrientationApplied = false;
 
     /**
     Junction adjacency in processing-position space when the curve order is
     active (from
     `_PolyhedralBoundedSolidSetIntersectionCurveBuilder`); null
-    otherwise. Used to restrict the near-miss ring rescue to true curve
-    neighbors.
+    otherwise. `scanjoin` joins a null edge only with a loose end left by
+    one of its neighbours along the curve.
     */
-    private static curveNeighborPositions: number[][] | null = null;
+    private curveNeighborPositions: number[][] | null = null;
 
     /**
     Processing pair index that pushed each loose entry, parallel to
     `endsa`/`endsb`.
     */
-    private static endsPairIndex: ArrayList<number> | null = null;
+    private endsPairIndex: ArrayList<number> | null = null;
 
     private static isPipelineSummaryTraceEnabled(): boolean {
         return JavaBoolean.getBoolean(_PolyhedralBoundedSolidSetNullEdgesConnector.TRACE_PIPELINE_SUMMARY_PROPERTY);
@@ -198,29 +229,29 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         );
     }
 
-    private static setCurrentConnectContext(pairIndex: number): void {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.currentConnectPairIndex = pairIndex;
+    private setCurrentConnectContext(pairIndex: number): void {
+        this.currentConnectPairIndex = pairIndex;
     }
 
-    private static allocateSyntheticPairIndex(): number {
-        const pairIndex = _PolyhedralBoundedSolidSetNullEdgesConnector.nextSyntheticPairIndex;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.nextSyntheticPairIndex++;
+    private allocateSyntheticPairIndex(): number {
+        const pairIndex = this.nextSyntheticPairIndex;
+        this.nextSyntheticPairIndex++;
         return pairIndex;
     }
 
-    public static getSonfaPairIndex(face: _PolyhedralBoundedSolidFace | null): number {
-        if (face === null || _PolyhedralBoundedSolidSetNullEdgesConnector.sonfaPairIndexByFaceId === null) {
+    public getSonfaPairIndex(face: _PolyhedralBoundedSolidFace | null): number {
+        if (face === null || this.sonfaPairIndexByFaceId === null) {
             return -1;
         }
-        const pairIndex = _PolyhedralBoundedSolidSetNullEdgesConnector.sonfaPairIndexByFaceId.get(face.id);
+        const pairIndex = this.sonfaPairIndexByFaceId.get(face.id);
         return pairIndex !== undefined ? pairIndex : -1;
     }
 
-    public static getSonfbPairIndex(face: _PolyhedralBoundedSolidFace | null): number {
-        if (face === null || _PolyhedralBoundedSolidSetNullEdgesConnector.sonfbPairIndexByFaceId === null) {
+    public getSonfbPairIndex(face: _PolyhedralBoundedSolidFace | null): number {
+        if (face === null || this.sonfbPairIndexByFaceId === null) {
             return -1;
         }
-        const pairIndex = _PolyhedralBoundedSolidSetNullEdgesConnector.sonfbPairIndexByFaceId.get(face.id);
+        const pairIndex = this.sonfbPairIndexByFaceId.get(face.id);
         return pairIndex !== undefined ? pairIndex : -1;
     }
 
@@ -384,42 +415,37 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         }
     }
 
-    private static removeLoosePair(index: number): void {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.endsa!.remove(index);
-        _PolyhedralBoundedSolidSetNullEdgesConnector.endsb!.remove(index);
+    private removeLoosePair(index: number): void {
+        this.endsa!.remove(index);
+        this.endsb!.remove(index);
     }
 
     public static getLastLooseACount(): number {
-        return _PolyhedralBoundedSolidSetNullEdgesConnector.lastLooseACount;
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.looseA;
     }
 
     public static getLastLooseBCount(): number {
-        return _PolyhedralBoundedSolidSetNullEdgesConnector.lastLooseBCount;
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.looseB;
     }
 
     public static getLastSonfaCount(): number {
-        return _PolyhedralBoundedSolidSetNullEdgesConnector.lastSonfaCount;
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.sonfaCount;
     }
 
     public static getLastSonfbCount(): number {
-        return _PolyhedralBoundedSolidSetNullEdgesConnector.lastSonfbCount;
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.sonfbCount;
     }
 
     public static getLastPairCount(): number {
-        return _PolyhedralBoundedSolidSetNullEdgesConnector.lastPairCount;
+        return _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.pairCount;
     }
 
     private updateLastSnapshot(): void {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastLooseACount =
-            _PolyhedralBoundedSolidSetNullEdgesConnector.endsa !== null
-                ? _PolyhedralBoundedSolidSetNullEdgesConnector.endsa.size()
-                : 0;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastLooseBCount =
-            _PolyhedralBoundedSolidSetNullEdgesConnector.endsb !== null
-                ? _PolyhedralBoundedSolidSetNullEdgesConnector.endsb.size()
-                : 0;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastSonfaCount = this.sonfa !== null ? this.sonfa.size() : 0;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastSonfbCount = this.sonfb !== null ? this.sonfb.size() : 0;
+        const last = _PolyhedralBoundedSolidSetNullEdgesConnector.LAST;
+        last.looseA = this.endsa !== null ? this.endsa.size() : 0;
+        last.looseB = this.endsb !== null ? this.endsb.size() : 0;
+        last.sonfaCount = this.sonfa !== null ? this.sonfa.size() : 0;
+        last.sonfbCount = this.sonfb !== null ? this.sonfb.size() : 0;
     }
 
     private static isLiveHalfEdge(he: _PolyhedralBoundedSolidHalfEdge | null): boolean {
@@ -551,7 +577,7 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor.pointInFace(targetFace, point) === Geometry.INSIDE;
     }
 
-    private static rebindClassicCurrentNullEdgeIfNeeded(
+    private rebindClassicCurrentNullEdgeIfNeeded(
         currentTargetFirst: _PolyhedralBoundedSolidHalfEdge | null,
         currentTargetSecond: _PolyhedralBoundedSolidHalfEdge | null,
         currentReferenceFirst: _PolyhedralBoundedSolidHalfEdge | null,
@@ -564,7 +590,7 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         let solid: PolyhedralBoundedSolid;
 
         if (
-            _PolyhedralBoundedSolidSetNullEdgesConnector.operation !== _PolyhedralBoundedSolidOperator.SUBTRACT ||
+            this.operation !== _PolyhedralBoundedSolidOperator.SUBTRACT ||
             !_PolyhedralBoundedSolidSetNullEdgesConnector.isLiveHalfEdge(currentTargetFirst) ||
             !_PolyhedralBoundedSolidSetNullEdgesConnector.isLiveHalfEdge(currentTargetSecond) ||
             currentTargetFirst!.parentLoop !== currentTargetSecond!.parentLoop
@@ -620,28 +646,28 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         );
     }
 
-    private static rebindClassicCurrentNullEdgesIfNeeded(
+    private rebindClassicCurrentNullEdgesIfNeeded(
         currentARight: _PolyhedralBoundedSolidHalfEdge | null,
         currentALeft: _PolyhedralBoundedSolidHalfEdge | null,
         currentBLeft: _PolyhedralBoundedSolidHalfEdge | null,
         currentBRight: _PolyhedralBoundedSolidHalfEdge | null,
     ): void {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.rebindClassicCurrentNullEdgeIfNeeded(
+        this.rebindClassicCurrentNullEdgeIfNeeded(
             currentARight,
             currentALeft,
             currentBLeft,
             currentBRight,
-            _PolyhedralBoundedSolidSetNullEdgesConnector.endsa,
-            _PolyhedralBoundedSolidSetNullEdgesConnector.endsb,
+            this.endsa,
+            this.endsb,
             "A",
         );
-        _PolyhedralBoundedSolidSetNullEdgesConnector.rebindClassicCurrentNullEdgeIfNeeded(
+        this.rebindClassicCurrentNullEdgeIfNeeded(
             currentBLeft,
             currentBRight,
             currentARight,
             currentALeft,
-            _PolyhedralBoundedSolidSetNullEdgesConnector.endsb,
-            _PolyhedralBoundedSolidSetNullEdgesConnector.endsa,
+            this.endsb,
+            this.endsa,
             "B",
         );
     }
@@ -652,43 +678,25 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         inSonea: ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>,
         inSoneb: ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>,
     ): ConnectResult {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.operation = op;
+        this.operation = op;
         _PolyhedralBoundedSolidSetNullEdgesConnector.debugFlags = flags;
         this.sonea = inSonea;
         this.soneb = inSoneb;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastPairCount = Math.min(this.sonea.size(), this.soneb.size());
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastLooseACount = 0;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastLooseBCount = 0;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastSonfaCount = 0;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastSonfbCount = 0;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.nextSyntheticPairIndex =
-            _PolyhedralBoundedSolidSetNullEdgesConnector.lastPairCount;
+        const last = new Diagnostics();
+        _PolyhedralBoundedSolidSetNullEdgesConnector.LAST = last;
+        last.pairCount = Math.min(this.sonea.size(), this.soneb.size());
+        this.nextSyntheticPairIndex = last.pairCount;
         // [MANT1988] §15.7 Program 15.14: single Connect implementation.
         // The "flexibleEndpointChains" alternative path was removed in §6.1
         // of plan-csg-boolean-fix-stage2 because it duplicated setOpConnect
         // with extra heuristics that the book does not require.
         this.setOpConnect();
-        return new ConnectResult(this.sonfa!, this.sonfb!);
+        return new ConnectResult(this.sonfa!, this.sonfb!, this);
     }
 
     private sortNullEdges(): void {
-        _PolyhedralBoundedSolidSetNullEdgesConnector.curveOrientationApplied = false;
-        _PolyhedralBoundedSolidSetNullEdgesConnector.curveNeighborPositions = null;
-        if (
-            _PolyhedralBoundedSolidSetNullEdgesConnector.testOnlyForcedConnectOrder !== null &&
-            _PolyhedralBoundedSolidSetNullEdgesConnector.testOnlyForcedConnectOrder.length === this.sonea!.size() &&
-            _PolyhedralBoundedSolidSetNullEdgesConnector.testOnlyForcedConnectOrder.length === this.soneb!.size()
-        ) {
-            this.applyOrderPermutation(_PolyhedralBoundedSolidSetNullEdgesConnector.testOnlyForcedConnectOrder);
-            _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport =
-                _PolyhedralBoundedSolidSetIntersectionCurveBuilder.build(
-                    this.sonea!,
-                    this.soneb!,
-                    PolyhedralBoundedSolidNumericPolicy.defaultContext().unitVectorTolerance(),
-                );
-            _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary("connect TEST-ONLY forced order applied");
-            return;
-        }
+        this.curveOrientationApplied = false;
+        this.curveNeighborPositions = null;
 
         // Always group null-edges by topological ring before any further
         // processing. Without this, the connect loop pairs null-edges from
@@ -816,15 +824,26 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         // Reconstruct the intersection curves for diagnosis (§5 of
         // doc/mythosPlan.md). The report is captured before any reordering
         // decision so it always describes the classifier's raw emission.
-        _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport =
-            _PolyhedralBoundedSolidSetIntersectionCurveBuilder.build(
+        this.curveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.build(
+            this.sonea!,
+            this.soneb!,
+            PolyhedralBoundedSolidNumericPolicy.defaultContext().unitVectorTolerance(),
+        );
+        _PolyhedralBoundedSolidSetNullEdgesConnector.LAST.curveReport = this.curveReport;
+        _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary("connect " + this.curveReport.summarize());
+        if (this.dropIsolatedNodes()) {
+            // The report kept for diagnostics stays the one above: what
+            // the classifier emitted. This one describes what is left to
+            // connect.
+            this.curveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.build(
                 this.sonea!,
                 this.soneb!,
                 PolyhedralBoundedSolidNumericPolicy.defaultContext().unitVectorTolerance(),
             );
-        _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
-            "connect " + _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport.summarize(),
-        );
+            _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
+                "connect " + this.curveReport.summarize(),
+            );
+        }
 
         const n = Math.min(this.sonea!.size(), this.soneb!.size());
         if (n !== this.sonea!.size() || n !== this.soneb!.size() || n < 2) {
@@ -842,21 +861,21 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         // _PolyhedralBoundedSolidSetIntersectionCurveBuilder.applyCurveOrientation).
         // On any anomaly (open chain, isolated node, pinch, odd/degenerate
         // face-pair group) fall through to the legacy ordering below.
-        if (_PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport.isCleanlyClosed()) {
+        if (this.curveReport.isCleanlyClosed()) {
+            const neighbors: (number[][] | null)[] = [null];
             const curveOrder = _PolyhedralBoundedSolidSetIntersectionCurveBuilder.orderAndOrientAlongCurves(
-                _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport.cycles,
+                this.curveReport.cycles,
                 n,
                 this.sonea!,
                 this.soneb!,
+                neighbors,
             );
             if (curveOrder !== null) {
                 this.applyOrderPermutation(curveOrder);
-                _PolyhedralBoundedSolidSetNullEdgesConnector.curveOrientationApplied = true;
-                _PolyhedralBoundedSolidSetNullEdgesConnector.curveNeighborPositions =
-                    _PolyhedralBoundedSolidSetIntersectionCurveBuilder.lastTraversalNeighborPositions;
+                this.curveOrientationApplied = true;
+                this.curveNeighborPositions = neighbors[0]!;
                 _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
-                    "connect curve-order applied: cycles=" +
-                        _PolyhedralBoundedSolidSetNullEdgesConnector.lastCurveReport.cycles.size(),
+                    "connect curve-order applied: cycles=" + this.curveReport.cycles.size(),
                 );
                 return;
             }
@@ -1021,11 +1040,22 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         let i: number;
         let condition1: boolean;
         let condition2: boolean;
-        const endsa = _PolyhedralBoundedSolidSetNullEdgesConnector.endsa!;
-        const endsb = _PolyhedralBoundedSolidSetNullEdgesConnector.endsb!;
+        const endsa = this.endsa!;
+        const endsb = this.endsb!;
         const debugFlags = _PolyhedralBoundedSolidSetNullEdgesConnector.debugFlags;
 
         for (i = 0; i < endsa.size(); i++) {
+            // A face that is not convex can be crossed several times by
+            // the same face of the other solid: the crossings lie on one
+            // line and all of them pass the face and role test of
+            // `neighbor`. Only the loose end left by a neighbour along the
+            // intersection curve is the other end of this chord; joining
+            // any other one draws a chord through the notch of the face
+            // (plan-stage11 Phase F). Program 15.13 of [MANT1988] gets the
+            // same effect from the order of its sorted null edges.
+            if (!this.isCurveNeighborOfCurrentPair(i)) {
+                continue;
+            }
             condition1 = _PolyhedralBoundedSolidOperator.neighbor(hea, endsa.get(i));
             condition2 = _PolyhedralBoundedSolidOperator.neighbor(heb, endsb.get(i));
 
@@ -1070,203 +1100,47 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
                 ret[1] = endsb.get(i);
                 endsa.remove(i);
                 endsb.remove(i);
-                if (i < _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex!.size()) {
-                    _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex!.remove(i);
+                if (i < this.endsPairIndex!.size()) {
+                    this.endsPairIndex!.remove(i);
                 }
                 return ret;
             }
         }
 
-        // mythosPlan Phase 3 (curve-ordered path only): rescue a unique
-        // near-miss before declaring this pair loose. When a face is
-        // crossed by several chords of the intersection curve, an earlier
-        // division can re-parent a pending strut ring away from the face
-        // where its junction partner waits; the junction then fails the
-        // neighbor face-equality forever (the EMPTY/BLACK_FACES cusp
-        // moons). If exactly one loose entry matches on one solid and
-        // differs ONLY by parent face on the other — with a two-half-edge
-        // strut ring on the mismatched side — re-parenting that ring to
-        // the partner's face restores the junction the curve order
-        // guarantees. Topological information only; no geometry.
-        if (_PolyhedralBoundedSolidSetNullEdgesConnector.curveOrientationApplied) {
-            const rescued = this.rescueRingFaceNearMiss(hea, heb);
-            if (rescued !== null) {
-                return rescued;
-            }
-        }
-
         endsa.add(hea);
         endsb.add(heb);
-        _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex!.add(
-            _PolyhedralBoundedSolidSetNullEdgesConnector.currentConnectPairIndex,
-        );
+        this.endsPairIndex!.add(this.currentConnectPairIndex);
         return null;
     }
 
-    private static rolesOpposite(
-        h1: _PolyhedralBoundedSolidHalfEdge | null,
-        h2: _PolyhedralBoundedSolidHalfEdge | null,
-    ): boolean {
-        if (h1 === null || h2 === null || h1.parentEdge === null || h2.parentEdge === null) {
-            return false;
+    /**
+    True when the loose entry `i` was left by one of the two pairs next to
+    the current pair on its intersection curve, or when the curves are not
+    known (no curve order applied): then every entry is a candidate, as in
+    the book.
+    */
+    private isCurveNeighborOfCurrentPair(i: number): boolean {
+        if (
+            !this.curveOrientationApplied ||
+            this.curveNeighborPositions === null ||
+            this.currentConnectPairIndex < 0 ||
+            this.currentConnectPairIndex >= this.curveNeighborPositions.length ||
+            this.curveNeighborPositions[this.currentConnectPairIndex] === null ||
+            i >= this.endsPairIndex!.size()
+        ) {
+            return true;
         }
+        const pusherPosition = this.endsPairIndex!.get(i);
+
         return (
-            (h1 === h1.parentEdge.rightHalf && h2 === h2.parentEdge.leftHalf) ||
-            (h1 === h1.parentEdge.leftHalf && h2 === h2.parentEdge.rightHalf)
+            pusherPosition === this.curveNeighborPositions[this.currentConnectPairIndex]![0] ||
+            pusherPosition === this.curveNeighborPositions[this.currentConnectPairIndex]![1]
         );
     }
 
-    /**
-    True when the half-edge dangles in a pending two-half-edge strut ring
-    (an inner loop holding only the null edge, as created by the vertex/face
-    classifier's makeRing) — the only configuration this rescue may
-    re-parent.
-    @param he half-edge to inspect
-    @return true for a pending strut ring's half-edge
-    */
-    private static isPendingStrutRing(he: _PolyhedralBoundedSolidHalfEdge | null): boolean {
-        if (
-            he === null ||
-            he.parentLoop === null ||
-            he.parentLoop.halfEdgesList === null ||
-            he.parentLoop.parentFace === null ||
-            he.parentLoop.parentFace.boundariesList.size() === 0
-        ) {
-            return false;
-        }
-        if (he.parentLoop.halfEdgesList.size() !== 2) {
-            return false;
-        }
-        return he.parentLoop !== he.parentLoop.parentFace.boundariesList.get(0);
-    }
-
-    /**
-    Attempts the near-miss rescue described at the scanjoin call site:
-    finds the unique loose index that matches on one solid and fails only
-    the face equality on the other, with a pending strut ring on the
-    mismatched side; re-parents that ring and completes the match.
-    @param hea query half on solid A
-    @param heb query half on solid B
-    @return the matched loose pair after the rescue, or null
-    */
-    private rescueRingFaceNearMiss(
-        hea: _PolyhedralBoundedSolidHalfEdge,
-        heb: _PolyhedralBoundedSolidHalfEdge,
-    ): _PolyhedralBoundedSolidHalfEdge[] | null {
-        let candidate = -1;
-        let mismatchOnA = false;
+    private isLooseA(he: _PolyhedralBoundedSolidHalfEdge | null): boolean {
         let i: number;
-        const endsa = _PolyhedralBoundedSolidSetNullEdgesConnector.endsa!;
-        const endsb = _PolyhedralBoundedSolidSetNullEdgesConnector.endsb!;
-        const curveNeighborPositions = _PolyhedralBoundedSolidSetNullEdgesConnector.curveNeighborPositions;
-        const currentConnectPairIndex = _PolyhedralBoundedSolidSetNullEdgesConnector.currentConnectPairIndex;
-
-        for (i = 0; i < endsa.size(); i++) {
-            // Only true curve neighbors of the current pair may be
-            // rescued: the loose entry must have been pushed by one of the
-            // two cycle-adjacent pairs. Without this guard the rescue can
-            // stitch a cycle seed to a leftover of another curve
-            // (regressed MANT1988_15_2_HOLED, mythosPlan §9).
-            if (
-                curveNeighborPositions === null ||
-                currentConnectPairIndex < 0 ||
-                currentConnectPairIndex >= curveNeighborPositions.length ||
-                curveNeighborPositions[currentConnectPairIndex] === null ||
-                curveNeighborPositions[currentConnectPairIndex] === undefined ||
-                i >= _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex!.size()
-            ) {
-                continue;
-            }
-            const pusherPosition = _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex!.get(i);
-            if (
-                pusherPosition !== curveNeighborPositions[currentConnectPairIndex]![0] &&
-                pusherPosition !== curveNeighborPositions[currentConnectPairIndex]![1]
-            ) {
-                continue;
-            }
-            const aOk = _PolyhedralBoundedSolidOperator.neighbor(hea, endsa.get(i));
-            const bOk = _PolyhedralBoundedSolidOperator.neighbor(heb, endsb.get(i));
-            const nearMissA =
-                !aOk &&
-                bOk &&
-                _PolyhedralBoundedSolidSetNullEdgesConnector.rolesOpposite(hea, endsa.get(i)) &&
-                (_PolyhedralBoundedSolidSetNullEdgesConnector.isPendingStrutRing(hea) ||
-                    _PolyhedralBoundedSolidSetNullEdgesConnector.isPendingStrutRing(endsa.get(i)));
-            const nearMissB =
-                aOk &&
-                !bOk &&
-                _PolyhedralBoundedSolidSetNullEdgesConnector.rolesOpposite(heb, endsb.get(i)) &&
-                (_PolyhedralBoundedSolidSetNullEdgesConnector.isPendingStrutRing(heb) ||
-                    _PolyhedralBoundedSolidSetNullEdgesConnector.isPendingStrutRing(endsb.get(i)));
-            if (nearMissA || nearMissB) {
-                if (candidate >= 0) {
-                    _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
-                        "connect ring-rescue ambiguous; skipped",
-                    );
-                    return null;
-                }
-                candidate = i;
-                mismatchOnA = nearMissA;
-            }
-        }
-        if (candidate < 0) {
-            return null;
-        }
-
-        const query = mismatchOnA ? hea : heb;
-        const stored = mismatchOnA ? endsa.get(candidate) : endsb.get(candidate);
-        let ringSide: _PolyhedralBoundedSolidHalfEdge;
-        let anchorSide: _PolyhedralBoundedSolidHalfEdge;
-        if (_PolyhedralBoundedSolidSetNullEdgesConnector.isPendingStrutRing(query)) {
-            ringSide = query;
-            anchorSide = stored;
-        } else {
-            ringSide = stored;
-            anchorSide = query;
-        }
-        const targetFace = anchorSide.parentLoop.parentFace;
-        if (targetFace === null || targetFace.parentSolid === null) {
-            return null;
-        }
-        if (
-            !PolyhedralBoundedSolidEulerOperators.lringmv(
-                targetFace.parentSolid,
-                ringSide.parentLoop,
-                targetFace,
-                false,
-            )
-        ) {
-            return null;
-        }
-        if (
-            !_PolyhedralBoundedSolidOperator.neighbor(hea, endsa.get(candidate)) ||
-            !_PolyhedralBoundedSolidOperator.neighbor(heb, endsb.get(candidate))
-        ) {
-            _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
-                "connect ring-rescue re-parent did not complete the match",
-            );
-            return null;
-        }
-        _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
-            "connect ring-rescue applied: ring v=" +
-                (ringSide.startingVertex === null ? "?" : Integer.toString(ringSide.startingVertex.id)) +
-                " -> face " +
-                targetFace.id,
-        );
-        const ret = new Array<_PolyhedralBoundedSolidHalfEdge>(2);
-        ret[0] = endsa.get(candidate);
-        ret[1] = endsb.get(candidate);
-        endsa.remove(candidate);
-        endsb.remove(candidate);
-        if (candidate < _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex!.size()) {
-            _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex!.remove(candidate);
-        }
-        return ret;
-    }
-
-    private static isLooseA(he: _PolyhedralBoundedSolidHalfEdge | null): boolean {
-        let i: number;
-        const endsa = _PolyhedralBoundedSolidSetNullEdgesConnector.endsa!;
+        const endsa = this.endsa!;
 
         for (i = 0; i < endsa.size(); i++) {
             if (he === endsa.get(i)) return true;
@@ -1275,9 +1149,9 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         return false;
     }
 
-    private static isLooseB(he: _PolyhedralBoundedSolidHalfEdge | null): boolean {
+    private isLooseB(he: _PolyhedralBoundedSolidHalfEdge | null): boolean {
         let i: number;
-        const endsb = _PolyhedralBoundedSolidSetNullEdgesConnector.endsb!;
+        const endsb = this.endsb!;
 
         for (i = 0; i < endsb.size(); i++) {
             if (he === endsb.get(i)) return true;
@@ -1305,11 +1179,8 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
             PolyhedralBoundedSolidEulerOperators.lkemr(s, he.parentEdge!.rightHalf!, he.parentEdge!.leftHalf!);
             if (addedFace.boundariesList.size() >= 2) {
                 this.sonfa!.add(addedFace);
-                if (_PolyhedralBoundedSolidSetNullEdgesConnector.sonfaPairIndexByFaceId !== null) {
-                    _PolyhedralBoundedSolidSetNullEdgesConnector.sonfaPairIndexByFaceId.put(
-                        addedFace.id,
-                        _PolyhedralBoundedSolidSetNullEdgesConnector.currentConnectPairIndex,
-                    );
+                if (this.sonfaPairIndexByFaceId !== null) {
+                    this.sonfaPairIndexByFaceId.put(addedFace.id, this.currentConnectPairIndex);
                 }
             } else {
                 addedFace = null;
@@ -1339,11 +1210,8 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
             PolyhedralBoundedSolidEulerOperators.lkemr(s, he.parentEdge!.rightHalf!, he.parentEdge!.leftHalf!);
             if (addedFace.boundariesList.size() >= 2) {
                 this.sonfb!.add(addedFace);
-                if (_PolyhedralBoundedSolidSetNullEdgesConnector.sonfbPairIndexByFaceId !== null) {
-                    _PolyhedralBoundedSolidSetNullEdgesConnector.sonfbPairIndexByFaceId.put(
-                        addedFace.id,
-                        _PolyhedralBoundedSolidSetNullEdgesConnector.currentConnectPairIndex,
-                    );
+                if (this.sonfbPairIndexByFaceId !== null) {
+                    this.sonfbPairIndexByFaceId.put(addedFace.id, this.currentConnectPairIndex);
                 }
             } else {
                 addedFace = null;
@@ -1441,21 +1309,19 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
         let h1b: _PolyhedralBoundedSolidHalfEdge | null = null;
         let h2b: _PolyhedralBoundedSolidHalfEdge | null = null;
         let r: _PolyhedralBoundedSolidHalfEdge[] | null;
-        const allowRingMoveOnAJoin =
-            _PolyhedralBoundedSolidSetNullEdgesConnector.operation === _PolyhedralBoundedSolidOperator.INTERSECTION;
         const withDebug =
             (debugFlags & _PolyhedralBoundedSolidSetNullEdgesConnector.DEBUG_99_SHOWOPERATIONS) !== 0x0 &&
             (debugFlags & _PolyhedralBoundedSolidSetNullEdgesConnector.DEBUG_05_CONNECT) !== 0x00;
 
-        _PolyhedralBoundedSolidSetNullEdgesConnector.endsa = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
-        _PolyhedralBoundedSolidSetNullEdgesConnector.endsb = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
-        _PolyhedralBoundedSolidSetNullEdgesConnector.endsPairIndex = new ArrayList<number>();
+        this.endsa = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+        this.endsb = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
+        this.endsPairIndex = new ArrayList<number>();
 
         this.sonfa = new ArrayList<_PolyhedralBoundedSolidFace>();
         this.sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
-        _PolyhedralBoundedSolidSetNullEdgesConnector.sonfaPairIndexByFaceId = new HashMap<number, number>();
-        _PolyhedralBoundedSolidSetNullEdgesConnector.sonfbPairIndexByFaceId = new HashMap<number, number>();
-        _PolyhedralBoundedSolidSetNullEdgesConnector.setCurrentConnectContext(-1);
+        this.sonfaPairIndexByFaceId = new HashMap<number, number>();
+        this.sonfbPairIndexByFaceId = new HashMap<number, number>();
+        this.setCurrentConnectContext(-1);
         let j: number;
 
         if (this.sonea!.size() !== this.soneb!.size()) {
@@ -1494,8 +1360,8 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
             );
 
             if ((debugFlags & _PolyhedralBoundedSolidSetNullEdgesConnector.DEBUG_05_CONNECT) !== 0x00) {
-                const endsa = _PolyhedralBoundedSolidSetNullEdgesConnector.endsa!;
-                const endsb = _PolyhedralBoundedSolidSetNullEdgesConnector.endsb!;
+                const endsa = this.endsa!;
+                const endsb = this.endsb!;
                 console.log(
                     "  - " +
                         (endsa.size() + endsb.size()) +
@@ -1563,7 +1429,7 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
             // along the intersection curves (mythosPlan §5.3), that
             // orientation must be respected — re-normalizing by id here
             // would undo it and reintroduce seam mismatches in scanjoin.
-            if (!_PolyhedralBoundedSolidSetNullEdgesConnector.curveOrientationApplied) {
+            if (!this.curveOrientationApplied) {
                 if (ha.startingVertex.id > ham.startingVertex.id) {
                     tmp = nextedgea.rightHalf;
                     nextedgea.rightHalf = nextedgea.leftHalf;
@@ -1576,39 +1442,39 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
                 }
             }
 
-            _PolyhedralBoundedSolidSetNullEdgesConnector.rebindClassicCurrentNullEdgesIfNeeded(
+            this.rebindClassicCurrentNullEdgesIfNeeded(
                 nextedgea.rightHalf,
                 nextedgea.leftHalf,
                 nextedgeb.leftHalf,
                 nextedgeb.rightHalf,
             );
 
-            _PolyhedralBoundedSolidSetNullEdgesConnector.setCurrentConnectContext(i);
+            this.setCurrentConnectContext(i);
             r = this.scanjoin(nextedgea.rightHalf!, nextedgeb.leftHalf!);
             if (r !== null) {
                 h1a = r[0]!;
                 h2b = r[1]!;
-                _PolyhedralBoundedSolidOperator.join(h1a, nextedgea.rightHalf!, withDebug, allowRingMoveOnAJoin);
-                if (!_PolyhedralBoundedSolidSetNullEdgesConnector.isLooseA(h1a.mirrorHalfEdge())) {
+                _PolyhedralBoundedSolidOperator.join(h1a, nextedgea.rightHalf!, withDebug);
+                if (!this.isLooseA(h1a.mirrorHalfEdge())) {
                     this.cutA(h1a);
                 }
                 _PolyhedralBoundedSolidOperator.join(h2b, nextedgeb.leftHalf!, withDebug);
-                if (!_PolyhedralBoundedSolidSetNullEdgesConnector.isLooseB(h2b.mirrorHalfEdge())) {
+                if (!this.isLooseB(h2b.mirrorHalfEdge())) {
                     this.cutB(h2b);
                 }
             }
 
-            _PolyhedralBoundedSolidSetNullEdgesConnector.setCurrentConnectContext(i);
+            this.setCurrentConnectContext(i);
             r = this.scanjoin(nextedgea.leftHalf!, nextedgeb.rightHalf!);
             if (r !== null) {
                 h2a = r[0]!;
                 h1b = r[1]!;
-                _PolyhedralBoundedSolidOperator.join(h2a, nextedgea.leftHalf!, withDebug, allowRingMoveOnAJoin);
-                if (!_PolyhedralBoundedSolidSetNullEdgesConnector.isLooseA(h2a.mirrorHalfEdge())) {
+                _PolyhedralBoundedSolidOperator.join(h2a, nextedgea.leftHalf!, withDebug);
+                if (!this.isLooseA(h2a.mirrorHalfEdge())) {
                     this.cutA(h2a);
                 }
                 _PolyhedralBoundedSolidOperator.join(h1b, nextedgeb.rightHalf!, withDebug);
-                if (!_PolyhedralBoundedSolidSetNullEdgesConnector.isLooseB(h1b.mirrorHalfEdge())) {
+                if (!this.isLooseB(h1b.mirrorHalfEdge())) {
                     this.cutB(h1b);
                 }
             }
@@ -1643,15 +1509,15 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
                         " h2b=" +
                         _PolyhedralBoundedSolidSetNullEdgesConnector.summarizeHalfEdge(h2b) +
                         " looseA=" +
-                        _PolyhedralBoundedSolidSetNullEdgesConnector.endsa!.size() +
+                        this.endsa!.size() +
                         " looseB=" +
-                        _PolyhedralBoundedSolidSetNullEdgesConnector.endsb!.size(),
+                        this.endsb!.size(),
                 );
             }
         }
 
-        const endsa = _PolyhedralBoundedSolidSetNullEdgesConnector.endsa!;
-        const endsb = _PolyhedralBoundedSolidSetNullEdgesConnector.endsb!;
+        const endsa = this.endsa!;
+        const endsb = this.endsb!;
 
         if ((debugFlags & _PolyhedralBoundedSolidSetNullEdgesConnector.DEBUG_05_CONNECT) !== 0x00) {
             console.log("  . Pending null edges to connect:");
@@ -1672,15 +1538,16 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
                 " looseB=" +
                 endsb.size(),
         );
-        // §6.1-B: post-loop safety nets removed.
-        // Per [MANT1988] Program 15.14, the main loop must leave
-        // looseA == looseB == 0 by itself. Any survivor for
-        // MANT1988_15_1 INTERSECTION/SUBTRACT (looseA=4) is the
-        // visible symptom of the §5.2 deferred sectoroverlap fix
-        // upstream — see plan §6.1-C analysis. A post-pass closure
-        // (pairLatentLooseEnds) was attempted but turned out to fuse
-        // legitimately-separate shells in cases like HOLLOW_BRICK, so
-        // it was retired. The right fix is upstream, not here.
+        // Per [MANT1988] Program 15.14 the main loop must leave
+        // looseA == looseB == 0. The only survivors left are isolated
+        // struts: both halves of one null edge still loose on A and on B.
+        // The vertex/vertex classifier emits them at a coplanar contact
+        // along a boundary ray (sectoroverlap is closed, see its comment)
+        // where the curve does not pass, e.g. MANT1988_15_1 ∩ and −. Such
+        // a strut bounds no null face; killing it restores the vertex it
+        // split. It never joins anything, so it cannot fuse shells (the
+        // retired pairLatentLooseEnds closure did, on HOLLOW_BRICK).
+        this.dropIsolatedStruts();
         _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
             "connect post-pass sonfa=" +
                 this.sonfa!.size() +
@@ -1702,6 +1569,210 @@ export class _PolyhedralBoundedSolidSetNullEdgesConnector extends _PolyhedralBou
                     " B=" +
                     _PolyhedralBoundedSolidSetNullEdgesConnector.summarizeHalfEdge(endsb.get(i)),
             );
+        }
+    }
+
+    /**
+    A node without neighbours on the intersection curve is a point where
+    the two boundaries touch without crossing: nothing is to be cut there.
+    When such nodes are the only thing that keeps the curves from being
+    closed cycles, their null edges are removed before connect (each with
+    lkev, which merges its two coincident vertices back into one), so that
+    the rest is connected in curve order. Groups of nodes on a pair of
+    coplanar faces do not prevent it: on coplanar faces those groups are
+    made of the isolated nodes themselves (vertices of one solid lying in
+    a face of the other) and are gone once they are removed. They used to stay, and a single
+    one of them sent the whole operation to the order of emission, where a
+    face crossed twice along one line is joined across its hole
+    (plan-stage11, coplanar non-convex faces).
+    @return true when some null edge was removed
+    */
+    private dropIsolatedNodes(): boolean {
+        const dropped = new ArrayList<number>();
+        const curveReport = this.curveReport!;
+        const sonea = this.sonea!;
+        const soneb = this.soneb!;
+        let covered = 0;
+        let i: number;
+        let j: number;
+
+        if (
+            !curveReport.pinchNodes.isEmpty() ||
+            curveReport.oddFacePairGroupCount > 0 ||
+            sonea.size() !== soneb.size()
+        ) {
+            return false;
+        }
+        for (i = 0; i < curveReport.openChains.size(); i++) {
+            const chain = curveReport.openChains.get(i);
+            for (j = 0; j < chain.length; j++) {
+                if (!this.liesInCoplanarFaces(chain[j]!)) {
+                    return false;
+                }
+                dropped.add(chain[j]!);
+            }
+            covered += chain.length;
+        }
+        dropped.addAll(curveReport.isolatedNodes);
+        if (dropped.isEmpty()) {
+            return false;
+        }
+        for (i = 0; i < curveReport.cycles.size(); i++) {
+            covered += curveReport.cycles.get(i).length;
+        }
+        if (covered + curveReport.isolatedNodes.size() !== curveReport.nodeCount) {
+            return false;
+        }
+        Collections.sort(dropped);
+        for (i = dropped.size() - 1; i >= 0; i--) {
+            const index = dropped.get(i);
+            const a = sonea.get(index).e;
+            const b = soneb.get(index).e;
+            _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
+                "connect drop contact node " +
+                    index +
+                    " A=" +
+                    _PolyhedralBoundedSolidSetNullEdgesConnector.summarizeHalfEdge(a.rightHalf) +
+                    " B=" +
+                    _PolyhedralBoundedSolidSetNullEdgesConnector.summarizeHalfEdge(b.rightHalf),
+            );
+            PolyhedralBoundedSolidEulerOperators.lkev(
+                a.rightHalf!.parentLoop.parentFace.parentSolid,
+                a.rightHalf!,
+                a.leftHalf!,
+            );
+            PolyhedralBoundedSolidEulerOperators.lkev(
+                b.rightHalf!.parentLoop.parentFace.parentSolid,
+                b.rightHalf!,
+                b.leftHalf!,
+            );
+            sonea.remove(index);
+            soneb.remove(index);
+        }
+        return true;
+    }
+
+    /**
+    True when node `index` is a vertex of one solid lying inside a face of
+    the other, with a face of its own on the plane of that face: on that
+    solid the null edge is a strut inside the face, and some face around
+    the vertex of the first solid is coplanar with it. A chain of such
+    nodes is an edge lying in a coplanar face; it crosses nothing.
+    */
+    private liesInCoplanarFaces(index: number): boolean {
+        const a = this.sonea!.get(index).e;
+        const b = this.soneb!.get(index).e;
+
+        if (
+            a === null ||
+            b === null ||
+            a.rightHalf === null ||
+            a.leftHalf === null ||
+            b.rightHalf === null ||
+            b.leftHalf === null
+        ) {
+            return false;
+        }
+        return (
+            _PolyhedralBoundedSolidSetNullEdgesConnector.isVertexInCoplanarFace(a, b) ||
+            _PolyhedralBoundedSolidSetNullEdgesConnector.isVertexInCoplanarFace(b, a)
+        );
+    }
+
+    /**
+    True when `strut` lies inside one face and some face around the ends
+    of `vertexEdge` is on the plane of that face.
+    */
+    private static isVertexInCoplanarFace(
+        vertexEdge: _PolyhedralBoundedSolidEdge,
+        strut: _PolyhedralBoundedSolidEdge,
+    ): boolean {
+        const face = strut.rightHalf!.parentLoop.parentFace;
+        const plane = face.getContainingPlane();
+
+        if (face !== strut.leftHalf!.parentLoop.parentFace || plane === null) {
+            return false;
+        }
+        const context = PolyhedralBoundedSolidNumericPolicy.forSolids(
+            face.parentSolid,
+            vertexEdge.rightHalf!.parentLoop.parentFace.parentSolid,
+        );
+        return (
+            _PolyhedralBoundedSolidSetNullEdgesConnector.hasFaceOnPlane(vertexEdge.rightHalf!, plane, context) ||
+            _PolyhedralBoundedSolidSetNullEdgesConnector.hasFaceOnPlane(vertexEdge.leftHalf!, plane, context)
+        );
+    }
+
+    /** Walks the faces around the starting vertex of `start`. */
+    private static hasFaceOnPlane(
+        start: _PolyhedralBoundedSolidHalfEdge,
+        plane: InfinitePlane,
+        context: ToleranceContext,
+    ): boolean {
+        let he: _PolyhedralBoundedSolidHalfEdge | null = start;
+        const normal = plane.getNormal();
+        let guard = 0;
+
+        do {
+            const own = he!.parentLoop.parentFace.getContainingPlane();
+            if (own !== null) {
+                const ownNormal = own.getNormal();
+                if (
+                    normal.crossProduct(ownNormal).length() <=
+                        context.unitVectorTolerance() * normal.length() * ownNormal.length() &&
+                    Math.abs(plane.pointDistance(he!.startingVertex.position)) <= context.bigEpsilon()
+                ) {
+                    return true;
+                }
+            }
+            const mate = he!.mirrorHalfEdge();
+            if (mate === null) {
+                return false;
+            }
+            he = mate.next();
+            guard++;
+        } while (he !== null && he !== start && guard < 1000);
+        return false;
+    }
+
+    /**
+    Removes the null edges whose two halves are both loose, on A and on B
+    at the same loose positions (see the call site). Each is killed with
+    lkev, which merges its two coincident vertices back into one.
+    */
+    private dropIsolatedStruts(): void {
+        const endsa = this.endsa!;
+        const endsb = this.endsb!;
+        const endsPairIndex = this.endsPairIndex!;
+        let i: number;
+        let j: number;
+
+        for (i = 0; i < endsa.size(); i++) {
+            const a = endsa.get(i);
+            const b = endsb.get(i);
+            for (j = i + 1; j < endsa.size(); j++) {
+                if (endsa.get(j) !== a.mirrorHalfEdge() || endsb.get(j) !== b.mirrorHalfEdge()) {
+                    continue;
+                }
+                _PolyhedralBoundedSolidSetNullEdgesConnector.tracePipelineSummary(
+                    "connect drop isolated strut A=" +
+                        _PolyhedralBoundedSolidSetNullEdgesConnector.summarizeHalfEdge(a) +
+                        " B=" +
+                        _PolyhedralBoundedSolidSetNullEdgesConnector.summarizeHalfEdge(b),
+                );
+                PolyhedralBoundedSolidEulerOperators.lkev(a.parentLoop.parentFace.parentSolid, a, a.mirrorHalfEdge()!);
+                PolyhedralBoundedSolidEulerOperators.lkev(b.parentLoop.parentFace.parentSolid, b, b.mirrorHalfEdge()!);
+                this.removeLoosePair(j);
+                this.removeLoosePair(i);
+                if (j < endsPairIndex.size()) {
+                    endsPairIndex.remove(j);
+                }
+                if (i < endsPairIndex.size()) {
+                    endsPairIndex.remove(i);
+                }
+                i--;
+                break;
+            }
         }
     }
 }

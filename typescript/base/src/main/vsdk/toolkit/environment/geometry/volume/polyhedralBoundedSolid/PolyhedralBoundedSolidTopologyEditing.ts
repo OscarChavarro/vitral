@@ -6,6 +6,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 import { VSDK } from "../../../../common/VSDK.js";
+import { VSDKFatalException } from "../../../../common/VSDKFatalException.js";
 import { Logger } from "../../../../common/logging/Logger.js";
 import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
 import type { InfinitePlane } from "../../surface/InfinitePlane.js";
@@ -18,7 +19,7 @@ import type { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
 import { PolyhedralBoundedSolidEulerOperators } from "./PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidGeometricValidator } from "./PolyhedralBoundedSolidGeometricValidator.js";
 import { PolyhedralBoundedSolidNumericPolicy, type ToleranceContext } from "./PolyhedralBoundedSolidNumericPolicy.js";
-import { _PolyhedralBoundedSolidTopologicalValidator } from "./_PolyhedralBoundedSolidTopologicalValidator.js";
+import { PolyhedralBoundedSolidRepair } from "./PolyhedralBoundedSolidRepair.js";
 
 /**
 Contains topology-editing operations for `PolyhedralBoundedSolid` that are
@@ -745,7 +746,7 @@ export class PolyhedralBoundedSolidTopologyEditing {
     }
 
     private static remakeEmanatingHalfedgesReferences(solid: PolyhedralBoundedSolid): void {
-        _PolyhedralBoundedSolidTopologicalValidator.remakeEmanatingHalfedgesReferences(solid);
+        PolyhedralBoundedSolidRepair.remakeEmanatingHalfEdgeReferences(solid);
     }
 
     /**
@@ -1030,16 +1031,20 @@ export class PolyhedralBoundedSolidTopologyEditing {
             //- Merge coplanar overlapping faces when one lies entirely over
             //- another that already carries rings. This completes the
             //- "maximal face" reduction expected by [MANT1988].15.5.
+            // Which faces have a plane is computed once per sweep (Stage G):
+            // the sweep restarts as soon as a reduction changes the solid.
+            const hasPlane: boolean[] = new Array<boolean>(solid.getPolygonsList().size()).fill(false);
+            for (i = 0; i < hasPlane.length; i++) {
+                hasPlane[i] = solid.getPolygonsList().get(i)!.getContainingPlane() !== null;
+            }
             for (i = 0; i < solid.getPolygonsList().size() && !restart; i++) {
                 const faceA = solid.getPolygonsList().get(i)!;
-                const planeA = faceA.getContainingPlane();
-                if (planeA === null) {
+                if (!hasPlane[i]) {
                     continue;
                 }
                 for (j = i + 1; j < solid.getPolygonsList().size(); j++) {
                     const faceB = solid.getPolygonsList().get(j)!;
-                    const planeB = faceB.getContainingPlane();
-                    if (planeB === null) {
+                    if (!hasPlane[j]) {
                         continue;
                     }
 
@@ -1085,12 +1090,7 @@ export class PolyhedralBoundedSolidTopologyEditing {
                     if (nedges > 2) break;
 
                     if (he === null) {
-                        Logger.reportMessage(
-                            solid,
-                            VSDK.FATAL_ERROR,
-                            "maximizeFaces",
-                            "Inconsistent model! Null HalfEdge. Check.",
-                        );
+                        throw new VSDKFatalException("maximizeFaces: Inconsistent model! Null HalfEdge. Check.");
                     }
 
                     heMirror = he!.mirrorHalfEdge();
@@ -1101,11 +1101,8 @@ export class PolyhedralBoundedSolidTopologyEditing {
 
                     he = heMirror.next();
                     if (he === null) {
-                        Logger.reportMessage(
-                            solid,
-                            VSDK.FATAL_ERROR,
-                            "maximizeFaces",
-                            "Inconsistent model! HalfEdge without next. Check.",
+                        throw new VSDKFatalException(
+                            "maximizeFaces: Inconsistent model! HalfEdge without next. Check.",
                         );
                     }
                     j++;

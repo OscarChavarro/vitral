@@ -4,6 +4,7 @@ import type { PolyhedralBoundedSolid } from "vsdk/toolkit/environment/geometry/v
 import { PolyhedralBoundedSolidValidationEngine } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
 import { PolyhedralBoundedSolidModeler } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
 import { PolyhedralBoundedSolidTestFixtures } from "../../volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTestFixtures.js";
+import { PolyhedralBoundedSolidVolumeOracle } from "./PolyhedralBoundedSolidVolumeOracle.js";
 
 /**
 Policy tests for no-intersection, touching-only, and containment boolean
@@ -59,6 +60,14 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
         ];
     }
 
+    /** AssertJ `usingComparatorWithPrecision(precision).containsExactly(expected)`. */
+    function expectContainsExactlyWithPrecision(actual: number[], expected: number[], precision: number): void {
+        expect(actual.length).toBe(expected.length);
+        for (let i = 0; i < expected.length; i++) {
+            expect(Math.abs(actual[i]! - expected[i]!), `element ${i}`).toBeLessThanOrEqual(precision);
+        }
+    }
+
     function commutativeOperations(): [number][] {
         return [[PolyhedralBoundedSolidModeler.UNION], [PolyhedralBoundedSolidModeler.INTERSECTION]];
     }
@@ -66,6 +75,7 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
     function mant1988StrictOperationSamples(): [number, number][] {
         return [
             [-1, PolyhedralBoundedSolidModeler.UNION],
+            [-1, PolyhedralBoundedSolidModeler.INTERSECTION],
             [-1, PolyhedralBoundedSolidModeler.SUBTRACT],
             [0, PolyhedralBoundedSolidModeler.INTERSECTION],
             [1, PolyhedralBoundedSolidModeler.UNION],
@@ -76,7 +86,6 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
 
     function mant1988IntermediateOnlySamples(): [number, number][] {
         return [
-            [-1, PolyhedralBoundedSolidModeler.INTERSECTION],
             [0, PolyhedralBoundedSolidModeler.UNION],
             [0, PolyhedralBoundedSolidModeler.SUBTRACT],
         ];
@@ -249,7 +258,11 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
         },
     );
 
-    it("given_mant1988Section15_2HoledIntersection_when_finalMaximizeFacesEnabled_then_resultRemainsIntermediateValidButNotStrict", () => {
+    it("given_mant1988Section15_2HoledIntersection_when_finalMaximizeFacesEnabled_then_resultIsTheStrictValidPrism", () => {
+        // The wedge pierces the block through two faces: two section rings
+        // strictly inside faces (Fable5.2Analysis.md B-01). Until the ring
+        // fix this result kept two zero-area ring faces and failed strict
+        // validation, which this test used to assert.
         // Arrange
         const operands = PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
         const solidA = operands[0]!;
@@ -265,10 +278,15 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
             false,
         );
 
-        // Assert
+        // Assert: triangular prism of section 0.5 * 0.55 * 0.3, length 0.5
         expect(result).not.toBeNull();
-        expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(result)).toBe(true);
-        expect(PolyhedralBoundedSolidValidationEngine.validateStrict(result)).toBe(false);
+        expect(PolyhedralBoundedSolidValidationEngine.validateStrict(result)).toBe(true);
+        expect(result.getPolygonsList().size()).toBe(5);
+        expect(result.getEdgesList().size()).toBe(9);
+        expect(result.getVerticesList().size()).toBe(6);
+        expect(
+            Math.abs(PolyhedralBoundedSolidVolumeOracle.solidVolume(result) - 0.5 * 0.55 * 0.3 * 0.5),
+        ).toBeLessThanOrEqual(1e-12);
     });
 
     it("given_mant1988Section15_2HoledUnion_when_currentKernelRuns_then_resultBecomesStrictAndKeepsBlockWithTriangularWings", () => {
@@ -314,7 +332,13 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
         expect(result.getVerticesList().size()).toBe(12);
         expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(result)).toBe(true);
         expect(PolyhedralBoundedSolidValidationEngine.validateStrict(result)).toBe(true);
-        expect(Array.from(result.getMinMax())).toEqual([1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0]);
+        // Answered by the normal pipeline since Stage D (formerly by the
+        // profile-difference fallback): compare with a tolerance.
+        expectContainsExactlyWithPrecision(
+            Array.from(result.getMinMax()),
+            [1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0],
+            1e-12,
+        );
     });
 
     it("given_mant1988Section15_1DifferenceBA_when_classicConnectRuns_then_resultClosesDoubleLoop", () => {
@@ -338,7 +362,13 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
         expect(result.getVerticesList().size()).toBe(12);
         expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(result)).toBe(true);
         expect(PolyhedralBoundedSolidValidationEngine.validateStrict(result)).toBe(true);
-        expect(Array.from(result.getMinMax())).toEqual([1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0]);
+        // Answered by the normal pipeline since Stage D (formerly by the
+        // profile-difference fallback): compare with a tolerance.
+        expectContainsExactlyWithPrecision(
+            Array.from(result.getMinMax()),
+            [1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0],
+            1e-12,
+        );
     });
 
     it("given_mant1988Section15_2HoledIntersection_when_togglingFinalMaximizeFaces_then_resultTopologyIsPreserved", () => {
@@ -367,8 +397,8 @@ describe("PolyhedralBoundedSolidSetOperatorTest", () => {
         // Assert
         expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(withMax)).toBe(true);
         expect(PolyhedralBoundedSolidValidationEngine.validateIntermediate(withoutMax)).toBe(true);
-        expect(PolyhedralBoundedSolidValidationEngine.validateStrict(withMax)).toBe(false);
-        expect(PolyhedralBoundedSolidValidationEngine.validateStrict(withoutMax)).toBe(false);
+        expect(PolyhedralBoundedSolidValidationEngine.validateStrict(withMax)).toBe(true);
+        expect(PolyhedralBoundedSolidValidationEngine.validateStrict(withoutMax)).toBe(true);
         expect(withMax.getPolygonsList().size()).toBe(withoutMax.getPolygonsList().size());
         expect(withMax.getEdgesList().size()).toBe(withoutMax.getEdgesList().size());
         expect(withMax.getVerticesList().size()).toBe(withoutMax.getVerticesList().size());

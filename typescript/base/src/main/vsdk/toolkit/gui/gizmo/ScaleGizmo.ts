@@ -111,7 +111,11 @@ export class ScaleGizmo extends Gizmo {
 
     /// The two-axis groups, in the order `buildBandQuad` and the renderers
     /// walk them
-    public static readonly BAND_GROUPS: readonly number[] = [ScaleGizmo.XY_GROUP, ScaleGizmo.YZ_GROUP, ScaleGizmo.XZ_GROUP];
+    public static readonly BAND_GROUPS: readonly number[] = [
+        ScaleGizmo.XY_GROUP,
+        ScaleGizmo.YZ_GROUP,
+        ScaleGizmo.XZ_GROUP,
+    ];
 
     /// Indexes of `elementInstances`, in the order `getElements` gives them
     private static readonly X_SHAFT_ELEMENT = 1;
@@ -194,14 +198,23 @@ export class ScaleGizmo extends Gizmo {
         const axisColorSource = new ReferenceFrameGizmo();
 
         this.axisColors = [];
-        this.inputGizmo = new InputGizmo(ScaleGizmo.AXIS_COUNT, InputGizmo.DECIMALS, 1, InputGizmoValueChangeRules.forScale());
+        this.inputGizmo = new InputGizmo(
+            ScaleGizmo.AXIS_COUNT,
+            InputGizmo.DECIMALS,
+            1,
+            InputGizmoValueChangeRules.forScale(),
+        );
         for (let axis = 0; axis < ScaleGizmo.AXIS_COUNT; axis++) {
             this.axisColors[axis] = axisColorSource.getAxisColor(axis);
             this.inputGizmo.setFieldColor(axis, this.axisColors[axis]!);
         }
 
         const initialShaftRadius: number = this.getLineWidthInWorldUnits() / 2;
-        this.shaftModel = new Cone(initialShaftRadius, initialShaftRadius, ScaleGizmo.AXIS_LENGTH - ScaleGizmo.TIP_SIZE);
+        this.shaftModel = new Cone(
+            initialShaftRadius,
+            initialShaftRadius,
+            ScaleGizmo.AXIS_LENGTH - ScaleGizmo.TIP_SIZE,
+        );
         this.tipModel = new Box(ScaleGizmo.TIP_SIZE, ScaleGizmo.TIP_SIZE, ScaleGizmo.TIP_SIZE);
 
         this.elements = [];
@@ -509,7 +522,13 @@ export class ScaleGizmo extends Gizmo {
 
             // The inner edge is shared with the uniform handle, so either of
             // the two being selected highlights it
-            this.addContourEdge(segments, quad[0]!, quad[2]!, axes, this.isBandHighlighted(group) || this.isUniformHighlighted());
+            this.addContourEdge(
+                segments,
+                quad[0]!,
+                quad[2]!,
+                axes,
+                this.isBandHighlighted(group) || this.isUniformHighlighted(),
+            );
             this.addContourEdge(segments, quad[1]!, quad[3]!, axes, this.isBandHighlighted(group));
         }
         return segments;
@@ -520,7 +539,13 @@ export class ScaleGizmo extends Gizmo {
     axis `axes[1]`, each one with the color of the axis it ends at (or yellow
     if the handle is highlighted).
     */
-    private addContourEdge(segments: ContourSegment[], a: Vector3Dd, b: Vector3Dd, axes: number[], highlighted: boolean): void {
+    private addContourEdge(
+        segments: ContourSegment[],
+        a: Vector3Dd,
+        b: Vector3Dd,
+        axes: number[],
+        highlighted: boolean,
+    ): void {
         const middle: Vector3Dd = a.add(b).multiply(0.5);
         const colorA: ColorRgb = highlighted ? InputGizmo.HIGHLIGHT_COLOR : this.axisColors[axes[0]!]!;
         const colorB: ColorRgb = highlighted ? InputGizmo.HIGHLIGHT_COLOR : this.axisColors[axes[1]!]!;
@@ -545,7 +570,8 @@ export class ScaleGizmo extends Gizmo {
         let index = 1;
 
         for (const element of this.elements) {
-            const hit: Ray | null = element.getGeometry() !== null ? element.doIntersectionFirstHit(ray.withT(Number.MAX_VALUE)) : null;
+            const hit: Ray | null =
+                element.getGeometry() !== null ? element.doIntersectionFirstHit(ray.withT(Number.MAX_VALUE)) : null;
 
             if (hit !== null && hit.getT() < nearestDistance) {
                 nearestDistance = hit.getT();
@@ -557,7 +583,15 @@ export class ScaleGizmo extends Gizmo {
         for (const group of ScaleGizmo.BAND_GROUPS) {
             const quad: Vector3Dd[] = this.buildBandQuad(group);
             // The quad, as the two triangles of its strip
-            const t: number | null = ScaleGizmo.nearestOfTwoTriangles(ray, quad[0]!, quad[1]!, quad[2]!, quad[1]!, quad[3]!, quad[2]!);
+            const t: number | null = ScaleGizmo.nearestOfTwoTriangles(
+                ray,
+                quad[0]!,
+                quad[1]!,
+                quad[2]!,
+                quad[1]!,
+                quad[3]!,
+                quad[2]!,
+            );
 
             if (t !== null && t < nearestDistance) {
                 nearestDistance = t;
@@ -568,7 +602,13 @@ export class ScaleGizmo extends Gizmo {
         const triangles: Vector3Dd[] = this.buildUniformTriangles();
 
         for (let i = 0; i + 2 < triangles.length; i += 3) {
-            const t: number | null = ScaleGizmo.rayTriangleT(ray.getOrigin(), ray.getDirection(), triangles[i]!, triangles[i + 1]!, triangles[i + 2]!);
+            const t: number | null = ScaleGizmo.rayTriangleT(
+                ray.getOrigin(),
+                ray.getDirection(),
+                triangles[i]!,
+                triangles[i + 1]!,
+                triangles[i + 2]!,
+            );
 
             if (t !== null && t < nearestDistance) {
                 nearestDistance = t;
@@ -639,7 +679,9 @@ export class ScaleGizmo extends Gizmo {
     public axisPoint(axis: number, reach: number): Vector3Dd {
         ScaleGizmo.checkAxis(axis);
 
-        return this.getPosition().add(this.getAxisDirection(axis).multiply(reach * this.currentScale * ScaleGizmo.AXIS_LENGTH));
+        return this.getPosition().add(
+            this.getAxisDirection(axis).multiply(reach * this.currentScale * ScaleGizmo.AXIS_LENGTH),
+        );
     }
 
     /**
@@ -810,7 +852,13 @@ export class ScaleGizmo extends Gizmo {
     handles, which are not backed by a `SimpleBody`.
     @return the distance along `dir` to the hit, or null if there is none
     */
-    private static rayTriangleT(origin: Vector3Dd, dir: Vector3Dd, a: Vector3Dd, b: Vector3Dd, c: Vector3Dd): number | null {
+    private static rayTriangleT(
+        origin: Vector3Dd,
+        dir: Vector3Dd,
+        a: Vector3Dd,
+        b: Vector3Dd,
+        c: Vector3Dd,
+    ): number | null {
         const edge1: Vector3Dd = b.subtract(a);
         const edge2: Vector3Dd = c.subtract(a);
         const h: Vector3Dd = dir.crossProduct(edge2);
@@ -846,7 +894,9 @@ export class ScaleGizmo extends Gizmo {
 
     private static checkAxis(axis: number): void {
         if (axis < 0 || axis >= ScaleGizmo.AXIS_COUNT) {
-            throw new IllegalArgumentException("Invalid axis: " + axis + ". It must be 0, 1 or 2 for the X, Y or Z axis.");
+            throw new IllegalArgumentException(
+                "Invalid axis: " + axis + ". It must be 0, 1 or 2 for the X, Y or Z axis.",
+            );
         }
     }
 

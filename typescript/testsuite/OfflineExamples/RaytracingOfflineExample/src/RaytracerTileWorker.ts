@@ -35,10 +35,7 @@ function loadScene(sceneDescriptor: WorkerTransferValue, xSize: number, ySize: n
     new ReaderMitScene().importEnvironment(String(sceneDescriptor), scene);
 
     const camera = scene.getActiveCamera();
-    return scene.exportToSimpleSceneSnapshot(
-        camera.exportToCameraSnapshot(xSize, ySize),
-        scene.getActiveBackground(),
-    );
+    return scene.exportToSimpleSceneSnapshot(camera.exportToCameraSnapshot(xSize, ySize), scene.getActiveBackground());
 }
 
 const renderer: ParallelRaytracerTileRenderer = new ParallelRaytracerTileRenderer(loadScene);

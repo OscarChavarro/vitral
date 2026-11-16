@@ -54,10 +54,18 @@ export abstract class WidgetVariable extends WidgetElement {
         msg =
             msg +
             "VARIABLE:\n" +
-            "     TYPE: " + this.getType() + "\n" +
-            "     NAME: " + this.getName() + "\n" +
-            "     INITIAL_VALUE: " + this.getInitialvalue() + "\n" +
-            "     VALID_RANGE: " + this.getValidRange() + "\n";
+            "     TYPE: " +
+            this.getType() +
+            "\n" +
+            "     NAME: " +
+            this.getName() +
+            "\n" +
+            "     INITIAL_VALUE: " +
+            this.getInitialvalue() +
+            "\n" +
+            "     VALID_RANGE: " +
+            this.getValidRange() +
+            "\n";
         return msg;
     }
 

@@ -90,7 +90,13 @@ export class SceneMembershipOperation implements UndoableOperation {
       SceneElementKinds.remove(this.kind, this.scene, toRemove[i].index());
     }
     for (const entry of toInsert) {
-      SceneElementKinds.insert(this.kind, this.scene, entry.index(), entry.element(), entry.selected());
+      SceneElementKinds.insert(
+        this.kind,
+        this.scene,
+        entry.index(),
+        entry.element(),
+        entry.selected(),
+      );
     }
   }
 

@@ -43,10 +43,19 @@ class Gizmo2DDrawListPrimitive {
     private readonly alignment: Gizmo2DDrawListAlignment | null;
 
     /** @internal */
-    public constructor(kind: Gizmo2DDrawListKind, x: number[], y: number[], color: ColorRgb,
-                       opacity: number, width: number, depth: number,
-                       overlay: boolean, text: string | null, fontSize: number,
-                       alignment: Gizmo2DDrawListAlignment | null) {
+    public constructor(
+        kind: Gizmo2DDrawListKind,
+        x: number[],
+        y: number[],
+        color: ColorRgb,
+        opacity: number,
+        width: number,
+        depth: number,
+        overlay: boolean,
+        text: string | null,
+        fontSize: number,
+        alignment: Gizmo2DDrawListAlignment | null,
+    ) {
         this.kind = kind;
         this.x = x;
         this.y = y;
@@ -60,38 +69,62 @@ class Gizmo2DDrawListPrimitive {
         this.alignment = alignment;
     }
 
-    public getKind(): Gizmo2DDrawListKind { return this.kind; }
+    public getKind(): Gizmo2DDrawListKind {
+        return this.kind;
+    }
 
     /** @return number of vertices (1 for labels) */
-    public getNumberOfVertices(): number { return this.x.length; }
+    public getNumberOfVertices(): number {
+        return this.x.length;
+    }
 
-    public getX(vertex: number): number { return this.x[vertex]!; }
+    public getX(vertex: number): number {
+        return this.x[vertex]!;
+    }
 
-    public getY(vertex: number): number { return this.y[vertex]!; }
+    public getY(vertex: number): number {
+        return this.y[vertex]!;
+    }
 
-    public getColor(): ColorRgb { return this.color; }
+    public getColor(): ColorRgb {
+        return this.color;
+    }
 
     /** @return opacity, from 0 (invisible) to 1 (opaque) */
-    public getOpacity(): number { return this.opacity; }
+    public getOpacity(): number {
+        return this.opacity;
+    }
 
     /** @return width of a line, in pixels */
-    public getWidth(): number { return this.width; }
+    public getWidth(): number {
+        return this.width;
+    }
 
     /** @return normalized device depth (bigger is farther) */
-    public getDepth(): number { return this.depth; }
+    public getDepth(): number {
+        return this.depth;
+    }
 
     /**
     @return true for screen space primitives (input boxes, labels), drawn
     after the depth sorted ones and never sorted
     */
-    public isOverlay(): boolean { return this.overlay; }
+    public isOverlay(): boolean {
+        return this.overlay;
+    }
 
-    public getText(): string | null { return this.text; }
+    public getText(): string | null {
+        return this.text;
+    }
 
     /** @return font size of a label, in pixels */
-    public getFontSize(): number { return this.fontSize; }
+    public getFontSize(): number {
+        return this.fontSize;
+    }
 
-    public getAlignment(): Gizmo2DDrawListAlignment | null { return this.alignment; }
+    public getAlignment(): Gizmo2DDrawListAlignment | null {
+        return this.alignment;
+    }
 }
 
 /**
@@ -137,19 +170,51 @@ export class Gizmo2DDrawList {
     /**
     Adds a polygon coming from a 3D element, sorted by depth.
     */
-    public addPolygon(x: number[], y: number[], depth: number, color: ColorRgb,
-                      opacity: number): void {
-        this.primitives.push(new Gizmo2DDrawListPrimitive(Gizmo2DDrawListKind.POLYGON,
-            x.slice(), y.slice(), color, opacity, 0, depth, false, null, 0, null));
+    public addPolygon(x: number[], y: number[], depth: number, color: ColorRgb, opacity: number): void {
+        this.primitives.push(
+            new Gizmo2DDrawListPrimitive(
+                Gizmo2DDrawListKind.POLYGON,
+                x.slice(),
+                y.slice(),
+                color,
+                opacity,
+                0,
+                depth,
+                false,
+                null,
+                0,
+                null,
+            ),
+        );
     }
 
     /**
     Adds a line coming from a 3D element, sorted by depth.
     */
-    public addLine(x0: number, y0: number, x1: number, y1: number, depth: number,
-                   color: ColorRgb, width: number): void {
-        this.primitives.push(new Gizmo2DDrawListPrimitive(Gizmo2DDrawListKind.LINE,
-            [x0, x1], [y0, y1], color, 1.0, width, depth, false, null, 0, null));
+    public addLine(
+        x0: number,
+        y0: number,
+        x1: number,
+        y1: number,
+        depth: number,
+        color: ColorRgb,
+        width: number,
+    ): void {
+        this.primitives.push(
+            new Gizmo2DDrawListPrimitive(
+                Gizmo2DDrawListKind.LINE,
+                [x0, x1],
+                [y0, y1],
+                color,
+                1.0,
+                width,
+                depth,
+                false,
+                null,
+                0,
+                null,
+            ),
+        );
     }
 
     /**
@@ -160,12 +225,22 @@ export class Gizmo2DDrawList {
     @param height height, in pixels
     @param color color to fill it with
     */
-    public addOverlayRectangle(x: number, y: number, width: number,
-                               height: number, color: ColorRgb): void {
-        this.primitives.push(new Gizmo2DDrawListPrimitive(Gizmo2DDrawListKind.POLYGON,
-            [x, x + width, x + width, x],
-            [y, y, y + height, y + height],
-            color, 1.0, 0, 0, true, null, 0, null));
+    public addOverlayRectangle(x: number, y: number, width: number, height: number, color: ColorRgb): void {
+        this.primitives.push(
+            new Gizmo2DDrawListPrimitive(
+                Gizmo2DDrawListKind.POLYGON,
+                [x, x + width, x + width, x],
+                [y, y, y + height, y + height],
+                color,
+                1.0,
+                0,
+                0,
+                true,
+                null,
+                0,
+                null,
+            ),
+        );
     }
 
     /**
@@ -177,10 +252,29 @@ export class Gizmo2DDrawList {
     @param fontSize size of the font, in pixels
     @param alignment how (x, y) relates to the box of the text
     */
-    public addOverlayLabel(x: number, y: number, text: string, color: ColorRgb,
-                           fontSize: number, alignment: Gizmo2DDrawListAlignment): void {
-        this.primitives.push(new Gizmo2DDrawListPrimitive(Gizmo2DDrawListKind.LABEL,
-            [x], [y], color, 1.0, 0, 0, true, text, fontSize, alignment));
+    public addOverlayLabel(
+        x: number,
+        y: number,
+        text: string,
+        color: ColorRgb,
+        fontSize: number,
+        alignment: Gizmo2DDrawListAlignment,
+    ): void {
+        this.primitives.push(
+            new Gizmo2DDrawListPrimitive(
+                Gizmo2DDrawListKind.LABEL,
+                [x],
+                [y],
+                color,
+                1.0,
+                0,
+                0,
+                true,
+                text,
+                fontSize,
+                alignment,
+            ),
+        );
     }
 
     /**
@@ -194,14 +288,13 @@ export class Gizmo2DDrawList {
         for (const p of this.primitives) {
             if (p.isOverlay()) {
                 overlays.push(p);
-            }
-            else {
+            } else {
                 sorted.push(p);
             }
         }
         // Stable: equal depths keep the order they were added
         const farToNear: Comparator<Gizmo2DDrawListPrimitive> = {
-            compare: (a, b) => b.getDepth() < a.getDepth() ? -1 : b.getDepth() > a.getDepth() ? 1 : 0,
+            compare: (a, b) => (b.getDepth() < a.getDepth() ? -1 : b.getDepth() > a.getDepth() ? 1 : 0),
         };
         Collections.sort(sorted, farToNear);
         sorted.push(...overlays);
