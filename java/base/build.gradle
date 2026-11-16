@@ -71,6 +71,25 @@ tasks.named('jacocoTestReport') {
     dependsOn(tasks.named('test'))
     reports {
         html.required = true
+        // HTML report in <java>/coverage/index.html (ignored by git).
+        html.outputLocation = rootProject.layout.projectDirectory.dir('coverage')
+        xml.required = true
+        csv.required = false
+    }
+}
+
+// Coverage of the fast and the slow-tagged tests together, also written to
+// <java>/coverage/index.html (see scripts/testAllWithSlowCases.sh).
+tasks.register('jacocoAllTestsReport', JacocoReport) {
+    group = 'verification'
+    description = 'Coverage report merging the test and slowTest executions.'
+    dependsOn(tasks.named('test'), tasks.named('slowTest'))
+    mustRunAfter(tasks.named('jacocoTestReport'))
+    executionData(tasks.named('test').get(), tasks.named('slowTest').get())
+    sourceSets(sourceSets.main)
+    reports {
+        html.required = true
+        html.outputLocation = rootProject.layout.projectDirectory.dir('coverage')
         xml.required = true
         csv.required = false
     }

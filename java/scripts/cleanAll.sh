@@ -81,3 +81,5 @@ rm -rf testsuite/Tools/SpriteFontGenerator/output/*
 rm -rf testsuite/OfflineExamples/PolyhedralBoundedSolidExpotImportExample/output/
 
 rm -rf .gradle-home/
+# JaCoCo HTML report (base/build.gradle jacocoTestReport, jacocoAllTestsReport)
+rm -rf coverage/
