@@ -342,6 +342,9 @@ SOURCES = \
     src/main/vsdk/toolkit/environment/scene/InstanceRayCrossingBuffer.cpp \
     src/main/vsdk/toolkit/environment/scene/SceneSolid.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBinHierarchy.cpp \
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.cpp \
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.cpp \
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBoundingVolume.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AxisAlignedBoundingBox.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BoundingVolumeHierarchy.cpp \

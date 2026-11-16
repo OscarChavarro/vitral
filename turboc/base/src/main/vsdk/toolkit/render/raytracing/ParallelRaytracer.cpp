@@ -286,6 +286,10 @@ void ParallelRaytracer::executeWithEncoder(
 #endif
     }
 
+    // Built here, before the workers start: their own calls only read.
+    SimpleRaytracer::prepareAccelerationStructures(
+        sceneSnapshot->getSimpleBodies(), rendererConfiguration);
+
     ArrayList<Future<Void> > futures;
     long i;
     for ( i = 0; i < numberOfThreads; i++ ) {

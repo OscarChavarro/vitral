@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.h"
 
 class CommandOptionsProcessor {
 private:
@@ -19,6 +20,7 @@ private:
     BOOLEAN showHelp;
     int xResolution;
     int yResolution;
+    TriangleMeshAccelerationMethod::Value meshAccelerationMethod;
 
     static BOOLEAN parseResolution(const String& value, int* x, int* y);
 
@@ -36,6 +38,7 @@ public:
     BOOLEAN shouldUseSceneResolution() const;
     int getXResolution() const;
     int getYResolution() const;
+    TriangleMeshAccelerationMethod::Value getMeshAccelerationMethod() const;
 };
 
 #endif

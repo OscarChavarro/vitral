@@ -69,6 +69,16 @@ public:
     SimpleRaytracer();
     virtual ~SimpleRaytracer() {}
 
+    /**
+    Builds (single threaded) the ray acceleration structures of the triangle
+    meshes of the bodies for `RendererConfiguration::getMeshAccelerationMethod`
+    (null configuration: the default method). `execute` calls it; a
+    caller tracing from several threads calls it before starting them, so
+    the calls from the threads find everything built and only read.
+    */
+    static void prepareAccelerationStructures(ArrayList<SimpleBody*>& bodies,
+        const RendererConfiguration* qualitySelection);
+
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* report);
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* report,ZBuffer* depthmap);
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2);

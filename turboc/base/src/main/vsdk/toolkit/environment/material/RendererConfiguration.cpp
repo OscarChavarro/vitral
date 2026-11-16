@@ -8,7 +8,8 @@ RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(TRUE), wires(FALSE), boundingVolume(FALSE), selectionCorners(FALSE),
       texture(TRUE), bumpMap(FALSE), points(FALSE), normals(FALSE), trianglesNormals(FALSE), useVertexColors(FALSE),
       vertexNormalSmoothingThresholdDegrees(15.0),
-      wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0)
+      wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0),
+      meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
 {
 }
 
@@ -62,6 +63,7 @@ void RendererConfiguration::cloneFrom(const RendererConfiguration& other)
     useVertexColors = other.useVertexColors;
     vertexNormalSmoothingThresholdDegrees = other.vertexNormalSmoothingThresholdDegrees;
     lodHint = other.lodHint;
+    meshAccelerationMethod = other.meshAccelerationMethod;
 }
 
 RendererConfiguration RendererConfiguration::clone() const
@@ -139,6 +141,16 @@ void RendererConfiguration::setUseVertexColors(BOOLEAN value) { useVertexColors 
 ColorRgb RendererConfiguration::getBoundingVolumeColor() const { return boundingVolumeColor; }
 void RendererConfiguration::setBoundingVolumeColor(const ColorRgb& c) { boundingVolumeColor = c; }
 
+void RendererConfiguration::setMeshAccelerationMethod(TriangleMeshAccelerationMethod::Value method)
+{
+    meshAccelerationMethod = method;
+}
+
+TriangleMeshAccelerationMethod::Value RendererConfiguration::getMeshAccelerationMethod() const
+{
+    return meshAccelerationMethod;
+}
+
 String RendererConfiguration::toString() const
 {
     String msg = "<RendererConfiguration>:\n";
@@ -162,6 +174,8 @@ String RendererConfiguration::toString() const
     msg += "  - With bump map: " + String(bumpMap ? "ON" : "OFF") + "\n";
     msg += "  - Vertex normal smoothing threshold: " +
         String::valueOf(vertexNormalSmoothingThresholdDegrees) + " deg\n";
+    msg += "  - Mesh acceleration method: " +
+        String(TriangleMeshAccelerationMethodUtil::name(meshAccelerationMethod)) + "\n";
     return msg;
 }
 

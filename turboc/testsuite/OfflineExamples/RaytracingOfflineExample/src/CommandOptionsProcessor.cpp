@@ -20,7 +20,8 @@ const int CommandOptionsProcessor::DEFAULT_Y_RESOLUTION = 240;
 CommandOptionsProcessor::CommandOptionsProcessor()
     : sceneFile(DEFAULT_SCENE_FILE), outputFile(DEFAULT_OUTPUT_FILE_NAME),
       save(TRUE), parallel(FALSE), showHelp(FALSE),
-      xResolution(DEFAULT_X_RESOLUTION), yResolution(DEFAULT_Y_RESOLUTION)
+      xResolution(DEFAULT_X_RESOLUTION), yResolution(DEFAULT_Y_RESOLUTION),
+      meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
 {
 }
 
@@ -72,6 +73,21 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const ArrayList<String>
                 return options;
             }
             options.sceneFile = args.get(++i);
+            continue;
+        }
+        if ( arg == "--mesh-acceleration" || arg == "-m" ) {
+            if ( i + 1 >= args.size() ) {
+                fprintf(stderr, "Missing value for %s\n", arg.c_str());
+                options.showHelp = TRUE;
+                return options;
+            }
+            String value = args.get(++i);
+            if ( !TriangleMeshAccelerationMethodUtil::fromName(value.c_str(),
+                     options.meshAccelerationMethod) ) {
+                fprintf(stderr, "Unknown mesh acceleration method: %s\n", value.c_str());
+                options.showHelp = TRUE;
+                return options;
+            }
             continue;
         }
         if ( arg == "--output" || arg == "-o" ) {
@@ -127,6 +143,10 @@ void CommandOptionsProcessor::printUsage()
     printf("                         to use the viewport of the scene file\n");
     printf("  --nosave, -n           Render only, no image file\n");
     printf("  -parallel, --parallel  Render tiles in parallel\n");
+    printf("  --mesh-acceleration, -m <method>\n");
+    printf("                         Triangle mesh ray acceleration:\n");
+    printf("                         bruteforce (none) or wald2007 (binned SAH\n");
+    printf("                         BVH, default)\n");
     printf("  --help, -h             Show this help\n\n");
     printf("Legacy compatibility:\n");
     printf("  - `nosave` (without dashes) is still accepted.\n");
@@ -140,3 +160,4 @@ BOOLEAN CommandOptionsProcessor::shouldShowHelp() const { return showHelp; }
 BOOLEAN CommandOptionsProcessor::shouldUseSceneResolution() const { return xResolution <= 0 || yResolution <= 0; }
 int CommandOptionsProcessor::getXResolution() const { return xResolution; }
 int CommandOptionsProcessor::getYResolution() const { return yResolution; }
+TriangleMeshAccelerationMethod::Value CommandOptionsProcessor::getMeshAccelerationMethod() const { return meshAccelerationMethod; }

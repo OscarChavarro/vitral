@@ -18,6 +18,8 @@
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/background/Background.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
@@ -280,8 +282,25 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
 void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2)
 { execute(inoutViewport, q, sceneSnapshot->getSimpleBodies(), sceneSnapshot->getLights(), sceneSnapshot->getBackground(), sceneSnapshot->getCameraSnapshot(), liveReport, depthEncoder != 0 ? outDepthmap : 0, depthEncoder, limx1, limy1, limx2, limy2); }
 
+void SimpleRaytracer::prepareAccelerationStructures(ArrayList<SimpleBody*>& bodies, const RendererConfiguration* q)
+{
+    const TriangleMeshAccelerationMethod::Value method = q != 0 ?
+        q->getMeshAccelerationMethod() : RendererConfiguration().getMeshAccelerationMethod();
+    for ( long int i=0; i<bodies.size(); i++ ) {
+        Geometry* geometry = bodies.get(i)->getGeometry();
+        if ( geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ) {
+            ((TriangleMesh*)geometry)->prepareAccelerationStructure(method);
+            continue;
+        }
+        if ( geometry != NULL && geometry->instanceOf(TriangleMeshGroup::CLASS) ) {
+            ((TriangleMeshGroup*)geometry)->prepareAccelerationStructures(method);
+        }
+    }
+}
+
 void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,ArrayList<SimpleBody*>& bodies,ArrayList<Light*>& lights,Background* bg,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2)
 {
+    prepareAccelerationStructures(bodies, q);
     RenderContext renderContext = buildRenderContext(q, lights);
     SceneRenderCache cache;
     for ( long int i=0; i<bodies.size(); i++ ) {

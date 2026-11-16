@@ -1458,6 +1458,13 @@ base/src/main/vsdk/toolkit/common/numerics/FloatingInterval.cpp,BASE/SRC/MAIN/V/
 base/src/main/vsdk/toolkit/common/numerics/FloatingInterval.h,BASE/SRC/MAIN/V/T/COMMON/NUMERICS/FLOAINTE.H,FloatingInterval.h,FLOAINTE.H
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBinHierarchy.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/AABBINHI.CPP,AabbBinHierarchy.cpp,AABBINHI.CPP
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBinHierarchy.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/AABBINHI.H,AabbBinHierarchy.h,AABBINHI.H
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BINSAHHI.CPP,BinnedSahHierarchy.cpp,BINSAHHI.CPP
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BINSAHHI.H,BinnedSahHierarchy.h,BINSAHHI.H
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BISATRHI.CPP,BinnedSahTriangleHierarchy.cpp,BISATRHI.CPP
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BISATRHI.H,BinnedSahTriangleHierarchy.h,BISATRHI.H
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/TRIACCST.CPP,TriangleAccelerationStructure.cpp,TRIACCST.CPP
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/TRIACCST.H,TriangleAccelerationStructure.h,TRIACCST.H
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/TRMEACME.H,TriangleMeshAccelerationMethod.h,TRMEACME.H
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBoundingVolume.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/AABBOUVO.CPP,AabbBoundingVolume.cpp,AABBOUVO.CPP
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBoundingVolume.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/AABBOUVO.H,AabbBoundingVolume.h,AABBOUVO.H
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AxisAlignedBoundingBox.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/AXALBOBO.CPP,AxisAlignedBoundingBox.cpp,AXALBOBO.CPP
@@ -1667,6 +1674,7 @@ base/src/test/UncertifiedTestBody.cpp,BASE/SRC/TEST/UNCTESBO.CPP,UncertifiedTest
 base/src/test/UncertifiedTestBody.h,BASE/SRC/TEST/UNCTESBO.H,UncertifiedTestBody.h,UNCTESBO.H
 base/src/test/VitralTest.h,BASE/SRC/TEST/VITRTEST.H,VitralTest.h,VITRTEST.H
 base/src/test/bounding_volume_hierarchy_tests.cpp,BASE/SRC/TEST/BOVOHITE.CPP,bounding_volume_hierarchy_tests.cpp,BOVOHITE.CPP
+base/src/test/triangle_acceleration_tests.cpp,BASE/SRC/TEST/TRIACCTE.CPP,triangle_acceleration_tests.cpp,TRIACCTE.CPP
 base/src/test/certified_containment_tests.cpp,BASE/SRC/TEST/CERCONTE.CPP,certified_containment_tests.cpp,CERCONTE.CPP
 base/src/test/csg_dyadic_reference.inc,BASE/SRC/TEST/CSGDYARE.INC,csg_dyadic_reference.inc,CSGDYARE.INC
 base/src/test/csg_evaluator_tests.cpp,BASE/SRC/TEST/CSGEVATE.CPP,csg_evaluator_tests.cpp,CSGEVATE.CPP

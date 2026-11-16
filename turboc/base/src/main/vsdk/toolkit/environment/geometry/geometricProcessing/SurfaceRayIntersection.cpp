@@ -14,14 +14,23 @@
 #ifndef __TURBOC__
 static BOOLEAN rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
 {
-    double* mm = geometry->getMinMax();
+    // Meshes with a prepared acceleration structure keep their bounds;
+    // getMinMax() walks every vertex, on every ray.
+    double prepared[6];
+    const TriangleMesh* mesh = geometry->instanceOf(TriangleMesh::CLASS) ?
+        (const TriangleMesh*)geometry : (const TriangleMesh*)NULL;
+    const TriangleMeshGroup* group = geometry->instanceOf(TriangleMeshGroup::CLASS) ?
+        (const TriangleMeshGroup*)geometry : (const TriangleMeshGroup*)NULL;
+    const BOOLEAN usePrepared = (mesh != 0 && mesh->getPreparedMinMax(prepared)) ||
+        (group != 0 && group->getPreparedMinMax(prepared));
+    double* mm = usePrepared ? prepared : geometry->getMinMax();
     Vector3Dd size(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
     Vector3Dd center(
         (mm[3]+mm[0])/2,
         (mm[4]+mm[1])/2,
         (mm[5]+mm[2])/2
     );
-    delete [] mm;
+    if (!usePrepared) delete [] mm;
 
     Box boundingVolume(size);
     Ray localRay(

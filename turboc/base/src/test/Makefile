@@ -47,6 +47,7 @@ TESTS = \
     refraction_tests \
     solid_boundary_tessellator_tests \
     subdivided_bezier_patch_tests \
+    triangle_acceleration_tests \
     triangle_mesh_contract_tests
 
 OTHER_PROGRAMS = \

@@ -5,6 +5,7 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/environment/material/ShadingType.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.h"
 class RendererConfiguration {
 public:
     enum {
@@ -31,6 +32,7 @@ private:
     ColorRgb wireColor;
     ColorRgb boundingVolumeColor;
     int lodHint;
+    TriangleMeshAccelerationMethod::Value meshAccelerationMethod;
 
 public:
     RendererConfiguration();
@@ -88,6 +90,14 @@ public:
     BOOLEAN getUseVertexColors() const;
     void setUseVertexColors(BOOLEAN useVertexColors);
     ColorRgb getBoundingVolumeColor() const;
+
+    /**
+    Method used by the raytracers to intersect rays with triangle meshes
+    (default `WALD2007_BINNED_SAH`). It changes only the speed: every method
+    gives the same image.
+    */
+    void setMeshAccelerationMethod(TriangleMeshAccelerationMethod::Value method);
+    TriangleMeshAccelerationMethod::Value getMeshAccelerationMethod() const;
     void setBoundingVolumeColor(const ColorRgb& boundingVolumeColor);
 
     String toString() const;
