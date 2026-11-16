@@ -4,6 +4,8 @@ package vsdk.toolkit.environment.material;
 import java.io.Serial;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethod;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethodUtil;
 
 /**
 The RendererConfiguration class is used to indicate some attributes in which a 
@@ -40,6 +42,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     private double vertexNormalSmoothingThresholdDegrees;
     private ColorRgb wireColor;
     private ColorRgb boundingVolumeColor;
+    private TriangleMeshAccelerationMethod meshAccelerationMethod;
 
     public int compareTo(RendererConfiguration other)
     {
@@ -98,6 +101,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.useVertexColors = other.useVertexColors;
         this.vertexNormalSmoothingThresholdDegrees =
             other.vertexNormalSmoothingThresholdDegrees;
+        this.meshAccelerationMethod = other.meshAccelerationMethod;
     }
 
     // To be used in future: depending of the rendering implementation for
@@ -135,6 +139,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         boundingVolumeColor = new ColorRgb(1, 1, 0);
         useVertexColors = false;
         vertexNormalSmoothingThresholdDegrees = 15.0;
+        meshAccelerationMethod = TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
     }
 
     public void setWireColor(ColorRgb c)
@@ -381,6 +386,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         msg = msg + "  - With bump map: " + (bumpMap?"ON":"OFF") + "\n";
         msg = msg + "  - Vertex normal smoothing threshold: " +
             vertexNormalSmoothingThresholdDegrees + " deg\n";
+        msg = msg + "  - Mesh acceleration method: " +
+            TriangleMeshAccelerationMethodUtil.name(meshAccelerationMethod) + "\n";
 
         return msg;
     }
@@ -417,6 +424,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         copy.useVertexColors = useVertexColors;
         copy.vertexNormalSmoothingThresholdDegrees =
             vertexNormalSmoothingThresholdDegrees;
+        copy.meshAccelerationMethod = meshAccelerationMethod;
         return copy;
     }
 
@@ -439,6 +447,22 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     */
     public ColorRgb getBoundingVolumeColor() {
         return boundingVolumeColor;
+    }
+
+    /**
+    Method used by the raytracers to intersect rays with triangle meshes
+    (default `WALD2007_BINNED_SAH`). It changes only the speed: every method
+    gives the same image.
+    @param method acceleration method
+    */
+    public void setMeshAccelerationMethod(TriangleMeshAccelerationMethod method)
+    {
+        meshAccelerationMethod = method;
+    }
+
+    public TriangleMeshAccelerationMethod getMeshAccelerationMethod()
+    {
+        return meshAccelerationMethod;
     }
 
     /**

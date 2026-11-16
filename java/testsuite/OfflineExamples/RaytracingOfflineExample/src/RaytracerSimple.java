@@ -8,6 +8,8 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethod;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethodUtil;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -63,7 +65,8 @@ public class RaytracerSimple {
         String fileName,
         boolean save,
         String outputFileName,
-        boolean parallel)
+        boolean parallel,
+        TriangleMeshAccelerationMethod meshAccelerationMethod)
     {
         RGBImageUncompressed resultingImage;
 
@@ -94,6 +97,7 @@ public class RaytracerSimple {
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();
         RendererConfiguration rendererConfiguration = new RendererConfiguration();
         optimizeRendererConfigurationForScene(rendererConfiguration);
+        rendererConfiguration.setMeshAccelerationMethod(meshAccelerationMethod);
 
         SimpleRaytracer visualizationEngine = new SimpleRaytracer();
         CameraSnapshot cameraSnapshot = activeCamera.exportToCameraSnapshot(
@@ -102,6 +106,20 @@ public class RaytracerSimple {
             scene.exportToSimpleSceneSnapshot(
                 cameraSnapshot,
                 scene.getActiveBackground());
+
+        // Acceleration structures are built here so their time is reported
+        // apart; the raytracers find them built and do not rebuild them.
+        StopWatch buildClock = new StopWatch();
+        buildClock.start();
+        SimpleRaytracer.prepareAccelerationStructures(
+            sceneSnapshot.getSimpleBodies(), rendererConfiguration);
+        buildClock.stop();
+        System.out.println(
+            "Mesh acceleration \"" +
+            TriangleMeshAccelerationMethodUtil.name(meshAccelerationMethod) +
+            "\" prepared in " +
+            VSDK.formatDouble(buildClock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS) +
+            " seconds.");
 
         StopWatch clock = new StopWatch();
         clock.start();
@@ -155,6 +173,7 @@ public class RaytracerSimple {
             options.getSceneFile(),
             options.shouldSave(),
             options.getOutputFile(),
-            options.shouldUseParallelExecutor());
+            options.shouldUseParallelExecutor(),
+            options.getMeshAccelerationMethod());
     }
 }

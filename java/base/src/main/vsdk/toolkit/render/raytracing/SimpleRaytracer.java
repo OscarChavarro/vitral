@@ -34,6 +34,10 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.geometry.element.RayHit;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
+import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethod;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
@@ -637,6 +641,33 @@ public class SimpleRaytracer extends RenderingElement {
         }
     }
 
+    /**
+    Builds (single threaded) the ray acceleration structures of the triangle
+    meshes of the bodies for `RendererConfiguration.getMeshAccelerationMethod`
+    (null configuration: the default method). `execute` calls it; a
+    caller tracing from several threads calls it before starting them, so
+    the calls from the threads find everything built and only read.
+    @param bodies bodies whose meshes are prepared
+    @param qualitySelection quality settings, or null
+    */
+    public static void prepareAccelerationStructures(List<SimpleBody> bodies,
+        RendererConfiguration qualitySelection)
+    {
+        final TriangleMeshAccelerationMethod method = qualitySelection != null ?
+            qualitySelection.getMeshAccelerationMethod() :
+            new RendererConfiguration().getMeshAccelerationMethod();
+        for ( int i = 0; i < bodies.size(); i++ ) {
+            Geometry geometry = bodies.get(i).getGeometry();
+            if ( geometry instanceof TriangleMesh mesh ) {
+                mesh.prepareAccelerationStructure(method);
+                continue;
+            }
+            if ( geometry instanceof TriangleMeshGroup group ) {
+                group.prepareAccelerationStructures(method);
+            }
+        }
+    }
+
     public void execute(RGBImageUncompressed inoutViewport,
                         RendererConfiguration inQualitySelection,
                         SimpleSceneSnapshot sceneSnapshot,
@@ -805,6 +836,7 @@ public class SimpleRaytracer extends RenderingElement {
         Ray rayo;
         ColorRgb color;
         RGBPixel outputPixel = new RGBPixel();
+        prepareAccelerationStructures(inSimpleBodiesArray, inQualitySelection);
         RenderContext renderContext =
             buildRenderContext(inQualitySelection, inLightsArray);
         SceneRenderCache sceneRenderCache =

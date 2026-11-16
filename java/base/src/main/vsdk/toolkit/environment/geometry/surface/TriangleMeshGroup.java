@@ -7,6 +7,9 @@ import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.element.RayHit;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.BinnedSahHierarchy;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleAccelerationStructure;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethod;
 
 public class TriangleMeshGroup extends Surface {
     @Serial private static final long serialVersionUID = 20060502L;
@@ -16,28 +19,133 @@ public class TriangleMeshGroup extends Surface {
     private final ThreadLocal<int[]> intersectionInformation =
         ThreadLocal.withInitial(() -> new int[] {-1, -1});
 
+    // Top level ray acceleration over the meshes (the TLAS role of the
+    // Vulkan raytracer), see prepareAccelerationStructures. Valid while
+    // preparedMeshCount == meshes.size(); -1 when there is none.
+    private BinnedSahHierarchy meshHierarchy;
+    private long preparedMeshCount;
+    private final double[] preparedBounds = new double[6];
+
     public TriangleMeshGroup() {
         meshes = new ArrayList<TriangleMesh> ();
+        meshHierarchy = new BinnedSahHierarchy();
+        preparedMeshCount = -1;
     }
 
     public TriangleMeshGroup(ArrayList<TriangleMesh> meshes) {
         this.meshes = meshes;
+        meshHierarchy = new BinnedSahHierarchy();
+        preparedMeshCount = -1;
     }
 
     public TriangleMeshGroup(TriangleMeshGroup group) {
         this.meshes = group.getMeshes();
+        meshHierarchy = new BinnedSahHierarchy(group.meshHierarchy);
+        preparedMeshCount = group.preparedMeshCount;
+        for ( int i = 0; i < 6; i++ ) preparedBounds[i] = group.preparedBounds[i];
     }
 
     public ArrayList<TriangleMesh> getMeshes() {
         return this.meshes;
     }
 
+    /**
+    `TriangleMesh.prepareAccelerationStructure` on every mesh and, unless
+    the method is `BRUTE_FORCE`, a `BinnedSahHierarchy` ([WALD2007]) over the
+    mesh boxes, so a ray visits the meshes nearest first instead of all of
+    them. Single threaded and idempotent: a second call with the same method
+    and unchanged meshes only reads. The hit does not depend on the method.
+    `setMeshes` / `addMesh` drop the top level; changes made to the meshes
+    through `getMeshes` / `getMeshAt` require calling this method again.
+    @param method acceleration method to use
+    */
+    public void prepareAccelerationStructures(TriangleMeshAccelerationMethod method)
+    {
+        boolean changed = false;
+        for ( int i = 0; i < meshes.size(); i++ ) {
+            final TriangleAccelerationStructure before = meshes.get(i).getAccelerationStructure();
+            meshes.get(i).prepareAccelerationStructure(method);
+            if ( meshes.get(i).getAccelerationStructure() != before ) changed = true;
+        }
+        if ( method == TriangleMeshAccelerationMethod.BRUTE_FORCE ) {
+            if ( preparedMeshCount != -1 ) preparedMeshCount = -1;
+            return;
+        }
+        // Nothing written when already prepared: safe from tracing threads.
+        if ( !changed && preparedMeshCount == meshes.size() ) return;
+        buildMeshHierarchy();
+    }
+
+    private void buildMeshHierarchy()
+    {
+        preparedMeshCount = -1;
+        double[] bounds = new double[6];
+        if ( !getPreparedMinMax(bounds) ) return;  // some mesh has no structure
+        // [WALD2007] top level: one padded box per mesh, from its cached bounds.
+        ArrayList<Double> boxes = new ArrayList<>(6 * (meshes.size() > 0 ? meshes.size() : 1));
+        for ( int i = 0; i < meshes.size(); i++ ) {
+            double[] mm = new double[6];
+            meshes.get(i).getPreparedMinMax(mm);
+            double[] lo = {mm[0], mm[1], mm[2]};
+            double[] hi = {mm[3], mm[4], mm[5]};
+            TriangleAccelerationStructure.padBox(lo, hi);
+            for ( int k = 0; k < 3; k++ ) boxes.add(lo[k]);
+            for ( int k = 0; k < 3; k++ ) boxes.add(hi[k]);
+        }
+        meshHierarchy.build(boxes);
+        for ( int k = 0; k < 6; k++ ) preparedBounds[k] = bounds[k];
+        preparedMeshCount = meshes.size();
+    }
+
+    /**
+    @return top level hierarchy over the meshes, or null when not prepared
+    */
+    public BinnedSahHierarchy getMeshHierarchy()
+    {
+        return preparedMeshCount == meshes.size() ? meshHierarchy : null;
+    }
+
+    /**
+    `getMinMax` from the prepared structures, when every mesh has one.
+    @param outMinMax six values array to fill
+    @return true when `outMinMax` was written
+    */
+    public boolean getPreparedMinMax(double[] outMinMax)
+    {
+        if ( preparedMeshCount >= 0 && preparedMeshCount == meshes.size() ) {
+            for ( int k = 0; k < 6; k++ ) outMinMax[k] = preparedBounds[k];
+            return true;
+        }
+        // Same combination as computeMinMaxPositions, from cached mesh bounds.
+        if ( meshes.size() == 0 ) return false;
+        double minX = 0, minY = 0, minZ = 0, maxX = 0, maxY = 0, maxZ = 0;
+        double[] mm = new double[6];
+        for ( int i = 0; i < meshes.size(); i++ ) {
+            if ( !meshes.get(i).getPreparedMinMax(mm) ) return false;
+            if ( i == 0 ) {
+                minX = mm[0]; minY = mm[1]; minZ = mm[2];
+                maxX = mm[3]; maxY = mm[4]; maxZ = mm[5];
+            }
+            if ( mm[0] < minX ) minX = mm[0];
+            if ( mm[1] < minY ) minY = mm[1];
+            if ( mm[2] < minZ ) minZ = mm[2];
+            if ( mm[3] > maxX ) maxX = mm[3];
+            if ( mm[4] > maxY ) maxY = mm[4];
+            if ( mm[5] > maxZ ) maxZ = mm[5];
+        }
+        outMinMax[0] = minX; outMinMax[1] = minY; outMinMax[2] = minZ;
+        outMinMax[3] = maxX; outMinMax[4] = maxY; outMinMax[5] = maxZ;
+        return true;
+    }
+
     public void setMeshes(ArrayList<TriangleMesh> meshes) {
         this.meshes = meshes;
+        preparedMeshCount = -1;
     }
 
     public void addMesh(TriangleMesh mesh) {
         this.meshes.add(mesh);
+        preparedMeshCount = -1;
     }
 
     public TriangleMesh getMeshAt(int index) {
@@ -158,36 +266,38 @@ public class TriangleMeshGroup extends Surface {
         doIntersectionFirstHit(inRay.withT(inT), outData);
     }
 
+    private void setIntersectionIndexes(int mesh, int triangle)
+    {
+        // Legacy last-hit state written by every ray: skip writes that change
+        // nothing.
+        int[] info = intersectionInformation.get();
+        if ( info[0] != mesh ) info[0] = mesh;
+        if ( info[1] != triangle ) info[1] = triangle;
+    }
+
     @Override
     public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        double minT = Double.MAX_VALUE;
-        RayHit bestHit = null;
-        int bestMesh = -1;
-        int bestTriangle = -1;
-        int[] triangleInformation = new int[1];
-
-        for ( int i = 0; i < meshes.size(); i++ ) {
-            TriangleMesh mesh = meshes.get(i);
-            RayHit meshHit = new RayHit();
-            if ( mesh.doIntersectionFirstHit(inRay, meshHit, triangleInformation) &&
-                 meshHit.getRay().getT() < minT ) {
-                minT = meshHit.getRay().getT();
-                bestHit = new RayHit(meshHit);
-                bestMesh = i;
-                bestTriangle = triangleInformation[0];
-            }
+        _TriangleMeshGroupClosestHit closest =
+            new _TriangleMeshGroupClosestHit(meshes, inRay);
+        double[] minT = {1e308};
+        boolean traversed = false;
+        if ( preparedMeshCount >= 0 && preparedMeshCount == meshes.size() ) {
+            traversed = meshHierarchy.traverseClosest(inRay, closest, minT);
+            if ( !traversed ) closest.reset();  // stack overflow: linear loop below
+        }
+        if ( !traversed ) {
+            minT[0] = 1e308;
+            for ( int i = 0; i < meshes.size(); i++ ) closest.visit(i, minT);
         }
 
-        if ( bestHit == null ) {
-            int[] info = intersectionInformation.get();
-            info[0] = -1;
-            info[1] = -1;
+        if ( !closest.hasBestHit ) {
+            setIntersectionIndexes(-1, -1);
             return false;
         }
-        int[] info = intersectionInformation.get();
-        info[0] = bestMesh;
-        info[1] = bestTriangle;
+
+        setIntersectionIndexes(closest.bestMesh, closest.bestTriangle);
+        RayHit bestHit = closest.bestHit;
 
         if ( outHit != null ) {
             outHit.clone(bestHit);

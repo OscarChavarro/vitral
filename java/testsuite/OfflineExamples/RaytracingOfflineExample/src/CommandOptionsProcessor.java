@@ -1,3 +1,6 @@
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethod;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethodUtil;
+
 final class CommandOptionsProcessor {
     private static final String DEFAULT_SCENE_FILE =
         "../../../../etc/geometry/mitscenes/balls.ray";
@@ -8,6 +11,8 @@ final class CommandOptionsProcessor {
     private boolean save = true;
     private boolean parallel = false;
     private boolean showHelp = false;
+    private TriangleMeshAccelerationMethod meshAccelerationMethod =
+        TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
 
     private CommandOptionsProcessor()
     {
@@ -39,6 +44,22 @@ final class CommandOptionsProcessor {
                     return options;
                 }
                 options.sceneFile = args[++i];
+                continue;
+            }
+            if ( "--mesh-acceleration".equals(arg) || "-m".equals(arg) ) {
+                if ( i + 1 >= args.length ) {
+                    System.err.println("Missing value for " + arg);
+                    options.showHelp = true;
+                    return options;
+                }
+                String value = args[++i];
+                TriangleMeshAccelerationMethod[] method = {options.meshAccelerationMethod};
+                if ( !TriangleMeshAccelerationMethodUtil.fromName(value, method) ) {
+                    System.err.println("Unknown mesh acceleration method: " + value);
+                    options.showHelp = true;
+                    return options;
+                }
+                options.meshAccelerationMethod = method[0];
                 continue;
             }
             if ( "--output".equals(arg) || "-o".equals(arg) ) {
@@ -81,6 +102,10 @@ final class CommandOptionsProcessor {
         System.out.println("  --output, -o <file>    Output image file (.ppm/.png/.jpg)");
         System.out.println("  --nosave, -n           Render only, no image file");
         System.out.println("  -parallel, --parallel  Render tiles in parallel");
+        System.out.println("  --mesh-acceleration, -m <method>");
+        System.out.println("                         Triangle mesh ray acceleration:");
+        System.out.println("                         bruteforce (none) or wald2007 (binned SAH");
+        System.out.println("                         BVH, default)");
         System.out.println("  --help, -h             Show this help");
         System.out.println();
         System.out.println("Legacy compatibility:");
@@ -110,5 +135,10 @@ final class CommandOptionsProcessor {
     boolean shouldShowHelp()
     {
         return showHelp;
+    }
+
+    TriangleMeshAccelerationMethod getMeshAccelerationMethod()
+    {
+        return meshAccelerationMethod;
     }
 }

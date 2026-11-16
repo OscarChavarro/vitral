@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.element.Triangle;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleAccelerationStructure;
+import vsdk.toolkit.environment.geometry.boundingVolumeHierarchy.TriangleMeshAccelerationMethod;
 import vsdk.toolkit.environment.geometry.element.Intersection;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.element.GeometryBounds;
@@ -136,6 +138,8 @@ public class TriangleMesh extends Surface implements Cloneable {
     // preprocessing
     private final TriangleMeshIntersectionIndex intersectionTriangleIndex =
         new TriangleMeshIntersectionIndex();
+    // Optional ray acceleration structure, see prepareAccelerationStructure
+    private TriangleAccelerationStructure accelerationStructure;
 
 //= Basic class management methods ==========================================
 
@@ -230,6 +234,8 @@ public class TriangleMesh extends Surface implements Cloneable {
 
         other. vertexSelections = cloneBooleanArray(this.vertexSelections);
         other.triangleIndexes = cloneIntArray(this.triangleIndexes);
+        other.accelerationStructure = this.accelerationStructure != null ?
+            this.accelerationStructure.copy() : null;
 
         // Pending!
         other.incidentTrianglesPerVertexArray = null;
@@ -492,6 +498,7 @@ public class TriangleMesh extends Surface implements Cloneable {
 
     public void initVertexPositionsArray(int n)
     {
+        accelerationStructure = null;
         vertexPositions = new double[n*3];
     }
 
@@ -618,6 +625,7 @@ public class TriangleMesh extends Surface implements Cloneable {
 
     public void initTriangleArrays(int n)
     {
+        accelerationStructure = null;
         triangleIndexes = new int[n*3];
         triangleNormals = new double [n*3];
     }
@@ -663,6 +671,7 @@ public class TriangleMesh extends Surface implements Cloneable {
     @param vertex
     */
     public void setVertexAt(int i, Vertex vertex) {
+        accelerationStructure = null;
         vertexPositions[3*i] = vertex.position.x();
         vertexPositions[3*i+1] = vertex.position.y();
         vertexPositions[3*i+2] = vertex.position.z();
@@ -687,6 +696,7 @@ public class TriangleMesh extends Surface implements Cloneable {
     @param triangle
     */
     public void setTriangleAt(int i, Triangle triangle) {
+        accelerationStructure = null;
         triangleIndexes[3*i] = triangle.getPoint0();
         triangleIndexes[3*i+1] = triangle.getPoint1();
         triangleIndexes[3*i+2] = triangle.getPoint2();
@@ -981,6 +991,61 @@ public class TriangleMesh extends Surface implements Cloneable {
     }
 
     /**
+    Makes `doIntersectionFirstHit` use the given method: builds its
+    acceleration structure (single threaded) unless one of the same method
+    is already built for the current sizes; `BRUTE_FORCE` releases it. Call
+    it before tracing from several threads: afterwards, calls with the same
+    method only read. The result of the intersection does not depend on the
+    method.
+
+    The structure is a snapshot: the mutators of this class release it, but
+    writes through the array getters (`getVertexPositions`,
+    `getTriangleIndexes`) do not, so call `releaseAccelerationStructure` or
+    this method again after them.
+    @param method acceleration method to use
+    */
+    public void prepareAccelerationStructure(TriangleMeshAccelerationMethod method)
+    {
+        if ( method == TriangleMeshAccelerationMethod.BRUTE_FORCE ) {
+            if ( accelerationStructure != null ) accelerationStructure = null;
+            return;
+        }
+        final TriangleAccelerationStructure current = accelerationStructure;
+        if ( current != null && current.getMethod() == method &&
+             current.matches(getNumVertices(), getNumTriangles()) ) return;
+        TriangleAccelerationStructure structure = TriangleAccelerationStructure.create(method);
+        if ( structure != null ) structure.build(vertexPositions, triangleIndexes);
+        accelerationStructure = structure;
+    }
+
+    public void releaseAccelerationStructure()
+    {
+        accelerationStructure = null;
+    }
+
+    /**
+    @return current structure, null when the brute force loop is used
+    */
+    public TriangleAccelerationStructure getAccelerationStructure()
+    {
+        return accelerationStructure;
+    }
+
+    /**
+    When a structure built for the current sizes exists: writes what
+    `getMinMax` would return, without walking the vertices, and returns true.
+    @param outMinMax six values array to fill
+    @return true when `outMinMax` was written
+    */
+    public boolean getPreparedMinMax(double[] outMinMax)
+    {
+        final TriangleAccelerationStructure structure = accelerationStructure;
+        if ( structure == null || !structure.matches(getNumVertices(), getNumTriangles()) ) return false;
+        structure.getVertexBounds(outMinMax);
+        return true;
+    }
+
+    /**
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
@@ -1072,35 +1137,46 @@ public class TriangleMesh extends Surface implements Cloneable {
         int[] outTriangleIndex)
     {
         Ray ray = new Ray(inRay);
-        int bestTriangle = -1;
-        double minT = Double.MAX_VALUE;
-        Intersection bestHit = null;
+        double[] bestT = {1e308};
+        int[] bestTri = {-1};
+        double[] bestU = {0};
+        double[] bestV = {0};
+        boolean found;
 
-        int nt = getNumTriangles();
-        for ( int i = 0; i < nt; i++ ) {
+        final TriangleAccelerationStructure structure = accelerationStructure;
+        if ( structure != null && structure.matches(getNumVertices(), getNumTriangles()) ) {
+            found = structure.firstHit(ray, vertexPositions, triangleIndexes,
+                bestT, bestU, bestV, bestTri);
+        }
+        else {
+            found = TriangleAccelerationStructure.firstHitBruteForce(ray,
+                vertexPositions, triangleIndexes, bestT, bestU, bestV, bestTri);
+        }
+        final int bestTriangle = bestTri[0];
+        Intersection bestHit = null;
+        if ( found ) {
+            // Same point and geometric normal of
+            // Triangle.doIntersectionWithTriangle, used before by this loop.
             Vector3Dd v0 = new Vector3Dd(
-                vertexPositions[3*triangleIndexes[3*i+0]+0],
-                vertexPositions[3*triangleIndexes[3*i+0]+1],
-                vertexPositions[3*triangleIndexes[3*i+0]+2]
+                vertexPositions[3*triangleIndexes[3*bestTriangle+0]+0],
+                vertexPositions[3*triangleIndexes[3*bestTriangle+0]+1],
+                vertexPositions[3*triangleIndexes[3*bestTriangle+0]+2]
             );
             Vector3Dd v1 = new Vector3Dd(
-                vertexPositions[3*triangleIndexes[3*i+1]+0],
-                vertexPositions[3*triangleIndexes[3*i+1]+1],
-                vertexPositions[3*triangleIndexes[3*i+1]+2]
+                vertexPositions[3*triangleIndexes[3*bestTriangle+1]+0],
+                vertexPositions[3*triangleIndexes[3*bestTriangle+1]+1],
+                vertexPositions[3*triangleIndexes[3*bestTriangle+1]+2]
             );
             Vector3Dd v2 = new Vector3Dd(
-                vertexPositions[3*triangleIndexes[3*i+2]+0],
-                vertexPositions[3*triangleIndexes[3*i+2]+1],
-                vertexPositions[3*triangleIndexes[3*i+2]+2]
+                vertexPositions[3*triangleIndexes[3*bestTriangle+2]+0],
+                vertexPositions[3*triangleIndexes[3*bestTriangle+2]+1],
+                vertexPositions[3*triangleIndexes[3*bestTriangle+2]+2]
             );
-
-            Intersection hit =
-                Triangle.doIntersectionWithTriangle(ray, v0, v1, v2);
-            if ( hit != null && hit.getT() < minT ) {
-                minT = hit.getT();
-                bestTriangle = i;
-                bestHit = hit;
-            }
+            bestHit = new Intersection(
+                bestT[0],
+                ray.getOrigin().add(ray.getDirection().multiply(bestT[0])),
+                v1.subtract(v0).crossProduct(v2.subtract(v0)).normalized()
+            );
         }
 
         if ( bestHit == null ) {
@@ -1299,6 +1375,7 @@ public class TriangleMesh extends Surface implements Cloneable {
     */
     public void compact()
     {
+        accelerationStructure = null;
         vertexNormals = null;
 
         //- Count triangle incidences on vertices -------------------------
@@ -1403,6 +1480,7 @@ public class TriangleMesh extends Surface implements Cloneable {
     */
     public void removeSelectedVertices()
     {
+        accelerationStructure = null;
         //-----------------------------------------------------------------
         if ( vertexSelections == null ) {
             return;

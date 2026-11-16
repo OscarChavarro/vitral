@@ -16,5 +16,11 @@ public class TriangleMeshIntersectionIndex {
         return this;
     }
     public int get() { return value.get(); }
-    public void set(int index) { value.set(index); }
+    public void set(int index)
+    {
+        // Every traced ray stores its result here: skipping the write when
+        // the value is already there (most often -1, a miss) avoids the
+        // redundant store.
+        if ( value.get() != index ) value.set(index);
+    }
 }

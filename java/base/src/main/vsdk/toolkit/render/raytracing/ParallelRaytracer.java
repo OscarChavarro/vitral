@@ -269,6 +269,10 @@ public class ParallelRaytracer
             consumerThread.start();
         }
 
+        // Built here, before the workers start: their own calls only read.
+        SimpleRaytracer.prepareAccelerationStructures(
+            sceneSnapshot.getSimpleBodies(), rendererConfiguration);
+
         try {
             List<Future<Void>> futures = new ArrayList<>(numberOfThreads);
             for ( int i = 0; i < numberOfThreads; i++ ) {

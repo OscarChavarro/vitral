@@ -29,7 +29,13 @@ public class SurfaceRayIntersection {
 
     private static boolean rayIntersectsGeometryBounds(Geometry geometry, Ray inRay)
     {
-        double[] mm = geometry.getMinMax();
+        // Meshes with a prepared acceleration structure keep their bounds;
+        // getMinMax() walks every vertex, on every ray.
+        double[] prepared = new double[6];
+        final boolean usePrepared =
+            (geometry instanceof TriangleMesh mesh && mesh.getPreparedMinMax(prepared)) ||
+            (geometry instanceof TriangleMeshGroup group && group.getPreparedMinMax(prepared));
+        double[] mm = usePrepared ? prepared : geometry.getMinMax();
         Vector3Dd size = new Vector3Dd(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
         Vector3Dd center = new Vector3Dd(
             (mm[3]+mm[0])/2,
