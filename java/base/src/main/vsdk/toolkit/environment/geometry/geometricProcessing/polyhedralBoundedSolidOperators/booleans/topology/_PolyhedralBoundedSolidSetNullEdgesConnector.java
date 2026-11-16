@@ -13,6 +13,7 @@ import java.util.Map;
 
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -113,7 +114,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         int sonfaCount;
         int sonfbCount;
         int pairCount;
-        int ringRescueCount;
         _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report curveReport;
     }
 
@@ -157,8 +157,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     Junction adjacency in processing-position space when the curve order is
     active (from
     {@code _PolyhedralBoundedSolidSetIntersectionCurveBuilder}); null
-    otherwise. Used to restrict the near-miss ring rescue to true curve
-    neighbors.
+    otherwise. `scanjoin` joins a null edge only with a loose end left by
+    one of its neighbours along the curve.
     */
     private int[][] curveNeighborPositions;
 
@@ -461,15 +461,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         endsb.remove(index);
     }
 
-
-    /**
-    Times the curve-neighbour ring rescue re-parented a strut ring during
-    the last connect (Fable5.2Analysis.md Stage C step 4).
-    */
-    static int getLastRingRescueCount()
-    {
-        return LAST.get().ringRescueCount;
-    }
 
     static int getLastLooseACount()
     {
@@ -862,6 +853,16 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     .unitVectorTolerance());
         LAST.get().curveReport = curveReport;
         tracePipelineSummary("connect " + curveReport.summarize());
+        if ( dropIsolatedNodes() ) {
+            // The report kept for diagnostics stays the one above: what
+            // the classifier emitted. This one describes what is left to
+            // connect.
+            curveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
+                .build(sonea, soneb,
+                    PolyhedralBoundedSolidNumericPolicy.defaultContext()
+                        .unitVectorTolerance());
+            tracePipelineSummary("connect " + curveReport.summarize());
+        }
 
         int n = Math.min(sonea.size(), soneb.size());
         if ( n != sonea.size() || n != soneb.size() || n < 2 ) {
@@ -1104,25 +1105,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             }
         }
 
-        // mythosPlan Phase 3 (curve-ordered path only): rescue a unique
-        // near-miss before declaring this pair loose. When a face is
-        // crossed by several chords of the intersection curve, an earlier
-        // division can re-parent a pending strut ring away from the face
-        // where its junction partner waits; the junction then fails the
-        // neighbor face-equality forever (the EMPTY/BLACK_FACES cusp
-        // moons). If exactly one loose entry matches on one solid and
-        // differs ONLY by parent face on the other — with a two-half-edge
-        // strut ring on the mismatched side — re-parenting that ring to
-        // the partner's face restores the junction the curve order
-        // guarantees. Topological information only; no geometry.
-        if ( curveOrientationApplied ) {
-            _PolyhedralBoundedSolidHalfEdge[] rescued =
-                rescueRingFaceNearMiss(hea, heb);
-            if ( rescued != null ) {
-                return rescued;
-            }
-        }
-
         endsa.add(hea);
         endsb.add(heb);
         endsPairIndex.add(Integer.valueOf(currentConnectPairIndex));
@@ -1150,152 +1132,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 curveNeighborPositions[currentConnectPairIndex][0] ||
             pusherPosition ==
                 curveNeighborPositions[currentConnectPairIndex][1];
-    }
-
-    private static boolean rolesOpposite(
-        _PolyhedralBoundedSolidHalfEdge h1,
-        _PolyhedralBoundedSolidHalfEdge h2)
-    {
-        if ( h1 == null || h2 == null ||
-             h1.parentEdge == null || h2.parentEdge == null ) {
-            return false;
-        }
-        return (h1 == h1.parentEdge.rightHalf &&
-                h2 == h2.parentEdge.leftHalf) ||
-               (h1 == h1.parentEdge.leftHalf &&
-                h2 == h2.parentEdge.rightHalf);
-    }
-
-    /**
-    True when the half-edge dangles in a pending two-half-edge strut ring
-    (an inner loop holding only the null edge, as created by the vertex/face
-    classifier's makeRing) — the only configuration this rescue may
-    re-parent.
-    @param he half-edge to inspect
-    @return true for a pending strut ring's half-edge
-    */
-    private static boolean isPendingStrutRing(
-        _PolyhedralBoundedSolidHalfEdge he)
-    {
-        if ( he == null || he.parentLoop == null ||
-             he.parentLoop.halfEdgesList == null ||
-             he.parentLoop.parentFace == null ||
-             he.parentLoop.parentFace.boundariesList.size() == 0 ) {
-            return false;
-        }
-        if ( he.parentLoop.halfEdgesList.size() != 2 ) {
-            return false;
-        }
-        return he.parentLoop !=
-            he.parentLoop.parentFace.boundariesList.get(0);
-    }
-
-    /**
-    Attempts the near-miss rescue described at the scanjoin call site:
-    finds the unique loose index that matches on one solid and fails only
-    the face equality on the other, with a pending strut ring on the
-    mismatched side; re-parents that ring and completes the match.
-    @param hea query half on solid A
-    @param heb query half on solid B
-    @return the matched loose pair after the rescue, or null
-    */
-    private _PolyhedralBoundedSolidHalfEdge[]
-    rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge hea,
-        _PolyhedralBoundedSolidHalfEdge heb)
-    {
-        int candidate = -1;
-        boolean mismatchOnA = false;
-        int i;
-
-        for ( i = 0; i < endsa.size(); i++ ) {
-            // Only true curve neighbors of the current pair may be
-            // rescued: the loose entry must have been pushed by one of the
-            // two cycle-adjacent pairs. Without this guard the rescue can
-            // stitch a cycle seed to a leftover of another curve
-            // (regressed MANT1988_15_2_HOLED, mythosPlan §9).
-            if ( curveNeighborPositions == null ||
-                 currentConnectPairIndex < 0 ||
-                 currentConnectPairIndex >= curveNeighborPositions.length ||
-                 curveNeighborPositions[currentConnectPairIndex] == null ||
-                 i >= endsPairIndex.size() ) {
-                continue;
-            }
-            int pusherPosition = endsPairIndex.get(i).intValue();
-            if ( pusherPosition !=
-                     curveNeighborPositions[currentConnectPairIndex][0] &&
-                 pusherPosition !=
-                     curveNeighborPositions[currentConnectPairIndex][1] ) {
-                continue;
-            }
-            boolean aOk = neighbor(hea, endsa.get(i));
-            boolean bOk = neighbor(heb, endsb.get(i));
-            boolean nearMissA = !aOk && bOk &&
-                rolesOpposite(hea, endsa.get(i)) &&
-                (isPendingStrutRing(hea) ||
-                 isPendingStrutRing(endsa.get(i)));
-            boolean nearMissB = aOk && !bOk &&
-                rolesOpposite(heb, endsb.get(i)) &&
-                (isPendingStrutRing(heb) ||
-                 isPendingStrutRing(endsb.get(i)));
-            if ( nearMissA || nearMissB ) {
-                if ( candidate >= 0 ) {
-                    tracePipelineSummary(
-                        "connect ring-rescue ambiguous; skipped");
-                    return null;
-                }
-                candidate = i;
-                mismatchOnA = nearMissA;
-            }
-        }
-        if ( candidate < 0 ) {
-            return null;
-        }
-
-        _PolyhedralBoundedSolidHalfEdge query =
-            mismatchOnA ? hea : heb;
-        _PolyhedralBoundedSolidHalfEdge stored = mismatchOnA
-            ? endsa.get(candidate) : endsb.get(candidate);
-        _PolyhedralBoundedSolidHalfEdge ringSide;
-        _PolyhedralBoundedSolidHalfEdge anchorSide;
-        if ( isPendingStrutRing(query) ) {
-            ringSide = query;
-            anchorSide = stored;
-        }
-        else {
-            ringSide = stored;
-            anchorSide = query;
-        }
-        _PolyhedralBoundedSolidFace targetFace =
-            anchorSide.parentLoop.parentFace;
-        if ( targetFace == null || targetFace.parentSolid == null ) {
-            return null;
-        }
-        if ( !PolyhedralBoundedSolidEulerOperators.lringmv(
-                 targetFace.parentSolid, ringSide.parentLoop,
-                 targetFace, false) ) {
-            return null;
-        }
-        if ( !neighbor(hea, endsa.get(candidate)) ||
-             !neighbor(heb, endsb.get(candidate)) ) {
-            tracePipelineSummary(
-                "connect ring-rescue re-parent did not complete the match");
-            return null;
-        }
-        LAST.get().ringRescueCount++;
-        tracePipelineSummary("connect ring-rescue applied: ring v="
-            + (ringSide.startingVertex == null ? "?"
-               : Integer.toString(ringSide.startingVertex.id))
-            + " -> face " + targetFace.id);
-        _PolyhedralBoundedSolidHalfEdge[] ret =
-            new _PolyhedralBoundedSolidHalfEdge[2];
-        ret[0] = endsa.get(candidate);
-        ret[1] = endsb.get(candidate);
-        endsa.remove(candidate);
-        endsb.remove(candidate);
-        if ( candidate < endsPairIndex.size() ) {
-            endsPairIndex.remove(candidate);
-        }
-        return ret;
     }
 
     private boolean isLooseA(_PolyhedralBoundedSolidHalfEdge he)
@@ -1463,7 +1299,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         _PolyhedralBoundedSolidHalfEdge h1b = null;
         _PolyhedralBoundedSolidHalfEdge h2b = null;
         _PolyhedralBoundedSolidHalfEdge r[];
-        boolean allowRingMoveOnAJoin = (operation == INTERSECTION);
         boolean withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                             ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
@@ -1570,8 +1405,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             if ( r != null ) {
                 h1a = r[0];
                 h2b = r[1];
-                join(h1a, nextedgea.rightHalf, withDebug,
-                    allowRingMoveOnAJoin);
+                join(h1a, nextedgea.rightHalf, withDebug);
                 if ( !isLooseA(h1a.mirrorHalfEdge()) ) {
                     cutA(h1a);
                 }
@@ -1586,8 +1420,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             if ( r != null ) {
                 h2a = r[0];
                 h1b = r[1];
-                join(h2a, nextedgea.leftHalf, withDebug,
-                    allowRingMoveOnAJoin);
+                join(h2a, nextedgea.leftHalf, withDebug);
                 if ( !isLooseA(h2a.mirrorHalfEdge()) ) {
                     cutA(h2a);
                 }
@@ -1654,6 +1487,148 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 "connect loose[" + i + "] A=" + summarizeHalfEdge(endsa.get(i)) +
                 " B=" + summarizeHalfEdge(endsb.get(i)));
         }
+    }
+
+    /**
+    A node without neighbours on the intersection curve is a point where
+    the two boundaries touch without crossing: nothing is to be cut there.
+    When such nodes are the only thing that keeps the curves from being
+    closed cycles, their null edges are removed before connect (each with
+    lkev, which merges its two coincident vertices back into one), so that
+    the rest is connected in curve order. Groups of nodes on a pair of
+    coplanar faces do not prevent it: on coplanar faces those groups are
+    made of the isolated nodes themselves (vertices of one solid lying in
+    a face of the other) and are gone once they are removed. They used to stay, and a single
+    one of them sent the whole operation to the order of emission, where a
+    face crossed twice along one line is joined across its hole
+    (plan-stage11, coplanar non-convex faces).
+    @return true when some null edge was removed
+    */
+    private boolean dropIsolatedNodes()
+    {
+        ArrayList<Integer> dropped = new ArrayList<Integer>();
+        int covered = 0;
+        int i;
+        int j;
+
+        if ( !curveReport.pinchNodes.isEmpty() ||
+             curveReport.oddFacePairGroupCount > 0 ||
+             sonea.size() != soneb.size() ) {
+            return false;
+        }
+        for ( i = 0; i < curveReport.openChains.size(); i++ ) {
+            int[] chain = curveReport.openChains.get(i);
+            for ( j = 0; j < chain.length; j++ ) {
+                if ( !liesInCoplanarFaces(chain[j]) ) {
+                    return false;
+                }
+                dropped.add(Integer.valueOf(chain[j]));
+            }
+            covered += chain.length;
+        }
+        dropped.addAll(curveReport.isolatedNodes);
+        if ( dropped.isEmpty() ) {
+            return false;
+        }
+        for ( i = 0; i < curveReport.cycles.size(); i++ ) {
+            covered += curveReport.cycles.get(i).length;
+        }
+        if ( covered + curveReport.isolatedNodes.size() !=
+             curveReport.nodeCount ) {
+            return false;
+        }
+        Collections.sort(dropped);
+        for ( i = dropped.size() - 1; i >= 0; i-- ) {
+            int index = dropped.get(i).intValue();
+            _PolyhedralBoundedSolidEdge a = sonea.get(index).e;
+            _PolyhedralBoundedSolidEdge b = soneb.get(index).e;
+            tracePipelineSummary("connect drop contact node " + index +
+                " A=" + summarizeHalfEdge(a.rightHalf) + " B=" +
+                summarizeHalfEdge(b.rightHalf));
+            PolyhedralBoundedSolidEulerOperators.lkev(
+                a.rightHalf.parentLoop.parentFace.parentSolid, a.rightHalf,
+                a.leftHalf);
+            PolyhedralBoundedSolidEulerOperators.lkev(
+                b.rightHalf.parentLoop.parentFace.parentSolid, b.rightHalf,
+                b.leftHalf);
+            sonea.remove(index);
+            soneb.remove(index);
+        }
+        return true;
+    }
+
+    /**
+    True when node `index` is a vertex of one solid lying inside a face of
+    the other, with a face of its own on the plane of that face: on that
+    solid the null edge is a strut inside the face, and some face around
+    the vertex of the first solid is coplanar with it. A chain of such
+    nodes is an edge lying in a coplanar face; it crosses nothing.
+    */
+    private boolean liesInCoplanarFaces(int index)
+    {
+        _PolyhedralBoundedSolidEdge a = sonea.get(index).e;
+        _PolyhedralBoundedSolidEdge b = soneb.get(index).e;
+
+        if ( a == null || b == null || a.rightHalf == null ||
+             a.leftHalf == null || b.rightHalf == null ||
+             b.leftHalf == null ) {
+            return false;
+        }
+        return isVertexInCoplanarFace(a, b) || isVertexInCoplanarFace(b, a);
+    }
+
+    /**
+    True when `strut` lies inside one face and some face around the ends
+    of `vertexEdge` is on the plane of that face.
+    */
+    private static boolean isVertexInCoplanarFace(
+        _PolyhedralBoundedSolidEdge vertexEdge,
+        _PolyhedralBoundedSolidEdge strut)
+    {
+        _PolyhedralBoundedSolidFace face =
+            strut.rightHalf.parentLoop.parentFace;
+        InfinitePlane plane = face.getContainingPlane();
+
+        if ( face != strut.leftHalf.parentLoop.parentFace || plane == null ) {
+            return false;
+        }
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context =
+            PolyhedralBoundedSolidNumericPolicy.forSolids(face.parentSolid,
+                vertexEdge.rightHalf.parentLoop.parentFace.parentSolid);
+        return hasFaceOnPlane(vertexEdge.rightHalf, plane, context) ||
+            hasFaceOnPlane(vertexEdge.leftHalf, plane, context);
+    }
+
+    /** Walks the faces around the starting vertex of `start`. */
+    private static boolean hasFaceOnPlane(
+        _PolyhedralBoundedSolidHalfEdge start, InfinitePlane plane,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context)
+    {
+        _PolyhedralBoundedSolidHalfEdge he = start;
+        Vector3Dd normal = plane.getNormal();
+        int guard = 0;
+
+        do {
+            InfinitePlane own = he.parentLoop.parentFace.getContainingPlane();
+            if ( own != null ) {
+                Vector3Dd ownNormal = own.getNormal();
+                if ( normal.crossProduct(ownNormal).length() <=
+                         context.unitVectorTolerance() * normal.length() *
+                             ownNormal.length() &&
+                     Math.abs(plane.pointDistance(
+                         he.startingVertex.position)) <=
+                         context.bigEpsilon() ) {
+                    return true;
+                }
+            }
+            _PolyhedralBoundedSolidHalfEdge mate = he.mirrorHalfEdge();
+            if ( mate == null ) {
+                return false;
+            }
+            he = mate.next();
+            guard++;
+        } while ( he != null && he != start && guard < 1000 );
+        return false;
     }
 
     /**

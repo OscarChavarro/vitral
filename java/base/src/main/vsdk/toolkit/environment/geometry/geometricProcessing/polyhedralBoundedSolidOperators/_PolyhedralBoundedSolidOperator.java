@@ -5,7 +5,10 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
 // VitralSDK classes
+import java.util.ArrayList;
+
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.common.dataStructures.CircularArrayList;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
@@ -276,6 +279,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         // regressed reference flows: mid-connect loops are not simple
         // regions and pending strut rings usually sit on the dividing chord,
         // so only unambiguous geometry overrides the legacy rule.
+        _RingSideTest sides = new _RingSideTest(f1, f2);
         for ( i = 1; i < f1.boundariesList.size(); i++ ) {
         l = f1.boundariesList.get(i);
             if ( l == keep ) {
@@ -286,7 +290,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
                     "laringmv MOVE wouldMove="
                     + ringBelongsToOtherHalf(f1, f2, l));
             }
-            if ( clearRingSide(f1, f2, l) == 1 ) {
+            if ( sides.side(l) == 1 ) {
                 continue;
             }
             if ( PolyhedralBoundedSolidEulerOperators.lringmv(f1.parentSolid, l, f2, false) ) {
@@ -370,29 +374,194 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     private static int clearRingSide(_PolyhedralBoundedSolidFace f1,
         _PolyhedralBoundedSolidFace f2, _PolyhedralBoundedSolidLoop l)
     {
-        if ( f1 == null || f2 == null || l == null ||
-             l.boundaryStartHalfEdge == null ||
-             l.boundaryStartHalfEdge.startingVertex == null ||
-             f1.boundariesList.size() == 0 ||
-             f2.boundariesList.size() == 0 ||
-             f1.boundariesList.get(0) == l ||
-             f2.boundariesList.get(0) == l ) {
+        if ( f1 == null || f2 == null ) {
             return 0;
         }
-        Vector3Dd point = l.boundaryStartHalfEdge.startingVertex.position;
-        double tolerance = PolyhedralBoundedSolidNumericPolicy
-            .forSolid(f1.parentSolid).bigEpsilon();
-        if ( outerLoopClearance(f1, point) <= tolerance ||
-             outerLoopClearance(f2, point) <= tolerance ) {
-            return 0;
+        return new _RingSideTest(f1, f2).side(l);
+    }
+
+    /**
+    The outer loop of a face as {@link #clearRingSide} needs it: its
+    vertices in order and the coordinate dropped to project it. Built once
+    per face, so that testing many rings against the same division walks
+    the loop and computes the plane once (performance.md P-04). The answers
+    are those of {@link #outerLoopClearance} and
+    {@link #outerLoopParityContains}.
+    */
+    private static final class _OuterLoopShadow
+    {
+        /** False when the loop has no start half-edge or is not closed. */
+        private final boolean walkable;
+        /** False when the face has no plane. */
+        private final boolean planar;
+        private final int dropAxis;
+        private final Vector3Dd[] points;
+        private final double[] u;
+        private final double[] v;
+
+        _OuterLoopShadow(_PolyhedralBoundedSolidFace f)
+        {
+            ArrayList<Vector3Dd> found = new ArrayList<Vector3Dd>();
+            _PolyhedralBoundedSolidLoop outer = f.boundariesList.get(0);
+            _PolyhedralBoundedSolidHalfEdge start =
+                outer == null ? null : outer.boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge he = start;
+            boolean closed = start != null;
+            int guard = 0;
+
+            while ( closed ) {
+                if ( he.startingVertex == null ) {
+                    closed = false;
+                    break;
+                }
+                found.add(he.startingVertex.position);
+                he = he.next();
+                guard++;
+                if ( he == null ) {
+                    closed = false;
+                }
+                else if ( he == start || guard >= 100000 ) {
+                    break;
+                }
+            }
+            walkable = closed;
+            points = found.toArray(new Vector3Dd[0]);
+            InfinitePlane plane = f.getContainingPlane();
+            planar = plane != null;
+            int axis = 2;
+            if ( planar ) {
+                Vector3Dd normal = plane.getNormal();
+                double ax = Math.abs(normal.x());
+                double ay = Math.abs(normal.y());
+                double az = Math.abs(normal.z());
+                if ( ax >= ay && ax >= az ) {
+                    axis = 0;
+                }
+                else if ( ay >= ax && ay >= az ) {
+                    axis = 1;
+                }
+            }
+            dropAxis = axis;
+            u = new double[points.length];
+            v = new double[points.length];
+            for ( guard = 0; guard < points.length; guard++ ) {
+                u[guard] = shadowProjectedU(points[guard], dropAxis);
+                v[guard] = shadowProjectedV(points[guard], dropAxis);
+            }
         }
-        Boolean in1 = outerLoopParityContains(f1, point);
-        Boolean in2 = outerLoopParityContains(f2, point);
-        if ( in1 == null || in2 == null ||
-             in1.booleanValue() == in2.booleanValue() ) {
-            return 0;
+
+        /**
+        As {@link #outerLoopClearance}, with the same arithmetic on plain
+        numbers: no vector is allocated per segment.
+        */
+        double clearance(Vector3Dd point)
+        {
+            double best = Double.MAX_VALUE;
+            double px = point.x();
+            double py = point.y();
+            double pz = point.z();
+            int i;
+
+            if ( !walkable ) {
+                return 0.0;
+            }
+            for ( i = 0; i < points.length; i++ ) {
+                Vector3Dd a = points[i];
+                Vector3Dd b = points[(i + 1) % points.length];
+                double abx = b.x() - a.x();
+                double aby = b.y() - a.y();
+                double abz = b.z() - a.z();
+                double len2 = abx * abx + aby * aby + abz * abz;
+                double t = len2 > 0.0 ?
+                    ((px - a.x()) * abx + (py - a.y()) * aby +
+                     (pz - a.z()) * abz) / len2 : 0.0;
+                t = Math.max(0.0, Math.min(1.0, t));
+                double dx = px - (a.x() + abx * t);
+                double dy = py - (a.y() + aby * t);
+                double dz = pz - (a.z() + abz * t);
+                best = Math.min(best, Math.sqrt(dx * dx + dy * dy + dz * dz));
+            }
+            return best;
         }
-        return in1.booleanValue() ? 1 : 2;
+
+        /** As {@link #outerLoopParityContains}. */
+        Boolean contains(Vector3Dd point)
+        {
+            double pu;
+            double pv;
+            boolean inside = false;
+            int i;
+
+            if ( !planar || !walkable || point == null ) {
+                return null;
+            }
+            pu = shadowProjectedU(point, dropAxis);
+            pv = shadowProjectedV(point, dropAxis);
+            for ( i = 0; i < points.length; i++ ) {
+                int next = (i + 1) % points.length;
+                if ( (v[i] > pv) != (v[next] > pv) ) {
+                    double crossingU = (u[next] - u[i]) * (pv - v[i]) /
+                        (v[next] - v[i]) + u[i];
+                    if ( pu < crossingU ) {
+                        inside = !inside;
+                    }
+                }
+            }
+            return Boolean.valueOf(inside);
+        }
+    }
+
+    /**
+    {@link #clearRingSide} for many rings of the same division: the two
+    outer loops and the tolerance are prepared once. Moving a ring from one
+    face to the other does not change their outer loops, so one instance
+    serves a whole pass over the rings.
+    */
+    private static final class _RingSideTest
+    {
+        private final _PolyhedralBoundedSolidFace firstFace;
+        private final _PolyhedralBoundedSolidFace secondFace;
+        private _OuterLoopShadow shadow1;
+        private _OuterLoopShadow shadow2;
+        private double tolerance;
+
+        _RingSideTest(_PolyhedralBoundedSolidFace f1,
+            _PolyhedralBoundedSolidFace f2)
+        {
+            this.firstFace = f1;
+            this.secondFace = f2;
+        }
+
+        /** See {@link #clearRingSide}. */
+        int side(_PolyhedralBoundedSolidLoop l)
+        {
+            if ( l == null || l.boundaryStartHalfEdge == null ||
+                 l.boundaryStartHalfEdge.startingVertex == null ||
+                 firstFace.boundariesList.size() == 0 ||
+                 secondFace.boundariesList.size() == 0 ||
+                 firstFace.boundariesList.get(0) == l ||
+                 secondFace.boundariesList.get(0) == l ) {
+                return 0;
+            }
+            if ( shadow1 == null ) {
+                shadow1 = new _OuterLoopShadow(firstFace);
+                shadow2 = new _OuterLoopShadow(secondFace);
+                tolerance = PolyhedralBoundedSolidNumericPolicy
+                    .forSolid(firstFace.parentSolid).bigEpsilon();
+            }
+            Vector3Dd point = l.boundaryStartHalfEdge.startingVertex.position;
+            if ( shadow1.clearance(point) <= tolerance ||
+                 shadow2.clearance(point) <= tolerance ) {
+                return 0;
+            }
+            Boolean in1 = shadow1.contains(point);
+            Boolean in2 = shadow2.contains(point);
+            if ( in1 == null || in2 == null ||
+                 in1.booleanValue() == in2.booleanValue() ) {
+                return 0;
+            }
+            return in1.booleanValue() ? 1 : 2;
+        }
     }
 
     /** Distance from `point` to the outer loop of `f` (3D segments). */
@@ -723,16 +892,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     /**
     Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
     */
-    protected static void
-    join(_PolyhedralBoundedSolidHalfEdge h1, _PolyhedralBoundedSolidHalfEdge h2, boolean withDebug)
-    {
-        join(h1, h2, withDebug, true);
-    }
-
     protected static void join(_PolyhedralBoundedSolidHalfEdge h1,
                                _PolyhedralBoundedSolidHalfEdge h2,
-                               boolean withDebug,
-                               boolean allowRingMove)
+                               boolean withDebug)
     {
         PolyhedralBoundedSolidStatistics.recordJoinCall();
         _PolyhedralBoundedSolidFace oldf;
@@ -807,10 +969,12 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
             // in the new half follow it ([MANT1988].13.5).
             if ( splitFace2 != null && newFace2 != null ) {
                 int k;
+                _RingSideTest sides =
+                    new _RingSideTest(splitFace2, newFace2);
                 for ( k = 1; k < splitFace2.boundariesList.size(); k++ ) {
                     _PolyhedralBoundedSolidLoop ring =
                         splitFace2.boundariesList.get(k);
-                    if ( clearRingSide(splitFace2, newFace2, ring) == 2 &&
+                    if ( sides.side(ring) == 2 &&
                          PolyhedralBoundedSolidEulerOperators.lringmv(s,
                              ring, newFace2, false) ) {
                         k--;
@@ -818,10 +982,15 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
                 }
             }
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {
-                if ( allowRingMove ) {
-                    laringmv(oldf, newf,
-                        holeLeftByDividedRing(oldf, newf, dividedInnerRing));
-                }
+                // Rings are redistributed on both solids and for every
+                // operation. Connect used to skip this on solid A unless
+                // the operation was an intersection; the rings that then
+                // stayed in the wrong half were what the ring rescue of
+                // connect moved back later, and a hole already cut by
+                // another curve was never moved back (plan-stage11 Phase
+                // F).
+                laringmv(oldf, newf,
+                    holeLeftByDividedRing(oldf, newf, dividedInnerRing));
             }
         }
     }

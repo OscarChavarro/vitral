@@ -37,18 +37,21 @@ class BooleanCompositeOracleFuzzGateTest
     keeps the outer loop first; finish keeps whole shells): rotated 65,
     chains 31, coplanar bottoms 50, and the 72 axis-aligned ones are
     answered, none rejected. No family returns a wrong volume any more,
-    and that is now a condition of its own: see the test.
+    and that is now a condition of its own: see the test. With rings
+    redistributed on both solids for every operation: rotated 72 of 72 at
+    the three scales, chains 36 of 36, coplanar bottoms 54; 72 once
+    contact nodes are removed before connect. Every family is complete.
     */
     private static final Map<Family, Integer> MINIMUM_OK = new EnumMap<>(
         Family.class);
 
     static {
         MINIMUM_OK.put(Family.NON_CONVEX_AXIS_ALIGNED, 72);
-        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED, 65);
-        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_MINUS_3, 65);
-        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_PLUS_3, 65);
-        MINIMUM_OK.put(Family.CHAINS, 31);
-        MINIMUM_OK.put(Family.NON_CONVEX_COPLANAR_BOTTOMS, 50);
+        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED, 72);
+        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_MINUS_3, 72);
+        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_PLUS_3, 72);
+        MINIMUM_OK.put(Family.CHAINS, 36);
+        MINIMUM_OK.put(Family.NON_CONVEX_COPLANAR_BOTTOMS, 72);
     }
 
     @ParameterizedTest(name = "{0}")

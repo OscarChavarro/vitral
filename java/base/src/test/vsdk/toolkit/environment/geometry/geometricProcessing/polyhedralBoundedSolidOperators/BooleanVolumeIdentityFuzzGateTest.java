@@ -36,7 +36,7 @@ class BooleanVolumeIdentityFuzzGateTest
 
     static {
         MINIMUM_OK.put(Family.CONVEX_PRISMS, 16);
-        MINIMUM_OK.put(Family.STAR_AND_CONVEX, 15);
+        MINIMUM_OK.put(Family.STAR_AND_CONVEX, 16);
         MINIMUM_OK.put(Family.STAR_PRISMS, 16);
     }
 

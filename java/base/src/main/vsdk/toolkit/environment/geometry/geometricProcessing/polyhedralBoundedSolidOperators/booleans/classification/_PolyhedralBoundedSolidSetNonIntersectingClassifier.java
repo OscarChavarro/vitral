@@ -639,6 +639,39 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return someInside;
     }
 
+    /**
+    True when some vertex of `inner`, or a point inside one of its faces,
+    lies on the boundary of `outer`. Meant for a solid already known to be
+    contained in `outer`.
+    */
+    static boolean touchesBoundaryFromInside(PolyhedralBoundedSolid inner,
+        PolyhedralBoundedSolid outer)
+    {
+        PolyhedralBoundedSolidFaceGeometry[] planes;
+        int i;
+
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(inner, outer));
+        planes = precomputeFacePlanes(outer);
+        for ( i = 0; i < inner.getVerticesList().size(); i++ ) {
+            if ( classifyPointAgainstSolid(outer, planes,
+                     inner.getVerticesList().get(i).position) ==
+                 Geometry.LIMIT ) {
+                return true;
+            }
+        }
+        for ( i = 0; i < inner.getPolygonsList().size(); i++ ) {
+            Vector3Dd witness = faceInteriorWitness(
+                inner.getPolygonsList().get(i));
+            if ( witness != null &&
+                 classifyPointAgainstSolid(outer, planes, witness) ==
+                     Geometry.LIMIT ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean someFaceWitnessIsOutside(
         PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB,

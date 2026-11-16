@@ -27,9 +27,10 @@ class KurlanderBowlMotifSweepRegressionTest
     /**
     Minimum number of motifs that must classify as OK.
     Observed after mythosPlan Phase 3 (2026-06-11): 40/40 — all stars and
-    all moons (curve-ordered connect + curve-neighbor ring rescue; see
-    _PolyhedralBoundedSolidSetIntersectionCurveBuilder and
-    _PolyhedralBoundedSolidSetNullEdgesConnector.rescueRingFaceNearMiss).
+    all moons (curve-ordered connect; see
+    _PolyhedralBoundedSolidSetIntersectionCurveBuilder). The ring rescue
+    that this needed until plan-stage11 was removed once rings were
+    distributed on both solids for every operation.
     */
     private static final int MINIMUM_OK_COUNT = 40;
 
@@ -38,15 +39,6 @@ class KurlanderBowlMotifSweepRegressionTest
     Observed after mythosPlan Phase 3 (2026-06-11): 0.
     */
     private static final int MAXIMUM_FAILURE_COUNT = 0;
-
-    /**
-    Ratchet on the curve-neighbour ring rescue (Fable5.2Analysis.md Stage C
-    step 4). After the B-01 ring fix of 2026-11-16 the rescue still fires 52
-    times, on the moon motifs 20, 22, 25, 27, 30, 32, 35 and 37, so it is
-    still needed. Lower this when the join's second division learns to
-    place rings; remove the rescue when it reaches 0.
-    */
-    private static final int MAXIMUM_RING_RESCUES = 52;
 
     @Test
     void given_kurlanderBowlAndAllSingleMotifs_when_subtracting_then_sweepResultsMeetMinimumThresholds()
@@ -59,7 +51,6 @@ class KurlanderBowlMotifSweepRegressionTest
         int blackFaces = 0;
         int unchanged = 0;
         int exception = 0;
-        int ringRescues = 0;
 
         for ( int motif = 0; motif < total; motif++ ) {
             String kind = motif < stars ? "STAR" : "MOON";
@@ -88,8 +79,6 @@ class KurlanderBowlMotifSweepRegressionTest
                 result = PolyhedralBoundedSolidModeler.setOp(
                     operands[0], operands[1],
                     PolyhedralBoundedSolidModeler.SUBTRACT, false);
-                ringRescues += _PolyhedralBoundedSolidSetNullEdgesConnector
-                    .getLastRingRescueCount();
             }
             catch ( Throwable t ) {
                 System.out.println("[SWEEP-EXCEPTION] " + tag + " motif=" + motif +
@@ -179,9 +168,5 @@ class KurlanderBowlMotifSweepRegressionTest
             .as("Total failures (empty+invalid+blackFaces+exception) must not exceed " +
                 MAXIMUM_FAILURE_COUNT)
             .isLessThanOrEqualTo(MAXIMUM_FAILURE_COUNT);
-        assertThat(ringRescues)
-            .as("Curve-neighbour ring rescues must not exceed " +
-                MAXIMUM_RING_RESCUES)
-            .isLessThanOrEqualTo(MAXIMUM_RING_RESCUES);
     }
 }

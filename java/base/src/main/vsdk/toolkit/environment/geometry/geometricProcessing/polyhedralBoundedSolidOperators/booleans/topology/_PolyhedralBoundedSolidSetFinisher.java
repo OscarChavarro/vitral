@@ -601,12 +601,17 @@ final class _PolyhedralBoundedSolidSetFinisher
         }
     }
 
-    /** {@link #countSide} over the faces across the half-edges of `loop`. */
+    /**
+    {@link #countSide} over the faces across the half-edges of `loop`, each
+    face once.
+    */
     private static int[] sidesAcross(_PolyhedralBoundedSolidLoop loop,
         PolyhedralBoundedSolid other,
         PolyhedralBoundedSolidFaceGeometry[] otherFaces)
     {
         int[] counts = new int[2];
+        java.util.IdentityHashMap<_PolyhedralBoundedSolidFace, Boolean>
+            counted = new java.util.IdentityHashMap<>();
         _PolyhedralBoundedSolidHalfEdge start = loop.boundaryStartHalfEdge;
         _PolyhedralBoundedSolidHalfEdge he = start;
         int guard = loop.halfEdgesList.size();
@@ -617,7 +622,9 @@ final class _PolyhedralBoundedSolidSetFinisher
         do {
             _PolyhedralBoundedSolidHalfEdge mate = he.mirrorHalfEdge();
             if ( mate != null && mate.parentLoop != null &&
-                 mate.parentLoop.parentFace != loop.parentFace ) {
+                 mate.parentLoop.parentFace != loop.parentFace &&
+                 counted.put(mate.parentLoop.parentFace, Boolean.TRUE) ==
+                     null ) {
                 countSide(mate.parentLoop.parentFace, other, otherFaces,
                     counts);
             }
@@ -665,12 +672,10 @@ final class _PolyhedralBoundedSolidSetFinisher
     otherwise.
     */
     private static boolean sidesAreSwapped(_PolyhedralBoundedSolidFace face,
-        PolyhedralBoundedSolid other, int cut, String name)
+        PolyhedralBoundedSolid other,
+        PolyhedralBoundedSolidFaceGeometry[] otherFaces, int cut,
+        String name)
     {
-        setNumericContext(PolyhedralBoundedSolidNumericPolicy.forSolids(
-            face.parentSolid, other));
-        PolyhedralBoundedSolidFaceGeometry[] otherFaces =
-            PolyhedralBoundedSolidFaceGeometry.of(other);
         int[] inside = sidesAcross(face.boundariesList.get(1), other,
             otherFaces);
         int[] outside;
@@ -847,9 +852,21 @@ final class _PolyhedralBoundedSolidSetFinisher
         // (plan-stage11 Phase F).
         boolean[] swappedA = new boolean[oldsize];
         boolean[] swappedB = new boolean[oldsize];
-        for ( i = 0; i < oldsize; i++ ) {
-            swappedA[i] = sidesAreSwapped(sonfa.get(i), inSolidB, i, "A");
-            swappedB[i] = sidesAreSwapped(sonfb.get(i), inSolidA, i, "B");
+        if ( oldsize > 0 ) {
+            // Nothing edits the two solids while the sides are read, so
+            // their face planes and boxes are computed once.
+            setNumericContext(PolyhedralBoundedSolidNumericPolicy.forSolids(
+                inSolidA, inSolidB));
+            PolyhedralBoundedSolidFaceGeometry[] facesOfA =
+                PolyhedralBoundedSolidFaceGeometry.of(inSolidA);
+            PolyhedralBoundedSolidFaceGeometry[] facesOfB =
+                PolyhedralBoundedSolidFaceGeometry.of(inSolidB);
+            for ( i = 0; i < oldsize; i++ ) {
+                swappedA[i] = sidesAreSwapped(sonfa.get(i), inSolidB,
+                    facesOfB, i, "A");
+                swappedB[i] = sidesAreSwapped(sonfb.get(i), inSolidA,
+                    facesOfA, i, "B");
+            }
         }
 
         for ( i = 0; i < oldsize; i++ ) {

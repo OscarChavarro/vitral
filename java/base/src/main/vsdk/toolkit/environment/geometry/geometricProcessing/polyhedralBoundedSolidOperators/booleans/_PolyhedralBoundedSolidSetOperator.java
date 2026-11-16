@@ -1225,6 +1225,16 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         // reads (plan-stage11 Phase C).
         weldCoincidentVerticesOfOperand(inSolidA, "A");
         weldCoincidentVerticesOfOperand(inSolidB, "B");
+        // Faces of B inside the tolerance band of a parallel face of A are
+        // put on its plane, so that every stage below takes the same
+        // decision about them (see the aligner).
+        Vector3Dd alignment =
+            _PolyhedralBoundedSolidSetOperandAligner.align(inSolidA,
+                inSolidB);
+        if ( alignment != null ) {
+            tracePipelineSummary("setOp operand B moved by " + alignment +
+                " to align faces inside the tolerance band");
+        }
         StringBuilder booleanInputMsg = new StringBuilder();
         boolean validInputs = PolyhedralBoundedSolidValidationEngine
             .validateBooleanInputs(inSolidA, inSolidB, booleanInputMsg);
@@ -1308,8 +1318,15 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         // second step of absorption identities A ∪ (A ∩ B) where
         // A ∩ B ⊂ A), the regular pipeline produces ∅. Dispatch to a
         // dedicated containment table per Mäntylä Ch.15.1.
+        // A solid inside the other and touching its boundary is not a
+        // plain containment for the difference: A - B is then A with a
+        // pocket open to the outside, not A with a cavity, and only the
+        // pipeline builds it.
         if ( isContainmentOnlyPreflightCase(inSolidA, inSolidB,
-                preflightCache) ) {
+                preflightCache) &&
+             !(op == SUBTRACT &&
+               _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                   .touchesBoundaryFromInside(inSolidB, inSolidA)) ) {
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op,
                 preflightCache);
             return completeSetOpResult(res, operandADiagnostics,

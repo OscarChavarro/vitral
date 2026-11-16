@@ -542,6 +542,17 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         if ( emptyA || (emptyB && op == INTERSECTION) ) {
             return false;
         }
+        if ( !emptyB ) {
+            // The operation aligned B with A inside the tolerance band
+            // before deciding anything; the witnesses are looked for in
+            // the same operands, on copies. Judged on the operands as
+            // given, a solid that sticks out of the other by one tolerance
+            // "proved" that an empty difference was wrong.
+            inSolidA = PolyhedralBoundedSolidStructuralCopy.copy(inSolidA);
+            inSolidB = PolyhedralBoundedSolidStructuralCopy.copy(inSolidB);
+            _PolyhedralBoundedSolidSetOperandAligner.align(inSolidA,
+                inSolidB);
+        }
         if ( op == INTERSECTION ) {
             return _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 .interiorsOverlap(inSolidA, inSolidB);

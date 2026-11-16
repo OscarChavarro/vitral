@@ -1,7 +1,5 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidVolumeOracle.OrientedBox;
@@ -40,21 +38,21 @@ class SetOpReentrancyTest
     }
 
     /**
-    Case 1 of the rotated non-convex fuzz, B − A: an open defect of the
-    connect stage (the pipeline loses the solid), so it throws after the
-    connector has run.
+    CROSS_PAIR A - B: the two pieces left of A touch along an edge, so the
+    result is rejected as non-manifold, by decision, after generate,
+    classify, connect and finish have all run. (This test used three
+    defects in turn as its failing boolean, a rotated non-convex pair, one
+    with coplanar bottoms and one inside the tolerance band; plan-stage11
+    fixed each of them. A rejection by decision does not go away.)
     */
     private static void failingBoolean()
     {
-        List<CompositeShapeOracle.Shape> shapes = BooleanCompositeOracleFuzz
-            .shapesOf(BooleanCompositeOracleFuzz.Family.NON_CONVEX_ROTATED,
-                1);
-        PolyhedralBoundedSolid a = shapes.get(0).toSolid();
-        PolyhedralBoundedSolid b = shapes.get(1).toSolid();
+        PolyhedralBoundedSolid[] pair =
+            CsgSampleCorpusFixtures.createPair(CsgSampleCorpus.CROSS_PAIR);
 
-        assertThatThrownBy(() -> PolyhedralBoundedSolidModeler.setOp(b, a,
-            PolyhedralBoundedSolidModeler.SUBTRACT))
-            .isInstanceOf(PolyhedralBoundedSolidOperationException.class);
+        assertThatThrownBy(() -> PolyhedralBoundedSolidModeler.setOp(
+            pair[0], pair[1], PolyhedralBoundedSolidModeler.SUBTRACT))
+            .isInstanceOf(NonManifoldBooleanResultException.class);
     }
 
     /** A rotated box pair, answered by the normal pipeline. */

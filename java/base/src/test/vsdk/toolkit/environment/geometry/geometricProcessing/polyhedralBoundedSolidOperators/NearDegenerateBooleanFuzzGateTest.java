@@ -24,27 +24,31 @@ and rotated; 36 operations per row.
     of its two pieces missing: connect had left loose null edges on an open
     intersection curve and finish went on. That is now rejected.</li>
 <li>Ratchet on the count of answered operations: raise it when a fix
-    lands, never lower it. The rejections are the open work of plan-stage11
-    Phases E and F: almost all sit at 0.1 and 1 tolerances, where the
-    kernel has to decide whether two faces coincide.</li>
+    lands, never lower it. Every row is at its total except EDGE_CONTACT,
+    whose unions near contact are rejected by decision.</li>
 </ul>
  */
 class NearDegenerateBooleanFuzzGateTest
 {
-    /** First measurement (2026-11-16): 363 of 432 answered, 69 rejected, 0 wrong. After plan-stage11 Phase E: 367 answered. */
+    /**
+    First measurement (2026-11-16): 363 of 432 answered, 69 rejected. With
+    the operands aligned inside the tolerance band: 422 answered. The 10
+    left are the unions of EDGE_CONTACT at 0, 0.1 and 1 tolerances, which
+    are edge contacts and are rejected by decision (B-04).
+    */
     static Stream<Arguments> rows()
     {
         return Stream.of(
-            Arguments.of(Contact.STACKED_PARTIAL, false, 26),
-            Arguments.of(Contact.STACKED_PARTIAL, true, 28),
-            Arguments.of(Contact.STACKED_SAME_FOOTPRINT, false, 35),
-            Arguments.of(Contact.STACKED_SAME_FOOTPRINT, true, 34),
-            Arguments.of(Contact.SIDE_BY_SIDE, false, 34),
-            Arguments.of(Contact.SIDE_BY_SIDE, true, 32),
-            Arguments.of(Contact.FLUSH_FACE_CROSSING, false, 28),
-            Arguments.of(Contact.FLUSH_FACE_CROSSING, true, 23),
-            Arguments.of(Contact.INNER_TANGENT, false, 33),
-            Arguments.of(Contact.INNER_TANGENT, true, 32),
+            Arguments.of(Contact.STACKED_PARTIAL, false, 36),
+            Arguments.of(Contact.STACKED_PARTIAL, true, 36),
+            Arguments.of(Contact.STACKED_SAME_FOOTPRINT, false, 36),
+            Arguments.of(Contact.STACKED_SAME_FOOTPRINT, true, 36),
+            Arguments.of(Contact.SIDE_BY_SIDE, false, 36),
+            Arguments.of(Contact.SIDE_BY_SIDE, true, 36),
+            Arguments.of(Contact.FLUSH_FACE_CROSSING, false, 36),
+            Arguments.of(Contact.FLUSH_FACE_CROSSING, true, 36),
+            Arguments.of(Contact.INNER_TANGENT, false, 36),
+            Arguments.of(Contact.INNER_TANGENT, true, 36),
             Arguments.of(Contact.EDGE_CONTACT, false, 31),
             Arguments.of(Contact.EDGE_CONTACT, true, 31));
     }

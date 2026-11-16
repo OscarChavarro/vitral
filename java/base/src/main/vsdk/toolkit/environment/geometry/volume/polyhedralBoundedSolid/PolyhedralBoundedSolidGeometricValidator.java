@@ -80,8 +80,14 @@ public class PolyhedralBoundedSolidGeometricValidator
         int j;
         int k;
 
-        for ( i = 0; i < points.size(); i++ ) {
-            for ( j = 0; j < points.size(); j++ ) {
+        // The plane is the one of the last pair (i, j), in ascending
+        // order, whose first admissible third point k is not collinear
+        // with it. The pairs are visited from the last one backwards and
+        // the search stops at the first that gives a plane: the same
+        // plane as visiting every pair and keeping the last one, which
+        // took a time cubic in the number of points (performance.md).
+        for ( i = points.size() - 1; i >= 0 && facePlane == null; i-- ) {
+            for ( j = points.size() - 1; j >= 0 && facePlane == null; j-- ) {
                 for ( k = 0; k < points.size(); k++ ) {
                     if ( i == j || i == k || j == k ) {
                         continue;
