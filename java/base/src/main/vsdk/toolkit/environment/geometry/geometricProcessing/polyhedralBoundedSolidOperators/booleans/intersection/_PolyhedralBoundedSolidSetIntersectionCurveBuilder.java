@@ -9,7 +9,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
@@ -210,6 +212,24 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
         return plane.getNormal();
     }
 
+    private static boolean segmentOnBothFaces(FacePairGroup group,
+        Vector3Dd from, Vector3Dd to)
+    {
+        double tolerance;
+        Vector3Dd middle;
+
+        if ( from == null || to == null ) {
+            return false;
+        }
+        tolerance = PolyhedralBoundedSolidNumericPolicy.defaultContext()
+            .bigEpsilon();
+        middle = from.add(to).multiply(0.5);
+        return group.faceA.testPointInside(middle, tolerance) !=
+                   Geometry.OUTSIDE &&
+               group.faceB.testPointInside(middle, tolerance) !=
+                   Geometry.OUTSIDE;
+    }
+
     private static void link(ArrayList<LinkedHashSet<Integer>> neighbors,
         int i,
         int j)
@@ -341,7 +361,33 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
             });
 
             if ( (m % 2) != 0 ) {
-                oddGroups++;
+                // An odd group is a chord that runs through a vertex of one
+                // face (the intersection line enters the next chord where
+                // the previous one ends, e.g. along the reflex corner of an
+                // L-shaped face). Parity cannot pair such points; link two
+                // consecutive points when the segment between them lies on
+                // both faces, which is exactly the chord definition.
+                // The group counts as odd (unresolved) only when some
+                // point is left without a chord.
+                boolean[] linked = new boolean[m];
+                for ( i = 0; i + 1 < m; i++ ) {
+                    if ( segmentOnBothFaces(group,
+                             nodePosition(sonea.get(sorted.get(i).intValue())),
+                             nodePosition(sonea.get(
+                                 sorted.get(i + 1).intValue()))) ) {
+                        link(neighbors, sorted.get(i).intValue(),
+                            sorted.get(i + 1).intValue());
+                        linked[i] = true;
+                        linked[i + 1] = true;
+                    }
+                }
+                for ( i = 0; i < m; i++ ) {
+                    if ( !linked[i] ) {
+                        oddGroups++;
+                        break;
+                    }
+                }
+                continue;
             }
             // Entry/exit parity along the intersection line: chord
             // endpoints pair as (0,1), (2,3), ... — linking consecutive
@@ -663,6 +709,20 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
                     soneb.get(successor), true);
             }
 
+            // Same-face struts (both halves in one face, e.g. at the reflex
+            // vertex of an L-shaped face) carry no face-sharing role, but
+            // the join toward one neighbor divides that face and only one
+            // half stays on the side where the other neighbor lies.
+            for ( j = 0; j < len; j++ ) {
+                int current = directedCycle[j];
+                int predecessor = directedCycle[(j - 1 + len) % len];
+                int successor = directedCycle[(j + 1) % len];
+                Vector3Dd p = nodePosition(sonea.get(predecessor));
+                Vector3Dd q = nodePosition(sonea.get(successor));
+                orientSameFaceStrut(sonea.get(current), p, q, true);
+                orientSameFaceStrut(soneb.get(current), p, q, false);
+            }
+
             // Rotation: the first cycle starts at its minimum member index;
             // later cycles start at the node geometrically closest to the
             // first cycle's start, so the proximity merge below begins in
@@ -807,6 +867,105 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
             current.e.rightHalf = current.e.leftHalf;
             current.e.leftHalf = tmp;
         }
+    }
+
+    /**
+    Orients a strut whose two halves lie in the same loop of one face.
+
+    <p>In that loop the strut appears as `first` (vertex v to v') followed
+    by its mirror `second` (v' to v), between the face edges entering and
+    leaving v. The face sector at v runs counterclockwise (around the face
+    normal) from the leaving edge to the entering edge. The join toward one
+    curve neighbor divides that sector; the neighbor that lies further along
+    it must be reached through `first`, the other through `second`, so that
+    the remaining half stays in the part of the face where its neighbor
+    is. On A the predecessor is joined through the right half; on B through
+    the left half (Program [MANT1988].15.14).</p>
+    */
+    private static void orientSameFaceStrut(
+        _PolyhedralBoundedSolidSetOperatorNullEdge current,
+        Vector3Dd predecessor, Vector3Dd successor,
+        boolean predecessorHalfIsRight)
+    {
+        _PolyhedralBoundedSolidHalfEdge r;
+        _PolyhedralBoundedSolidHalfEdge l;
+        _PolyhedralBoundedSolidHalfEdge first;
+        _PolyhedralBoundedSolidHalfEdge second;
+        _PolyhedralBoundedSolidHalfEdge predecessorHalf;
+        _PolyhedralBoundedSolidHalfEdge successorHalf;
+
+        if ( current == null || current.e == null || predecessor == null ||
+             successor == null ) {
+            return;
+        }
+        r = current.e.rightHalf;
+        l = current.e.leftHalf;
+        if ( r == null || l == null || r.parentLoop == null ||
+             r.parentLoop != l.parentLoop ) {
+            return;
+        }
+        if ( r.next() == l ) {
+            first = r;
+        }
+        else if ( l.next() == r ) {
+            first = l;
+        }
+        else {
+            return;
+        }
+        second = first.mirrorHalfEdge();
+
+        Vector3Dd v = first.startingVertex.position;
+        Vector3Dd dIn = first.previous().startingVertex.position.subtract(v);
+        Vector3Dd dOut = second.next().next().startingVertex.position
+            .subtract(v);
+        Vector3Dd n = faceNormal(halfEdgeFace(first));
+        Vector3Dd dP = predecessor.subtract(v);
+        Vector3Dd dS = successor.subtract(v);
+        double tiny = 1.0e-12;
+
+        if ( n == null || dIn.length() < tiny || dOut.length() < tiny ||
+             dP.length() < tiny || dS.length() < tiny ) {
+            return;
+        }
+        double sectorEnd = ccwAngle(dOut, dIn, n);
+        double thetaP = clampToSector(ccwAngle(dOut, dP, n), sectorEnd);
+        double thetaS = clampToSector(ccwAngle(dOut, dS, n), sectorEnd);
+        if ( Math.abs(thetaP - thetaS) < 1.0e-9 ) {
+            return;
+        }
+        predecessorHalf = (thetaP > thetaS) ? first : second;
+        successorHalf = (predecessorHalf == first) ? second : first;
+        if ( predecessorHalfIsRight ) {
+            current.e.rightHalf = predecessorHalf;
+            current.e.leftHalf = successorHalf;
+        }
+        else {
+            current.e.leftHalf = predecessorHalf;
+            current.e.rightHalf = successorHalf;
+        }
+    }
+
+    /** Counterclockwise angle around n from `from` to `to`, in [0, 2pi). */
+    private static double ccwAngle(Vector3Dd from, Vector3Dd to, Vector3Dd n)
+    {
+        Vector3Dd u = new Vector3Dd(from).normalized();
+        Vector3Dd w = n.crossProduct(u).normalized();
+        double angle = Math.atan2(to.dotProduct(w), to.dotProduct(u));
+        return angle < 0.0 ? angle + 2.0 * Math.PI : angle;
+    }
+
+    /**
+    A neighbor lies on the face, so its angle belongs to [0, sectorEnd].
+    Rounding can put a neighbor on the leaving edge at 2pi; such angles go
+    to the nearest end of the sector.
+    */
+    private static double clampToSector(double angle, double sectorEnd)
+    {
+        if ( angle <= sectorEnd ) {
+            return angle;
+        }
+        return (2.0 * Math.PI - angle) < (angle - sectorEnd) ? 0.0 : sectorEnd;
     }
 
     private static int minOf(int[] values)

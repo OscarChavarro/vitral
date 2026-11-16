@@ -170,6 +170,7 @@ public class PolyhedralBoundedSolidValidationEngine
         strategies.add(new _GeometricPlanarityStrategy());
         strategies.add(new _TopologicalIntegrityStrategy());
         strategies.add(new _GeometricStrictLoopsStrategy());
+        strategies.add(new _GeometricCollapsedLaminaStrategy());
         strategies.add(new _GeometricStrictFaceIntersectionsStrategy());
 
         int i;

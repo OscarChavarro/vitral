@@ -343,11 +343,141 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         // The symmetric disjoint case (B entirely left of A) is not yet fixed here;
         // that requires a deeper restructuring of the coplanar V/V path.
         boolean decision = (a2 + VSDK.EPSILON > b1 - VSDK.EPSILON);
+        if ( decision && touchOnlyAlongConcaveEdge(na, nb) ) {
+            decision = false;
+        }
         recordSectoroverlapCall(na, nb, a1, a2, b1, b2, decision);
         if ( withDebug ) {
             System.out.print(decision ? " <TRUE>" : " <FALSE>");
         }
         return decision;
+    }
+
+    /**
+    True when two coplanar sectors meet only along a boundary ray that is an
+    edge of both faces, and that edge is concave in at least one of the two
+    solids: a concave edge of one solid lying on an edge of the other, as at
+    the shared corner of two bars. The sectors lie on opposite sides of the
+    edge and share no area, so treating them as an "on" pair would propagate
+    a coplanar class across a face that does not touch the other solid.
+    Contact along a convex edge of both solids (blocks glued face to face)
+    and contact along the bisector that splits a wide sector keep the
+    closed-set behavior of [MANT1988].15.6.2.
+    */
+    private static boolean touchOnlyAlongConcaveEdge(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb)
+    {
+        boolean[] firstA = { true, false };
+        boolean[] firstB = { true, false };
+
+        if ( sectorsShareInteriorDirection(na, nb) ) {
+            return false;
+        }
+        for ( boolean fa : firstA ) {
+            for ( boolean fb : firstB ) {
+                Vector3Dd ra = fa ? na.ref1 : na.ref2;
+                Vector3Dd rb = fb ? nb.ref1 : nb.ref2;
+                if ( !sameDirection(ra, rb) ) {
+                    continue;
+                }
+                if ( !isFaceEdgeRay(na, ra) || !isFaceEdgeRay(nb, rb) ) {
+                    return false;
+                }
+                return isConcaveEdgeRay(na, fa) || isConcaveEdgeRay(nb, fb);
+            }
+        }
+        return false;
+    }
+
+    private static boolean sameDirection(Vector3Dd a, Vector3Dd b)
+    {
+        Vector3Dd na = new Vector3Dd(a).normalized();
+        Vector3Dd nb = new Vector3Dd(b).normalized();
+        return na.dotProduct(nb) > 1.0 - VSDK.EPSILON;
+    }
+
+    private static boolean isFaceEdgeRay(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n,
+        Vector3Dd ray)
+    {
+        Vector3Dd origin = n.he.startingVertex.position;
+        return sameDirection(ray,
+                   n.he.previous().startingVertex.position.subtract(origin)) ||
+               sameDirection(ray,
+                   n.he.next().startingVertex.position.subtract(origin));
+    }
+
+    /**
+    Whether the edge along the sector's first (ref1, edge he.previous()) or
+    second (ref2, edge he) ray is concave: the sector's face, next to the
+    edge, lies in front of the plane of the face across the edge.
+    */
+    private static boolean isConcaveEdgeRay(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n,
+        boolean firstRay)
+    {
+        _PolyhedralBoundedSolidHalfEdge edgeHalf;
+        Vector3Dd ray;
+        Vector3Dd other;
+        Vector3Dd inside;
+        Vector3Dd acrossNormal;
+
+        edgeHalf = firstRay ? n.he.previous() : n.he;
+        ray = firstRay ? n.ref1 : n.ref2;
+        other = firstRay ? n.ref2 : n.ref1;
+        if ( edgeHalf.mirrorHalfEdge() == null ||
+             edgeHalf.mirrorHalfEdge().parentLoop == null ) {
+            return false;
+        }
+        acrossNormal = edgeHalf.mirrorHalfEdge().parentLoop.parentFace
+            .getContainingPlane().getNormal();
+        inside = new Vector3Dd(ray).normalized().add(
+            new Vector3Dd(other).normalized().multiply(1.0e-3));
+        return inside.dotProduct(acrossNormal) > VSDK.EPSILON * 1.0e-3;
+    }
+
+    /**
+    Two coplanar sectors overlap when some direction lies strictly inside
+    both. Every sector is the minor arc from ref1 to ref2 (wide sectors are
+    split at their bisector by the neighborhood preprocessing), so it is
+    enough to test the middle direction of each gap between consecutive
+    boundary rays.
+    */
+    static boolean sectorsShareInteriorDirection(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb)
+    {
+        Vector3Dd n = na.he.parentLoop.parentFace.getContainingPlane()
+            .getNormal();
+        Vector3Dd u = new Vector3Dd(na.ref1).normalized();
+        Vector3Dd v = n.crossProduct(u).normalized();
+        double[] angles = new double[4];
+        Vector3Dd[] rays = { na.ref1, na.ref2, nb.ref1, nb.ref2 };
+        int i;
+
+        for ( i = 0; i < 4; i++ ) {
+            Vector3Dd r = new Vector3Dd(rays[i]).normalized();
+            angles[i] = Math.atan2(r.dotProduct(v), r.dotProduct(u));
+        }
+        java.util.Arrays.sort(angles);
+        for ( i = 0; i < 4; i++ ) {
+            double from = angles[i];
+            double to = (i == 3) ? angles[0] + 2.0 * Math.PI : angles[i + 1];
+            double middle;
+            Vector3Dd dir;
+
+            if ( to - from < VSDK.EPSILON ) {
+                continue;
+            }
+            middle = (from + to) / 2.0;
+            dir = u.multiply(Math.cos(middle)).add(v.multiply(Math.sin(middle)));
+            if ( sctrwitthinProper(dir, na.ref1, na.ref2, na.ref12) &&
+                 sctrwitthinProper(dir, nb.ref1, nb.ref2, nb.ref12) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static double angleFromVectors(Vector3Dd u, Vector3Dd v, Vector3Dd a)

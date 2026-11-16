@@ -9,8 +9,8 @@ import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBo
 
 /**
 The result path names which code produced a boolean result: the
-[MANT1988] Ch. 15 pipeline ("normal-pipeline") or one of the preflights and
-fallbacks in front of it. Tests can then tell a pipeline answer from a
+[MANT1988] Ch. 15 pipeline ("normal-pipeline") or one of the preflights in
+front of it (no-intersection, identity, partial coplanar area). Tests can then tell a pipeline answer from a
 replacement (Fable5.2Analysis.md Stage A step 4).
  */
 class SetOpResultPathTest

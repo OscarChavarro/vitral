@@ -1,11 +1,6 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,9 +113,12 @@ final class StepperMotorGuideCsgFixture
         Matrix4x4d move = new Matrix4x4d();
         move = move.translation(x, y, z);
         PolyhedralBoundedSolidModeler.applyTransformation(probe, move);
+        // setOp leaves its operands intact (Stage F), so the solid is not
+        // cloned first. The serialization clone used here before needed
+        // more than 1 MB of stack on the 131-face guide.
         PolyhedralBoundedSolid intersection =
             PolyhedralBoundedSolidModeler.setOp(
-                deepClone(solid), probe,
+                solid, probe,
                 PolyhedralBoundedSolidModeler.INTERSECTION,
                 false, true, false);
         return intersection.getPolygonsList().size() > 0;
@@ -265,25 +263,5 @@ final class StepperMotorGuideCsgFixture
     private static double mm(double value)
     {
         return value * MILLIMETERS_TO_MODEL_UNITS;
-    }
-
-    private static PolyhedralBoundedSolid deepClone(
-        PolyhedralBoundedSolid solid)
-    {
-        try {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            ObjectOutputStream output = new ObjectOutputStream(bytes);
-            output.writeObject(solid);
-            output.close();
-            ObjectInputStream input = new ObjectInputStream(
-                new ByteArrayInputStream(bytes.toByteArray()));
-            PolyhedralBoundedSolid clone =
-                (PolyhedralBoundedSolid)input.readObject();
-            input.close();
-            return clone;
-        }
-        catch ( IOException | ClassNotFoundException e ) {
-            throw new IllegalStateException("Unable to clone test solid", e);
-        }
     }
 }

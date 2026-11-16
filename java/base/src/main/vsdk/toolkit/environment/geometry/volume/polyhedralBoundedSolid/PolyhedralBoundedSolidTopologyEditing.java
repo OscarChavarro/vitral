@@ -1034,16 +1034,21 @@ public final class PolyhedralBoundedSolidTopologyEditing
             //- Merge coplanar overlapping faces when one lies entirely over
             //- another that already carries rings. This completes the
             //- "maximal face" reduction expected by [MANT1988].15.5.
+            // Which faces have a plane is computed once per sweep (Stage G):
+            // the sweep restarts as soon as a reduction changes the solid.
+            boolean[] hasPlane = new boolean[solid.getPolygonsList().size()];
+            for ( i = 0; i < hasPlane.length; i++ ) {
+                hasPlane[i] = solid.getPolygonsList().get(i)
+                    .getContainingPlane() != null;
+            }
             for ( i = 0; i < solid.getPolygonsList().size() && !restart; i++ ) {
                 _PolyhedralBoundedSolidFace faceA = solid.getPolygonsList().get(i);
-                InfinitePlane planeA = faceA.getContainingPlane();
-                if ( planeA == null ) {
+                if ( !hasPlane[i] ) {
                     continue;
                 }
                 for ( j = i + 1; j < solid.getPolygonsList().size(); j++ ) {
                     _PolyhedralBoundedSolidFace faceB = solid.getPolygonsList().get(j);
-                    InfinitePlane planeB = faceB.getContainingPlane();
-                    if ( planeB == null ) {
+                    if ( !hasPlane[j] ) {
                         continue;
                     }
 

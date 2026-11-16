@@ -14,8 +14,15 @@ jacoco {
 
 tasks.named('test') {
     useJUnitPlatform()
-    // Keep base tests in serial mode by default.
-    maxParallelForks = 1
+    // Tests run serially inside each JVM (the kernel keeps per-call state in
+    // static fields and ThreadLocals), but test classes are spread over
+    // several forked JVMs, which share nothing (Fable5.2Analysis.md Stage F
+    // step 3). Override with -PtestForks=N; -PtestForks=1 restores the old
+    // single-JVM run.
+    maxParallelForks = (project.findProperty('testForks') ?:
+        Math.max(1, Math.min(8,
+            Runtime.runtime.availableProcessors().intdiv(2)))).toString()
+            .toInteger()
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
     // Fatal kernel errors must fail a test, never kill the Gradle worker
     // (Fable5.2Analysis.md Stage A step 5).

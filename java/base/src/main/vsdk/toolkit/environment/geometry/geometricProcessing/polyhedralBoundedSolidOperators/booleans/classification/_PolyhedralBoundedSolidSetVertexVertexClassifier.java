@@ -502,6 +502,176 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     }
 
     /**
+    Resolves "on" edge classes from the local geometry of both vertex
+    neighborhoods before the operation-biased rules of figures
+    [MANT1988].15.10 to 15.12 are applied.
+
+    <p>A sector edge is classified "on" when it lies in the plane of the
+    other sector. The biased rules assume that the surface crosses the other
+    solid along that edge. When the surface on both sides of the edge has
+    the same class with respect to the other solid (for instance a concave
+    edge of one solid lying on a convex edge of the other, with the faces
+    interleaved), there is no crossing and the edge takes that class. When
+    the two sides differ, the curve runs along the edge and it stays "on"
+    for the biased rules.</p>
+    */
+    private void resolveOnEdgesByLocalNeighborhood()
+    {
+        int ON = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON;
+
+        for ( _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector s :
+                  sectors ) {
+            if ( !s.intersect ) {
+                continue;
+            }
+            if ( s.s1a == ON ) {
+                s.s1a = classifyRayWithoutCrossing(nba, s.secta, true, nbb);
+            }
+            if ( s.s2a == ON ) {
+                s.s2a = classifyRayWithoutCrossing(nba, s.secta, false, nbb);
+            }
+            if ( s.s1b == ON ) {
+                s.s1b = classifyRayWithoutCrossing(nbb, s.sectb, true, nba);
+            }
+            if ( s.s2b == ON ) {
+                s.s2b = classifyRayWithoutCrossing(nbb, s.sectb, false, nba);
+            }
+            if ( (s.s1a == s.s2a && s.s1a != ON) ||
+                 (s.s1b == s.s2b && s.s1b != ON) ) {
+                s.intersect = false;
+            }
+        }
+    }
+
+    /**
+    Class of the surface next to a boundary ray of sector `index` in `own`,
+    measured against the `other` neighborhood on both sides of the ray (in
+    this sector and in the adjacent one that shares the ray). ON when the
+    sides differ or either side lies on the other solid's surface.
+    */
+    private int classifyRayWithoutCrossing(
+        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> own,
+        int index, boolean firstRay,
+        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> other)
+    {
+        int ON = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex adjacent;
+        Vector3Dd ray;
+        Vector3Dd adjacentRay;
+        Vector3Dd adjacentOther;
+        int here;
+        int there;
+
+        n = own.get(index);
+        if ( firstRay ) {
+            adjacent = own.get(index == 0 ? own.size() - 1 : index - 1);
+            ray = n.ref1;
+            here = classifyDirectionInNeighborhood(
+                directionNextToRay(n.ref1, n.ref2), other);
+            adjacentRay = adjacent.ref2;
+            adjacentOther = adjacent.ref1;
+        }
+        else {
+            adjacent = own.get(index == own.size() - 1 ? 0 : index + 1);
+            ray = n.ref2;
+            here = classifyDirectionInNeighborhood(
+                directionNextToRay(n.ref2, n.ref1), other);
+            adjacentRay = adjacent.ref1;
+            adjacentOther = adjacent.ref2;
+        }
+        if ( here == ON ||
+             new Vector3Dd(ray).normalized().dotProduct(
+                 new Vector3Dd(adjacentRay).normalized()) <
+                 1.0 - VSDK.EPSILON ) {
+            return ON;
+        }
+        there = classifyDirectionInNeighborhood(
+            directionNextToRay(adjacentRay, adjacentOther), other);
+        return there == here ? here : ON;
+    }
+
+    /**
+    A direction inside a (minor arc) sector, next to its boundary ray.
+    */
+    private static Vector3Dd directionNextToRay(Vector3Dd ray,
+        Vector3Dd otherRay)
+    {
+        Vector3Dd r = new Vector3Dd(ray).normalized();
+        Vector3Dd o = new Vector3Dd(otherRay).normalized();
+        return r.add(o.multiply(1.0e-3)).normalized();
+    }
+
+    private static final Vector3Dd[] PROBE_RAYS = {
+        new Vector3Dd(0.5773, 0.3341, 0.7452).normalized(),
+        new Vector3Dd(-0.2311, 0.8817, 0.4113).normalized(),
+        new Vector3Dd(0.7061, -0.6129, 0.3549).normalized()
+    };
+
+    /**
+    Classifies a direction leaving the common vertex against the cone that
+    the given neighborhood sectors bound: IN, OUT, or ON when the direction
+    lies on one of those sectors or no probe ray gives an unambiguous count.
+    Ray parity over the sectors, each a planar minor arc through the vertex.
+    */
+    private int classifyDirectionInNeighborhood(Vector3Dd d,
+        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nb)
+    {
+        int ON = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON;
+        double planeTolerance = 1.0e-9;
+
+        for ( _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n :
+                  nb ) {
+            Vector3Dd normal = n.he.parentLoop.parentFace.getContainingPlane()
+                .getNormal();
+            if ( Math.abs(d.dotProduct(normal)) < planeTolerance &&
+                 sctrwitthin(d, n.ref1, n.ref2, n.ref12) ) {
+                return ON;
+            }
+        }
+
+        for ( Vector3Dd w : PROBE_RAYS ) {
+            int crossings = 0;
+            boolean ambiguous = false;
+
+            for ( _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n :
+                      nb ) {
+                Vector3Dd normal = n.he.parentLoop.parentFace
+                    .getContainingPlane().getNormal();
+                double denominator = w.dotProduct(normal);
+                double t;
+                Vector3Dd q;
+
+                if ( Math.abs(denominator) < 1.0e-9 ) {
+                    continue;
+                }
+                t = -d.dotProduct(normal) / denominator;
+                if ( t <= 0.0 ) {
+                    continue;
+                }
+                q = d.add(w.multiply(t));
+                if ( q.length() < 1.0e-9 ||
+                     PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+                         q, n.ref1, numericContext) ||
+                     PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
+                         q, n.ref2, numericContext) ) {
+                    ambiguous = true;
+                    break;
+                }
+                if ( sctrwitthin(q, n.ref1, n.ref2, n.ref12) ) {
+                    crossings++;
+                }
+            }
+            if ( !ambiguous ) {
+                return (crossings % 2) == 1 ?
+                    _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
+                    _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
+            }
+        }
+        return ON;
+    }
+
+    /**
     Reclassification procedure for "on"-edges on the vertex/vertex classifier,
     as expected from the high-level description of section [MANT1988].15.6.2
     and the case structures of figures [MANT1988].15.10, [MANT1988].15.11,
@@ -517,6 +687,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
         int prevsecta;
         int sectb;
         int prevsectb;
+
+        resolveOnEdgesByLocalNeighborhood();
 
         for ( i = 0; i < sectors.size(); i++ ) {
             if ( sectors.get(i).intersect &&

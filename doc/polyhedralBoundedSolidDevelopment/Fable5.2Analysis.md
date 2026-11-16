@@ -7,6 +7,9 @@ boolean set operations; the reference [MANT1988]; the 2026 git history; the
 development notes in `doc/` and `doc/polyhedralBoundedSolidDevelopment/`.
 **Constraint honoured:** no production code was changed. Only tests were
 added (Section 8).
+**Execution:** the plan of Section 7 was then carried out on the Java port;
+Section 10 records what was done, the numbers after it, and what is still
+open (2026-11-16).
 
 All Gradle commands in this document run from `java/`.
 
@@ -350,6 +353,12 @@ It is restated here because it interacts with everything above: after a
 strict-validation exception the caller has neither a result nor its
 operands.
 
+*Resolution (2026-11-16).* `PolyhedralBoundedSolidModeler.setOp` runs on
+structural copies of its operands (`PolyhedralBoundedSolidStructuralCopy`,
+the `scopy` of Problem 16.2) and leaves them intact, also when it throws.
+The consuming form is `setOpDestructive`. The serialization clone used
+inside the set operator was replaced by the same structural copy.
+
 ### 5.2 Splitter
 
 #### S-01 — A plane through a vertex returns nothing
@@ -376,6 +385,30 @@ edges are all strictly above or below, combined with vertices from
 fields (`soov`, `sone`, `sonf`, `ends`, …); stage 7 did not reach it. When
 the plane misses the solid, the list "above" receives the *same object* as
 the input, not a copy.
+
+*Resolution (2026-11-16, Stage E).* Four causes, all fixed in
+`_PolyhedralBoundedSolidSplitter`:
+
+1. The sector convention was inconsistent. The face of `he_k` lies between
+   edges `e_(k-1)` and `e_k`, but wide sectors were inserted after their
+   half-edge and the coplanar rule set the wrong pair of entries. Now there
+   is one documented convention: wide entries go before the half-edge, and
+   the coplanar rule sets entries `i` and `i-1`.
+2. `insertNullEdges` (Program 14.7) did not advance `head` between runs of
+   the same vertex, and chose the orientation of `lmev` by a half-space
+   test. Now it is always `lmev(tail, head)`. When head and tail are the
+   same half-edge, the null edge is a strut, oriented in `splitConnect`.
+3. An ON edge between two sectors of the same class was always reclassified
+   to the opposite class. Now it is reclassified only at a reflex edge.
+4. `splitFinish` swapped "above" and "below" in every cut. The pieces are
+   now assigned by their side of the plane.
+
+The splitter also runs on a structural copy: the input is never modified or
+returned. A plane that does not cut the solid sends a copy to the side the
+solid lies on and an empty solid to the other side. The state lives in a
+per-call context. A seeded fuzz (`SplitterOracleFuzzTest`) splits every
+corpus solid by 256 planes through its vertices: 252 are correct (37 before
+the fix). The 4 left are listed in Section 10.
 
 ### 5.3 Euler operators
 
@@ -1140,6 +1173,96 @@ empty.
 
 Items 1–8 are what 2026 added, in whole or in part. Items 9 and 10 are what
 this analysis says is still missing.
+
+---
+
+## 10. Execution of the plan (Java port, 2026-11-16)
+
+All stages of Section 7 were carried out in `java/base`. The C++,
+TypeScript and Turbo C ports are unchanged.
+
+### 10.1 Stages
+
+| Stage | Result |
+|---|---|
+| A — oracle as a gate | `BooleanOracleFuzzGateTest` and `RigidMotionInvarianceGateTest`, tagged `slow`, run by `gradle :base:slowTest`. Each family has a ratchet. `getLastSetOpResultPath()` reports the path that answered. The test tasks set `vsdk.withSystemExit=false`. |
+| B — foundation | L-01 to L-03 and E-01 to E-06 fixed; their tests are enabled. `validateIntermediate` checks that every vertex has a valid emanating half-edge. Half-edges keep a back-pointer to their list node, so `next()` and `previous()` are O(1). |
+| C — B-01 | Ring ownership fixed. The rotated families went from 46 / 48 and 26 / 48 to 48 / 48. |
+| D — coplanar faces, preflights | B-02 and B-03 fixed. One containment predicate with interior witness points is used for all preflights. Face contact is glued by the pipeline (B-04). Edge or vertex contact in a union is rejected as non-manifold (`NonManifoldBooleanResultException`). The fallbacks are built only when connect fails. |
+| E — splitter | S-01 fixed (see its resolution). The splitter and the vertex/face classifier were **not** merged (step 4); they now share one sector convention. |
+| F — contracts | Operands are not modified (C-01). Typed failures: `PolyhedralBoundedSolidOperationException`, which extends `IllegalStateException`, with subclasses `NonManifoldBooleanResultException`, `InvalidSolidResultException` and `SolidOperationFailedException`. A wrapped `VSDKFatalException` is the cause of the last one. `isEmptyResult` identifies the empty result. An empty result that the operands disprove throws instead of being returned. The static state is **not** removed (see 10.3). |
+| G — efficiency | Face planes and boxes are computed once per pass (`PolyhedralBoundedSolidFaceGeometry`). Strict validation skips face pairs whose grown boxes are apart. Point classification skips faces whose projected box excludes the point. Generate computes one plane per edge/face pair and skips pairs whose boxes are apart. All the box tests are conservative: they skip only work that would answer "no contact". The plane is not cached on the face (step 3), because vertex positions are public and change outside the Euler operators. |
+| H — fallbacks retired (2026-11-16) | The four shape-specific fallbacks (axis-aligned cells, orthogonal profile, profile difference, offset cylinder) and their lazy wrapper were deleted; `setOp` always runs connect and finish. The pipeline now handles the cases they used to answer: tangent containment with null edges on one side only ([MANT1988] 15.4), a wider near-boundary hit in generate, collinear section points of an odd face pair linked when the segment lies on both faces, same-face struts oriented by the sector they leave, `sectoroverlap` ignoring a touch only along a concave edge, and ON edges in vertex/vertex classification resolved from the local neighbourhood. A result with two coincident vertices or two edges on the same vertex pair is rejected as non-manifold. |
+| Documentation | `coverage_MANT1988.md`, `vitralCadKernel.md` and the impact matrix of `optimizationsOverMANT1988.md` (with the result path) updated. The 41 tests under `test/vsdk/toolkit/processing/polyhedralBoundedSolidOperators` moved to the directory of their package. |
+
+### 10.2 Numbers
+
+| Box-pair family (4 operations each) | Section 1 | Stage D | Now (no fallbacks) | Rejected as non-manifold |
+|---|---:|---:|---:|---:|
+| Axis-aligned, general position | 48 / 48 | 48 / 48 (4 by fallback) | 48 / 48 | 0 |
+| B rotated about z | 46 / 48 | 48 / 48 | 48 / 48 | 0 |
+| B rotated about a random axis | 26 / 48 | 48 / 48 | 48 / 48 | 0 |
+| Same, translated to (1000, 1000, 1000) | 26 / 48 | 48 / 48 | 48 / 48 | 0 |
+| Integer-grid coordinates | 314 / 320 | 320 / 320 (19 by fallback) | 320 / 320 | 14 |
+| Coplanar top and bottom, B rotated 45° | 19 / 48 | 48 / 48 | 48 / 48 | 0 |
+
+- `BooleanVolumeOracleTest`: no disabled rows left.
+- Splitter fuzz: 252 / 256.
+- Rigid-motion invariance: 31 / 36 at stage D, 36 / 36 after stage H.
+- `gradle :base:test`: 1110 tests, 0 failures, 38 skipped. The skipped
+  tests are diagnostics and legacy rows unrelated to these defects.
+- Wall time: from about 4 minutes in one JVM to 34 s. The test task now
+  runs up to 8 forked JVMs (`-PtestForks=N` overrides the count). Stage G
+  alone took the summed class time from 250 s to 81 s, and the slowest
+  class, `KurlanderMotif4OperationMatrixTest`, from 97 s to 13 s.
+
+### 10.3 Still open, and found on the way
+
+1. **Splitter: pinched section loop.** 4 of the 256 fuzz planes go through
+   a reflex vertex of the L-shaped brick, so that two section regions meet
+   at that vertex inside one face. The section face comes out as one
+   self-touching loop. The volume is right, but strict validation rejects
+   the result ("self-intersecting loop"). A possible fix is to reuse
+   `splitSelfTouchingLoops` from the set operator.
+2. **`CROSS_PAIR` A−B — closed (stage H).** The two remaining pieces of A
+   touch the removed bar of B along one edge, so the regularised result is
+   non-manifold. Following the B-04 decision ("if the two shells touch,
+   reject it, it is a non-manifold result") `setOp` throws
+   `NonManifoldBooleanResultException`, as built and rotated. The retired
+   cell fallback returned two shells (F=12, E=23, V=14) that failed the
+   strict Euler check.
+3. **Rigid motion — closed (stage H), 36 / 36.** Rotated `CROSS_PAIR` ∪, ∩
+   and B−A are answered by the pipeline with the unrotated counts;
+   `MANT1988_3` union is the same with and without the rotation.
+4. **`STACKED_BLOCKS` ∩ — decided (2026-11-16).** A lamina, two faces back
+   to back with zero volume, is a valid result: it is topologically sound
+   and easy to display, even though the regularised intersection is empty.
+   A collapsed lamina, with area below EPSILON scaled to the model, is
+   rejected (`LaminaPolicyTest`). ∩, A−B and B−A of this pair still come
+   from the partial-coplanar preflight, not from the pipeline.
+5. **Fallbacks — retired (stage H).** All 36 corpus operations report
+   `normal-pipeline` except the 3 `STACKED_BLOCKS` preflight answers and
+   the rejected `CROSS_PAIR` A−B; none of the 560 fuzz cases depends on a
+   fallback. Only `fallbacks/_PolyhedralBoundedSolidIdNamespace` remains in
+   that package. The TypeScript port still carries the fallbacks until it
+   is updated from the Java port.
+6. **Static state remains.** The null-edge connector keeps about 13 static
+   fields, several classes keep `debugFlags`, and the id counters are
+   global. The public operations of `PolyhedralBoundedSolidModeler` are
+   serialized on one lock: they are thread-safe but not concurrent. Test
+   parallelism therefore comes from separate JVMs.
+7. **Input validation.** A failed `validateBooleanInputs` is still only a
+   warning.
+8. **Behaviour changes for callers.**
+   - `split` no longer returns its input, and above/below were swapped
+     before. Pieces on one side that touch each other come out as separate
+     solids. The JOGL example `GeneralModelsBuilder` (`SPLIT_TEST_PART_2/3`)
+     now shows the other half.
+   - The union of solids that touch along an edge or at a vertex throws.
+
+The fuzz harness, the oracle and the gates are what made items 1 to 5
+visible. In Section 1 the same defects would have been silent or masked by
+a fallback.
 
 ---
 

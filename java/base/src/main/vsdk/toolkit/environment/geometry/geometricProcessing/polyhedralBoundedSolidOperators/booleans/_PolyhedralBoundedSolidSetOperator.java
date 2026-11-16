@@ -13,28 +13,17 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 // Java classes
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
-import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidStructuralCopy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologySummary;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -46,7 +35,6 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
-import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._PolyhedralBoundedSolidFallbackGeometry.*;
 import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace.isCoplanarTangentialTraceEnabled;
 import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace.isPipelineSummaryTraceEnabled;
 import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace.traceCoplanarTangential;
@@ -805,7 +793,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
     /**
     Name of the path that produced the last setOp result on the calling
     thread: "normal-pipeline" for the [MANT1988] Ch. 15 pipeline, or the name
-    of the preflight or fallback that answered instead. Recorded before the
+    of the preflight that answered instead. Recorded before the
     strict postcondition runs, so it is also available after a strict
     validation failure. Fable5.2Analysis.md Stage A step 4.
     */
@@ -877,11 +865,42 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         }
         for ( i = 0; i < nullFaces.size(); i++ ) {
             _PolyhedralBoundedSolidFace f = nullFaces.get(i);
-            if ( f.boundariesList.size() != 2 ) {
+            // A null face collapsed to a single point (only zero-length
+            // strut rings, left where the section curve runs straight
+            // through a vertex of one face) bounds no section and is
+            // discarded by finish; it is not a section-curve face.
+            if ( f.boundariesList.size() != 2 && !isPointLikeFace(f) ) {
                 violations.add(label + ": null face " + f.id + " has " +
                     f.boundariesList.size() + " loops instead of 2");
             }
         }
+    }
+
+    private static boolean isPointLikeFace(_PolyhedralBoundedSolidFace f)
+    {
+        Vector3Dd first = null;
+        int i;
+
+        for ( i = 0; i < f.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge start =
+                f.boundariesList.get(i).boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge he = start;
+            if ( start == null ) {
+                continue;
+            }
+            do {
+                Vector3Dd p = he.startingVertex.position;
+                if ( first == null ) {
+                    first = p;
+                }
+                else if ( Vector3Dd.distance(first, p) >
+                          numericContext.bigEpsilon() ) {
+                    return false;
+                }
+                he = he.next();
+            } while ( he != start );
+        }
+        return true;
     }
 
     private static void collectCoincidentLoopViolations(String label,
@@ -936,6 +955,59 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         return true;
     }
 
+    /**
+    Detects result pieces that touch only along an edge or at a vertex: two
+    distinct vertices at the same point, or two distinct edges joining the
+    same two points. A manifold boundary has neither. Returns a short
+    description of the first contact found, or null.
+    */
+    static String findNonManifoldContact(PolyhedralBoundedSolid result)
+    {
+        double tolerance = numericContext.bigEpsilon();
+        int nv = result.getVerticesList().size();
+        int ne = result.getEdgesList().size();
+        int i;
+        int j;
+
+        for ( i = 0; i < nv; i++ ) {
+            Vector3Dd p = result.getVerticesList().get(i).position;
+            for ( j = i + 1; j < nv; j++ ) {
+                if ( Vector3Dd.distance(p,
+                         result.getVerticesList().get(j).position) <=
+                     tolerance ) {
+                    return "vertices " +
+                        result.getVerticesList().get(i).id + " and " +
+                        result.getVerticesList().get(j).id +
+                        " coincide at " + p;
+                }
+            }
+        }
+        for ( i = 0; i < ne; i++ ) {
+            _PolyhedralBoundedSolidEdge e = result.getEdgesList().get(i);
+            for ( j = i + 1; j < ne; j++ ) {
+                _PolyhedralBoundedSolidEdge f = result.getEdgesList().get(j);
+                if ( sameEndpoints(e, f) ) {
+                    return "edges " + e.id + " and " + f.id +
+                        " join the same points " +
+                        e.rightHalf.startingVertex.position + " - " +
+                        e.leftHalf.startingVertex.position;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean sameEndpoints(_PolyhedralBoundedSolidEdge e,
+        _PolyhedralBoundedSolidEdge f)
+    {
+        _PolyhedralBoundedSolidVertex e1 = e.rightHalf.startingVertex;
+        _PolyhedralBoundedSolidVertex e2 = e.leftHalf.startingVertex;
+        _PolyhedralBoundedSolidVertex f1 = f.rightHalf.startingVertex;
+        _PolyhedralBoundedSolidVertex f2 = f.leftHalf.startingVertex;
+
+        return (e1 == f1 && e2 == f2) || (e1 == f2 && e2 == f1);
+    }
+
     private static PolyhedralBoundedSolid completeSetOpResult(
         PolyhedralBoundedSolid result,
         String operandADiagnostics,
@@ -953,6 +1025,14 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         }
         if ( result.getPolygonsList().size() > 0 ) {
             postProcessResult(result, maximizeResultFaces);
+        }
+        String contact = findNonManifoldContact(result);
+        if ( contact != null ) {
+            // Same policy as B-04: pieces of the result that touch only
+            // along an edge or at a vertex form a non-manifold solid.
+            throw new NonManifoldBooleanResultException(
+                operationName(op) + " result is non-manifold (" + contact +
+                "); rejected (path=" + resultPath + ")");
         }
         if ( doStrictValidation ) {
             StringBuilder strictMessage = new StringBuilder();
@@ -999,119 +1079,18 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             "}";
     }
 
+    /**
+    Independent copy of `solid` for the recovery paths. It used to be a
+    Java serialization round trip, which recursed over the linked structure
+    and could overflow the stack on large solids; it is now the linear
+    structural copy of [MANT1988] Sec. 15.8 (`scopy`, Stage F). The label
+    is kept for the callers' diagnostics.
+    */
     private static PolyhedralBoundedSolid deepCloneSolid(
         PolyhedralBoundedSolid solid,
         String solidLabel)
     {
-        byte[] snapshot;
-
-        if ( solid == null ) {
-            return null;
-        }
-
-        try ( ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-              ObjectOutputStream output =
-                  new ObjectOutputStream(bytes) ) {
-            output.writeObject(solid);
-            output.flush();
-            snapshot = bytes.toByteArray();
-        }
-        catch ( IOException e ) {
-            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
-                VSDK.WARNING, "deepCloneSolid",
-                "Unable to clone " + solidLabel +
-                " for subtract connect recovery: " +
-                e.getClass().getSimpleName() + ": " + e.getMessage());
-            return null;
-        }
-
-        try ( ByteArrayInputStream bytes =
-                  new ByteArrayInputStream(snapshot);
-              ObjectInputStream input = new ObjectInputStream(bytes) ) {
-            return (PolyhedralBoundedSolid)input.readObject();
-        }
-        catch ( IOException e ) {
-            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
-                VSDK.WARNING, "deepCloneSolid",
-                "Unable to restore " + solidLabel +
-                " for subtract connect recovery: " +
-                e.getClass().getSimpleName() + ": " + e.getMessage());
-        }
-        catch ( StackOverflowError e ) {
-            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
-                VSDK.WARNING, "deepCloneSolid",
-                "Unable to restore " + solidLabel +
-                " for subtract connect recovery: " +
-                e.getClass().getSimpleName());
-        }
-        catch ( ClassNotFoundException e ) {
-            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
-                VSDK.WARNING, "deepCloneSolid",
-                "Unable to restore " + solidLabel +
-                " for subtract connect recovery: " +
-                e.getClass().getSimpleName() + ": " + e.getMessage());
-        }
-
-        return null;
-    }
-
-    private static boolean hasDegenerateFace(PolyhedralBoundedSolid solid)
-    {
-        int i;
-
-        if ( solid == null ) {
-            return true;
-        }
-        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
-            _PolyhedralBoundedSolidFace face;
-
-            face = solid.getPolygonsList().get(i);
-            if ( face.boundariesList.size() < 1 ||
-                 face.boundariesList.get(0).halfEdgesList.size() < 3 ||
-                 face.getContainingPlane() == null ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean shouldUseAxisAlignedCellBooleanFallback(
-        _PolyhedralBoundedSolidLazyFallback fallback,
-        PolyhedralBoundedSolid result)
-    {
-        PolyhedralBoundedSolid built;
-
-        if ( !fallback.isAvailable() ) {
-            return false;
-        }
-        // Check the result first: the fallback is built only when it may
-        // replace an empty or degenerate result.
-        if ( result != null && result.getPolygonsList().size() > 0 &&
-             !hasDegenerateFace(result) ) {
-            return false;
-        }
-        built = fallback.peek();
-        return built != null && built.getPolygonsList().size() > 0;
-    }
-
-    private static _PolyhedralBoundedSolidLazyFallback
-    lazyAxisAlignedCellFallback(PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB, int op)
-    {
-        if ( !_PolyhedralBoundedSolidAxisAlignedCellFallback
-                 .isAxisAlignedPair(inSolidA, inSolidB) ) {
-            return new _PolyhedralBoundedSolidLazyFallback(null);
-        }
-        final PolyhedralBoundedSolid snapshotA = deepCloneSolid(inSolidA,
-            "operand A for the axis-aligned cell fallback");
-        final PolyhedralBoundedSolid snapshotB = deepCloneSolid(inSolidB,
-            "operand B for the axis-aligned cell fallback");
-        if ( snapshotA == null || snapshotB == null ) {
-            return new _PolyhedralBoundedSolidLazyFallback(null);
-        }
-        return new _PolyhedralBoundedSolidLazyFallback(() ->
-            _PolyhedralBoundedSolidAxisAlignedCellFallback
-                .buildAxisAlignedCellBooleanFallback(snapshotA, snapshotB, op));
+        return PolyhedralBoundedSolidStructuralCopy.copy(solid);
     }
 
     private static boolean hasIncompleteConnectState()
@@ -1120,39 +1099,6 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             .getLastLooseACount() > 0 ||
             _PolyhedralBoundedSolidSetNullEdgesConnector
                 .getLastLooseBCount() > 0;
-    }
-
-    static boolean isStructurallyUsableSetOpResult(
-        PolyhedralBoundedSolid result)
-    {
-        if ( result == null ||
-             result.getPolygonsList().size() <= 0 ||
-             hasDegenerateFace(result) ) {
-            return false;
-        }
-        return PolyhedralBoundedSolidValidationEngine
-            .validateIntermediate(result);
-    }
-
-    private static boolean hasBasicSetOpShapeData(
-        PolyhedralBoundedSolid result)
-    {
-        return result != null &&
-            result.getPolygonsList().size() > 0 &&
-            result.getEdgesList().size() > 0 &&
-            result.getVerticesList().size() > 0;
-    }
-
-    private static boolean hasSameShapeData(
-        PolyhedralBoundedSolid first,
-        PolyhedralBoundedSolid second)
-    {
-        return hasBasicSetOpShapeData(first) &&
-            hasBasicSetOpShapeData(second) &&
-            first.getPolygonsList().size() == second.getPolygonsList().size() &&
-            first.getEdgesList().size() == second.getEdgesList().size() &&
-            first.getVerticesList().size() == second.getVerticesList().size() &&
-            boundsMatch(first.getMinMax(), second.getMinMax());
     }
 
     /**
@@ -1230,14 +1176,6 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
 
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid res = new PolyhedralBoundedSolid();
-        _PolyhedralBoundedSolidProfileDifferenceFallbackSpec
-            profileDifferenceFallback;
-        _PolyhedralBoundedSolidOffsetCylinderFallback.OffsetCylinderDifferenceFallbackSpec
-            offsetCylinderDifferenceFallbackSpec;
-        PolyhedralBoundedSolid offsetCylinderDifferenceFallback;
-        _PolyhedralBoundedSolidLazyFallback axisAlignedCellBooleanFallback;
-        _PolyhedralBoundedSolidLazyFallback orthogonalProfileBooleanFallback;
-        boolean fallbackProvidedResult;
         String resultPath;
         String operandADiagnostics;
         String operandBDiagnostics;
@@ -1245,8 +1183,6 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         _SetOperationContext ctx = new _SetOperationContext();
         ctx.sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         ctx.soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
-        offsetCylinderDifferenceFallback = null;
-        fallbackProvidedResult = false;
         resultPath = "normal-pipeline";
         operandADiagnostics = cardinalitiesAndBounds(inSolidA);
         operandBDiagnostics = cardinalitiesAndBounds(inSolidB);
@@ -1280,25 +1216,6 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
         _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(
             numericContext);
-        profileDifferenceFallback = _PolyhedralBoundedSolidProfileDifferenceFallback
-            .prepareProfileDifferenceFallbackSpec(
-            inSolidA, inSolidB, op);
-        offsetCylinderDifferenceFallbackSpec =
-            _PolyhedralBoundedSolidOffsetCylinderFallback
-                .prepareOffsetCylinderDifferenceFallbackSpec(inSolidA, inSolidB,
-                op);
-        // Lazy (Stage D step 4): the cell fallback keeps a snapshot of the
-        // operands, taken only when both are axis-aligned, and classifies its
-        // cells only if connect or finish fails; the profile fallback keeps
-        // its geometric spec.
-        axisAlignedCellBooleanFallback = lazyAxisAlignedCellFallback(
-            inSolidA, inSolidB, op);
-        orthogonalProfileBooleanFallback =
-            new _PolyhedralBoundedSolidLazyFallback(
-                _PolyhedralBoundedSolidOrthogonalProfileFallback
-                    .lazyOrthogonalProfileBooleanFallback(
-                        inSolidA, inSolidB, op));
-
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage01");
             debugSolid(inSolidB, "outputB_stage01");
@@ -1407,7 +1324,13 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         // flag those normal struts. Genuine self-touch is only meaningful
         // after Generate (above), so we deliberately do not scan post-Classify.
 
-        if ( ctx.sonea.isEmpty() && ctx.sonvv.isEmpty() ) {
+        // [MANT1988] Sec. 15.4: what matters is whether classification
+        // produced null edges. Vertex/vertex contacts that yield none (a
+        // solid tangent inside the other along whole faces, for instance)
+        // leave nothing to connect, so the result follows from containment
+        // as in the no-intersection case; running connect and finish on
+        // them returned an empty solid.
+        if ( ctx.sonea.isEmpty() && ctx.soneb.isEmpty() ) {
             // No intersections found
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
             return completeSetOpResult(res, operandADiagnostics,
@@ -1430,113 +1353,15 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             debugSolid(inSolidB, "outputB_stage05");
         }
 
-        if ( hasIncompleteConnectState() &&
-             offsetCylinderDifferenceFallbackSpec != null ) {
-            offsetCylinderDifferenceFallback =
-                _PolyhedralBoundedSolidOffsetCylinderFallback
-                    .buildOffsetCylinderDifferenceFallback(
-                    offsetCylinderDifferenceFallbackSpec);
-            if ( offsetCylinderDifferenceFallback != null ) {
-                tracePipelineSummary(
-                    "offset cylinder fallback replacing incomplete connect");
-                res = offsetCylinderDifferenceFallback;
-                offsetCylinderDifferenceFallback = null;
-                fallbackProvidedResult = true;
-                resultPath = "offset-cylinder-fallback-incomplete-connect";
-            }
-        }
-
-        boolean looseEnds =
-            _PolyhedralBoundedSolidSetNullEdgesConnector
-                .getLastLooseACount() > 0 ||
-            _PolyhedralBoundedSolidSetNullEdgesConnector
-                .getLastLooseBCount() > 0;
-        if ( !fallbackProvidedResult && looseEnds &&
-             axisAlignedCellBooleanFallback.peek() != null ) {
-            tracePipelineSummary(
-                "axis-aligned cell fallback replacing incomplete connect");
-            res = axisAlignedCellBooleanFallback.take();
-            fallbackProvidedResult = true;
-            resultPath = "axis-aligned-cell-fallback-incomplete-connect";
-        }
-        else if ( !fallbackProvidedResult && looseEnds &&
-                  orthogonalProfileBooleanFallback.peek() != null ) {
-            tracePipelineSummary(
-                "orthogonal profile fallback replacing incomplete connect");
-            res = orthogonalProfileBooleanFallback.take();
-            fallbackProvidedResult = true;
-            resultPath = "orthogonal-profile-fallback-incomplete-connect";
-        }
-        if ( !fallbackProvidedResult ) {
-            try {
-                setOpFinish(ctx, inSolidA, inSolidB, res, op);
-            }
-            catch ( RuntimeException e ) {
-                PolyhedralBoundedSolid offsetCylinderExceptionFallback =
-                    _PolyhedralBoundedSolidOffsetCylinderFallback
-                        .buildOffsetCylinderDifferenceFallback(
-                        offsetCylinderDifferenceFallbackSpec);
-                if ( isStructurallyUsableSetOpResult(
-                         offsetCylinderExceptionFallback) ) {
-                    tracePipelineSummary(
-                        "offset cylinder fallback replacing finish exception: " +
-                        e.getClass().getSimpleName());
-                    res = offsetCylinderExceptionFallback;
-                    axisAlignedCellBooleanFallback.discard();
-                    orthogonalProfileBooleanFallback.discard();
-                    resultPath =
-                        "offset-cylinder-fallback-finish-exception";
-                }
-                else if ( axisAlignedCellBooleanFallback.peek() == null &&
-                     orthogonalProfileBooleanFallback.peek() == null ) {
-                    throw e;
-                }
-                else if ( axisAlignedCellBooleanFallback.peek() != null ) {
-                    tracePipelineSummary(
-                        "axis-aligned cell fallback replacing finish exception: " +
-                        e.getClass().getSimpleName());
-                    res = axisAlignedCellBooleanFallback.take();
-                    resultPath =
-                        "axis-aligned-cell-fallback-finish-exception";
-                }
-                else {
-                    tracePipelineSummary(
-                        "orthogonal profile fallback replacing finish exception: " +
-                        e.getClass().getSimpleName());
-                    res = orthogonalProfileBooleanFallback.take();
-                    resultPath =
-                        "orthogonal-profile-fallback-finish-exception";
-                }
-            }
-        }
+        // [MANT1988] Sec. 15.8: finish builds the result from the null
+        // faces. Every answer comes from this pipeline; there is no
+        // shape-specific fallback behind it.
+        setOpFinish(ctx, inSolidA, inSolidB, res, op);
 
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage06");
             debugSolid(inSolidB, "outputB_stage06");
             debugSolid(res, "outputR_stage06");
-        }
-
-        if ( shouldUseAxisAlignedCellBooleanFallback(
-                 axisAlignedCellBooleanFallback, res) ) {
-            tracePipelineSummary(
-                "axis-aligned cell fallback replacing incomplete result");
-            res = axisAlignedCellBooleanFallback.take();
-            resultPath = "axis-aligned-cell-fallback-incomplete-result";
-        }
-        if ( shouldUseAxisAlignedCellBooleanFallback(
-                 orthogonalProfileBooleanFallback, res) ) {
-            tracePipelineSummary(
-                "orthogonal profile fallback replacing incomplete result");
-            res = orthogonalProfileBooleanFallback.take();
-            resultPath = "orthogonal-profile-fallback-incomplete-result";
-        }
-
-        PolyhedralBoundedSolid resultBeforeProfileFallback = res;
-        res = _PolyhedralBoundedSolidProfileDifferenceFallback
-            .applyProfileDifferenceFallbackIfNeeded(
-            profileDifferenceFallback, res);
-        if ( res != resultBeforeProfileFallback ) {
-            resultPath = "profile-difference-fallback";
         }
 
         res = completeSetOpResult(res, operandADiagnostics,

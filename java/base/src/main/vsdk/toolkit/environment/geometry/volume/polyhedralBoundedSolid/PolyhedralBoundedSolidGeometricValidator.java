@@ -6,6 +6,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -578,14 +579,15 @@ public class PolyhedralBoundedSolidGeometricValidator
 
     private static boolean facesAreCoplanar(_PolyhedralBoundedSolidFace faceA,
                                             _PolyhedralBoundedSolidFace faceB,
+        InfinitePlane planeA, InfinitePlane planeB,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
-        if ( faceA.getContainingPlane() == null || faceB.getContainingPlane() == null ) {
+        if ( planeA == null || planeB == null ) {
             return false;
         }
 
-        Vector3Dd nA = faceA.getContainingPlane().getNormal().multiply(1.0);
-        Vector3Dd nB = faceB.getContainingPlane().getNormal().multiply(1.0);
+        Vector3Dd nA = planeA.getNormal().multiply(1.0);
+        Vector3Dd nB = planeB.getNormal().multiply(1.0);
         nA = nA.normalized();
         nB = nB.normalized();
         if ( Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) >
@@ -597,7 +599,7 @@ public class PolyhedralBoundedSolidGeometricValidator
             _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
             if ( loop.halfEdgesList.size() > 0 ) {
                 Vector3Dd p = loop.halfEdgesList.get(0).startingVertex.position;
-                return Math.abs(faceB.getContainingPlane().pointDistance(p)) <=
+                return Math.abs(planeB.pointDistance(p)) <=
                     numericContext.bigEpsilon();
             }
         }
@@ -621,29 +623,37 @@ public class PolyhedralBoundedSolidGeometricValidator
 
     private static boolean vertexStrictlyInsideFace(_PolyhedralBoundedSolidVertex v,
                                                     _PolyhedralBoundedSolidFace face,
+        PolyhedralBoundedSolidFaceGeometry faceGeometry,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
-        if ( face.getContainingPlane().doContainmentTest(v.position,
+        InfinitePlane plane = faceGeometry.getPlane();
+        if ( plane.doContainmentTest(v.position,
             numericContext.bigEpsilon()) != Geometry.LIMIT ) {
             return false;
         }
-        return PolyhedralBoundedSolidNumericPolicy
-            .testPointInside(face, v.position, numericContext) == Geometry.INSIDE;
+        if ( faceGeometry.projectionExcludes(v.position,
+                 numericContext.bigEpsilon()) ) {
+            return false;
+        }
+        return face.testPointInside(v.position, numericContext.bigEpsilon(),
+            plane) == Geometry.INSIDE;
     }
 
     private static boolean edgePiercesFaceInterior(_PolyhedralBoundedSolidHalfEdge he,
                                                    _PolyhedralBoundedSolidFace face,
+        PolyhedralBoundedSolidFaceGeometry faceGeometry,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
         _PolyhedralBoundedSolidHalfEdge next = he.next();
-        if ( next == null || face.getContainingPlane() == null ) {
+        InfinitePlane plane = faceGeometry.getPlane();
+        if ( next == null || plane == null ) {
             return false;
         }
 
         Vector3Dd p0 = he.startingVertex.position;
         Vector3Dd p1 = next.startingVertex.position;
-        double d0 = face.getContainingPlane().pointDistance(p0);
-        double d1 = face.getContainingPlane().pointDistance(p1);
+        double d0 = plane.pointDistance(p0);
+        double d1 = plane.pointDistance(p1);
 
         if ( Math.abs(d0) <= numericContext.bigEpsilon() &&
              Math.abs(d1) <= numericContext.bigEpsilon() ) {
@@ -664,12 +674,17 @@ public class PolyhedralBoundedSolidGeometricValidator
         }
 
         Vector3Dd p = p0.add(p1.subtract(p0).multiply(t));
-        return PolyhedralBoundedSolidNumericPolicy
-            .testPointInside(face, p, numericContext) == Geometry.INSIDE;
+        if ( faceGeometry.projectionExcludes(p, numericContext.bigEpsilon()) ) {
+            return false;
+        }
+        return face.testPointInside(p, numericContext.bigEpsilon(), plane) ==
+            Geometry.INSIDE;
     }
 
     private static boolean facesHaveImproperIntersection(_PolyhedralBoundedSolidFace faceA,
                                                          _PolyhedralBoundedSolidFace faceB,
+        PolyhedralBoundedSolidFaceGeometry geometryA,
+        PolyhedralBoundedSolidFaceGeometry geometryB,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
                                                          StringBuilder msg)
     {
@@ -682,13 +697,15 @@ public class PolyhedralBoundedSolidGeometricValidator
             _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
             for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
                 he = loop.halfEdgesList.get(j);
-                if ( vertexStrictlyInsideFace(he.startingVertex, faceB,
-                                              numericContext) ) {
+                if ( geometryB.getPlane() != null &&
+                     vertexStrictlyInsideFace(he.startingVertex, faceB,
+                                              geometryB, numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
                 }
-                if ( edgePiercesFaceInterior(he, faceB, numericContext) ) {
+                if ( edgePiercesFaceInterior(he, faceB, geometryB,
+                                             numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
@@ -700,13 +717,15 @@ public class PolyhedralBoundedSolidGeometricValidator
             _PolyhedralBoundedSolidLoop loop = faceB.boundariesList.get(i);
             for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
                 he = loop.halfEdgesList.get(j);
-                if ( vertexStrictlyInsideFace(he.startingVertex, faceA,
-                                              numericContext) ) {
+                if ( geometryA.getPlane() != null &&
+                     vertexStrictlyInsideFace(he.startingVertex, faceA,
+                                              geometryA, numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
                 }
-                if ( edgePiercesFaceInterior(he, faceA, numericContext) ) {
+                if ( edgePiercesFaceInterior(he, faceA, geometryA,
+                                             numericContext) ) {
                     msg.append("  - Faces [").append(faceA.id).append("] and [")
                        .append(faceB.id).append("] intersect improperly.\n");
                     return true;
@@ -714,7 +733,8 @@ public class PolyhedralBoundedSolidGeometricValidator
             }
         }
 
-        if ( facesAreCoplanar(faceA, faceB, numericContext) ) {
+        if ( facesAreCoplanar(faceA, faceB, geometryA.getPlane(),
+                 geometryB.getPlane(), numericContext) ) {
             int dominantCoordinate = dominantCoordinateForFace(faceA);
             for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
                 _PolyhedralBoundedSolidLoop loopA = faceA.boundariesList.get(i);
@@ -778,17 +798,173 @@ public class PolyhedralBoundedSolidGeometricValidator
     {
         int i;
         int j;
-        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
-            _PolyhedralBoundedSolidFace faceA = solid.getPolygonsList().get(i);
-            for ( j = i+1; j < solid.getPolygonsList().size(); j++ ) {
-                _PolyhedralBoundedSolidFace faceB = solid.getPolygonsList().get(j);
-                if ( facesHaveImproperIntersection(faceA, faceB, numericContext,
-                                                   msg) ) {
+        int n = solid.getPolygonsList().size();
+        _PolyhedralBoundedSolidFace[] faces = new _PolyhedralBoundedSolidFace[n];
+        PolyhedralBoundedSolidFaceGeometry[] geometry;
+        double[] margin = new double[n];
+        double coplanarSlack;
+
+        // Stage G (Fable5.2Analysis.md): planes are computed once per pass
+        // instead of once per face pair and per point, and face pairs whose
+        // grown boxes are apart are skipped. Every improper intersection has
+        // a witness point that lies in both grown boxes: a vertex of one face
+        // inside the other, the point where an edge pierces a face, or a
+        // crossing of two coplanar edges. For the last one the faces may be
+        // tilted by up to acos(1 - coplanarDotTolerance), which coplanarSlack
+        // bounds over the whole solid.
+        geometry = PolyhedralBoundedSolidFaceGeometry.of(solid);
+        coplanarSlack = 2.0 * Math.sqrt(2.0 *
+            numericContext.coplanarDotTolerance()) * solidDiagonal(solid);
+        for ( i = 0; i < n; i++ ) {
+            faces[i] = solid.getPolygonsList().get(i);
+            margin[i] = geometry[i].containmentMargin(
+                numericContext.bigEpsilon());
+        }
+        for ( i = 0; i < n; i++ ) {
+            for ( j = i+1; j < n; j++ ) {
+                if ( geometry[i].boxSeparatedFrom(geometry[j],
+                         margin[i] + margin[j] + coplanarSlack) ) {
+                    continue;
+                }
+                if ( facesHaveImproperIntersection(faces[i], faces[j],
+                         geometry[i], geometry[j], numericContext, msg) ) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    private static double solidDiagonal(PolyhedralBoundedSolid solid)
+    {
+        double[] box = solid.getMinMax();
+        return Math.sqrt((box[3] - box[0]) * (box[3] - box[0]) +
+            (box[4] - box[1]) * (box[4] - box[1]) +
+            (box[5] - box[2]) * (box[5] - box[2]));
+    }
+
+    /**
+    Area below which a face is collapsed: VSDK.EPSILON scaled by the square
+    of the model scale, so that it equals EPSILON for models of unit size and
+    is invariant under a uniform change of units.
+    */
+    public static double collapsedFaceAreaThreshold(
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        return VSDK.EPSILON * numericContext.modelScale() *
+            numericContext.modelScale();
+    }
+
+    /**
+    Area of a face: half the length of the Newell vector summed over all its
+    loops, so inner loops (holes, oriented the other way) are subtracted.
+    */
+    public static double faceArea(_PolyhedralBoundedSolidFace face)
+    {
+        double nx = 0.0;
+        double ny = 0.0;
+        double nz = 0.0;
+        int i;
+
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge start;
+            _PolyhedralBoundedSolidHalfEdge he;
+            if ( loop == null || loop.boundaryStartHalfEdge == null ) {
+                continue;
+            }
+            start = loop.boundaryStartHalfEdge;
+            he = start;
+            do {
+                _PolyhedralBoundedSolidHalfEdge next = he.next();
+                if ( next == null ) {
+                    break;
+                }
+                Vector3Dd p = he.startingVertex.position;
+                Vector3Dd q = next.startingVertex.position;
+                nx += (p.y() - q.y()) * (p.z() + q.z());
+                ny += (p.z() - q.z()) * (p.x() + q.x());
+                nz += (p.x() - q.x()) * (p.y() + q.y());
+                he = next;
+            } while ( he != start );
+        }
+        return 0.5 * Math.sqrt(nx * nx + ny * ny + nz * nz);
+    }
+
+    /**
+    Rejects collapsed laminae. A lamina is a shell made of exactly two faces
+    (which then share all their edges, back to back); it has zero volume and
+    is a valid result. It is collapsed when its area is below
+    collapsedFaceAreaThreshold. Small faces of shells that enclose volume
+    (slivers of a tessellation) are not judged by this rule.
+    */
+    public static boolean validateNoCollapsedLaminae(
+        PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+        StringBuilder msg)
+    {
+        double threshold = collapsedFaceAreaThreshold(numericContext);
+        java.util.IdentityHashMap<_PolyhedralBoundedSolidFace, Integer> shellOf =
+            new java.util.IdentityHashMap<>();
+        java.util.ArrayList<java.util.ArrayList<_PolyhedralBoundedSolidFace>>
+            shells = new java.util.ArrayList<>();
+        boolean ok = true;
+        int i;
+
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace seed = solid.getPolygonsList().get(i);
+            if ( shellOf.containsKey(seed) ) {
+                continue;
+            }
+            java.util.ArrayList<_PolyhedralBoundedSolidFace> shell =
+                new java.util.ArrayList<>();
+            java.util.ArrayDeque<_PolyhedralBoundedSolidFace> pending =
+                new java.util.ArrayDeque<>();
+            shellOf.put(seed, shells.size());
+            pending.add(seed);
+            while ( !pending.isEmpty() ) {
+                _PolyhedralBoundedSolidFace face = pending.poll();
+                shell.add(face);
+                for ( int j = 0; j < face.boundariesList.size(); j++ ) {
+                    _PolyhedralBoundedSolidLoop loop =
+                        face.boundariesList.get(j);
+                    for ( int k = 0; k < loop.halfEdgesList.size(); k++ ) {
+                        _PolyhedralBoundedSolidHalfEdge he =
+                            loop.halfEdgesList.get(k);
+                        _PolyhedralBoundedSolidHalfEdge mate =
+                            he.parentEdge == null ? null :
+                            he.mirrorHalfEdge();
+                        if ( mate == null || mate.parentLoop == null ) {
+                            continue;
+                        }
+                        _PolyhedralBoundedSolidFace other =
+                            mate.parentLoop.parentFace;
+                        if ( other != null && !shellOf.containsKey(other) ) {
+                            shellOf.put(other, shells.size());
+                            pending.add(other);
+                        }
+                    }
+                }
+            }
+            shells.add(shell);
+        }
+
+        for ( i = 0; i < shells.size(); i++ ) {
+            java.util.ArrayList<_PolyhedralBoundedSolidFace> shell =
+                shells.get(i);
+            if ( shell.size() != 2 ) {
+                continue;
+            }
+            double area = faceArea(shell.get(0));
+            if ( area < threshold ) {
+                msg.append("  - Lamina of faces [").append(shell.get(0).id)
+                   .append("] and [").append(shell.get(1).id)
+                   .append("] is collapsed: area ").append(area)
+                   .append(" < ").append(threshold).append(".\n");
+                ok = false;
+            }
+        }
+        return ok;
     }
 
     /**

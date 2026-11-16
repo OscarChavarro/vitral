@@ -55,8 +55,7 @@ class BooleanOracleFuzzGateTest
         FamilySummary summary = BooleanOracleFuzz.runFamily(family);
 
         System.out.println(family + ": " + summary.correct + " / " +
-            summary.total + " correct (" + summary.okByFallback +
-            " by fallback) " + summary.byOutcome);
+            summary.total + " correct " + summary.byOutcome);
         summary.failures.forEach(f -> System.out.println("  " + f));
 
         assertThat(summary.correct)

@@ -30,8 +30,13 @@ defined on point sets, hence invariant under isometries).</p>
 @Tag("slow")
 class RigidMotionInvarianceGateTest
 {
-    /** Stage A measured 24; Stage D raised it to 31. */
-    private static final int MINIMUM_INVARIANT = 31;
+    /**
+    Stage A measured 24; Stage D raised it to 31. With the fallbacks retired
+    (every answer from the Ch. 15 pipeline) all 36 cases are invariant; the
+    same exception on both sides (CROSS_PAIR A-B, rejected as non-manifold)
+    counts as invariant.
+    */
+    private static final int MINIMUM_INVARIANT = 36;
 
     private static final int[] OPERATIONS = BooleanOracleFuzz.OPERATIONS;
 
@@ -98,10 +103,13 @@ class RigidMotionInvarianceGateTest
             for ( int op : OPERATIONS ) {
                 Outcome plain = run(sample, op, null);
                 Outcome rotated = run(sample, op, GENERIC_ROTATION);
+                boolean bothRejected = Double.isNaN(plain.volume) &&
+                    Double.isNaN(rotated.volume);
                 boolean same = plain.summary.equals(rotated.summary) &&
                     plain.strictValid == rotated.strictValid &&
-                    Math.abs(plain.volume - rotated.volume) <=
-                        1.0e-6 * Math.max(1.0, Math.abs(plain.volume));
+                    (bothRejected ||
+                     Math.abs(plain.volume - rotated.volume) <=
+                         1.0e-6 * Math.max(1.0, Math.abs(plain.volume)));
                 total++;
                 if ( same ) {
                     invariant++;

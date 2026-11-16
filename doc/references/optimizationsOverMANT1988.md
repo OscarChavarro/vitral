@@ -9,48 +9,72 @@ Recovery should proceed by re-enabling one test or one fixture at a time after t
 # Code improvement impact matrix
 
 Having a green check means test worked, red cross means test not working.
+The result path is what `PolyhedralBoundedSolidModeler.getLastSetOpResultPath()`
+reports for the operation with the default strict validation (measured
+2026-11-16, Java port): `normal-pipeline` is the [MANT1988] Ch. 15
+algorithm; any other value names the preflight that answered. The
+shape-specific fallbacks (axis-aligned cells, orthogonal profile, profile
+difference, offset cylinder) were retired on 2026-11-16: every answer now
+comes from the Chapter 15 pipeline or from one of its preflights.
 
-| model name / operation | current logic |
-|---|:---:|
-| MANT1986_2 + UNION | ✅ |
-| MANT1986_2 + INTERSECTION | ✅ |
-| MANT1986_2 + A-B | ✅ |
-| MANT1986_2 + B-A | ✅ |
-| STACKED_BLOCKS + UNION | ✅ |
-| STACKED_BLOCKS + INTERSECTION | ✅ |
-| STACKED_BLOCKS + A-B | ✅ |
-| STACKED_BLOCKS + B-A | ✅ |
-| MOON_BLOCK + UNION | ✅ |
-| MOON_BLOCK + INTERSECTION | ✅ |
-| MOON_BLOCK + A-B | ✅ |
-| MOON_BLOCK + B-A | ✅ |
-| CROSS_PAIR + UNION | ✅ |
-| CROSS_PAIR + INTERSECTION | ✅ |
-| CROSS_PAIR + A-B | ✅ |
-| CROSS_PAIR + B-A | ✅ |
-| HOLLOW_BRICK + UNION | ✅ |
-| HOLLOW_BRICK + INTERSECTION | ✅ |
-| HOLLOW_BRICK + A-B | ✅ |
-| HOLLOW_BRICK + B-A | ✅ |
-| MANT1988_6_13 + UNION | ✅ |
-| MANT1988_6_13 + INTERSECTION | ✅ |
-| MANT1988_6_13 + A-B | ✅ |
-| MANT1988_6_13 + B-A | ✅ |
-| MANT1988_15_1 + UNION | ✅ |
-| MANT1988_15_1 + INTERSECTION | ✅ |
-| MANT1988_15_1 + A-B | ✅ |
-| MANT1988_15_1 + B-A | ✅ |
-| MANT1988_3 + UNION | ✅ |
-| MANT1988_3 + INTERSECTION | ✅ |
-| MANT1988_3 + A-B | ✅ |
-| MANT1988_3 + B-A | ✅ |
-| MANT1988_15_2_HOLED + UNION | ✅ |
-| MANT1988_15_2_HOLED + INTERSECTION | ✅ |
-| MANT1988_15_2_HOLED + A-B | ✅ |
-| MANT1988_15_2_HOLED + B-A | ✅ |
-| CSG_LAMP_SHELL | ✅ |
-| FEATURED_OBJECT | ✅ |
-| CSG_KURLANDER_BOWL | ❌ |
+| model name / operation | current logic | result path |
+|---|:---:|---|
+| MANT1986_2 + UNION | ✅ | `normal-pipeline` |
+| MANT1986_2 + INTERSECTION | ✅ | `normal-pipeline` |
+| MANT1986_2 + A-B | ✅ | `normal-pipeline` |
+| MANT1986_2 + B-A | ✅ | `normal-pipeline` |
+| STACKED_BLOCKS + UNION | ✅ | `normal-pipeline` |
+| STACKED_BLOCKS + INTERSECTION | ✅ | `partial-coplanar-area-preflight` |
+| STACKED_BLOCKS + A-B | ✅ | `partial-coplanar-area-preflight` |
+| STACKED_BLOCKS + B-A | ✅ | `partial-coplanar-area-preflight` |
+| MOON_BLOCK + UNION | ✅ | `normal-pipeline` |
+| MOON_BLOCK + INTERSECTION | ✅ | `normal-pipeline` |
+| MOON_BLOCK + A-B | ✅ | `normal-pipeline` |
+| MOON_BLOCK + B-A | ✅ | `normal-pipeline` |
+| CROSS_PAIR + UNION | ✅ | `normal-pipeline` |
+| CROSS_PAIR + INTERSECTION | ✅ | `normal-pipeline` |
+| CROSS_PAIR + A-B | ⚠️ | `normal-pipeline`, then `NonManifoldBooleanResultException` (see below) |
+| CROSS_PAIR + B-A | ✅ | `normal-pipeline` |
+| HOLLOW_BRICK + UNION | ✅ | `normal-pipeline` |
+| HOLLOW_BRICK + INTERSECTION | ✅ | `normal-pipeline` |
+| HOLLOW_BRICK + A-B | ✅ | `normal-pipeline` |
+| HOLLOW_BRICK + B-A | ✅ | `normal-pipeline` |
+| MANT1988_6_13 + UNION | ✅ | `normal-pipeline` |
+| MANT1988_6_13 + INTERSECTION | ✅ | `normal-pipeline` |
+| MANT1988_6_13 + A-B | ✅ | `normal-pipeline` |
+| MANT1988_6_13 + B-A | ✅ | `normal-pipeline` |
+| MANT1988_15_1 + UNION | ✅ | `normal-pipeline` |
+| MANT1988_15_1 + INTERSECTION | ✅ | `normal-pipeline` |
+| MANT1988_15_1 + A-B | ✅ | `normal-pipeline` |
+| MANT1988_15_1 + B-A | ✅ | `normal-pipeline` |
+| MANT1988_3 + UNION | ✅ | `normal-pipeline` |
+| MANT1988_3 + INTERSECTION | ✅ | `normal-pipeline` |
+| MANT1988_3 + A-B | ✅ | `normal-pipeline` |
+| MANT1988_3 + B-A | ✅ | `normal-pipeline` |
+| MANT1988_15_2_HOLED + UNION | ✅ | `normal-pipeline` |
+| MANT1988_15_2_HOLED + INTERSECTION | ✅ | `normal-pipeline` |
+| MANT1988_15_2_HOLED + A-B | ✅ | `normal-pipeline` |
+| MANT1988_15_2_HOLED + B-A | ✅ | `normal-pipeline` |
+| CSG_LAMP_SHELL | ✅ | not measured (composite model) |
+| FEATURED_OBJECT | ✅ | not measured (composite model) |
+| CSG_KURLANDER_BOWL | ❌ | — |
+
+⚠️ means the operation has no manifold answer and the default `setOp`
+rejects it. `CROSS_PAIR` A−B: the two remaining pieces of A touch B's
+removed bar along one edge, so the regularised result is non-manifold
+(two shells sharing an edge). By the B-04 policy (2026-11-16: "if the two
+shells touch, reject it, it is a non-manifold result") `setOp` throws
+`NonManifoldBooleanResultException`. The retired cell fallback used to
+return two shells (F=12, E=23, V=14) that failed the strict Euler check.
+
+Beyond this matrix the oracle fuzz gates (`BooleanOracleFuzzGateTest`,
+slow) check six families of box pairs against an independent volume
+oracle: all 560 cases are correct (2026-11-16), all from the pipeline,
+14 of them rejected as non-manifold unions (B-04). The rigid-motion gate
+(`RigidMotionInvarianceGateTest`) gives 36 / 36: with the fallbacks gone,
+no answer depends on the operands being axis-aligned. See
+`doc/polyhedralBoundedSolidDevelopment/Fable5.2Analysis.md` (Sections 5
+and 10).
 
 # The block and wedge case
 
@@ -87,6 +111,10 @@ passed with this fix.
 
 # The MANT1988_15_1 profile difference case
 
+*Retired 2026-11-16.* The profile difference fallback described below was removed. The
+case is now answered by the Chapter 15 pipeline (`normal-pipeline`), with
+the same counts. The text is kept as a record of the failure.
+
 `MANT1988_15_1` is the L-block against beveled-block fixture. The visible
 failure was `B-A`: the expected result is the right-hand reduced part of B,
 bounded by the new cut profile, but finish returned the full operand B. The
@@ -117,6 +145,10 @@ All four operations for `MANT1988_15_1` are locked in
 
 # The MANT1988_3 rectilinear contact case
 
+*Retired 2026-11-16.* The axis-aligned cell fallback described below was removed. The
+case is now answered by the Chapter 15 pipeline (`normal-pipeline`), with
+the same counts. The text is kept as a record of the failure.
+
 `MANT1988_3` L-profile against box fixture. The systematic trace showed that preflight did not apply, while
 generate and classify did find the expected vertex/face and vertex/vertex
 contacts. The break was at connect -> finish: connect left loose point
@@ -138,6 +170,10 @@ results and are locked in `BooleansFromReferenceObjectPairsTest`: UNION,
 INTERSECTION, A-B, and B-A.
 
 # The MANT1988_6_13 orthogonal profile case
+
+*Retired 2026-11-16.* The orthogonal profile fallback described below was removed. The
+case is now answered by the Chapter 15 pipeline (`normal-pipeline`), with
+the same counts. The text is kept as a record of the failure.
 
 `MANT1988_6_13` is the left-view profile extrusion against the front-view
 profile extrusion. The stage trace showed that preflight did not apply and

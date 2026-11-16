@@ -40,10 +40,16 @@ class SetOpConnectRingInvariantTest
         PolyhedralBoundedSolid[] p = CsgSampleCorpusFixtures.createPair(sample);
         boolean bMinusA = op == BooleanOracleFuzz.B_MINUS_A;
 
-        PolyhedralBoundedSolidModeler.setOp(bMinusA ? p[1] : p[0],
-            bMinusA ? p[0] : p[1],
-            bMinusA ? PolyhedralBoundedSolidModeler.SUBTRACT : op,
-            false, true, false);
+        try {
+            PolyhedralBoundedSolidModeler.setOp(bMinusA ? p[1] : p[0],
+                bMinusA ? p[0] : p[1],
+                bMinusA ? PolyhedralBoundedSolidModeler.SUBTRACT : op,
+                false, true, false);
+        }
+        catch ( NonManifoldBooleanResultException e ) {
+            // Rejected after finish (CROSS_PAIR A-B: two bars touching
+            // along an edge); connect ran and its invariant still applies.
+        }
 
         assertViolationsEmpty(sample + " " + BooleanOracleFuzz.opName(op));
     }

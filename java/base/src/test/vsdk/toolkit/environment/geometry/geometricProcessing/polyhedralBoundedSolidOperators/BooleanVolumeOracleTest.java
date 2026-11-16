@@ -94,8 +94,8 @@ class BooleanVolumeOracleTest
 
     /**
     B-05 control: top and bottom faces coplanar, both operands axis-aligned.
-    Three of the four operations are answered by the axis-aligned
-    cell-decomposition fallback, not by the Ch. 15 pipeline.
+    Answered by the Ch. 15 pipeline (the cell-decomposition fallback that
+    used to answer three of the operations was retired).
     */
     private static OrientedBox[] coplanarAxisAligned()
     {
@@ -107,8 +107,8 @@ class BooleanVolumeOracleTest
     /**
     B-05 (rigid-motion invariance): coplanarAxisAligned() with one rigid
     rotation applied to BOTH operands. A boolean must be invariant under a
-    common rigid motion; here the axis-aligned fallback no longer applies
-    and the general pipeline is exposed on coplanar overlapping faces
+    common rigid motion; the pipeline handles both orientations the same
+    way on coplanar overlapping faces
     ([MANT1988] Figs. 15.1 and 15.5).
     */
     private static OrientedBox[] coplanarRigidlyRotated()

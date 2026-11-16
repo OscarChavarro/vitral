@@ -14,6 +14,8 @@ import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidFaceGeometry;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -356,7 +358,17 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return outRes;
         }
 
+        // The intersection of solids that share part of a face is returned
+        // as laminae (zero volume, valid and easy to display), not as the
+        // regularised empty set. A contact whose area is below the collapsed
+        // face threshold gives no lamina: a collapsed lamina is not a valid
+        // result (see _GeometricCollapsedLaminaStrategy).
         for ( i = 0; i < contactPolygons.size(); i++ ) {
+            if ( polygonArea(contactPolygons.get(i)) <
+                 PolyhedralBoundedSolidGeometricValidator
+                     .collapsedFaceAreaThreshold(numericContext) ) {
+                continue;
+            }
             PolyhedralBoundedSolid lamina =
                 createLaminaFromPolygon(contactPolygons.get(i));
             if ( lamina.getPolygonsList().size() > 0 ) {
@@ -381,28 +393,21 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     /**
-    Precomputes the containing plane of every face of {@code solid}, indexed by
-    face position. Point classification tests many points against the same
-    unmutated solid, so computing each plane once (instead of once per point per
-    face) removes the dominant Newell/tolerance-context recompute from the hot
-    path. The returned array is only valid while {@code solid} is not mutated.
+    Precomputes the containing plane and the bounding box of every face of
+    {@code solid}, indexed by face position. Point classification tests many
+    points against the same unmutated solid, so computing each plane once
+    (instead of once per point per face) removes the dominant
+    Newell/tolerance-context recompute from the hot path, and the box skips
+    the point-in-face test for points far from the face (Stage G). The
+    returned array is only valid while {@code solid} is not mutated.
     */
-    private static InfinitePlane[] precomputeFacePlanes(
+    private static PolyhedralBoundedSolidFaceGeometry[] precomputeFacePlanes(
         PolyhedralBoundedSolid solid)
     {
-        int n;
-        int i;
-        InfinitePlane[] planes;
-
         if ( solid == null ) {
-            return new InfinitePlane[0];
+            return new PolyhedralBoundedSolidFaceGeometry[0];
         }
-        n = solid.getPolygonsList().size();
-        planes = new InfinitePlane[n];
-        for ( i = 0; i < n; i++ ) {
-            planes[i] = solid.getPolygonsList().get(i).getContainingPlane();
-        }
-        return planes;
+        return PolyhedralBoundedSolidFaceGeometry.of(solid);
     }
 
     private static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
@@ -413,7 +418,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
-        InfinitePlane[] facePlanes,
+        PolyhedralBoundedSolidFaceGeometry[] facePlanes,
         Vector3Dd point)
     {
         int i;
@@ -429,11 +434,12 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
         for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             face = solid.getPolygonsList().get(i);
-            InfinitePlane facePlane = facePlanes[i];
+            InfinitePlane facePlane = facePlanes[i].getPlane();
             if ( facePlane == null ) {
                 continue;
             }
-            if ( Math.abs(facePlane.pointDistance(point)) <= eps ) {
+            if ( Math.abs(facePlane.pointDistance(point)) <= eps &&
+                 !facePlanes[i].projectionExcludes(point, eps) ) {
                 if ( face.testPointInside(point, eps, facePlane) !=
                      Geometry.OUTSIDE ) {
                     return Geometry.LIMIT;
@@ -455,7 +461,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
             for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
                 face = solid.getPolygonsList().get(i);
-                InfinitePlane facePlane = facePlanes[i];
+                InfinitePlane facePlane = facePlanes[i].getPlane();
                 if ( facePlane == null ) {
                     ambiguous = true;
                     break;
@@ -471,6 +477,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
                 Vector3Dd pi = hit.getOrigin().add(
                     hit.getDirection().multiply(hit.getT()));
+                if ( facePlanes[i].projectionExcludes(pi, eps) ) {
+                    continue;
+                }
                 int status = face.testPointInside(pi, eps, facePlane);
                 if ( status == Geometry.LIMIT ) {
                     ambiguous = true;
@@ -549,8 +558,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         double[] bounds,
         PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB,
-        InfinitePlane[] planesA,
-        InfinitePlane[] planesB)
+        PolyhedralBoundedSolidFaceGeometry[] planesA,
+        PolyhedralBoundedSolidFaceGeometry[] planesB)
     {
         double[] sx = axisProbeCoordinates(bounds[0], bounds[3]);
         double[] sy = axisProbeCoordinates(bounds[1], bounds[4]);
@@ -722,7 +731,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     static boolean hasBoundaryPointOutside(PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB)
     {
-        InfinitePlane[] planesB;
+        PolyhedralBoundedSolidFaceGeometry[] planesB;
         int i;
 
         setNumericContext(
@@ -762,8 +771,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         // Precompute each solid's face planes once; every probe/grid point is
         // classified against the same unmutated solids, so this removes the
         // per-point Newell/tolerance-context recompute (P2 scoped cache).
-        InfinitePlane[] planesA = precomputeFacePlanes(solidA);
-        InfinitePlane[] planesB = precomputeFacePlanes(solidB);
+        PolyhedralBoundedSolidFaceGeometry[] planesA = precomputeFacePlanes(solidA);
+        PolyhedralBoundedSolidFaceGeometry[] planesB = precomputeFacePlanes(solidB);
 
         // P1.2 — cheap early-positive pass. hasConfirmedInteriorOverlap is an
         // existence test ("is there a point interior to both solids"); any
@@ -830,7 +839,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return Geometry.OUTSIDE;
         }
 
-        InfinitePlane[] planesB = precomputeFacePlanes(solidB);
+        PolyhedralBoundedSolidFaceGeometry[] planesB = precomputeFacePlanes(solidB);
         for ( i = 0; i < solidA.getVerticesList().size(); i++ ) {
             _PolyhedralBoundedSolidVertex v = solidA.getVerticesList().get(i);
             int status = classifyPointAgainstSolid(solidB, planesB, v.position);
@@ -868,7 +877,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     {
         int i;
         boolean someInside = false;
-        InfinitePlane[] planes = precomputeFacePlanes(outer);
+        PolyhedralBoundedSolidFaceGeometry[] planes = precomputeFacePlanes(outer);
 
         for ( i = 0; i < inner.getVerticesList().size(); i++ ) {
             if ( classifyPointAgainstSolid(outer, planes,
@@ -897,7 +906,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     private static boolean someFaceWitnessIsOutside(
         PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB,
-        InfinitePlane[] planesB)
+        PolyhedralBoundedSolidFaceGeometry[] planesB)
     {
         int i;
 
@@ -984,11 +993,13 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         int s1;
         int s2;
         Vector3Dd p;
+        PolyhedralBoundedSolidFaceGeometry[] otherFaces;
 
         if ( current == null || other == null ) {
             return false;
         }
 
+        otherFaces = precomputeFacePlanes(other);
         for ( i = 0; i < current.getEdgesList().size(); i++ ) {
             edge = current.getEdgesList().get(i);
             if ( edge == null || edge.rightHalf == null ||
@@ -1006,7 +1017,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 if ( face == null ) {
                     continue;
                 }
-                InfinitePlane facePlane = face.getContainingPlane();
+                InfinitePlane facePlane = otherFaces[j].getPlane();
                 if ( facePlane == null ) {
                     continue;
                 }
@@ -1391,6 +1402,23 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         }
 
         return Math.abs(accumulator.dotProduct(normal.normalized())) * 0.5;
+    }
+
+    private static double polygonArea(ArrayList<Vector3Dd> points)
+    {
+        double nx = 0.0;
+        double ny = 0.0;
+        double nz = 0.0;
+        int i;
+
+        for ( i = 0; i < points.size(); i++ ) {
+            Vector3Dd p = points.get(i);
+            Vector3Dd q = points.get((i + 1) % points.size());
+            nx += (p.y() - q.y()) * (p.z() + q.z());
+            ny += (p.z() - q.z()) * (p.x() + q.x());
+            nz += (p.x() - q.x()) * (p.y() + q.y());
+        }
+        return 0.5 * Math.sqrt(nx * nx + ny * ny + nz * nz);
     }
 
     private static PolyhedralBoundedSolid createLaminaFromPolygon(

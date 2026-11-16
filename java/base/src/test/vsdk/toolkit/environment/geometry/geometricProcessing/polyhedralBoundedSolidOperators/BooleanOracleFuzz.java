@@ -94,7 +94,6 @@ final class BooleanOracleFuzz
     {
         int total;
         int correct;
-        int okByFallback;
         /** Included in {@link #correct}. */
         int okByRejection;
         final Map<Outcome, Integer> byOutcome = new LinkedHashMap<>();
@@ -319,10 +318,6 @@ final class BooleanOracleFuzz
                 }
                 else if ( r.outcome == Outcome.OK ) {
                     summary.correct++;
-                    if ( r.path != null && !r.path.equals("normal-pipeline") &&
-                         r.path.contains("fallback") ) {
-                        summary.okByFallback++;
-                    }
                 }
                 else {
                     summary.failures.add(r);
@@ -335,15 +330,15 @@ final class BooleanOracleFuzz
     public static void main(String[] args)
     {
         vsdk.toolkit.common.VSDK.setWithSystemExit(false);
-        System.out.println("| Family | Correct (strict-valid or rejected) | by fallback | " +
+        System.out.println("| Family | Correct (strict-valid or rejected) | " +
             "rejected non-manifold | wrong volume | strict rejected | " +
             "exception |");
-        System.out.println("|---|---:|---:|---:|---:|---:|---:|");
+        System.out.println("|---|---:|---:|---:|---:|---:|");
         ArrayList<CaseResult> failures = new ArrayList<>();
         for ( Family family : Family.values() ) {
             FamilySummary s = runFamily(family);
             System.out.println("| " + family + " | " + s.correct + " / " +
-                s.total + " | " + s.okByFallback + " | " +
+                s.total + " | " +
                 s.okByRejection + " | " +
                 s.byOutcome.get(Outcome.WRONG_VOLUME) + " | " +
                 s.byOutcome.get(Outcome.STRICT_REJECTED) + " | " +

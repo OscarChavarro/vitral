@@ -1,7 +1,9 @@
 # CAD Kernel Audit
 
-**Updated:** 2026-11-14, at revision `4412e55a` (Java port, `java/base`).
-This version replaces the April 2026 audit. The evidence behind every
+**Updated:** 2026-11-16, after the execution of the Fable 5.2 plan on the
+Java port (`java/base`). The previous version (2026-11-14, revision
+`4412e55a`) described the kernel before that plan; Section 4 compares the
+two. The execution record is Section 10 of `Fable5.2Analysis.md`. The evidence behind every
 statement marked with a defect id (B-, S-, E-, L-, C-) is in
 `doc/polyhedralBoundedSolidDevelopment/Fable5.2Analysis.md`.
 
@@ -14,22 +16,23 @@ to `java/base/src/main/vsdk/toolkit/`:
   Euler operators, topology editing, validation, numeric policy, predicates.
 - `environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators`
   — modeler façade, `slicing/`, `booleans/` (`intersection/`,
-  `classification/`, `topology/`), `fallbacks/`, `construction/`, `fixtures/`.
+  `classification/`, `topology/`), `fallbacks/` (only the id namespace
+  remains), `construction/`, `fixtures/`.
 - `common/dataStructures/CircularDoubleLinkedList` — the container under
   every face, loop, edge, vertex and half-edge list.
 - Tests under `java/base/src/test/vsdk/toolkit/` (the directories
-  `processing/polyhedralBoundedSolidOperators` and
-  `environment/geometry/volume/polyhedralBoundedSolid`; the first one
-  declares the package of `geometricProcessing`, so directory and package do
-  not match).
+  `environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators`
+  and `environment/geometry/volume/polyhedralBoundedSolid`; directories now
+  match packages).
 
 Scope decision kept from the previous audit: lack of curved-surface support
 is excluded from the gap analysis.
 
 Method: source reading, the stage plans 1–10, the full test suite
-(`gradle :base:test`: 712 tests, 0 failures, 48 skipped), and an independent
-volume oracle run on box pairs and splitting planes that are not part of the
-fixture corpus.
+(`gradle :base:test`: 1109 tests, 0 failures, 38 skipped; 712 tests in the
+previous version), the slow gates (`gradle :base:slowTest`: oracle fuzz and
+rigid-motion invariance), and an independent volume oracle run on box pairs
+and splitting planes that are not part of the fixture corpus.
 
 ## 2) MANT1988 baseline used for comparison
 
@@ -48,87 +51,83 @@ fixture corpus.
 Strengths:
 - Operator vocabulary and data model follow the book (`mvfs/kvfs`,
   `lmev/lkev`, `lmef/lkef`, `lkemr/lmekr`, `lkfmrh/lmfkrh`, `lringmv`).
-- Euler operators, topology editing and validation are separate classes
-  since the June refactor.
-- `maximizeFaces` is iterative and has a planarity guard; the open
-  "Case 2: not tested" marker of the previous audit is gone.
+- Euler operators, topology editing and validation are separate classes.
+- The list container defects (L-01 to L-03) and the operator special cases
+  (E-01 to E-06) are fixed. The operators check those preconditions on entry
+  and reject without side effects.
+- `he.next()` and `he.previous()` are O(1): a half-edge keeps a
+  back-pointer to its list node.
+- `PolyhedralBoundedSolidStructuralCopy` gives a linear structural copy
+  (`scopy`) that keeps ids, list order and loop starts.
 
 Weaknesses:
-- The list container has three defects: stale head after the list becomes
-  empty (L-01), `remove` with an invalid index deletes the element under the
-  stale window (L-02), `insertBefore` with a missing pivot inserts at the
-  head (L-03).
-- Six operator edge cases are broken or unchecked: `lkev` followed by `lmev`
-  on a skeleton (E-01), `lkemr` when the outer loop collapses to one vertex
-  (E-02), `lmekr` leaving a null emanating half-edge (E-03), `lmef(he, he)`
-  (E-04), `lkev` leaving a dangling emanating half-edge (E-05), `lmef`
-  across two loops (E-06).
-- Operators report broken preconditions with warnings and may return after
-  partial modification.
-- `he.next()` is a linear scan of the loop; the book's intrusive links are
-  O(1).
+- Global id counters in `_HalfEdge` and `_Edge`.
+- `remakeEmanatingHalfedgesReferences` still mixes validation and repair.
 
-Assessment: sound on the main paths, not yet on the special cases the book
-calls out (empty loops, inverse round trips).
+Assessment: sound on the main paths and on the special cases the book calls
+out.
 
 ### 3.2 Splitter (`slicing/_PolyhedralBoundedSolidSplitter`)
 
 Strengths:
 - Follows Program 14.1 (`splitGenerate`, `splitClassify`, `splitConnect`,
-  `splitFinish`).
-- Correct on generic planes, planes containing an edge, planes through two
-  opposite edges, and planes coincident with a face (volume conserved,
-  pieces strict-valid).
-- A regression test exists for the MANT1986 fixture.
+  `splitFinish`), with its state in a per-call context.
+- Planes through vertices work (S-01 fixed). One sector convention is
+  documented and used by the classification and the null-edge insertion.
+- The input is never modified or returned; each piece goes to the list of
+  its side of the plane, and a plane that does not cut sends a copy to the
+  side the solid lies on.
+- A seeded fuzz splits every corpus solid by planes through its vertices:
+  252 / 256 correct.
 
 Weaknesses:
-- A plane through a vertex of the solid returns two empty solids and
-  empties the input, without any message (S-01).
-- All state is still static (`soov`, `sone`, `sonf`, `ends`, …).
-- When the plane misses the solid, the input object itself is returned.
+- A section pinched at a reflex vertex (two section regions meeting at one
+  vertex inside a face) comes out as a single self-touching loop: right
+  volume, strict-invalid (4 fuzz cases).
+- The splitter and the vertex/face classifier remain two implementations
+  (Problem 15.4).
 - A slicing-only variant (§14.9, Problem 14.3) does not exist.
 
-Assessment: close to the book and reliable away from vertices; not general
-in the sense of §14.1.
+Assessment: general in the sense of §14.1 except for the pinched-section
+case.
 
 ### 3.3 Set operations (`booleans/`)
 
 Strengths:
 - Pipeline aligned with Ch. 15 and split into intersector, classifiers,
-  connector and finisher.
-- The intersection curve is an explicit object
-  (`_PolyhedralBoundedSolidSetIntersectionCurveBuilder`) and orders the
-  connect step.
-- Per-operation list state lives in `_SetOperationContext`.
-- Strict validation is a default postcondition of `setOp`, with a topology
-  summary in the failure message.
-- All reference fixtures and the 40-motif Kurlander bowl sweep pass.
+  connector and finisher. The intersection curve is an explicit object.
+- Ring ownership (B-01), coplanar faces with crossing edges and tangent
+  containment (B-02), edges lying in a face (B-03) are fixed. Face contact is
+  glued by the pipeline (B-04).
+- All 560 cases of the oracle fuzz are correct, including rotated operands,
+  translation to 1000 and coplanar faces after a 45° rotation.
+- Contract: `setOp` leaves its operands intact (`setOpDestructive` keeps the
+  book's behaviour). Failures are typed under
+  `PolyhedralBoundedSolidOperationException`. An empty result that the
+  operands disprove throws `SolidOperationFailedException` instead of being
+  returned silently. `getLastSetOpResultPath()` names the path that
+  answered.
+- Generate rejects edge/face pairs by bounding boxes; read-only passes
+  compute each face plane once.
 
 Weaknesses:
-- A section ring strictly inside a face is finished incorrectly when the
-  result needs the disk inside the ring: a zero-area face with two
-  coincident loops remains and strict validation throws (B-01). This is the
-  generic failure for rotated boxes: 26 of 48 operations correct on
-  randomly rotated box pairs.
-- Coplanar faces whose edges cross, and containment with tangent faces,
-  give wrong volumes or a fatal error (B-02).
-- A solid with edges lying in a face of the other is taken as contained;
-  the wrong result passes strict validation (B-03).
-- Two solids sharing a face are returned as two shells; strict validation
-  rejects that result (B-04).
-- Axis-aligned coplanar cases are answered by the cell fallback; the same
-  operands after a common rigid motion fail (B-05). `MANT1988_15_1`,
-  `MANT1988_3` and `MANT1988_6_13` are also answered by fallbacks.
-- Fallbacks are built before they are needed, and the cell fallback writes
-  the B-Rep directly, without Euler operators.
-- Operands are consumed (C-01).
-- Static mutable state remains: debug flags, numeric context, id namespace,
-  the connector's scratch and counters, finisher counters, global id
-  counters in `_HalfEdge` and `_Edge`. Execution is not reentrant.
-- No bounding-box rejection in generate.
+- A union touching only along an edge or at a vertex is rejected
+  (`NonManifoldBooleanResultException`), by decision, instead of returning
+  the pseudomanifold of criterion 3′.
+- `STACKED_BLOCKS` ∩, A−B and B−A are still answered by the
+  partial-coplanar preflight, not by the pipeline.
+- Two blocks sharing a face give a zero-volume lamina for ∩, not the
+  regularised empty set. This is policy (2026-11-16): a lamina is valid and
+  easy to display; a collapsed lamina (area below EPSILON) is rejected.
+- Static mutable state remains in the connector (scratch and counters), the
+  debug flags and the id counters. The public operations are serialized on
+  one lock: thread-safe, not concurrent.
+- A failed input validation is still only a warning.
 
-Assessment: correct on the fixture families and on axis-aligned general
-position; not yet correct for two arbitrary convex polyhedra.
+Assessment: correct on every box-pair family measured, including rotated
+and coplanar ones, with every answer from the Chapter 15 pipeline or its
+preflights. The shape-specific fallbacks were retired on 2026-11-16 (B-05
+closed, rigid-motion gate 36 / 36).
 
 ### 3.4 Validation
 
@@ -136,35 +135,56 @@ Strengths:
 - Two levels (`validateIntermediate`, `validateStrict`) with composed
   strategies; shells and adjusted Euler characteristic in
   `PolyhedralBoundedSolidTopologySummary`.
+- `validateIntermediate` checks the emanating half-edge of every vertex.
+- Strict validation computes face planes and boxes once and skips face
+  pairs whose boxes are apart.
 - Numeric policy is centralised.
 
 Weaknesses:
-- `validateIntermediate` does not check vertex back-pointers (E-05 passes).
-- The empty solid passes `validateStrict`.
-- Strict validation rejects the pseudomanifold results that §15.2 admits
-  and that the touching-only preflight produces.
+- The empty solid passes `validateStrict`; `isEmptyResult` and the
+  lost-solid check of `setOp` cover the case for callers.
 - `remakeEmanatingHalfedgesReferences` still removes vertices with a null
-  emanating half-edge, mixing validation and repair.
-- A failed input validation is logged and the operation continues.
+  emanating half-edge.
 
 ### 3.5 Tests
 
 Strengths:
-- 48 kernel-related test classes; direct operator tests, invariant tests on
-  connect and finish, curve builder tests, algebraic identity tests.
 - An independent volume oracle (`PolyhedralBoundedSolidVolumeOracle`) with
-  18 box-pair rows that pass and 20 rows kept as a disabled work queue.
+  no disabled rows left, a seeded oracle fuzz over six box-pair families
+  (560 cases, ratchets per family), a rigid-motion invariance gate, a split
+  fuzz, and contract tests (`SetOpContractTest`).
+- Fatal kernel errors fail a test instead of killing the Gradle worker
+  (`vsdk.withSystemExit=false` for the test tasks).
+- The test task runs in up to 8 forked JVMs: about 34 s for the suite.
 
 Weaknesses:
-- Most regression tests assert topology counts captured from the kernel's
-  own output; they detect change, not error.
-- Touching cases are tested with strict validation off and assert two
-  shells.
-- `Logger` fatal errors call `System.exit(1)` unless a test class disables
-  it; only a few do.
-- No fuzz or rigid-motion invariance gate yet.
+- Most regression tests still assert topology counts captured from the
+  kernel's own output; they detect change, not error. The oracle covers
+  boxes only: non-convex operands and chains of booleans have no
+  independent check yet.
 
-## 4) Comparison with the April 2026 version of this document
+## 4) Comparison with earlier versions
+
+### With the 2026-11-14 version
+
+Closed by the Fable 5.2 plan:
+- L-01 to L-03, E-01 to E-06, B-01, B-02, B-03, S-01, C-01.
+- B-04: face contact glued; edge or vertex contact rejected as
+  non-manifold.
+- Fatal errors no longer kill the test worker; typed failures; explicit
+  empty result.
+- Splitter state in a context; input of `split` and `setOp` preserved.
+- Bounding-box rejection in generate and strict validation; planes
+  computed once per read-only pass.
+- Oracle fuzz, rigid-motion and split fuzz gates.
+
+Still open:
+- Static state in the connector, validation mixed with repair, input
+  validation as a warning, the pinched split section, the
+  `STACKED_BLOCKS` preflight. (B-05 closed: fallbacks retired; `CROSS_PAIR`
+  A−B rejected as non-manifold; the lamina kept by policy.)
+
+### Earlier: comparison of the 2026-11-14 version with the April 2026 version
 
 Closed since then:
 - Table-driven coplanar predicates, touching-only policy, iterative
@@ -188,51 +208,53 @@ New in this version:
 
 ## 5) Production readiness (curved surfaces excluded)
 
-Maturity: advanced research prototype.
+Maturity: robust research prototype, close to usable for polyhedral models
+built from boxes, prisms and sweeps.
 
 Why not production yet:
-- Wrong results on simple inputs outside the corpus, some of them silent.
-- The splitter loses the solid on a common degenerate plane.
-- Operands are destroyed and execution is not reentrant.
-- Quality gates are snapshots of the kernel's own output.
+- The independent oracle covers box pairs only.
+- Static state limits concurrency to one operation at a time.
+- The kernel has not been measured on models with thousands of faces.
 
 ## 6) What is missing
 
 Priority P0:
-- Fix the container and the Euler special cases; check operator
-  preconditions and reject without side effects.
-- Fix ring ownership in connect (B-01).
-- Fix the splitter for planes through vertices (S-01).
-- Make the volume oracle and a seeded fuzz a permanent gate.
+- Done 2026-11-16: fallbacks retired, `CROSS_PAIR`, `MANT1988_3` and
+  `MANT1988_6_13` report `normal-pipeline`, rigid-motion gate 36 / 36;
+  laminae allowed, collapsed laminae rejected.
+- Answer `STACKED_BLOCKS` from the pipeline instead of the partial-coplanar
+  preflight.
 
 Priority P1:
-- Treat coplanar faces inside the pipeline with a two-dimensional boolean
-  (B-02, B-04, B-05) and unify the preflight predicates (B-03); then retire
-  the fallbacks.
-- Non-destructive `setOp` through a structural copy.
-- Remove the remaining static state; move the splitter to a context object.
+- Split pinched sections into separate loops (reuse
+  `splitSelfTouchingLoops`).
+- An oracle for non-convex operands and chains of booleans.
+- Remove the static state of the connector; then lift the lock.
 
 Priority P2:
-- Typed failures; validation separated from repair.
-- Bounding-box rejection in generate; spatial index for strict validation.
-- Intrusive half-edge links.
+- Validation separated from repair; failed input validation as an error.
+- Spatial index for larger models; measure on thousands of faces.
+- Volume and other integral properties (§13.3) in production code.
 
-The staged plan is in `Fable5.2Analysis.md`, Section 7.
+The record of the plan and its open items is Section 10 of
+`Fable5.2Analysis.md`.
 
 ## 7) Verdict
 
-The kernel is a faithful and much-hardened realisation of [MANT1988], with
-one important addition of its own (the explicit intersection curve). It
-passes its corpus. Measured outside the corpus it is reliable for
-axis-aligned operands in general position and unreliable for rotated
-operands, coplanar faces and planes through vertices.
+The kernel is a faithful and hardened realisation of [MANT1988], with one
+important addition of its own (the explicit intersection curve). Measured
+outside its corpus with an independent oracle, it is correct on every
+box-pair family tried, including rotated and coplanar operands, and its
+splitter handles planes through vertices. The shape-specific fallbacks are
+gone; the open work is concurrency, the remaining preflight and an oracle
+beyond box pairs.
 
 ## 8) MANT1988 problems backlog
 
 | Problem | Evidence in code | Status | Still missing |
 |---|---|---|---|
-| 11.3 (`lkev`, `lkef`) | `PolyhedralBoundedSolidEulerOperators` | Implemented, with defects | E-01, E-05 |
-| 11.4 (`lmekr`) | same | Implemented, with defects | E-03 |
+| 11.3 (`lkev`, `lkef`) | `PolyhedralBoundedSolidEulerOperators` | Implemented | — |
+| 11.4 (`lmekr`) | same | Implemented | — |
 | 11.5 (`lkimrh`, `lmikrh`) | aliases of `lkfmrh`/`lmfkrh` | Implemented | Argument checks |
 | 12.2 (rotational sweep, endpoint on axis) | `rotationalSweepExtrudeWireAroundXAxis` | Implemented (baseline) | Strict-clean results at the poles |
 | 12.3 (closed figure with edge on axis) | same | Partial | Formal constraints, corpus |
@@ -240,36 +262,36 @@ operands, coplanar faces and planes through vertices.
 | 13.1 (face equation at origin) | Newell plane on the face | Implemented | — |
 | 13.2 (`dropcoord`) | face projection | Implemented | — |
 | 13.3 (`contfv`) | `testPointInside` | Implemented | — |
-| 13.5 (ring moving) | `laringmv`, ring rescue | Implemented, with defects | B-01 |
+| 13.5 (ring moving) | `laringmv`, ring rescue | Implemented | Check whether the ring rescue still fires |
 | 13.6 (wide sector) | `checkWideness` (signed angle) | Implemented | Tolerance-boundary tests |
 | 13.3 text (volume) | only in the test oracle | Missing in production | A kernel utility |
 | 14.1 (`bisector`) | operator base | Implemented | Near-colinear case |
 | 14.2 (`cleanup`) | operator base | Implemented | Separate rebuild from repair |
 | 14.3 (slicing) | — | Missing | Section polygons as output |
-| 15.1 (containment) | non-intersecting classifier, preflights | Implemented, with defects | B-02 (b), B-03 |
+| 15.1 (containment) | non-intersecting classifier, preflights | Implemented | — |
 | 15.2 (`maximize_faces`) | `maximizeFaces` | Implemented | Test for a face inside another |
 | 15.3 (no recursion) | worklist in the intersector | Implemented | — |
-| 15.4 (vertex/face classifier) | `_SetVertexFaceClassifier` | Implemented, with defects | B-01 |
-| 15.5 (`sectoroverlap`) | predicate processor | Implemented | B-02 |
+| 15.4 (vertex/face classifier) | `_SetVertexFaceClassifier` | Implemented | Sharing code with the splitter |
+| 15.5 (`sectoroverlap`) | predicate processor | Implemented | — |
 | 15.6 (`revert`) | solid core | Implemented | — |
-| 15.7 (both results at once) | — | Missing | Needs operand copy |
+| 15.7 (both results at once) | — | Missing | Operand copy now exists |
 | 15.8 (2D set operations) | Weiler–Atherton clipper exists separately | Missing in the kernel | Use it for coplanar faces |
 | 15.9 (`A \ B` as `A ∩ reverse(B)`) | `AlgebraicIdentityRegressionTest` | Partial | Oracle-based laws |
 | 16.1 (`printproperties`) | `PolyhedralBoundedSolidTopologySummary` | Implemented | — |
-| 16.2 (`scopy`) | serialisation-based clone | Partial | Structural copy |
-| 16.4 (undo) | — | Missing | Operation log or copy-on-entry |
+| 16.2 (`scopy`) | `PolyhedralBoundedSolidStructuralCopy` | Implemented | — |
+| 16.4 (undo) | copy on entry in `setOp` and `split` | Partial | Operation log |
 
 ## 9) Robustness strategy
 
 | Workstream | Current state | Target | Outcome |
 |---|---|---|---|
-| Container and Euler operators | Defects L-01–L-03, E-01–E-06 | Checked preconditions, intrusive half-edge links, round-trip tests | A trustworthy foundation |
-| Ring ownership in connect | Unconditional `laringmv`, operation-specific control, ring rescue | Invariant: one two-loop null face per curve and solid; carrier face keeps its hole | B-01 closed, rescue removable |
-| Coplanar faces | Sector-level reclassification, fallbacks for axis-aligned shapes | Face-pair `on` classification plus a 2D boolean | B-02, B-04, B-05 closed, fallbacks retired |
-| No-intersection decisions | Four preflights with separate predicates | One predicate set with interior witness points | B-03 closed |
-| Splitter | Static state, S-01 | Context object, shared classifier with the vertex/face path | General splitting |
-| Operand contract | Destructive | Copy on entry, destructive variant named explicitly | Safe failure |
-| Static state | Partly removed | None outside constants | Reentrant, parallel tests |
-| Validation | Two levels, gaps | Back-pointer checks, pseudomanifold rule, no repair in validators | Fail-fast, diagnosable |
-| Tests | Snapshots plus an oracle work queue | Seeded fuzz, rigid-motion invariance, result-path assertions | Errors detected, not only changes |
-| Efficiency | All edges × all faces, all-pairs strict scan | Box rejection, spatial index | Larger models |
+| Container and Euler operators | Fixed; preconditions checked; O(1) half-edge neighbours | Intrusive links in the other ports | A trustworthy foundation |
+| Ring ownership in connect | B-01 closed | Remove the ring rescue if it no longer fires | Simpler connect |
+| Coplanar faces | B-02, B-04 and B-05 closed; fallbacks retired, rigid-motion gate 36 / 36 | Answer `STACKED_BLOCKS` without the preflight | Every answer from the pipeline |
+| No-intersection decisions | One predicate set with interior witness points; B-03 closed; laminae allowed by policy | Reject only collapsed laminae (done) | Laminae as displayable results |
+| Splitter | Context object, S-01 closed, 252 / 256 fuzz | Split pinched sections; share the classifier | General splitting |
+| Operand contract | Copy on entry; `setOpDestructive`; typed failures | — | Safe failure (done) |
+| Static state | Connector scratch, debug flags, id counters; public operations behind a lock; tests parallel across JVMs | None outside constants | Concurrent operations |
+| Validation | Back-pointer checks; non-manifold unions rejected | No repair in validators; input validation as an error | Fail-fast, diagnosable |
+| Tests | Oracle fuzz, rigid-motion and split gates, contract tests, result paths | Oracle for non-convex operands and chains | Errors detected, not only changes |
+| Efficiency | Box rejection in generate and strict validation; planes once per pass | Spatial index; measurements on large models | Larger models |

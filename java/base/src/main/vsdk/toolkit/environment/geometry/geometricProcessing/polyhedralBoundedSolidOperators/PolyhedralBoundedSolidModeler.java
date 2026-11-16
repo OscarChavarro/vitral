@@ -567,8 +567,8 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     /**
     Reports which path produced the last `setOp` result on the calling
     thread: "normal-pipeline" when the [MANT1988] Ch. 15 pipeline answered,
-    otherwise the name of the preflight or fallback that did (for example
-    "touching-only-preflight" or "axis-aligned-cell-fallback-incomplete-connect").
+    otherwise the name of the preflight that did (for example
+    "touching-only-preflight" or "partial-coplanar-area-preflight").
     Returns null before the first call or when the last call failed before
     producing a result.
     */
