@@ -18,8 +18,9 @@ to `java/base/src/main/vsdk/toolkit/`:
   — modeler façade, `slicing/`, `booleans/` (`intersection/`,
   `classification/`, `topology/`), `fallbacks/` (only the id namespace
   remains), `construction/`, `fixtures/`.
-- `common/dataStructures/CircularDoubleLinkedList` — the container under
-  every face, loop, edge, vertex and half-edge list.
+- `common/dataStructures/CircularArrayList` — the container under every
+  face, loop, edge, vertex and half-edge list (array-backed since stage
+  11; reading it writes nothing).
 - Tests under `java/base/src/test/vsdk/toolkit/` (the directories
   `environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators`
   and `environment/geometry/volume/polyhedralBoundedSolid`; directories now
@@ -28,9 +29,9 @@ to `java/base/src/main/vsdk/toolkit/`:
 Scope decision kept from the previous audit: lack of curved-surface support
 is excluded from the gap analysis.
 
-Method: source reading, the stage plans 1–10, the full test suite
-(`gradle :base:test`: 1114 tests, 0 failures, 0 skipped; 712 tests in the
-previous version), the slow gates (`gradle :base:slowTest`: box-pair oracle fuzz,
+Method: source reading, the stage plans 1–11, the full test suite
+(`gradle :base:test`: 1149 tests, 0 failures, 0 skipped; 712 tests in the
+April 2026 version), the slow gates (`gradle :base:slowTest`: box-pair oracle fuzz,
 rigid-motion invariance, the whole Kurlander bowl), and two independent
 volume oracles, for box pairs and splitting planes and for non-convex
 operands and chains of booleans, that are not part of the fixture corpus.
@@ -117,24 +118,30 @@ Weaknesses:
 - A union touching only along an edge or at a vertex is rejected
   (`NonManifoldBooleanResultException`), by decision, instead of returning
   the pseudomanifold of criterion 3′.
-- `STACKED_BLOCKS` ∩, A−B and B−A are still answered by the
-  partial-coplanar preflight, not by the pipeline.
 - Two blocks sharing a face give a zero-volume lamina for ∩, not the
   regularised empty set. This is policy (2026-11-16): a lamina is valid and
   easy to display; a collapsed lamina (area below EPSILON) is rejected.
-- Non-convex operands in general position: 47 of 72 rotated checks and
-  23 of 36 chain checks are correct (`BooleanCompositeOracleFuzzGateTest`).
-  The failures come from the connect stage on non-convex faces: loose
-  pairs joined across the wrong chords, strut rings on a dividing chord
-  (the ring rescue is still needed there).
+- Inside the tolerance band the second operand is moved: a face of B
+  parallel to a face of A and closer than two tolerances is put on its
+  plane by translating B (`_PolyhedralBoundedSolidSetOperandAligner`).
+  This is what makes 422 of the 432 operations of
+  `NearDegenerateBooleanFuzzGateTest` answered (the other 10 are unions
+  in edge contact, rejected by decision), and it means A ∪ B and B ∪ A
+  can differ by that displacement. Faces tilted by less than the
+  tolerance, not parallel, are not covered.
 - Global state remains in the numeric context, the id namespace, the
   debug flags and the id counters; the connector itself is per instance.
   The public operations are serialized on one lock: thread-safe, not
   concurrent.
 
-Assessment: correct on every box-pair family measured, including rotated
-and coplanar ones, with every answer from the Chapter 15 pipeline or its
-preflights. The shape-specific fallbacks were retired on 2026-11-16 (B-05
+Assessment: correct on every family measured. Box pairs 560 / 560.
+Non-convex operands (L, U, step and frame shapes; star prisms), rotated,
+at three scales, with coplanar bottoms and in chains of three operations:
+every check of `BooleanCompositeOracleFuzzGateTest` and
+`BooleanVolumeIdentityFuzzGateTest` is answered right since stage 11
+(`plan-stage11-robustness-hardening.md`). Every answer comes from the
+Chapter 15 pipeline or from the three general decisions taken before it
+(contact, identity, containment). The shape-specific fallbacks were retired on 2026-11-16 (B-05
 closed, rigid-motion gate 36 / 36).
 
 ### 3.4 Validation
@@ -167,9 +174,10 @@ Strengths:
 
 Weaknesses:
 - Most regression tests still assert topology counts captured from the
-  kernel's own output; they detect change, not error. The oracle covers
-  boxes only: non-convex operands and chains of booleans have no
-  independent check yet.
+  kernel's own output; they detect change, not error. The oracles and the
+  volume identities cover boxes, shapes made of boxes and prisms; solids
+  with curved-like faces of many sides are checked by the identities
+  only.
 
 ## 4) Comparison with earlier versions
 
@@ -187,13 +195,20 @@ Closed by the Fable 5.2 plan:
 - Oracle fuzz, rigid-motion and split fuzz gates.
 
 Still open:
-- Validation mixed with repair, the `STACKED_BLOCKS` preflight, the
-  remaining global state. (B-05 closed: fallbacks retired; `CROSS_PAIR`
+- The remaining global state. Validation mixed with repair and the
+  `STACKED_BLOCKS` preflight were closed in stage 11. (B-05 closed: fallbacks retired; `CROSS_PAIR`
   A−B rejected as non-manifold; the lamina kept by policy.)
 - Second pass (2026-11-16, Fable5.2Analysis.md 10.4): the pinched split
   section, input validation as an error, the connector's static state and
   the shared neighbourhood are closed; the non-convex oracle is in place
   and shows the open connect defects.
+- Stage 11 (2026-11-16, `plan-stage11-robustness-hardening.md`): those
+  connect defects are closed. Root causes: `lmekr` lost the outer loop of
+  a face; connect redistributed rings on solid A only for intersections;
+  `scanjoin` joined ends that were not neighbours on the curve; finish
+  dropped shells that no cut reaches; contact nodes kept the curves from
+  being ordered. The ring rescue is removed. Validation is read-only, the
+  interior-overlap test no longer samples, the container is an array.
 
 ### Earlier: comparison of the 2026-11-14 version with the April 2026 version
 
@@ -223,8 +238,6 @@ Maturity: robust research prototype, close to usable for polyhedral models
 built from boxes, prisms and sweeps.
 
 Why not production yet:
-- Non-convex operands in general position fail in about a third of the
-  oracle checks.
 - Global state limits concurrency to one operation at a time.
 - The kernel has not been measured on models with thousands of faces.
 
@@ -234,23 +247,26 @@ Priority P0:
 - Done 2026-11-16: fallbacks retired, `CROSS_PAIR`, `MANT1988_3` and
   `MANT1988_6_13` report `normal-pipeline`, rigid-motion gate 36 / 36;
   laminae allowed, collapsed laminae rejected.
-- Answer `STACKED_BLOCKS` from the pipeline instead of the partial-coplanar
-  preflight.
+- Done in stage 11: `STACKED_BLOCKS` answered by generate and classify;
+  connect on non-convex faces; the ring rescue retired; validation
+  separated from repair.
+
+- Done after stage 11: one decision for "these two faces coincide"
+  inside the tolerance band, taken before the operation; the ring side
+  test and three related costs (two 514-face cylinders from about 5.8 s
+  to about 2 s).
 
 Priority P1:
-- Connect on non-convex faces: the failures of the composite oracle
-  (rotated families, chains, coplanar bottoms); then retire the ring
-  rescue.
 - Thread the numeric context and the id namespace through the
   operations; then lift the lock.
 
 Priority P2:
-- Validation separated from repair.
 - Spatial index for larger models; measure on thousands of faces.
 - Volume and other integral properties (§13.3) in production code.
 
 The record of the plan and its open items is Section 10 of
-`Fable5.2Analysis.md`.
+`Fable5.2Analysis.md` and `plan-stage11-robustness-hardening.md`;
+efficiency is in `performance.md`.
 
 ## 7) Verdict
 
@@ -259,8 +275,10 @@ important addition of its own (the explicit intersection curve). Measured
 outside its corpus with an independent oracle, it is correct on every
 box-pair family tried, including rotated and coplanar operands, and its
 splitter handles planes through vertices. The shape-specific fallbacks are
-gone. The oracle for non-convex operands shows the open work: the connect
-stage on non-convex faces, then concurrency and the remaining preflight.
+gone, and so are the ring rescue and the special preflight. Non-convex
+operands, coplanar faces and chains of operations are answered right on
+every family of the oracles, and so are contacts inside the tolerance
+band. The open work is concurrency and efficiency.
 
 ## 8) MANT1988 problems backlog
 
@@ -275,7 +293,7 @@ stage on non-convex faces, then concurrency and the remaining preflight.
 | 13.1 (face equation at origin) | Newell plane on the face | Implemented | — |
 | 13.2 (`dropcoord`) | face projection | Implemented | — |
 | 13.3 (`contfv`) | `testPointInside` | Implemented | — |
-| 13.5 (ring moving) | `laringmv`, `clearRingSide` in `join` | Implemented | The ring rescue no longer fires on the corpus and the box fuzz; still needed for non-convex faces |
+| 13.5 (ring moving) | `laringmv`, `clearRingSide` in `join` | Implemented | — (rings are redistributed on both solids for every operation; the ring rescue is removed) |
 | 13.6 (wide sector) | `checkWideness` (signed angle) | Implemented | Tolerance-boundary tests |
 | 13.3 text (volume) | only in the test oracle | Missing in production | A kernel utility |
 | 14.1 (`bisector`) | operator base | Implemented | Near-colinear case |
@@ -299,12 +317,12 @@ stage on non-convex faces, then concurrency and the remaining preflight.
 | Workstream | Current state | Target | Outcome |
 |---|---|---|---|
 | Container and Euler operators | Fixed; preconditions checked; O(1) half-edge neighbours | Intrusive links in the other ports | A trustworthy foundation |
-| Ring ownership in connect | B-01 closed; rings follow the half that clearly contains them after both divisions of `join`; the rescue fires only on non-convex faces | Correct connect on non-convex faces, then remove the rescue | Simpler connect |
-| Coplanar faces | B-02, B-04 and B-05 closed; fallbacks retired, rigid-motion gate 36 / 36 | Answer `STACKED_BLOCKS` without the preflight | Every answer from the pipeline |
+| Ring ownership in connect | Closed: `lmekr` keeps the outer loop first, rings are redistributed on both solids for every operation, joins follow the curve; no rescue | — | Simpler connect (done) |
+| Coplanar faces | B-02, B-04 and B-05 closed; fallbacks and the coplanar preflight retired; contact nodes removed before connect; coplanar non-convex family 72 / 72; B aligned with A inside the tolerance band (422 of 432 near-degenerate operations answered) | Faces tilted by less than the tolerance | No rejection near coincidence |
 | No-intersection decisions | One predicate set with interior witness points; B-03 closed; laminae allowed by policy | Reject only collapsed laminae (done) | Laminae as displayable results |
 | Splitter | Context object, S-01 closed, pinched sections split, neighbourhood shared with the vertex/face classifier, 256 / 256 fuzz | — | General splitting (done) |
 | Operand contract | Copy on entry; `setOpDestructive`; typed failures | — | Safe failure (done) |
 | Static state | Connector per instance; numeric context, id namespace, debug flags, id counters still global; public operations behind a lock; tests parallel across JVMs | None outside constants | Concurrent operations |
-| Validation | Back-pointer checks; non-manifold unions rejected; invalid operands throw `InvalidOperandException` | No repair in validators | Fail-fast, diagnosable |
-| Tests | Box and non-convex oracle fuzz (with scales and chains), rigid-motion and split gates, reentrancy, contract tests, result paths; no disabled kernel test | Raise the non-convex ratchets | Errors detected, not only changes |
+| Validation | Read-only; repair is `PolyhedralBoundedSolidRepair`, on request; non-manifold results and unclosed intersection curves rejected; invalid operands throw | — | Fail-fast, diagnosable (done) |
+| Tests | Box and non-convex oracle fuzz (scales, chains, coplanar), volume identities on prisms, near-degenerate contacts, split with general planes, Euler operator sequences, determinism, read-only validation, reentrancy; every ratchet of the oracles at its total | — (every ratchet at its total, or at the count left by a decision) | Errors detected, not only changes |
 | Efficiency | Box rejection in generate and strict validation; planes once per pass | Spatial index; measurements on large models | Larger models |

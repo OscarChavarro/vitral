@@ -17,6 +17,32 @@ Every improvement found is listed with an identifier (P = single thread,
 MT = threads, E = encapsulation, T = tests). Nothing in this document is
 implemented except P-01.
 
+**Update after stage 11** (`plan-stage11-robustness-hardening.md`). The
+measurements of Section 3 are from before that stage. What changed:
+
+- The linked list is replaced by `CircularArrayList`: `get` is O(1) and
+  reading writes nothing. That is P-05 for every list at once, and it
+  removes the reader race of Section 5. Most of P-02 and P-03 went with
+  it, since their cost was the list walk.
+- The interior-overlap grid is gone (P-08): the decision is taken from
+  the boundaries.
+- Validation is read-only, which MT-2 needs.
+- Timings now: the Kurlander bowl 5.7 s (17.6 s in Section 3); two
+  514-face cylinders 5.4 to 6.2 s (4.3 to 5.1 s in Section 3). The
+  cylinders are slower because rings are now redistributed on both
+  solids for every operation, through the routine of P-04. P-04 and P-07
+  are therefore the first things to do.
+- T-07 exists as `BooleanVolumeIdentityFuzzGateTest`.
+
+**Second update.** P-04 is done, together with three related costs
+(clearance without allocations, one classification per face in finish,
+a linear planarity check). Timings now: two 514-face cylinders 1.9 to
+2.3 s; two 258-face ones 0.32 to 0.41 s; the Kurlander bowl 4.9 s. The
+growth from 258 to 514 faces is still close to six times. The next costs
+on the cylinders are the index updates of `CircularArrayList` when a long
+loop is edited (about a fifth of the time) and the point classifications
+of finish and of the contact decision (about a quarter).
+
 ---
 
 ## 1. Summary

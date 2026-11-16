@@ -11,7 +11,7 @@ Vitral polyhedral bounded solid implementation. Paths are relative to
 
 - `main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid`
 - `main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators`
-- `main/vsdk/toolkit/common/dataStructures/CircularDoubleLinkedList.java`
+- `main/vsdk/toolkit/common/dataStructures/CircularArrayList.java`
 - `test/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid`
 - `test/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators`
 - `testsuite/Jogl4Examples/PolyhedralBoundedSolidExample`
@@ -32,8 +32,8 @@ Defect ids (B-, S-, E-, L-, C-) refer to
 | Ch. 9.3, Example | Box and holed-box constructions in `Box` and `SimpleTestGeometryLibrary`. | 65% | Fixture tests; no step-by-step assertion of Fig. 9.11. |
 | Ch. 9.4, Properties | Euler characteristic and shells in `PolyhedralBoundedSolidTopologySummary`. Inverse round trips restore counts and back-pointers (E-03, E-05 fixed). | 60% | `PolyhedralBoundedSolidTopologySummaryTest`, inverse-pair tests. |
 | Ch. 10.2, Data structure | Node hierarchy matches the book. Half-edge links are held in a list container instead of `nxt`/`prv`. | 80% | Validator tests, fixtures. |
-| Ch. 10.3–10.4, Details and access | Neighbour access, mate, parent pointers. `next()` and `previous()` are O(1) through the half-edge's back-pointer to its list node. | 80% | Indirect. |
-| Ch. 11.2, Storage and lists | Java-managed; `CircularDoubleLinkedList` replaces `addlist`/`dellist`. Container defects L-01 to L-03 fixed; a missing pivot or an invalid index is a hard error. `delhe` differs from the book. | 75% | `CircularDoubleLinkedListTest` (all enabled). |
+| Ch. 10.3–10.4, Details and access | Neighbour access, mate, parent pointers. `next()` and `previous()` are O(1) through the index each half-edge keeps of its place in the loop. | 80% | Indirect. |
+| Ch. 11.2, Storage and lists | Java-managed; `CircularArrayList` replaces `addlist`/`dellist`: an array, with `get` in O(1), and reading it writes nothing (stage 11). Container defects L-01 to L-03 fixed; a missing pivot or an invalid index is a hard error. `delhe` differs from the book. `lmekr` keeps the merged loop as the outer loop when it removes the outer one (stage 11). | 80% | `CircularArrayListTest`, `EulerOperatorSequenceFuzzTest`, `PolyhedralBoundedSolidEulerOperatorsTest`. |
 | Ch. 11.3, Low-level operators | All implemented. The preconditions behind E-01 to E-06 are checked on entry; the operator rejects without side effects. | 88% | Operator suite and edge-case suite. |
 | Ch. 11.5, High-level operators | `mev`, `smev`, `mef`, `smef`, `kemr`, `kfmrh`. | 82% | Wrapper tests on successful paths. |
 | Ch. 12.2, Arcs and circles | `addArcToExistingFace`, `createCircularLamina`. | 70% | Cylinders, moon fixtures, sweep tests. |
@@ -54,9 +54,9 @@ Defect ids (B-, S-, E-, L-, C-) refer to
 | Ch. 15.5, `setopgenerate` | `_PolyhedralBoundedSolidSetIntersector` with a worklist, weld of coincident vertices, split of self-touching loops and edge/face box rejection. Edges lying in a face are handled (B-03 fixed). | 85% | `IntersectorWeldTest`, `IntersectorParametricOrderingTest`, oracle fuzz. |
 | Ch. 15.6.1, Vertex/face classification | `_PolyhedralBoundedSolidSetVertexFaceClassifier`, on the neighbourhood shared with the splitter; a reflex sector is split by its bisector. A ring inside a face is finished correctly (B-01 fixed). | 80% | `VertexFaceClassifierCoplanarTest`, oracle rows, rotated fuzz families. |
 | Ch. 15.6.2, Vertex/vertex classification | Sector search, reclassification of "on" sectors and edges, null-edge insertion. Coplanar faces with crossing edges work (B-02 fixed). `sectoroverlap` tests both ends of the angular intervals. | 75% | `SectoroverlapTraceDiagnosticTest`, coplanar predicate tests, `VertexVertexEndpointRecoveryTest`, coplanar fuzz family. |
-| Ch. 15.7, `setopconnect` | `_PolyhedralBoundedSolidSetNullEdgesConnector`, ordered by the intersection curve builder, with its state per instance. Ring ownership fixed (B-01); rings follow the half that clearly contains them after both divisions of `join`. Isolated struts are dropped, so no loose end is left on the corpus. Non-convex faces in general position still fail in part (composite oracle). | 70% | `SetOpConnectScanJoinTest`, `SetOpConnectNoLooseInvariantTest` (no pending case), `IntersectionCurveBuilderTest`, `SetOpReentrancyTest`, `BooleanCompositeOracleFuzzGateTest`. |
-| Ch. 15.8, `setopfinish` | `_PolyhedralBoundedSolidSetFinisher`: pair sanitising, `lmfkrh`, `revert`, `movefac`, `lkfmrh`, `loopGlue`, triangulation of non-planar faces. | 70% | `SetOpFinishInvariantsTest`, reference pairs. |
-| Ch. 15.4, "no intersections found" | Preflights for touching, identity, containment and partial coplanar area, with one containment predicate based on interior witness points (B-02 b, B-03 fixed). Two blocks sharing a face give a lamina for ∩, not the empty set (open). | 70% | `PolyhedralBoundedSolidPreflightTest`, set-operator tests, oracle rows. |
+| Ch. 15.7, `setopconnect` | `_PolyhedralBoundedSolidSetNullEdgesConnector`, ordered by the intersection curve builder, with its state per instance. Ring ownership fixed (B-01); rings follow the half that clearly contains them after both divisions of `join`. Stage 11: `scanjoin` joins only neighbours along the curve; rings are redistributed on both solids for every operation (the ring rescue is removed); contact nodes are removed before connect; an operation that ends with loose ends is rejected. Non-convex faces are answered on every oracle family. | 90% | `SetOpConnectScanJoinTest`, `SetOpConnectNoLooseInvariantTest` (no pending case), `IntersectionCurveBuilderTest`, `SetOpReentrancyTest`, `BooleanCompositeOracleFuzzGateTest`. |
+| Ch. 15.8, `setopfinish` | `_PolyhedralBoundedSolidSetFinisher`: pair sanitising, `lmfkrh`, `revert`, `movefac`, `lkfmrh`, `loopGlue`, triangulation of non-planar faces. Stage 11: shells that no cut reaches are classified against the other solid and kept (the book's finish loses them); the two sides of a cut are checked against the other solid. | 85% | `SetOpFinishInvariantsTest`, `SetOpWholeShellTest`, reference pairs, chains of the composite oracle. |
+| Ch. 15.4, "no intersections found" | Decisions for contact, identity and containment, taken before generate, and the same resolution after classify when no null edge is found; both answer from operands that generate has not edited. Whether the interiors overlap is decided from the boundaries, without sampling (`_PolyhedralBoundedSolidInteriorOverlap`). Two blocks sharing a face give a lamina for ∩, by policy. The partial-coplanar preflight is retired. | 85% | `InteriorOverlapPredicateTest`, `SetOpResultPathTest`, `PolyhedralBoundedSolidPreflightTest`, set-operator tests, oracle rows. |
 | Ch. 15 problems | 15.1, 15.2, 15.3, 15.4, 15.5, 15.6 implemented; 15.9 partly tested; 15.7 and 15.8 missing. | 65% | See the backlog in `vitralCadKernel.md`. |
 | Ch. 16, Undoing | Inverse operators and `revert`; no undo log. Structural copy (`scopy`, Problem 16.2) in `PolyhedralBoundedSolidStructuralCopy`; `setOp` and `split` leave their operands intact (C-01 fixed). | 35% | Inverse-operator tests, `PolyhedralBoundedSolidStructuralCopyTest`, `SetOpContractTest`. |
 | Ch. 17, User Interface | JOGL4 debugger, HUD, CSG sample navigation, offline renderer. | 30% | Manual. |
@@ -74,7 +74,7 @@ quantitative invisibility for the Appel hidden-line renderer ([APPE1967]).
 
 | Area | Main implementation points | Tests | Confidence |
 | --- | --- | --- | --- |
-| List container | `CircularDoubleLinkedList` | `CircularDoubleLinkedListTest` | High; L-01 to L-03 fixed. |
+| List container | `CircularArrayList` | `CircularArrayListTest` | High; L-01 to L-03 fixed; handles after every edit; concurrent readers. |
 | Euler operators | `PolyhedralBoundedSolidEulerOperators` | `…EulerOperatorsTest`, `…EulerOperatorsEdgeCasesTest`, `…KimrhMikrhTest` | High, including the empty-loop cases. |
 | Half-edge invariants | Node classes, `_PolyhedralBoundedSolidTopologicalValidator`, `PolyhedralBoundedSolidValidationEngine` | `…TopologicalValidatorTest`, `…ValidationEngineTest`, `…TopologySummaryTest` | Medium-high; vertex back-pointers are checked. |
 | Geometric predicates | `PolyhedralBoundedSolidGeometricValidator`, `…NumericPolicy`, `…Predicates`, `_…SetGeometricPredicateProcessor` | `…GeometricValidatorTest`, `…NumericPolicyTest`, `…PredicatesTest`, `…CoplanarPredicateTest` | Medium. |
@@ -84,17 +84,16 @@ quantitative invisibility for the Appel hidden-line renderer ([APPE1967]).
 | Boolean connect | `_…SetNullEdgesConnector`, `_…SetIntersectionCurveBuilder` | `SetOpConnectScanJoinTest`, `SetOpConnectNoLooseInvariantTest`, `IntersectionCurveBuilderTest` | Medium-high; rings inside a face fixed. |
 | Boolean finish | `_…SetFinisher` | `SetOpFinishInvariantsTest`, `…StrictSetOpTest` | Medium-high. |
 | Public contract | `PolyhedralBoundedSolidModeler`, `PolyhedralBoundedSolidStructuralCopy`, typed exceptions | `SetOpContractTest`, `PolyhedralBoundedSolidStructuralCopyTest` | High: operands intact, typed failures, no silent empty result. |
-| Reference corpus | `SimpleTestGeometryLibrary`, `CsgSampleCorpus` | `BooleansFromReferenceObjectPairsTest`, `AlgebraicIdentityRegressionTest`, `Mant1988Section15_2UnionDiagnostic`, `RigidMotionInvarianceGateTest` | High for these fixtures; 33 of 36 operations come from the pipeline (the other 3 from the partial-coplanar preflight, `CROSS_PAIR` A−B rejected as non-manifold), and all 36 are invariant under a rigid motion. |
+| Reference corpus | `SimpleTestGeometryLibrary`, `CsgSampleCorpus` | `BooleansFromReferenceObjectPairsTest`, `AlgebraicIdentityRegressionTest`, `Mant1988Section15_2UnionDiagnostic`, `RigidMotionInvarianceGateTest` | High for these fixtures; 35 of 36 operations are answered by the pipeline (`STACKED_BLOCKS` ∩ and differences through its "no intersections found" case; `CROSS_PAIR` A−B rejected as non-manifold), and all 36 are invariant under a rigid motion. |
 | Kurlander bowl | `CsgKurlanderBowlFixture` | `KurlanderBowlStarInvariantTest`, `KurlanderBowlMotifSweepRegressionTest`, `KurlanderMotif4OperationMatrixTest`, `CsgKurlanderBowl…RegressionTest`, `CsgMoonCylinderDifferenceDegeneracyTest`, `Stage6FaceSubdivisionDiagnosticTest` | High: the 4 operations on all 40 motifs, and the whole bowl (82 booleans, genus 40, `CsgKurlanderBowlFullModelTest`, slow); baselines are kernel snapshots. |
 | Applied models | `StepperMotorGuideCsgFixture` | `StepperMotorGuideStrictValidationTest` | High for this model. |
-| Independent oracle | `PolyhedralBoundedSolidVolumeOracle`, `CompositeShapeOracle` (tests) | `BooleanVolumeOracleTest` (no disabled rows), `BooleanOracleFuzzGateTest` (560 cases, slow), `BooleanCompositeOracleFuzzGateTest` (non-convex, scales, chains) | The only correctness checks that do not depend on kernel output; all box cases correct; non-convex cases about two thirds (ratchet). |
+| Independent oracle | `PolyhedralBoundedSolidVolumeOracle`, `CompositeShapeOracle` (tests) | `BooleanVolumeOracleTest` (no disabled rows), `BooleanOracleFuzzGateTest` (560 cases, slow), `BooleanCompositeOracleFuzzGateTest` (non-convex, scales, chains) | The only correctness checks that do not depend on kernel output. All box cases and all non-convex cases correct (rotated at three scales, chains, coplanar bottoms: every ratchet at its total). |
 
 ## Known alignment gaps
 
-- The shape-specific fallbacks were retired (2026-11-16). `STACKED_BLOCKS`
-  ∩, A−B and B−A still come from the partial-coplanar preflight, not from
-  the pipeline. The result path of each operation is in the impact matrix
-  of `optimizationsOverMANT1988.md`.
+- The shape-specific fallbacks and the partial-coplanar preflight were
+  retired (2026-11-16). The result path of each operation is in the impact
+  matrix of `optimizationsOverMANT1988.md`.
 - `CROSS_PAIR` A−B has a non-manifold answer (two pieces touching along an
   edge) and is rejected with `NonManifoldBooleanResultException`, both
   as built and rotated.
@@ -102,8 +101,10 @@ quantitative invisibility for the Appel hidden-line renderer ([APPE1967]).
   empty set. This is policy (2026-11-16): laminae are valid results because
   they are topologically sound and easy to display; only a collapsed
   lamina, with area below EPSILON, is rejected (`LaminaPolicyTest`).
-- Non-convex operands in general position: the composite oracle finds
-  connect failures (about a third of the rotated checks).
+- Contacts inside the tolerance band (faces 0.1 to 1 tolerances apart)
+  are answered by moving B onto the planes of A before the operation.
+  This is not in [MANT1988], which assumes exact arithmetic. Faces tilted
+  by less than the tolerance are not covered.
 - Global state (numeric context, id namespace, debug flags, id counters);
   the public operations are serialized on a lock.
 - Integral properties (§13.3), slicing (§14.9), simultaneous results

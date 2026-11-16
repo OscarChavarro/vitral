@@ -503,6 +503,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(vitral_base PUBLIC -ffp-contract=off)
 endif()
 
+# The library carries the ray tracing hot paths (solvers, noise, patches,
+# height fields), so it must be optimized like its clients. PRIVATE: clients
+# choose their own level. Without this, a client that adds base/ as a
+# subdirectory without CMAKE_BUILD_TYPE compiles the library with no -O flag.
+target_compile_options(vitral_base PRIVATE -O3)
+
 # Link optional libraries and set compile definitions
 if(WITH_JPEG)
     target_include_directories(vitral_base PRIVATE ${JPEG_INCLUDE_DIR})

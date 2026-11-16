@@ -136,7 +136,7 @@ Start: rotated 47/72, chains 23/36, coplanar bottoms 46/72.
 | C | done |
 | D | done |
 | E | done |
-| F | in progress: four causes fixed, two open |
+| F | done |
 
 ## Results
 
@@ -262,69 +262,136 @@ Defects found by Phase B:
   decisions of [MANT1988] 15.4 and problem 15.1 taken before generate;
   none is written for one shape.
 
-### Phase F (in progress)
+### Phase F (done)
 
-| Family | Before | Now |
+| Family | Before the stage | Now |
 |---|---:|---:|
 | Non-convex, axis-aligned | 72 / 72, 3 of them rejections counted as correct | 72 / 72, all answered |
-| Non-convex, rotated (also at 10⁻³ and 10³) | 47 / 72 | 65 / 72 |
-| Chains of three operations | 23 / 36, one wrong volume | 31 / 36, none wrong |
-| Non-convex, coplanar bottoms | 46 / 72 | 50 / 72 |
-| Star prism and regular prism | 13 / 16 | 15 / 16 |
+| Non-convex, rotated (also at 10⁻³ and 10³) | 47 / 72 | 72 / 72 |
+| Chains of three operations | 23 / 36, one wrong volume | 36 / 36 |
+| Non-convex, coplanar bottoms | 46 / 72 | 72 / 72 |
+| Star prism and regular prism | 13 / 16 | 16 / 16 |
 | Two star prisms | 11 / 16 | 16 / 16 |
+| Near-degenerate contacts | 363 of 432 answered, 2 wrong before the gate | 371 answered, 61 rejected, 0 wrong |
 
-Causes found and fixed:
+Suite: 1149 tests, 0 failures, 0 skipped. Slow gates: 8 of 8. Kurlander
+bowl: same solid (F=1133, volume 0.38391604531097).
 
-1. **`lmekr` lost the outer loop** (an Euler operator defect). It removes
-   the loop of its second half-edge. When that was the outer loop of the
-   face, the merged loop stayed in the place of the ring and another ring
-   of the face became "the outer loop". Connect does exactly this on a
-   face crossed by chords that pass through vertices inside it; every
-   later decision about pending rings was then taken against the wrong
-   loop. The merged loop now takes the first place. This is the largest
-   single gain of the stage. Test:
-   `PolyhedralBoundedSolidEulerOperatorsTest`, two rings.
-2. **`scanjoin` joined any loose end with the same face and role.** A face
+Causes found and fixed, in the order they were found:
+
+1. **`scanjoin` joined any loose end with the same face and role.** A face
    that is not convex can be crossed several times by one face of the
    other solid; the crossings lie on one line and all pass that test, so
    an end was joined across the notch of the face. Only the end left by a
-   neighbour along the intersection curve is accepted now. The curve
-   builder already knew the neighbours; the ring rescue used them and
-   `scanjoin` did not.
+   neighbour along the intersection curve is accepted now.
+2. **`lmekr` lost the outer loop** (an Euler operator defect). It removes
+   the loop of its second half-edge. When that was the outer loop of the
+   face, the merged loop stayed in the place of the ring and another ring
+   of the face became "the outer loop". Test:
+   `PolyhedralBoundedSolidEulerOperatorsTest`, two rings.
 3. **Whole shells were dropped.** Finish moves to the result the parts
    connected to a cut. A shell that no cut reaches (one piece of a
    two-piece solid, or the wall of a cavity) was left behind without an
    error. Each such shell is now classified against the other solid and
    kept on the same terms as the cut parts. Test: `SetOpWholeShellTest`.
-4. **Sides of a cut taken by convention only.** Finish takes the null
-   face for the part outside the other solid and the face made from its
-   ring for the part inside. When the faces on both sides of a cut say
-   the opposite, with no face disagreeing, the two are exchanged. It
-   changes one case of the fuzz; it is kept because it only acts on
-   unanimous evidence.
+4. **Sides of a cut taken by convention only.** When the faces on both
+   sides of a cut say the opposite of the convention, with no face
+   disagreeing, finish exchanges the two.
+5. **Rings were redistributed on solid A only for intersections.** Connect
+   called `join` on A with ring moving switched off unless the operation
+   was an intersection. After a division of a face of A, a ring that lay
+   in the new half stayed in the old one. This was the root of two things
+   at once:
+   - the ring rescue: 266 of its 284 firings over the fuzz families moved
+     a ring out of a face that did not contain it into the one that did;
+   - the "ring in the wrong piece" failures: a hole already cut by another
+     curve is not a pending strut, so the rescue never moved it back.
+
+   Rings are now redistributed on both solids for every operation. The
+   rescue fires 0 times on the fuzz families and on the 40 Kurlander
+   motifs (52 before), and is removed, with its ratchet. `join` no longer
+   has a ring-moving switch.
+6. **Contact nodes kept the curves from being ordered.** A vertex of one
+   solid lying in a coplanar face of the other gives a null edge with no
+   neighbour on the intersection curve; an edge lying in such a face gives
+   an open chain of two. One of them made connect give up the curve order
+   for the whole operation and fall back to the order of emission, which
+   joins a face crossed twice along one line across its hole. These nodes
+   are removed before connect (`dropIsolatedNodes`). An open chain is
+   removed only when every node of it is a vertex in a coplanar face; any
+   other open chain is a curve with a crossing missing, and the operation
+   is rejected.
+7. **Loose ends after connect are always an error** ([MANT1988] Program
+   15.14). With the fixes above no correct answer has them.
 
 Tried and withdrawn, because no family changed: keeping rings out of
 faces without area; redistributing rings after the first division of
 `join`.
 
-The ring rescue: not removed. Its counter was not re-measured after
-these fixes; that is the first thing to do next.
+## After the stage: the tolerance band and the slow cylinders
 
-Open, with what is known:
+### The tolerance band (done)
 
-1. **A ring in the wrong piece of a face crossed by two curves** (the 7
-   rotated failures, 5 of the chain ones, 1 star). Smallest case:
-   `NON_CONVEX_ROTATED` #2, STEP/L, union. A corner of B goes through a
-   face of A and leaves a triangular hole; another curve divides the same
-   face; the hole ends in the piece that is inside B, while it lies in
-   the other. Connect closes every curve and finish glues what it is
-   given, so the result has two unjoined copies of a loop and is rejected
-   as non-manifold. The division that misplaces the ring was not located:
-   the two places where rings are redistributed (`laringmv` and the
-   second division of `join`) both decide correctly in the trace.
-2. **Coplanar faces in general position** (22 of the coplanar-bottoms
-   family, and most of the 65 rejections of the near-degenerate gate).
-   The intersection curve comes out with an open chain: one crossing on a
-   coplanar face is missing or classified differently on the two solids.
-   This is [MANT1988] problem 15.8 territory (the vertex/vertex classifier
-   on coplanar, non-convex faces), not connect.
+Near-degenerate gate: 422 of 432 operations answered, 0 wrong. The 10
+left are the unions of solids in edge contact, rejected by decision
+(B-04). Before: 371 answered.
+
+1. **One decision on whether two faces coincide.**
+   `_PolyhedralBoundedSolidSetOperandAligner` runs in the preparation of
+   the operands, on the copies the operation owns. A face of B parallel
+   to a face of A, next to it and closer than two tolerances is put on
+   its plane by translating B as a rigid body. After that every stage
+   sees exact coincidence, which it handles; before, generate, the
+   classifiers and the contact decision each decided on their own and
+   disagreed inside the band (open curves, lost solids, results that
+   failed strict validation).
+   - A translation, not a move of single vertices: every face of B stays
+     planar.
+   - Two gaps along two directions are both closed. Two different gaps
+     along one direction cannot be: nothing moves and the operands go on
+     as they are.
+   - The displacement is at most two tolerances per direction. Only B is
+     moved, so A ∪ B and B ∪ A can differ by it.
+   - The "result cannot be empty" guard of `setOp` looks for its
+     witnesses in operands aligned the same way.
+2. **Tangent containment and the difference.** B inside A with a face on
+   a face of A: A − B is A with a pocket open to the outside. The
+   containment decision answered it with a cavity, which strict
+   validation rejected, at exact contact too. Those pairs now go to the
+   pipeline, which builds the pocket.
+
+Tests: `SetOperandAlignerTest`; every row of
+`NearDegenerateBooleanFuzzGateTest` at 36 of 36 except the two of
+EDGE_CONTACT (31).
+
+### The slow cylinders (done)
+
+| Workload | Before | Now |
+|---|---:|---:|
+| Two 514-face cylinders, union / intersection / difference | 6.2 / 5.4 / 5.8 s | 2.3 / 1.9 / 1.9 s |
+| Two 258-face cylinders | 1.15 / 1.0 / 1.1 s | 0.41 / 0.32 / 0.35 s |
+| Kurlander bowl, 82 booleans | 5.7 s | 4.9 s |
+
+Same results to the last digit of the volumes; every fuzz family
+unchanged. Four changes, none of which alters a decision:
+
+1. The ring side test prepares the two outer loops, their plane and the
+   tolerance once per division, not once per ring
+   (`_RingSideTest`, `performance.md` P-04).
+2. Its clearance is computed on plain numbers, without allocating a
+   vector per segment.
+3. Finish classifies each face next to a cut once, not once per edge it
+   shares with the cut, and computes the face planes of the two solids
+   once.
+4. The planarity check looked at every pair of points of a face to keep
+   the plane of the last one that gives a plane: cubic in the size of
+   the face. It now starts from the last pair and stops at the first
+   that gives a plane, which is the same plane.
+
+## Open
+
+1. **Efficiency** (`performance.md`): the next costs on the cylinders
+   are the index updates of `CircularArrayList` when a long loop is
+   edited and the point classifications of finish.
+2. **Concurrency**: the global state behind the lock.
+3. **The other ports.** Everything here is in the Java port only.

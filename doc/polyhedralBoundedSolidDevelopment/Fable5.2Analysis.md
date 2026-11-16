@@ -1326,6 +1326,29 @@ change the rounding mode), and `ReaderMitSceneCommandsTest` lost the
 cubemap test (no JPEG decoder on the `base` classpath). The suite runs
 with no skipped test.
 
+
+### 10.5 Stage 11: robustness hardening (2026-11-16)
+
+Recorded in `plan-stage11-robustness-hardening.md`. In short:
+
+- The container is `CircularArrayList`; reading it writes nothing.
+- Validation is read-only; repair is `PolyhedralBoundedSolidRepair`.
+- Interior overlap is decided from the boundaries, without sampling.
+- `STACKED_BLOCKS` is answered by generate and classify; the
+  partial-coplanar preflight is retired.
+- Connect on non-convex faces is closed, and the ring rescue of item 3 of
+  10.4 is removed. Its cause was not in the second division of `join`, as
+  10.4 says, but in two other places: `lmekr` lost the outer loop of a
+  face, and connect redistributed the rings of solid A only for
+  intersections.
+- Every family of the composite oracle and of the volume identities is
+  at its total: 72 / 72 rotated at three scales, 72 / 72 with coplanar
+  bottoms, 36 / 36 chains, 16 / 16 star prisms.
+- Contacts inside the tolerance band: B is aligned with A before the
+  operation when a face of it is within two tolerances of a parallel
+  face of A. 422 of 432 near-degenerate operations are answered; the
+  other 10 are unions in edge contact, rejected by decision.
+
 ---
 
 ## Appendix — Reproductions

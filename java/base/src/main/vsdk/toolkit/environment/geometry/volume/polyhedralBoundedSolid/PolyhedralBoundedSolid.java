@@ -476,6 +476,9 @@ public class PolyhedralBoundedSolid extends Solid {
         while ( other.getPolygonsList().size() > 0 ) {
             f = other.getPolygonsList().get(0);
             f.id += offsetFacesId;
+            // The merged face now belongs to this solid: Euler operators
+            // (i.e. `lkfmrh` when gluing) check `parentSolid`
+            f.parentSolid = this;
             if ( f.id > maxFaceId ) maxFaceId = f.id;
             polygonsList.add(f);
             other.getPolygonsList().remove(0);

@@ -76,6 +76,19 @@ no answer depends on the operands being axis-aligned. See
 `doc/polyhedralBoundedSolidDevelopment/Fable5.2Analysis.md` (Sections 5
 and 10).
 
+Stage 11 (`plan-stage11-robustness-hardening.md`) added gates for what
+this matrix and the box pairs do not cover, all at their totals:
+
+| Gate | Operands | Result |
+|---|---|---:|
+| `BooleanCompositeOracleFuzzGateTest` | L, U, step and frame shapes: axis-aligned, rotated at 10⁻³, 1 and 10³, with coplanar bottoms, and chains of three operations | 72 / 72 in each of the five pair families, 36 / 36 chains |
+| `BooleanVolumeIdentityFuzzGateTest` | Regular prisms and star prisms, rotated | 16 / 16 in each of the three families |
+| `NearDegenerateBooleanFuzzGateTest` | Box pairs in contact, displaced by −100 to 100 tolerances | 422 of 432 answered, 0 wrong; the 10 rejected are unions in edge contact (B-04) |
+
+The result paths in use are `normal-pipeline`,
+`no-intersection-after-classify`, `touching-only-preflight`,
+`containment-only-preflight` and `geometric-identity-preflight`.
+
 # The block and wedge case
 
 The failure in `MANT1988_15_2_HOLED + UNION` was not in preflight,
