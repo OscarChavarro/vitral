@@ -17,6 +17,14 @@ tasks.named('test') {
     // Keep base tests in serial mode by default.
     maxParallelForks = 1
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
+    // Fatal kernel errors must fail a test, never kill the Gradle worker
+    // (Fable5.2Analysis.md Stage A step 5).
+    systemProperty 'vsdk.withSystemExit', 'false'
+    // Slow oracle fuzz families run in the 'slowTest' task
+    // (Fable5.2Analysis.md Stage A step 2).
+    useJUnitPlatform {
+        excludeTags 'slow'
+    }
     // Stage 10 A/B harness: keeps the existing moon-cylinder unit-test
     // fixtures/assertions unchanged while selecting the new setOp flag.
     systemProperty 'vsdk.strictValidationBenchmark',
@@ -32,6 +40,24 @@ tasks.named('test') {
             'filename=' + new File(profilingDir, 'test.jfr').absolutePath)
     }
     finalizedBy(tasks.named('jacocoTestReport'))
+}
+
+tasks.register('slowTest', Test) {
+    group = 'verification'
+    description = 'Runs the slow-tagged oracle fuzz gates (Fable5.2Analysis.md Stage A).'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'slow'
+    }
+    maxParallelForks = 1
+    // Large heap so a runaway case is told apart from a merely memory-hungry
+    // one (the build machine has ~196 GB); override with -PslowTestHeap=...
+    maxHeapSize = (project.findProperty('slowTestHeap') ?: '48g').toString()
+    systemProperty 'vsdk.withSystemExit', 'false'
+    testLogging {
+        showStandardStreams = true
+    }
 }
 
 tasks.named('jacocoTestReport') {

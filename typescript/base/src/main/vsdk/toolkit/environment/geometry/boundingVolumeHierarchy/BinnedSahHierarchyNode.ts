@@ -12,9 +12,9 @@ As in [WALD2007].3.6: the child pair of an inner node is stored next to
 each other, a leaf refers to one contiguous block of the primitive ids.
 */
 export class BinnedSahHierarchyNode {
-    public readonly lo: number[] = [0, 0, 0];
+    public readonly minimum: number[] = [0, 0, 0];
     public leftOrFirst = 0;
-    public readonly hi: number[] = [0, 0, 0];
+    public readonly maximum: number[] = [0, 0, 0];
     public count = 0;
 
     public constructor();
@@ -25,8 +25,8 @@ export class BinnedSahHierarchyNode {
             return;
         }
         for (let a = 0; a < 3; a++) {
-            this.lo[a] = other.lo[a]!;
-            this.hi[a] = other.hi[a]!;
+            this.minimum[a] = other.minimum[a]!;
+            this.maximum[a] = other.maximum[a]!;
         }
         this.leftOrFirst = other.leftOrFirst;
         this.count = other.count;

@@ -305,6 +305,16 @@ edge or vertex contact the book's criterion 3′ (§15.2) admits the two-shell
 pseudomanifold, so strict validation must accept that pattern or the
 preflight must say that it does not produce strict-valid results.
 
+*Resolution (2026-11-16).* Face contact: the union goes through the
+pipeline and returns one glued, strict-valid shell (Stage D.3). Edge or
+vertex contact: decided to **reject** the union as non-manifold.
+`setOp` throws `NonManifoldBooleanResultException`, also without strict
+validation. It records the path `rejected-non-manifold-union`, and the
+operands are left unmodified. The fuzz counts this rejection as a correct
+answer, which brings the integer grid to 320 / 320. The other three
+operations on edge-touching pairs are manifold and are checked against the
+oracle.
+
 #### B-05 — The axis-aligned fallback hides the coplanar defect
 
 *Configuration.* B-02 (a) without the rotation: slab and cube axis-aligned,

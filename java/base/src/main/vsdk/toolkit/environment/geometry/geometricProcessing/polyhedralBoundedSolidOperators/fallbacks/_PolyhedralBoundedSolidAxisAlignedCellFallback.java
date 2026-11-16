@@ -180,6 +180,13 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
         return changingAxes <= 1;
     }
 
+    /** Cheap eligibility test of the cell fallback: O(edges). */
+    static boolean isAxisAlignedPair(PolyhedralBoundedSolid a,
+        PolyhedralBoundedSolid b)
+    {
+        return isAxisAlignedSolid(a) && isAxisAlignedSolid(b);
+    }
+
     private static boolean isAxisAlignedSolid(PolyhedralBoundedSolid solid)
     {
         int i;

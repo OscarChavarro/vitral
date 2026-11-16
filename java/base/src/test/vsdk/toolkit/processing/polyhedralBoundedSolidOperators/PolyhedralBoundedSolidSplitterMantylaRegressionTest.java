@@ -2,11 +2,8 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -22,20 +19,6 @@ PolyhedralBoundedSolidExample SPLIT_TEST_PART_2 and SPLIT_TEST_PART_3.
  */
 class PolyhedralBoundedSolidSplitterMantylaRegressionTest
 {
-    @BeforeEach
-    void reportFatalKernelErrorsAsExceptions()
-    {
-        VSDK.setWithSystemExit(false);
-        VSDK.setWithFatalExceptions(true);
-    }
-
-    @AfterEach
-    void restoreDesktopFatalErrorBehavior()
-    {
-        VSDK.setWithSystemExit(true);
-        VSDK.setWithFatalExceptions(true);
-    }
-
     @Test
     void given_mantylaFixture_when_splitAtZPointThree_then_bothResultsAreValidSolids()
     {

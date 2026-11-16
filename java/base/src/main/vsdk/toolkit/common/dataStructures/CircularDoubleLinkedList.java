@@ -36,6 +36,71 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         accessMemoNode = null;
     }
 
+    /**
+    Records `node` as the current holder of its element: the node knows its
+    list and, for {@link Linkable} elements, the element knows its node.
+    */
+    @SuppressWarnings("unchecked")
+    private void attach(_CircularDoubleLinkedListNode<E> node)
+    {
+        node.owner = this;
+        if ( node.data instanceof Linkable ) {
+            ((Linkable<E>)node.data).setListNode(node);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> void detach(_CircularDoubleLinkedListNode<T> node)
+    {
+        node.owner = null;
+        if ( node.data instanceof Linkable ) {
+            Linkable<T> l = (Linkable<T>)node.data;
+            if ( l.getListNode() == node ) {
+                l.setListNode(null);
+            }
+        }
+    }
+
+    /**
+    O(1) lookup of the node holding `e` when `e` is a {@link Linkable}
+    currently held by this list; null otherwise (callers then scan).
+    */
+    @SuppressWarnings("unchecked")
+    private _CircularDoubleLinkedListNode<E> trackedNodeOf(E e)
+    {
+        if ( e instanceof Linkable ) {
+            _CircularDoubleLinkedListNode<E> node =
+                ((Linkable<E>)e).getListNode();
+            if ( node != null && node.owner == this && node.data == e ) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    private _CircularDoubleLinkedListNode<E> nodeOf(E e)
+    {
+        _CircularDoubleLinkedListNode<E> current;
+        int i;
+
+        current = trackedNodeOf(e);
+        if ( current != null ) {
+            return current;
+        }
+        for ( i = 0, current = head;
+              i < currentSize; i++, current = current.next ) {
+            if ( current.data == e ) {
+                return current;
+            }
+        }
+        return null;
+    }
+
+    public boolean contains(E e)
+    {
+        return nodeOf(e) != null;
+    }
+
     public int size()
     {
         return currentSize;
@@ -57,37 +122,39 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             head.previous.next = newContainer;
             head.previous = newContainer;
         }
+        attach(newContainer);
         currentSize++;
         invalidateAccessMemo();
     }
 
+    /**
+    Inserts `newElem` immediately before `pivot`. When `pivot` is the head,
+    `newElem` becomes the new head. A pivot that is not in the list is a
+    broken precondition (it used to insert at the head silently, defect L-03
+    in Fable5.2Analysis.md): the list is left unchanged and an
+    IllegalArgumentException is thrown.
+    */
     public void insertBefore(E newElem, E pivot)
     {
-        locateWindowAtElem(pivot);
+        _CircularDoubleLinkedListNode<E> pivotNode = nodeOf(pivot);
         _CircularDoubleLinkedListNode<E> newContainer;
+
+        if ( pivotNode == null ) {
+            throw new IllegalArgumentException(
+                "CircularDoubleLinkedList.insertBefore: pivot is not in the list");
+        }
+        window = pivotNode;
 
         newContainer = new _CircularDoubleLinkedListNode<E>();
         newContainer.data = newElem;
-
-        if ( head == null ) {
+        newContainer.previous = pivotNode.previous;
+        newContainer.next = pivotNode;
+        pivotNode.previous.next = newContainer;
+        pivotNode.previous = newContainer;
+        if ( pivotNode == head ) {
             head = newContainer;
-            newContainer.next = newContainer;
-            newContainer.previous = newContainer;
         }
-        else if ( window == null || window == head ) {
-            window = head;
-            head = newContainer;
-            newContainer.previous = window.previous;
-            newContainer.next = window;
-            window.previous.next = newContainer;
-            window.previous = newContainer;
-        }
-        else {
-            newContainer.previous = window.previous;
-            newContainer.next = window;
-            window.previous.next = newContainer;
-            window.previous = newContainer;
-        }
+        attach(newContainer);
         currentSize++;
         invalidateAccessMemo();
     }
@@ -109,6 +176,11 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
     {
         int i;
 
+        _CircularDoubleLinkedListNode<E> tracked = trackedNodeOf(e);
+        if ( tracked != null ) {
+            window = tracked;
+            return true;
+        }
         for ( i = 0, window = head;
               i < currentSize;
               i++, window = window.next ) {
@@ -132,6 +204,8 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
 
         window1.data = window2.data;
         window2.data = temp;
+        attach(window1);
+        attach(window2);
         invalidateAccessMemo();
     }
 
@@ -166,30 +240,16 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
 
     public E nextOf(E e)
     {
-        _CircularDoubleLinkedListNode<E> current;
-        int i;
+        _CircularDoubleLinkedListNode<E> node = nodeOf(e);
 
-        for ( i = 0, current = head;
-              i < currentSize; i++, current = current.next ) {
-            if ( current.data == e ) {
-                return current.next.data;
-            }
-        }
-        return null;
+        return node == null ? null : node.next.data;
     }
 
     public E previousOf(E e)
     {
-        _CircularDoubleLinkedListNode<E> current;
-        int i;
+        _CircularDoubleLinkedListNode<E> node = nodeOf(e);
 
-        for ( i = 0, current = head;
-              i < currentSize; i++, current = current.next ) {
-            if ( current.data == e ) {
-                return current.previous.data;
-            }
-        }
-        return null;
+        return node == null ? null : node.previous.data;
     }
 
     public E get(int index)
@@ -225,8 +285,19 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         return current.data;
     }
 
+    /**
+    Removes the element at `pos`. An index outside [0, size) is a broken
+    precondition: it used to delete whatever element an earlier call had
+    left the window on (defect L-02 in Fable5.2Analysis.md). Now the list is
+    left unchanged and an IndexOutOfBoundsException is thrown.
+    */
     public void remove(int pos)
     {
+        if ( pos < 0 || pos >= currentSize ) {
+            throw new IndexOutOfBoundsException(
+                "CircularDoubleLinkedList.remove: index " + pos +
+                " in a list with " + currentSize + " elements");
+        }
         locateWindowAtIndex(pos);
         removeElemAtWindow();
     }
@@ -234,11 +305,39 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
     public void removeElemAtWindow()
     {
         if ( window == null ) return;
-        if ( window == head ) head = window.next;
-        window.previous.next = window.next;
-        window.next.previous = window.previous;
+        if ( currentSize <= 1 ) {
+            // Last element: the list becomes empty. Leaving `head` on the
+            // removed node made the next add() link behind a stale node
+            // (defect L-01 in Fable5.2Analysis.md).
+            head = null;
+        }
+        else {
+            if ( window == head ) head = window.next;
+            window.previous.next = window.next;
+            window.next.previous = window.previous;
+        }
+        detach(window);
+        window.next = null;
+        window.previous = null;
         window = null;
         currentSize--;
+        invalidateAccessMemo();
+    }
+
+    /** Removes every element. */
+    public void clear()
+    {
+        _CircularDoubleLinkedListNode<E> current = head;
+        int i;
+
+        for ( i = 0; i < currentSize; i++ ) {
+            _CircularDoubleLinkedListNode<E> next = current.next;
+            detach(current);
+            current = next;
+        }
+        head = null;
+        window = null;
+        currentSize = 0;
         invalidateAccessMemo();
     }
 
@@ -269,6 +368,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             window.previous.next = newContainer;
             window.previous = newContainer;
         }
+        attach(newContainer);
         currentSize++;
         invalidateAccessMemo();
     }
@@ -279,12 +379,17 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         E tmp;
         int i = 0;
 
+        if ( head == null ) {
+            return;
+        }
         ptr = head;
         qtr = head.previous;
         do {
             tmp = ptr.data;
             ptr.data = qtr.data;
             qtr.data = tmp;
+            attach(ptr);
+            attach(qtr);
 
             ptr = ptr.next;
             qtr = qtr.previous;

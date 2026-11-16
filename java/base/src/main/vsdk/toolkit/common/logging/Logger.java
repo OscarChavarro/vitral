@@ -15,8 +15,17 @@ public final class Logger
     private static boolean withFatalExceptions;
 
     static {
-        withSystemExit = true;
+        // The system property lets a test JVM turn process termination off
+        // once for every class (-Dvsdk.withSystemExit=false), instead of each
+        // test class toggling it.
+        withSystemExit = !"false".equalsIgnoreCase(
+            System.getProperty("vsdk.withSystemExit", "true"));
         withFatalExceptions = true;
+    }
+
+    public static boolean isWithSystemExit()
+    {
+        return withSystemExit;
     }
 
     private Logger()

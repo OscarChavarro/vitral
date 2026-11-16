@@ -1,11 +1,7 @@
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -31,27 +27,12 @@ E-06) and stay disabled until the production fix lands.</p>
  */
 class PolyhedralBoundedSolidEulerOperatorsEdgeCasesTest
 {
-    @BeforeEach
-    void reportFatalKernelErrorsAsExceptions()
-    {
-        VSDK.setWithSystemExit(false);
-        VSDK.setWithFatalExceptions(true);
-    }
-
-    @AfterEach
-    void restoreDesktopFatalErrorBehavior()
-    {
-        VSDK.setWithSystemExit(true);
-        VSDK.setWithFatalExceptions(true);
-    }
-
     /**
-    Hidden defect E-01: mvfs -> lmev (strut) -> lkev returns to the skeletal
+    Defect (fixed) E-01: mvfs -> lmev (strut) -> lkev returns to the skeletal
     count, but the loop's half-edge list is left with a stale head node
     (list defect L-01). The next lmev on the same vertex then yields a
     two-half-edge loop whose next() chain does not visit both half-edges.
     */
-    @Disabled("Hidden defect E-01: lkev to skeleton then lmev corrupts loop traversal (L-01); see Fable5.2Analysis.md")
     @Test
     void given_strutKilledBackToSkeleton_when_newStrutIsAdded_then_loopTraversalVisitsBothHalfEdges()
     {
@@ -77,13 +58,12 @@ class PolyhedralBoundedSolidEulerOperatorsEdgeCasesTest
     }
 
     /**
-    Hidden defect E-02: the lkemr documentation (after [MANT1988] Sec.
+    Defect (fixed) E-02: the lkemr documentation (after [MANT1988] Sec.
     11.3.4) says the arguments can be swapped to choose which component
     stays as the outer loop. With the arguments swapped so that the outer
     component collapses to a single vertex, the operator raises the fatal
     "Case B Should not happen!" instead of leaving an empty (edge-less) loop.
     */
-    @Disabled("Hidden defect E-02: lkemr cannot leave a lone-vertex outer loop; see Fable5.2Analysis.md")
     @Test
     void given_strutInsideFace_when_lkemrArgumentsAreSwapped_then_outerLoopBecomesLoneVertex()
     {
@@ -101,13 +81,12 @@ class PolyhedralBoundedSolidEulerOperatorsEdgeCasesTest
     }
 
     /**
-    Hidden defect E-03: lkemr leaves the vertex of a single-vertex ring with
+    Defect (fixed) E-03: lkemr leaves the vertex of a single-vertex ring with
     a null emanating half-edge, and the inverse lmekr does not restore it,
     so lkemr -> lmekr is not an identity on the vertex back-pointers. Any
     later pass that treats "null emanating half-edge" as "orphan vertex"
     (e.g. remakeEmanatingHalfedgesReferences) will delete a live vertex.
     */
-    @Disabled("Hidden defect E-03: lmekr leaves a null emanating half-edge; see Fable5.2Analysis.md")
     @Test
     void given_loneVertexRing_when_lmekrReconnectsIt_then_everyVertexHasALiveEmanatingHalfEdge()
     {
@@ -125,12 +104,11 @@ class PolyhedralBoundedSolidEulerOperatorsEdgeCasesTest
     }
 
     /**
-    Hidden defect E-04: lmef(he, he) is documented (after Program 11.7) as
+    Defect (fixed) E-04: lmef(he, he) is documented (after Program 11.7) as
     creating a "circular" face with one edge. The container-based port
     inserts both new half-edges in the old loop and returns a face whose
     loop is empty.
     */
-    @Disabled("Hidden defect E-04: lmef(he, he) returns a face with an empty loop; see Fable5.2Analysis.md")
     @Test
     void given_sameHalfEdgeTwice_when_lmef_then_newFaceOwnsASingleSelfLoopEdge()
     {
@@ -152,12 +130,11 @@ class PolyhedralBoundedSolidEulerOperatorsEdgeCasesTest
     }
 
     /**
-    Hidden defect E-05: after lkev removes a strut from a box face, the
+    Defect (fixed) E-05: after lkev removes a strut from a box face, the
     surviving vertex keeps an emanating half-edge that was unlisted from
     its loop (dangling back-pointer). validateIntermediate still reports
     the solid as valid, so the validator has a matching gap.
     */
-    @Disabled("Hidden defect E-05: lkev leaves a dangling emanating half-edge; see Fable5.2Analysis.md")
     @Test
     void given_boxWithStrut_when_lkevRemovesStrut_then_everyVertexHasALiveEmanatingHalfEdge()
     {
@@ -182,13 +159,12 @@ class PolyhedralBoundedSolidEulerOperatorsEdgeCasesTest
     }
 
     /**
-    Hidden defect E-06: lmef does not check its precondition
+    Defect (fixed) E-06: lmef does not check its precondition
     he1.parentLoop == he2.parentLoop ([MANT1988] Sec. 11.3.3). With
     half-edges from two different faces it silently migrates a whole loop,
     returns a non-null face and leaves the solid invalid. A rejected call
     must leave the solid untouched.
     */
-    @Disabled("Hidden defect E-06: lmef does not check that both half-edges share a loop; see Fable5.2Analysis.md")
     @Test
     void given_halfEdgesFromDifferentLoops_when_lmef_then_operationIsRejectedWithoutSideEffects()
     {

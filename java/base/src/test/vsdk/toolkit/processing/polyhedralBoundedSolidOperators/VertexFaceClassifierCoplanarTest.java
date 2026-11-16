@@ -87,12 +87,13 @@ class VertexFaceClassifierCoplanarTest
     }
 
     @Test
-    void given_touchingBoxes_when_runningUnion_then_resultIsValidTwoShellPair()
+    void given_touchingBoxes_when_runningUnion_then_resultIsOneGluedBox()
     {
-        // Two unit cubes sharing only a single face produce a touching-only
-        // result: the pipeline correctly preserves both shells (Euler=4)
-        // because the V/F classifier classifies the shared face as boundary
-        // rather than interior.
+        // Two unit cubes sharing a whole face. The regularised union is one
+        // 2 x 1 x 1 box glued along the AonB- faces ([MANT1988] Eq. 15.2).
+        // Until Stage D (Fable5.2Analysis.md B-04) the touching-only
+        // preflight returned the two shells (Euler 4), which strict
+        // validation rejects; this test used to assert that.
         PolyhedralBoundedSolid[] pair =
             PolyhedralBoundedSolidTestFixtures.createTouchingBoxPair();
 
@@ -101,12 +102,14 @@ class VertexFaceClassifierCoplanarTest
             false, true, false);
 
         assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateIntermediate(result)).isTrue();
+            .validateStrict(result)).isTrue();
         assertThat(result.getVerticesList().size()
             - result.getEdgesList().size()
             + result.getPolygonsList().size())
-            .as("Euler characteristic for two-shell union")
-            .isEqualTo(4);
+            .as("Euler characteristic of the glued box")
+            .isEqualTo(2);
+        assertThat(PolyhedralBoundedSolidVolumeOracle.solidVolume(result))
+            .isCloseTo(2.0, org.assertj.core.data.Offset.offset(1e-12));
         double[] minmax = result.getMinMax();
         assertThat(minmax[0]).isEqualTo(-0.5);
         assertThat(minmax[3]).isEqualTo(1.5);

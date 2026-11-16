@@ -73,8 +73,8 @@ export class BinnedSahHierarchy {
 
     private static setNodeBounds(node: BinnedSahHierarchyNode, box: _BinnedSahBox): void {
         for (let a = 0; a < 3; a++) {
-            node.lo[a] = box.lo[a]!;
-            node.hi[a] = box.hi[a]!;
+            node.minimum[a] = box.minimum[a]!;
+            node.maximum[a] = box.maximum[a]!;
         }
     }
 
@@ -112,7 +112,7 @@ export class BinnedSahHierarchy {
             }
             // [WALD2007].3.1 Bins of equal width over the centroid bounds; all
             // three axes are tried, [WALD2007] bins only the widest one.
-            const lo = centroidBox.lo[axis]!;
+            const lo = centroidBox.minimum[axis]!;
             const scale = BINS / extent;
 
             // [WALD2007].3.4 Bin updates: count and full 3D bounds per bin,
@@ -196,8 +196,8 @@ export class BinnedSahHierarchy {
         for (let i = 0; i < primitiveCount; i++) {
             const box = new _BinnedSahBox();
             for (let a = 0; a < 3; a++) {
-                box.lo[a] = boxValues.get(6 * i + a);
-                box.hi[a] = boxValues.get(6 * i + 3 + a);
+                box.minimum[a] = boxValues.get(6 * i + a);
+                box.maximum[a] = boxValues.get(6 * i + 3 + a);
             }
             boxes.add(box);
         }
@@ -282,7 +282,7 @@ export class BinnedSahHierarchy {
                 }
                 // [WALD2007].3.6 ID list partitioning with a temporary array;
                 // stable: members of bins [0, splitBin] first.
-                const lo = centroidBox.lo[axis]!;
+                const lo = centroidBox.minimum[axis]!;
                 const scale = BinnedSahHierarchy.BIN_COUNT / centroidBox.extent(axis);
                 scratch.clear();
                 for (let i = task.first; i < task.first + task.count; i++) {
@@ -476,17 +476,17 @@ export namespace BinnedSahHierarchy {
             for (let a = 0; a < 3; a++) {
                 // Empty box (the negative box of an empty instance or mesh): the
                 // swap below would otherwise turn it into a box that is entered.
-                if (node.lo[a]! > node.hi[a]!) {
+                if (node.minimum[a]! > node.maximum[a]!) {
                     return -1.0;
                 }
                 if (this.parallel[a]) {
-                    if (this.origin[a]! < node.lo[a]! || this.origin[a]! > node.hi[a]!) {
+                    if (this.origin[a]! < node.minimum[a]! || this.origin[a]! > node.maximum[a]!) {
                         return -1.0;
                     }
                     continue;
                 }
-                let t0 = (node.lo[a]! - this.origin[a]!) * this.inverse[a]!;
-                let t1 = (node.hi[a]! - this.origin[a]!) * this.inverse[a]!;
+                let t0 = (node.minimum[a]! - this.origin[a]!) * this.inverse[a]!;
+                let t1 = (node.maximum[a]! - this.origin[a]!) * this.inverse[a]!;
                 if (t0 > t1) {
                     const swap = t0;
                     t0 = t1;

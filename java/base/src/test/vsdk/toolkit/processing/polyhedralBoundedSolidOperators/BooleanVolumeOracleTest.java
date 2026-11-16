@@ -2,21 +2,19 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidVolumeOracle.OrientedBox;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidVolumeOracle.rotation;
 import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidVolumeOracle.translation;
 
@@ -45,20 +43,6 @@ class BooleanVolumeOracleTest
         PolyhedralBoundedSolidModeler.INTERSECTION;
     private static final int A_MINUS_B = PolyhedralBoundedSolidModeler.SUBTRACT;
     private static final int B_MINUS_A = 4;
-
-    @BeforeEach
-    void reportFatalKernelErrorsAsExceptions()
-    {
-        VSDK.setWithSystemExit(false);
-        VSDK.setWithFatalExceptions(true);
-    }
-
-    @AfterEach
-    void restoreDesktopFatalErrorBehavior()
-    {
-        VSDK.setWithSystemExit(true);
-        VSDK.setWithFatalExceptions(true);
-    }
 
     // -- Case catalogue ----------------------------------------------------
 
@@ -195,9 +179,9 @@ class BooleanVolumeOracleTest
 
     /**
     B-04: two boxes touching along an edge segment only. [MANT1988] Sec.
-    15.2 criterion 3' admits coincident edges with distinct edge
-    neighborhoods as a valid (pseudomanifold) result, but strict validation
-    rejects the two-shell result the kernel itself produces.
+    15.2 criterion 3' would admit the two-shell pseudomanifold union; the
+    kernel rejects it by design as non-manifold (decision 2026-11-16). The
+    other three operations are manifold and checked against the oracle.
     */
     private static OrientedBox[] boxesTouchingAlongAnEdge()
     {
@@ -213,18 +197,33 @@ class BooleanVolumeOracleTest
         return Stream.of(
             operations("corner-in-corner", cornerInCorner(),
                 UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
+            // B-01 fixed 2026-11-16: all four operations.
             operations("peg-ending-inside-block", pegEndingInsideBlock(),
-                UNION, A_MINUS_B),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
             operations("peg-through-block", pegThroughBlock(),
-                UNION, A_MINUS_B),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
             operations("cube-corner-through-slab-face",
-                cubeCornerThroughSlabFace(), UNION, A_MINUS_B),
+                cubeCornerThroughSlabFace(),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
             operations("coplanar-axis-aligned", coplanarAxisAligned(),
                 UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
+            // Stage D (2026-11-16): vertex/face neighbourhood fix, witness
+            // containment and face-contact union.
             operations("coplanar-rigidly-rotated", coplanarRigidlyRotated(),
-                UNION, B_MINUS_A),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
             operations("coplanar-with-crossing-edges",
-                coplanarWithCrossingEdges(), UNION, B_MINUS_A)
+                coplanarWithCrossingEdges(),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
+            operations("inner-box-with-faces-on-outer-faces",
+                innerBoxWithFacesOnOuterFaces(),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
+            operations("diamond-straddling-face", diamondStraddlingFace(),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
+            operations("cubes-sharing-a-face", cubesSharingAFace(),
+                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
+            operations("boxes-touching-along-an-edge",
+                boxesTouchingAlongAnEdge(),
+                INTERSECTION, A_MINUS_B, B_MINUS_A)
         ).flatMap(s -> s);
     }
 
@@ -236,58 +235,36 @@ class BooleanVolumeOracleTest
         assertBooleanMatchesOracle(a, b, op);
     }
 
-    // -- Hidden defects (work queue) ---------------------------------------
+    // -- Non-manifold results are rejected (B-04) -------------------------
 
-    static Stream<Arguments> operationsWithHiddenDefects()
+    /**
+    The union of two solids that share only an edge (or a vertex) is two
+    shells meeting at a non-manifold boundary. setOp must refuse it with the
+    typed exception, with or without the strict postcondition, and record
+    the rejection path.
+    */
+    @ParameterizedTest(name = "strict={0}")
+    @ValueSource(booleans = {true, false})
+    void given_boxesTouchingAlongAnEdge_when_union_then_rejectedAsNonManifold(
+        boolean doStrictValidation)
     {
-        return Stream.of(
-            operations("B-01 peg-ending-inside-block",
-                pegEndingInsideBlock(), INTERSECTION, B_MINUS_A),
-            operations("B-01 peg-through-block", pegThroughBlock(),
-                INTERSECTION, B_MINUS_A),
-            operations("B-01 cube-corner-through-slab-face",
-                cubeCornerThroughSlabFace(), INTERSECTION, B_MINUS_A),
-            operations("B-05 coplanar-rigidly-rotated",
-                coplanarRigidlyRotated(), INTERSECTION, A_MINUS_B),
-            operations("B-02 coplanar-with-crossing-edges",
-                coplanarWithCrossingEdges(), INTERSECTION, A_MINUS_B),
-            operations("B-02 inner-box-with-faces-on-outer-faces",
-                innerBoxWithFacesOnOuterFaces(),
-                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
-            operations("B-03 diamond-straddling-face",
-                diamondStraddlingFace(),
-                UNION, INTERSECTION, A_MINUS_B, B_MINUS_A),
-            operations("B-04 cubes-sharing-a-face", cubesSharingAFace(),
-                UNION),
-            operations("B-04 boxes-touching-along-an-edge",
-                boxesTouchingAlongAnEdge(), UNION)
-        ).flatMap(s -> s);
+        OrientedBox[] pair = boxesTouchingAlongAnEdge();
+
+        assertThatThrownBy(() ->
+            PolyhedralBoundedSolidModeler.setOp(pair[0].toSolid(),
+                pair[1].toSolid(), UNION, false, true, doStrictValidation))
+            .isInstanceOf(NonManifoldBooleanResultException.class);
+        assertThat(PolyhedralBoundedSolidModeler.getLastSetOpResultPath())
+            .isEqualTo("rejected-non-manifold-union");
     }
 
     /**
-    Every row is a reproducible wrong result or failure of the current
-    kernel on two boxes. Enable one row at a time as the corresponding
-    defect is fixed (see the catalogue comments above and the analysis
-    document for the diagnosis of each family).
+    Contract C-01 (fixed in Stage F): setOp no longer consumes its operands.
+    The book's algorithm does ([MANT1988] Sec. 15.8: "the parts of A and B
+    not required in the final result will remain in the original solids");
+    setOp now runs on structural copies, and the consuming form is
+    setOpDestructive.
     */
-    @Disabled("Hidden defects B-01..B-05: see Fable5.2Analysis.md; re-enable row by row as fixes land")
-    @ParameterizedTest(name = "{0} {1}")
-    @MethodSource("operationsWithHiddenDefects")
-    void given_boxPairWithHiddenDefect_when_setOp_then_resultIsStrictValidAndVolumeMatchesOracle(
-        String name, String opName, OrientedBox a, OrientedBox b, int op)
-    {
-        assertBooleanMatchesOracle(a, b, op);
-    }
-
-    /**
-    Contract defect C-01: setOp consumes its operands. After a successful
-    union both input solids have lost faces to the result ([MANT1988] Sec.
-    15.8: "the parts of A and B not required in the final result will remain
-    in the original solids"), so a caller that keeps using them holds
-    fragments. The public API should either copy the operands or expose the
-    destructive variant under an explicit name.
-    */
-    @Disabled("Contract defect C-01: setOp destroys its operands; see Fable5.2Analysis.md")
     @Test
     void given_operands_when_setOp_then_operandsAreStillTheSameValidSolids()
     {

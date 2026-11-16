@@ -1,9 +1,9 @@
 package vsdk.toolkit.common.dataStructures;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
 Direct coverage for the circular list that backs every face, loop, edge and
@@ -55,13 +55,12 @@ class CircularDoubleLinkedListTest
     }
 
     /**
-    Hidden defect L-01: removeElemAtWindow() leaves `head` pointing at the
+    Defect L-01 (fixed): removeElemAtWindow() leaves `head` pointing at the
     removed node when the list becomes empty, so the next add() links the new
     element behind a stale node and get(0) resurrects the removed element.
     This is exactly the sequence lkev() performs when it kills the last edge
     of a loop (unlist both half-edges, then re-add the surviving one).
     */
-    @Disabled("Hidden defect L-01: stale head after removing the last element; see Fable5.2Analysis.md")
     @Test
     void given_listEmptiedByRemove_when_add_then_onlyTheNewElementIsVisible()
     {
@@ -79,10 +78,9 @@ class CircularDoubleLinkedListTest
     }
 
     /**
-    Hidden defect L-01 (continued): after the stale-head corruption the ring
+    Defect L-01 (fixed, continued): after the stale-head corruption the ring
     holds a phantom node, so neighbor queries disagree with indexed access.
     */
-    @Disabled("Hidden defect L-01: stale head after removing the last element; see Fable5.2Analysis.md")
     @Test
     void given_listEmptiedByRemove_when_addAndInsertBefore_then_neighborsMatchIndexOrder()
     {
@@ -102,39 +100,88 @@ class CircularDoubleLinkedListTest
     }
 
     /**
-    Hidden defect L-02: remove(index) with an out-of-range index does not
-    reposition the window, so it silently deletes whatever element the window
-    was left on by an unrelated earlier call.
+    Defect L-02 (fixed): remove(index) with an out-of-range index used to
+    delete whatever element the window was left on by an unrelated earlier
+    call. It is now a hard error that leaves the list unchanged.
     */
-    @Disabled("Hidden defect L-02: remove(invalid index) deletes the stale window element; see Fable5.2Analysis.md")
     @Test
-    void given_windowLeftOnAnElement_when_removeWithInvalidIndex_then_nothingIsRemoved()
+    void given_windowLeftOnAnElement_when_removeWithInvalidIndex_then_errorAndNothingIsRemoved()
     {
         CircularDoubleLinkedList<String> list = abc();
         list.locateWindowAtElem("b");
 
-        list.remove(7);
+        assertThatThrownBy(() -> list.remove(7))
+            .isInstanceOf(IndexOutOfBoundsException.class);
 
         assertThat(list.size()).isEqualTo(3);
         assertThat(list.get(1)).isEqualTo("b");
     }
 
     /**
-    Hidden defect L-03: insertBefore(newElem, pivot) with a pivot that is not
-    in the list silently inserts at the head instead of reporting the broken
-    precondition. Euler operators rely on this call (addhe) to place new
+    Defect L-03 (fixed): insertBefore(newElem, pivot) with a pivot that is
+    not in the list used to insert at the head silently. It is now a hard
+    error that leaves the list unchanged. Euler operators rely on this call (addhe) to place new
     half-edges, so a wrong pivot corrupts a loop without any diagnostic.
     */
-    @Disabled("Hidden defect L-03: insertBefore with a missing pivot inserts at head; see Fable5.2Analysis.md")
     @Test
-    void given_missingPivot_when_insertBefore_then_listIsNotModified()
+    void given_missingPivot_when_insertBefore_then_errorAndListIsNotModified()
     {
         CircularDoubleLinkedList<String> list = abc();
 
-        list.insertBefore("x", "not-in-list");
+        assertThatThrownBy(() -> list.insertBefore("x", "not-in-list"))
+            .isInstanceOf(IllegalArgumentException.class);
 
         assertThat(list.size()).isEqualTo(3);
         assertThat(list.get(0)).isEqualTo("a");
+    }
+
+    @Test
+    void given_linkableElements_when_reorderedAndRemoved_then_neighborsStayConsistent()
+    {
+        CircularDoubleLinkedList<Item> list = new CircularDoubleLinkedList<>();
+        Item a = new Item();
+        Item b = new Item();
+        Item c = new Item();
+        list.add(a);
+        list.add(b);
+        list.add(c);
+
+        list.reverse();
+        assertThat(list.nextOf(c)).isSameAs(b);
+        assertThat(list.previousOf(c)).isSameAs(a);
+
+        list.swapElements(a, c);
+        assertThat(list.get(0)).isSameAs(a);
+        assertThat(list.nextOf(a)).isSameAs(b);
+
+        list.locateWindowAtElem(b);
+        list.removeElemAtWindow();
+        assertThat(list.contains(b)).isFalse();
+        assertThat(b.getListNode()).isNull();
+        assertThat(list.nextOf(a)).isSameAs(c);
+        assertThat(list.nextOf(c)).isSameAs(a);
+
+        CircularDoubleLinkedList<Item> other = new CircularDoubleLinkedList<>();
+        other.add(a);
+        assertThat(list.nextOf(a)).as("falls back to a scan").isSameAs(c);
+        assertThat(other.nextOf(a)).isSameAs(a);
+    }
+
+    private static final class Item implements Linkable<Item>
+    {
+        private _CircularDoubleLinkedListNode<Item> listNode;
+
+        @Override
+        public _CircularDoubleLinkedListNode<Item> getListNode()
+        {
+            return listNode;
+        }
+
+        @Override
+        public void setListNode(_CircularDoubleLinkedListNode<Item> n)
+        {
+            listNode = n;
+        }
     }
 
     private static CircularDoubleLinkedList<String> abc()

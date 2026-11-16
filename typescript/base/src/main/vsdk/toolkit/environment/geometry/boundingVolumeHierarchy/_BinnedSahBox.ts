@@ -9,40 +9,40 @@ Axis aligned box of the build. The default box is the "negative box"
 unchanged, so bins and partitions grow without emptiness checks.
 */
 export class _BinnedSahBox {
-    public readonly lo: number[] = [0, 0, 0];
-    public readonly hi: number[] = [0, 0, 0];
+    public readonly minimum: number[] = [0, 0, 0];
+    public readonly maximum: number[] = [0, 0, 0];
 
     public constructor() {
         for (let a = 0; a < 3; a++) {
-            this.lo[a] = 1e30;
-            this.hi[a] = -1e30;
+            this.minimum[a] = 1e30;
+            this.maximum[a] = -1e30;
         }
     }
 
     public isEmpty(): boolean {
-        return this.lo[0]! > this.hi[0]! || this.lo[1]! > this.hi[1]! || this.lo[2]! > this.hi[2]!;
+        return this.minimum[0]! > this.maximum[0]! || this.minimum[1]! > this.maximum[1]! || this.minimum[2]! > this.maximum[2]!;
     }
 
     public enclose(other: _BinnedSahBox): void {
         for (let a = 0; a < 3; a++) {
-            this.lo[a] = other.lo[a]! < this.lo[a]! ? other.lo[a]! : this.lo[a]!;
-            this.hi[a] = other.hi[a]! > this.hi[a]! ? other.hi[a]! : this.hi[a]!;
+            this.minimum[a] = other.minimum[a]! < this.minimum[a]! ? other.minimum[a]! : this.minimum[a]!;
+            this.maximum[a] = other.maximum[a]! > this.maximum[a]! ? other.maximum[a]! : this.maximum[a]!;
         }
     }
 
     public enclosePoint(point: number[]): void {
         for (let a = 0; a < 3; a++) {
-            this.lo[a] = point[a]! < this.lo[a]! ? point[a]! : this.lo[a]!;
-            this.hi[a] = point[a]! > this.hi[a]! ? point[a]! : this.hi[a]!;
+            this.minimum[a] = point[a]! < this.minimum[a]! ? point[a]! : this.minimum[a]!;
+            this.maximum[a] = point[a]! > this.maximum[a]! ? point[a]! : this.maximum[a]!;
         }
     }
 
     public centroid(axis: number): number {
-        return 0.5 * (this.lo[axis]! + this.hi[axis]!);
+        return 0.5 * (this.minimum[axis]! + this.maximum[axis]!);
     }
 
     public extent(axis: number): number {
-        return this.hi[axis]! - this.lo[axis]!;
+        return this.maximum[axis]! - this.minimum[axis]!;
     }
 
     /** Half the surface area: the SAH cost of [WALD2007].3.1 drops the
@@ -51,9 +51,9 @@ export class _BinnedSahBox {
         if (this.isEmpty()) {
             return 0.0;
         }
-        const dx = this.hi[0]! - this.lo[0]!;
-        const dy = this.hi[1]! - this.lo[1]!;
-        const dz = this.hi[2]! - this.lo[2]!;
+        const dx = this.maximum[0]! - this.minimum[0]!;
+        const dy = this.maximum[1]! - this.minimum[1]!;
+        const dz = this.maximum[2]! - this.minimum[2]!;
         return dx * dy + dy * dz + dz * dx;
     }
 }

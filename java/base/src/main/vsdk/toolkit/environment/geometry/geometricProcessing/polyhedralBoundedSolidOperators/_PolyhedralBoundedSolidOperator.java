@@ -251,6 +251,21 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     private static void laringmv(_PolyhedralBoundedSolidFace f1,
                                  _PolyhedralBoundedSolidFace f2)
     {
+        laringmv(f1, f2, null);
+    }
+
+    /**
+    As {@link #laringmv(_PolyhedralBoundedSolidFace, _PolyhedralBoundedSolidFace)}
+    but never moves `keep`. `join` passes the remainder of an inner ring it
+    has just divided: that remainder is the hole the section polygon leaves
+    in `f1`, while the divided-off part became the outer loop of `f2` (the
+    disk). Both coincide geometrically, so no containment test can tell them
+    apart; topology does (Fable5.2Analysis.md defect B-01).
+    */
+    private static void laringmv(_PolyhedralBoundedSolidFace f1,
+                                 _PolyhedralBoundedSolidFace f2,
+                                 _PolyhedralBoundedSolidLoop keep)
+    {
         _PolyhedralBoundedSolidLoop l;
         int i;
 
@@ -264,6 +279,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         // what the geometric rule would have decided, for diagnosis only.
         for ( i = 1; i < f1.boundariesList.size(); i++ ) {
         l = f1.boundariesList.get(i);
+            if ( l == keep ) {
+                continue;
+            }
             if ( Boolean.getBoolean("vsdk.setop.tracePipelineSummary") ) {
                 traceRingMoveShadowDecision(f1, f2, l,
                     "laringmv MOVE wouldMove="
@@ -537,6 +555,103 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     }
 
     /**
+    After `join` divides an inner ring of `oldf` with `lmef`, one of the two
+    coincident copies of the section polygon must stay in `oldf` as its hole
+    and the other must be the outer loop of `newf` (the disk). `lmef` puts
+    the h1 side in `newf` whatever its winding, so when the remainder left in
+    `oldf` is wound as a disk and `newf`'s outer loop is wound as a hole, the
+    two loops are exchanged. Returns the loop that is now the hole of `oldf`
+    (and must not be moved by laringmv), or null when the division does not
+    have that shape (Fable5.2Analysis.md defect B-01).
+    */
+    private static _PolyhedralBoundedSolidLoop holeLeftByDividedRing(
+        _PolyhedralBoundedSolidFace oldf,
+        _PolyhedralBoundedSolidFace newf,
+        _PolyhedralBoundedSolidLoop dividedInnerRing)
+    {
+        if ( dividedInnerRing == null || newf == null ||
+             dividedInnerRing.parentFace != oldf ||
+             newf.boundariesList.size() < 1 ) {
+            return null;
+        }
+        _PolyhedralBoundedSolidLoop newOuter = newf.boundariesList.get(0);
+        if ( Boolean.getBoolean("vsdk.setop.tracePipelineSummary") ) {
+            System.out.println("[RINGDIV] oldf=" + oldf.id + " newf=" +
+                newf.id + " remainder=" +
+                dividedInnerRing.halfEdgesList.size() + " dot=" +
+                windingDot(dividedInnerRing, oldf) + " newfLoops=" +
+                newf.boundariesList.size() + " newOuter=" +
+                newOuter.halfEdgesList.size() + " dotVsOldf=" +
+                windingDot(newOuter, oldf));
+        }
+        if ( isWoundAsHole(dividedInnerRing, oldf) ) {
+            return dividedInnerRing;
+        }
+        // Both copies are measured against oldf's normal: newf's own plane
+        // follows whatever winding its outer loop got, so it cannot tell.
+        if ( newf.boundariesList.size() != 1 ||
+             !isWoundAsHole(newOuter, oldf) ||
+             !isWoundAsDisk(dividedInnerRing, oldf) ) {
+            return null;
+        }
+        PolyhedralBoundedSolid s = oldf.parentSolid;
+        // newf keeps one loop only while the exchange happens: first move the
+        // disk in as outer loop, then send the hole piece to oldf.
+        if ( !PolyhedralBoundedSolidEulerOperators.lringmv(s,
+                 dividedInnerRing, newf, true) ) {
+            return null;
+        }
+        if ( !PolyhedralBoundedSolidEulerOperators.lringmv(s, newOuter, oldf,
+                 false) ) {
+            return null;
+        }
+        return newOuter;
+    }
+
+    private static boolean isWoundAsDisk(_PolyhedralBoundedSolidLoop loop,
+        _PolyhedralBoundedSolidFace face)
+    {
+        return windingDot(loop, face) > VSDK.EPSILON * VSDK.EPSILON;
+    }
+
+    /**
+    True when `loop` is a loop of `face` whose winding (Newell normal) is
+    opposite to the face normal, i.e. it is wound as a hole. A loop with no
+    measurable area answers false.
+    */
+    private static boolean isWoundAsHole(_PolyhedralBoundedSolidLoop loop,
+        _PolyhedralBoundedSolidFace face)
+    {
+        return windingDot(loop, face) < -VSDK.EPSILON * VSDK.EPSILON;
+    }
+
+    /** Newell normal of `loop` dotted with `face`'s normal (0 if unknown). */
+    private static double windingDot(_PolyhedralBoundedSolidLoop loop,
+        _PolyhedralBoundedSolidFace face)
+    {
+        if ( loop == null || face == null ||
+             face.getContainingPlane() == null ||
+             loop.halfEdgesList.size() < 3 ) {
+            return 0.0;
+        }
+        double nx = 0.0;
+        double ny = 0.0;
+        double nz = 0.0;
+        int i;
+        int n = loop.halfEdgesList.size();
+        for ( i = 0; i < n; i++ ) {
+            Vector3Dd a = loop.halfEdgesList.get(i).startingVertex.position;
+            Vector3Dd b = loop.halfEdgesList.get((i + 1) % n)
+                .startingVertex.position;
+            nx += (a.y() - b.y()) * (a.z() + b.z());
+            ny += (a.z() - b.z()) * (a.x() + b.x());
+            nz += (a.x() - b.x()) * (a.y() + b.y());
+        }
+        Vector3Dd normal = face.getContainingPlane().getNormal();
+        return nx * normal.x() + ny * normal.y() + nz * normal.z();
+    }
+
+    /**
     Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
     */
     protected static void
@@ -564,7 +679,12 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         oldf = h1.parentLoop.parentFace;
         newf = null;
         s = oldf.parentSolid;
+        _PolyhedralBoundedSolidLoop dividedInnerRing = null;
         if ( h1.parentLoop == h2.parentLoop ) {
+            if ( oldf.boundariesList.size() > 1 &&
+                 oldf.boundariesList.get(0) != h1.parentLoop ) {
+                dividedInnerRing = h1.parentLoop;
+            }
             if ( h1.previous().previous() != h2 ) {
                 int fid1 = (idNamespace != null)
                     ? idNamespace.nextFaceId(s)
@@ -614,7 +734,8 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
             }
             if ( newf != null && oldf.boundariesList.size() >= 2 ) {
                 if ( allowRingMove ) {
-                    laringmv(oldf, newf);
+                    laringmv(oldf, newf,
+                        holeLeftByDividedRing(oldf, newf, dividedInnerRing));
                 }
             }
         }

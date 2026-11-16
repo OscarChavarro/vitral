@@ -10,4 +10,9 @@ public class _CircularDoubleLinkedListNode<E> extends FundamentalEntity
     public E data;
     public _CircularDoubleLinkedListNode<E> next;
     public _CircularDoubleLinkedListNode<E> previous;
+
+    /// List that currently holds this node, or null once it was removed.
+    /// Lets an element that keeps a handle to its node (see
+    /// `CircularDoubleLinkedList.Linkable`) find its neighbors in O(1).
+    public CircularDoubleLinkedList<E> owner;
 }

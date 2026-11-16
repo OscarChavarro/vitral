@@ -240,6 +240,31 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     }
 
     /**
+    True when the face sector at he.startingVertex, between he.previous()
+    and he, is reflex: (next - v) x (prev - v) points against the face
+    normal (loops run counterclockwise about the normal). A flat sector
+    (a vertex inserted inside an edge by generate) is not: its two edge
+    entries already bound it, and a bisector sample there lies on the
+    reference plane whenever the face crosses it, which the edge
+    reclassification would then turn into a spurious in/out entry.
+    */
+    private static boolean isReflexSector(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        Vector3Dd v = he.startingVertex.position;
+        Vector3Dd a = he.next().startingVertex.position.subtract(v);
+        Vector3Dd b = he.previous().startingVertex.position.subtract(v);
+        Vector3Dd n = he.parentLoop.parentFace.getContainingPlane().getNormal();
+        Vector3Dd axb = a.crossProduct(b);
+
+        if ( axb.length() <= numericContext.unitVectorTolerance() *
+                 a.length() * b.length() ) {
+            return false;
+        }
+        return axb.dotProduct(n) < 0.0;
+    }
+
+    /**
     Current method is the first step for the initial vertex/face
     classification of sectors (vertex neighborhood) for `vtx`, as indicated on
     section [MANT1988].14.5.2 and program [MANT1988].14.4, but biased towards
@@ -264,21 +289,19 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
 
         he = vtx.emanatingHalfEdge;
         do {
-            c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
-            c.sector = he;
-            d = referencePlane.pointDistance((he.next()).startingVertex.position);
-            c.cl = compareToZero(d);
-            c.isWide = false;
-            c.position = new Vector3Dd((he.next()).startingVertex.position);
-            c.situation =
-                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
-            c.referencePlane = referencePlane;
-            neighborSectorsInfo.add(c);
-            if ( checkWideness(he) ) {
+            // The loop turns with mirror(he).next(), so the sector of `he`
+            // (its face, between he.previous() and he) lies between the
+            // entry of the previous half-edge and the entry of `he`; its
+            // bisector entry therefore goes before the entry of `he`. Only
+            // reflex sectors get one: convex and flat sectors are bounded
+            // by their two edge entries. Before Stage D every convex and
+            // flat sector got a sample n x a placed after the entry of
+            // `he`, which put it in the neighbouring sector's slot and,
+            // for a right-angled corner, on the other edge; with coplanar
+            // or in-face contacts that produced spurious in/out
+            // alternations (Fable5.2Analysis.md B-02, B-03, B-05).
+            if ( isReflexSector(he) ) {
                 bisect = inside(he).add(vtx.position);
-                c.situation =
-                    _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
-
                 c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
                 c.sector = he;
                 d = referencePlane.pointDistance(bisect);
@@ -290,6 +313,16 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
                 c.referencePlane = referencePlane;
                 neighborSectorsInfo.add(c);
             }
+            c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
+            c.sector = he;
+            d = referencePlane.pointDistance((he.next()).startingVertex.position);
+            c.cl = compareToZero(d);
+            c.isWide = false;
+            c.position = new Vector3Dd((he.next()).startingVertex.position);
+            c.situation =
+                _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
+            c.referencePlane = referencePlane;
+            neighborSectorsInfo.add(c);
             he = (he.mirrorHalfEdge()).next();
         } while ( he != vtx.emanatingHalfEdge );
 
@@ -468,6 +501,11 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
                     return;
                 }
             }
+            // Next in->out transition: its sector heads the next null
+            // edge. The previous lmev moved the old head to the new
+            // vertex, so reusing it would split the wrong vertex when the
+            // neighbourhood alternates more than once (B-03).
+            head = nbr.get(i).sector;
         }
     }
 

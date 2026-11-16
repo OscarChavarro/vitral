@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.VSDKFatalException;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -18,6 +19,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidStructuralCopy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
@@ -37,6 +39,12 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static final int UNION = 1;
     public static final int INTERSECTION = 2;
     public static final int SUBTRACT = 3;
+
+    /**
+    Serializes the public set operations and splits: the kernel keeps
+    per-call state in static fields (Fable5.2Analysis.md Stage F step 3).
+    */
+    private static final Object KERNEL_LOCK = new Object();
 
     // Weld tolerance for glyph/poly-line simplification, expressed as a
     // fraction of the contour bounding-box diagonal.
@@ -345,8 +353,16 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         List<PolyhedralBoundedSolid> outSolidsAbove,
         List<PolyhedralBoundedSolid> outSolidsBelow)
     {
-        _PolyhedralBoundedSolidSplitter.split(inSolid, inSplittingPlane,
-                                             outSolidsAbove, outSolidsBelow);
+        synchronized ( KERNEL_LOCK ) {
+            try {
+                _PolyhedralBoundedSolidSplitter.split(inSolid,
+                    inSplittingPlane, outSolidsAbove, outSolidsBelow);
+            }
+            catch ( VSDKFatalException e ) {
+                throw new SolidOperationFailedException(
+                    "Split failed: " + e.getMessage(), e);
+            }
+        }
     }
 
     /**
@@ -391,16 +407,39 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     }
 
     /**
-    Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp` with
-    configurable strict result validation.
+    Regularized set operation ([MANT1988] Ch. 15) with configurable strict
+    result validation.
+
+    <p>The operands are not modified: the operation runs on structural
+    copies of them ([MANT1988] Sec. 15.8, `scopy`). Use
+    {@link #setOpDestructive} to skip the copies when the operands are no
+    longer needed; it consumes them as the book's algorithm does.</p>
 
     <p>Strict validation performs global shell/Euler analysis and an
     all-face-pairs intersection scan. It is enabled by default by the shorter
     overloads; callers can pass {@code false} here for an explicit
     performance/legacy-compatibility opt-out.</p>
 
-    @throws IllegalStateException when a completed boolean result fails the
-        strict B-Rep postcondition
+    <p>Empty results. A solid with no faces is returned when the regularized
+    result is empty (A \ A, the intersection of disjoint or touching
+    solids, A \ B with A inside B); {@link #isEmptyResult} tells it apart.
+    When the operands prove that the result cannot be empty (a union of
+    non-empty solids, an intersection of solids whose interiors overlap,
+    A \ B with a point of A strictly outside B) and the pipeline returned
+    nothing, {@link SolidOperationFailedException} is raised instead of
+    silently returning an empty solid.</p>
+
+    <p>The public operations of this class are serialized on one lock: the
+    kernel still keeps per-call state in static fields, so concurrent calls
+    from several threads run one after the other.</p>
+
+    @throws NonManifoldBooleanResultException when the result would be
+        non-manifold (a union of solids touching only along edges or at
+        vertices); raised even when {@code doStrictValidation} is false
+    @throws InvalidSolidResultException when a completed boolean result
+        fails the strict B-Rep postcondition
+    @throws SolidOperationFailedException when the operation fails or lost
+        the solid
     */
     public static PolyhedralBoundedSolid setOp(
         PolyhedralBoundedSolid inSolidA,
@@ -410,8 +449,131 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         boolean maximizeResultFaces,
         boolean doStrictValidation)
     {
-        PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
-        return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
-            withDebug, maximizeResultFaces, doStrictValidation);
+        synchronized ( KERNEL_LOCK ) {
+            PolyhedralBoundedSolid result;
+
+            PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
+            result = runSetOp(
+                PolyhedralBoundedSolidStructuralCopy.copy(inSolidA),
+                PolyhedralBoundedSolidStructuralCopy.copy(inSolidB),
+                op, withDebug, maximizeResultFaces, doStrictValidation);
+            if ( isEmptyResult(result) &&
+                 resultCannotBeEmpty(inSolidA, inSolidB, op) ) {
+                throw new SolidOperationFailedException(
+                    "Boolean operation lost the solid: op=" +
+                    operationName(op) + " returned an empty solid but " +
+                    "the operands prove the result is not empty (path=" +
+                    getLastSetOpResultPath() + ")");
+            }
+            return result;
+        }
+    }
+
+    /**
+    Destructive form of {@link #setOp(PolyhedralBoundedSolid,
+    PolyhedralBoundedSolid, int, boolean, boolean, boolean)}: no copies are
+    made and the operands are consumed ([MANT1988] Sec. 15.8: "the parts of
+    A and B not required in the final result will remain in the original
+    solids"). After the call the operands hold fragments and must not be
+    used. The empty-result witness check is not done, since it needs intact
+    operands.
+    */
+    public static PolyhedralBoundedSolid setOpDestructive(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op,
+        boolean withDebug,
+        boolean maximizeResultFaces,
+        boolean doStrictValidation)
+    {
+        synchronized ( KERNEL_LOCK ) {
+            PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
+            return runSetOp(inSolidA, inSolidB, op, withDebug,
+                maximizeResultFaces, doStrictValidation);
+        }
+    }
+
+    /**
+    True for the empty solid a set operation or a split returns when the
+    regularized result is empty: no faces at all.
+    */
+    public static boolean isEmptyResult(PolyhedralBoundedSolid result)
+    {
+        return result != null && result.getPolygonsList().size() == 0;
+    }
+
+    private static PolyhedralBoundedSolid runSetOp(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op,
+        boolean withDebug,
+        boolean maximizeResultFaces,
+        boolean doStrictValidation)
+    {
+        try {
+            return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA,
+                inSolidB, op, withDebug, maximizeResultFaces,
+                doStrictValidation);
+        }
+        catch ( VSDKFatalException e ) {
+            throw new SolidOperationFailedException(
+                "Boolean operation failed: op=" + operationName(op) +
+                " (path=" + getLastSetOpResultPath() + "): " +
+                e.getMessage(), e);
+        }
+    }
+
+    /**
+    Witnesses that the regularized result of `op` on the intact operands
+    is not empty. Only sufficient conditions are used, so false means
+    "could be empty", never "is empty".
+    */
+    private static boolean resultCannotBeEmpty(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op)
+    {
+        boolean emptyA = inSolidA == null || isEmptyResult(inSolidA);
+        boolean emptyB = inSolidB == null || isEmptyResult(inSolidB);
+
+        if ( op == UNION ) {
+            return !emptyA || !emptyB;
+        }
+        if ( emptyA || (emptyB && op == INTERSECTION) ) {
+            return false;
+        }
+        if ( op == INTERSECTION ) {
+            return _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                .interiorsOverlap(inSolidA, inSolidB);
+        }
+        if ( op == SUBTRACT ) {
+            return emptyB ||
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                    .hasBoundaryPointOutside(inSolidA, inSolidB);
+        }
+        return false;
+    }
+
+    private static String operationName(int op)
+    {
+        switch ( op ) {
+          case UNION: return "UNION";
+          case INTERSECTION: return "INTERSECTION";
+          case SUBTRACT: return "SUBTRACT";
+          default: return "op#" + op;
+        }
+    }
+
+    /**
+    Reports which path produced the last `setOp` result on the calling
+    thread: "normal-pipeline" when the [MANT1988] Ch. 15 pipeline answered,
+    otherwise the name of the preflight or fallback that did (for example
+    "touching-only-preflight" or "axis-aligned-cell-fallback-incomplete-connect").
+    Returns null before the first call or when the last call failed before
+    producing a result.
+    */
+    public static String getLastSetOpResultPath()
+    {
+        return _PolyhedralBoundedSolidSetOperator.getLastResultPath();
     }
 }

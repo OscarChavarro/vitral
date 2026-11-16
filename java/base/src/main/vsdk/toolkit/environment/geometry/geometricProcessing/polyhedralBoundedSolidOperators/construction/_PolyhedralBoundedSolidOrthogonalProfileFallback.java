@@ -544,22 +544,49 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
         }
     }
 
+    /**
+    Lazy form for {@code setOp} (Fable5.2Analysis.md Stage D step 4): the
+    spec is computed now, from the unmodified operands; the cells are built
+    only if {@code get()} is called.
+    @return null when the operands are not orthogonal profiles
+    */
+    static java.util.function.Supplier<PolyhedralBoundedSolid>
+    lazyOrthogonalProfileBooleanFallback(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op)
+    {
+        final OrthogonalProfileBooleanFallbackSpec spec =
+            prepareOrthogonalProfileBooleanFallbackSpec(inSolidA, inSolidB);
+        if ( spec == null ) {
+            return null;
+        }
+        return () -> buildOrthogonalProfileBooleanFallback(spec, op);
+    }
+
     static PolyhedralBoundedSolid buildOrthogonalProfileBooleanFallback(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB,
         int op)
     {
         OrthogonalProfileBooleanFallbackSpec spec;
-        ProfileCellBooleanBuilder builder;
-        boolean[][][] occupied;
-        int zone;
-        int iy;
-        int iz;
 
         spec = prepareOrthogonalProfileBooleanFallbackSpec(inSolidA, inSolidB);
         if ( spec == null ) {
             return null;
         }
+        return buildOrthogonalProfileBooleanFallback(spec, op);
+    }
+
+    private static PolyhedralBoundedSolid buildOrthogonalProfileBooleanFallback(
+        OrthogonalProfileBooleanFallbackSpec spec,
+        int op)
+    {
+        ProfileCellBooleanBuilder builder;
+        boolean[][][] occupied;
+        int zone;
+        int iy;
+        int iz;
 
         occupied =
             new boolean[2][spec.yCoordinates.size() - 1][spec.zCoordinates.size() - 1];

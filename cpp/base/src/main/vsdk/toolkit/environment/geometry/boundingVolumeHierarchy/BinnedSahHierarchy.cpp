@@ -14,46 +14,46 @@ unchanged, so bins and partitions grow without emptiness checks.
 */
 class _BinnedSahBox {
   public:
-    double lo[3];
-    double hi[3];
+    double minimum[3];
+    double maximum[3];
 
     _BinnedSahBox()
     {
         for (int a = 0; a < 3; a++) {
-            lo[a] = 1e30;
-            hi[a] = -1e30;
+            minimum[a] = 1e30;
+            maximum[a] = -1e30;
         }
     }
 
     bool isEmpty() const
     {
-        return lo[0] > hi[0] || lo[1] > hi[1] || lo[2] > hi[2];
+        return minimum[0] > maximum[0] || minimum[1] > maximum[1] || minimum[2] > maximum[2];
     }
 
     void enclose(const _BinnedSahBox &other)
     {
         for (int a = 0; a < 3; a++) {
-            lo[a] = other.lo[a] < lo[a] ? other.lo[a] : lo[a];
-            hi[a] = other.hi[a] > hi[a] ? other.hi[a] : hi[a];
+            minimum[a] = other.minimum[a] < minimum[a] ? other.minimum[a] : minimum[a];
+            maximum[a] = other.maximum[a] > maximum[a] ? other.maximum[a] : maximum[a];
         }
     }
 
     void enclosePoint(const double *point)
     {
         for (int a = 0; a < 3; a++) {
-            lo[a] = point[a] < lo[a] ? point[a] : lo[a];
-            hi[a] = point[a] > hi[a] ? point[a] : hi[a];
+            minimum[a] = point[a] < minimum[a] ? point[a] : minimum[a];
+            maximum[a] = point[a] > maximum[a] ? point[a] : maximum[a];
         }
     }
 
     double centroid(int axis) const
     {
-        return 0.5 * (lo[axis] + hi[axis]);
+        return 0.5 * (minimum[axis] + maximum[axis]);
     }
 
     double extent(int axis) const
     {
-        return hi[axis] - lo[axis];
+        return maximum[axis] - minimum[axis];
     }
 
     /** Half the surface area: the SAH cost of [WALD2007].3.1 drops the
@@ -63,9 +63,9 @@ class _BinnedSahBox {
         if (isEmpty()) {
             return 0.0;
         }
-        const double dx = hi[0] - lo[0];
-        const double dy = hi[1] - lo[1];
-        const double dz = hi[2] - lo[2];
+        const double dx = maximum[0] - minimum[0];
+        const double dy = maximum[1] - minimum[1];
+        const double dz = maximum[2] - minimum[2];
         return dx * dy + dy * dz + dz * dx;
     }
 };
@@ -83,8 +83,8 @@ static void
 setNodeBounds(BinnedSahHierarchyNode &node, const _BinnedSahBox &box)
 {
     for (int a = 0; a < 3; a++) {
-        node.lo[a] = box.lo[a];
-        node.hi[a] = box.hi[a];
+        node.minimum[a] = box.minimum[a];
+        node.maximum[a] = box.maximum[a];
     }
 }
 
@@ -118,7 +118,7 @@ findSplit(const java::ArrayList<_BinnedSahBox> &boxes,
         }
         // [WALD2007].3.1 Bins of equal width over the centroid bounds; all
         // three axes are tried, [WALD2007] bins only the widest one.
-        const double lo = centroidBox.lo[axis];
+        const double lo = centroidBox.minimum[axis];
         const double scale = (double)BINS / extent;
 
         // [WALD2007].3.4 Bin updates: count and full 3D bounds per bin,
@@ -199,8 +199,8 @@ BinnedSahHierarchy::build(const java::ArrayList<double> &boxValues,
     for (int i = 0; i < primitiveCount; i++) {
         _BinnedSahBox box;
         for (int a = 0; a < 3; a++) {
-            box.lo[a] = boxValues[6 * i + a];
-            box.hi[a] = boxValues[6 * i + 3 + a];
+            box.minimum[a] = boxValues[6 * i + a];
+            box.maximum[a] = boxValues[6 * i + 3 + a];
         }
         boxes.add(box);
     }
@@ -275,7 +275,7 @@ BinnedSahHierarchy::build(const java::ArrayList<double> &boxValues,
             }
             // [WALD2007].3.6 ID list partitioning with a temporary array;
             // stable: members of bins [0, splitBin] first.
-            const double lo = centroidBox.lo[axis];
+            const double lo = centroidBox.minimum[axis];
             const double scale = (double)BIN_COUNT / centroidBox.extent(axis);
             scratch.clear();
             for (int i = task.first; i < task.first + task.count; i++) {

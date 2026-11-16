@@ -27,8 +27,11 @@ class StepperMotorGuideStrictValidationTest
             .hasMessageContaining("op=UNION")
             .hasMessageContaining("path=normal-pipeline")
             .hasMessageContaining("TopologySummary{")
-            .hasMessageContaining(
-                "Face [4] has a loop with fewer than 3 edges");
+            // The face id depends on processing order (it moved from 4 to 3
+            // when lkemr stopped leaving the bridge half in the ring); the
+            // defect is the short loop, whatever face carries it.
+            .hasMessageMatching(
+                "(?s).*Face \\[\\d+\\] has a loop with fewer than 3 edges.*");
     }
 
     @Test

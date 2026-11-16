@@ -75,8 +75,8 @@ public class BinnedSahHierarchy {
     private static void setNodeBounds(BinnedSahHierarchyNode node, _BinnedSahBox box)
     {
         for ( int a = 0; a < 3; a++ ) {
-            node.lo[a] = box.lo[a];
-            node.hi[a] = box.hi[a];
+            node.minimum[a] = box.minimum[a];
+            node.maximum[a] = box.maximum[a];
         }
     }
 
@@ -109,7 +109,7 @@ public class BinnedSahHierarchy {
             }
             // [WALD2007].3.1 Bins of equal width over the centroid bounds; all
             // three axes are tried, [WALD2007] bins only the widest one.
-            final double lo = centroidBox.lo[axis];
+            final double lo = centroidBox.minimum[axis];
             final double scale = (double)BINS / extent;
 
             // [WALD2007].3.4 Bin updates: count and full 3D bounds per bin,
@@ -201,8 +201,8 @@ public class BinnedSahHierarchy {
         for ( int i = 0; i < primitiveCount; i++ ) {
             _BinnedSahBox box = new _BinnedSahBox();
             for ( int a = 0; a < 3; a++ ) {
-                box.lo[a] = boxValues.get(6 * i + a);
-                box.hi[a] = boxValues.get(6 * i + 3 + a);
+                box.minimum[a] = boxValues.get(6 * i + a);
+                box.maximum[a] = boxValues.get(6 * i + 3 + a);
             }
             boxes.add(box);
         }
@@ -279,7 +279,7 @@ public class BinnedSahHierarchy {
                 }
                 // [WALD2007].3.6 ID list partitioning with a temporary array;
                 // stable: members of bins [0, splitBin] first.
-                final double lo = centroidBox.lo[axis];
+                final double lo = centroidBox.minimum[axis];
                 final double scale = (double)BIN_COUNT / centroidBox.extent(axis);
                 scratch.clear();
                 for ( int i = task.first; i < task.first + task.count; i++ ) {
@@ -479,17 +479,17 @@ public class BinnedSahHierarchy {
             for ( int a = 0; a < 3; a++ ) {
                 // Empty box (the negative box of an empty instance or mesh): the
                 // swap below would otherwise turn it into a box that is entered.
-                if ( node.lo[a] > node.hi[a] ) {
+                if ( node.minimum[a] > node.maximum[a] ) {
                     return -1.0;
                 }
                 if ( parallel[a] ) {
-                    if ( origin[a] < node.lo[a] || origin[a] > node.hi[a] ) {
+                    if ( origin[a] < node.minimum[a] || origin[a] > node.maximum[a] ) {
                         return -1.0;
                     }
                     continue;
                 }
-                double t0 = (node.lo[a] - origin[a]) * inverse[a];
-                double t1 = (node.hi[a] - origin[a]) * inverse[a];
+                double t0 = (node.minimum[a] - origin[a]) * inverse[a];
+                double t1 = (node.maximum[a] - origin[a]) * inverse[a];
                 if ( t0 > t1 ) {
                     final double swap = t0;
                     t0 = t1;

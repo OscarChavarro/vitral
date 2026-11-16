@@ -11,46 +11,46 @@ Axis aligned box of the build. The default box is the "negative box"
 unchanged, so bins and partitions grow without emptiness checks.
 */
 class _BinnedSahBox {
-    final double[] lo = new double[3];
-    final double[] hi = new double[3];
+    final double[] minimum = new double[3];
+    final double[] maximum = new double[3];
 
     _BinnedSahBox()
     {
         for ( int a = 0; a < 3; a++ ) {
-            lo[a] = 1e30;
-            hi[a] = -1e30;
+            minimum[a] = 1e30;
+            maximum[a] = -1e30;
         }
     }
 
     boolean isEmpty()
     {
-        return lo[0] > hi[0] || lo[1] > hi[1] || lo[2] > hi[2];
+        return minimum[0] > maximum[0] || minimum[1] > maximum[1] || minimum[2] > maximum[2];
     }
 
     void enclose(_BinnedSahBox other)
     {
         for ( int a = 0; a < 3; a++ ) {
-            lo[a] = other.lo[a] < lo[a] ? other.lo[a] : lo[a];
-            hi[a] = other.hi[a] > hi[a] ? other.hi[a] : hi[a];
+            minimum[a] = other.minimum[a] < minimum[a] ? other.minimum[a] : minimum[a];
+            maximum[a] = other.maximum[a] > maximum[a] ? other.maximum[a] : maximum[a];
         }
     }
 
     void enclosePoint(double[] point)
     {
         for ( int a = 0; a < 3; a++ ) {
-            lo[a] = point[a] < lo[a] ? point[a] : lo[a];
-            hi[a] = point[a] > hi[a] ? point[a] : hi[a];
+            minimum[a] = point[a] < minimum[a] ? point[a] : minimum[a];
+            maximum[a] = point[a] > maximum[a] ? point[a] : maximum[a];
         }
     }
 
     double centroid(int axis)
     {
-        return 0.5 * (lo[axis] + hi[axis]);
+        return 0.5 * (minimum[axis] + maximum[axis]);
     }
 
     double extent(int axis)
     {
-        return hi[axis] - lo[axis];
+        return maximum[axis] - minimum[axis];
     }
 
     /** Half the surface area: the SAH cost of [WALD2007].3.1 drops the
@@ -60,9 +60,9 @@ class _BinnedSahBox {
         if ( isEmpty() ) {
             return 0.0;
         }
-        final double dx = hi[0] - lo[0];
-        final double dy = hi[1] - lo[1];
-        final double dz = hi[2] - lo[2];
+        final double dx = maximum[0] - minimum[0];
+        final double dy = maximum[1] - minimum[1];
+        final double dz = maximum[2] - minimum[2];
         return dx * dy + dy * dz + dz * dx;
     }
 }

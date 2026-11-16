@@ -26,9 +26,9 @@ each other, a leaf refers to one contiguous block of the primitive ids.
 */
 class BinnedSahHierarchyNode {
   public:
-    double lo[3];
+    double minimum[3];
     int leftOrFirst;
-    double hi[3];
+    double maximum[3];
     int count;
 };
 
@@ -167,17 +167,17 @@ BinnedSahHierarchy::RaySlab::entry(const BinnedSahHierarchyNode &node, double tM
     for (int a = 0; a < 3; a++) {
         // Empty box (the negative box of an empty instance or mesh): the
         // swap below would otherwise turn it into a box that is entered.
-        if (node.lo[a] > node.hi[a]) {
+        if (node.minimum[a] > node.maximum[a]) {
             return -1.0;
         }
         if (parallel[a]) {
-            if (origin[a] < node.lo[a] || origin[a] > node.hi[a]) {
+            if (origin[a] < node.minimum[a] || origin[a] > node.maximum[a]) {
                 return -1.0;
             }
             continue;
         }
-        double t0 = (node.lo[a] - origin[a]) * inverse[a];
-        double t1 = (node.hi[a] - origin[a]) * inverse[a];
+        double t0 = (node.minimum[a] - origin[a]) * inverse[a];
+        double t1 = (node.maximum[a] - origin[a]) * inverse[a];
         if (t0 > t1) {
             const double swap = t0;
             t0 = t1;

@@ -134,6 +134,9 @@ public final class PolyhedralBoundedSolidEulerOperators
             new _PolyhedralBoundedSolidHalfEdge(newVertex, newLoop, solid);
         newLoop.halfEdgesList.add(newHalfEdge);
         newLoop.boundaryStartHalfEdge = newHalfEdge;
+        // The lone vertex of an empty loop points at the loop's edge-less
+        // half-edge, so every vertex has a live emanating half-edge.
+        newVertex.emanatingHalfEdge = newHalfEdge;
     }
 
     /**
@@ -296,10 +299,10 @@ public final class PolyhedralBoundedSolidEulerOperators
             return;
         }
 
-        if ( he1.parentEdge != he2.parentEdge ) {
+        if ( he1.parentEdge == null || he1.parentEdge != he2.parentEdge ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
             Logger.reportMessage(solid, VSDK.WARNING, "lkev",
-            "Given half-edges must lie over the same edge!");
+            "Given half-edges must be the two halves of one edge!");
             return;
         }        
 
@@ -322,12 +325,24 @@ public final class PolyhedralBoundedSolidEulerOperators
             he = he.mirrorHalfEdge().next();
         }
 
+        // The surviving vertex must keep a live emanating half-edge
+        // (defect E-05): he1.next() starts at he2's vertex; when that is he2
+        // itself (strut seen from the other side) use he2.next() instead.
+        _PolyhedralBoundedSolidHalfEdge he1next;
+        he1next = he1.next();
         he2next = he2.next();
         he1.parentLoop.unlistHalfEdge(he1);
         he2.parentLoop.unlistHalfEdge(he2);
-        he2.startingVertex.emanatingHalfEdge = he2next;
-        if ( he2.parentLoop.halfEdgesList.size() < 1 ) {
-            he2.startingVertex.emanatingHalfEdge = null;
+        if ( he1next != he1 && he1next != he2 ) {
+            he2.startingVertex.emanatingHalfEdge = he1next;
+        }
+        else if ( he2next != he1 && he2next != he2 ) {
+            he2.startingVertex.emanatingHalfEdge = he2next;
+        }
+        else {
+            // Loop becomes empty; he2 survives below as its edge-less
+            // half-edge.
+            he2.startingVertex.emanatingHalfEdge = he2;
         }
 
         solid.getEdgesList().locateWindowAtElem(he1.parentEdge);
@@ -378,6 +393,8 @@ public final class PolyhedralBoundedSolidEulerOperators
         _PolyhedralBoundedSolidHalfEdge halfEdgePivot;
 
         halfEdgePivot = he1.next();
+        _PolyhedralBoundedSolidHalfEdge he1nextBeforeKill = halfEdgePivot;
+        _PolyhedralBoundedSolidHalfEdge he2nextBeforeKill = he2.next();
         edgeToBeKilled = he1.parentEdge;
         loopToBeKilled = he2.parentLoop;
         faceToBeKilled = loopToBeKilled.parentFace;
@@ -436,6 +453,17 @@ public final class PolyhedralBoundedSolidEulerOperators
             orphanedLoop.parentFace = he1.parentLoop.parentFace;
             faceToBeKilled.boundariesList.remove(0);
             he1.parentLoop.parentFace.boundariesList.add(orphanedLoop);
+        }
+
+        // Redirect vertex back-pointers away from the killed half-edges:
+        // he2.next() starts at he1's vertex and he1.next() at he2's.
+        if ( he1.startingVertex.emanatingHalfEdge == he1 ||
+             he1.startingVertex.emanatingHalfEdge == he2 ) {
+            he1.startingVertex.emanatingHalfEdge = he2nextBeforeKill;
+        }
+        if ( he2.startingVertex.emanatingHalfEdge == he1 ||
+             he2.startingVertex.emanatingHalfEdge == he2 ) {
+            he2.startingVertex.emanatingHalfEdge = he1nextBeforeKill;
         }
     }
 
@@ -501,8 +529,20 @@ public final class PolyhedralBoundedSolidEulerOperators
             "Cannot split face because one input half-edge has null starting vertex.");
             return null;
         }
+        if ( he1.parentLoop != he2.parentLoop ) {
+            // [MANT1988] Sec. 11.3.3 precondition (defect E-06): rejected
+            // before any change to the solid.
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef",
+            "Cannot split face because the half-edges belong to different loops.");
+            return null;
+        }
 
         if ( newFaceId > solid.getMaxFaceId() ) solid.setMaxFaceId(newFaceId);
+
+        if ( he1 == he2 ) {
+            return lmefCircularFace(solid, he1, newFaceId);
+        }
 
         newFace = new _PolyhedralBoundedSolidFace(he1.parentLoop.parentFace.parentSolid, newFaceId);
         oldLoop = he1.parentLoop;
@@ -543,6 +583,56 @@ public final class PolyhedralBoundedSolidEulerOperators
     }
 
     /**
+    `lmef(he, he)`: the "circular" face of Program 11.7 (defect E-04). The new
+    edge starts and ends at `he.startingVertex`; one half lies alone in the
+    new face's loop, the other is inserted before `he` in the old loop. When
+    `he` is the edge-less half-edge of an empty loop it becomes the new
+    face's half-edge, as `addhe` reuses it in the book.
+    */
+    private static _PolyhedralBoundedSolidFace lmefCircularFace(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidHalfEdge he,
+        int newFaceId)
+    {
+        _PolyhedralBoundedSolidFace newFace;
+        _PolyhedralBoundedSolidLoop newLoop;
+        _PolyhedralBoundedSolidLoop oldLoop;
+        _PolyhedralBoundedSolidEdge newEdge;
+        _PolyhedralBoundedSolidHalfEdge nhe1;
+        _PolyhedralBoundedSolidHalfEdge nhe2;
+        _PolyhedralBoundedSolidVertex v;
+
+        oldLoop = he.parentLoop;
+        v = he.startingVertex;
+        newFace = new _PolyhedralBoundedSolidFace(solid, newFaceId);
+        newLoop = new _PolyhedralBoundedSolidLoop(newFace);
+        newEdge = new _PolyhedralBoundedSolidEdge(solid);
+
+        if ( he.parentEdge == null ) {
+            oldLoop.unlistHalfEdge(he);
+            nhe1 = he;
+            nhe1.parentLoop = newLoop;
+            newLoop.halfEdgesList.add(nhe1);
+            nhe2 = new _PolyhedralBoundedSolidHalfEdge(v, oldLoop, solid);
+            oldLoop.halfEdgesList.add(nhe2);
+        }
+        else {
+            nhe1 = new _PolyhedralBoundedSolidHalfEdge(v, newLoop, solid);
+            newLoop.halfEdgesList.add(nhe1);
+            nhe2 = new _PolyhedralBoundedSolidHalfEdge(v, oldLoop, solid);
+            oldLoop.halfEdgesList.insertBefore(nhe2, he);
+        }
+        nhe1.parentEdge = newEdge;
+        nhe2.parentEdge = newEdge;
+        newEdge.rightHalf = nhe1;
+        newEdge.leftHalf = nhe2;
+        newLoop.boundaryStartHalfEdge = nhe1;
+        oldLoop.boundaryStartHalfEdge = nhe2;
+        v.emanatingHalfEdge = nhe2;
+        return newFace;
+    }
+
+    /**
     lkemr: low level kill edge make ring (loop splitting operator).
     Operator lkemr removes the edge of `he1` and `he2`, and divides their
     common loop into two components (i.e., it creates a new "ring").  If
@@ -571,58 +661,71 @@ public final class PolyhedralBoundedSolidEulerOperators
     {
         PolyhedralBoundedSolidStatistics.recordLkemrCall();
         //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge he3;
-        _PolyhedralBoundedSolidHalfEdge he4;
+        if ( he1 == null || he2 == null || he1 == he2 ||
+             he1.parentEdge == null || he1.parentEdge != he2.parentEdge ||
+             he1.parentLoop != he2.parentLoop ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(solid, VSDK.WARNING, "lkemr",
+            "Given half-edges must be the two halves of one edge in one loop. "
+            + "Operation aborted.");
+            return;
+        }
+
+        //-----------------------------------------------------------------
+        // Following Program 11.8: the loop he1, R, he2, O (R and O being the
+        // half-edges strictly between he1 and he2, and between he2 and he1)
+        // becomes the old loop {he1, O} and the new ring {he2, R}; then the
+        // two halves of the bridge are deleted. A component that ends up
+        // without half-edges keeps its bridge half as the edge-less
+        // half-edge of an empty loop (the book's delhe), so both "one
+        // resulting loop empty" cases of Sec. 11.3.4 are handled (defect
+        // E-02). Every vertex keeps a live emanating half-edge (E-03).
+        _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidLoop newLoop;
         _PolyhedralBoundedSolidLoop oldLoop;
         _PolyhedralBoundedSolidEdge killedEdge;
-
-        oldLoop = he1.parentLoop;
-        newLoop = new _PolyhedralBoundedSolidLoop(oldLoop.parentFace);
-        killedEdge = he1.parentEdge;
-
-        //-----------------------------------------------------------------
-        ArrayList<_PolyhedralBoundedSolidHalfEdge> migratedHalfEdges;
-        migratedHalfEdges = new ArrayList<>();
-
-        he4 = he1.next();
-        do {
-            migratedHalfEdges.add(he4);
-            if ( he4 == he2 ) break;
-        } while ( (he4 = he4.next()) != he2 );
-
-        //-----------------------------------------------------------------
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> ring;
         int i;
 
-        for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
-            he3 = migratedHalfEdges.get(i);
-            oldLoop.halfEdgesList.locateWindowAtElem(he3);
+        oldLoop = he1.parentLoop;
+        killedEdge = he1.parentEdge;
+        ring = new ArrayList<>();
+        for ( he = he1.next(); he != he2; he = he.next() ) {
+            ring.add(he);
+        }
+        newLoop = new _PolyhedralBoundedSolidLoop(oldLoop.parentFace);
+
+        for ( i = 0; i < ring.size(); i++ ) {
+            he = ring.get(i);
+            oldLoop.halfEdgesList.locateWindowAtElem(he);
             oldLoop.halfEdgesList.removeElemAtWindow();
-            newLoop.halfEdgesList.add(he3);
-            he3.parentLoop = newLoop;
+            newLoop.halfEdgesList.add(he);
+            he.parentLoop = newLoop;
+        }
+
+        // he2 always leaves the old loop.
+        oldLoop.halfEdgesList.locateWindowAtElem(he2);
+        oldLoop.halfEdgesList.removeElemAtWindow();
+        if ( ring.isEmpty() ) {
+            he2.parentEdge = null;
+            he2.parentLoop = newLoop;
+            newLoop.halfEdgesList.add(he2);
         }
         newLoop.boundaryStartHalfEdge = newLoop.halfEdgesList.get(0);
-
-        //-----------------------------------------------------------------
-        oldLoop.delhe(he1);
-        oldLoop.delhe(he2);
-
-        if ( newLoop.halfEdgesList.size() <= 1 ) {
-            newLoop.boundaryStartHalfEdge.parentEdge = null;
-            if ( newLoop.halfEdgesList.size() <= 0 ) {
-                Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr",
-                "Case A Should not happen!");
-            }
-            newLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
-        }
+        he2.startingVertex.emanatingHalfEdge = newLoop.boundaryStartHalfEdge;
 
         if ( oldLoop.halfEdgesList.size() <= 1 ) {
-            oldLoop.boundaryStartHalfEdge.parentEdge = null;
-            if ( oldLoop.halfEdgesList.size() <= 0 ) {
-                Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr",
-                "Case B Should not happen!");
-            }
-            oldLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
+            // Only he1 is left: it becomes the edge-less half-edge.
+            he1.parentEdge = null;
+            oldLoop.boundaryStartHalfEdge = he1;
+            he1.startingVertex.emanatingHalfEdge = he1;
+        }
+        else {
+            _PolyhedralBoundedSolidHalfEdge he1next = he1.next();
+            oldLoop.halfEdgesList.locateWindowAtElem(he1);
+            oldLoop.halfEdgesList.removeElemAtWindow();
+            oldLoop.boundaryStartHalfEdge = he1next;
+            he1.startingVertex.emanatingHalfEdge = he1next;
         }
 
         solid.getEdgesList().locateWindowAtElem(killedEdge);
@@ -646,6 +749,12 @@ public final class PolyhedralBoundedSolidEulerOperators
         _PolyhedralBoundedSolidFace face1,
         _PolyhedralBoundedSolidFace face2)
     {
+        if ( face1 == null || face2 == null || face1 == face2 ||
+             face1.parentSolid != solid || face2.parentSolid != solid ) {
+            Logger.reportMessage(solid, VSDK.WARNING, "lkfmrh",
+                "Faces must be two distinct faces of the given solid!");
+            return;
+        }
         if ( face2.boundariesList.size() > 1 ) {
             Logger.reportMessage(solid, VSDK.WARNING, "lkfmrh",
                 "Internal face to form new loop must have just one boundary!");
@@ -921,9 +1030,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         //-----------------------------------------------------------------
         int i;
 
-        for ( i = 0; i < ringToKill.halfEdgesList.size(); i++ ) {
-            ringToKill.halfEdgesList.remove(i);
-        }
+        ringToKill.halfEdgesList.clear();
         ringToKill.parentFace.boundariesList.locateWindowAtElem(ringToKill);
         ringToKill.parentFace.boundariesList.removeElemAtWindow();
 
@@ -953,6 +1060,9 @@ public final class PolyhedralBoundedSolidEulerOperators
             he.parentLoop = he1.parentLoop;
             he1.parentLoop.halfEdgesList.insertBefore(he, heLast);
         }
+        // heLast starts at v2 and is always in the merged loop; a lone ring
+        // vertex had its edge-less half-edge dropped above (defect E-03).
+        v2.emanatingHalfEdge = heLast;
     }
 
     //= HIGH LEVEL EULER OPERATIONS ===================================

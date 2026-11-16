@@ -430,6 +430,17 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     }
 
 
+    /**
+    Times the curve-neighbour ring rescue re-parented a strut ring during
+    the last connect (Fable5.2Analysis.md Stage C step 4).
+    */
+    private static int lastRingRescueCount = 0;
+
+    static int getLastRingRescueCount()
+    {
+        return lastRingRescueCount;
+    }
+
     static int getLastLooseACount()
     {
         return lastLooseACount;
@@ -681,6 +692,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         lastLooseBCount = 0;
         lastSonfaCount = 0;
         lastSonfbCount = 0;
+        lastRingRescueCount = 0;
         nextSyntheticPairIndex = lastPairCount;
         // [MANT1988] §15.7 Program 15.14: single Connect implementation.
         // The "flexibleEndpointChains" alternative path was removed in §6.1
@@ -1218,6 +1230,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 "connect ring-rescue re-parent did not complete the match");
             return null;
         }
+        lastRingRescueCount++;
         tracePipelineSummary("connect ring-rescue applied: ring v="
             + (ringSide.startingVertex == null ? "?"
                : Integer.toString(ringSide.startingVertex.id))

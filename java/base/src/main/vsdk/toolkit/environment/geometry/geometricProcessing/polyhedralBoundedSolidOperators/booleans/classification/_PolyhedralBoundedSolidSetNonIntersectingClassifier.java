@@ -250,6 +250,21 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         int relation = classifyNoIntersectionRelation(cache.aInB(),
             cache.bInA());
 
+        // Tangent containment (B-02 b): one solid inside the other with
+        // faces on the other's boundary. The vertex test cannot see it
+        // (every vertex is "on"), so it reports touching. Only the answers
+        // that need no cavity use it; B \ A-style cavities need the
+        // pipeline.
+        if ( relation == NO_INT_RELATION_TOUCHING ) {
+            if ( isTangentlyContained(inSolidA, inSolidB) ) {
+                relation = NO_INT_RELATION_A_IN_B;
+            }
+            else if ( op != SUBTRACT &&
+                      isTangentlyContained(inSolidB, inSolidA) ) {
+                relation = NO_INT_RELATION_B_IN_A;
+            }
+        }
+
         if ( op == INTERSECTION ) {
             if ( relation == NO_INT_RELATION_A_IN_B ) {
                 outRes.merge(inSolidA);
@@ -266,6 +281,15 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             }
             else if ( relation == NO_INT_RELATION_B_IN_A ) {
                 outRes.merge(inSolidA);
+            }
+            else if ( relation == NO_INT_RELATION_TOUCHING ) {
+                // Two shells sharing only an edge or a vertex: a
+                // non-manifold result, rejected by design (B-04). Face
+                // contact never gets here: the pipeline glues it.
+                throw new NonManifoldBooleanResultException(
+                    "UNION of solids touching only along edges or at " +
+                    "vertices is non-manifold (two shells sharing a " +
+                    "boundary point); rejected");
             }
             else {
                 outRes.merge(inSolidA);
@@ -674,6 +698,46 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return result;
     }
 
+    /**
+    Witness test used to tell a right empty result from a lost solid
+    (Fable5.2Analysis.md Stage F step 4): true when some point is interior
+    to both solids, so their intersection cannot be empty. The operands
+    must be intact (not consumed by a set operation).
+    */
+    static boolean interiorsOverlap(PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB)
+    {
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(solidA, solidB));
+        return hasConfirmedInteriorOverlap(solidA, solidB);
+    }
+
+    /**
+    Witness test for A \ B: true when a vertex or a face interior witness
+    of `solidA` lies strictly outside `solidB`. A boundary point of A
+    outside B has interior points of A around it that are outside B, so
+    A \ B cannot be empty. (The converse does not hold, so a false answer
+    proves nothing.)
+    */
+    static boolean hasBoundaryPointOutside(PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB)
+    {
+        InfinitePlane[] planesB;
+        int i;
+
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(solidA, solidB));
+        planesB = precomputeFacePlanes(solidB);
+        for ( i = 0; i < solidA.getVerticesList().size(); i++ ) {
+            if ( classifyPointAgainstSolid(solidB, planesB,
+                     solidA.getVerticesList().get(i).position) ==
+                 Geometry.OUTSIDE ) {
+                return true;
+            }
+        }
+        return someFaceWitnessIsOutside(solidA, solidB, planesB);
+    }
+
     private static boolean hasConfirmedInteriorOverlap(
         PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB)
@@ -735,13 +799,32 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return false;
     }
 
+    /**
+    Classifies solid A against solid B for the "no proper intersection"
+    preflights (Fable5.2Analysis.md Stage D step 1, defect B-03).
+    <ul>
+    <li>INSIDE: A is contained in B. No vertex of A is outside B, at least
+        one is strictly inside, and a witness point interior to every face of
+        A is not outside B. The witness test separates tangent containment
+        from a solid whose edges lie in a face of B while part of it sticks
+        out (B-03): there every vertex is in or on B, yet a face is not.</li>
+    <li>LIMIT: A touches B, or straddles its boundary (vertices on both
+        sides, or a face witness outside). Callers must not take LIMIT as
+        containment; the touching preflight additionally requires that the
+        interiors do not overlap.</li>
+    <li>OUTSIDE: every vertex of A is outside B.</li>
+    </ul>
+    Before this rule the first vertex found inside made A "contained", even
+    with other vertices outside.
+    */
     private static int classifySolidAgainstSolid(
         PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB)
     {
         int i;
-        boolean sawLimit = false;
-        boolean sawOutside = false;
+        int inside = 0;
+        int limit = 0;
+        int outside = 0;
 
         if ( solidA == null || solidA.getVerticesList().size() < 1 ) {
             return Geometry.OUTSIDE;
@@ -752,23 +835,122 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             _PolyhedralBoundedSolidVertex v = solidA.getVerticesList().get(i);
             int status = classifyPointAgainstSolid(solidB, planesB, v.position);
             if ( status == Geometry.INSIDE ) {
-                return Geometry.INSIDE;
+                inside++;
             }
-            if ( status == Geometry.LIMIT ) {
-                sawLimit = true;
+            else if ( status == Geometry.LIMIT ) {
+                limit++;
             }
             else {
-                sawOutside = true;
+                outside++;
             }
         }
 
-        if ( sawLimit ) {
+        if ( outside > 0 ) {
+            return (inside > 0 || limit > 0) ? Geometry.LIMIT
+                                             : Geometry.OUTSIDE;
+        }
+        if ( inside == 0 ) {
             return Geometry.LIMIT;
         }
-        if ( sawOutside ) {
-            return Geometry.OUTSIDE;
+        if ( someFaceWitnessIsOutside(solidA, solidB, planesB) ) {
+            return Geometry.LIMIT;
         }
-        return Geometry.OUTSIDE;
+        return Geometry.INSIDE;
+    }
+
+    /**
+    True when no vertex and no face witness of {@code inner} is outside
+    {@code outer}, and at least one face witness is strictly inside it:
+    containment with boundary contact.
+    */
+    private static boolean isTangentlyContained(PolyhedralBoundedSolid inner,
+        PolyhedralBoundedSolid outer)
+    {
+        int i;
+        boolean someInside = false;
+        InfinitePlane[] planes = precomputeFacePlanes(outer);
+
+        for ( i = 0; i < inner.getVerticesList().size(); i++ ) {
+            if ( classifyPointAgainstSolid(outer, planes,
+                     inner.getVerticesList().get(i).position) ==
+                 Geometry.OUTSIDE ) {
+                return false;
+            }
+        }
+        for ( i = 0; i < inner.getPolygonsList().size(); i++ ) {
+            Vector3Dd witness = faceInteriorWitness(
+                inner.getPolygonsList().get(i));
+            if ( witness == null ) {
+                continue;
+            }
+            int status = classifyPointAgainstSolid(outer, planes, witness);
+            if ( status == Geometry.OUTSIDE ) {
+                return false;
+            }
+            if ( status == Geometry.INSIDE ) {
+                someInside = true;
+            }
+        }
+        return someInside;
+    }
+
+    private static boolean someFaceWitnessIsOutside(
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB,
+        InfinitePlane[] planesB)
+    {
+        int i;
+
+        for ( i = 0; i < solidA.getPolygonsList().size(); i++ ) {
+            Vector3Dd witness = faceInteriorWitness(
+                solidA.getPolygonsList().get(i));
+            if ( witness != null &&
+                 classifyPointAgainstSolid(solidB, planesB, witness) ==
+                     Geometry.OUTSIDE ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+    A point strictly inside the face: the centroid of the first triangle of
+    consecutive outer-loop vertices whose centroid the face classifies as
+    INSIDE (holes and concave corners are rejected by that test).
+    @return the witness, or null when no such triangle exists
+    */
+    static Vector3Dd faceInteriorWitness(_PolyhedralBoundedSolidFace face)
+    {
+        _PolyhedralBoundedSolidLoop loop;
+        _PolyhedralBoundedSolidHalfEdge he;
+        InfinitePlane plane;
+        double eps = numericContext.bigEpsilon();
+
+        if ( face == null || face.boundariesList.size() < 1 ) {
+            return null;
+        }
+        plane = face.getContainingPlane();
+        loop = face.boundariesList.get(0);
+        if ( plane == null || loop == null ||
+             loop.boundaryStartHalfEdge == null ) {
+            return null;
+        }
+        he = loop.boundaryStartHalfEdge;
+        do {
+            _PolyhedralBoundedSolidHalfEdge n1 = he.next();
+            if ( n1 == null || n1.next() == null ) {
+                return null;
+            }
+            Vector3Dd c = he.startingVertex.position
+                .add(n1.startingVertex.position)
+                .add(n1.next().startingVertex.position)
+                .multiply(1.0 / 3.0);
+            if ( face.testPointInside(c, eps, plane) == Geometry.INSIDE ) {
+                return c;
+            }
+            he = n1;
+        } while ( he != loop.boundaryStartHalfEdge );
+        return null;
     }
 
     private static int classifyNoIntersectionRelation(int aInB, int bInA)
@@ -877,6 +1059,53 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         }
 
         return false;
+    }
+
+    /**
+    True when a face of A and a face of B lie on the same plane with
+    opposite orientation and share a region of positive area: the solids
+    touch along a face (Fable5.2Analysis.md B-04). Two cubes sharing a whole
+    face are detected through the interior witness of one face, since none
+    of their vertices or edge midpoints is inside the other face.
+    */
+    static boolean hasOppositeCoplanarFaceAreaContact(
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB)
+    {
+        int i;
+        int j;
+
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(solidA, solidB));
+        for ( i = 0; i < solidA.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = solidA.getPolygonsList().get(i);
+            for ( j = 0; j < solidB.getPolygonsList().size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB =
+                    solidB.getPolygonsList().get(j);
+                if ( !coplanarFaces(faceA, faceB) ||
+                     faceA.getContainingPlane().getNormal().dotProduct(
+                         faceB.getContainingPlane().getNormal()) >= 0.0 ) {
+                    continue;
+                }
+                if ( partialCoplanarFaceAreaOverlap(faceA, faceB) ||
+                     witnessInsideFace(faceA, faceB) ||
+                     witnessInsideFace(faceB, faceA) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean witnessInsideFace(
+        _PolyhedralBoundedSolidFace source,
+        _PolyhedralBoundedSolidFace target)
+    {
+        Vector3Dd witness = faceInteriorWitness(source);
+
+        return witness != null &&
+            target.testPointInside(witness, numericContext.bigEpsilon()) ==
+                Geometry.INSIDE;
     }
 
     private static ArrayList<ArrayList<Vector3Dd>>

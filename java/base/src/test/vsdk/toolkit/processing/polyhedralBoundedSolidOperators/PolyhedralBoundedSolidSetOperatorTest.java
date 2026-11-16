@@ -210,8 +210,12 @@ class PolyhedralBoundedSolidSetOperatorTest
     }
 
     @org.junit.jupiter.api.Test
-    void given_mant1988Section15_2HoledIntersection_when_finalMaximizeFacesEnabled_then_resultRemainsIntermediateValidButNotStrict()
+    void given_mant1988Section15_2HoledIntersection_when_finalMaximizeFacesEnabled_then_resultIsTheStrictValidPrism()
     {
+        // The wedge pierces the block through two faces: two section rings
+        // strictly inside faces (Fable5.2Analysis.md B-01). Until the ring
+        // fix this result kept two zero-area ring faces and failed strict
+        // validation, which this test used to assert.
         // Arrange
         PolyhedralBoundedSolid[] operands =
             PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(
@@ -224,12 +228,16 @@ class PolyhedralBoundedSolidSetOperatorTest
             solidA, solidB, PolyhedralBoundedSolidModeler.INTERSECTION, false,
             true, false);
 
-        // Assert
+        // Assert: triangular prism of section 0.5 * 0.55 * 0.3, length 0.5
         assertThat(result).isNotNull();
         assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateIntermediate(result)).isTrue();
-        assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateStrict(result)).isFalse();
+            .validateStrict(result)).isTrue();
+        assertThat(result.getPolygonsList().size()).isEqualTo(5);
+        assertThat(result.getEdgesList().size()).isEqualTo(9);
+        assertThat(result.getVerticesList().size()).isEqualTo(6);
+        assertThat(PolyhedralBoundedSolidVolumeOracle.solidVolume(result))
+            .isCloseTo(0.5 * 0.55 * 0.3 * 0.5,
+                org.assertj.core.data.Offset.offset(1e-12));
     }
 
     @org.junit.jupiter.api.Test
@@ -280,8 +288,10 @@ class PolyhedralBoundedSolidSetOperatorTest
             .validateIntermediate(result)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateStrict(result)).isTrue();
-        assertThat(result.getMinMax()).containsExactly(
-            1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
+        // Answered by the normal pipeline since Stage D (formerly by the
+        // profile-difference fallback): compare with a tolerance.
+        assertThat(result.getMinMax()).usingComparatorWithPrecision(1e-12)
+            .containsExactly(1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
     }
 
     @org.junit.jupiter.api.Test
@@ -307,8 +317,10 @@ class PolyhedralBoundedSolidSetOperatorTest
             .validateIntermediate(result)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateStrict(result)).isTrue();
-        assertThat(result.getMinMax()).containsExactly(
-            1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
+        // Answered by the normal pipeline since Stage D (formerly by the
+        // profile-difference fallback): compare with a tolerance.
+        assertThat(result.getMinMax()).usingComparatorWithPrecision(1e-12)
+            .containsExactly(1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
     }
 
     @org.junit.jupiter.api.Test
@@ -336,9 +348,9 @@ class PolyhedralBoundedSolidSetOperatorTest
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(withoutMax)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateStrict(withMax)).isFalse();
+            .validateStrict(withMax)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
-            .validateStrict(withoutMax)).isFalse();
+            .validateStrict(withoutMax)).isTrue();
         assertThat(withMax.getPolygonsList().size())
             .isEqualTo(withoutMax.getPolygonsList().size());
         assertThat(withMax.getEdgesList().size())
@@ -413,6 +425,7 @@ class PolyhedralBoundedSolidSetOperatorTest
     {
         return Stream.of(
             Arguments.of(-1, PolyhedralBoundedSolidModeler.UNION),
+            Arguments.of(-1, PolyhedralBoundedSolidModeler.INTERSECTION),
             Arguments.of(-1, PolyhedralBoundedSolidModeler.SUBTRACT),
             Arguments.of(0, PolyhedralBoundedSolidModeler.INTERSECTION),
             Arguments.of(1, PolyhedralBoundedSolidModeler.UNION),
@@ -424,7 +437,6 @@ class PolyhedralBoundedSolidSetOperatorTest
     private static Stream<Arguments> mant1988IntermediateOnlySamples()
     {
         return Stream.of(
-            Arguments.of(-1, PolyhedralBoundedSolidModeler.INTERSECTION),
             Arguments.of(0, PolyhedralBoundedSolidModeler.UNION),
             Arguments.of(0, PolyhedralBoundedSolidModeler.SUBTRACT)
         );
