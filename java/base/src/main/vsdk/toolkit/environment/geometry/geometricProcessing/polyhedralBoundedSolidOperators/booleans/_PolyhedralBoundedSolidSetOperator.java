@@ -24,6 +24,7 @@ import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidStructuralCopy;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologySummary;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -669,6 +670,23 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             ctx.connected);
     }
 
+    private static void weldCoincidentVerticesOfOperand(
+        PolyhedralBoundedSolid solid, String name)
+    {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+
+        if ( PolyhedralBoundedSolidGeometricValidator
+                .validateNoCoincidentVertices(solid, context,
+                    new StringBuilder()) ) {
+            return;
+        }
+        int welded = PolyhedralBoundedSolidTopologyEditing
+            .weldCoincidentVertices(solid, context);
+        tracePipelineSummary("setOp operand " + name +
+            " had coincident vertices; welded " + welded + " pair(s)");
+    }
+
     private static boolean isTouchingOnlyPreflightCase(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
@@ -1201,16 +1219,15 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidB);
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
+        // Operand preparation, on the copies this operation owns: edges
+        // shorter than the tolerance are collapsed, so that generate does
+        // not meet two vertices at one point. Validation, below, only
+        // reads (plan-stage11 Phase C).
+        weldCoincidentVerticesOfOperand(inSolidA, "A");
+        weldCoincidentVerticesOfOperand(inSolidB, "B");
         StringBuilder booleanInputMsg = new StringBuilder();
-        boolean validInputs;
-        try {
-            validInputs = PolyhedralBoundedSolidValidationEngine
-                .validateBooleanInputs(inSolidA, inSolidB, booleanInputMsg);
-        }
-        catch ( IllegalArgumentException e ) {
-            throw new InvalidOperandException(
-                "Boolean operands are not valid solids: " + e.getMessage(), e);
-        }
+        boolean validInputs = PolyhedralBoundedSolidValidationEngine
+            .validateBooleanInputs(inSolidA, inSolidB, booleanInputMsg);
         if ( !validInputs ) {
             throw new InvalidOperandException(
                 "Boolean operands are not valid solids:\n" + booleanInputMsg);
@@ -1240,18 +1257,6 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             preflightCache =
                 _PolyhedralBoundedSolidSetNonIntersectingClassifier
                     .newPreflightCache(inSolidA, inSolidB);
-
-        PolyhedralBoundedSolid coplanarAreaContactResult =
-            _PolyhedralBoundedSolidSetNonIntersectingClassifier
-                .runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, res, op,
-                    preflightCache);
-        if ( coplanarAreaContactResult != null ) {
-            res = coplanarAreaContactResult;
-            return completeSetOpResult(res, operandADiagnostics,
-                operandBDiagnostics, op,
-                "partial-coplanar-area-preflight", maximizeResultFaces,
-                doStrictValidation);
-        }
 
         // A union of solids that touch along a face is one solid, glued
         // along the AonB- faces ([MANT1988] Eq. 15.2): leave it to the
@@ -1313,6 +1318,17 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                 doStrictValidation);
         }
 
+        // Generate and classify edit the operands (vertices on edges and
+        // faces, null edges). When they find no intersection the answer is
+        // one of the operands, or their contact: it is taken from these
+        // copies, made before any edit (plan-stage11 Phase E). Taken from
+        // the edited operands it carried their extra vertices, and failed
+        // strict validation for contacts inside the tolerance band.
+        PolyhedralBoundedSolid untouchedA =
+            PolyhedralBoundedSolidStructuralCopy.copy(inSolidA);
+        PolyhedralBoundedSolid untouchedB =
+            PolyhedralBoundedSolidStructuralCopy.copy(inSolidB);
+
         setOpGenerate(ctx, inSolidA, inSolidB);
 
         if ( withDebug ) {
@@ -1343,7 +1359,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         // them returned an empty solid.
         if ( ctx.sonea.isEmpty() && ctx.soneb.isEmpty() ) {
             // No intersections found
-            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+            res = setOpNoIntersectionCase(untouchedA, untouchedB, res, op);
             return completeSetOpResult(res, operandADiagnostics,
                 operandBDiagnostics, op,
                 "no-intersection-after-classify", maximizeResultFaces,
@@ -1358,6 +1374,30 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         setOpConnect(ctx, op);
         lastConnectInvariantViolations.set(
             checkConnectInvariant(inSolidA, inSolidB, ctx));
+        // [MANT1988] Program 15.14: connect ends with every null edge
+        // joined. Loose ends mean that part of the intersection curve was
+        // not cut: a crossing was missed or misclassified, or two ends that
+        // belong together sat in different faces. The null faces found so
+        // far then describe only part of the result. Finishing with them
+        // returned a solid with a piece missing and no error (plan-stage11
+        // Phase B, near-degenerate fuzz), or a solid with coincident,
+        // unjoined vertices that the non-manifold check rejected for the
+        // wrong reason.
+        int looseA = _PolyhedralBoundedSolidSetNullEdgesConnector
+            .getLastLooseACount();
+        int looseB = _PolyhedralBoundedSolidSetNullEdgesConnector
+            .getLastLooseBCount();
+        _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
+            curveReport = _PolyhedralBoundedSolidSetNullEdgesConnector
+                .getLastCurveReport();
+        if ( looseA > 0 || looseB > 0 ) {
+            lastResultPath.set("normal-pipeline");
+            throw new SolidOperationFailedException(
+                "Boolean operation could not close the intersection curve: " +
+                "op=" + operationName(op) + ", " + looseA +
+                " loose null edge end(s) on A and " + looseB + " on B " +
+                "after connect (" + curveReport + ")");
+        }
 
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage05");

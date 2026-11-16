@@ -33,19 +33,22 @@ class BooleanCompositeOracleFuzzGateTest
     scale-aware tolerances and the ring placement of join: the rotated
     families 47 of 72, the chains 23 of 36 and the coplanar bottoms 46 of
     72. In general position a non-manifold rejection counts as a failure.
-    The remaining failures are open defects of the connect stage on
-    non-convex faces.
+    After plan-stage11 Phase F (connect joins curve neighbours only; lmekr
+    keeps the outer loop first; finish keeps whole shells): rotated 65,
+    chains 31, coplanar bottoms 50, and the 72 axis-aligned ones are
+    answered, none rejected. No family returns a wrong volume any more,
+    and that is now a condition of its own: see the test.
     */
     private static final Map<Family, Integer> MINIMUM_OK = new EnumMap<>(
         Family.class);
 
     static {
         MINIMUM_OK.put(Family.NON_CONVEX_AXIS_ALIGNED, 72);
-        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED, 47);
-        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_MINUS_3, 47);
-        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_PLUS_3, 47);
-        MINIMUM_OK.put(Family.CHAINS, 23);
-        MINIMUM_OK.put(Family.NON_CONVEX_COPLANAR_BOTTOMS, 46);
+        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED, 65);
+        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_MINUS_3, 65);
+        MINIMUM_OK.put(Family.NON_CONVEX_ROTATED_SCALE_1E_PLUS_3, 65);
+        MINIMUM_OK.put(Family.CHAINS, 31);
+        MINIMUM_OK.put(Family.NON_CONVEX_COPLANAR_BOTTOMS, 50);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -59,6 +62,11 @@ class BooleanCompositeOracleFuzzGateTest
             summary.total + " correct " + summary.byOutcome);
         summary.failures.forEach(f -> System.out.println("  " + f));
 
+        assertThat(summary.byOutcome.get(
+                BooleanCompositeOracleFuzz.Outcome.WRONG_VOLUME))
+            .as("solids returned with a wrong volume in family " + family +
+                " (a silent error, whatever the ratchet says)")
+            .isIn(null, Integer.valueOf(0));
         assertThat(summary.correct)
             .as("correct results in family " + family +
                 " must not regress below the ratchet")

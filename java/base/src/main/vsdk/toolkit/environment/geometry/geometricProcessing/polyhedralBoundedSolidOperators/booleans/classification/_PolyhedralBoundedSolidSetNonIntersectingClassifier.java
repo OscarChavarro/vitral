@@ -47,11 +47,11 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     mutated until the Mäntylä generate stage runs (after every preflight has
     either fired or declined), so each predicate is a pure function of
     {@code (a, b)} and may be computed once and reused across
-    {@link #runPartialCoplanarFaceAreaCase}, {@link #runTouchingOnlyPreflightCase},
+    {@link #runTouchingOnlyPreflightCase},
     {@link #runContainmentOnlyPreflightCase} and {@link #runSetOpNoIntersectionCase}.
 
     <p>The cache only memoizes the heavy primitives (two
-    {@code classifySolidAgainstSolid} scans, the interior-overlap grid test and
+    {@code classifySolidAgainstSolid} scans, the interior-overlap test and
     the two edge/face intersection scans). It does not change any decision: a
     request that hits the cache returns exactly the value the uncached path
     would have recomputed.</p>
@@ -218,10 +218,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
-        if ( hasPartialCoplanarFaceAreaOverlap(inSolidA, inSolidB) ) {
-            return false;
-        }
-
+        // Solids that share part of a face and nothing else are a contact
+        // too (STACKED_BLOCKS): the interiors do not overlap. A union along
+        // such a face is glued by the pipeline; the caller keeps it out.
         if ( cache.hasInteriorOverlap() ) {
             return false;
         }
@@ -274,6 +273,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             else if ( relation == NO_INT_RELATION_B_IN_A ) {
                 outRes.merge(inSolidB);
             }
+            else if ( !cache.hasInteriorOverlap() ) {
+                appendContactLaminae(inSolidA, inSolidB, outRes);
+            }
             return outRes;
         }
 
@@ -314,57 +316,25 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return outRes;
     }
 
-    static PolyhedralBoundedSolid runPartialCoplanarFaceAreaCase(
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB,
-        PolyhedralBoundedSolid outRes,
-        int op)
-    {
-        return runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, outRes, op,
-            newPreflightCache(inSolidA, inSolidB));
-    }
+    /**
+    Lamina policy for the intersection of solids that share part of a face
+    and nothing else (STACKED_BLOCKS): the shared part is returned as
+    laminae, zero volume, valid and easy to display, not as the regularised
+    empty set. A contact whose area is below the collapsed face threshold
+    gives no lamina: a collapsed lamina is not a valid result (see
+    _GeometricCollapsedLaminaStrategy).
 
-    static PolyhedralBoundedSolid runPartialCoplanarFaceAreaCase(
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB,
-        PolyhedralBoundedSolid outRes,
-        int op,
-        _PreflightCache cache)
+    <p>This is part of the "no intersections found" resolution of the
+    pipeline ([MANT1988] 15.4). Until plan-stage11 Phase E a preflight
+    answered these pairs before generate and classify ran.</p>
+    */
+    private static void appendContactLaminae(PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB, PolyhedralBoundedSolid outRes)
     {
-        ArrayList<ArrayList<Vector3Dd>> contactPolygons;
+        ArrayList<ArrayList<Vector3Dd>> contactPolygons =
+            partialCoplanarFaceAreaOverlapPolygons(inSolidA, inSolidB);
         int i;
 
-        if ( op == UNION ) {
-            return null;
-        }
-
-        setNumericContext(
-            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
-
-        if ( cache.hasEdgeFaceIntersectionAB() ||
-             cache.hasEdgeFaceIntersectionBA() ) {
-            return null;
-        }
-
-        contactPolygons = partialCoplanarFaceAreaOverlapPolygons(inSolidA,
-            inSolidB);
-        if ( contactPolygons.isEmpty() ) {
-            return null;
-        }
-        if ( cache.hasInteriorOverlap() ) {
-            return null;
-        }
-
-        if ( op == SUBTRACT ) {
-            outRes.merge(inSolidA);
-            return outRes;
-        }
-
-        // The intersection of solids that share part of a face is returned
-        // as laminae (zero volume, valid and easy to display), not as the
-        // regularised empty set. A contact whose area is below the collapsed
-        // face threshold gives no lamina: a collapsed lamina is not a valid
-        // result (see _GeometricCollapsedLaminaStrategy).
         for ( i = 0; i < contactPolygons.size(); i++ ) {
             if ( polygonArea(contactPolygons.get(i)) <
                  PolyhedralBoundedSolidGeometricValidator
@@ -377,8 +347,6 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 outRes.merge(lamina);
             }
         }
-
-        return outRes;
     }
 
     private static int compareToZero(double value)
@@ -419,7 +387,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             point);
     }
 
-    private static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
+    static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
         PolyhedralBoundedSolidFaceGeometry[] facePlanes,
         Vector3Dd point)
     {
@@ -523,192 +491,6 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return Geometry.LIMIT;
     }
 
-    private static double[] overlappingBounds(PolyhedralBoundedSolid solidA,
-                                              PolyhedralBoundedSolid solidB)
-    {
-        double[] a = solidA.getMinMax();
-        double[] b = solidB.getMinMax();
-
-        return new double[] {
-            Math.max(a[0], b[0]),
-            Math.max(a[1], b[1]),
-            Math.max(a[2], b[2]),
-            Math.min(a[3], b[3]),
-            Math.min(a[4], b[4]),
-            Math.min(a[5], b[5])
-        };
-    }
-
-    private static boolean hasPositiveOverlapVolume(double[] bounds)
-    {
-        double eps = numericContext.bigEpsilon();
-
-        return bounds[3] - bounds[0] > eps &&
-            bounds[4] - bounds[1] > eps &&
-            bounds[5] - bounds[2] > eps;
-    }
-
-    /**
-    Cheap, constant-size existence probe for a point interior to both solids.
-    Tests the 27 quarter/center/three-quarter combinations of the overlap AABB
-    {@code bounds} (a strict superset of the per-axis center samples the full
-    grid uses). Returns {@code true} only on a genuine INSIDE/INSIDE witness, so
-    a positive result is always exact; a negative result is inconclusive and the
-    caller must still run the exhaustive grid.
-    */
-    private static boolean hasInteriorOverlapWitnessInAabb(
-        double[] bounds,
-        PolyhedralBoundedSolid solidA,
-        PolyhedralBoundedSolid solidB,
-        PolyhedralBoundedSolidFaceGeometry[] planesA,
-        PolyhedralBoundedSolidFaceGeometry[] planesB)
-    {
-        double[] sx = axisProbeCoordinates(bounds[0], bounds[3]);
-        double[] sy = axisProbeCoordinates(bounds[1], bounds[4]);
-        double[] sz = axisProbeCoordinates(bounds[2], bounds[5]);
-        int i;
-        int j;
-        int k;
-
-        for ( i = 0; i < sx.length; i++ ) {
-            for ( j = 0; j < sy.length; j++ ) {
-                for ( k = 0; k < sz.length; k++ ) {
-                    Vector3Dd sample = new Vector3Dd(sx[i], sy[j], sz[k]);
-                    if ( classifyPointAgainstSolid(solidA, planesA, sample) ==
-                         Geometry.INSIDE &&
-                         classifyPointAgainstSolid(solidB, planesB, sample) ==
-                         Geometry.INSIDE ) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private static double[] axisProbeCoordinates(double min, double max)
-    {
-        double span = max - min;
-
-        return new double[] {
-            min + span / 4.0,
-            min + span / 2.0,
-            max - span / 4.0
-        };
-    }
-
-    private static double vertexCoordinate(
-        _PolyhedralBoundedSolidVertex vertex,
-        int axis)
-    {
-        if ( axis == 0 ) {
-            return vertex.position.x();
-        }
-        if ( axis == 1 ) {
-            return vertex.position.y();
-        }
-        return vertex.position.z();
-    }
-
-    private static void appendInteriorVertexCoordinates(
-        ArrayList<Double> coords,
-        PolyhedralBoundedSolid solid,
-        int axis,
-        double min,
-        double max,
-        double eps)
-    {
-        int i;
-
-        if ( solid == null ) {
-            return;
-        }
-
-        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
-            double c = vertexCoordinate(solid.getVerticesList().get(i), axis);
-            if ( c > min + eps && c < max - eps ) {
-                coords.add(Double.valueOf(c));
-            }
-        }
-    }
-
-    private static void appendUniqueInteriorSample(
-        ArrayList<Double> samples,
-        double value,
-        double min,
-        double max,
-        double eps)
-    {
-        int i;
-
-        if ( value <= min + eps || value >= max - eps ) {
-            return;
-        }
-
-        for ( i = 0; i < samples.size(); i++ ) {
-            if ( Math.abs(samples.get(i).doubleValue() - value) <= eps ) {
-                return;
-            }
-        }
-        samples.add(Double.valueOf(value));
-    }
-
-    private static double[] sampleCoordinates(double min, double max,
-                                              PolyhedralBoundedSolid solidA,
-                                              PolyhedralBoundedSolid solidB,
-                                              int axis)
-    {
-        ArrayList<Double> coords;
-        ArrayList<Double> samples;
-        ArrayList<Double> uniqueCoords;
-        double eps = numericContext.bigEpsilon();
-        double center = (min + max) / 2.0;
-        double quarter = min + (max - min) / 4.0;
-        double threeQuarters = max - (max - min) / 4.0;
-        int i;
-
-        coords = new ArrayList<Double>();
-        coords.add(Double.valueOf(min));
-        coords.add(Double.valueOf(max));
-        appendInteriorVertexCoordinates(coords, solidA, axis, min, max, eps);
-        appendInteriorVertexCoordinates(coords, solidB, axis, min, max, eps);
-        Collections.sort(coords);
-
-        uniqueCoords = new ArrayList<Double>();
-        for ( i = 0; i < coords.size(); i++ ) {
-            double c = coords.get(i).doubleValue();
-            if ( uniqueCoords.isEmpty() ||
-                 Math.abs(uniqueCoords.get(uniqueCoords.size()-1).doubleValue() - c) > eps ) {
-                uniqueCoords.add(Double.valueOf(c));
-            }
-        }
-
-        samples = new ArrayList<Double>();
-        appendUniqueInteriorSample(samples, quarter, min, max, eps);
-        appendUniqueInteriorSample(samples, center, min, max, eps);
-        appendUniqueInteriorSample(samples, threeQuarters, min, max, eps);
-
-        for ( i = 0; i < uniqueCoords.size() - 1; i++ ) {
-            double left = uniqueCoords.get(i).doubleValue();
-            double right = uniqueCoords.get(i+1).doubleValue();
-            if ( right - left > eps ) {
-                appendUniqueInteriorSample(samples, (left + right) / 2.0,
-                    min, max, eps);
-            }
-        }
-
-        Collections.sort(samples);
-        if ( samples.isEmpty() ) {
-            return new double[] { center };
-        }
-
-        double[] result = new double[samples.size()];
-        for ( i = 0; i < samples.size(); i++ ) {
-            result[i] = samples.get(i).doubleValue();
-        }
-        return result;
-    }
-
     /**
     Witness test used to tell a right empty result from a lost solid
     (Fable5.2Analysis.md Stage F step 4): true when some point is interior
@@ -749,65 +531,17 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return someFaceWitnessIsOutside(solidA, solidB, planesB);
     }
 
+    /**
+    True when some point is strictly inside both solids. Decided from the
+    boundaries by {@link _PolyhedralBoundedSolidInteriorOverlap}, without
+    sampling.
+    */
     private static boolean hasConfirmedInteriorOverlap(
         PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB)
     {
-        double[] bounds;
-        double[] xs;
-        double[] ys;
-        double[] zs;
-        int i;
-        int j;
-        int k;
-
-        if ( solidA == null || solidB == null ) {
-            return false;
-        }
-
-        bounds = overlappingBounds(solidA, solidB);
-        if ( !hasPositiveOverlapVolume(bounds) ) {
-            return false;
-        }
-
-        // Precompute each solid's face planes once; every probe/grid point is
-        // classified against the same unmutated solids, so this removes the
-        // per-point Newell/tolerance-context recompute (P2 scoped cache).
-        PolyhedralBoundedSolidFaceGeometry[] planesA = precomputeFacePlanes(solidA);
-        PolyhedralBoundedSolidFaceGeometry[] planesB = precomputeFacePlanes(solidB);
-
-        // P1.2 — cheap early-positive pass. hasConfirmedInteriorOverlap is an
-        // existence test ("is there a point interior to both solids"); any
-        // witness gives the same answer. Probe a constant-size set of likely
-        // interior candidates (the 27 quarter/center/three-quarter combinations
-        // of the overlap AABB) before paying for the full vertex-derived grid,
-        // which can reach 10^4-10^6 points for the bowl. This only returns true
-        // on a genuine INSIDE/INSIDE witness; the exhaustive grid below remains
-        // the exact fallback for the negative case.
-        if ( hasInteriorOverlapWitnessInAabb(bounds, solidA, solidB,
-                 planesA, planesB) ) {
-            return true;
-        }
-
-        xs = sampleCoordinates(bounds[0], bounds[3], solidA, solidB, 0);
-        ys = sampleCoordinates(bounds[1], bounds[4], solidA, solidB, 1);
-        zs = sampleCoordinates(bounds[2], bounds[5], solidA, solidB, 2);
-
-        for ( i = 0; i < xs.length; i++ ) {
-            for ( j = 0; j < ys.length; j++ ) {
-                for ( k = 0; k < zs.length; k++ ) {
-                    Vector3Dd sample = new Vector3Dd(xs[i], ys[j], zs[k]);
-                    if ( classifyPointAgainstSolid(solidA, planesA, sample) ==
-                         Geometry.INSIDE &&
-                         classifyPointAgainstSolid(solidB, planesB, sample) ==
-                         Geometry.INSIDE ) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
+        return _PolyhedralBoundedSolidInteriorOverlap.interiorsOverlap(
+            solidA, solidB);
     }
 
     /**
@@ -1046,31 +780,6 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 }
             }
         }
-        return false;
-    }
-
-    private static boolean hasPartialCoplanarFaceAreaOverlap(
-        PolyhedralBoundedSolid solidA,
-        PolyhedralBoundedSolid solidB)
-    {
-        int i;
-        int j;
-
-        if ( solidA == null || solidB == null ) {
-            return false;
-        }
-
-        for ( i = 0; i < solidA.getPolygonsList().size(); i++ ) {
-            _PolyhedralBoundedSolidFace faceA = solidA.getPolygonsList().get(i);
-            for ( j = 0; j < solidB.getPolygonsList().size(); j++ ) {
-                _PolyhedralBoundedSolidFace faceB = solidB.getPolygonsList().get(j);
-                if ( coplanarFaces(faceA, faceB) &&
-                     partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
-                    return true;
-                }
-            }
-        }
-
         return false;
     }
 

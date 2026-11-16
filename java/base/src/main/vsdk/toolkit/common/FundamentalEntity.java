@@ -18,7 +18,7 @@ derived from this abstract class belong two one of the following groups:
     supposed to evolve nor change, and as they impact greatly in application
     performance.
   - Extended collections: similar to other, but not found in basic
-    java implementations. For example, CircularDoubleLinkedList implementation
+    java implementations. For example, CircularArrayList implementation
     is similar to LinkedList included with java.util package.
   - Fundamental data element common in 3D computer graphics, like Ray's,
     Triangle's and Vertices.

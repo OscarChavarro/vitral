@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidFaceGeometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -563,6 +565,246 @@ final class _PolyhedralBoundedSolidSetFinisher
     Answer integrator for the set-operations pipeline.
     Following program [MANT1988].15.15.
     */
+    private static void exchange(ArrayList<_PolyhedralBoundedSolidFace> faces,
+        int i, int j)
+    {
+        _PolyhedralBoundedSolidFace exchanged = faces.get(i);
+
+        faces.set(i, faces.get(j));
+        faces.set(j, exchanged);
+    }
+
+    /**
+    Adds to `counts` the answer for one face: element 0 when a point of its
+    interior is strictly inside `other`, element 1 when strictly outside.
+    A face without such a point, or with it on the boundary of `other`,
+    adds nothing.
+    */
+    private static void countSide(_PolyhedralBoundedSolidFace face,
+        PolyhedralBoundedSolid other,
+        PolyhedralBoundedSolidFaceGeometry[] otherFaces, int[] counts)
+    {
+        Vector3Dd witness =
+            _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                .faceInteriorWitness(face);
+
+        if ( witness == null ) {
+            return;
+        }
+        int status = _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            .classifyPointAgainstSolid(other, otherFaces, witness);
+        if ( status == Geometry.INSIDE ) {
+            counts[0]++;
+        }
+        else if ( status == Geometry.OUTSIDE ) {
+            counts[1]++;
+        }
+    }
+
+    /** {@link #countSide} over the faces across the half-edges of `loop`. */
+    private static int[] sidesAcross(_PolyhedralBoundedSolidLoop loop,
+        PolyhedralBoundedSolid other,
+        PolyhedralBoundedSolidFaceGeometry[] otherFaces)
+    {
+        int[] counts = new int[2];
+        _PolyhedralBoundedSolidHalfEdge start = loop.boundaryStartHalfEdge;
+        _PolyhedralBoundedSolidHalfEdge he = start;
+        int guard = loop.halfEdgesList.size();
+
+        if ( start == null ) {
+            return counts;
+        }
+        do {
+            _PolyhedralBoundedSolidHalfEdge mate = he.mirrorHalfEdge();
+            if ( mate != null && mate.parentLoop != null &&
+                 mate.parentLoop.parentFace != loop.parentFace ) {
+                countSide(mate.parentLoop.parentFace, other, otherFaces,
+                    counts);
+            }
+            he = he.next();
+            guard--;
+        } while ( he != null && he != start && guard >= 0 );
+        return counts;
+    }
+
+    /**
+    True when the outer loop of `face` runs through the points of its ring
+    and no others: the face is the null face between the two copies of a
+    cut, without area of its own.
+    */
+    private static boolean isBand(_PolyhedralBoundedSolidFace face)
+    {
+        _PolyhedralBoundedSolidLoop outer = face.boundariesList.get(0);
+        _PolyhedralBoundedSolidLoop ring = face.boundariesList.get(1);
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context =
+            PolyhedralBoundedSolidNumericPolicy.forFace(face);
+        int i;
+        int j;
+
+        for ( i = 0; i < outer.halfEdgesList.size(); i++ ) {
+            boolean found = false;
+            for ( j = 0; j < ring.halfEdgesList.size() && !found; j++ ) {
+                found = PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                    outer.halfEdgesList.get(i).startingVertex.position,
+                    ring.halfEdgesList.get(j).startingVertex.position,
+                    context);
+            }
+            if ( !found ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+    `face` is a null face of connect: its ring is one copy of a cut. By
+    convention the faces across the ring are the part of the solid inside
+    `other`, and what lies on the side of the outer loop (the faces across
+    it for a band, the face itself otherwise) is the part outside. True
+    when both sides say the opposite and neither has a face that says
+    otherwise.
+    */
+    private static boolean sidesAreSwapped(_PolyhedralBoundedSolidFace face,
+        PolyhedralBoundedSolid other, int cut, String name)
+    {
+        setNumericContext(PolyhedralBoundedSolidNumericPolicy.forSolids(
+            face.parentSolid, other));
+        PolyhedralBoundedSolidFaceGeometry[] otherFaces =
+            PolyhedralBoundedSolidFaceGeometry.of(other);
+        int[] inside = sidesAcross(face.boundariesList.get(1), other,
+            otherFaces);
+        int[] outside;
+
+        if ( isBand(face) ) {
+            outside = sidesAcross(face.boundariesList.get(0), other,
+                otherFaces);
+        }
+        else {
+            outside = new int[2];
+            countSide(face, other, otherFaces, outside);
+        }
+        boolean swapped = inside[0] == 0 && outside[1] == 0 &&
+            inside[1] > 0 && outside[0] > 0;
+        tracePipelineSummary("finish sides of cut " + cut + " on " + name +
+            ": the part taken for inside has " + inside[0] +
+            " faces inside and " + inside[1] +
+            " outside; the part taken for outside " + outside[0] +
+            " and " + outside[1] + (swapped ? "; exchanged" : ""));
+        return swapped;
+    }
+
+    /** Adds to `reached` every face connected to `seed` through edges. */
+    private static void flood(_PolyhedralBoundedSolidFace seed,
+        java.util.IdentityHashMap<_PolyhedralBoundedSolidFace, Boolean>
+            reached,
+        ArrayList<_PolyhedralBoundedSolidFace> component)
+    {
+        ArrayList<_PolyhedralBoundedSolidFace> pending =
+            new ArrayList<_PolyhedralBoundedSolidFace>();
+        int i;
+
+        if ( seed == null || reached.containsKey(seed) ) {
+            return;
+        }
+        reached.put(seed, Boolean.TRUE);
+        pending.add(seed);
+        while ( !pending.isEmpty() ) {
+            _PolyhedralBoundedSolidFace face =
+                pending.remove(pending.size() - 1);
+            if ( component != null ) {
+                component.add(face);
+            }
+            for ( i = 0; i < face.boundariesList.size(); i++ ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+                _PolyhedralBoundedSolidHalfEdge start =
+                    loop.boundaryStartHalfEdge;
+                _PolyhedralBoundedSolidHalfEdge he = start;
+                int guard = loop.halfEdgesList.size();
+                if ( start == null ) {
+                    continue;
+                }
+                do {
+                    _PolyhedralBoundedSolidHalfEdge mate =
+                        he.mirrorHalfEdge();
+                    if ( mate != null && mate.parentLoop != null &&
+                         mate.parentLoop.parentFace != null &&
+                         !reached.containsKey(mate.parentLoop.parentFace) ) {
+                        reached.put(mate.parentLoop.parentFace, Boolean.TRUE);
+                        pending.add(mate.parentLoop.parentFace);
+                    }
+                    he = he.next();
+                    guard--;
+                } while ( he != null && he != start && guard >= 0 );
+            }
+        }
+    }
+
+    /**
+    One face of every shell of `solid` that no cut reaches and that lies on
+    the wanted side of `other`: inside when `keepInside`, outside
+    otherwise. The side is the one of the first vertex of the shell that is
+    not on the boundary of `other`; a shell with every vertex on that
+    boundary is left out.
+    @param cutFaces the null faces of `solid` and the faces made from their
+           rings: every cut part of the solid is connected to one of them
+    */
+    private static ArrayList<_PolyhedralBoundedSolidFace>
+    untouchedShellsToKeep(PolyhedralBoundedSolid solid,
+        ArrayList<_PolyhedralBoundedSolidFace> cutFaces,
+        PolyhedralBoundedSolid other, boolean keepInside)
+    {
+        ArrayList<_PolyhedralBoundedSolidFace> seeds =
+            new ArrayList<_PolyhedralBoundedSolidFace>();
+        java.util.IdentityHashMap<_PolyhedralBoundedSolidFace, Boolean>
+            reached = new java.util.IdentityHashMap<>();
+        PolyhedralBoundedSolidFaceGeometry[] otherFaces = null;
+        int i;
+        int j;
+        int k;
+
+        for ( i = 0; i < cutFaces.size(); i++ ) {
+            flood(cutFaces.get(i), reached, null);
+        }
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
+            if ( reached.containsKey(face) ) {
+                continue;
+            }
+            ArrayList<_PolyhedralBoundedSolidFace> shell =
+                new ArrayList<_PolyhedralBoundedSolidFace>();
+            flood(face, reached, shell);
+            if ( otherFaces == null ) {
+                setNumericContext(PolyhedralBoundedSolidNumericPolicy
+                    .forSolids(solid, other));
+                otherFaces = PolyhedralBoundedSolidFaceGeometry.of(other);
+            }
+            int side = Geometry.LIMIT;
+            for ( j = 0; j < shell.size() && side == Geometry.LIMIT; j++ ) {
+                _PolyhedralBoundedSolidFace member = shell.get(j);
+                for ( k = 0; k < member.boundariesList.size() &&
+                      side == Geometry.LIMIT; k++ ) {
+                    _PolyhedralBoundedSolidHalfEdge he = member
+                        .boundariesList.get(k).boundaryStartHalfEdge;
+                    if ( he == null || he.startingVertex == null ) {
+                        continue;
+                    }
+                    side = _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                        .classifyPointAgainstSolid(other, otherFaces,
+                            he.startingVertex.position);
+                }
+            }
+            if ( (keepInside && side == Geometry.INSIDE) ||
+                 (!keepInside && side == Geometry.OUTSIDE) ) {
+                seeds.add(face);
+                tracePipelineSummary("finish keeps a whole shell of " +
+                    shell.size() + " faces, " +
+                    (keepInside ? "inside" : "outside") +
+                    " the other solid");
+            }
+        }
+        return seeds;
+    }
+
     static void finish(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB,
@@ -595,6 +837,21 @@ final class _PolyhedralBoundedSolidSetFinisher
         inda = (op == INTERSECTION) ? sonfa.size() : 0;
         indb = (op == UNION) ? 0 : sonfb.size();
 
+        // [MANT1988] Program 15.15 takes sonf[i] for the part of the solid
+        // outside the other one and the face lmfkrh makes from its ring
+        // for the part inside. That rests on the orientation every null
+        // edge got on its way here. The parts themselves say which is
+        // which: a point of the faces on each side of the cut is inside
+        // the other solid or outside it. When they say the opposite of the
+        // convention for a whole cut, the two faces are exchanged
+        // (plan-stage11 Phase F).
+        boolean[] swappedA = new boolean[oldsize];
+        boolean[] swappedB = new boolean[oldsize];
+        for ( i = 0; i < oldsize; i++ ) {
+            swappedA[i] = sidesAreSwapped(sonfa.get(i), inSolidB, i, "A");
+            swappedB[i] = sidesAreSwapped(sonfb.get(i), inSolidA, i, "B");
+        }
+
         for ( i = 0; i < oldsize; i++ ) {
             f = PolyhedralBoundedSolidEulerOperators.lmfkrh(inSolidA, sonfa.get(i).boundariesList.get(1),
                                 inSolidA.getMaxFaceId()+1);
@@ -605,6 +862,30 @@ final class _PolyhedralBoundedSolidSetFinisher
             sonfb.add(f);
         }
 
+        for ( i = 0; i < oldsize; i++ ) {
+            if ( swappedA[i] ) {
+                exchange(sonfa, i, i + oldsize);
+            }
+            if ( swappedB[i] ) {
+                exchange(sonfb, i, i + oldsize);
+            }
+        }
+
+        // Shells that no intersection curve reaches are not connected to
+        // any null face, so the moves below never see them. Each one lies
+        // wholly inside or wholly outside the other solid and belongs to
+        // the result on the same terms as the cut parts: A outside B for
+        // the union and the difference, A inside B for the intersection;
+        // B outside A for the union, B inside A otherwise. They used to be
+        // left behind without an error (plan-stage11 Phase F): the union
+        // of a two-piece solid with a solid that crosses only one of the
+        // pieces lost the other piece.
+        ArrayList<_PolyhedralBoundedSolidFace> wholeShellsOfA =
+            untouchedShellsToKeep(inSolidA, sonfa, inSolidB,
+                op == INTERSECTION);
+        ArrayList<_PolyhedralBoundedSolidFace> wholeShellsOfB =
+            untouchedShellsToKeep(inSolidB, sonfb, inSolidA, op != UNION);
+
         if ( op == SUBTRACT) {
             inSolidB.revert();
         }
@@ -612,6 +893,12 @@ final class _PolyhedralBoundedSolidSetFinisher
         for ( i = 0; i < oldsize; i++ ) {
             movefac(sonfa.get(i+inda), outRes);
             movefac(sonfb.get(i+indb), outRes);
+        }
+        for ( i = 0; i < wholeShellsOfA.size(); i++ ) {
+            movefac(wholeShellsOfA.get(i), outRes);
+        }
+        for ( i = 0; i < wholeShellsOfB.size(); i++ ) {
+            movefac(wholeShellsOfB.get(i), outRes);
         }
 
         cleanup(outRes);

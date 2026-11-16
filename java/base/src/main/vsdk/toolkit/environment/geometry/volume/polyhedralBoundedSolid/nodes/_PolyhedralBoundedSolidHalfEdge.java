@@ -7,8 +7,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.common.dataStructures.Linkable;
-import vsdk.toolkit.common.dataStructures._CircularDoubleLinkedListNode;
+import vsdk.toolkit.common.dataStructures.ArrayLinkable;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
@@ -26,7 +25,7 @@ from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
 public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity
-    implements Linkable<_PolyhedralBoundedSolidHalfEdge> {
+    implements ArrayLinkable {
     @Serial private static final long serialVersionUID = 20061118L;
 
     public static final int LEFT_SIDE = 1;
@@ -48,25 +47,30 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity
     public int id;
     private static int currentId = 1;
 
-    /// Node of `parentLoop.halfEdgesList` that holds this half-edge. It plays
-    /// the role of the intrusive `nxt`/`prv` links of [MANT1988] Program
-    /// 10.1: `next()` and `previous()` are O(1) through it. The list keeps
-    /// it up to date (see `Linkable`).
-    private _CircularDoubleLinkedListNode<_PolyhedralBoundedSolidHalfEdge>
-        listNode;
+    /// Place of this half-edge in `parentLoop.halfEdgesList`. It plays the
+    /// role of the intrusive `nxt`/`prv` links of [MANT1988] Program 10.1:
+    /// `next()` and `previous()` are O(1) through it. The list keeps it up
+    /// to date (see `ArrayLinkable`).
+    private Object listOwner;
+    private int listIndex = -1;
 
     @Override
-    public _CircularDoubleLinkedListNode<_PolyhedralBoundedSolidHalfEdge>
-    getListNode()
+    public Object getListOwner()
     {
-        return listNode;
+        return listOwner;
     }
 
     @Override
-    public void setListNode(
-        _CircularDoubleLinkedListNode<_PolyhedralBoundedSolidHalfEdge> node)
+    public int getListIndex()
     {
-        listNode = node;
+        return listIndex;
+    }
+
+    @Override
+    public void setListSlot(Object owner, int index)
+    {
+        listOwner = owner;
+        listIndex = index;
     }
 
     //=================================================================

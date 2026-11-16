@@ -24,9 +24,9 @@ comes from the Chapter 15 pipeline or from one of its preflights.
 | MANT1986_2 + A-B | ✅ | `normal-pipeline` |
 | MANT1986_2 + B-A | ✅ | `normal-pipeline` |
 | STACKED_BLOCKS + UNION | ✅ | `normal-pipeline` |
-| STACKED_BLOCKS + INTERSECTION | ✅ | `partial-coplanar-area-preflight` |
-| STACKED_BLOCKS + A-B | ✅ | `partial-coplanar-area-preflight` |
-| STACKED_BLOCKS + B-A | ✅ | `partial-coplanar-area-preflight` |
+| STACKED_BLOCKS + INTERSECTION | ✅ | `no-intersection-after-classify` |
+| STACKED_BLOCKS + A-B | ✅ | `no-intersection-after-classify` |
+| STACKED_BLOCKS + B-A | ✅ | `no-intersection-after-classify` |
 | MOON_BLOCK + UNION | ✅ | `normal-pipeline` |
 | MOON_BLOCK + INTERSECTION | ✅ | `normal-pipeline` |
 | MOON_BLOCK + A-B | ✅ | `normal-pipeline` |

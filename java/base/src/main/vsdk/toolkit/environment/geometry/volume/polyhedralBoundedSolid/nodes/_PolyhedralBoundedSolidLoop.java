@@ -5,8 +5,9 @@
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes;
 import java.io.Serial;
 
-import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
+import vsdk.toolkit.common.dataStructures.CircularArrayList;
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.dataStructures.ArrayLinkable;
 
 /**
 As noted in [MANT1988].10.2.1, a `_PolyhedralBoundedSolidLoop` describes
@@ -20,8 +21,33 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
+public class _PolyhedralBoundedSolidLoop extends FundamentalEntity
+    implements ArrayLinkable {
     @Serial private static final long serialVersionUID = 20061118L;
+
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    private Object listOwner;
+    private int listIndex = -1;
+
+    @Override
+    public Object getListOwner()
+    {
+        return listOwner;
+    }
+
+    @Override
+    public int getListIndex()
+    {
+        return listIndex;
+    }
+
+    @Override
+    public void setListSlot(Object owner, int index)
+    {
+        listOwner = owner;
+        listIndex = index;
+    }
 
     /// Defined as presented in [MANT1988].10.2.1
     public _PolyhedralBoundedSolidFace parentFace;
@@ -31,7 +57,7 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     /// reference.
     public _PolyhedralBoundedSolidHalfEdge boundaryStartHalfEdge;
 
-    public CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge> halfEdgesList;
+    public CircularArrayList<_PolyhedralBoundedSolidHalfEdge> halfEdgesList;
 
     //=================================================================
     public _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace parent)
@@ -44,7 +70,7 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
         parentFace = parent;
         parentFace.boundariesList.add(this);
         halfEdgesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge>();
+            new CircularArrayList<_PolyhedralBoundedSolidHalfEdge>();
     }
 
     public void unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge he)

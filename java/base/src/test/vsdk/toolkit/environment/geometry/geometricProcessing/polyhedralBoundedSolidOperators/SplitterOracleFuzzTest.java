@@ -118,7 +118,7 @@ class SplitterOracleFuzzTest
             .isGreaterThanOrEqualTo(MINIMUM_CORRECT);
     }
 
-    private static String check(PolyhedralBoundedSolid base,
+    static String check(PolyhedralBoundedSolid base,
         InfinitePlane plane)
     {
         PolyhedralBoundedSolid solid =

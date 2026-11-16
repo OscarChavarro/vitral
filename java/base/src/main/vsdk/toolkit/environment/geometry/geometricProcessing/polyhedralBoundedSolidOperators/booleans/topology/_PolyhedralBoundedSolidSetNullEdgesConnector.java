@@ -1055,6 +1055,17 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         boolean condition2;
 
         for ( i = 0; i < endsa.size(); i++ ) {
+            // A face that is not convex can be crossed several times by
+            // the same face of the other solid: the crossings lie on one
+            // line and all of them pass the face and role test of
+            // `neighbor`. Only the loose end left by a neighbour along the
+            // intersection curve is the other end of this chord; joining
+            // any other one draws a chord through the notch of the face
+            // (plan-stage11 Phase F). Program 15.13 of [MANT1988] gets the
+            // same effect from the order of its sorted null edges.
+            if ( !isCurveNeighborOfCurrentPair(i) ) {
+                continue;
+            }
             condition1 = neighbor(hea, endsa.get(i));
             condition2 = neighbor(heb, endsb.get(i));
 
@@ -1116,6 +1127,29 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         endsb.add(heb);
         endsPairIndex.add(Integer.valueOf(currentConnectPairIndex));
         return null;
+    }
+
+    /**
+    True when the loose entry `i` was left by one of the two pairs next to
+    the current pair on its intersection curve, or when the curves are not
+    known (no curve order applied): then every entry is a candidate, as in
+    the book.
+    */
+    private boolean isCurveNeighborOfCurrentPair(int i)
+    {
+        if ( !curveOrientationApplied || curveNeighborPositions == null ||
+             currentConnectPairIndex < 0 ||
+             currentConnectPairIndex >= curveNeighborPositions.length ||
+             curveNeighborPositions[currentConnectPairIndex] == null ||
+             i >= endsPairIndex.size() ) {
+            return true;
+        }
+        int pusherPosition = endsPairIndex.get(i).intValue();
+
+        return pusherPosition ==
+                curveNeighborPositions[currentConnectPairIndex][0] ||
+            pusherPosition ==
+                curveNeighborPositions[currentConnectPairIndex][1];
     }
 
     private static boolean rolesOpposite(

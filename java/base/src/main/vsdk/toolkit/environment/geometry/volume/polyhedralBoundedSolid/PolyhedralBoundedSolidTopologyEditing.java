@@ -749,8 +749,7 @@ public final class PolyhedralBoundedSolidTopologyEditing
     private static void remakeEmanatingHalfedgesReferences(
         PolyhedralBoundedSolid solid)
     {
-        _PolyhedralBoundedSolidTopologicalValidator
-            .remakeEmanatingHalfedgesReferences(solid);
+        PolyhedralBoundedSolidRepair.remakeEmanatingHalfEdgeReferences(solid);
     }
 
     /**

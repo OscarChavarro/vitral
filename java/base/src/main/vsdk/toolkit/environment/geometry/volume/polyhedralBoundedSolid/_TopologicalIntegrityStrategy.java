@@ -20,13 +20,11 @@ public class _TopologicalIntegrityStrategy
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
         StringBuilder msg)
     {
-        // Back-pointers are checked before the repair pass below, so that a
-        // dangling pointer left by an operator is reported, not hidden. The
-        // repair still runs, keeping the old behaviour for callers.
+        // Validation only reads. A dangling pointer left by an operator is
+        // reported; repairing it is PolyhedralBoundedSolidRepair's job, on
+        // request (plan-stage11 Phase C).
         boolean backPointersOk = _PolyhedralBoundedSolidTopologicalValidator
             .validateBackPointers(solid, msg);
-        _PolyhedralBoundedSolidTopologicalValidator
-            .remakeEmanatingHalfedgesReferences(solid);
         if ( !_PolyhedralBoundedSolidTopologicalValidator
             .validateTopologicalIntegrity(solid) ) {
             msg.append("  - Topological integrity test failed.\n");

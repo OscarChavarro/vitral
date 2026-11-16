@@ -115,8 +115,8 @@ public class _PolyhedralBoundedSolidTopologicalValidator
     - every vertex has a non-null emanating half-edge that starts at the
       vertex and is a member of its loop (for the lone vertex of an empty
       loop, that is the loop's edge-less half-edge).
-    Must run before `remakeEmanatingHalfedgesReferences`, which would hide a
-    broken pointer by repairing it.
+    Validation never repairs them: see
+    {@link PolyhedralBoundedSolidRepair#remakeEmanatingHalfEdgeReferences}.
     @return true when all hold; violations are appended to `msg`.
     */
     public static boolean validateBackPointers(PolyhedralBoundedSolid solid,
@@ -176,49 +176,4 @@ public class _PolyhedralBoundedSolidTopologicalValidator
         return ok;
     }
 
-    /**
-    Rebuilds the vertex-to-emanating-halfedge links required by the vertex node
-    definition of [MANT1988].10.2.1 and used throughout the Euler-operator
-    programs of chapter [MANT1988].11.
-    */
-    public static void remakeEmanatingHalfedgesReferences(PolyhedralBoundedSolid solid)
-    {
-        int i;
-        int j;
-
-        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
-            solid.getVerticesList().get(i).emanatingHalfEdge = null;
-        }
-
-        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
-            for ( j = 0; j < face.boundariesList.size(); j++ ) {
-                _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he;
-                _PolyhedralBoundedSolidHalfEdge heStart;
-
-                loop = face.boundariesList.get(j);
-                he = loop.boundaryStartHalfEdge;
-                if ( he == null ) {
-                    continue;
-                }
-                heStart = he;
-                do {
-                    he.startingVertex.emanatingHalfEdge = he;
-                    he = he.next();
-                    if ( he == null ) {
-                        break;
-                    }
-                } while( he != heStart );
-            }
-        }
-
-        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
-            if ( solid.getVerticesList().get(i).emanatingHalfEdge == null ) {
-                solid.getVerticesList().locateWindowAtElem(solid.getVerticesList().get(i));
-                solid.getVerticesList().removeElemAtWindow();
-                i--;
-            }
-        }
-    }
 }

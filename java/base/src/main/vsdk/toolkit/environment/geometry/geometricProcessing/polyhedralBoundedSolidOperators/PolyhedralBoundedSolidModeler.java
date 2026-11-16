@@ -568,7 +568,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     Reports which path produced the last `setOp` result on the calling
     thread: "normal-pipeline" when the [MANT1988] Ch. 15 pipeline answered,
     otherwise the name of the preflight that did (for example
-    "touching-only-preflight" or "partial-coplanar-area-preflight").
+    "touching-only-preflight" or "no-intersection-after-classify").
     Returns null before the first call or when the last call failed before
     producing a result.
     */

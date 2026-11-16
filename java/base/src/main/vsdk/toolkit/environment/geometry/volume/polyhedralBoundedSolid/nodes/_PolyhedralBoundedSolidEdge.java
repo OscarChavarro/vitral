@@ -6,6 +6,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes;
 import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.dataStructures.ArrayLinkable;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
@@ -22,8 +23,33 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
+public class _PolyhedralBoundedSolidEdge extends FundamentalEntity
+    implements ArrayLinkable {
     @Serial private static final long serialVersionUID = 20061118L;
+
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    private Object listOwner;
+    private int listIndex = -1;
+
+    @Override
+    public Object getListOwner()
+    {
+        return listOwner;
+    }
+
+    @Override
+    public int getListIndex()
+    {
+        return listIndex;
+    }
+
+    @Override
+    public void setListSlot(Object owner, int index)
+    {
+        listOwner = owner;
+        listIndex = index;
+    }
 
     /// Reference to `right` half edge, as defined in [MANT1988].10.2.2.
     /// Note that half edge in this side is considered positively oriented.

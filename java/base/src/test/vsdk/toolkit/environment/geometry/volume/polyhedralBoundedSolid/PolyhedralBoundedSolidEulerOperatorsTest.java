@@ -220,6 +220,76 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         assertThat(face.boundariesList.size()).isEqualTo(1);
     }
 
+    /**
+    lmekr removes the loop of its second half-edge. When that loop is the
+    outer loop of the face (the first half-edge is on a ring), the merged
+    loop is the outer boundary and must come first. It used to stay in the
+    place of the ring, so that in a face with another ring that other ring
+    was taken for the outer loop. The connect stage of the set operations
+    does exactly this when a face is crossed by several chords that pass
+    through vertices inside the face (plan-stage11 Phase F): every later
+    decision about where a pending ring belongs was then taken against the
+    wrong loop.
+    */
+    @Test
+    void given_faceWithTwoRings_when_lmekrMergesTheOuterLoopIntoARing_then_mergedLoopIsTheOuterLoop()
+    {
+        // Arrange: a square face with two strut rings, {5,6} and {7,8}.
+        PolyhedralBoundedSolid solid = createPlanarFaceWithBridgeToHoleSeed();
+        _PolyhedralBoundedSolidFace face = solid.findFace(1);
+        PolyhedralBoundedSolidEulerOperators.lmev(solid,
+            solid.findVertex(5).emanatingHalfEdge,
+            solid.findVertex(5).emanatingHalfEdge, 6,
+            new Vector3Dd(0.4, 0.3, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid,
+            face.findHalfEdge(1, 5), face.findHalfEdge(5, 1));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid,
+            face.findHalfEdge(3), face.findHalfEdge(3), 7,
+            new Vector3Dd(0.75, 0.75, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid,
+            solid.findVertex(7).emanatingHalfEdge,
+            solid.findVertex(7).emanatingHalfEdge, 8,
+            new Vector3Dd(0.6, 0.7, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid,
+            face.findHalfEdge(3, 7), face.findHalfEdge(7, 3));
+        assertThat(face.boundariesList.size()).isEqualTo(3);
+        _PolyhedralBoundedSolidLoop outer = face.boundariesList.get(0);
+        _PolyhedralBoundedSolidLoop firstRing = loopThrough(face, 5);
+        _PolyhedralBoundedSolidLoop secondRing = loopThrough(face, 7);
+        assertThat(firstRing).isNotSameAs(outer).isNotSameAs(secondRing);
+
+        // Action: the ring half-edge first, the outer half-edge second.
+        PolyhedralBoundedSolidEulerOperators.lmekr(solid,
+            firstRing.boundaryStartHalfEdge, outer.boundaryStartHalfEdge);
+
+        // Assert
+        assertThat(face.boundariesList.size()).isEqualTo(2);
+        assertThat(face.boundariesList.get(0)).isSameAs(firstRing);
+        assertThat(face.boundariesList.get(1)).isSameAs(secondRing);
+        assertThat(loopThrough(face, 1)).isSameAs(face.boundariesList.get(0));
+        assertThat(loopThrough(face, 3)).isSameAs(face.boundariesList.get(0));
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(solid)).isTrue();
+    }
+
+    private static _PolyhedralBoundedSolidLoop loopThrough(
+        _PolyhedralBoundedSolidFace face, int vertexId)
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
+                if ( loop.halfEdgesList.get(j).startingVertex.id ==
+                     vertexId ) {
+                    return loop;
+                }
+            }
+        }
+        return null;
+    }
+
     @Test
     void given_faceWithRing_when_lringmvReordersOuterLoop_then_keepsSameFace()
     {

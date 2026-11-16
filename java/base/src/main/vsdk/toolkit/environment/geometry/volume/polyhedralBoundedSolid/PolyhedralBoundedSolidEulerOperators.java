@@ -1025,9 +1025,21 @@ public final class PolyhedralBoundedSolidEulerOperators
         //-----------------------------------------------------------------
         int i;
 
+        // The loop of `he2` is the one removed. When it is the outer loop of
+        // the face (`he1` is on a ring and `he2` on the outer boundary), the
+        // merged loop is the outer boundary from now on and must take its
+        // place. It used to stay where the ring of `he1` was, and whatever
+        // other ring came first in the list was taken for the outer loop
+        // (plan-stage11 Phase F).
+        boolean killsOuterLoop =
+            ringToKill.parentFace.boundariesList.get(0) == ringToKill;
+
         ringToKill.halfEdgesList.clear();
         ringToKill.parentFace.boundariesList.locateWindowAtElem(ringToKill);
         ringToKill.parentFace.boundariesList.removeElemAtWindow();
+        if ( killsOuterLoop ) {
+            promoteLoopAsOuter(he1.parentLoop.parentFace, he1.parentLoop);
+        }
 
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidEdge newEdge;

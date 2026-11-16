@@ -6,7 +6,7 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
+import vsdk.toolkit.common.dataStructures.CircularArrayList;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -55,7 +55,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     }
 
     private static boolean searchForEdge(
-        CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> l,
+        CircularArrayList<_PolyhedralBoundedSolidEdge> l,
         _PolyhedralBoundedSolidEdge e)
     {
         int i;
@@ -67,7 +67,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     }
 
     private static boolean searchForVertex(
-        CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> l,
+        CircularArrayList<_PolyhedralBoundedSolidVertex> l,
         _PolyhedralBoundedSolidVertex v)
     {
         int i;

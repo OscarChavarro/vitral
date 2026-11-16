@@ -9,8 +9,9 @@ import java.io.Serial;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
+import vsdk.toolkit.common.dataStructures.CircularArrayList;
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.dataStructures.ArrayLinkable;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
@@ -40,8 +41,33 @@ classes in the same package
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */
-public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
+public class _PolyhedralBoundedSolidFace extends FundamentalEntity
+    implements ArrayLinkable {
     @Serial private static final long serialVersionUID = 20061118L;
+
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    private Object listOwner;
+    private int listIndex = -1;
+
+    @Override
+    public Object getListOwner()
+    {
+        return listOwner;
+    }
+
+    @Override
+    public int getListIndex()
+    {
+        return listIndex;
+    }
+
+    @Override
+    public void setListSlot(Object owner, int index)
+    {
+        listOwner = owner;
+        listIndex = index;
+    }
 
     /// Defined as presented in [MANT1988].10.2.1
     public int id;
@@ -52,7 +78,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /// Each face should have at least one loop, corresponding to the
     /// external boundary. Each subsequent loop will be interpreted as a ring.
     /// Defined as presented in [MANT1988].10.2.1
-    public CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop> boundariesList;
+    public CircularArrayList<_PolyhedralBoundedSolidLoop> boundariesList;
 
     //=================================================================
 
@@ -98,7 +124,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         parentSolid = parent;
         parentSolid.getPolygonsList().add(this);
         boundariesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>();
+            new CircularArrayList<_PolyhedralBoundedSolidLoop>();
     }
 
     private static double boundaryLoopAreaMagnitude(

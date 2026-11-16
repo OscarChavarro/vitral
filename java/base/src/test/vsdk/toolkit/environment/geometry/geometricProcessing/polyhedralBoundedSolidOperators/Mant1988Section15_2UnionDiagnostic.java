@@ -58,20 +58,12 @@ public final class Mant1988Section15_2UnionDiagnostic
         printSolidSummary("preparedA:block", solidA);
         printSolidSummary("preparedB:wedge", solidB);
 
-        PolyhedralBoundedSolid preflight = new PolyhedralBoundedSolid();
-        PolyhedralBoundedSolid coplanarAreaResult =
-            _PolyhedralBoundedSolidSetNonIntersectingClassifier
-                .runPartialCoplanarFaceAreaCase(
-                    solidA, solidB, preflight,
-                    PolyhedralBoundedSolidModeler.UNION);
         boolean touchingOnly =
             _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 .runTouchingOnlyPreflightCase(solidA, solidB);
 
         System.out.println();
         System.out.println("=== Preflight ===");
-        System.out.println("partialCoplanarAreaResult=" +
-            (coplanarAreaResult != null));
         System.out.println("touchingOnlyPreflight=" + touchingOnly);
 
         invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
@@ -418,7 +410,7 @@ public final class Mant1988Section15_2UnionDiagnostic
     }
 
     private static String summarizeLoop(
-        vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge> halfEdges)
+        vsdk.toolkit.common.dataStructures.CircularArrayList<_PolyhedralBoundedSolidHalfEdge> halfEdges)
     {
         StringBuilder out = new StringBuilder();
         int i;
