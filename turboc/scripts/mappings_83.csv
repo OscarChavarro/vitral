@@ -1462,6 +1462,8 @@ base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSa
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BINSAHHI.H,BinnedSahHierarchy.h,BINSAHHI.H
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BISATRHI.CPP,BinnedSahTriangleHierarchy.cpp,BISATRHI.CPP
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BISATRHI.H,BinnedSahTriangleHierarchy.h,BISATRHI.H
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BISAINHI.CPP,BinnedSahInstanceHierarchy.cpp,BISAINHI.CPP
+base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/BISAINHI.H,BinnedSahInstanceHierarchy.h,BISAINHI.H
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/TRIACCST.CPP,TriangleAccelerationStructure.cpp,TRIACCST.CPP
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/TRIACCST.H,TriangleAccelerationStructure.h,TRIACCST.H
 base/src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/BVH/TRMEACME.H,TriangleMeshAccelerationMethod.h,TRMEACME.H

@@ -19,7 +19,7 @@ const int CommandOptionsProcessor::DEFAULT_Y_RESOLUTION = 240;
 
 CommandOptionsProcessor::CommandOptionsProcessor()
     : sceneFile(DEFAULT_SCENE_FILE), outputFile(DEFAULT_OUTPUT_FILE_NAME),
-      save(TRUE), parallel(FALSE), showHelp(FALSE),
+      save(TRUE), parallel(FALSE), statistics(FALSE), showHelp(FALSE),
       xResolution(DEFAULT_X_RESOLUTION), yResolution(DEFAULT_Y_RESOLUTION),
       meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
 {
@@ -60,6 +60,10 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const ArrayList<String>
         }
         if ( arg == "-parallel" || arg == "--parallel" ) {
             options.parallel = TRUE;
+            continue;
+        }
+        if ( arg == "--stats" ) {
+            options.statistics = TRUE;
             continue;
         }
         if ( arg == "--help" || arg == "-h" ) {
@@ -147,6 +151,8 @@ void CommandOptionsProcessor::printUsage()
     printf("                         Triangle mesh ray acceleration:\n");
     printf("                         bruteforce (none) or wald2007 (binned SAH\n");
     printf("                         BVH, default)\n");
+    printf("  --stats                Count rays and acceleration structure work\n");
+    printf("                         (RaytraceStatistics) and print a summary\n");
     printf("  --help, -h             Show this help\n\n");
     printf("Legacy compatibility:\n");
     printf("  - `nosave` (without dashes) is still accepted.\n");
@@ -156,6 +162,7 @@ const String& CommandOptionsProcessor::getSceneFile() const { return sceneFile; 
 const String& CommandOptionsProcessor::getOutputFile() const { return outputFile; }
 BOOLEAN CommandOptionsProcessor::shouldSave() const { return save; }
 BOOLEAN CommandOptionsProcessor::shouldUseParallelExecutor() const { return parallel; }
+BOOLEAN CommandOptionsProcessor::shouldPrintStatistics() const { return statistics; }
 BOOLEAN CommandOptionsProcessor::shouldShowHelp() const { return showHelp; }
 BOOLEAN CommandOptionsProcessor::shouldUseSceneResolution() const { return xResolution <= 0 || yResolution <= 0; }
 int CommandOptionsProcessor::getXResolution() const { return xResolution; }

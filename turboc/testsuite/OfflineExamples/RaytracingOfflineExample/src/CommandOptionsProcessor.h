@@ -17,6 +17,7 @@ private:
     String outputFile;
     BOOLEAN save;
     BOOLEAN parallel;
+    BOOLEAN statistics;
     BOOLEAN showHelp;
     int xResolution;
     int yResolution;
@@ -34,6 +35,7 @@ public:
     const String& getOutputFile() const;
     BOOLEAN shouldSave() const;
     BOOLEAN shouldUseParallelExecutor() const;
+    BOOLEAN shouldPrintStatistics() const;
     BOOLEAN shouldShowHelp() const;
     BOOLEAN shouldUseSceneResolution() const;
     int getXResolution() const;

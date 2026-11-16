@@ -4,6 +4,7 @@
 #include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h"
@@ -154,6 +155,8 @@ TriangleAccelerationStructure::firstHitBruteForce(const Ray &ray,
     double &outT, double &outU, double &outV, int &outTriangle)
 {
     const int triangleCount = (int)(indexes.size() / 3);
+    // No nodes: every triangle is a primitive test.
+    RaytraceStatistics::recordPrimitiveLevelTraversal(0, triangleCount);
     double bestT = 1e308;
     double bestU = 0;
     double bestV = 0;

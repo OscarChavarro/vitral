@@ -176,7 +176,9 @@ static void offlineExecution(const String& fileName,
 
     printf("Image generated in %s seconds.\n",
         VSDK::formatDouble(clock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS).c_str());
-    RaytraceStatistics::printSummary();
+    if ( RaytraceStatistics::isEnabled() ) {
+        RaytraceStatistics::printSummary();
+    }
 
     if ( save ) {
         ImageExporter imageExporter;
@@ -205,6 +207,9 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    if ( options.shouldPrintStatistics() ) {
+        RaytraceStatistics::setEnabled(TRUE);
+    }
     offlineExecution(options.getSceneFile(),
                      options.shouldSave(),
                      options.getOutputFile(),

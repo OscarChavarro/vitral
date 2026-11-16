@@ -4,6 +4,9 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
@@ -307,6 +310,199 @@ TEST(TriangleMeshGroup, MeshHierarchyHitsMatchLinearLoop) {
     EXPECT_TRUE(accelerated.getMeshHierarchy() == 0);
     accelerated.prepareAccelerationStructures(TriangleMeshAccelerationMethod::BRUTE_FORCE);
     EXPECT_TRUE(accelerated.getMeshHierarchy() == 0);
+}
+
+// Leaf size parameter: leaves never exceed twice the requested size (they
+// may keep up to that when a split is not cheaper), and size 1 gives one
+// primitive per leaf on boxes that never share a centroid.
+TEST(BinnedSahHierarchy, MaximumLeafSizeIsHonored) {
+    ArrayList<double> boxes;
+    TriangleAccelerationTestRandom random(5);
+    long int i;
+    for (i = 0; i < 500; i++) {
+        const double x = random.next() * 10, y = random.next() * 10, z = random.next() * 10;
+        boxes.add(x); boxes.add(y); boxes.add(z);
+        boxes.add(x + 0.1); boxes.add(y + 0.1); boxes.add(z + 0.1);
+    }
+    for (int leafSize = 1; leafSize <= 8; leafSize *= 2) {
+        BinnedSahHierarchy hierarchy;
+        hierarchy.build(boxes, leafSize);
+        const ArrayList<BinnedSahHierarchyNode> &nodes = hierarchy.getNodes();
+        int largest = 0;
+        for (i = 0; i < nodes.size(); i++) {
+            if (nodes[i].count > largest) largest = nodes[i].count;
+        }
+        EXPECT_LE(largest, 2 * leafSize);
+        if (leafSize == 1) {
+            EXPECT_EQ(1, largest);
+            EXPECT_EQ(2L * 500 - 1, hierarchy.getNodeCount());
+        }
+    }
+    BinnedSahHierarchy byDefault;
+    BinnedSahHierarchy explicitDefault;
+    byDefault.build(boxes);
+    explicitDefault.build(boxes, BinnedSahHierarchy::DEFAULT_MAXIMUM_LEAF_SIZE);
+    EXPECT_EQ(byDefault.getNodeCount(), explicitDefault.getNodeCount());
+}
+
+static Matrix4x4d instanceTransform(int k)
+{
+    const Matrix4x4d identity;
+    const Matrix4x4d rotation = identity.axisRotation(0.3 + 0.7 * k, 1.0, 0.5 * k, 0.25);
+    const Matrix4x4d scale = identity.scale(0.2 + 0.05 * (k % 3), 0.25, 0.15 + 0.05 * (k % 2));
+    const Matrix4x4d translation = identity.translation(
+        (k % 5) * 0.6 - 1.2, ((k / 5) % 5) * 0.6 - 1.2, (k % 3) * 0.4 - 0.4);
+    return translation.multiply(rotation.multiply(scale));
+}
+
+// Closest hit over transformed copies of meshes: the visitor of the
+// instance hierarchy tests one mesh hierarchy in object space.
+class _InstanceTestClosestHit : public BinnedSahInstanceVisitor {
+  public:
+    const ArrayList<BinnedSahTriangleHierarchy *> &meshes;
+    const ArrayList<int> &meshOfInstance;
+    const ArrayList<ArrayList<double> > &positions;
+    const ArrayList<ArrayList<int> > &indexes;
+    int bestInstance;
+    int bestTriangle;
+    _InstanceTestClosestHit(const ArrayList<BinnedSahTriangleHierarchy *> &inMeshes,
+        const ArrayList<int> &inMeshOfInstance,
+        const ArrayList<ArrayList<double> > &inPositions,
+        const ArrayList<ArrayList<int> > &inIndexes)
+        : meshes(inMeshes), meshOfInstance(inMeshOfInstance), positions(inPositions),
+          indexes(inIndexes), bestInstance(-1), bestTriangle(-1) {}
+    void visit(int instance, const Ray &objectRay, double &inOutBestT)
+    {
+        const int m = meshOfInstance[instance];
+        double t, u, v;
+        int triangle;
+        if (!meshes[m]->firstHit(objectRay, positions[m], indexes[m], t, u, v, triangle)) return;
+        if (t < inOutBestT || (t == inOutBestT && instance < bestInstance)) {
+            inOutBestT = t;
+            bestInstance = instance;
+            bestTriangle = triangle;
+        }
+    }
+};
+
+TEST(BinnedSahInstanceHierarchy, TransformedInstancesMatchLinearLoop) {
+    ArrayList<ArrayList<double> > positions;
+    ArrayList<ArrayList<int> > indexes;
+    ArrayList<BinnedSahTriangleHierarchy *> meshes;
+    int m;
+    int k;
+    int c;
+    for (m = 0; m < 3; m++) {
+        ArrayList<double> p;
+        ArrayList<int> i;
+        if (m == 1) buildGrid(6, p, i); else buildSoup(60 + 40 * m, p, i);
+        positions.add(p);
+        indexes.add(i);
+    }
+    // Built after the arrays stop moving (the hierarchies keep no pointers,
+    // the arrays are passed again on each query).
+    for (m = 0; m < 3; m++) {
+        BinnedSahTriangleHierarchy *h = new BinnedSahTriangleHierarchy();
+        h->build(positions[m], indexes[m]);
+        meshes.add(h);
+    }
+    ArrayList<double> objectBoxes;
+    ArrayList<Matrix4x4d> transforms;
+    ArrayList<int> meshOfInstance;
+    for (k = 0; k < 40; k++) {
+        const int mesh = k % 3;
+        double bounds[6];
+        meshes[mesh]->getVertexBounds(bounds);
+        for (c = 0; c < 6; c++) objectBoxes.add(bounds[c]);
+        transforms.add(instanceTransform(k));
+        meshOfInstance.add(mesh);
+    }
+    // One empty instance: never reached.
+    for (c = 0; c < 3; c++) objectBoxes.add(1.0);
+    for (c = 0; c < 3; c++) objectBoxes.add(-1.0);
+    transforms.add(Matrix4x4d());
+    meshOfInstance.add(0);
+
+    BinnedSahInstanceHierarchy instances;
+    instances.build(objectBoxes, transforms);
+    ASSERT_EQ(41, instances.getInstanceCount());
+    EXPECT_LE(instances.getHierarchy().getDepth(), BinnedSahHierarchy::MAXIMUM_DEPTH);
+
+    TriangleAccelerationTestRandom random(23);
+    int hits = 0;
+    for (k = 0; k < 2000; k++) {
+        const Ray ray = randomRay(random, k);
+        _InstanceTestClosestHit linear(meshes, meshOfInstance, positions, indexes);
+        double linearT = 1e308;
+        for (int i = 0; i < 40; i++) {
+            linear.visit(i, instances.toObjectSpace(i, ray), linearT);
+        }
+        _InstanceTestClosestHit accelerated(meshes, meshOfInstance, positions, indexes);
+        double acceleratedT = 1e308;
+        instances.traverseClosest(ray, accelerated, acceleratedT);
+        ASSERT_EQ(linear.bestInstance, accelerated.bestInstance);
+        EXPECT_EQ(linear.bestTriangle, accelerated.bestTriangle);
+        EXPECT_EQ(linearT, acceleratedT);
+        if (linear.bestInstance >= 0) hits++;
+    }
+    EXPECT_GT(hits, 200);
+    for (m = 0; m < meshes.size(); m++) delete meshes[m];
+}
+
+TEST(BinnedSahInstanceHierarchy, ObjectRayKeepsWorldParameter) {
+    ArrayList<double> objectBoxes;
+    int c;
+    for (c = 0; c < 3; c++) objectBoxes.add(-1.0);
+    for (c = 0; c < 3; c++) objectBoxes.add(1.0);
+    ArrayList<Matrix4x4d> transforms;
+    transforms.add(instanceTransform(7));
+    BinnedSahInstanceHierarchy instances;
+    instances.build(objectBoxes, transforms);
+    const Ray world(Vector3Dd(0.3, -2, 0.7), Vector3Dd(0.1, 1, -0.2));
+    const Ray object = instances.toObjectSpace(0, world);
+    // The point at t in object space, taken back, is the world point at t.
+    const double t = 1.7;
+    const Vector3Dd objectPoint = object.getOrigin().add(object.getDirection().multiply(t));
+    const Vector3Dd back = BinnedSahInstanceHierarchy::transformPoint(
+        instances.getObjectToWorld(0), objectPoint);
+    const Vector3Dd expected = world.getOrigin().add(world.getDirection().multiply(t));
+    EXPECT_NEAR(expected.x(), back.x(), 1e-12);
+    EXPECT_NEAR(expected.y(), back.y(), 1e-12);
+    EXPECT_NEAR(expected.z(), back.z(), 1e-12);
+}
+
+TEST(RaytraceStatistics, CountsHierarchyWork) {
+    ArrayList<double> positions;
+    ArrayList<int> indexes;
+    buildGrid(20, positions, indexes);
+    BinnedSahTriangleHierarchy hierarchy;
+    hierarchy.build(positions, indexes);
+    const Ray ray(Vector3Dd(0.31, -0.27, 2), Vector3Dd(0, 0, -1));
+    double t, u, v;
+    int triangle;
+
+    RaytraceStatistics::setEnabled(FALSE);
+    RaytraceStatistics::reset();
+    ASSERT_TRUE(hierarchy.firstHit(ray, positions, indexes, t, u, v, triangle));
+    EXPECT_EQ(0, RaytraceStatistics::getPrimitiveLevelTraversals());
+
+    RaytraceStatistics::setEnabled(TRUE);
+    ASSERT_TRUE(hierarchy.firstHit(ray, positions, indexes, t, u, v, triangle));
+    EXPECT_EQ(1, RaytraceStatistics::getPrimitiveLevelTraversals());
+    const long long visits = RaytraceStatistics::getPrimitiveLevelNodeVisits();
+    const long long tests = RaytraceStatistics::getPrimitiveLevelPrimitiveTests();
+    EXPECT_GT(visits, 0);
+    EXPECT_GT(tests, 0);
+    EXPECT_LT(tests, (long long)(indexes.size() / 3));
+    EXPECT_LE(visits, hierarchy.getNodeCount());
+
+    TriangleAccelerationStructure::firstHitBruteForce(ray, positions, indexes, t, u, v, triangle);
+    EXPECT_EQ(2, RaytraceStatistics::getPrimitiveLevelTraversals());
+    EXPECT_EQ(tests + (long long)(indexes.size() / 3),
+        RaytraceStatistics::getPrimitiveLevelPrimitiveTests());
+    EXPECT_EQ(visits, RaytraceStatistics::getPrimitiveLevelNodeVisits());
+    RaytraceStatistics::setEnabled(FALSE);
+    RaytraceStatistics::reset();
 }
 
 VITRAL_TEST_MAIN()
