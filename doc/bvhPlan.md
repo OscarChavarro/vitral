@@ -41,15 +41,19 @@ platform (minimal kernel, Turbo C port).
 - `TriangleAccelerationStructure`: abstract mesh level structure. A new
   scheme is a new enum constant, a subclass and a case in
   `TriangleAccelerationStructure::create`.
-- `BinnedSahHierarchy`: generic binned SAH BVH over boxes, the double
-  precision port of `VulkanBvhBuilder` (Vulkan 1.4 raytracer, compute path)
-  with the same parameters (12 bins, leaves of at most 4, depth at most 30)
-  and the traversal of `casTraverseBlas` (nearest child first). Deviations
-  from [WALD2007] are listed in its header.
+- `BinnedSahHierarchy`: generic binned SAH BVH over boxes (12 bins,
+  leaves of `maximumLeafSize` entries, 4 by default, depth at most 30) with
+  the traversal of `casTraverseBlas` (nearest child first). Deviations from
+  [WALD2007] are listed in its header. It is the single builder of vitral:
+  the Vulkan 1.4 raytracer (compute path) uploads its output instead of
+  building its own tree. Output format: `doc/flatBinaryTreeContract.md`.
 - Two levels, as the Vulkan BLAS / TLAS:
   - `BinnedSahTriangleHierarchy`: triangles of one `TriangleMesh`.
   - `TriangleMeshGroup`: a `BinnedSahHierarchy` over the boxes of its
     meshes.
+  - `BinnedSahInstanceHierarchy`: transformed instances of bottom levels
+    (object box + object to world matrix, leaves of 1), the CPU form of a
+    Vulkan TLAS; the Vulkan compute path builds its top level with it.
 - `SimpleRaytracer::prepareAccelerationStructures` builds them before
   tracing (`SimpleRaytracer::execute`, and `ParallelRaytracer` before
   starting its workers); later calls only read.
@@ -85,13 +89,23 @@ mesh index).
   on soups, shared edge grids and a 60 mesh group; determinism; depth
   bound; copies and invalidation). `vitral_base_tests`: 354 passed.
 
+## Counters (2026-11-16)
+
+`RaytraceStatistics` counts traversals, node visits and entry / primitive
+tests per level (`doc/flatBinaryTreeContract.md` section 7);
+`RaytracingOfflineExample --stats`. `balls_cowobj.ray`, `wald2007`: 9.77 M
+primitive level traversals, 27.1 M node visits, 10.8 M triangle tests;
+image identical with and without `--stats`.
+
 ## Pending
 
 - `TriangleMesh::queryFirstHit` / `emitRayCrossings` (CSG and typed
   queries) still use the linear loop: their contract reports
   `Indeterminate` triangles, so they need their own traversal.
 - Scene level: `SimpleRaytracer` still loops over all bodies
-  (`selectNearestThingInRayDirection`, shadow rays).
+  (`selectNearestThingInRayDirection`, shadow rays);
+  `BinnedSahInstanceHierarchy` is the structure for it (one instance per
+  `SimpleBody`, its placement as the matrix).
 - Java and Turbo C ports of the new classes.
 - `balls_featured_object.ray` takes 4 s with either method: not mesh bound,
   to be profiled.

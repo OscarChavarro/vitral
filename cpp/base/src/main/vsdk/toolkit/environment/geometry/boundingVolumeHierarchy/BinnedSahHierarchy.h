@@ -10,8 +10,10 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 
 /**
-One node of a `BinnedSahHierarchy`, the double precision form of
-`VulkanBvhNode` (`CasNode` of `computeAccelerationStructure.glsl`):
+One node of a `BinnedSahHierarchy`, an element of the flat binary tree
+contract of `doc/flatBinaryTreeContract.md` (the Vulkan 1.4 compute path
+copies it into its single precision `VulkanBvhNode`, `CasNode` of
+`computeAccelerationStructure.glsl`):
 
 - inner node (`count == 0`): children at `leftOrFirst` and `leftOrFirst + 1`;
 - leaf (`count > 0`): entries `leftOrFirst` .. `leftOrFirst + count - 1`
@@ -42,11 +44,13 @@ class BinnedSahLeafVisitor {
 /**
 Binary bounding volume hierarchy over axis aligned primitive boxes, built
 top-down with the binned surface area heuristic of [WALD2007].3. It is the
-CPU, double precision port of `VulkanBvhBuilder` (Vulkan 1.4 raytracer,
-compute path without `VK_KHR_acceleration_structure`), with the same
-parameters, and serves both levels as there: the triangles of a mesh
-(`BinnedSahTriangleHierarchy`, bottom level) and the meshes of a
-`TriangleMeshGroup` (top level). Its traversal is the one of
+single builder of vitral for binary hierarchies: it serves the triangles of
+a mesh (`BinnedSahTriangleHierarchy`, bottom level), the meshes of a
+`TriangleMeshGroup` and the transformed instances of a
+`BinnedSahInstanceHierarchy` (top level), and the Vulkan 1.4 raytracer
+uploads its result to the GPU for the compute path without
+`VK_KHR_acceleration_structure`. The output follows the flat binary tree
+contract of `doc/flatBinaryTreeContract.md`. Its traversal is the one of
 `casTraverseBlas` in `computeAccelerationStructure.glsl`: a stack, nearest
 child first, nodes farther than the closest hit skipped.
 
@@ -58,7 +62,7 @@ members, grown from a negative box ([WALD2007].3.4); the cost
 sweep from each side ([WALD2007].3.1, .3.5); the build rearranges one
 primitive id array, with a temporary array ([WALD2007].3.6).
 
-Deviations from [WALD2007], the same of `VulkanBvhBuilder`:
+Deviations from [WALD2007]:
 - the three axes are binned, not only the widest one (the alternative
   mentioned in [WALD2007].3.1);
 - 12 bins (16 recommended, 4 already reasonable, [WALD2007].3.7);
@@ -67,7 +71,7 @@ Deviations from [WALD2007], the same of `VulkanBvhBuilder`:
 - termination ([WALD2007].3.8): a node with all its centroids at one point
   is split in halves instead of becoming a leaf, a split more expensive
   than the leaf is still taken while the node holds more than twice
-  `MAXIMUM_LEAF_SIZE` primitives, and the depth is capped by
+  `maximumLeafSize` primitives, and the depth is capped by
   `MAXIMUM_DEPTH` (bounded traversal stack);
 - single threaded and deterministic: the parallel build of [WALD2007].4 is
   not used, so it runs on every vitral platform.
@@ -76,7 +80,8 @@ class BinnedSahHierarchy {
   public:
     static const int BIN_COUNT = 12;
     static const int MAXIMUM_DEPTH = 30;
-    static const int MAXIMUM_LEAF_SIZE = 4;
+    /** Leaf size of `build` when none is given (bottom level) */
+    static const int DEFAULT_MAXIMUM_LEAF_SIZE = 4;
     /** Traversal stack; it never holds more than `MAXIMUM_DEPTH + 1`
     entries */
     static const int STACK_SIZE = 64;
@@ -90,9 +95,15 @@ class BinnedSahHierarchy {
 
     /**
     @param boxes six values per primitive: lo x, y, z, hi x, y, z. Callers
-    pad the boxes so rounding never hides a hit.
+    pad the boxes so rounding never hides a hit. An empty box (lo > hi)
+    is allowed: its primitive is never reached.
+    @param maximumLeafSize leaves are split while they hold more primitives
+    than this and a split is cheaper (SAH), or while they hold more than
+    twice this; values below 1 count as 1. Top levels over instances use 1,
+    as a hardware TLAS.
     */
-    void build(const java::ArrayList<double> &boxes);
+    void build(const java::ArrayList<double> &boxes,
+        int maximumLeafSize = DEFAULT_MAXIMUM_LEAF_SIZE);
 
     /**
     Closest hit traversal: calls the visitor for the primitives of every
@@ -101,6 +112,8 @@ class BinnedSahHierarchy {
     resolving ties by primitive index gets the same answer as a linear
     loop. Returns false when the stack would overflow (not reachable with
     `MAXIMUM_DEPTH < STACK_SIZE`); the caller then uses its linear loop.
+    Node visits and leaf entries are reported to `RaytraceStatistics` as
+    instance level work (`recordInstanceLevelTraversal`).
     */
     bool traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visitor,
         double &inOutBestT) const;
@@ -120,7 +133,7 @@ class BinnedSahHierarchy {
         bool parallel[3];
         explicit RaySlab(const Ray &ray);
         /** Entry parameter of the ray in the node box clipped to [0, tMax],
-        or -1 on a miss (`casSlab`) */
+        or -1 on a miss or an empty box (`casSlab`) */
         double entry(const BinnedSahHierarchyNode &node, double tMax) const;
     };
 };
@@ -145,6 +158,11 @@ BinnedSahHierarchy::RaySlab::entry(const BinnedSahHierarchyNode &node, double tM
     double tNear = 0.0;
     double tFar = tMax;
     for (int a = 0; a < 3; a++) {
+        // Empty box (the negative box of an empty instance or mesh): the
+        // swap below would otherwise turn it into a box that is entered.
+        if (node.lo[a] > node.hi[a]) {
+            return -1.0;
+        }
         if (parallel[a]) {
             if (origin[a] < node.lo[a] || origin[a] > node.hi[a]) {
                 return -1.0;

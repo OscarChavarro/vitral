@@ -4,6 +4,7 @@
 //=     Interactive Ray Tracing, 2007, pp. 33-40.                           =
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.h"
 
 /**
@@ -172,7 +173,7 @@ findSplit(const java::ArrayList<_BinnedSahBox> &boxes,
 // Definitions of the integral constants, for uses that take their address.
 const int BinnedSahHierarchy::BIN_COUNT;
 const int BinnedSahHierarchy::MAXIMUM_DEPTH;
-const int BinnedSahHierarchy::MAXIMUM_LEAF_SIZE;
+const int BinnedSahHierarchy::DEFAULT_MAXIMUM_LEAF_SIZE;
 const int BinnedSahHierarchy::STACK_SIZE;
 
 BinnedSahLeafVisitor::~BinnedSahLeafVisitor()
@@ -184,8 +185,12 @@ BinnedSahHierarchy::BinnedSahHierarchy()
 }
 
 void
-BinnedSahHierarchy::build(const java::ArrayList<double> &boxValues)
+BinnedSahHierarchy::build(const java::ArrayList<double> &boxValues,
+    int maximumLeafSize)
 {
+    if (maximumLeafSize < 1) {
+        maximumLeafSize = 1;
+    }
     const int primitiveCount = (int)(boxValues.size() / 6);
 
     // [WALD2007].3.2 Initial setup: the box of every primitive, given by
@@ -252,7 +257,7 @@ BinnedSahHierarchy::build(const java::ArrayList<double> &boxValues)
 
         // [WALD2007].3.8 Termination a): few primitives. The depth cap is
         // not in [WALD2007]: it bounds the traversal stack.
-        if (task.count <= MAXIMUM_LEAF_SIZE || task.depth >= MAXIMUM_DEPTH) {
+        if (task.count <= maximumLeafSize || task.depth >= MAXIMUM_DEPTH) {
             continue;
         }
 
@@ -265,7 +270,7 @@ BinnedSahHierarchy::build(const java::ArrayList<double> &boxValues)
             const double leafCost = (double)task.count * bounds.halfArea();
             // [WALD2007].3.8 Termination c): the split costs more than the
             // leaf (only for nodes small enough to stay a leaf).
-            if (splitCost >= leafCost && task.count <= 2 * MAXIMUM_LEAF_SIZE) {
+            if (splitCost >= leafCost && task.count <= 2 * maximumLeafSize) {
                 continue;
             }
             // [WALD2007].3.6 ID list partitioning with a temporary array;
@@ -332,8 +337,12 @@ BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visito
     const BinnedSahHierarchyNode *nodeArray = nodes.data();
     const double rootDistance = slab.entry(nodeArray[0], inOutBestT);
     if (rootDistance < 0.0) {
+        RaytraceStatistics::recordInstanceLevelTraversal(0, 0);
         return true;
     }
+    // Counted locally, reported once: no shared write per node.
+    long int nodeVisits = 0;
+    long int entryTests = 0;
     int nodeStack[STACK_SIZE];
     double distanceStack[STACK_SIZE];
     int sp = 0;
@@ -346,10 +355,12 @@ BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visito
             continue;
         }
         const BinnedSahHierarchyNode &node = nodeArray[nodeStack[sp]];
+        nodeVisits++;
         if (node.count > 0) {
             for (int i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++) {
                 visitor.visit(primitiveOrder[i], inOutBestT);
             }
+            entryTests += node.count;
             continue;
         }
         int left = node.leftOrFirst;
@@ -366,6 +377,7 @@ BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visito
             dr = swapDistance;
         }
         if (sp + 2 > STACK_SIZE) {
+            RaytraceStatistics::recordInstanceLevelTraversal(nodeVisits, entryTests);
             return false;
         }
         if (dl >= 0.0) {
@@ -379,6 +391,7 @@ BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visito
             sp++;
         }
     }
+    RaytraceStatistics::recordInstanceLevelTraversal(nodeVisits, entryTests);
     return true;
 }
 

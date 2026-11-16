@@ -7,7 +7,7 @@ const char* CommandOptionsProcessor::DEFAULT_OUTPUT_FILE_NAME = "./output.ppm";
 
 CommandOptionsProcessor::CommandOptionsProcessor()
     : sceneFile(DEFAULT_SCENE_FILE), outputFile(DEFAULT_OUTPUT_FILE_NAME),
-      save(true), parallel(false), showHelp(false),
+      save(true), parallel(false), statistics(false), showHelp(false),
       meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
 {
 }
@@ -25,6 +25,10 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<j
         }
         if ( arg == "-parallel" || arg == "--parallel" ) {
             options.parallel = true;
+            continue;
+        }
+        if ( arg == "--stats" ) {
+            options.statistics = true;
             continue;
         }
         if ( arg == "--help" || arg == "-h" ) {
@@ -95,6 +99,8 @@ void CommandOptionsProcessor::printUsage()
     printf("                         Triangle mesh ray acceleration:\n");
     printf("                         bruteforce (none) or wald2007 (binned SAH\n");
     printf("                         BVH, default)\n");
+    printf("  --stats                Count rays and acceleration structure work\n");
+    printf("                         (RaytraceStatistics) and print a summary\n");
     printf("  --help, -h             Show this help\n\n");
     printf("Legacy compatibility:\n");
     printf("  - `nosave` (without dashes) is still accepted.\n");
@@ -104,5 +110,6 @@ const java::String& CommandOptionsProcessor::getSceneFile() const { return scene
 const java::String& CommandOptionsProcessor::getOutputFile() const { return outputFile; }
 bool CommandOptionsProcessor::shouldSave() const { return save; }
 bool CommandOptionsProcessor::shouldUseParallelExecutor() const { return parallel; }
+bool CommandOptionsProcessor::shouldPrintStatistics() const { return statistics; }
 bool CommandOptionsProcessor::shouldShowHelp() const { return showHelp; }
 TriangleMeshAccelerationMethod CommandOptionsProcessor::getMeshAccelerationMethod() const { return meshAccelerationMethod; }

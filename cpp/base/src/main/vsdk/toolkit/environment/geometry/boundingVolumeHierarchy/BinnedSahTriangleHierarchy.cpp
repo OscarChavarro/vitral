@@ -4,6 +4,7 @@
 //=     Interactive Ray Tracing, 2007, pp. 33-40.                           =
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.h"
@@ -77,8 +78,12 @@ BinnedSahTriangleHierarchy::firstHit(const Ray &ray,
 
     const double rootDistance = slab.entry(nodeArray[0], bestT);
     if (rootDistance < 0.0) {
+        RaytraceStatistics::recordPrimitiveLevelTraversal(0, 0);
         return false;
     }
+    // Counted locally, reported once: no shared write per node.
+    long int nodeVisits = 0;
+    long int triangleTests = 0;
     // Traversal of casTraverseBlas (computeAccelerationStructure.glsl),
     // specialized for triangles: no virtual call per leaf entry.
     int nodeStack[BinnedSahHierarchy::STACK_SIZE];
@@ -96,7 +101,9 @@ BinnedSahTriangleHierarchy::firstHit(const Ray &ray,
             continue;
         }
         const BinnedSahHierarchyNode &node = nodeArray[nodeStack[sp]];
+        nodeVisits++;
         if (node.count > 0) {
+            triangleTests += node.count;
             for (int i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++) {
                 const double *p = vertexArray + 9 * i;
                 const Vector3Dd v0(p[0], p[1], p[2]);
@@ -132,6 +139,7 @@ BinnedSahTriangleHierarchy::firstHit(const Ray &ray,
         if (sp + 2 > BinnedSahHierarchy::STACK_SIZE) {
             // Unreachable with MAXIMUM_DEPTH < STACK_SIZE; never give a
             // wrong answer if it happens.
+            RaytraceStatistics::recordPrimitiveLevelTraversal(nodeVisits, triangleTests);
             return firstHitBruteForce(ray, positions, indexes, outT, outU, outV, outTriangle);
         }
         if (dl >= 0.0) {
@@ -145,6 +153,7 @@ BinnedSahTriangleHierarchy::firstHit(const Ray &ray,
             sp++;
         }
     }
+    RaytraceStatistics::recordPrimitiveLevelTraversal(nodeVisits, triangleTests);
     if (best < 0) {
         return false;
     }

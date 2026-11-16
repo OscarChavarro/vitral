@@ -14,6 +14,7 @@ private:
     java::String outputFile;
     bool save;
     bool parallel;
+    bool statistics;
     bool showHelp;
     TriangleMeshAccelerationMethod meshAccelerationMethod;
 
@@ -27,6 +28,7 @@ public:
     const java::String& getOutputFile() const;
     bool shouldSave() const;
     bool shouldUseParallelExecutor() const;
+    bool shouldPrintStatistics() const;
     bool shouldShowHelp() const;
     TriangleMeshAccelerationMethod getMeshAccelerationMethod() const;
 };
