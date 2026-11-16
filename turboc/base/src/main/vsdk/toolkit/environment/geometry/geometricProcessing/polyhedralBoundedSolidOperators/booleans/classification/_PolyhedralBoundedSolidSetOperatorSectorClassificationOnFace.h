@@ -8,7 +8,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSectorClassification.h"
 
 class InfinitePlane;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -26,14 +26,8 @@ from the operator family, as in Java, because `updateLabel` uses its
 numeric context.
 */
 class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-    : public _PolyhedralBoundedSolidOperator {
+    : public _PolyhedralBoundedSolidSectorClassification {
 public:
-    enum {
-        ABOVE = 1,
-        BELOW = -1,
-        ON = 0
-    };
-
     enum {
         AinB = 11,
         AoutB = 12,
@@ -46,33 +40,29 @@ public:
     };
 
     enum {
-        COPLANAR_FACE = 10,
-        INPLANE_EDGE = 20,
-        CROSSING_EDGE = 30,
-        UNDEFINED = 40
-    };
-
-    enum {
         COPLANAR_UNKNOWN = 0,
         COPLANAR_DISJOINT = 1,
         COPLANAR_TOUCHING = 2,
         COPLANAR_OVERLAP = 3
     };
 
-    _PolyhedralBoundedSolidHalfEdge* sector;
     /** Referenced, not owned */
     InfinitePlane* referencePlane;
-    int cl;
 
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
-    BOOLEAN isWide;
-    Vector3Dd position;
-    int situation;
     BOOLEAN reverse;
     int coplanarRelation;
 
     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
+
+    /**
+    C++ port note: converts an entry made by
+    `_PolyhedralBoundedSolidVertexNeighborhood::classify` (Java builds the
+    entries of this type there through a factory).
+    */
+    explicit _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace(
+        const _PolyhedralBoundedSolidSectorClassification& other);
 
     /**
     Current method implements the set of changes from table [MANT1988].15.3.

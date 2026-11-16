@@ -3,13 +3,14 @@
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
+#include "vsdk/toolkit/common/dataStructures/ArrayLinkable.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class _PolyhedralBoundedSolidLoop;
 class _PolyhedralBoundedSolidEdge;
 class _PolyhedralBoundedSolidVertex;
 
-class _PolyhedralBoundedSolidHalfEdge {
+class _PolyhedralBoundedSolidHalfEdge : public ArrayLinkable {
 public:
     enum {
         LEFT_SIDE = 1,

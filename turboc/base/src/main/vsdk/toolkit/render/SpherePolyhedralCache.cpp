@@ -93,7 +93,7 @@ counterclockwise seen from outside the sphere
 static ArrayList<Vector3Dd> collectTriangles(PolyhedralBoundedSolid* solid)
 {
     ArrayList<Vector3Dd> triangles;
-    ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
+    CircularArrayList<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
 
     for (long int f = 0; f < faces.size(); f++) {
         _PolyhedralBoundedSolidFace* face = faces.get(f);

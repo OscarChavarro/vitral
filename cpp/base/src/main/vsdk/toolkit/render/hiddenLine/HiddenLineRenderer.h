@@ -34,7 +34,7 @@ public:
 
     /// Diagnostic: when >= 0, processLineToBeDrawn logs the contour-crossing /
     /// segment-splitting decisions for the cached edge with this edgeIndex.
-    static int DEBUG_EDGE_INDEX;
+    static int debugEdgeIndex;
 
     class AppelSegmentDump : public RenderingElement {
     public:

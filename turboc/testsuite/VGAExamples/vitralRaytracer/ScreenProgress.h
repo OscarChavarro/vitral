@@ -11,30 +11,30 @@ class ScreenProgress : public ProgressMonitor {
     int color;
     int filled;
     int text;
-    double percent;
+    double currentPercent;
 
 public:
     static const Class CLASS;
     virtual const Class *getClass() const;
 
     ScreenProgress(int width, int height, int color, int text)
-        : width(width), row(height - 1), color(color), filled(0), text(text), percent(0) {}
+        : width(width), row(height - 1), color(color), filled(0), text(text), currentPercent(0) {}
     virtual void begin() {
         filled = 0;
-        percent = 0;
+        currentPercent = 0;
     }
     virtual void end() {
-        percent = 100.0;
+        currentPercent = 100.0;
         advance(width);
     }
     virtual void update(double minValue, double maxValue, double currentValue) {
         if (maxValue - minValue < 1e-9) {
             return;
         }
-        percent = 100.0 * (currentValue - minValue) / (maxValue - minValue);
-        advance((int)(percent * width / 100.0));
+        currentPercent = 100.0 * (currentValue - minValue) / (maxValue - minValue);
+        advance((int)(currentPercent * width / 100.0));
     }
-    virtual double getCurrentPercent() { return percent; }
+    virtual double getCurrentPercent() { return currentPercent; }
 
 private:
     void advance(int to) {

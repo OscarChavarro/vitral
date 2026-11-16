@@ -25,7 +25,7 @@ private:
     int xSize;
     int ySize;
     unsigned long rowStride;
-    unsigned long imageBytes;
+    unsigned long byteCount;
 
     unsigned long pixelOffset(int x, int y) const;
 

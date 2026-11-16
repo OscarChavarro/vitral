@@ -3,6 +3,13 @@
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.h"
+#include "vsdk/toolkit/common/dataStructures/CircularArrayList.h"
+// The node lists need the node classes complete (see CircularArrayList)
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 class Ray;
@@ -24,12 +31,20 @@ public:
     };
 
 private:
-    ArrayList<_PolyhedralBoundedSolidFace*> polygonsList;
-    ArrayList<_PolyhedralBoundedSolidEdge*> edgesList;
-    ArrayList<_PolyhedralBoundedSolidVertex*> verticesList;
+    CircularArrayList<_PolyhedralBoundedSolidFace*> polygonsList;
+    CircularArrayList<_PolyhedralBoundedSolidEdge*> edgesList;
+    CircularArrayList<_PolyhedralBoundedSolidVertex*> verticesList;
     int maxVertexId;
     int maxFaceId;
     BOOLEAN modelIsValid;
+
+    // C++ port: nodes unlinked by the Euler operators (see retire*). Java
+    // leaves them to its garbage collector.
+    ArrayList<_PolyhedralBoundedSolidFace*> retiredFaces;
+    ArrayList<_PolyhedralBoundedSolidLoop*> retiredLoops;
+    ArrayList<_PolyhedralBoundedSolidHalfEdge*> retiredHalfEdges;
+    ArrayList<_PolyhedralBoundedSolidEdge*> retiredEdges;
+    ArrayList<_PolyhedralBoundedSolidVertex*> retiredVertices;
 
     InfinitePlane** queryPlaneCache;
     double* queryFaceAabb;
@@ -51,15 +66,35 @@ public:
     PolyhedralBoundedSolid();
     virtual ~PolyhedralBoundedSolid();
 
+    // C++ port: the Euler operators hand the nodes they unlink to these
+    // methods instead of deleting them, since the callers may still read
+    // them after the operator returns (Java leaves them to its garbage
+    // collector). The solid deletes them when it is deleted. A retired face
+    // or loop must not hold nodes anymore: its list is emptied here, without
+    // deleting the elements.
+    void retireFace(_PolyhedralBoundedSolidFace* face);
+    void retireLoop(_PolyhedralBoundedSolidLoop* loop);
+    void retireHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    void retireEdge(_PolyhedralBoundedSolidEdge* edge);
+    void retireVertex(_PolyhedralBoundedSolidVertex* vertex);
+    /**
+    C++ port: a boolean operation moves nodes between the copies of its
+    operands and its result, and a node can stay listed in more than one of
+    them for a while. This removes, from the lists of this solid (live and
+    retired), every node that `reference` lists (live or retired), so that
+    each node has one owner.
+    */
+    void unlistNodesOwnedBy(PolyhedralBoundedSolid* reference);
+
     _PolyhedralBoundedSolidFace* findFace(int id);
     _PolyhedralBoundedSolidVertex* findVertex(int id);
 
-    ArrayList<_PolyhedralBoundedSolidFace*>& getPolygonsList();
-    void setPolygonsList(ArrayList<_PolyhedralBoundedSolidFace*>& polygonsList);
-    ArrayList<_PolyhedralBoundedSolidEdge*>& getEdgesList();
-    void setEdgesList(ArrayList<_PolyhedralBoundedSolidEdge*>& edgesList);
-    ArrayList<_PolyhedralBoundedSolidVertex*>& getVerticesList();
-    void setVerticesList(ArrayList<_PolyhedralBoundedSolidVertex*>& verticesList);
+    CircularArrayList<_PolyhedralBoundedSolidFace*>& getPolygonsList();
+    void setPolygonsList(CircularArrayList<_PolyhedralBoundedSolidFace*>& polygonsList);
+    CircularArrayList<_PolyhedralBoundedSolidEdge*>& getEdgesList();
+    void setEdgesList(CircularArrayList<_PolyhedralBoundedSolidEdge*>& edgesList);
+    CircularArrayList<_PolyhedralBoundedSolidVertex*>& getVerticesList();
+    void setVerticesList(CircularArrayList<_PolyhedralBoundedSolidVertex*>& verticesList);
 
     int getMaxVertexId() const;
     void setMaxVertexId(int maxVertexId);

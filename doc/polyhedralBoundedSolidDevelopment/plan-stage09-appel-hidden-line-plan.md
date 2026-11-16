@@ -65,7 +65,7 @@ cd java && gradle :testsuite:Jogl4Examples:PolyhedralBoundedSolidExample:runMain
 object, 28 = kurlanderBowl). `-Dpoly.appelDisplayMode=2` = "edges + visible",
 `-Dpoly.surfaces=false` = wireframe. The JSON dump (gated on
 `poly.edgeIndex=-3`) holds per-edge type, per-segment midpoint QI, and the
-classification. A static diagnostic hook `HiddenLineRenderer.DEBUG_EDGE_INDEX`
+classification. A static diagnostic hook `HiddenLineRenderer.debugEdgeIndex`
 (default -1, inert) logs the contour-crossing/split decisions for one edge.
 
 ---
@@ -192,7 +192,7 @@ algorithm seeds QI once per edge and **propagates** it by ±1 ΔQI at each conto
 crossing — roughly one QI ray cast per edge instead of one per sub-segment
 (≈6× fewer on kurlanderBowl). Restoring it was **attempted and reverted**: the
 cheap per-crossing ΔQI sign is not robust on concave solids. Concrete blockers
-(all proven with `DEBUG_EDGE_INDEX` and a per-face occlusion probe):
+(all proven with `debugEdgeIndex` and a per-face occlusion probe):
 
 - The occluding face at a crossing is frequently **not** the contour edge's
   camera-"visible" face (the face label can be wrong, or the occluder is a

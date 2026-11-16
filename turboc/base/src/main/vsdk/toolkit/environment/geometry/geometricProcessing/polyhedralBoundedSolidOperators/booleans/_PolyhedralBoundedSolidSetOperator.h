@@ -22,6 +22,9 @@
 
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidHalfEdge;
+class _PolyhedralBoundedSolidEdge;
+class _PolyhedralBoundedSolidFace;
+class _PolyhedralBoundedSolidLoop;
 class _SetOperationContext;
 class _PolyhedralBoundedSolidIdNamespace;
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexFace.h"
@@ -47,7 +50,7 @@ C++ port notes:
   result), but before returning, every node used by the result is unlisted
   from the operands, so the caller can delete the operands and the result
   independently.
-- Java `IllegalStateException` is thrown as `IllegalStateException`.
+- Java's per-thread (ThreadLocal) diagnostics are single static values.
 
 C++ counterpart of Java's `_PolyhedralBoundedSolidSetOperator`.
 */
@@ -111,22 +114,53 @@ public:
         PolyhedralBoundedSolid* inSolidB);
 
     /**
-    @return true when `result` has faces, none degenerate, and passes the
-    intermediate validation
+    Result path recorded when the operation is rejected with
+    `NonManifoldBooleanResultException`.
     */
-    static BOOLEAN isStructurallyUsableSetOpResult(PolyhedralBoundedSolid* result);
+    static const char* const REJECTED_NON_MANIFOLD_PATH;
+
+    /**
+    Name of the path that produced the last setOp result:
+    "normal-pipeline" for the [MANT1988] Ch. 15 pipeline, or the name of the
+    preflight that answered instead. Recorded before the strict
+    postcondition runs, so it is also available after a strict validation
+    failure.
+    @return the path, or NULL (Java null) when none was recorded
+    */
+    static const String* getLastResultPath();
+
+    /**
+    Violations of the post-connect invariant found on the last setOp that
+    reached connect.
+    @return the violations (empty: none), or NULL (Java null) when connect
+    was not reached
+    */
+    static const ArrayList<String>* getLastConnectInvariantViolations();
+
+    /**
+    Detects result pieces that touch only along an edge or at a vertex.
+    @return true, with a short description in `outContact`, when found
+    (Java returns the description or null)
+    */
+    static BOOLEAN findNonManifoldContact(PolyhedralBoundedSolid* result,
+        String& outContact);
 
     /**
     Following program [MANT1988].15.1.
-    @param inSolidA first operand (consumed)
-    @param inSolidB second operand (consumed)
+    @param inSolidA first operand (modified, as in Java the operation
+    works on it: callers that keep it pass a copy)
+    @param inSolidB second operand (modified, see `inSolidA`)
     @param op UNION, INTERSECTION or SUBTRACT
     @param withDebug true to dump the pipeline state to files and stdout
     @param maximizeResultFaces true to maximize the faces of the result
     @param doStrictValidation true to enforce strict validation of the result
     @return the result solid, owned by the caller
-    @throws IllegalStateException (Java IllegalStateException) when
-    `doStrictValidation` is true and the result fails strict validation
+    @throws InvalidOperandException when the operands are not valid solids
+    @throws NonManifoldBooleanResultException when the result would be
+    non-manifold
+    @throws SolidOperationFailedException when the pipeline fails
+    @throws InvalidSolidResultException when `doStrictValidation` is true
+    and the result fails strict validation
     */
     static PolyhedralBoundedSolid* setOp(
         PolyhedralBoundedSolid* inSolidA,
@@ -150,6 +184,10 @@ private:
     };
     static int debugFlags;
     static DebugSolidExporter debugSolidExporter;
+    static String lastResultPath;
+    static BOOLEAN hasLastResultPath;
+    static ArrayList<String> lastConnectInvariantViolations;
+    static BOOLEAN hasLastConnectInvariantViolations;
 
     /** Identifier range installed by the most recent setOp (owned here). */
     static _PolyhedralBoundedSolidIdNamespace* ownedNamespace;
@@ -179,6 +217,30 @@ private:
     static void setOpFinish(_SetOperationContext& ctx,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
         PolyhedralBoundedSolid* outRes, int op);
+    static void weldCoincidentVerticesOfOperand(PolyhedralBoundedSolid* solid,
+        const char* name);
+    static PolyhedralBoundedSolid* setOpNoIntersectionCase(
+        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+        PolyhedralBoundedSolid* outRes, int op);
+    static PolyhedralBoundedSolid* setOpNoIntersectionCase(
+        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+        PolyhedralBoundedSolid* outRes, int op, PreflightCache& cache);
+    static void setLastResultPath(const char* path);
+    static void checkConnectInvariant(PolyhedralBoundedSolid* inSolidA,
+        PolyhedralBoundedSolid* inSolidB, _SetOperationContext& ctx,
+        ArrayList<String>& violations);
+    static void collectNullFaceViolations(const char* label,
+        const ArrayList<_PolyhedralBoundedSolidFace*>& nullFaces,
+        ArrayList<String>& violations);
+    static BOOLEAN isPointLikeFace(_PolyhedralBoundedSolidFace* f);
+    static void collectCoincidentLoopViolations(const char* label,
+        PolyhedralBoundedSolid* solid,
+        const ArrayList<_PolyhedralBoundedSolidFace*>& nullFaces,
+        ArrayList<String>& violations);
+    static BOOLEAN loopsCoincide(_PolyhedralBoundedSolidLoop* a,
+        _PolyhedralBoundedSolidLoop* b);
+    static BOOLEAN sameEndpoints(_PolyhedralBoundedSolidEdge* e,
+        _PolyhedralBoundedSolidEdge* f);
     static void debugSolid(PolyhedralBoundedSolid* solid, const char* pattern);
     static void postProcessResult(PolyhedralBoundedSolid* res,
         BOOLEAN maximizeResultFaces);
@@ -194,13 +256,7 @@ private:
     static String cardinalitiesAndBounds(PolyhedralBoundedSolid* solid);
     static PolyhedralBoundedSolid* deepCloneSolid(PolyhedralBoundedSolid* solid,
         const char* solidLabel);
-    static BOOLEAN hasDegenerateFace(PolyhedralBoundedSolid* solid);
-    static BOOLEAN shouldUseAxisAlignedCellBooleanFallback(
-        PolyhedralBoundedSolid* fallback, PolyhedralBoundedSolid* result);
     static BOOLEAN hasIncompleteConnectState();
-    static BOOLEAN hasBasicSetOpShapeData(PolyhedralBoundedSolid* result);
-    static BOOLEAN hasSameShapeData(PolyhedralBoundedSolid* first,
-        PolyhedralBoundedSolid* second);
 
     /**
     C++ ownership helper: removes from the lists of `from` every face, edge
@@ -210,11 +266,12 @@ private:
         PolyhedralBoundedSolid* reference);
 
     /**
-    C++ ownership helper: deletes an intermediate result that is being
-    replaced, after unlisting the nodes it shares with the operands.
+    C++ ownership helper: leaves `res` as the only owner of its nodes and
+    deletes the untouched operand copies (NULL when not made).
     */
-    static void discardIntermediateResult(PolyhedralBoundedSolid* result,
-        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
+    static void releaseResultNodes(PolyhedralBoundedSolid* res,
+        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+        PolyhedralBoundedSolid* untouchedA, PolyhedralBoundedSolid* untouchedB);
 };
 
 #endif

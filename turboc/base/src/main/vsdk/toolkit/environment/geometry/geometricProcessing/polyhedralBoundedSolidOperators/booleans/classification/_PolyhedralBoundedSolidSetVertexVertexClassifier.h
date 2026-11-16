@@ -75,6 +75,14 @@ private:
     void vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
                                      _PolyhedralBoundedSolidVertex* vb);
     void vertexVertexReclassifyOnSectors(int op);
+    void resolveOnEdgesByLocalNeighborhood();
+    int classifyRayWithoutCrossing(const ArrayList<SectorOnVertex>& own,
+        int index, BOOLEAN firstRay, const ArrayList<SectorOnVertex>& other);
+    static Vector3Dd directionNextToRay(const Vector3Dd& ray,
+        const Vector3Dd& otherRay);
+    static const Vector3Dd PROBE_RAYS[3];
+    int classifyDirectionInNeighborhood(const Vector3Dd& d,
+        const ArrayList<SectorOnVertex>& nb);
     void vertexVertexReclassifyOnEdges(int op);
 };
 

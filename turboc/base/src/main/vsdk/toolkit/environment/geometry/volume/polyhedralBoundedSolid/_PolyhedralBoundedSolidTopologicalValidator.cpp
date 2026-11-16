@@ -3,6 +3,7 @@
 #include "java/util/ArrayList.txx"
 #include "java/util/Collections.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "vsdk/toolkit/common/Cpp98Support.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidTopologicalValidator.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
@@ -89,45 +90,68 @@ BOOLEAN _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrit
     return TRUE;
 }
 
-void _PolyhedralBoundedSolidTopologicalValidator::remakeEmanatingHalfedgesReferences(
-    PolyhedralBoundedSolid* solid)
+BOOLEAN _PolyhedralBoundedSolidTopologicalValidator::validateBackPointers(
+    PolyhedralBoundedSolid* solid, String* msg)
 {
+    BOOLEAN ok = TRUE;
     long int i;
     long int j;
+    long int k;
+    String discarded;
 
-    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
-        solid->getVerticesList().get(i)->emanatingHalfEdge = 0;
+    if ( msg == 0 ) {
+        msg = &discarded;
     }
-
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
         for ( j = 0; j < face->boundariesList.size(); j++ ) {
-            _PolyhedralBoundedSolidLoop* loop;
-            _PolyhedralBoundedSolidHalfEdge* he;
-            _PolyhedralBoundedSolidHalfEdge* heStart;
-
-            loop = face->boundariesList.get(j);
-            he = loop->boundaryStartHalfEdge;
-            if ( he == 0 ) {
-                continue;
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(j);
+            if ( loop->boundaryStartHalfEdge == 0 ||
+                 !loop->halfEdgesList.contains(
+                     loop->boundaryStartHalfEdge) ) {
+                *msg += "  - Face [";
+                *msg += Cpp98Support::toString(face->id).c_str();
+                *msg += "] has a loop whose start half-edge is not";
+                *msg += " a member of the loop.\n";
+                ok = FALSE;
             }
-            heStart = he;
-            do {
-                he->startingVertex->emanatingHalfEdge = he;
-                he = he->next();
-                if ( he == 0 ) {
+            for ( k = 0; k < loop->halfEdgesList.size(); k++ ) {
+                if ( loop->halfEdgesList.get(k)->parentLoop != loop ) {
+                    *msg += "  - Face [";
+                    *msg += Cpp98Support::toString(face->id).c_str();
+                    *msg += "] has a half-edge whose parent loop";
+                    *msg += " is another loop.\n";
+                    ok = FALSE;
                     break;
                 }
-            } while ( he != heStart );
+            }
         }
     }
 
-    // C++ port note: as the Java version, unreferenced vertices are only
-    // unlisted from the solid; they are not deleted here
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
-        if ( solid->getVerticesList().get(i)->emanatingHalfEdge == 0 ) {
-            solid->getVerticesList().remove(i);
-            i--;
+        _PolyhedralBoundedSolidVertex* v = solid->getVerticesList().get(i);
+        _PolyhedralBoundedSolidHalfEdge* he = v->emanatingHalfEdge;
+        if ( he == 0 ) {
+            *msg += "  - Vertex [";
+            *msg += Cpp98Support::toString(v->id).c_str();
+            *msg += "] has no emanating half-edge.\n";
+            ok = FALSE;
+        }
+        else if ( he->startingVertex != v ) {
+            *msg += "  - Vertex [";
+            *msg += Cpp98Support::toString(v->id).c_str();
+            *msg += "] emanating half-edge starts at another";
+            *msg += " vertex.\n";
+            ok = FALSE;
+        }
+        else if ( he->parentLoop == 0 ||
+                  !he->parentLoop->halfEdgesList.contains(he) ) {
+            *msg += "  - Vertex [";
+            *msg += Cpp98Support::toString(v->id).c_str();
+            *msg += "] emanating half-edge is not a member of its";
+            *msg += " loop.\n";
+            ok = FALSE;
         }
     }
+    return ok;
 }

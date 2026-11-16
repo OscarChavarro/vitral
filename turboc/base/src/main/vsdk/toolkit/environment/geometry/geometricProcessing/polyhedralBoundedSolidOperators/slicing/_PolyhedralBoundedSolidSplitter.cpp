@@ -18,6 +18,13 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "java/util/Collections.h"
 #include "java/util/Comparator.h"
+#include "java/util/TreeMap.txx"
+#include "java/util/TreeSet.txx"
+#include "java/lang/Double.h"
+#include "java/lang/Math.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidVertexNeighborhood.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidStructuralCopy.h"
 
 
 /** Order of `_PolyhedralBoundedSolidSplitterNullEdge::compareTo` */
@@ -31,12 +38,44 @@ public:
     }
 };
 
+/**
+A vertex position labelled with its shell, as the `double[]` entries
+{x, y, z, shell} of `hasTouchingShells` in Java.
+*/
+class _SplitterShellPoint {
+public:
+    double x;
+    double y;
+    double z;
+    double shell;
+
+    _SplitterShellPoint() : x(0.0), y(0.0), z(0.0), shell(0.0) {}
+    _SplitterShellPoint(double x, double y, double z, double shell) :
+        x(x), y(y), z(z), shell(shell) {}
+};
+
+/** As Java `(u, w) -> Double.compare(u[0], w[0])` */
+class SplitterShellPointOrder : public Comparator<_SplitterShellPoint> {
+public:
+    int compare(const _SplitterShellPoint& u,
+        const _SplitterShellPoint& w) const
+    {
+        return Double::compare(u.x, w.x);
+    }
+};
 
 //= _PolyhedralBoundedSolidSplitterSectorClassification ===================
 
 _PolyhedralBoundedSolidSplitterSectorClassification::
 _PolyhedralBoundedSolidSplitterSectorClassification()
-    : sector(NULL), cl(ON), isWide(FALSE), situation(UNDEFINED)
+    : _PolyhedralBoundedSolidSectorClassification()
+{
+}
+
+_PolyhedralBoundedSolidSplitterSectorClassification::
+_PolyhedralBoundedSolidSplitterSectorClassification(
+    const _PolyhedralBoundedSolidSectorClassification& other)
+    : _PolyhedralBoundedSolidSectorClassification(other)
 {
 }
 
@@ -44,7 +83,7 @@ String _PolyhedralBoundedSolidSplitterSectorClassification::toString() const
 {
     String msg = "{";
     msg += sector->toString().c_str();
-    switch ( cl ) {
+    switch ( classification ) {
       case ABOVE: msg += " ABOVE"; break;
       case BELOW: msg += " BELOW"; break;
       case ON: msg += " ON"; break;
@@ -53,6 +92,7 @@ String _PolyhedralBoundedSolidSplitterSectorClassification::toString() const
     if ( isWide ) {
         msg += " (W) ";
     }
+    //msg = msg + ", pos: " + position;
 
     switch ( situation ) {
       case COPLANAR_FACE: msg += "<COPLANAR_FACE>"; break;
@@ -67,24 +107,20 @@ String _PolyhedralBoundedSolidSplitterSectorClassification::toString() const
 
 //= _PolyhedralBoundedSolidSplitterNullEdge ===============================
 
-PolyhedralBoundedSolidNumericPolicy::ToleranceContext
-    _PolyhedralBoundedSolidSplitterNullEdge::nullEdgeNumericContext =
-    PolyhedralBoundedSolidNumericPolicy::defaultContext();
-
-_PolyhedralBoundedSolidSplitterNullEdge::_PolyhedralBoundedSolidSplitterNullEdge(
-    _PolyhedralBoundedSolidEdge* e)
-    : e(e)
+_PolyhedralBoundedSolidSplitterNullEdge::_PolyhedralBoundedSolidSplitterNullEdge()
+    : numericContext(PolyhedralBoundedSolidNumericPolicy::defaultContext()),
+      e(NULL)
 {
 }
 
-void _PolyhedralBoundedSolidSplitterNullEdge::setNumericContext(
+_PolyhedralBoundedSolidSplitterNullEdge::_PolyhedralBoundedSolidSplitterNullEdge(
+    _PolyhedralBoundedSolidEdge* e,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext* context)
+    : numericContext(PolyhedralBoundedSolidNumericPolicy::defaultContext()),
+      e(e)
 {
-    if ( context == NULL ) {
-        nullEdgeNumericContext = PolyhedralBoundedSolidNumericPolicy::defaultContext();
-    }
-    else {
-        nullEdgeNumericContext = *context;
+    if ( context != NULL ) {
+        numericContext = *context;
     }
 }
 
@@ -98,7 +134,7 @@ int _PolyhedralBoundedSolidSplitterNullEdge::compareTo(
     b = other.e->rightHalf->startingVertex->position;
 
     if ( PolyhedralBoundedSolidNumericPolicy
-        ::compare(a.x(), b.x(), nullEdgeNumericContext.bigEpsilon()) != 0 ) {
+        ::compare(a.x(), b.x(), numericContext.bigEpsilon()) != 0 ) {
         if ( a.x() < b.x() ) {
             return -1;
         }
@@ -106,7 +142,7 @@ int _PolyhedralBoundedSolidSplitterNullEdge::compareTo(
     }
     else {
         if ( PolyhedralBoundedSolidNumericPolicy
-            ::compare(a.y(), b.y(), nullEdgeNumericContext.bigEpsilon()) != 0 ) {
+            ::compare(a.y(), b.y(), numericContext.bigEpsilon()) != 0 ) {
             if ( a.y() < b.y() ) {
                 return -1;
             }
@@ -123,13 +159,39 @@ int _PolyhedralBoundedSolidSplitterNullEdge::compareTo(
 
 //= _PolyhedralBoundedSolidSplitter =======================================
 
-ArrayList<_PolyhedralBoundedSolidVertex*> _PolyhedralBoundedSolidSplitter::soov;
-ArrayList<_PolyhedralBoundedSolidSplitterNullEdge> _PolyhedralBoundedSolidSplitter::sone;
-ArrayList<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::sonf;
-ArrayList<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::facesToFixAbove;
-ArrayList<_PolyhedralBoundedSolidFace*> _PolyhedralBoundedSolidSplitter::facesToFixBelow;
-ArrayList<_PolyhedralBoundedSolidHalfEdge*> _PolyhedralBoundedSolidSplitter::ends;
-ArrayList<_PolyhedralBoundedSolidHalfEdge*> _PolyhedralBoundedSolidSplitter::tieds;
+class _PolyhedralBoundedSolidSplitter::_SplitContext {
+public:
+    /**
+    Variable `soov` ("set of ON-vertices") from program [MANT1988].14.1.
+    */
+    ArrayList<_PolyhedralBoundedSolidVertex*> soov;
+
+    /**
+    Variable `sone` ("set of null edges") from program [MANT1988].14.1.
+    */
+    ArrayList<_PolyhedralBoundedSolidSplitterNullEdge> sone;
+
+    /**
+    Variable `sonf` ("set of null faces") from program [MANT1988].14.1.
+    */
+    ArrayList<_PolyhedralBoundedSolidFace*> sonf;
+
+    ArrayList<_PolyhedralBoundedSolidFace*> facesToFixAbove;
+    ArrayList<_PolyhedralBoundedSolidFace*> facesToFixBelow;
+
+    /**
+    Variable `ends` from program [MANT1988].14.9.
+    */
+    ArrayList<_PolyhedralBoundedSolidHalfEdge*> ends;
+    ArrayList<_PolyhedralBoundedSolidHalfEdge*> tieds;
+
+    /**
+    Null edges created by lmev(he, he) (struts): both halves lie in the
+    same face. Their halves are paired by geometry in `splitConnect`.
+    C++ port note: Java uses an identity set.
+    */
+    TreeSet<_PolyhedralBoundedSolidEdge*> struts;
+};
 
 int _PolyhedralBoundedSolidSplitter::compareToZero(double value)
 {
@@ -141,16 +203,17 @@ int _PolyhedralBoundedSolidSplitter::compareToZero(double value)
 Implements function `addsoov` from section [MANT1988].14.4. and program
 [MANT1988].14.2.
 */
-void _PolyhedralBoundedSolidSplitter::addsoov(_PolyhedralBoundedSolidVertex* v)
+void _PolyhedralBoundedSolidSplitter::addsoov(_SplitContext& ctx,
+    _PolyhedralBoundedSolidVertex* v)
 {
     long i;
 
-    for ( i = 0; i < soov.size(); i++ ) {
-        if ( soov[i] == v ) {
+    for ( i = 0; i < ctx.soov.size(); i++ ) {
+        if ( ctx.soov[i] == v ) {
             return;
         }
     }
-    soov.add(v);
+    ctx.soov.add(v);
 }
 
 /**
@@ -164,7 +227,7 @@ them on `soov` for later usage.
 This method subdivides all edges of `inSolid` that intersects
 `inSplittingPlane` at their intersection points.
 */
-void _PolyhedralBoundedSolidSplitter::splitGenerate(
+void _PolyhedralBoundedSolidSplitter::splitGenerate(_SplitContext& ctx,
     PolyhedralBoundedSolid* inSolid, const InfinitePlane& inSplittingPlane)
 {
     _PolyhedralBoundedSolidEdge* e;
@@ -179,7 +242,6 @@ void _PolyhedralBoundedSolidSplitter::splitGenerate(
     int s2;
     long i;
 
-    soov.clear();
     for ( i = 0; i < inSolid->getEdgesList().size(); i++ ) {
         e = inSolid->getEdgesList().get(i);
         v1 = e->rightHalf->startingVertex;
@@ -194,14 +256,14 @@ void _PolyhedralBoundedSolidSplitter::splitGenerate(
             he = e->leftHalf->next();
             PolyhedralBoundedSolidEulerOperators::lmev(inSolid, e->rightHalf, he,
                 inSolid->getMaxVertexId()+1, p);
-            addsoov(he->previous()->startingVertex);
+            addsoov(ctx, he->previous()->startingVertex);
         }
         else {
             if ( s1 == 0 ) {
-                addsoov(v1);
+                addsoov(ctx, v1);
             }
             if ( s2 == 0 ) {
-                addsoov(v2);
+                addsoov(ctx, v2);
             }
         }
     }
@@ -214,123 +276,40 @@ program [MANT1988].14.4.
 
 Vitral SDK's implementation of this procedure extends the original from
 [MANT1988] by adding extra information flags to sector classifications
-`.isWide`, `.position` and `.situation`. Those flags are an additional
-aid for debugging purposes and specifically the `situation` flag will be
-later used on `splitClassify` to correct the ordering of sectors in order
-to keep consistency with Vitral SDK's interpretation of coordinate system.
+`.isWide`, `.position` and `.situation`, as a debugging aid.
+
+Sector convention. Entries follow the half-edges `he_k` leaving
+`vtx`, with `he_(k+1) = mirror(he_k).next()`. Entry k classifies the
+edge `e_k` of `he_k`. The face of `he_k` lies between `e_(k-1)` and
+`e_k`, so a change of class between entries k-1 and k means the plane
+crosses the face of `he_k`: the sector of entry k. A reflex face
+corner gets an extra (wide) entry at its inward bisector, placed
+BEFORE the entry of its half-edge, i.e. between `e_(k-1)` and `e_k`
+where it geometrically belongs (problem [MANT1988].14.1). The same
+convention is used by the set operator's vertex/face classifier.
 */
 ArrayList<_PolyhedralBoundedSolidSplitterSectorClassification>
 _PolyhedralBoundedSolidSplitter::getNeighborhood(
     _PolyhedralBoundedSolidVertex* vtx, const InfinitePlane& inSplittingPlane)
 {
-    _PolyhedralBoundedSolidHalfEdge* he;
-    Vector3Dd bisect;
-    double d;
+    ArrayList<_PolyhedralBoundedSolidSectorClassification> entries;
     ArrayList<SectorClassification> neighborSectorsInfo;
-
-    he = vtx->emanatingHalfEdge;
-
-    do {
-        SectorClassification c;
-        c.sector = he;
-        d = inSplittingPlane.pointDistance((he->next())->startingVertex->position);
-        c.cl = compareToZero(d);
-        c.isWide = FALSE;
-        c.position = (he->next())->startingVertex->position;
-        c.situation = SectorClassification::UNDEFINED;
-        if ( checkSplitterSectorWideness(he) ) {
-            bisect = bisector(he);
-            c.situation = SectorClassification::CROSSING_EDGE;
-            neighborSectorsInfo.add(c);
-
-            SectorClassification wide;
-            wide.sector = he;
-            d = inSplittingPlane.pointDistance(bisect);
-            wide.cl = compareToZero(d);
-            wide.isWide = TRUE;
-            wide.position = bisect;
-            wide.situation = SectorClassification::CROSSING_EDGE;
-            neighborSectorsInfo.add(wide);
-        }
-        else {
-            neighborSectorsInfo.add(c);
-        }
-        he = (he->mirrorHalfEdge())->next();
-    } while ( he != vtx->emanatingHalfEdge );
-
-    //-----------------------------------------------------------------
-    // Extra pass, not from original [MANT1988] code
     long i;
 
-    for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
-        SectorClassification& c = neighborSectorsInfo[i];
-        if ( c.cl == SectorClassification::ON &&
-             c.situation == SectorClassification::UNDEFINED ) {
-            c.situation = SectorClassification::INPLANE_EDGE;
-        }
+    _PolyhedralBoundedSolidVertexNeighborhood::classify(vtx,
+        inSplittingPlane, entries);
+    for ( i = 0; i < entries.size(); i++ ) {
+        neighborSectorsInfo.add(SectorClassification(entries[i]));
     }
-
     return neighborSectorsInfo;
 }
 
 /**
-The splitter needs the oriented interior angle from [MANT1988].14.5.2.
-Boolean set operations intentionally use the legacy cross-product
-predicate inherited from `_PolyhedralBoundedSolidOperator`; that
-predicate treats degenerate/straight sectors as wide and is not
-interchangeable with the splitter classification.
-*/
-BOOLEAN _PolyhedralBoundedSolidSplitter::checkSplitterSectorWideness(
-    _PolyhedralBoundedSolidHalfEdge* he)
-{
-    if ( he == NULL || he->parentLoop == NULL ||
-         he->parentLoop->parentFace == NULL ||
-         he->parentLoop->parentFace->getContainingPlane() == NULL ||
-         he->previous() == NULL || he->next() == NULL ) {
-        return TRUE;
-    }
-
-    Vector3Dd vertex = he->startingVertex->position;
-    Vector3Dd incoming = vertex.subtract(
-        he->previous()->startingVertex->position);
-    Vector3Dd outgoing = he->next()->startingVertex->position.subtract(vertex);
-    Vector3Dd faceNormal =
-        he->parentLoop->parentFace->getContainingPlane()->getNormal();
-
-    if ( incoming.length() <= numericContext.unitVectorTolerance() ||
-         outgoing.length() <= numericContext.unitVectorTolerance() ||
-         faceNormal.length() <= numericContext.unitVectorTolerance() ) {
-        return TRUE;
-    }
-
-    incoming = incoming.normalized();
-    outgoing = outgoing.normalized();
-    faceNormal = faceNormal.normalized();
-
-    double signedTurn = atan2(
-        faceNormal.dotProduct(incoming.crossProduct(outgoing)),
-        incoming.dotProduct(outgoing));
-    double interiorAngle = signedTurn < 0.0
-        ? 2.0 * M_PI + signedTurn
-        : signedTurn;
-
-    return interiorAngle > M_PI + numericContext.angleTolerance();
-}
-
-BOOLEAN _PolyhedralBoundedSolidSplitter::inplaneEdgesOn(
-    const ArrayList<SectorClassification>& nbr)
-{
-    long i;
-
-    for ( i = 0; i < nbr.size(); i++ ) {
-        if ( nbr[i].situation == SectorClassification::INPLANE_EDGE ) return TRUE;
-    }
-    return FALSE;
-}
-
-/**
 Current method applies the first reclassification rule presented at
-sections [MANT1988].14.5.1 and [MANT1988].14.5.2:
+sections [MANT1988].14.5.1 and [MANT1988].14.5.2. A face lying on the
+plane spans the entry of its half-edge and the entry before it (see the
+sector convention in `getNeighborhood`); both get the class that
+leaves the face on the side opposite to its outward normal.
 For the given vertex neigborhood, classify each edge according to whether
 its final vertex lies above, on or below the `inSplittingPlane`. Tag
 the edge with the corresponding label ABOVE, ON or BELOW.
@@ -348,22 +327,24 @@ void _PolyhedralBoundedSolidSplitter::reclassifyOnSectors(
     for ( i = 0; i < nbr.size(); i++ ) {
         SectorClassification& l = nbr[i];
         f = l.sector->parentLoop->parentFace;
-        c = f->getContainingPlane()->getNormal().crossProduct(inSplittingPlane.getNormal());
+        InfinitePlane* facePlane = f->getContainingPlane();
+        c = facePlane->getNormal().crossProduct(inSplittingPlane.getNormal());
         d = c.dotProduct(c);
         if ( compareToZero(d) == 0 ) {
             // Entering this means "faces are coplanar"
-            d = f->getContainingPlane()->getNormal().dotProduct(inSplittingPlane.getNormal());
+            d = facePlane->getNormal().dotProduct(inSplittingPlane.getNormal());
             if ( compareToZero(d) == 1 ) {
-                l.cl = SectorClassification::BELOW;
+                l.classification = SectorClassification::BELOW;
                 l.situation = SectorClassification::COPLANAR_FACE;
-                nbr[(i+1)%nbr.size()].cl = SectorClassification::BELOW;
+                nbr[(i+nbr.size()-1)%nbr.size()].classification = SectorClassification::BELOW;
             }
             else {
-                l.cl = SectorClassification::ABOVE;
+                l.classification = SectorClassification::ABOVE;
                 l.situation = SectorClassification::COPLANAR_FACE;
-                nbr[(i+1)%nbr.size()].cl = SectorClassification::ABOVE;
+                nbr[(i+nbr.size()-1)%nbr.size()].classification = SectorClassification::ABOVE;
             }
         }
+        delete facePlane;
     }
 }
 
@@ -380,28 +361,82 @@ of the following arrangements, ON edge is reclassified as ABOVE or BELOW:
 Those 4 rules are designed so that nonmanifold results will be represented
 as disconnected models.
 Following program [MANT1988].14.6.
+
+The two rules with equal neighbours are only right for a reflex
+(concave) edge, where the solid lies on both sides of the plane and the
+section is pinched at the edge. A convex edge with both neighbours on
+one side merely touches the plane: reclassifying it to the other side
+would insert a pair of null edges around a sector of zero width and
+produce a two-vertex null face (found with the split fuzz, Stage E). A
+convex touching edge therefore keeps the class of its neighbours.
 */
 void _PolyhedralBoundedSolidSplitter::reclassifyOnEdges(
     ArrayList<SectorClassification>& nbr)
 {
+    int prev;
+    int next;
     long i;
     long n = nbr.size();
 
     for ( i = 0; i < n; i++ ) {
-        if ( nbr[i].cl == SectorClassification::ON ) {
-            if ( nbr[(n+i-1) % n].cl == SectorClassification::BELOW ) {
-                if ( nbr[(i+1) % n].cl == SectorClassification::BELOW ) {
-                    nbr[i].cl = SectorClassification::ABOVE;
-                }
-                else {
-                    nbr[i].cl = SectorClassification::BELOW;
-                }
-            }
-            else {
-                nbr[i].cl = SectorClassification::BELOW;
-            }
+        SectorClassification& l = nbr[i];
+        if ( l.classification != SectorClassification::ON ) {
+            continue;
+        }
+        prev = nbr[(n+i-1) % n].classification;
+        next = nbr[(i+1) % n].classification;
+        if ( prev == next && !l.isWide &&
+             isConvexEdge(l.sector) ) {
+            l.classification = prev;
+        }
+        else if ( prev == SectorClassification::BELOW &&
+                  next == SectorClassification::BELOW ) {
+            l.classification = SectorClassification::ABOVE;
+        }
+        else {
+            l.classification = SectorClassification::BELOW;
         }
     }
+}
+
+/**
+True when the edge of `he` is convex: with outward face normals `nA`
+(face of `he`) and `nB` (face of its mirror) and loops running
+counterclockwise about them, the edge is convex when
+(nA x nB) . t > 0, `t` being the direction of `he`. The test is local
+to the edge, so it holds for non-convex faces. Flat or undecidable
+edges report false, which keeps the [MANT1988] rule.
+*/
+BOOLEAN _PolyhedralBoundedSolidSplitter::isConvexEdge(
+    _PolyhedralBoundedSolidHalfEdge* he)
+{
+    InfinitePlane* pa;
+    InfinitePlane* pb;
+    Vector3Dd t;
+    double s;
+
+    if ( he == NULL || he->parentEdge == NULL ) {
+        return FALSE;
+    }
+    pa = he->parentLoop->parentFace->getContainingPlane();
+    pb = he->mirrorHalfEdge()->parentLoop->parentFace->getContainingPlane();
+    if ( pa == NULL || pb == NULL ) {
+        delete pa;
+        delete pb;
+        return FALSE;
+    }
+    t = he->next()->startingVertex->position.subtract(
+        he->startingVertex->position);
+    if ( t.length() <= numericContext.unitVectorTolerance() ) {
+        delete pa;
+        delete pb;
+        return FALSE;
+    }
+    s = pa->getNormal().crossProduct(pb->getNormal())
+        .dotProduct(t.normalized());
+    delete pa;
+    delete pb;
+    return s > numericContext.unitVectorTolerance();
 }
 
 /**
@@ -411,10 +446,19 @@ Note, this code is horrible! YUCK! :P
 With respect to the original algorithm from [MANT1988], current
 implementation adds an extra check to ensure the orientation of the
 edges from below to above.
+
+The null edge is inserted in the sectors where the class changes:
+the entry AFTER each BELOW/ABOVE and ABOVE/BELOW transition (the face
+of that entry's half-edge is the one the plane crosses). Taking the
+entry before the transition, as this code used to, puts the null edge
+in the wrong face whenever the ON-vertex has more than two edges, so
+no null edges could be joined and the whole solid was lost (defect
+S-01, plane through a vertex).
 */
 void _PolyhedralBoundedSolidSplitter::insertNullEdges(
+    _SplitContext& ctx,
     ArrayList<SectorClassification>& nbr,
-    PolyhedralBoundedSolid* inSolid, const InfinitePlane& inSplittingPlane)
+    PolyhedralBoundedSolid* inSolid, const InfinitePlane& /*inSplittingPlane*/)
 {
     long start;
     long i;
@@ -426,52 +470,68 @@ void _PolyhedralBoundedSolidSplitter::insertNullEdges(
 
     //- Locate the head of an ABOVE-sequence --------------------------
     i = 0;
-    while ( !( nbr[i].cl == SectorClassification::BELOW &&
-               nbr[(i+1)%nnbr].cl == SectorClassification::ABOVE )  ) {
+    while ( !( nbr[i].classification == SectorClassification::BELOW &&
+               nbr[(i+1)%nnbr].classification == SectorClassification::ABOVE )  ) {
         i++;
         if ( i >= nnbr ) {
             return;
         }
     }
     start = i;
-    head = nbr[i].sector;
+    head = nbr[(i+1) % nnbr].sector;
 
     //-----------------------------------------------------------------
     while ( TRUE ) {
         //- Locate the final sector of the sequence ------------------
-        while ( !( nbr[i].cl == SectorClassification::ABOVE &&
-                   nbr[(i+1)%nnbr].cl == SectorClassification::BELOW ) ) {
+        while ( !( nbr[i].classification == SectorClassification::ABOVE &&
+                   nbr[(i+1)%nnbr].classification == SectorClassification::BELOW ) ) {
             i = (i+1) % nnbr;
         }
-        tail = nbr[i].sector;
+        tail = nbr[(i+1) % nnbr].sector;
 
         //- Insert null edge -----------------------------------------
-        int d1;
-        d1 = ((InfinitePlane&)(inSplittingPlane)).doContainmentTestHalfSpace(
-            head->next()->startingVertex->position,
-            numericContext.epsilon());
-
-        if ( d1 != Geometry::OUTSIDE ) {
-            PolyhedralBoundedSolidEulerOperators::lmev(inSolid, tail, head,
-                inSolid->getMaxVertexId()+1, head->startingVertex->position);
-            sone.add(_PolyhedralBoundedSolidSplitterNullEdge(
-                tail->previous()->parentEdge));
+        // Always the same orientation, so that the two null-edge halves
+        // lying in a crossed face are a right and a left half and
+        // `neighbor` can join them. Choosing it per vertex from the side
+        // of head's far end (as this code used to) gave inconsistent
+        // orientations at reflex ON-vertices.
+        // A face crossed twice at this vertex (reflex corner) is the
+        // sector of two runs. After the first null edge split the
+        // vertex, the corner left for the second crossing starts at
+        // the null half inserted just before the sector half-edge.
+        if ( tail->startingVertex != head->startingVertex ) {
+            if ( tail->previous()->startingVertex == head->startingVertex ) {
+                tail = tail->previous();
+            }
+            else if ( head->previous()->startingVertex ==
+                      tail->startingVertex ) {
+                head = head->previous();
+            }
         }
-        else {
-            PolyhedralBoundedSolidEulerOperators::lmev(inSolid, head, tail,
-                inSolid->getMaxVertexId()+1, head->startingVertex->position);
-            sone.add(_PolyhedralBoundedSolidSplitterNullEdge(
-                head->previous()->parentEdge));
+        PolyhedralBoundedSolidEulerOperators::lmev(inSolid, tail, head,
+            inSolid->getMaxVertexId()+1, head->startingVertex->position);
+        if ( head == tail ) {
+            // A run made of one wide (bisector) entry only: the plane
+            // enters and leaves the same reflex face corner at the
+            // vertex. lmev(he, he) inserts a strut edge with both
+            // halves in that face ([MANT1988] Sec. 14.6.2).
+            ctx.struts.add(tail->previous()->parentEdge);
         }
+        ctx.sone.add(_PolyhedralBoundedSolidSplitterNullEdge(
+            tail->previous()->parentEdge, &numericContext));
 
         //- Locate the start of the next sequence --------------------
-        while ( !( nbr[i].cl == SectorClassification::BELOW &&
-                   nbr[(i+1) % nnbr].cl == SectorClassification::ABOVE ) ) {
+        while ( !( nbr[i].classification == SectorClassification::BELOW &&
+                   nbr[(i+1) % nnbr].classification == SectorClassification::ABOVE ) ) {
             i = (i+1) % nnbr;
             if ( i == start ) {
                 return;
             }
         }
+        // Program 14.7 starts every ABOVE run at its own head. This
+        // code used to keep the head of the first run, so a vertex
+        // with two runs got its second null edge in the wrong sector.
+        head = nbr[(i+1) % nnbr].sector;
     }
 }
 
@@ -479,30 +539,24 @@ void _PolyhedralBoundedSolidSplitter::insertNullEdges(
 Vertex neighborhood classifier, as presented in section [MANT1988].14.5,
 and program 14.3.
 
-It appears that original algorithm from [MANT1988] assumes a left handed
-geometry or orientation or other difference to current Vitral SDK
-implementation of the boundary representation. That difference implies
-a reverse order in some cases, so `inplaneEdgesOn` check is added here
-to keep current implementation's consistency.
+Earlier versions reversed the neighborhood when it had in-plane
+edges, to compensate for taking the null-edge sectors one entry too
+early. With the sector convention documented on `getNeighborhood` no
+reversal is needed.
 */
-void _PolyhedralBoundedSolidSplitter::splitClassify(
+void _PolyhedralBoundedSolidSplitter::splitClassify(_SplitContext& ctx,
     PolyhedralBoundedSolid* inSolid, const InfinitePlane& inSplittingPlane)
 {
     long i;
 
-    sone.clear();
-
     /// Following variable `nbr` from program [MANT1988].14.3.
     ArrayList<SectorClassification> nbr;
 
-    for ( i = 0; i < soov.size(); i++ ) {
-        nbr = getNeighborhood(soov[i], inSplittingPlane);
-        if ( inplaneEdgesOn(nbr) ) {
-            Collections<SectorClassification>::reverse(nbr);
-        }
+    for ( i = 0; i < ctx.soov.size(); i++ ) {
+        nbr = getNeighborhood(ctx.soov[i], inSplittingPlane);
         reclassifyOnSectors(nbr, inSplittingPlane);
         reclassifyOnEdges(nbr);
-        insertNullEdges(nbr, inSolid, inSplittingPlane);
+        insertNullEdges(ctx, nbr, inSolid, inSplittingPlane);
     }
 }
 
@@ -510,20 +564,20 @@ void _PolyhedralBoundedSolidSplitter::splitClassify(
 Following section [MANT1988].14.7.2. and program [MANT1988].14.9.
 */
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidSplitter::canJoin(
-    _PolyhedralBoundedSolidHalfEdge* he)
+    _SplitContext& ctx, _PolyhedralBoundedSolidHalfEdge* he)
 {
     _PolyhedralBoundedSolidHalfEdge* ret;
     long i;
 
-    for ( i = 0; i < ends.size(); i++ ) {
-        if ( neighbor(he, ends[i]) ) {
-            ret = ends[i];
-            ends.remove((long)i);
-            tieds.add(ret);
+    for ( i = 0; i < ctx.ends.size(); i++ ) {
+        if ( neighbor(he, ctx.ends[i]) ) {
+            ret = ctx.ends[i];
+            ctx.ends.remove((long)i);
+            ctx.tieds.add(ret);
             return ret;
         }
     }
-    ends.add(he);
+    ctx.ends.add(he);
     return NULL;
 }
 
@@ -537,19 +591,21 @@ void _PolyhedralBoundedSolidSplitter::printNbr(
     }
 }
 
-void _PolyhedralBoundedSolidSplitter::printEnds()
+void _PolyhedralBoundedSolidSplitter::printEnds(_SplitContext& ctx)
 {
     long i;
 
-    for ( i = 0; i < ends.size(); i++ ) {
-        printf("  - ends[%ld]: %s\n", (long)i, ends[i]->toString().c_str());
+    for ( i = 0; i < ctx.ends.size(); i++ ) {
+        printf("  - ends[%ld]: %s\n", (long)i,
+            ctx.ends[i]->toString().c_str());
     }
 }
 
 /**
 Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
 */
-void _PolyhedralBoundedSolidSplitter::cut(_PolyhedralBoundedSolidHalfEdge* he)
+void _PolyhedralBoundedSolidSplitter::cut(_SplitContext& ctx,
+    _PolyhedralBoundedSolidHalfEdge* he)
 {
     PolyhedralBoundedSolid* s;
 
@@ -557,7 +613,7 @@ void _PolyhedralBoundedSolidSplitter::cut(_PolyhedralBoundedSolidHalfEdge* he)
 
     if ( he->parentEdge->rightHalf->parentLoop ==
          he->parentEdge->leftHalf->parentLoop ) {
-        sonf.add(he->parentLoop->parentFace);
+        ctx.sonf.add(he->parentLoop->parentFace);
         PolyhedralBoundedSolidEulerOperators::lkemr(s, he->parentEdge->rightHalf,
             he->parentEdge->leftHalf);
     }
@@ -567,12 +623,13 @@ void _PolyhedralBoundedSolidSplitter::cut(_PolyhedralBoundedSolidHalfEdge* he)
     }
 }
 
-BOOLEAN _PolyhedralBoundedSolidSplitter::isLoose(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN _PolyhedralBoundedSolidSplitter::isLoose(_SplitContext& ctx,
+    _PolyhedralBoundedSolidHalfEdge* he)
 {
     long i;
 
-    for ( i = 0; i < tieds.size(); i++ ) {
-        if ( he == tieds[i] ) return FALSE;
+    for ( i = 0; i < ctx.tieds.size(); i++ ) {
+        if ( he == ctx.tieds[i] ) return FALSE;
     }
 
     return TRUE;
@@ -581,88 +638,144 @@ BOOLEAN _PolyhedralBoundedSolidSplitter::isLoose(_PolyhedralBoundedSolidHalfEdge
 /**
 Following section [MANT1988].14.7.2. and program [MANT1988].14.9.
 */
-void _PolyhedralBoundedSolidSplitter::splitConnect()
+void _PolyhedralBoundedSolidSplitter::splitConnect(_SplitContext& ctx)
 {
     long i;
-
-    ends.clear();
-    tieds.clear();
-
-    //-----------------------------------------------------------------
     _PolyhedralBoundedSolidEdge* nextedge;
     _PolyhedralBoundedSolidHalfEdge* h1;
     _PolyhedralBoundedSolidHalfEdge* h2;
 
-    sonf.clear();
-
     // As Java `Collections.sort`: stable, with the order of `compareTo`
-    sone.sort(SplitterNullEdgeOrder());
+    ctx.sone.sort(SplitterNullEdgeOrder());
 
-    for ( i = 0; i < sone.size(); i++ ) {
-        nextedge = sone[i].e;
-        h1 = canJoin(nextedge->rightHalf);
-
+    for ( i = 0; i < ctx.sone.size(); i++ ) {
+        nextedge = ctx.sone[i].e;
+        if ( ctx.struts.contains(nextedge) ) {
+            orientStrut(ctx, nextedge);
+        }
+        h1 = canJoin(ctx, nextedge->rightHalf);
         if ( h1 != NULL ) {
             join(h1, nextedge->rightHalf, FALSE);
-            tieds.add(nextedge->rightHalf);
-            if ( !isLoose(h1->mirrorHalfEdge()) ) {
-                cut(h1);
+            ctx.tieds.add(nextedge->rightHalf);
+            if ( !isLoose(ctx, h1->mirrorHalfEdge()) ) {
+                cut(ctx, h1);
             }
         }
-        h2 = canJoin(nextedge->leftHalf);
-
+        h2 = canJoin(ctx, nextedge->leftHalf);
         if ( h2 != NULL ) {
             join(h2, nextedge->leftHalf, FALSE);
-            tieds.add(nextedge->leftHalf);
-            if ( !isLoose(h2->mirrorHalfEdge()) ) {
-                cut(h2);
+            ctx.tieds.add(nextedge->leftHalf);
+            if ( !isLoose(ctx, h2->mirrorHalfEdge()) ) {
+                cut(ctx, h2);
             }
         }
         if ( h1 != NULL && h2 != NULL ) {
-            cut(nextedge->rightHalf);
+            cut(ctx, nextedge->rightHalf);
         }
     }
+}
+
+/**
+A strut (null edge from lmev(he, he)) sits at a reflex corner of a face
+that the section line crosses straight through the vertex. Its halves
+are `s1` (from the original vertex to the new one) followed by `s2`
+in the face loop, and `s2.next()` leaves the vertex along the face
+boundary in direction `a`. Joining the earlier loose end `E` of that
+face to `s1` leaves `s2` in the part of the face that holds the
+boundary after the vertex; joining it to `s2` leaves `s1` in the part
+before. The far end of the section line must end up with the half
+that stays loose, so `s1` is joined when `E` lies on the second ray
+counterclockwise from `a`, and `s2` otherwise. `canJoin` pairs a right
+half with a left one, so the edge's right/left roles are swapped when
+needed for the chosen half to be complementary to `E`.
+*/
+void _PolyhedralBoundedSolidSplitter::orientStrut(_SplitContext& ctx,
+    _PolyhedralBoundedSolidEdge* strut)
+{
+    _PolyhedralBoundedSolidHalfEdge* s1;
+    _PolyhedralBoundedSolidHalfEdge* s2;
+    _PolyhedralBoundedSolidHalfEdge* e = NULL;
+    _PolyhedralBoundedSolidHalfEdge* wanted;
+    _PolyhedralBoundedSolidFace* face;
+    InfinitePlane* plane;
+    Vector3Dd v;
+    Vector3Dd a;
+    Vector3Dd d;
+    Vector3Dd n;
+    long i;
+
+    if ( strut->rightHalf->next() == strut->leftHalf ) {
+        s1 = strut->rightHalf;
+    }
+    else {
+        s1 = strut->leftHalf;
+    }
+    s2 = s1->next();
+    face = s1->parentLoop->parentFace;
+    for ( i = 0; i < ctx.ends.size(); i++ ) {
+        if ( ctx.ends[i]->parentLoop->parentFace == face ) {
+            e = ctx.ends[i];
+            break;
+        }
+    }
+    if ( e == NULL ) {
+        return;
+    }
+    plane = face->getContainingPlane();
+    if ( plane == NULL ) {
+        return;
+    }
+    v = s1->startingVertex->position;
+    a = s2->next()->next()->startingVertex->position.subtract(v);
+    d = e->startingVertex->position.subtract(v);
+    n = plane->getNormal();
+    delete plane;
+    if ( d.length() <= numericContext.unitVectorTolerance() ) {
+        return;
+    }
+    if ( ccwAngle(a, d, n) > ccwAngle(a, d.multiply(-1.0), n) ) {
+        wanted = s1;
+    }
+    else {
+        wanted = s2;
+    }
+    BOOLEAN eIsRight = e == e->parentEdge->rightHalf;
+    BOOLEAN wantedIsRight = wanted == strut->rightHalf;
+    if ( eIsRight == wantedIsRight ) {
+        _PolyhedralBoundedSolidHalfEdge* tmp = strut->rightHalf;
+        strut->rightHalf = strut->leftHalf;
+        strut->leftHalf = tmp;
+    }
+}
+
+/** Counterclockwise angle about `n` from `a` to `b`, in [0, 2 pi). */
+double _PolyhedralBoundedSolidSplitter::ccwAngle(const Vector3Dd& a,
+    const Vector3Dd& b, const Vector3Dd& n)
+{
+    double angle = atan2(n.dotProduct(a.crossProduct(b)),
+        a.dotProduct(b));
+    if ( angle < 0.0 ) {
+        return angle + 2.0 * M_PI;
+    }
+    return angle;
 }
 
 /**
 Following section [MANT1988].14.8. and program [MANT1988].14.12.
 */
-void _PolyhedralBoundedSolidSplitter::classify(PolyhedralBoundedSolid* /*s*/,
+void _PolyhedralBoundedSolidSplitter::classify(_SplitContext& ctx,
                                                PolyhedralBoundedSolid* above,
                                                PolyhedralBoundedSolid* below)
 {
     long i;
-    facesToFixAbove.clear();
-    facesToFixBelow.clear();
+    long half = ctx.sonf.size()/2;
 
-    for ( i = 0; i < sonf.size()/2; i++ ) {
-        movefac(sonf[i], above);
-        facesToFixAbove.add(sonf[i]);
-        movefac(sonf[i+sonf.size()/2], below);
-        facesToFixBelow.add(sonf[i+sonf.size()/2]);
+    for ( i = 0; i < half; i++ ) {
+        movefac(ctx.sonf[i], above);
+        ctx.facesToFixAbove.add(ctx.sonf[i]);
+        movefac(ctx.sonf[i+half], below);
+        ctx.facesToFixBelow.add(ctx.sonf[i+half]);
     }
-}
-
-BOOLEAN _PolyhedralBoundedSolidSplitter::isNullFace(_PolyhedralBoundedSolidFace* f)
-{
-    long i;
-
-    for ( i = 0; i < sonf.size(); i++ ) {
-        if ( sonf[i] == f ) return TRUE;
-    }
-    return FALSE;
-}
-
-/**
-C++ port note: Java replaces the lists of the solid with new empty ones;
-here they are emptied without deleting their nodes, which now belong to
-the solids built by the split.
-*/
-void _PolyhedralBoundedSolidSplitter::destroy(PolyhedralBoundedSolid* inSolid)
-{
-    inSolid->getPolygonsList().clear();
-    inSolid->getEdgesList().clear();
-    inSolid->getVerticesList().clear();
 }
 
 /**
@@ -720,36 +833,355 @@ void _PolyhedralBoundedSolidSplitter::fixNullFaces(
 
 /**
 Following section [MANT1988].14.8. and program [MANT1988].14.11.
+
+The two halves of `sonf` are not tied to a side of the plane by the
+construction, so each piece is put in the list of the side its
+vertices lie on (it used to be the opposite one for every plane).
 */
-void _PolyhedralBoundedSolidSplitter::splitFinish(
+void _PolyhedralBoundedSolidSplitter::splitFinish(_SplitContext& ctx,
     PolyhedralBoundedSolid* inSolid,
+    const InfinitePlane& inSplittingPlane,
     ArrayList<PolyhedralBoundedSolid*>& outSolidsAbove,
     ArrayList<PolyhedralBoundedSolid*>& outSolidsBelow)
 {
     long i;
     long firstHalfSize;
     _PolyhedralBoundedSolidFace* newface;
-    PolyhedralBoundedSolid* newAbove;
-    PolyhedralBoundedSolid* newBelow;
+    PolyhedralBoundedSolid* first;
+    PolyhedralBoundedSolid* second;
 
-    firstHalfSize = sonf.size();
+    firstHalfSize = ctx.sonf.size();
     for ( i = 0; i < firstHalfSize; i++ ) {
         newface = PolyhedralBoundedSolidEulerOperators::lmfkrh(inSolid,
-            sonf[i]->boundariesList.get(1), inSolid->getMaxFaceId()+1);
-        sonf.add(newface);
+            ctx.sonf[i]->boundariesList.get(1),
+            inSolid->getMaxFaceId()+1);
+        ctx.sonf.add(newface);
     }
-    newAbove = new PolyhedralBoundedSolid();
-    newBelow = new PolyhedralBoundedSolid();
-    classify(inSolid, newAbove, newBelow);
-    fixNullFaces(facesToFixAbove);
-    fixNullFaces(facesToFixBelow);
-    cleanup(newAbove);
-    PolyhedralBoundedSolidValidationEngine::validateIntermediate(newAbove);
-    cleanup(newBelow);
-    PolyhedralBoundedSolidValidationEngine::validateIntermediate(newBelow);
-    outSolidsAbove.add(newAbove);
-    outSolidsBelow.add(newBelow);
-    destroy(inSolid);
+    first = new PolyhedralBoundedSolid();
+    second = new PolyhedralBoundedSolid();
+    classify(ctx, first, second);
+    fixNullFaces(ctx.facesToFixAbove);
+    fixNullFaces(ctx.facesToFixBelow);
+    cleanup(first);
+    resolvePinchedLoops(first);
+    PolyhedralBoundedSolidValidationEngine::validateIntermediate(first);
+    cleanup(second);
+    resolvePinchedLoops(second);
+    PolyhedralBoundedSolidValidationEngine::validateIntermediate(second);
+    if ( sideOf(first, inSplittingPlane) < 0 ||
+         sideOf(second, inSplittingPlane) > 0 ) {
+        PolyhedralBoundedSolid* swap = first;
+        first = second;
+        second = swap;
+    }
+    separateShells(first, outSolidsAbove);
+    separateShells(second, outSolidsBelow);
+}
+
+/**
+A plane through a reflex vertex can cut a section made of two regions
+that touch at that vertex. Connect then closes both regions in one
+loop that passes twice through the contact point, and the section face
+is self-touching. Two forms appear, and each is resolved with Euler
+operators so that every face loop is simple:
+
+  - The loop passes twice through the same vertex: the piece
+    is two regions joined only at that vertex. `lmev` splits the
+    vertex between the two half-edges (the new edge, of zero length, is a
+    bridge of the loop), `lkemr` removes the bridge leaving two
+    rings, and `lmfkrh` makes the second ring a face of its own. The
+    two regions become shells that touch at a vertex position, which
+    `separateShells` returns as separate solids ([MANT1988] Sec.
+    14.5.1).
+  - The loop passes through two distinct vertices at the same
+    position: the piece is one manifold solid whose section has two faces
+    sharing that point. `lmef` splits the face with a zero-length
+    edge between them and `lkev` merges the two vertices.
+*/
+void _PolyhedralBoundedSolidSplitter::resolvePinchedLoops(
+    PolyhedralBoundedSolid* piece)
+{
+    BOOLEAN changed = TRUE;
+    long f;
+    long l;
+
+    while ( changed ) {
+        changed = FALSE;
+        for ( f = 0; f < piece->getPolygonsList().size() && !changed;
+              f++ ) {
+            _PolyhedralBoundedSolidFace* face =
+                piece->getPolygonsList().get(f);
+            for ( l = 0; l < face->boundariesList.size() && !changed;
+                  l++ ) {
+                changed = resolveOnePinch(piece,
+                    face->boundariesList.get(l));
+            }
+        }
+    }
+}
+
+BOOLEAN _PolyhedralBoundedSolidSplitter::resolveOnePinch(
+    PolyhedralBoundedSolid* piece, _PolyhedralBoundedSolidLoop* loop)
+{
+    long n = loop->halfEdgesList.size();
+    long a;
+    long b;
+
+    if ( n < 4 ) {
+        return FALSE;
+    }
+    for ( a = 0; a < n; a++ ) {
+        for ( b = a + 2; b < n; b++ ) {
+            if ( a == 0 && b == n - 1 ) {
+                continue;
+            }
+            _PolyhedralBoundedSolidHalfEdge* ha = loop->halfEdgesList.get(a);
+            _PolyhedralBoundedSolidHalfEdge* hb = loop->halfEdgesList.get(b);
+            _PolyhedralBoundedSolidVertex* va = ha->startingVertex;
+            _PolyhedralBoundedSolidVertex* vb = hb->startingVertex;
+
+            if ( va == vb ) {
+                if ( !rotatesInto(ha, hb) ) {
+                    continue;
+                }
+                PolyhedralBoundedSolidEulerOperators::lmev(piece, ha, hb,
+                    piece->getMaxVertexId() + 1,
+                    Vector3Dd(va->position));
+                // lmev put the new edge before ha and before hb, both
+                // in this loop: it is a bridge.
+                _PolyhedralBoundedSolidHalfEdge* bridgeA = ha->previous();
+                _PolyhedralBoundedSolidHalfEdge* bridgeB = hb->previous();
+                PolyhedralBoundedSolidEulerOperators::lkemr(piece,
+                    bridgeA, bridgeB);
+                _PolyhedralBoundedSolidFace* face = loop->parentFace;
+                PolyhedralBoundedSolidEulerOperators::lmfkrh(piece,
+                    face->boundariesList.get(
+                        face->boundariesList.size() - 1),
+                    piece->getMaxFaceId() + 1);
+                return TRUE;
+            }
+            if ( PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
+                     va->position, vb->position, numericContext) ) {
+                if ( PolyhedralBoundedSolidEulerOperators::lmef(piece, ha,
+                         hb, piece->getMaxFaceId() + 1) == NULL ) {
+                    continue;
+                }
+                // lmef put the half-edge from vb before ha and the one
+                // from va before hb; lkev keeps va.
+                PolyhedralBoundedSolidEulerOperators::lkev(piece,
+                    ha->previous(), hb->previous());
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+/**
+True when turning around the vertex of `from` (mirror, then next,
+as lmev does) reaches `to`.
+*/
+BOOLEAN _PolyhedralBoundedSolidSplitter::rotatesInto(
+    _PolyhedralBoundedSolidHalfEdge* from,
+    _PolyhedralBoundedSolidHalfEdge* to)
+{
+    _PolyhedralBoundedSolidHalfEdge* he = from;
+    int steps;
+
+    for ( steps = 0; steps < 1000; steps++ ) {
+        if ( he == to ) {
+            return TRUE;
+        }
+        _PolyhedralBoundedSolidHalfEdge* mirror = he->mirrorHalfEdge();
+        if ( mirror == NULL ) {
+            return FALSE;
+        }
+        he = mirror->next();
+        if ( he == from ) {
+            return FALSE;
+        }
+    }
+    return FALSE;
+}
+
+/**
+The pieces on one side of the plane can be several shells. Disjoint
+shells stay together in one solid, as program [MANT1988].14.12 leaves
+them. Shells that touch at a vertex or along an edge (the non-manifold
+situations [MANT1988] Sec. 14.5.1 resolves as disconnected models) are
+returned as separate solids, so that every solid in the output lists is
+a valid manifold B-Rep.
+
+C++ port note: the shells are appended to `shells` (Java returns a new
+list); when `piece` is split into shells, the emptied `piece` is deleted.
+*/
+void _PolyhedralBoundedSolidSplitter::separateShells(
+    PolyhedralBoundedSolid* piece,
+    ArrayList<PolyhedralBoundedSolid*>& shells)
+{
+    if ( !hasTouchingShells(piece) ) {
+        shells.add(piece);
+        return;
+    }
+    while ( piece->getPolygonsList().size() > 0 ) {
+        PolyhedralBoundedSolid* shell = new PolyhedralBoundedSolid();
+        movefac(piece->getPolygonsList().get(0), shell);
+        cleanup(shell);
+        updateMaximumIds(shell);
+        PolyhedralBoundedSolidValidationEngine::validateIntermediate(shell);
+        shells.add(shell);
+    }
+    discard(piece);
+}
+
+/**
+Labels the shells (connected components of the face/edge adjacency
+graph) and reports whether two different shells have a vertex at the
+same position. A split creates a vertex at every contact point, so
+shells that touch always share a vertex position.
+*/
+BOOLEAN _PolyhedralBoundedSolidSplitter::hasTouchingShells(
+    PolyhedralBoundedSolid* solid)
+{
+    TreeMap<_PolyhedralBoundedSolidFace*, int> shellOf;
+    ArrayList<_PolyhedralBoundedSolidFace*> stack;
+    ArrayList<_SplitterShellPoint> points;
+    int shells = 0;
+    long i;
+    long j;
+    long k;
+
+    for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
+        _PolyhedralBoundedSolidFace* start = solid->getPolygonsList().get(i);
+        if ( shellOf.containsKey(start) ) {
+            continue;
+        }
+        shellOf.put(start, shells);
+        stack.add(start);
+        while ( !stack.isEmpty() ) {
+            _PolyhedralBoundedSolidFace* f = stack.get(stack.size() - 1);
+            stack.remove((long)(stack.size() - 1));
+            for ( j = 0; j < f->boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop* l = f->boundariesList.get(j);
+                for ( k = 0; k < l->halfEdgesList.size(); k++ ) {
+                    _PolyhedralBoundedSolidHalfEdge* he =
+                        l->halfEdgesList.get(k);
+                    Vector3Dd p = he->startingVertex->position;
+                    points.add(_SplitterShellPoint(p.x(), p.y(), p.z(),
+                        (double)shells));
+                    _PolyhedralBoundedSolidHalfEdge* m = he->mirrorHalfEdge();
+                    if ( m != NULL && m->parentLoop != NULL &&
+                         m->parentLoop->parentFace != NULL &&
+                         !shellOf.containsKey(m->parentLoop->parentFace) ) {
+                        shellOf.put(m->parentLoop->parentFace, shells);
+                        stack.add(m->parentLoop->parentFace);
+                    }
+                }
+            }
+        }
+        shells++;
+    }
+    if ( shells <= 1 ) {
+        return FALSE;
+    }
+
+    double tolerance = numericContext.bigEpsilon();
+    points.sort(SplitterShellPointOrder());
+    for ( i = 0; i < points.size(); i++ ) {
+        const _SplitterShellPoint& u = points[i];
+        for ( j = i + 1; j < points.size() &&
+                  points[j].x - u.x <= tolerance; j++ ) {
+            const _SplitterShellPoint& w = points[j];
+            if ( u.shell != w.shell &&
+                 fabs(u.y - w.y) <= tolerance &&
+                 fabs(u.z - w.z) <= tolerance ) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+void _PolyhedralBoundedSolidSplitter::updateMaximumIds(
+    PolyhedralBoundedSolid* solid)
+{
+    int maxVertex = -1;
+    int maxFace = -1;
+    long i;
+
+    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
+        maxVertex = Math::max(maxVertex,
+            solid->getVerticesList().get(i)->id);
+    }
+    for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
+        maxFace = Math::max(maxFace, solid->getPolygonsList().get(i)->id);
+    }
+    solid->setMaxVertexId(maxVertex);
+    solid->setMaxFaceId(maxFace);
+}
+
+/**
+True when some vertex lies strictly above the plane and some strictly
+below. Otherwise the plane misses the solid or only touches it (at a
+vertex, along an edge or on a face), there is nothing to cut, and
+running the algorithm would only insert null edges along the contact
+and return a degenerate piece.
+*/
+BOOLEAN _PolyhedralBoundedSolidSplitter::straddles(
+    PolyhedralBoundedSolid* solid, const InfinitePlane& plane)
+{
+    BOOLEAN above = FALSE;
+    BOOLEAN below = FALSE;
+    long i;
+
+    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
+        int side = compareToZero(plane.pointDistance(
+            solid->getVerticesList().get(i)->position));
+        if ( side > 0 ) {
+            above = TRUE;
+        }
+        if ( side < 0 ) {
+            below = TRUE;
+        }
+        if ( above && below ) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+/**
+Side of the plane a piece lies on: the sign of the signed distance of
+its farthest vertex (0 when every vertex is on the plane or the piece
+is empty).
+*/
+int _PolyhedralBoundedSolidSplitter::sideOf(PolyhedralBoundedSolid* piece,
+    const InfinitePlane& plane)
+{
+    double best = 0.0;
+    long i;
+
+    for ( i = 0; i < piece->getVerticesList().size(); i++ ) {
+        double d = plane.pointDistance(
+            piece->getVerticesList().get(i)->position);
+        if ( fabs(d) > fabs(best) ) {
+            best = d;
+        }
+    }
+    return compareToZero(best);
+}
+
+/**
+C++ port note, no Java counterpart (garbage collected there): deletes a
+solid whose faces were moved to other solids. Its lists are emptied first
+without deleting their nodes, which belong to those solids now.
+*/
+void _PolyhedralBoundedSolidSplitter::discard(PolyhedralBoundedSolid* emptied)
+{
+    emptied->getPolygonsList().clear();
+    emptied->getEdgesList().clear();
+    emptied->getVerticesList().clear();
+    delete emptied;
 }
 
 void _PolyhedralBoundedSolidSplitter::split(
@@ -761,38 +1193,45 @@ void _PolyhedralBoundedSolidSplitter::split(
     PolyhedralBoundedSolidStatistics::recordSplitCall();
     int aboveBefore = (int)outSolidsAbove.size();
     int belowBefore = (int)outSolidsBelow.size();
+    _SplitContext ctx;
+    PolyhedralBoundedSolid* work;
+
     //-----------------------------------------------------------------
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
         PolyhedralBoundedSolidNumericPolicy::forSolid(inSolid);
     setNumericContext(&context);
-    _PolyhedralBoundedSolidSplitterNullEdge::setNumericContext(&numericContext);
 
     PolyhedralBoundedSolidValidationEngine::validateIntermediate(inSolid);
-    splitGenerate(inSolid, inSplittingPlane);
-    splitClassify(inSolid, inSplittingPlane);
-
-    if ( sone.size() <= 0 ) {
-        // Plane should be tested here before asuming this order!
-        PolyhedralBoundedSolidStatistics::recordSplitNoNullEdgesCase();
-        outSolidsAbove.add(inSolid);
-        outSolidsBelow.add(new PolyhedralBoundedSolid());
-        PolyhedralBoundedSolidStatistics::recordSplitProducedSolids(
-            (int)outSolidsAbove.size() - aboveBefore,
-            (int)outSolidsBelow.size() - belowBefore);
-        return;
+    work = NULL;
+    if ( straddles(inSolid, inSplittingPlane) ) {
+        work = PolyhedralBoundedSolidStructuralCopy::copy(inSolid);
+        splitGenerate(ctx, work, inSplittingPlane);
+        splitClassify(ctx, work, inSplittingPlane);
     }
 
-    splitConnect();
-    splitFinish(inSolid, outSolidsAbove, outSolidsBelow);
+    if ( ctx.sone.size() <= 0 ) {
+        PolyhedralBoundedSolidStatistics::recordSplitNoNullEdgesCase();
+        if ( sideOf(inSolid, inSplittingPlane) < 0 ) {
+            outSolidsAbove.add(new PolyhedralBoundedSolid());
+            outSolidsBelow.add(
+                PolyhedralBoundedSolidStructuralCopy::copy(inSolid));
+        }
+        else {
+            outSolidsAbove.add(
+                PolyhedralBoundedSolidStructuralCopy::copy(inSolid));
+            outSolidsBelow.add(new PolyhedralBoundedSolid());
+        }
+        // C++ port note: the copy that was cut by nothing is not used
+        delete work;
+    }
+    else {
+        splitConnect(ctx);
+        splitFinish(ctx, work, inSplittingPlane, outSolidsAbove,
+            outSolidsBelow);
+        // C++ port note: the faces of the copy were moved to the pieces
+        discard(work);
+    }
     PolyhedralBoundedSolidStatistics::recordSplitProducedSolids(
         (int)outSolidsAbove.size() - aboveBefore,
         (int)outSolidsBelow.size() - belowBefore);
-
-    //-----------------------------------------------------------------
-    soov.clear();
-    sone.clear();
-    sonf.clear();
 }
-
-// Integral constants bound to references (i.e. by `?:`) need a
-// definition out of the class in C++98

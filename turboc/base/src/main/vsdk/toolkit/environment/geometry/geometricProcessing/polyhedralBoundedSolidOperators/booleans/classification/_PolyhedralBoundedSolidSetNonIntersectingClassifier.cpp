@@ -24,6 +24,10 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "java/lang/Math.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/NonManifoldBooleanResultException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidInteriorOverlap.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFaceGeometry.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
 
 typedef _PolyhedralBoundedSolidSetNonIntersectingClassifier Classifier;
 
@@ -81,34 +85,32 @@ BOOLEAN Classifier::Pfc::hasEfb()
 //= Face planes holder ==============================================
 
 /**
-Precomputes the containing plane of every face of `solid`, indexed by
-face position. Point classification tests many points against the same
-unmutated solid, so computing each plane once (instead of once per point per
-face) removes the dominant Newell/tolerance-context recompute from the hot
-path.
+Precomputes the containing plane and the bounding box of every face of
+`solid`, indexed by face position. Point classification tests many
+points against the same unmutated solid, so computing each plane once
+(instead of once per point per face) removes the dominant
+Newell/tolerance-context recompute from the hot path, and the box skips
+the point-in-face test for points far from the face (Stage G). The
+holder is only valid while `solid` is not mutated.
+C++ port note: Java's precomputeFacePlanes returns an array; this holder
+owns the snapshots.
 */
 Classifier::FacePlanes::FacePlanes(PolyhedralBoundedSolid* solid)
 {
-    long int i;
-
     if ( solid == 0 ) {
         return;
     }
-    for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
-        planes.add(solid->getPolygonsList().get(i)->getContainingPlane());
-    }
+    PolyhedralBoundedSolidFaceGeometry::of(solid, geometry);
 }
 
 Classifier::FacePlanes::~FacePlanes()
 {
-    for ( long i = 0; i < planes.size(); i++ ) {
-        delete planes[i];
-    }
+    PolyhedralBoundedSolidFaceGeometry::dispose(geometry);
 }
 
-InfinitePlane* Classifier::FacePlanes::get(long int i) const
+const Classifier::FaceGeometryList& Classifier::FacePlanes::all() const
 {
-    return planes[i];
+    return geometry;
 }
 
 //= Public preflight API ============================================
@@ -190,10 +192,6 @@ BOOLEAN Classifier::runTouchingOnlyPreflightCase(
         return FALSE;
     }
 
-    if ( cache.hasInteriorOverlap() ) {
-        return FALSE;
-    }
-
     if ( cache.hasEfa() ) {
         return FALSE;
     }
@@ -201,7 +199,10 @@ BOOLEAN Classifier::runTouchingOnlyPreflightCase(
         return FALSE;
     }
 
-    if ( hasPartialCoplanarFaceAreaOverlap(inSolidA, inSolidB) ) {
+    // Solids that share part of a face and nothing else are a contact
+    // too (STACKED_BLOCKS): the interiors do not overlap. A union along
+    // such a face is glued by the pipeline; the caller keeps it out.
+    if ( cache.hasInteriorOverlap() ) {
         return FALSE;
     }
 
@@ -231,12 +232,30 @@ PolyhedralBoundedSolid* Classifier::runSetOpNoIntersectionCase(
 
     int relation = classifyNoIntersectionRelation(cache.aInB(), cache.bInA());
 
+    // Tangent containment (B-02 b): one solid inside the other with
+    // faces on the other's boundary. The vertex test cannot see it
+    // (every vertex is "on"), so it reports touching. Only the answers
+    // that need no cavity use it; B \ A-style cavities need the
+    // pipeline.
+    if ( relation == NO_INT_RELATION_TOUCHING ) {
+        if ( isTangentlyContained(inSolidA, inSolidB) ) {
+            relation = NO_INT_RELATION_A_IN_B;
+        }
+        else if ( op != SUBTRACT &&
+                  isTangentlyContained(inSolidB, inSolidA) ) {
+            relation = NO_INT_RELATION_B_IN_A;
+        }
+    }
+
     if ( op == INTERSECTION ) {
         if ( relation == NO_INT_RELATION_A_IN_B ) {
             outRes->merge(inSolidA);
         }
         else if ( relation == NO_INT_RELATION_B_IN_A ) {
             outRes->merge(inSolidB);
+        }
+        else if ( !cache.hasInteriorOverlap() ) {
+            appendContactLaminae(inSolidA, inSolidB, outRes);
         }
         return outRes;
     }
@@ -247,6 +266,15 @@ PolyhedralBoundedSolid* Classifier::runSetOpNoIntersectionCase(
         }
         else if ( relation == NO_INT_RELATION_B_IN_A ) {
             outRes->merge(inSolidA);
+        }
+        else if ( relation == NO_INT_RELATION_TOUCHING ) {
+            // Two shells sharing only an edge or a vertex: a
+            // non-manifold result, rejected by design (B-04). Face
+            // contact never gets here: the pipeline glues it.
+            throw NonManifoldBooleanResultException(
+                "UNION of solids touching only along edges or at "
+                "vertices is non-manifold (two shells sharing a "
+                "boundary point); rejected");
         }
         else {
             outRes->merge(inSolidA);
@@ -269,51 +297,31 @@ PolyhedralBoundedSolid* Classifier::runSetOpNoIntersectionCase(
     return outRes;
 }
 
-PolyhedralBoundedSolid* Classifier::runPartialCoplanarFaceAreaCase(
-    PolyhedralBoundedSolid* inSolidA,
-    PolyhedralBoundedSolid* inSolidB,
-    PolyhedralBoundedSolid* outRes,
-    int op)
+/**
+Lamina policy for the intersection of solids that share part of a face
+and nothing else (STACKED_BLOCKS): the shared part is returned as
+laminae, zero volume, valid and easy to display, not as the regularised
+empty set. A contact whose area is below the collapsed face threshold
+gives no lamina: a collapsed lamina is not a valid result (see
+_GeometricCollapsedLaminaStrategy).
+
+This is part of the "no intersections found" resolution of the
+pipeline ([MANT1988] 15.4). Until plan-stage11 Phase E a preflight
+answered these pairs before generate and classify ran.
+*/
+void Classifier::appendContactLaminae(PolyhedralBoundedSolid* inSolidA,
+    PolyhedralBoundedSolid* inSolidB, PolyhedralBoundedSolid* outRes)
 {
-    Pfc cache = newPreflightCache(inSolidA, inSolidB);
-    return runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, outRes, op, cache);
-}
-
-PolyhedralBoundedSolid* Classifier::runPartialCoplanarFaceAreaCase(
-    PolyhedralBoundedSolid* inSolidA,
-    PolyhedralBoundedSolid* inSolidB,
-    PolyhedralBoundedSolid* outRes,
-    int op,
-    Pfc& cache)
-{
-    long i;
-
-    if ( op == UNION ) {
-        return 0;
-    }
-
-    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
-        PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
-    setNumericContext(&context);
-
-    if ( cache.hasInteriorOverlap() ||
-         cache.hasEfa() ||
-         cache.hasEfb() ) {
-        return 0;
-    }
-
     ArrayList<Polygon> contactPolygons =
         partialCoplanarFaceAreaOverlapPolygons(inSolidA, inSolidB);
-    if ( contactPolygons.isEmpty() ) {
-        return 0;
-    }
-
-    if ( op == SUBTRACT ) {
-        outRes->merge(inSolidA);
-        return outRes;
-    }
+    long i;
 
     for ( i = 0; i < contactPolygons.size(); i++ ) {
+        if ( polygonArea(contactPolygons[i]) <
+             PolyhedralBoundedSolidGeometricValidator
+                 ::collapsedFaceAreaThreshold(numericContext) ) {
+            continue;
+        }
         PolyhedralBoundedSolid* lamina =
             createLaminaFromPolygon(contactPolygons[i]);
         if ( lamina->getPolygonsList().size() > 0 ) {
@@ -322,8 +330,6 @@ PolyhedralBoundedSolid* Classifier::runPartialCoplanarFaceAreaCase(
         // After merge the lamina is an empty shell
         delete lamina;
     }
-
-    return outRes;
 }
 
 //= Point and solid classification ==================================
@@ -345,6 +351,13 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
     const FacePlanes& facePlanes,
     const Vector3Dd& point)
 {
+    return classifyPointAgainstSolid(solid, facePlanes.all(), point);
+}
+
+int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
+    const FaceGeometryList& facePlanes,
+    const Vector3Dd& point)
+{
     long int i;
     int j;
     _PolyhedralBoundedSolidFace* face;
@@ -358,11 +371,12 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
 
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         face = solid->getPolygonsList().get(i);
-        InfinitePlane* facePlane = facePlanes.get(i);
+        InfinitePlane* facePlane = facePlanes[i]->getPlane();
         if ( facePlane == 0 ) {
             continue;
         }
-        if ( fabs(facePlane->pointDistance(point)) <= eps ) {
+        if ( fabs(facePlane->pointDistance(point)) <= eps &&
+             !facePlanes[i]->projectionExcludes(point, eps) ) {
             if ( face->testPointInside(point, eps, facePlane) !=
                  Geometry::OUTSIDE ) {
                 return Geometry::LIMIT;
@@ -384,7 +398,7 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
 
         for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
             face = solid->getPolygonsList().get(i);
-            InfinitePlane* facePlane = facePlanes.get(i);
+            InfinitePlane* facePlane = facePlanes[i]->getPlane();
             if ( facePlane == 0 ) {
                 ambiguous = TRUE;
                 break;
@@ -401,6 +415,9 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
                 continue;
             }
 
+            if ( facePlanes[i]->projectionExcludes(pi, eps) ) {
+                continue;
+            }
             int status = face->testPointInside(pi, eps, facePlane);
             if ( status == Geometry::LIMIT ) {
                 ambiguous = TRUE;
@@ -441,286 +458,84 @@ int Classifier::classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
     return Geometry::LIMIT;
 }
 
-ArrayList<double> Classifier::overlappingBounds(
-    PolyhedralBoundedSolid* solidA,
+/**
+Witness test used to tell a right empty result from a lost solid
+(Fable5.2Analysis.md Stage F step 4): true when some point is interior
+to both solids, so their intersection cannot be empty. The operands
+must be intact (not consumed by a set operation).
+*/
+BOOLEAN Classifier::interiorsOverlap(PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
-    double* a = solidA->getMinMax();
-    double* b = solidB->getMinMax();
-    ArrayList<double> bounds(Collections<double>::nCopies(6, 0.0));
-
-    bounds[0] = Math::max(a[0], b[0]);
-    bounds[1] = Math::max(a[1], b[1]);
-    bounds[2] = Math::max(a[2], b[2]);
-    bounds[3] = Math::min(a[3], b[3]);
-    bounds[4] = Math::min(a[4], b[4]);
-    bounds[5] = Math::min(a[5], b[5]);
-    delete[] a;
-    delete[] b;
-    return bounds;
-}
-
-BOOLEAN Classifier::hasPositiveOverlapVolume(const ArrayList<double>& bounds)
-{
-    double eps = numericContext.bigEpsilon();
-
-    return bounds[3] - bounds[0] > eps &&
-        bounds[4] - bounds[1] > eps &&
-        bounds[5] - bounds[2] > eps;
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forSolids(solidA, solidB);
+    setNumericContext(&context);
+    return hasConfirmedInteriorOverlap(solidA, solidB);
 }
 
 /**
-Cheap, constant-size existence probe for a point interior to both solids.
-Tests the 27 quarter/center/three-quarter combinations of the overlap AABB
-`bounds`. Returns true only on a genuine INSIDE/INSIDE witness, so a positive
-result is always exact; a negative result is inconclusive and the caller
-must still run the exhaustive grid.
+Witness test for A \ B: true when a vertex or a face interior witness
+of `solidA` lies strictly outside `solidB`. A boundary point of A
+outside B has interior points of A around it that are outside B, so
+A \ B cannot be empty. (The converse does not hold, so a false answer
+proves nothing.)
 */
-BOOLEAN Classifier::hasInteriorOverlapWitnessInAabb(
-    const ArrayList<double>& bounds,
-    PolyhedralBoundedSolid* solidA,
-    PolyhedralBoundedSolid* solidB,
-    const FacePlanes& planesA,
-    const FacePlanes& planesB)
-{
-    ArrayList<double> sx = axisProbeCoordinates(bounds[0], bounds[3]);
-    ArrayList<double> sy = axisProbeCoordinates(bounds[1], bounds[4]);
-    ArrayList<double> sz = axisProbeCoordinates(bounds[2], bounds[5]);
-    long i;
-    long j;
-    long k;
-
-    for ( i = 0; i < sx.size(); i++ ) {
-        for ( j = 0; j < sy.size(); j++ ) {
-            for ( k = 0; k < sz.size(); k++ ) {
-                Vector3Dd sample(sx[i], sy[j], sz[k]);
-                if ( classifyPointAgainstSolid(solidA, planesA, sample) ==
-                     Geometry::INSIDE &&
-                     classifyPointAgainstSolid(solidB, planesB, sample) ==
-                     Geometry::INSIDE ) {
-                    return TRUE;
-                }
-            }
-        }
-    }
-    return FALSE;
-}
-
-ArrayList<double> Classifier::axisProbeCoordinates(double min, double max)
-{
-    double span = max - min;
-    ArrayList<double> coordinates(Collections<double>::nCopies(3, 0.0));
-
-    coordinates[0] = min + span / 4.0;
-    coordinates[1] = min + span / 2.0;
-    coordinates[2] = max - span / 4.0;
-    return coordinates;
-}
-
-double Classifier::vertexCoordinate(_PolyhedralBoundedSolidVertex* vertex,
-    int axis)
-{
-    if ( axis == 0 ) {
-        return vertex->position.x();
-    }
-    if ( axis == 1 ) {
-        return vertex->position.y();
-    }
-    return vertex->position.z();
-}
-
-void Classifier::appendInteriorVertexCoordinates(
-    ArrayList<double>& coords,
-    PolyhedralBoundedSolid* solid,
-    int axis,
-    double min,
-    double max,
-    double eps)
-{
-    long int i;
-
-    if ( solid == 0 ) {
-        return;
-    }
-
-    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
-        double c = vertexCoordinate(solid->getVerticesList().get(i), axis);
-        if ( c > min + eps && c < max - eps ) {
-            coords.add(c);
-        }
-    }
-}
-
-void Classifier::appendUniqueInteriorSample(
-    ArrayList<double>& samples,
-    double value,
-    double min,
-    double max,
-    double eps)
+BOOLEAN Classifier::hasBoundaryPointOutside(PolyhedralBoundedSolid* solidA,
+    PolyhedralBoundedSolid* solidB)
 {
     long i;
 
-    if ( value <= min + eps || value >= max - eps ) {
-        return;
-    }
-
-    for ( i = 0; i < samples.size(); i++ ) {
-        if ( fabs(samples[i] - value) <= eps ) {
-            return;
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forSolids(solidA, solidB);
+    setNumericContext(&context);
+    FacePlanes planesB(solidB);
+    for ( i = 0; i < solidA->getVerticesList().size(); i++ ) {
+        if ( classifyPointAgainstSolid(solidB, planesB,
+                 solidA->getVerticesList().get(i)->position) ==
+             Geometry::OUTSIDE ) {
+            return TRUE;
         }
     }
-    samples.add(value);
-}
-
-
-/**
-Emulates `Collections.sort` over a list of `Double`: stable natural order
-of `Double.compareTo`.
-*/
-class NonIntersectingJavaDoubleOrder : public Comparator<double> {
-public:
-    int compare(const double& x, const double& y) const
-    {
-        return Double::compare(x, y);
-    }
-};
-
-static void sortAsJavaDoubles(ArrayList<double>& values)
-{
-    values.sort(NonIntersectingJavaDoubleOrder());
+    return someFaceWitnessIsOutside(solidA, solidB, planesB);
 }
 
 /**
-Orders points by their angle around a center, in the plane spanned by the
-`u` and `v` axes.
+True when some point is strictly inside both solids. Decided from the
+boundaries by `_PolyhedralBoundedSolidInteriorOverlap`, without
+sampling.
 */
-class AngleAroundCenterOrder : public Comparator<Vector3Dd> {
-public:
-    const Vector3Dd& center;
-    const Vector3Dd& u;
-    const Vector3Dd& v;
-
-    AngleAroundCenterOrder(const Vector3Dd& inCenter, const Vector3Dd& inU,
-        const Vector3Dd& inV) : center(inCenter), u(inU), v(inV) {}
-
-    int compare(const Vector3Dd& p1, const Vector3Dd& p2) const
-    {
-        Vector3Dd d1 = p1.subtract(center);
-        Vector3Dd d2 = p2.subtract(center);
-        double a1 = atan2(d1.dotProduct(v), d1.dotProduct(u));
-        double a2 = atan2(d2.dotProduct(v), d2.dotProduct(u));
-        return Double::compare(a1, a2);
-    }
-};
-
-
-ArrayList<double> Classifier::sampleCoordinates(double min, double max,
-    PolyhedralBoundedSolid* solidA,
-    PolyhedralBoundedSolid* solidB,
-    int axis)
-{
-    ArrayList<double> coords;
-    ArrayList<double> samples;
-    ArrayList<double> uniqueCoords;
-    double eps = numericContext.bigEpsilon();
-    double center = (min + max) / 2.0;
-    double quarter = min + (max - min) / 4.0;
-    double threeQuarters = max - (max - min) / 4.0;
-    long i;
-
-    coords.add(min);
-    coords.add(max);
-    appendInteriorVertexCoordinates(coords, solidA, axis, min, max, eps);
-    appendInteriorVertexCoordinates(coords, solidB, axis, min, max, eps);
-    sortAsJavaDoubles(coords);
-
-    for ( i = 0; i < coords.size(); i++ ) {
-        double c = coords[i];
-        if ( uniqueCoords.isEmpty() ||
-             fabs(uniqueCoords[uniqueCoords.size()-1] - c) > eps ) {
-            uniqueCoords.add(c);
-        }
-    }
-
-    appendUniqueInteriorSample(samples, quarter, min, max, eps);
-    appendUniqueInteriorSample(samples, center, min, max, eps);
-    appendUniqueInteriorSample(samples, threeQuarters, min, max, eps);
-
-    for ( i = 0; i + 1 < uniqueCoords.size(); i++ ) {
-        double left = uniqueCoords[i];
-        double right = uniqueCoords[i+1];
-        if ( right - left > eps ) {
-            appendUniqueInteriorSample(samples, (left + right) / 2.0,
-                min, max, eps);
-        }
-    }
-
-    sortAsJavaDoubles(samples);
-    if ( samples.isEmpty() ) {
-        samples.add(center);
-    }
-    return samples;
-}
-
 BOOLEAN Classifier::hasConfirmedInteriorOverlap(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
-    long i;
-    long j;
-    long k;
-
-    if ( solidA == 0 || solidB == 0 ) {
-        return FALSE;
-    }
-
-    ArrayList<double> bounds = overlappingBounds(solidA, solidB);
-    if ( !hasPositiveOverlapVolume(bounds) ) {
-        return FALSE;
-    }
-
-    // Precompute each solid's face planes once; every probe/grid point is
-    // classified against the same unmutated solids, so this removes the
-    // per-point Newell/tolerance-context recompute (P2 scoped cache).
-    FacePlanes planesA(solidA);
-    FacePlanes planesB(solidB);
-
-    // P1.2 - cheap early-positive pass: any INSIDE/INSIDE witness gives the
-    // same answer as the exhaustive vertex-derived grid below, which remains
-    // the exact fallback for the negative case.
-    if ( hasInteriorOverlapWitnessInAabb(bounds, solidA, solidB,
-             planesA, planesB) ) {
-        return TRUE;
-    }
-
-    ArrayList<double> xs = sampleCoordinates(bounds[0], bounds[3], solidA, solidB, 0);
-    ArrayList<double> ys = sampleCoordinates(bounds[1], bounds[4], solidA, solidB, 1);
-    ArrayList<double> zs = sampleCoordinates(bounds[2], bounds[5], solidA, solidB, 2);
-
-    for ( i = 0; i < xs.size(); i++ ) {
-        for ( j = 0; j < ys.size(); j++ ) {
-            for ( k = 0; k < zs.size(); k++ ) {
-                Vector3Dd sample(xs[i], ys[j], zs[k]);
-                if ( classifyPointAgainstSolid(solidA, planesA, sample) ==
-                     Geometry::INSIDE &&
-                     classifyPointAgainstSolid(solidB, planesB, sample) ==
-                     Geometry::INSIDE ) {
-                    return TRUE;
-                }
-            }
-        }
-    }
-
-    return FALSE;
+    return _PolyhedralBoundedSolidInteriorOverlap::interiorsOverlap(
+        solidA, solidB);
 }
 
+/**
+Classifies solid A against solid B for the "no proper intersection"
+preflights (Fable5.2Analysis.md Stage D step 1, defect B-03).
+  - INSIDE: A is contained in B. No vertex of A is outside B, at least
+    one is strictly inside, and a witness point interior to every face of
+    A is not outside B. The witness test separates tangent containment
+    from a solid whose edges lie in a face of B while part of it sticks
+    out (B-03): there every vertex is in or on B, yet a face is not.
+  - LIMIT: A touches B, or straddles its boundary (vertices on both
+    sides, or a face witness outside). Callers must not take LIMIT as
+    containment; the touching preflight additionally requires that the
+    interiors do not overlap.
+  - OUTSIDE: every vertex of A is outside B.
+Before this rule the first vertex found inside made A "contained", even
+with other vertices outside.
+*/
 int Classifier::classifySolidAgainstSolid(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
     long int i;
-    BOOLEAN sawLimit = FALSE;
-    BOOLEAN sawOutside = FALSE;
+    int inside = 0;
+    int limit = 0;
+    int outside = 0;
 
     if ( solidA == 0 || solidA->getVerticesList().size() < 1 ) {
         return Geometry::OUTSIDE;
@@ -731,23 +546,163 @@ int Classifier::classifySolidAgainstSolid(
         _PolyhedralBoundedSolidVertex* v = solidA->getVerticesList().get(i);
         int status = classifyPointAgainstSolid(solidB, planesB, v->position);
         if ( status == Geometry::INSIDE ) {
-            return Geometry::INSIDE;
+            inside++;
         }
-        if ( status == Geometry::LIMIT ) {
-            sawLimit = TRUE;
+        else if ( status == Geometry::LIMIT ) {
+            limit++;
         }
         else {
-            sawOutside = TRUE;
+            outside++;
         }
     }
 
-    if ( sawLimit ) {
-        return Geometry::LIMIT;
-    }
-    if ( sawOutside ) {
+    if ( outside > 0 ) {
+        if ( inside > 0 || limit > 0 ) {
+            return Geometry::LIMIT;
+        }
         return Geometry::OUTSIDE;
     }
-    return Geometry::OUTSIDE;
+    if ( inside == 0 ) {
+        return Geometry::LIMIT;
+    }
+    if ( someFaceWitnessIsOutside(solidA, solidB, planesB) ) {
+        return Geometry::LIMIT;
+    }
+    return Geometry::INSIDE;
+}
+
+/**
+True when no vertex and no face witness of `inner` is outside
+`outer`, and at least one face witness is strictly inside it:
+containment with boundary contact.
+*/
+BOOLEAN Classifier::isTangentlyContained(PolyhedralBoundedSolid* inner,
+    PolyhedralBoundedSolid* outer)
+{
+    long i;
+    BOOLEAN someInside = FALSE;
+    FacePlanes planes(outer);
+
+    for ( i = 0; i < inner->getVerticesList().size(); i++ ) {
+        if ( classifyPointAgainstSolid(outer, planes,
+                 inner->getVerticesList().get(i)->position) ==
+             Geometry::OUTSIDE ) {
+            return FALSE;
+        }
+    }
+    for ( i = 0; i < inner->getPolygonsList().size(); i++ ) {
+        Vector3Dd witness;
+        if ( !faceInteriorWitness(inner->getPolygonsList().get(i),
+                 witness) ) {
+            continue;
+        }
+        int status = classifyPointAgainstSolid(outer, planes, witness);
+        if ( status == Geometry::OUTSIDE ) {
+            return FALSE;
+        }
+        if ( status == Geometry::INSIDE ) {
+            someInside = TRUE;
+        }
+    }
+    return someInside;
+}
+
+/**
+True when some vertex of `inner`, or a point inside one of its faces,
+lies on the boundary of `outer`. Meant for a solid already known to be
+contained in `outer`.
+*/
+BOOLEAN Classifier::touchesBoundaryFromInside(PolyhedralBoundedSolid* inner,
+    PolyhedralBoundedSolid* outer)
+{
+    long i;
+
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forSolids(inner, outer);
+    setNumericContext(&context);
+    FacePlanes planes(outer);
+    for ( i = 0; i < inner->getVerticesList().size(); i++ ) {
+        if ( classifyPointAgainstSolid(outer, planes,
+                 inner->getVerticesList().get(i)->position) ==
+             Geometry::LIMIT ) {
+            return TRUE;
+        }
+    }
+    for ( i = 0; i < inner->getPolygonsList().size(); i++ ) {
+        Vector3Dd witness;
+        if ( faceInteriorWitness(inner->getPolygonsList().get(i), witness) &&
+             classifyPointAgainstSolid(outer, planes, witness) ==
+                 Geometry::LIMIT ) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+BOOLEAN Classifier::someFaceWitnessIsOutside(
+    PolyhedralBoundedSolid* solidA,
+    PolyhedralBoundedSolid* solidB,
+    const FacePlanes& planesB)
+{
+    long i;
+
+    for ( i = 0; i < solidA->getPolygonsList().size(); i++ ) {
+        Vector3Dd witness;
+        if ( faceInteriorWitness(solidA->getPolygonsList().get(i), witness) &&
+             classifyPointAgainstSolid(solidB, planesB, witness) ==
+                 Geometry::OUTSIDE ) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+/**
+A point strictly inside the face: the centroid of the first triangle of
+consecutive outer-loop vertices whose centroid the face classifies as
+INSIDE (holes and concave corners are rejected by that test).
+C++ port note: Java returns the witness or null; here the witness goes to
+`out` and the return value tells whether it exists.
+@return true when the witness exists
+*/
+BOOLEAN Classifier::faceInteriorWitness(_PolyhedralBoundedSolidFace* face,
+    Vector3Dd& out)
+{
+    _PolyhedralBoundedSolidLoop* loop;
+    _PolyhedralBoundedSolidHalfEdge* he;
+    InfinitePlane* plane;
+    double eps = numericContext.bigEpsilon();
+    BOOLEAN found = FALSE;
+
+    if ( face == 0 || face->boundariesList.size() < 1 ) {
+        return FALSE;
+    }
+    plane = face->getContainingPlane();
+    loop = face->boundariesList.get(0);
+    if ( plane == 0 || loop == 0 ||
+         loop->boundaryStartHalfEdge == 0 ) {
+        delete plane;
+        return FALSE;
+    }
+    he = loop->boundaryStartHalfEdge;
+    do {
+        _PolyhedralBoundedSolidHalfEdge* n1 = he->next();
+        if ( n1 == 0 || n1->next() == 0 ) {
+            break;
+        }
+        Vector3Dd c = he->startingVertex->position
+            .add(n1->startingVertex->position)
+            .add(n1->next()->startingVertex->position)
+            .multiply(1.0 / 3.0);
+        if ( face->testPointInside(c, eps, plane) == Geometry::INSIDE ) {
+            out = c;
+            found = TRUE;
+            break;
+        }
+        he = n1;
+    } while ( he != loop->boundaryStartHalfEdge );
+    delete plane;
+    return found;
 }
 
 int Classifier::classifyNoIntersectionRelation(int aInB, int bInA)
@@ -786,6 +741,7 @@ BOOLEAN Classifier::hasProperEdgeFaceIntersection(
         return FALSE;
     }
 
+    FacePlanes otherFaces(other);
     for ( i = 0; i < current->getEdgesList().size(); i++ ) {
         edge = current->getEdgesList().get(i);
         if ( edge == 0 || edge->rightHalf == 0 || edge->leftHalf == 0 ) {
@@ -802,7 +758,7 @@ BOOLEAN Classifier::hasProperEdgeFaceIntersection(
             if ( face == 0 ) {
                 continue;
             }
-            InfinitePlane* facePlane = face->getContainingPlane();
+            InfinitePlane* facePlane = otherFaces.all()[j]->getPlane();
             if ( facePlane == 0 ) {
                 continue;
             }
@@ -813,7 +769,6 @@ BOOLEAN Classifier::hasProperEdgeFaceIntersection(
             s2 = compareToZero(d2);
 
             if ( !((s1 == -1 && s2 == 1) || (s1 == 1 && s2 == -1)) ) {
-                delete facePlane;
                 continue;
             }
 
@@ -821,7 +776,6 @@ BOOLEAN Classifier::hasProperEdgeFaceIntersection(
             p = v1->position.add(
                 v2->position.subtract(v1->position).multiply(t));
             d3 = facePlane->pointDistance(p);
-            delete facePlane;
             if ( compareToZero(d3) != 0 ) {
                 continue;
             }
@@ -836,29 +790,58 @@ BOOLEAN Classifier::hasProperEdgeFaceIntersection(
 
 //= Coplanar faces overlap ==========================================
 
-BOOLEAN Classifier::hasPartialCoplanarFaceAreaOverlap(
+/**
+True when a face of A and a face of B lie on the same plane with
+opposite orientation and share a region of positive area: the solids
+touch along a face (Fable5.2Analysis.md B-04). Two cubes sharing a whole
+face are detected through the interior witness of one face, since none
+of their vertices or edge midpoints is inside the other face.
+*/
+BOOLEAN Classifier::hasOppositeCoplanarFaceAreaContact(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB)
 {
     long int i;
     long int j;
 
-    if ( solidA == 0 || solidB == 0 ) {
-        return FALSE;
-    }
-
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forSolids(solidA, solidB);
+    setNumericContext(&context);
     for ( i = 0; i < solidA->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* faceA = solidA->getPolygonsList().get(i);
         for ( j = 0; j < solidB->getPolygonsList().size(); j++ ) {
-            _PolyhedralBoundedSolidFace* faceB = solidB->getPolygonsList().get(j);
-            if ( coplanarFaces(faceA, faceB) &&
-                 partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
+            _PolyhedralBoundedSolidFace* faceB =
+                solidB->getPolygonsList().get(j);
+            if ( !coplanarFaces(faceA, faceB) ) {
+                continue;
+            }
+            InfinitePlane* planeA = faceA->getContainingPlane();
+            InfinitePlane* planeB = faceB->getContainingPlane();
+            double dot = planeA->getNormal().dotProduct(planeB->getNormal());
+            delete planeA;
+            delete planeB;
+            if ( dot >= 0.0 ) {
+                continue;
+            }
+            if ( partialCoplanarFaceAreaOverlap(faceA, faceB) ||
+                 witnessInsideFace(faceA, faceB) ||
+                 witnessInsideFace(faceB, faceA) ) {
                 return TRUE;
             }
         }
     }
-
     return FALSE;
+}
+
+BOOLEAN Classifier::witnessInsideFace(
+    _PolyhedralBoundedSolidFace* source,
+    _PolyhedralBoundedSolidFace* target)
+{
+    Vector3Dd witness;
+
+    return faceInteriorWitness(source, witness) &&
+        target->testPointInside(witness, numericContext.bigEpsilon()) ==
+            Geometry::INSIDE;
 }
 
 ArrayList<Classifier::Polygon> Classifier::partialCoplanarFaceAreaOverlapPolygons(
@@ -1076,6 +1059,29 @@ void Classifier::appendUniquePoint(Polygon& points, const Vector3Dd& point)
     points.add(point);
 }
 
+/**
+Orders points by their angle around a center, in the plane spanned by the
+`u` and `v` axes.
+*/
+class AngleAroundCenterOrder : public Comparator<Vector3Dd> {
+public:
+    const Vector3Dd& center;
+    const Vector3Dd& u;
+    const Vector3Dd& v;
+
+    AngleAroundCenterOrder(const Vector3Dd& inCenter, const Vector3Dd& inU,
+        const Vector3Dd& inV) : center(inCenter), u(inU), v(inV) {}
+
+    int compare(const Vector3Dd& p1, const Vector3Dd& p2) const
+    {
+        Vector3Dd d1 = p1.subtract(center);
+        Vector3Dd d2 = p2.subtract(center);
+        double a1 = atan2(d1.dotProduct(v), d1.dotProduct(u));
+        double a2 = atan2(d2.dotProduct(v), d2.dotProduct(u));
+        return Double::compare(a1, a2);
+    }
+};
+
 void Classifier::sortCoplanarPolygon(Polygon& points, const Vector3Dd& normal)
 {
     Vector3Dd center;
@@ -1122,6 +1128,23 @@ double Classifier::coplanarPolygonAreaMagnitude(const Polygon& points,
     }
 
     return fabs(accumulator.dotProduct(normal.normalized())) * 0.5;
+}
+
+double Classifier::polygonArea(const Polygon& points)
+{
+    double nx = 0.0;
+    double ny = 0.0;
+    double nz = 0.0;
+    long i;
+
+    for ( i = 0; i < points.size(); i++ ) {
+        Vector3Dd p = points[i];
+        Vector3Dd q = points[(i + 1) % points.size()];
+        nx += (p.y() - q.y()) * (p.z() + q.z());
+        ny += (p.z() - q.z()) * (p.x() + q.x());
+        nz += (p.x() - q.x()) * (p.y() + q.y());
+    }
+    return 0.5 * sqrt(nx * nx + ny * ny + nz * nz);
 }
 
 PolyhedralBoundedSolid* Classifier::createLaminaFromPolygon(

@@ -122,17 +122,20 @@ void ArrayDeque<E>::doubleCapacity() {
     tail = n;
 }
 
+/*
+As `java.util.ArrayDeque.addFirst`: the element is stored, and the array
+doubled when it became full (head == tail), the precondition of
+doubleCapacity. Doubling before storing, when one slot was still free,
+copied that free slot as an element (a NULL appeared after 16 pushes).
+*/
 template <class E>
 void ArrayDeque<E>::addFirst(const E& e) {
     long m = mask();
-    long i = (head - 1) & m;
-    if (i == (tail & m)) {
+    head = (head - 1) & m;
+    elements[head] = e;
+    if (head == tail) {
         doubleCapacity();
-        m = mask();
-        i = (head - 1) & m;
     }
-    head = i;
-    elements[i] = e;
 }
 
 template <class E>

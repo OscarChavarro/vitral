@@ -3,12 +3,15 @@
 //=     Computer Science Press, 1988.                                       =
 
 #include <float.h>
+#include <math.h>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/TreeMap.h"
 #include "java/util/TreeSet.h"
 #include "java/lang/String.h"
 
 #include "java/lang/Double.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersectionCurveBuilder.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
@@ -22,8 +25,6 @@
 #include "java/util/Collections.h"
 
 typedef _PolyhedralBoundedSolidSetIntersectionCurveBuilder Builder;
-
-ArrayList<Builder::IndexList> Builder::lastTraversalNeighborPositions;
 
 /**
 Orders node indexes by the position of their null edges along a direction
@@ -96,6 +97,31 @@ struct FacePairGroup {
     _PolyhedralBoundedSolidFace* faceB;
     ArrayList<int> nodes;
 };
+
+/**
+C++ port note: Java passes positions that may be null; here a flag tells
+whether each one is known.
+*/
+static BOOLEAN segmentOnBothFaces(const FacePairGroup& group,
+    BOOLEAN hasFrom, const Vector3Dd& from,
+    BOOLEAN hasTo, const Vector3Dd& to)
+{
+    double tolerance;
+    Vector3Dd middle;
+
+    if ( !hasFrom || !hasTo ) {
+        return FALSE;
+    }
+    // Scale of the operands, not of the unit model: at 10^-3 a unit
+    // tolerance would be a tenth of the features.
+    tolerance = PolyhedralBoundedSolidNumericPolicy::forSolids(
+        group.faceA->parentSolid, group.faceB->parentSolid).bigEpsilon();
+    middle = from.add(to).multiply(0.5);
+    return group.faceA->testPointInside(middle, tolerance) !=
+               Geometry::OUTSIDE &&
+           group.faceB->testPointInside(middle, tolerance) !=
+               Geometry::OUTSIDE;
+}
 
 static BOOLEAN containsValue(const ArrayList<int>& values, int value)
 {
@@ -365,7 +391,37 @@ Builder::Report Builder::build(const NullEdgeList& sonea,
 #endif
 
         if ( (m % 2) != 0 ) {
-            report.oddFacePairGroupCount++;
+            // An odd group is a chord that runs through a vertex of one
+            // face (the intersection line enters the next chord where
+            // the previous one ends, e.g. along the reflex corner of an
+            // L-shaped face). Parity cannot pair such points; link two
+            // consecutive points when the segment between them lies on
+            // both faces, which is exactly the chord definition.
+            // The group counts as odd (unresolved) only when some
+            // point is left without a chord.
+            ArrayList<BOOLEAN> linked(
+                Collections<BOOLEAN>::nCopies(m, FALSE));
+            for ( i = 0; i + 1 < m; i++ ) {
+                Vector3Dd fromPosition;
+                Vector3Dd toPosition;
+                BOOLEAN hasFrom = nodePosition(sonea[sorted[i]],
+                    fromPosition);
+                BOOLEAN hasTo = nodePosition(sonea[sorted[i + 1]],
+                    toPosition);
+                if ( segmentOnBothFaces(group, hasFrom, fromPosition,
+                         hasTo, toPosition) ) {
+                    link(neighbors, sorted[i], sorted[i + 1]);
+                    linked[i] = TRUE;
+                    linked[i + 1] = TRUE;
+                }
+            }
+            for ( i = 0; i < m; i++ ) {
+                if ( !linked[i] ) {
+                    report.oddFacePairGroupCount++;
+                    break;
+                }
+            }
+            continue;
         }
         // Entry/exit parity along the intersection line: chord
         // endpoints pair as (0,1), (2,3), ... - linking consecutive
@@ -559,13 +615,14 @@ BOOLEAN Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
     int nodeCount,
     NullEdgeList& sonea,
     NullEdgeList& soneb,
-    IndexList& outPermutation)
+    IndexList& outPermutation,
+    ArrayList<IndexList>& neighborsOut)
 {
     long c;
     long j;
     IndexList validation;
 
-    lastTraversalNeighborPositions.clear();
+    neighborsOut.clear();
     if ( !computeTraversalOrder(cycles, nodeCount, validation) ) {
         return FALSE;
     }
@@ -640,6 +697,22 @@ BOOLEAN Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
             int successor = directedCycle[(j + 1) % len];
             orientTowardSuccessor(sonea[current], sonea[successor], FALSE);
             orientTowardSuccessor(soneb[current], soneb[successor], TRUE);
+        }
+
+        // Same-face struts (both halves in one face, e.g. at the reflex
+        // vertex of an L-shaped face) carry no face-sharing role, but
+        // the join toward one neighbor divides that face and only one
+        // half stays on the side where the other neighbor lies.
+        for ( j = 0; j < len; j++ ) {
+            int current = directedCycle[j];
+            int predecessor = directedCycle[(j - 1 + len) % len];
+            int successor = directedCycle[(j + 1) % len];
+            Vector3Dd p;
+            Vector3Dd q;
+            BOOLEAN hasP = nodePosition(sonea[predecessor], p);
+            BOOLEAN hasQ = nodePosition(sonea[successor], q);
+            orientSameFaceStrut(sonea[current], hasP, p, hasQ, q, TRUE);
+            orientSameFaceStrut(soneb[current], hasP, p, hasQ, q, FALSE);
         }
 
         // Rotation: the first cycle starts at its minimum member index;
@@ -718,8 +791,128 @@ BOOLEAN Builder::orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
             neighborPositions[positionOf[original]] = partners;
         }
     }
-    lastTraversalNeighborPositions = neighborPositions;
+    neighborsOut = neighborPositions;
     return TRUE;
+}
+
+/**
+Orients a strut whose two halves lie in the same loop of one face.
+
+In that loop the strut appears as `first` (vertex v to v') followed
+by its mirror `second` (v' to v), between the face edges entering and
+leaving v. The face sector at v runs counterclockwise (around the face
+normal) from the leaving edge to the entering edge. The join toward one
+curve neighbor divides that sector; the neighbor that lies further along
+it must be reached through `first`, the other through `second`, so that
+the remaining half stays in the part of the face where its neighbor
+is. On A the predecessor is joined through the right half; on B through
+the left half (Program [MANT1988].15.14).
+
+C++ port note: Java passes neighbor positions that may be null; here a
+flag tells whether each one is known.
+*/
+void Builder::orientSameFaceStrut(
+    _PolyhedralBoundedSolidSetOperatorNullEdge& current,
+    BOOLEAN hasPredecessor, const Vector3Dd& predecessor,
+    BOOLEAN hasSuccessor, const Vector3Dd& successor,
+    BOOLEAN predecessorHalfIsRight)
+{
+    _PolyhedralBoundedSolidHalfEdge* r;
+    _PolyhedralBoundedSolidHalfEdge* l;
+    _PolyhedralBoundedSolidHalfEdge* first;
+    _PolyhedralBoundedSolidHalfEdge* second;
+    _PolyhedralBoundedSolidHalfEdge* predecessorHalf;
+    _PolyhedralBoundedSolidHalfEdge* successorHalf;
+
+    if ( current.e == 0 || !hasPredecessor || !hasSuccessor ) {
+        return;
+    }
+    r = current.e->rightHalf;
+    l = current.e->leftHalf;
+    if ( r == 0 || l == 0 || r->parentLoop == 0 ||
+         r->parentLoop != l->parentLoop ) {
+        return;
+    }
+    if ( r->next() == l ) {
+        first = r;
+    }
+    else if ( l->next() == r ) {
+        first = l;
+    }
+    else {
+        return;
+    }
+    second = first->mirrorHalfEdge();
+
+    Vector3Dd v = first->startingVertex->position;
+    Vector3Dd dIn = first->previous()->startingVertex->position.subtract(v);
+    Vector3Dd dOut = second->next()->next()->startingVertex->position
+        .subtract(v);
+    Vector3Dd n;
+    BOOLEAN hasNormal = faceNormal(halfEdgeFace(first), n);
+    Vector3Dd dP = predecessor.subtract(v);
+    Vector3Dd dS = successor.subtract(v);
+    double tiny = 1.0e-12;
+
+    if ( !hasNormal || dIn.length() < tiny || dOut.length() < tiny ||
+         dP.length() < tiny || dS.length() < tiny ) {
+        return;
+    }
+    double sectorEnd = ccwAngle(dOut, dIn, n);
+    double thetaP = clampToSector(ccwAngle(dOut, dP, n), sectorEnd);
+    double thetaS = clampToSector(ccwAngle(dOut, dS, n), sectorEnd);
+    if ( fabs(thetaP - thetaS) < 1.0e-9 ) {
+        return;
+    }
+    if ( thetaP > thetaS ) {
+        predecessorHalf = first;
+    }
+    else {
+        predecessorHalf = second;
+    }
+    if ( predecessorHalf == first ) {
+        successorHalf = second;
+    }
+    else {
+        successorHalf = first;
+    }
+    if ( predecessorHalfIsRight ) {
+        current.e->rightHalf = predecessorHalf;
+        current.e->leftHalf = successorHalf;
+    }
+    else {
+        current.e->leftHalf = predecessorHalf;
+        current.e->rightHalf = successorHalf;
+    }
+}
+
+/** Counterclockwise angle around n from `from` to `to`, in [0, 2pi). */
+double Builder::ccwAngle(const Vector3Dd& from, const Vector3Dd& to,
+    const Vector3Dd& n)
+{
+    Vector3Dd u = Vector3Dd(from).normalized();
+    Vector3Dd w = n.crossProduct(u).normalized();
+    double angle = atan2(to.dotProduct(w), to.dotProduct(u));
+    if ( angle < 0.0 ) {
+        return angle + 2.0 * M_PI;
+    }
+    return angle;
+}
+
+/**
+A neighbor lies on the face, so its angle belongs to [0, sectorEnd].
+Rounding can put a neighbor on the leaving edge at 2pi; such angles go
+to the nearest end of the sector.
+*/
+double Builder::clampToSector(double angle, double sectorEnd)
+{
+    if ( angle <= sectorEnd ) {
+        return angle;
+    }
+    if ( (2.0 * M_PI - angle) < (angle - sectorEnd) ) {
+        return 0.0;
+    }
+    return sectorEnd;
 }
 
 int Builder::successorSharedHalfIsRight(

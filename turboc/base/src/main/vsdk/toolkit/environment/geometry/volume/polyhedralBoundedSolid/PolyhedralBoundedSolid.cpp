@@ -4,6 +4,7 @@
 #include "java/lang/StringBuilder.h"
 
 #include "java/util/ArrayList.txx"
+#include "java/util/TreeSet.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
@@ -154,16 +155,111 @@ PolyhedralBoundedSolid::~PolyhedralBoundedSolid()
 {
     clearVisibilityQueryCache();
     long int i;
-    for (i = 0; i < polygonsList.size(); ++i) delete polygonsList[i];
-    for (i = 0; i < edgesList.size(); ++i) delete edgesList[i];
-    for (i = 0; i < verticesList.size(); ++i) delete verticesList[i];
+    for (i = 0; i < polygonsList.size(); ++i) delete polygonsList.get(i);
+    for (i = 0; i < edgesList.size(); ++i) delete edgesList.get(i);
+    for (i = 0; i < verticesList.size(); ++i) delete verticesList.get(i);
+    for (i = 0; i < retiredFaces.size(); ++i) delete retiredFaces.get(i);
+    for (i = 0; i < retiredLoops.size(); ++i) delete retiredLoops.get(i);
+    for (i = 0; i < retiredHalfEdges.size(); ++i) delete retiredHalfEdges.get(i);
+    for (i = 0; i < retiredEdges.size(); ++i) delete retiredEdges.get(i);
+    for (i = 0; i < retiredVertices.size(); ++i) delete retiredVertices.get(i);
+}
+
+void PolyhedralBoundedSolid::retireFace(_PolyhedralBoundedSolidFace* face)
+{
+    if ( face == NULL ) return;
+    face->boundariesList.clear();
+    retiredFaces.add(face);
+}
+
+void PolyhedralBoundedSolid::retireLoop(_PolyhedralBoundedSolidLoop* loop)
+{
+    if ( loop == NULL ) return;
+    loop->halfEdgesList.clear();
+    retiredLoops.add(loop);
+}
+
+void PolyhedralBoundedSolid::retireHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
+{
+    if ( he == NULL ) return;
+    retiredHalfEdges.add(he);
+}
+
+void PolyhedralBoundedSolid::retireEdge(_PolyhedralBoundedSolidEdge* edge)
+{
+    if ( edge == NULL ) return;
+    retiredEdges.add(edge);
+}
+
+void PolyhedralBoundedSolid::retireVertex(_PolyhedralBoundedSolidVertex* vertex)
+{
+    if ( vertex == NULL ) return;
+    retiredVertices.add(vertex);
+}
+
+template <class T>
+static void collectOwnedNodes(TreeSet<T*>& set, CircularArrayList<T*>& live,
+    ArrayList<T*>& retired)
+{
+    long int i;
+    for ( i = 0; i < live.size(); i++ ) set.add(live.get(i));
+    for ( i = 0; i < retired.size(); i++ ) set.add(retired.get(i));
+}
+
+template <class T>
+static void removeOwnedFromLive(CircularArrayList<T*>& list, TreeSet<T*>& set)
+{
+    long int i = 0;
+    while ( i < list.size() ) {
+        if ( set.contains(list.get(i)) ) list.remove(i);
+        else i++;
+    }
+}
+
+template <class T>
+static void removeOwnedFromRetired(ArrayList<T*>& list, TreeSet<T*>& set)
+{
+    long int i = 0;
+    while ( i < list.size() ) {
+        if ( set.contains(list.get(i)) ) list.remove(i);
+        else i++;
+    }
+}
+
+void PolyhedralBoundedSolid::unlistNodesOwnedBy(PolyhedralBoundedSolid* reference)
+{
+    if ( reference == NULL || reference == this ) return;
+    TreeSet<_PolyhedralBoundedSolidFace*> faces;
+    TreeSet<_PolyhedralBoundedSolidEdge*> edges;
+    TreeSet<_PolyhedralBoundedSolidVertex*> vertices;
+    TreeSet<_PolyhedralBoundedSolidLoop*> loops;
+    TreeSet<_PolyhedralBoundedSolidHalfEdge*> halfEdges;
+    long int i;
+
+    collectOwnedNodes(faces, reference->polygonsList, reference->retiredFaces);
+    collectOwnedNodes(edges, reference->edgesList, reference->retiredEdges);
+    collectOwnedNodes(vertices, reference->verticesList, reference->retiredVertices);
+    for ( i = 0; i < reference->retiredLoops.size(); i++ ) {
+        loops.add(reference->retiredLoops.get(i));
+    }
+    for ( i = 0; i < reference->retiredHalfEdges.size(); i++ ) {
+        halfEdges.add(reference->retiredHalfEdges.get(i));
+    }
+    removeOwnedFromLive(polygonsList, faces);
+    removeOwnedFromLive(edgesList, edges);
+    removeOwnedFromLive(verticesList, vertices);
+    removeOwnedFromRetired(retiredFaces, faces);
+    removeOwnedFromRetired(retiredEdges, edges);
+    removeOwnedFromRetired(retiredVertices, vertices);
+    removeOwnedFromRetired(retiredLoops, loops);
+    removeOwnedFromRetired(retiredHalfEdges, halfEdges);
 }
 
 _PolyhedralBoundedSolidFace* PolyhedralBoundedSolid::findFace(int id)
 {
     for (long int i = 0; i < polygonsList.size(); ++i) {
-        if (polygonsList[i] != 0 && polygonsList[i]->id == id) {
-            return polygonsList[i];
+        if (polygonsList.get(i) != 0 && polygonsList.get(i)->id == id) {
+            return polygonsList.get(i);
         }
     }
     return 0;
@@ -172,21 +268,21 @@ _PolyhedralBoundedSolidFace* PolyhedralBoundedSolid::findFace(int id)
 _PolyhedralBoundedSolidVertex* PolyhedralBoundedSolid::findVertex(int id)
 {
     for (long int i = 0; i < verticesList.size(); ++i) {
-        if (verticesList[i] != 0 && verticesList[i]->id == id) {
-            return verticesList[i];
+        if (verticesList.get(i) != 0 && verticesList.get(i)->id == id) {
+            return verticesList.get(i);
         }
     }
     return 0;
 }
 
-ArrayList<_PolyhedralBoundedSolidFace*>&
+CircularArrayList<_PolyhedralBoundedSolidFace*>&
 PolyhedralBoundedSolid::getPolygonsList()
 {
     return polygonsList;
 }
 
 void PolyhedralBoundedSolid::setPolygonsList(
-    ArrayList<_PolyhedralBoundedSolidFace*>& v)
+    CircularArrayList<_PolyhedralBoundedSolidFace*>& v)
 {
     polygonsList.clear();
     for (long int i = 0; i < v.size(); ++i) {
@@ -194,14 +290,14 @@ void PolyhedralBoundedSolid::setPolygonsList(
     }
 }
 
-ArrayList<_PolyhedralBoundedSolidEdge*>&
+CircularArrayList<_PolyhedralBoundedSolidEdge*>&
 PolyhedralBoundedSolid::getEdgesList()
 {
     return edgesList;
 }
 
 void PolyhedralBoundedSolid::setEdgesList(
-    ArrayList<_PolyhedralBoundedSolidEdge*>& v)
+    CircularArrayList<_PolyhedralBoundedSolidEdge*>& v)
 {
     edgesList.clear();
     for (long int i = 0; i < v.size(); ++i) {
@@ -209,14 +305,14 @@ void PolyhedralBoundedSolid::setEdgesList(
     }
 }
 
-ArrayList<_PolyhedralBoundedSolidVertex*>&
+CircularArrayList<_PolyhedralBoundedSolidVertex*>&
 PolyhedralBoundedSolid::getVerticesList()
 {
     return verticesList;
 }
 
 void PolyhedralBoundedSolid::setVerticesList(
-    ArrayList<_PolyhedralBoundedSolidVertex*>& v)
+    CircularArrayList<_PolyhedralBoundedSolidVertex*>& v)
 {
     verticesList.clear();
     for (long int i = 0; i < v.size(); ++i) {
@@ -343,22 +439,21 @@ void PolyhedralBoundedSolid::merge(PolyhedralBoundedSolid* other)
     int offsetVertexId = getMaxVertexId();
 
     while (other->getPolygonsList().size() != 0) {
-        _PolyhedralBoundedSolidFace* f = other->getPolygonsList()[0];
+        _PolyhedralBoundedSolidFace* f = other->getPolygonsList().get(0);
         f->id += offsetFacesId;
-        // C++ port note: the merged face now belongs to this solid. Java
-        // keeps `parentSolid` pointing to the drained `other` (kept alive by
-        // the garbage collector); in C++ `other` may be deleted by its owner
+        // The merged face now belongs to this solid: Euler operators
+        // (i.e. `lkfmrh` when gluing) check `parentSolid`
         f->parentSolid = this;
         if (f->id > maxFaceId) maxFaceId = f->id;
         polygonsList.add(f);
         other->getPolygonsList().remove(0L);
     }
     while (other->getEdgesList().size() != 0) {
-        edgesList.add(other->getEdgesList()[0]);
+        edgesList.add(other->getEdgesList().get(0));
         other->getEdgesList().remove(0L);
     }
     while (other->getVerticesList().size() != 0) {
-        _PolyhedralBoundedSolidVertex* v = other->getVerticesList()[0];
+        _PolyhedralBoundedSolidVertex* v = other->getVerticesList().get(0);
         v->id += offsetVertexId;
         if (v->id > maxVertexId) maxVertexId = v->id;
         verticesList.add(v);
@@ -614,8 +709,8 @@ int PolyhedralBoundedSolid::compareValue(double a, double b, double tolerance)
 void PolyhedralBoundedSolid::revert()
 {
     for (long int i = 0; i < polygonsList.size(); ++i) {
-        if (polygonsList[i] != 0) {
-            polygonsList[i]->revert();
+        if (polygonsList.get(i) != 0) {
+            polygonsList.get(i)->revert();
         }
     }
 }

@@ -24,6 +24,12 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/util/TreeSet.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/SolidOperationFailedException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetNonIntersectingClassifier.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFaceGeometry.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
 typedef _PolyhedralBoundedSolidSetFinisher Finisher;
 typedef PolyhedralBoundedSolidNumericPolicy::ToleranceContext ToleranceContext;
@@ -38,16 +44,11 @@ static String str(int value)
 }
 
 
-int Finisher::lastLegacyFallbackCount = 0;
+// C++ port note: Java keeps this counter per thread (ThreadLocal)
 int Finisher::lastTriangulatedFaceCount = 0;
 
 _PolyhedralBoundedSolidSetFinisher::_PolyhedralBoundedSolidSetFinisher()
 {
-}
-
-int Finisher::getLastLegacyFallbackCount()
-{
-    return lastLegacyFallbackCount;
 }
 
 int Finisher::getLastTriangulatedFaceCount()
@@ -147,7 +148,8 @@ BOOLEAN Finisher::hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* f
     return TRUE;
 }
 
-String Finisher::integrationRingSummary(_PolyhedralBoundedSolidFace* face)
+String Finisher::integrationRingSummary(_PolyhedralBoundedSolidFace* face,
+    const ConnectResult& pairs)
 {
     String text;
 
@@ -165,20 +167,19 @@ String Finisher::integrationRingSummary(_PolyhedralBoundedSolidFace* face)
         " usable=" + (hasUsableIntegrationRing(face) ? "true" : "false") +
         " connected=" + (hasCompleteHalfEdgeConnectivity(face) ? "true" : "false") +
         " pair=" +
-        str(_PolyhedralBoundedSolidSetNullEdgesConnector::getSonfaPairIndex(face)) +
+        str(pairs.pairIndexA(face)) +
         "/" +
-        str(_PolyhedralBoundedSolidSetNullEdgesConnector::getSonfbPairIndex(face));
+        str(pairs.pairIndexB(face));
     return String(text.c_str());
 }
 
-int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
+int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb,
+    const ConnectResult& pairs)
 {
     FaceList matchedA;
     FaceList matchedB;
     long i;
     long j;
-
-    lastLegacyFallbackCount = 0;
 
     ArrayList<BOOLEAN> usedB(Collections<BOOLEAN>::nCopies(sonfb.size(), FALSE));
 
@@ -190,13 +191,12 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
         if ( !validA ) {
             if ( isPipelineSummaryTraceEnabled() ) {
                 tracePipelineSummary(String("finish sanitize skip A ") +
-                    integrationRingSummary(faceA));
+                    integrationRingSummary(faceA, pairs));
             }
             continue;
         }
 
-        pairIndexA = _PolyhedralBoundedSolidSetNullEdgesConnector
-            ::getSonfaPairIndex(faceA);
+        pairIndexA = pairs.pairIndexA(faceA);
         for ( j = 0; j < sonfb.size(); j++ ) {
             _PolyhedralBoundedSolidFace* faceB = sonfb[j];
             int pairIndexB;
@@ -209,17 +209,16 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
             if ( !validB ) {
                 if ( isPipelineSummaryTraceEnabled() ) {
                     tracePipelineSummary(String("finish sanitize skip B ") +
-                        integrationRingSummary(faceB));
+                        integrationRingSummary(faceB, pairs));
                 }
                 continue;
             }
-            pairIndexB = _PolyhedralBoundedSolidSetNullEdgesConnector
-                ::getSonfbPairIndex(faceB);
+            pairIndexB = pairs.pairIndexB(faceB);
             if ( pairIndexA != -1 && pairIndexA == pairIndexB ) {
                 if ( isPipelineSummaryTraceEnabled() ) {
                     tracePipelineSummary(String("finish sanitize match A ") +
-                        integrationRingSummary(faceA) + " B " +
-                        integrationRingSummary(faceB));
+                        integrationRingSummary(faceA, pairs) + " B " +
+                        integrationRingSummary(faceB, pairs));
                 }
                 matchedA.add(faceA);
                 matchedB.add(faceB);
@@ -230,17 +229,13 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
     }
 
     if ( matchedA.isEmpty() && !sonfa.isEmpty() && sonfa.size() == sonfb.size() ) {
-        // Section 9.1 instrumentation: legacy ordering fallback - no
-        // pairIndex matches found. Count it so tests can assert it stays 0.
-        lastLegacyFallbackCount++;
-        Logger::reportMessage(String(), Logger::WARNING,
-            "sanitizePairedFaces",
-            ("Legacy ordering fallback taken (pairIndex matching found no "
-             "pairs for sonfa=" + str((int)sonfa.size()) + " sonfb=" +
-             str((int)sonfb.size()) +
-             "). This indicates Connect did not tag faces with pairIndex.").c_str());
-        tracePipelineSummary("finish sanitize kept legacy ordering");
-        return (int)sonfa.size();
+        // [MANT1988] Program 15.15 pairs sonfa[i] with sonfb[i]. Connect
+        // tags every pair with its index; when none of them matches, the
+        // null faces cannot be paired and finish has nothing to glue.
+        // This used to fall back to list order; it is now an error.
+        String message = "finish: no null face pair matched by pair index (sonfa=" +
+            str((int)sonfa.size()) + " sonfb=" + str((int)sonfb.size()) + ")";
+        throw SolidOperationFailedException(message);
     }
 
     sonfa = matchedA;
@@ -531,13 +526,265 @@ void Finisher::triangulateNonPlanarFaces(PolyhedralBoundedSolid* solid)
     }
 }
 
+void Finisher::exchange(FaceList& faces, int i, int j)
+{
+    _PolyhedralBoundedSolidFace* exchanged = faces[i];
+
+    faces[i] = faces[j];
+    faces[j] = exchanged;
+}
+
+/**
+Adds to `counts` the answer for one face: element 0 when a point of its
+interior is strictly inside `other`, element 1 when strictly outside.
+A face without such a point, or with it on the boundary of `other`,
+adds nothing.
+*/
+void Finisher::countSide(_PolyhedralBoundedSolidFace* face,
+    PolyhedralBoundedSolid* other, const FaceGeometryList& otherFaces,
+    int counts[2])
+{
+    Vector3Dd witness;
+
+    if ( !_PolyhedralBoundedSolidSetNonIntersectingClassifier
+              ::faceInteriorWitness(face, witness) ) {
+        return;
+    }
+    int status = _PolyhedralBoundedSolidSetNonIntersectingClassifier
+        ::classifyPointAgainstSolid(other, otherFaces, witness);
+    if ( status == Geometry::INSIDE ) {
+        counts[0]++;
+    }
+    else if ( status == Geometry::OUTSIDE ) {
+        counts[1]++;
+    }
+}
+
+/**
+`countSide` over the faces across the half-edges of `loop`, each
+face once.
+*/
+void Finisher::sidesAcross(_PolyhedralBoundedSolidLoop* loop,
+    PolyhedralBoundedSolid* other, const FaceGeometryList& otherFaces,
+    int counts[2])
+{
+    TreeSet<_PolyhedralBoundedSolidFace*> counted;
+    _PolyhedralBoundedSolidHalfEdge* start = loop->boundaryStartHalfEdge;
+    _PolyhedralBoundedSolidHalfEdge* he = start;
+    long guard = loop->halfEdgesList.size();
+
+    counts[0] = 0;
+    counts[1] = 0;
+    if ( start == 0 ) {
+        return;
+    }
+    do {
+        _PolyhedralBoundedSolidHalfEdge* mate = he->mirrorHalfEdge();
+        if ( mate != 0 && mate->parentLoop != 0 &&
+             mate->parentLoop->parentFace != loop->parentFace &&
+             !counted.contains(mate->parentLoop->parentFace) ) {
+            counted.add(mate->parentLoop->parentFace);
+            countSide(mate->parentLoop->parentFace, other, otherFaces,
+                counts);
+        }
+        he = he->next();
+        guard--;
+    } while ( he != 0 && he != start && guard >= 0 );
+}
+
+/**
+True when the outer loop of `face` runs through the points of its ring
+and no others: the face is the null face between the two copies of a
+cut, without area of its own.
+*/
+BOOLEAN Finisher::isBand(_PolyhedralBoundedSolidFace* face)
+{
+    _PolyhedralBoundedSolidLoop* outer = face->boundariesList.get(0);
+    _PolyhedralBoundedSolidLoop* ring = face->boundariesList.get(1);
+    ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forFace(face);
+    long i;
+    long j;
+
+    for ( i = 0; i < outer->halfEdgesList.size(); i++ ) {
+        BOOLEAN found = FALSE;
+        for ( j = 0; j < ring->halfEdgesList.size() && !found; j++ ) {
+            found = PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
+                outer->halfEdgesList.get(i)->startingVertex->position,
+                ring->halfEdgesList.get(j)->startingVertex->position,
+                context);
+        }
+        if ( !found ) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+/**
+`face` is a null face of connect: its ring is one copy of a cut. By
+convention the faces across the ring are the part of the solid inside
+`other`, and what lies on the side of the outer loop (the faces across
+it for a band, the face itself otherwise) is the part outside. True
+when both sides say the opposite and neither has a face that says
+otherwise.
+*/
+BOOLEAN Finisher::sidesAreSwapped(_PolyhedralBoundedSolidFace* face,
+    PolyhedralBoundedSolid* other, const FaceGeometryList& otherFaces,
+    int cut, const char* name)
+{
+    int inside[2];
+    int outside[2];
+
+    sidesAcross(face->boundariesList.get(1), other, otherFaces, inside);
+    if ( isBand(face) ) {
+        sidesAcross(face->boundariesList.get(0), other, otherFaces,
+            outside);
+    }
+    else {
+        outside[0] = 0;
+        outside[1] = 0;
+        countSide(face, other, otherFaces, outside);
+    }
+    BOOLEAN swapped = inside[0] == 0 && outside[1] == 0 &&
+        inside[1] > 0 && outside[0] > 0;
+    String text = "finish sides of cut " + str(cut) + " on " + name +
+        ": the part taken for inside has " + str(inside[0]) +
+        " faces inside and " + str(inside[1]) +
+        " outside; the part taken for outside " + str(outside[0]) +
+        " and " + str(outside[1]);
+    if ( swapped ) {
+        text = text + "; exchanged";
+    }
+    tracePipelineSummary(text);
+    return swapped;
+}
+
+/**
+Adds to `reached` every face connected to `seed` through edges.
+C++ port note: Java takes a null `component` to skip the collection.
+*/
+void Finisher::flood(_PolyhedralBoundedSolidFace* seed,
+    TreeSet<_PolyhedralBoundedSolidFace*>& reached,
+    FaceList* component)
+{
+    FaceList pending;
+    long i;
+
+    if ( seed == 0 || reached.contains(seed) ) {
+        return;
+    }
+    reached.add(seed);
+    pending.add(seed);
+    while ( !pending.isEmpty() ) {
+        _PolyhedralBoundedSolidFace* face = pending[pending.size() - 1];
+        pending.remove(pending.size() - 1);
+        if ( component != 0 ) {
+            component->add(face);
+        }
+        for ( i = 0; i < face->boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge* start =
+                loop->boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge* he = start;
+            long guard = loop->halfEdgesList.size();
+            if ( start == 0 ) {
+                continue;
+            }
+            do {
+                _PolyhedralBoundedSolidHalfEdge* mate = he->mirrorHalfEdge();
+                if ( mate != 0 && mate->parentLoop != 0 &&
+                     mate->parentLoop->parentFace != 0 &&
+                     !reached.contains(mate->parentLoop->parentFace) ) {
+                    reached.add(mate->parentLoop->parentFace);
+                    pending.add(mate->parentLoop->parentFace);
+                }
+                he = he->next();
+                guard--;
+            } while ( he != 0 && he != start && guard >= 0 );
+        }
+    }
+}
+
+/**
+One face of every shell of `solid` that no cut reaches and that lies on
+the wanted side of `other`: inside when `keepInside`, outside
+otherwise. The side is the one of the first vertex of the shell that is
+not on the boundary of `other`; a shell with every vertex on that
+boundary is left out.
+@param cutFaces the null faces of `solid` and the faces made from their
+       rings: every cut part of the solid is connected to one of them
+*/
+void Finisher::untouchedShellsToKeep(PolyhedralBoundedSolid* solid,
+    const FaceList& cutFaces, PolyhedralBoundedSolid* other,
+    BOOLEAN keepInside, FaceList& seeds)
+{
+    TreeSet<_PolyhedralBoundedSolidFace*> reached;
+    FaceGeometryList otherFaces;
+    BOOLEAN haveOtherFaces = FALSE;
+    long i;
+    long j;
+    long k;
+
+    seeds.clear();
+    for ( i = 0; i < cutFaces.size(); i++ ) {
+        flood(cutFaces[i], reached, 0);
+    }
+    for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
+        _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
+        if ( reached.contains(face) ) {
+            continue;
+        }
+        FaceList shell;
+        flood(face, reached, &shell);
+        if ( !haveOtherFaces ) {
+            ToleranceContext context =
+                PolyhedralBoundedSolidNumericPolicy::forSolids(solid, other);
+            setNumericContext(&context);
+            PolyhedralBoundedSolidFaceGeometry::of(other, otherFaces);
+            haveOtherFaces = TRUE;
+        }
+        int side = Geometry::LIMIT;
+        for ( j = 0; j < shell.size() && side == Geometry::LIMIT; j++ ) {
+            _PolyhedralBoundedSolidFace* member = shell[j];
+            for ( k = 0; k < member->boundariesList.size() &&
+                  side == Geometry::LIMIT; k++ ) {
+                _PolyhedralBoundedSolidHalfEdge* he = member
+                    ->boundariesList.get(k)->boundaryStartHalfEdge;
+                if ( he == 0 || he->startingVertex == 0 ) {
+                    continue;
+                }
+                side = _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                    ::classifyPointAgainstSolid(other, otherFaces,
+                        he->startingVertex->position);
+            }
+        }
+        if ( (keepInside && side == Geometry::INSIDE) ||
+             (!keepInside && side == Geometry::OUTSIDE) ) {
+            seeds.add(face);
+            String where;
+            if ( keepInside ) {
+                where = "inside";
+            }
+            else {
+                where = "outside";
+            }
+            tracePipelineSummary("finish keeps a whole shell of " +
+                str((int)shell.size()) + " faces, " + where +
+                " the other solid");
+        }
+    }
+    PolyhedralBoundedSolidFaceGeometry::dispose(otherFaces);
+}
+
 void Finisher::finish(PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
     PolyhedralBoundedSolid* outRes,
     int op,
     int debugFlags,
     FaceList& sonfa,
-    FaceList& sonfb)
+    FaceList& sonfb,
+    const ConnectResult& pairs)
 {
     int i;
     int inda;
@@ -556,12 +803,39 @@ void Finisher::finish(PolyhedralBoundedSolid* inSolidA,
         " sonfa=" + str((int)sonfa.size()) +
         " sonfb=" + str((int)sonfb.size())).c_str());
 
-    int oldsize = sanitizePairedFaces(sonfa, sonfb);
-    // Section 11 fail-fast precondition failed: MANT1988_15_1 B-A fires the
-    // legacy fallback (count>0) while still producing a valid result. Track
-    // via getLastLegacyFallbackCount().
+    int oldsize = sanitizePairedFaces(sonfa, sonfb, pairs);
     inda = (op == INTERSECTION) ? (int)sonfa.size() : 0;
     indb = (op == UNION) ? 0 : (int)sonfb.size();
+
+    // [MANT1988] Program 15.15 takes sonf[i] for the part of the solid
+    // outside the other one and the face lmfkrh makes from its ring
+    // for the part inside. That rests on the orientation every null
+    // edge got on its way here. The parts themselves say which is
+    // which: a point of the faces on each side of the cut is inside
+    // the other solid or outside it. When they say the opposite of the
+    // convention for a whole cut, the two faces are exchanged
+    // (plan-stage11 Phase F).
+    ArrayList<BOOLEAN> swappedA(Collections<BOOLEAN>::nCopies(oldsize, FALSE));
+    ArrayList<BOOLEAN> swappedB(Collections<BOOLEAN>::nCopies(oldsize, FALSE));
+    if ( oldsize > 0 ) {
+        // Nothing edits the two solids while the sides are read, so
+        // their face planes and boxes are computed once.
+        ToleranceContext context =
+            PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
+        setNumericContext(&context);
+        FaceGeometryList facesOfA;
+        FaceGeometryList facesOfB;
+        PolyhedralBoundedSolidFaceGeometry::of(inSolidA, facesOfA);
+        PolyhedralBoundedSolidFaceGeometry::of(inSolidB, facesOfB);
+        for ( i = 0; i < oldsize; i++ ) {
+            swappedA[i] = sidesAreSwapped(sonfa[i], inSolidB,
+                facesOfB, i, "A");
+            swappedB[i] = sidesAreSwapped(sonfb[i], inSolidA,
+                facesOfA, i, "B");
+        }
+        PolyhedralBoundedSolidFaceGeometry::dispose(facesOfA);
+        PolyhedralBoundedSolidFaceGeometry::dispose(facesOfB);
+    }
 
     for ( i = 0; i < oldsize; i++ ) {
         f = PolyhedralBoundedSolidEulerOperators::lmfkrh(inSolidA,
@@ -573,6 +847,31 @@ void Finisher::finish(PolyhedralBoundedSolid* inSolidA,
         sonfb.add(f);
     }
 
+    for ( i = 0; i < oldsize; i++ ) {
+        if ( swappedA[i] ) {
+            exchange(sonfa, i, i + oldsize);
+        }
+        if ( swappedB[i] ) {
+            exchange(sonfb, i, i + oldsize);
+        }
+    }
+
+    // Shells that no intersection curve reaches are not connected to
+    // any null face, so the moves below never see them. Each one lies
+    // wholly inside or wholly outside the other solid and belongs to
+    // the result on the same terms as the cut parts: A outside B for
+    // the union and the difference, A inside B for the intersection;
+    // B outside A for the union, B inside A otherwise. They used to be
+    // left behind without an error (plan-stage11 Phase F): the union
+    // of a two-piece solid with a solid that crosses only one of the
+    // pieces lost the other piece.
+    FaceList wholeShellsOfA;
+    FaceList wholeShellsOfB;
+    untouchedShellsToKeep(inSolidA, sonfa, inSolidB,
+        op == INTERSECTION, wholeShellsOfA);
+    untouchedShellsToKeep(inSolidB, sonfb, inSolidA, op != UNION,
+        wholeShellsOfB);
+
     if ( op == SUBTRACT ) {
         inSolidB->revert();
     }
@@ -580,6 +879,12 @@ void Finisher::finish(PolyhedralBoundedSolid* inSolidA,
     for ( i = 0; i < oldsize; i++ ) {
         movefac(sonfa[i+inda], outRes);
         movefac(sonfb[i+indb], outRes);
+    }
+    for ( i = 0; i < (int)wholeShellsOfA.size(); i++ ) {
+        movefac(wholeShellsOfA[i], outRes);
+    }
+    for ( i = 0; i < (int)wholeShellsOfB.size(); i++ ) {
+        movefac(wholeShellsOfB[i], outRes);
     }
 
     cleanup(outRes);

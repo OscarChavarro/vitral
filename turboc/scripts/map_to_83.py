@@ -52,6 +52,10 @@ TC_EXCLUDED_SOURCES = {
     "src/main/java/util/regex/Pattern.cpp",
     "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.cpp",
 }
+# Generated files that may already be in the tree, under any case, from a
+# previous run: base/base.bat and base/baselink.bat are kept in the repository
+# (the staging scripts move them aside, but a direct run replaces them)
+REGENERATED_FILES = {"base/BASE.BAT", "base/BASELINK.BAT", "base/BASE86.BAT", "base/BASELK86.BAT"}
 INCLUDE_RE = re.compile(rb'^([ \t]*#[ \t]*include[ \t]*)(["<])([^">\r\n]+)([">])(.*)$', re.M)
 RAW_ID_RE = re.compile(r"^raw_identifier '([A-Za-z_$][A-Za-z0-9_$]*)'\t.*Loc=<.*:(\d+):(\d+)>$")
 
@@ -639,15 +643,34 @@ def generated_files(project_root: Path, mappings, base_sources):
     result = []
     for rel, data in files:
         folder, name = rel.rsplit("/", 1)
-        if any(p.name.upper() == name for p in (project_root / folder).iterdir()):
-            raise RuntimeError(f"{folder} already has a {name} file")
-        result.append((nodes[folder] + "/" + name, data))
+        stale = None
+        for p in (project_root / folder).iterdir():
+            if p.name.upper() != name:
+                continue
+            if rel not in REGENERATED_FILES and not is_marked_generated_file(p):
+                raise RuntimeError(f"{folder} already has a {name} file")
+            # A previous output of this script (the batches of base are kept
+            # in the repository with lower case names): it is replaced
+            stale = nodes[folder] + "/" + p.name
+        result.append((nodes[folder] + "/" + name, data, stale))
     return result
+
+
+def is_marked_generated_file(path: Path) -> bool:
+    if not path.is_file():
+        return False
+    with path.open("rb") as f:
+        head = f.read(64)
+    return head.startswith(NAMES_MARK) or head.startswith(MAKE_MARK)
 
 
 def write_generated_files(project_root: Path, generated, dry_run: bool):
     print(f"Phase 6: writing {len(generated)} files of the Turbo C++ build")
-    for rel, data in generated:
+    for rel, data, stale in generated:
+        if stale is not None:
+            print(f"  {stale} (replaced)")
+            if not dry_run:
+                (project_root / stale).unlink()
         print(f"  {rel}")
         if not dry_run:
             (project_root / rel).write_bytes(data)

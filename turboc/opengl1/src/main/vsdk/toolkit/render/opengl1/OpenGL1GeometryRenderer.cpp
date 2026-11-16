@@ -574,7 +574,7 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     PolyhedralBoundedSolid& solid, const RendererConfiguration* quality,
     BOOLEAN doubleSided)
 {
-    ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid.getPolygonsList();
+    CircularArrayList<_PolyhedralBoundedSolidFace*>& faces = solid.getPolygonsList();
     BOOLEAN smoothNormals =
         quality->getShadingType() != RendererConfiguration::SHADING_TYPE_FLAT &&
         quality->getShadingType() != RendererConfiguration::SHADING_TYPE_NOLIGHT;
@@ -584,7 +584,7 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     ArrayList<Vector3Dd> faceNormals(Collections<Vector3Dd>::nCopies(faces.size(), Vector3Dd()));
     long f;
     for ( f = 0; f < faces.size(); f++ ) {
-        _PolyhedralBoundedSolidFace* face = faces[f];
+        _PolyhedralBoundedSolidFace* face = faces.get(f);
         InfinitePlane* plane = face != NULL ? face->getContainingPlane() : NULL;
         if ( plane == NULL || !(plane->getNormal().length() > 1e-12) ) {
             continue;
@@ -594,7 +594,7 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
             continue;
         }
         for ( long l = 0; l < face->boundariesList.size(); l++ ) {
-            _PolyhedralBoundedSolidLoop* loop = face->boundariesList[l];
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(l);
             if ( loop == NULL || loop->boundaryStartHalfEdge == NULL ) {
                 continue;
             }
@@ -623,7 +623,7 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     OpenGL1MeshBuilder builder(maxAbsExtent(solid.getMinMax()));
     builder.setDoubleSided(doubleSided);
     for ( f = 0; f < faces.size(); f++ ) {
-        _PolyhedralBoundedSolidFace* face = faces[f];
+        _PolyhedralBoundedSolidFace* face = faces.get(f);
         const Vector3Dd& normal = faceNormals[f];
         if ( face == NULL || !(normal.length() > 1e-12) ) {
             continue;
@@ -633,7 +633,7 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
         gluTessNormal(tess, normal.x(), normal.y(), normal.z());
         gluTessBeginPolygon(tess, &t);
         for ( long l = 0; l < face->boundariesList.size(); l++ ) {
-            _PolyhedralBoundedSolidLoop* loop = face->boundariesList[l];
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(l);
             if ( loop == NULL || loop->boundaryStartHalfEdge == NULL ) {
                 continue;
             }

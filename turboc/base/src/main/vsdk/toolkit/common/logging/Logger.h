@@ -16,6 +16,7 @@ public:
     };
 
     static void setWithSystemExit(BOOLEAN flag);
+    static BOOLEAN isWithSystemExit();
     static void setWithFatalExceptions(BOOLEAN flag);
 
     static void reportMessage(const String& className, int level, const String& method, const String& message);

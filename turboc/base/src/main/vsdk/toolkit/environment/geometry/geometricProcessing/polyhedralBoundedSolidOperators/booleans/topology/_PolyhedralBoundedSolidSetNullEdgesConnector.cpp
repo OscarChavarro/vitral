@@ -53,32 +53,50 @@ static String positionString(const Vector3Dd& p)
 
 
 int Connector::debugFlags = 0;
-int Connector::operation = 0;
-Connector::HalfEdgeList Connector::endsa;
-Connector::HalfEdgeList Connector::endsb;
-TreeMap<int, int> Connector::sonfaPairIndexByFaceId;
-TreeMap<int, int> Connector::sonfbPairIndexByFaceId;
-BOOLEAN Connector::hasPairIndexMaps = FALSE;
-int Connector::lastLooseACount = 0;
-int Connector::lastLooseBCount = 0;
-int Connector::lastSonfaCount = 0;
-int Connector::lastSonfbCount = 0;
-int Connector::lastPairCount = 0;
-int Connector::currentConnectPairIndex = 0;
-int Connector::nextSyntheticPairIndex = 0;
-_PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report Connector::lastCurveReport;
-ArrayList<int> Connector::testOnlyForcedConnectOrder;
-BOOLEAN Connector::hasTestOnlyForcedConnectOrder = FALSE;
-BOOLEAN Connector::curveOrientationApplied = FALSE;
-ArrayList<ArrayList<int> > Connector::curveNeighborPositions;
-ArrayList<int> Connector::endsPairIndex;
+Connector::Diagnostics Connector::LAST;
+
+Connector::Diagnostics::Diagnostics()
+    : looseA(0), looseB(0), sonfaCount(0), sonfbCount(0), pairCount(0),
+      hasCurveReport(FALSE)
+{
+}
 
 //= Results =========================================================
 
-Connector::ConnectResult::ConnectResult(const FaceList& sonfa,
-    const FaceList& sonfb)
-    : sonfaValue(sonfa), sonfbValue(sonfb)
+Connector::ConnectResult::ConnectResult()
+    : hasPairIndexMaps(FALSE)
 {
+}
+
+Connector::ConnectResult::ConnectResult(const FaceList& sonfa,
+    const FaceList& sonfb, const Connector& connector)
+    : sonfaValue(sonfa), sonfbValue(sonfb),
+      sonfaPairIndexByFaceId(connector.sonfaPairIndexByFaceId),
+      sonfbPairIndexByFaceId(connector.sonfbPairIndexByFaceId),
+      hasPairIndexMaps(connector.hasPairIndexMaps)
+{
+}
+
+/** Pair index of a null face of A, or -1 (used by finish). */
+int Connector::ConnectResult::pairIndexA(
+    _PolyhedralBoundedSolidFace* face) const
+{
+    if ( face == 0 || !hasPairIndexMaps ) {
+        return -1;
+    }
+    const int* found = sonfaPairIndexByFaceId.get(face->id);
+    return found != NULL ? (*found) : -1;
+}
+
+/** Pair index of a null face of B, or -1 (used by finish). */
+int Connector::ConnectResult::pairIndexB(
+    _PolyhedralBoundedSolidFace* face) const
+{
+    if ( face == 0 || !hasPairIndexMaps ) {
+        return -1;
+    }
+    const int* found = sonfbPairIndexByFaceId.get(face->id);
+    return found != NULL ? (*found) : -1;
 }
 
 const Connector::FaceList& Connector::ConnectResult::sonfa() const
@@ -92,8 +110,25 @@ const Connector::FaceList& Connector::ConnectResult::sonfb() const
 }
 
 _PolyhedralBoundedSolidSetNullEdgesConnector::_PolyhedralBoundedSolidSetNullEdgesConnector()
-    : nextNullEdgeIndex(0), sonea(0), soneb(0)
+    : operation(0), nextNullEdgeIndex(0), sonea(0), soneb(0),
+      hasPairIndexMaps(FALSE), currentConnectPairIndex(0),
+      nextSyntheticPairIndex(0), curveOrientationApplied(FALSE)
 {
+}
+
+/** Curve report of the most recent connect (Java null: NULL). */
+const _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report*
+Connector::getLastCurveReport()
+{
+    if ( !LAST.hasCurveReport ) {
+        return NULL;
+    }
+    return &LAST.curveReport;
+}
+
+void Connector::clearLastCurveReport()
+{
+    LAST.hasCurveReport = FALSE;
 }
 
 //= Traces and summaries ============================================
@@ -373,35 +408,35 @@ void Connector::removeLoosePair(int index)
 
 int Connector::getLastLooseACount()
 {
-    return lastLooseACount;
+    return LAST.looseA;
 }
 
 int Connector::getLastLooseBCount()
 {
-    return lastLooseBCount;
+    return LAST.looseB;
 }
 
 int Connector::getLastSonfaCount()
 {
-    return lastSonfaCount;
+    return LAST.sonfaCount;
 }
 
 int Connector::getLastSonfbCount()
 {
-    return lastSonfbCount;
+    return LAST.sonfbCount;
 }
 
 int Connector::getLastPairCount()
 {
-    return lastPairCount;
+    return LAST.pairCount;
 }
 
 void Connector::updateLastSnapshot()
 {
-    lastLooseACount = (int)endsa.size();
-    lastLooseBCount = (int)endsb.size();
-    lastSonfaCount = (int)sonfa.size();
-    lastSonfbCount = (int)sonfb.size();
+    LAST.looseA = (int)endsa.size();
+    LAST.looseB = (int)endsb.size();
+    LAST.sonfaCount = (int)sonfa.size();
+    LAST.sonfbCount = (int)sonfb.size();
 }
 
 BOOLEAN Connector::isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
@@ -608,18 +643,15 @@ Connector::ConnectResult Connector::connect(int op, int flags,
     debugFlags = flags;
     sonea = &inSonea;
     soneb = &inSoneb;
-    lastPairCount = (int)Math::min(sonea->size(), soneb->size());
-    lastLooseACount = 0;
-    lastLooseBCount = 0;
-    lastSonfaCount = 0;
-    lastSonfbCount = 0;
-    nextSyntheticPairIndex = lastPairCount;
+    LAST = Diagnostics();
+    LAST.pairCount = (int)Math::min(sonea->size(), soneb->size());
+    nextSyntheticPairIndex = LAST.pairCount;
     // [MANT1988] section 15.7 Program 15.14: single Connect implementation.
     // The "flexibleEndpointChains" alternative path was removed in section
     // 6.1 of plan-csg-boolean-fix-stage2 because it duplicated setOpConnect
     // with extra heuristics that the book does not require.
     setOpConnect();
-    return ConnectResult(sonfa, sonfb);
+    return ConnectResult(sonfa, sonfb, *this);
 }
 
 //= Null edges ordering =============================================
@@ -628,17 +660,6 @@ void Connector::sortNullEdges()
 {
     curveOrientationApplied = FALSE;
     curveNeighborPositions.clear();
-    if ( hasTestOnlyForcedConnectOrder &&
-         testOnlyForcedConnectOrder.size() == sonea->size() &&
-         testOnlyForcedConnectOrder.size() == soneb->size() ) {
-        applyOrderPermutation(testOnlyForcedConnectOrder);
-        lastCurveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
-            ::build(*sonea, *soneb,
-                PolyhedralBoundedSolidNumericPolicy::defaultContext()
-                    .unitVectorTolerance());
-        tracePipelineSummary("connect TEST-ONLY forced order applied");
-        return;
-    }
 
     // Always group null-edges by topological ring before any further
     // processing. Without this, the connect loop pairs null-edges from
@@ -738,11 +759,23 @@ void Connector::groupNullEdgesByRing()
     // Reconstruct the intersection curves for diagnosis. The report is
     // captured before any reordering decision so it always describes the
     // classifier's raw emission.
-    lastCurveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
+    curveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
         ::build(*sonea, *soneb,
             PolyhedralBoundedSolidNumericPolicy::defaultContext()
                 .unitVectorTolerance());
-    tracePipelineSummary(String("connect ") + lastCurveReport.summarize());
+    LAST.curveReport = curveReport;
+    LAST.hasCurveReport = TRUE;
+    tracePipelineSummary(String("connect ") + curveReport.summarize());
+    if ( dropIsolatedNodes() ) {
+        // The report kept for diagnostics stays the one above: what
+        // the classifier emitted. This one describes what is left to
+        // connect.
+        curveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
+            ::build(*sonea, *soneb,
+                PolyhedralBoundedSolidNumericPolicy::defaultContext()
+                    .unitVectorTolerance());
+        tracePipelineSummary(String("connect ") + curveReport.summarize());
+    }
 
     int n = (int)Math::min(sonea->size(), soneb->size());
     if ( n != (int)sonea->size() || n != (int)soneb->size() || n < 2 ) {
@@ -753,18 +786,17 @@ void Connector::groupNullEdgesByRing()
     // curve, reorder pairs along each curve AND orient every strut
     // consistently with the traversal. On any anomaly fall through to the
     // legacy ordering below.
-    if ( lastCurveReport.isCleanlyClosed() ) {
+    if ( curveReport.isCleanlyClosed() ) {
         ArrayList<int> curveOrder;
+        ArrayList<ArrayList<int> > neighbors;
         if ( _PolyhedralBoundedSolidSetIntersectionCurveBuilder
-                 ::orderAndOrientAlongCurves(lastCurveReport.cycles, n,
-                     *sonea, *soneb, curveOrder) ) {
+                 ::orderAndOrientAlongCurves(curveReport.cycles, n,
+                     *sonea, *soneb, curveOrder, neighbors) ) {
             applyOrderPermutation(curveOrder);
             curveOrientationApplied = TRUE;
-            curveNeighborPositions =
-                _PolyhedralBoundedSolidSetIntersectionCurveBuilder
-                    ::lastTraversalNeighborPositions;
+            curveNeighborPositions = neighbors;
             tracePipelineSummary(("connect curve-order applied: cycles=" +
-                str((int)lastCurveReport.cycles.size())).c_str());
+                str((int)curveReport.cycles.size())).c_str());
             return;
         }
     }
@@ -905,6 +937,17 @@ BOOLEAN Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
     BOOLEAN condition2;
 
     for ( i = 0; i < endsa.size(); i++ ) {
+        // A face that is not convex can be crossed several times by
+        // the same face of the other solid: the crossings lie on one
+        // line and all of them pass the face and role test of
+        // `neighbor`. Only the loose end left by a neighbour along the
+        // intersection curve is the other end of this chord; joining
+        // any other one draws a chord through the notch of the face
+        // (plan-stage11 Phase F). Program 15.13 of [MANT1988] gets the
+        // same effect from the order of its sorted null edges.
+        if ( !isCurveNeighborOfCurrentPair((int)i) ) {
+            continue;
+        }
         condition1 = neighbor(hea, endsa[i]);
         condition2 = neighbor(heb, endsb[i]);
 
@@ -939,143 +982,33 @@ BOOLEAN Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
         }
     }
 
-    // Curve-ordered path only: rescue a unique near-miss before declaring
-    // this pair loose (an earlier division can re-parent a pending strut
-    // ring away from the face where its junction partner waits).
-    if ( curveOrientationApplied ) {
-        if ( rescueRingFaceNearMiss(hea, heb, outA, outB) ) {
-            return TRUE;
-        }
-    }
-
     endsa.add(hea);
     endsb.add(heb);
     endsPairIndex.add(currentConnectPairIndex);
     return FALSE;
 }
 
-BOOLEAN Connector::rolesOpposite(_PolyhedralBoundedSolidHalfEdge* h1,
-    _PolyhedralBoundedSolidHalfEdge* h2)
-{
-    if ( h1 == 0 || h2 == 0 || h1->parentEdge == 0 || h2->parentEdge == 0 ) {
-        return FALSE;
-    }
-    return (h1 == h1->parentEdge->rightHalf &&
-            h2 == h2->parentEdge->leftHalf) ||
-           (h1 == h1->parentEdge->leftHalf &&
-            h2 == h2->parentEdge->rightHalf);
-}
-
 /**
-True when the half-edge dangles in a pending two-half-edge strut ring (an
-inner loop holding only the null edge, as created by the vertex/face
-classifier's makeRing).
+True when the loose entry `i` was left by one of the two pairs next to
+the current pair on its intersection curve, or when the curves are not
+known (no curve order applied): then every entry is a candidate, as in
+the book.
 */
-BOOLEAN Connector::isPendingStrutRing(_PolyhedralBoundedSolidHalfEdge* he)
+BOOLEAN Connector::isCurveNeighborOfCurrentPair(int i)
 {
-    if ( he == 0 || he->parentLoop == 0 ||
-         he->parentLoop->parentFace == 0 ||
-         he->parentLoop->parentFace->boundariesList.size() == 0 ) {
-        return FALSE;
+    if ( !curveOrientationApplied || curveNeighborPositions.isEmpty() ||
+         currentConnectPairIndex < 0 ||
+         currentConnectPairIndex >= (int)curveNeighborPositions.size() ||
+         curveNeighborPositions[currentConnectPairIndex].isEmpty() ||
+         i >= (int)endsPairIndex.size() ) {
+        return TRUE;
     }
-    if ( he->parentLoop->halfEdgesList.size() != 2 ) {
-        return FALSE;
-    }
-    return he->parentLoop != he->parentLoop->parentFace->boundariesList.get(0);
-}
+    int pusherPosition = endsPairIndex[i];
 
-/**
-Near-miss rescue: finds the unique loose index (pushed by a curve neighbor
-of the current pair) that matches on one solid and fails only the face
-equality on the other, with a pending strut ring on the mismatched side;
-re-parents that ring and completes the match.
-*/
-BOOLEAN Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
-    _PolyhedralBoundedSolidHalfEdge* heb,
-    _PolyhedralBoundedSolidHalfEdge** outA,
-    _PolyhedralBoundedSolidHalfEdge** outB)
-{
-    int candidate = -1;
-    BOOLEAN mismatchOnA = FALSE;
-    long i;
-
-    for ( i = 0; i < endsa.size(); i++ ) {
-        // Only true curve neighbors of the current pair may be rescued.
-        if ( curveNeighborPositions.isEmpty() ||
-             currentConnectPairIndex < 0 ||
-             currentConnectPairIndex >= (int)curveNeighborPositions.size() ||
-             curveNeighborPositions[currentConnectPairIndex].isEmpty() ||
-             i >= endsPairIndex.size() ) {
-            continue;
-        }
-        int pusherPosition = endsPairIndex[i];
-        if ( pusherPosition != curveNeighborPositions[currentConnectPairIndex][0] &&
-             pusherPosition != curveNeighborPositions[currentConnectPairIndex][1] ) {
-            continue;
-        }
-        BOOLEAN aOk = neighbor(hea, endsa[i]);
-        BOOLEAN bOk = neighbor(heb, endsb[i]);
-        BOOLEAN nearMissA = !aOk && bOk &&
-            rolesOpposite(hea, endsa[i]) &&
-            (isPendingStrutRing(hea) || isPendingStrutRing(endsa[i]));
-        BOOLEAN nearMissB = aOk && !bOk &&
-            rolesOpposite(heb, endsb[i]) &&
-            (isPendingStrutRing(heb) || isPendingStrutRing(endsb[i]));
-        if ( nearMissA || nearMissB ) {
-            if ( candidate >= 0 ) {
-                tracePipelineSummary("connect ring-rescue ambiguous; skipped");
-                return FALSE;
-            }
-            candidate = (int)i;
-            mismatchOnA = nearMissA;
-        }
-    }
-    if ( candidate < 0 ) {
-        return FALSE;
-    }
-
-    _PolyhedralBoundedSolidHalfEdge* query = mismatchOnA ? hea : heb;
-    _PolyhedralBoundedSolidHalfEdge* stored = mismatchOnA ?
-        endsa[candidate] : endsb[candidate];
-    _PolyhedralBoundedSolidHalfEdge* ringSide;
-    _PolyhedralBoundedSolidHalfEdge* anchorSide;
-    if ( isPendingStrutRing(query) ) {
-        ringSide = query;
-        anchorSide = stored;
-    }
-    else {
-        ringSide = stored;
-        anchorSide = query;
-    }
-    _PolyhedralBoundedSolidFace* targetFace = anchorSide->parentLoop->parentFace;
-    if ( targetFace == 0 || targetFace->parentSolid == 0 ) {
-        return FALSE;
-    }
-    if ( !PolyhedralBoundedSolidEulerOperators::lringmv(
-             targetFace->parentSolid, ringSide->parentLoop,
-             targetFace, FALSE) ) {
-        return FALSE;
-    }
-    if ( !neighbor(hea, endsa[candidate]) ||
-         !neighbor(heb, endsb[candidate]) ) {
-        tracePipelineSummary(
-            "connect ring-rescue re-parent did not complete the match");
-        return FALSE;
-    }
-    String ringVertex = "?";
-    if ( ringSide->startingVertex != 0 ) {
-        ringVertex = str(ringSide->startingVertex->id);
-    }
-    tracePipelineSummary(("connect ring-rescue applied: ring v=" +
-        ringVertex + " -> face " + str(targetFace->id)).c_str());
-    *outA = endsa[candidate];
-    *outB = endsb[candidate];
-    endsa.remove((long)candidate);
-    endsb.remove((long)candidate);
-    if ( candidate < (int)endsPairIndex.size() ) {
-        endsPairIndex.remove((long)candidate);
-    }
-    return TRUE;
+    return pusherPosition ==
+            curveNeighborPositions[currentConnectPairIndex][0] ||
+        pusherPosition ==
+            curveNeighborPositions[currentConnectPairIndex][1];
 }
 
 BOOLEAN Connector::isLooseA(_PolyhedralBoundedSolidHalfEdge* he)
@@ -1234,7 +1167,6 @@ void Connector::setOpConnect()
     _PolyhedralBoundedSolidHalfEdge* h2b = 0;
     _PolyhedralBoundedSolidHalfEdge* r0;
     _PolyhedralBoundedSolidHalfEdge* r1;
-    BOOLEAN allowRingMoveOnAJoin = (operation == INTERSECTION);
     BOOLEAN withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                      ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
@@ -1338,7 +1270,7 @@ void Connector::setOpConnect()
         if ( scanjoin(nextedgea->rightHalf, nextedgeb->leftHalf, &r0, &r1) ) {
             h1a = r0;
             h2b = r1;
-            join(h1a, nextedgea->rightHalf, withDebug, allowRingMoveOnAJoin);
+            join(h1a, nextedgea->rightHalf, withDebug);
             if ( !isLooseA(h1a->mirrorHalfEdge()) ) {
                 cutA(h1a);
             }
@@ -1352,7 +1284,7 @@ void Connector::setOpConnect()
         if ( scanjoin(nextedgea->leftHalf, nextedgeb->rightHalf, &r0, &r1) ) {
             h2a = r0;
             h1b = r1;
-            join(h2a, nextedgea->leftHalf, withDebug, allowRingMoveOnAJoin);
+            join(h2a, nextedgea->leftHalf, withDebug);
             if ( !isLooseA(h2a->mirrorHalfEdge()) ) {
                 cutA(h2a);
             }
@@ -1401,9 +1333,17 @@ void Connector::setOpConnect()
         " sonfb=" + str((int)sonfb.size()) +
         " looseA=" + str((int)endsa.size()) +
         " looseB=" + str((int)endsb.size())).c_str());
-    // Section 6.1-B: post-loop safety nets removed. Per [MANT1988]
-    // Program 15.14, the main loop must leave looseA == looseB == 0 by
-    // itself; any survivor is the visible symptom of an upstream defect.
+    // Per [MANT1988] Program 15.14 the main loop must leave
+    // looseA == looseB == 0. The only survivors left are isolated
+    // struts: both halves of one null edge still loose on A and on B.
+    // The vertex/vertex classifier emits them at a coplanar contact
+    // along a boundary ray (sectoroverlap is closed, see its comment)
+    // where the curve does not pass, e.g. MANT1988_15_1 intersection and
+    // difference. Such a strut bounds no null face; killing it restores
+    // the vertex it split. It never joins anything, so it cannot fuse
+    // shells (the retired pairLatentLooseEnds closure did, on
+    // HOLLOW_BRICK).
+    dropIsolatedStruts();
     tracePipelineSummary(("connect post-pass sonfa=" + str((int)sonfa.size()) +
         " sonfb=" + str((int)sonfb.size()) +
         " looseA=" + str((int)endsa.size()) +
@@ -1415,6 +1355,194 @@ void Connector::setOpConnect()
             tracePipelineSummary(String(("connect loose[" + str((int)j) +
                 "] A=").c_str()) + summarizeHalfEdge(endsa[j]) + " B=" +
                 summarizeHalfEdge(endsb[j]));
+        }
+    }
+}
+
+/**
+A node without neighbours on the intersection curve is a point where
+the two boundaries touch without crossing: nothing is to be cut there.
+When such nodes are the only thing that keeps the curves from being
+closed cycles, their null edges are removed before connect (each with
+lkev, which merges its two coincident vertices back into one), so that
+the rest is connected in curve order. Groups of nodes on a pair of
+coplanar faces do not prevent it: on coplanar faces those groups are
+made of the isolated nodes themselves (vertices of one solid lying in
+a face of the other) and are gone once they are removed. They used to stay, and a single
+one of them sent the whole operation to the order of emission, where a
+face crossed twice along one line is joined across its hole
+(plan-stage11, coplanar non-convex faces).
+@return true when some null edge was removed
+*/
+BOOLEAN Connector::dropIsolatedNodes()
+{
+    ArrayList<int> dropped;
+    int covered = 0;
+    long i;
+    long j;
+
+    if ( !curveReport.pinchNodes.isEmpty() ||
+         curveReport.oddFacePairGroupCount > 0 ||
+         sonea->size() != soneb->size() ) {
+        return FALSE;
+    }
+    for ( i = 0; i < curveReport.openChains.size(); i++ ) {
+        const ArrayList<int>& chain = curveReport.openChains[i];
+        for ( j = 0; j < chain.size(); j++ ) {
+            if ( !liesInCoplanarFaces(chain[j]) ) {
+                return FALSE;
+            }
+            dropped.add(chain[j]);
+        }
+        covered += (int)chain.size();
+    }
+    dropped.addAll(curveReport.isolatedNodes);
+    if ( dropped.isEmpty() ) {
+        return FALSE;
+    }
+    for ( i = 0; i < curveReport.cycles.size(); i++ ) {
+        covered += (int)curveReport.cycles[i].size();
+    }
+    if ( covered + (int)curveReport.isolatedNodes.size() !=
+         curveReport.nodeCount ) {
+        return FALSE;
+    }
+    dropped.sort(NaturalOrderComparator<int>());
+    for ( i = dropped.size() - 1; i >= 0; i-- ) {
+        int index = dropped[i];
+        _PolyhedralBoundedSolidEdge* a = (*sonea)[index].e;
+        _PolyhedralBoundedSolidEdge* b = (*soneb)[index].e;
+        tracePipelineSummary(String(("connect drop contact node " +
+            str(index) + " A=").c_str()) + summarizeHalfEdge(a->rightHalf) +
+            " B=" + summarizeHalfEdge(b->rightHalf));
+        PolyhedralBoundedSolidEulerOperators::lkev(
+            a->rightHalf->parentLoop->parentFace->parentSolid, a->rightHalf,
+            a->leftHalf);
+        PolyhedralBoundedSolidEulerOperators::lkev(
+            b->rightHalf->parentLoop->parentFace->parentSolid, b->rightHalf,
+            b->leftHalf);
+        sonea->remove((long)index);
+        soneb->remove((long)index);
+    }
+    return TRUE;
+}
+
+/**
+True when node `index` is a vertex of one solid lying inside a face of
+the other, with a face of its own on the plane of that face: on that
+solid the null edge is a strut inside the face, and some face around
+the vertex of the first solid is coplanar with it. A chain of such
+nodes is an edge lying in a coplanar face; it crosses nothing.
+*/
+BOOLEAN Connector::liesInCoplanarFaces(int index)
+{
+    _PolyhedralBoundedSolidEdge* a = (*sonea)[index].e;
+    _PolyhedralBoundedSolidEdge* b = (*soneb)[index].e;
+
+    if ( a == 0 || b == 0 || a->rightHalf == 0 ||
+         a->leftHalf == 0 || b->rightHalf == 0 ||
+         b->leftHalf == 0 ) {
+        return FALSE;
+    }
+    return isVertexInCoplanarFace(a, b) || isVertexInCoplanarFace(b, a);
+}
+
+/**
+True when `strut` lies inside one face and some face around the ends
+of `vertexEdge` is on the plane of that face.
+*/
+BOOLEAN Connector::isVertexInCoplanarFace(
+    _PolyhedralBoundedSolidEdge* vertexEdge,
+    _PolyhedralBoundedSolidEdge* strut)
+{
+    _PolyhedralBoundedSolidFace* face =
+        strut->rightHalf->parentLoop->parentFace;
+    InfinitePlane* plane = face->getContainingPlane();
+    BOOLEAN result;
+
+    if ( face != strut->leftHalf->parentLoop->parentFace || plane == 0 ) {
+        // C++ port note: the plane is owned here
+        delete plane;
+        return FALSE;
+    }
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forSolids(face->parentSolid,
+            vertexEdge->rightHalf->parentLoop->parentFace->parentSolid);
+    result = hasFaceOnPlane(vertexEdge->rightHalf, *plane, context) ||
+        hasFaceOnPlane(vertexEdge->leftHalf, *plane, context);
+    delete plane;
+    return result;
+}
+
+/** Walks the faces around the starting vertex of `start`. */
+BOOLEAN Connector::hasFaceOnPlane(
+    _PolyhedralBoundedSolidHalfEdge* start, const InfinitePlane& plane,
+    const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context)
+{
+    _PolyhedralBoundedSolidHalfEdge* he = start;
+    Vector3Dd normal = plane.getNormal();
+    int guard = 0;
+
+    do {
+        InfinitePlane* own = he->parentLoop->parentFace->getContainingPlane();
+        if ( own != 0 ) {
+            Vector3Dd ownNormal = own->getNormal();
+            delete own;
+            if ( normal.crossProduct(ownNormal).length() <=
+                     context.unitVectorTolerance() * normal.length() *
+                         ownNormal.length() &&
+                 Math::abs(plane.pointDistance(
+                     he->startingVertex->position)) <=
+                     context.bigEpsilon() ) {
+                return TRUE;
+            }
+        }
+        _PolyhedralBoundedSolidHalfEdge* mate = he->mirrorHalfEdge();
+        if ( mate == 0 ) {
+            return FALSE;
+        }
+        he = mate->next();
+        guard++;
+    } while ( he != 0 && he != start && guard < 1000 );
+    return FALSE;
+}
+
+/**
+Removes the null edges whose two halves are both loose, on A and on B
+at the same loose positions (see the call site). Each is killed with
+lkev, which merges its two coincident vertices back into one.
+*/
+void Connector::dropIsolatedStruts()
+{
+    long i;
+    long j;
+
+    for ( i = 0; i < endsa.size(); i++ ) {
+        _PolyhedralBoundedSolidHalfEdge* a = endsa[i];
+        _PolyhedralBoundedSolidHalfEdge* b = endsb[i];
+        for ( j = i + 1; j < endsa.size(); j++ ) {
+            if ( endsa[j] != a->mirrorHalfEdge() ||
+                 endsb[j] != b->mirrorHalfEdge() ) {
+                continue;
+            }
+            tracePipelineSummary(String("connect drop isolated strut A=")
+                + summarizeHalfEdge(a) + " B=" + summarizeHalfEdge(b));
+            PolyhedralBoundedSolidEulerOperators::lkev(
+                a->parentLoop->parentFace->parentSolid, a,
+                a->mirrorHalfEdge());
+            PolyhedralBoundedSolidEulerOperators::lkev(
+                b->parentLoop->parentFace->parentSolid, b,
+                b->mirrorHalfEdge());
+            removeLoosePair((int)j);
+            removeLoosePair((int)i);
+            if ( j < endsPairIndex.size() ) {
+                endsPairIndex.remove(j);
+            }
+            if ( i < endsPairIndex.size() ) {
+                endsPairIndex.remove(i);
+            }
+            i--;
+            break;
         }
     }
 }

@@ -2,11 +2,12 @@
 #define __PLYHDRL_BNDD_SLD_EDG__
 
 #include "java/lang/String.h"
+#include "vsdk/toolkit/common/dataStructures/ArrayLinkable.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 class _PolyhedralBoundedSolidHalfEdge;
 
-class _PolyhedralBoundedSolidEdge {
+class _PolyhedralBoundedSolidEdge : public ArrayLinkable {
 public:
     _PolyhedralBoundedSolidHalfEdge* rightHalf;
     _PolyhedralBoundedSolidHalfEdge* leftHalf;

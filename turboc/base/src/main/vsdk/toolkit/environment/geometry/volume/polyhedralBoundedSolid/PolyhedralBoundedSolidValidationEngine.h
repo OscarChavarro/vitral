@@ -25,15 +25,13 @@ public:
     static BOOLEAN validateIntermediate(PolyhedralBoundedSolid* solid);
 
     /**
-    Validates both operands of a boolean operation before the pipeline starts:
-    runs validateIntermediate on each solid, welds coincident vertices and
-    checks ids uniqueness.
+    Validates both operands of a boolean operation before the pipeline
+    starts: validateIntermediate on each solid, no coincident vertices, and
+    unique face and vertex ids. It only reads.
     @param solidA first operand
     @param solidB second operand
     @param msg receives failure details, can be null
     @return true only when both solids pass all checks
-    @throws IllegalArgumentException (Java IllegalArgumentException) when a
-    solid remains invalid after the automated repair
     */
     static BOOLEAN validateBooleanInputs(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB, String* msg);
@@ -80,6 +78,8 @@ public:
 
 private:
     static AtomicLong strictValidationInvocationCount;
+    static BOOLEAN validateBooleanInput(const String& name,
+        PolyhedralBoundedSolid* solid, String* msg);
     PolyhedralBoundedSolidValidationEngine();
 };
 

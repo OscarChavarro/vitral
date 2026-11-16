@@ -196,6 +196,9 @@ int PolyhedralBoundedSolidPredicates::classifyPoint(
 {
     double tolerance = Math::max(distanceTolerance,
         solid->queryToleranceContext().bigEpsilon());
+    // C++ port: outside a visibility query the plane is new (see
+    // cachedFacePlane)
+    BOOLEAN borrowedPlanes = solid->visibilityQueriesActive();
 
     for ( int i = 0; i < (int)solid->getPolygonsList().size(); i++ ) {
         if ( !solid->queryPointNearFace(point, i, tolerance) ) {
@@ -206,9 +209,11 @@ int PolyhedralBoundedSolidPredicates::classifyPoint(
         if ( plane == NULL ) {
             continue;
         }
-        if ( Cpp98Support::abs(plane->pointDistance(point)) <= tolerance &&
+        BOOLEAN onBoundary = Cpp98Support::abs(plane->pointDistance(point)) <= tolerance &&
              face->testPointInside(point, tolerance, plane) !=
-                 Geometry::OUTSIDE ) {
+                 Geometry::OUTSIDE;
+        if ( !borrowedPlanes ) delete plane;
+        if ( onBoundary ) {
             return Geometry::LIMIT;
         }
     }

@@ -326,7 +326,7 @@ static void buildCache(
 
     Vector3Dd prevEnd;
     BOOLEAN hasPrevEnd = FALSE;
-    ArrayList<_PolyhedralBoundedSolidEdge*>& edges = solid->getEdgesList();
+    CircularArrayList<_PolyhedralBoundedSolidEdge*>& edges = solid->getEdgesList();
 
     for (long int i = 0; i < edges.size(); ++i) {
         _PolyhedralBoundedSolidEdge* edge = edges.get(i);

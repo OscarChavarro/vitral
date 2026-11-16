@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "vsdk/toolkit/common/VSDK.h"
 
@@ -253,6 +254,20 @@ vitralTestDoubleCheck(BOOLEAN condition, const char *file, int line,
         VitralTestCase::currentSkipped() = TRUE; \
         return; \
     }
+
+/**
+JUnit's `@Tag("slow")` of the Java tests (run there by `gradle :base:slowTest`
+only): the case is skipped unless the environment variable
+VITRAL_SLOW_TESTS is set (`make slowcheck`), so `make check` stays fast.
+*/
+inline BOOLEAN
+vitralTestSlowEnabled()
+{
+    return getenv("VITRAL_SLOW_TESTS") != NULL;
+}
+
+#define VITRAL_SLOW_TEST() \
+    if ( !vitralTestSlowEnabled() ) GTEST_SKIP()
 
 /**
 C++ port note: the dynamic_cast of the cpp tests (no RTTI on legacy

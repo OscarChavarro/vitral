@@ -97,15 +97,15 @@ per-sub-segment midpoint quantitative-invisibility classification are the Java
 ones, statement by statement. Java's public nested dump records are the
 members of the `HiddenLineRenderer` namespace below, and Java's
 `String.format("%.5f", ...)` in the diagnostic log becomes `toFixed(5)`, which
-only the `DEBUG_EDGE_INDEX` trace prints.
+only the `debugEdgeIndex` trace prints.
 */
 export class HiddenLineRenderer extends RenderingElement {
     /// Diagnostic: when >= 0, processLineToBeDrawn logs the contour-crossing /
     /// segment-splitting decisions for the cached edge with this edgeIndex.
-    public static DEBUG_EDGE_INDEX = -1;
+    public static debugEdgeIndex = -1;
 
     private static debugSplit(edgeIndex: number, message: string): void {
-        if (edgeIndex === HiddenLineRenderer.DEBUG_EDGE_INDEX) {
+        if (edgeIndex === HiddenLineRenderer.debugEdgeIndex) {
             console.log("[AppelSplit e" + edgeIndex + "] " + message);
         }
     }
@@ -547,7 +547,7 @@ export class HiddenLineRenderer extends RenderingElement {
             t0 = ray.getDirection().length() - 6 * VSDK.EPSILON;
             ray = ray.withDirection(ray.getDirection().normalized());
             const hit: Intersection | null = Triangle.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
-            if (inEdge.edgeIndex === HiddenLineRenderer.DEBUG_EDGE_INDEX && hit !== null) {
+            if (inEdge.edgeIndex === HiddenLineRenderer.debugEdgeIndex && hit !== null) {
                 HiddenLineRenderer.debugSplit(
                     inEdge.edgeIndex,
                     "contour cl.edgeIndex=" +

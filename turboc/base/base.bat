@@ -1,4518 +1,8112 @@
 @echo off
-if not exist BUILD md BUILD
-if not exist BUILDTC md BUILDTC
+if not exist BUILD\NUL md BUILD
+if not exist BUILDTC\NUL md BUILDTC
 
-echo [1/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\VSDK.CPP
+echo [1/386] Compiling SRC\MAIN\V\T\COMMON\VSDK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VSDK.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\VSDK.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\VSDK.CPP >> TC.RSP
+if exist BUILDTC\VSDK.OBJ del BUILDTC\VSDK.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VSDK.OBJ goto error
 
-echo [2/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\CPP98SUP.CPP
+echo [2/386] Compiling SRC\MAIN\V\T\COMMON\CPP98SUP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CPP98SUP.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\CPP98SUP.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\CPP98SUP.CPP >> TC.RSP
+if exist BUILDTC\CPP98SUP.OBJ del BUILDTC\CPP98SUP.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CPP98SUP.OBJ goto error
 
-echo [3/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\ENTITY.CPP
+echo [3/386] Compiling SRC\MAIN\V\T\COMMON\ENTITY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ENTITY.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\ENTITY.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\ENTITY.CPP >> TC.RSP
+if exist BUILDTC\ENTITY.OBJ del BUILDTC\ENTITY.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ENTITY.OBJ goto error
 
-echo [4/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\ENTCONAC.CPP
+echo [4/386] Compiling SRC\MAIN\V\T\COMMON\ENTCONAC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ENTCONAC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\ENTCONAC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\ENTCONAC.CPP >> TC.RSP
+if exist BUILDTC\ENTCONAC.OBJ del BUILDTC\ENTCONAC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ENTCONAC.OBJ goto error
 
-echo [5/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\EDITOR\CONTSPEC.CPP
+echo [5/386] Compiling SRC\MAIN\V\T\GUI\EDITOR\CONTSPEC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CONTSPEC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\EDITOR\CONTSPEC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\EDITOR\CONTSPEC.CPP >> TC.RSP
+if exist BUILDTC\CONTSPEC.OBJ del BUILDTC\CONTSPEC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CONTSPEC.OBJ goto error
 
-echo [6/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\EDITOR\GENEEDIT.CPP
+echo [6/386] Compiling SRC\MAIN\V\T\GUI\EDITOR\GENEEDIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GENEEDIT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\EDITOR\GENEEDIT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\EDITOR\GENEEDIT.CPP >> TC.RSP
+if exist BUILDTC\GENEEDIT.OBJ del BUILDTC\GENEEDIT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GENEEDIT.OBJ goto error
 
-echo [7/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\LOGGING\LOGGER.CPP
+echo [7/386] Compiling SRC\MAIN\V\T\COMMON\LOGGING\LOGGER.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\LOGGER.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\LOGGING\LOGGER.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\LOGGING\LOGGER.CPP >> TC.RSP
+if exist BUILDTC\LOGGER.OBJ del BUILDTC\LOGGER.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\LOGGER.OBJ goto error
 
-echo [8/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\RAYTSTAT.CPP
+echo [8/386] Compiling SRC\MAIN\V\T\COMMON\STATISTI\RAYTSTAT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RAYTSTAT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\RAYTSTAT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\STATISTI\RAYTSTAT.CPP >> TC.RSP
+if exist BUILDTC\RAYTSTAT.OBJ del BUILDTC\RAYTSTAT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RAYTSTAT.OBJ goto error
 
-echo [9/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\SOLTEXST.CPP
+echo [9/386] Compiling SRC\MAIN\V\T\COMMON\STATISTI\SOLTEXST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SOLTEXST.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\SOLTEXST.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\STATISTI\SOLTEXST.CPP >> TC.RSP
+if exist BUILDTC\SOLTEXST.OBJ del BUILDTC\SOLTEXST.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SOLTEXST.OBJ goto error
 
-echo [10/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\GEOMSTAT.CPP
+echo [10/386] Compiling SRC\MAIN\V\T\COMMON\STATISTI\GEOMSTAT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GEOMSTAT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\GEOMSTAT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\STATISTI\GEOMSTAT.CPP >> TC.RSP
+if exist BUILDTC\GEOMSTAT.OBJ del BUILDTC\GEOMSTAT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GEOMSTAT.OBJ goto error
 
-echo [11/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\COLOR\COLORRGB.CPP
+echo [11/386] Compiling SRC\MAIN\V\T\COMMON\COLOR\COLORRGB.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\COLORRGB.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\COLOR\COLORRGB.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\COLOR\COLORRGB.CPP >> TC.RSP
+if exist BUILDTC\COLORRGB.OBJ del BUILDTC\COLORRGB.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\COLORRGB.OBJ goto error
 
-echo [12/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\COMPLEX.CPP
+echo [12/386] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\COMPLEX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\COMPLEX.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\COMPLEX.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\LINEALGE\COMPLEX.CPP >> TC.RSP
+if exist BUILDTC\COMPLEX.OBJ del BUILDTC\COMPLEX.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\COMPLEX.OBJ goto error
 
-echo [13/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\MATRINXM.CPP
+echo [13/386] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATRINXM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MATRINXM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\MATRINXM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\LINEALGE\MATRINXM.CPP >> TC.RSP
+if exist BUILDTC\MATRINXM.OBJ del BUILDTC\MATRINXM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MATRINXM.OBJ goto error
 
-echo [14/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\MATR4X4D.CPP
+echo [14/386] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4D.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MATR4X4D.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\MATR4X4D.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4D.CPP >> TC.RSP
+if exist BUILDTC\MATR4X4D.OBJ del BUILDTC\MATR4X4D.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MATR4X4D.OBJ goto error
 
-echo [15/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\MATR4X4F.CPP
+echo [15/386] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4F.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MATR4X4F.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\MATR4X4F.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4F.CPP >> TC.RSP
+if exist BUILDTC\MATR4X4F.OBJ del BUILDTC\MATR4X4F.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MATR4X4F.OBJ goto error
 
-echo [16/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\ALGEPRIM.CPP
+echo [16/386] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\ALGEPRIM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ALGEPRIM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\ALGEPRIM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\LINEALGE\ALGEPRIM.CPP >> TC.RSP
+if exist BUILDTC\ALGEPRIM.OBJ del BUILDTC\ALGEPRIM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ALGEPRIM.OBJ goto error
 
-echo [17/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\PROCESSI\LINALGEN.CPP
+echo [17/386] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\PROCESSI\LINALGEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\LINALGEN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\LINEALGE\PROCESSI\LINALGEN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\LINEALGE\PROCESSI\LINALGEN.CPP >> TC.RSP
+if exist BUILDTC\LINALGEN.OBJ del BUILDTC\LINALGEN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\LINALGEN.OBJ goto error
 
-echo [18/283] Compiling SRC\MAIN\VSDK\TOOL\PROCESSI\COMPGEOM.CPP
+echo [18/386] Compiling SRC\MAIN\V\T\PROCESSI\COMPGEOM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\COMPGEOM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\PROCESSI\COMPGEOM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\PROCESSI\COMPGEOM.CPP >> TC.RSP
+if exist BUILDTC\COMPGEOM.OBJ del BUILDTC\COMPGEOM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\COMPGEOM.OBJ goto error
 
-echo [19/283] Compiling SRC\MAIN\VSDK\TOOL\NUMEANAL\LOOUPTAB\LOUPTAC1.CPP
+echo [19/386] Compiling SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTAC1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\LOUPTAC1.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\NUMEANAL\LOOUPTAB\LOUPTAC1.CPP >> TC.RSP
+echo SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTAC1.CPP >> TC.RSP
+if exist BUILDTC\LOUPTAC1.OBJ del BUILDTC\LOUPTAC1.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\LOUPTAC1.OBJ goto error
 
-echo [20/283] Compiling SRC\MAIN\VSDK\TOOL\NUMEANAL\LOOUPTAB\LOUPTASI.CPP
+echo [20/386] Compiling SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTASI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\LOUPTASI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\NUMEANAL\LOOUPTAB\LOUPTASI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTASI.CPP >> TC.RSP
+if exist BUILDTC\LOUPTASI.OBJ del BUILDTC\LOUPTASI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\LOUPTASI.OBJ goto error
 
-echo [21/283] Compiling SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\POLYSOLV.CPP
+echo [21/386] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\POLYSOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POLYSOLV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\POLYSOLV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\NUMEANAL\POLYNOMI\POLYSOLV.CPP >> TC.RSP
+if exist BUILDTC\POLYSOLV.OBJ del BUILDTC\POLYSOLV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POLYSOLV.OBJ goto error
 
-echo [22/283] Compiling SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\CUBISOLV.CPP
+echo [22/386] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\CUBISOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CUBISOLV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\CUBISOLV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\NUMEANAL\POLYNOMI\CUBISOLV.CPP >> TC.RSP
+if exist BUILDTC\CUBISOLV.OBJ del BUILDTC\CUBISOLV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CUBISOLV.OBJ goto error
 
-echo [23/283] Compiling SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\QUADSOLV.CPP
+echo [23/386] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUADSOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\QUADSOLV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\QUADSOLV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUADSOLV.CPP >> TC.RSP
+if exist BUILDTC\QUADSOLV.OBJ del BUILDTC\QUADSOLV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\QUADSOLV.OBJ goto error
 
-echo [24/283] Compiling SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\QUARSOLV.CPP
+echo [24/386] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUARSOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\QUARSOLV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\NUMEANAL\POLYNOMI\QUARSOLV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUARSOLV.CPP >> TC.RSP
+if exist BUILDTC\QUARSOLV.OBJ del BUILDTC\QUARSOLV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\QUARSOLV.OBJ goto error
 
-echo [25/283] Compiling SRC\MAIN\JAVA\LANG\OBJECT.CPP
+echo [25/386] Compiling SRC\MAIN\JACKSON\DATABIND\JSONNODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\JSONNODE.OBJ >> TC.RSP
+echo SRC\MAIN\JACKSON\DATABIND\JSONNODE.CPP >> TC.RSP
+if exist BUILDTC\JSONNODE.OBJ del BUILDTC\JSONNODE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\JSONNODE.OBJ goto error
+
+echo [26/386] Compiling SRC\MAIN\JACKSON\DATABIND\OBJEMAPP.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\OBJEMAPP.OBJ >> TC.RSP
+echo SRC\MAIN\JACKSON\DATABIND\OBJEMAPP.CPP >> TC.RSP
+if exist BUILDTC\OBJEMAPP.OBJ del BUILDTC\OBJEMAPP.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\OBJEMAPP.OBJ goto error
+
+echo [27/386] Compiling SRC\MAIN\JAVA\LANG\OBJECT.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\OBJECT.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\OBJECT.CPP >> TC.RSP
+if exist BUILDTC\OBJECT.OBJ del BUILDTC\OBJECT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\OBJECT.OBJ goto error
 
-echo [26/283] Compiling SRC\MAIN\JAVA\LANG\MATH.CPP
+echo [28/386] Compiling SRC\MAIN\JAVA\LANG\MATH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MATH.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\MATH.CPP >> TC.RSP
+if exist BUILDTC\MATH.OBJ del BUILDTC\MATH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MATH.OBJ goto error
 
-echo [27/283] Compiling SRC\MAIN\JAVA\LANG\INTECONS.CPP
+echo [29/386] Compiling SRC\MAIN\JAVA\LANG\INTECONS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INTECONS.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\INTECONS.CPP >> TC.RSP
+if exist BUILDTC\INTECONS.OBJ del BUILDTC\INTECONS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INTECONS.OBJ goto error
 
-echo [28/283] Compiling SRC\MAIN\JAVA\LANG\STRING.CPP
+echo [30/386] Compiling SRC\MAIN\JAVA\LANG\STRING.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\STRING.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\STRING.CPP >> TC.RSP
+if exist BUILDTC\STRING.OBJ del BUILDTC\STRING.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\STRING.OBJ goto error
 
-echo [29/283] Compiling SRC\MAIN\JAVA\LANG\SYSTEM.CPP
+echo [31/386] Compiling SRC\MAIN\JAVA\LANG\SYSTEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SYSTEM.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\SYSTEM.CPP >> TC.RSP
+if exist BUILDTC\SYSTEM.OBJ del BUILDTC\SYSTEM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SYSTEM.OBJ goto error
 
-echo [30/283] Compiling SRC\MAIN\JAVA\LANG\CHARACTE.CPP
+echo [32/386] Compiling SRC\MAIN\JAVA\LANG\CHARACTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CHARACTE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\CHARACTE.CPP >> TC.RSP
+if exist BUILDTC\CHARACTE.OBJ del BUILDTC\CHARACTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CHARACTE.OBJ goto error
 
-echo [31/283] Compiling SRC\MAIN\JAVA\LANG\FLOAT.CPP
+echo [33/386] Compiling SRC\MAIN\JAVA\LANG\FLOAT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FLOAT.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\FLOAT.CPP >> TC.RSP
+if exist BUILDTC\FLOAT.OBJ del BUILDTC\FLOAT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FLOAT.OBJ goto error
 
-echo [32/283] Compiling SRC\MAIN\JAVA\LANG\DOUBLE.CPP
+echo [34/386] Compiling SRC\MAIN\JAVA\LANG\DOUBLE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DOUBLE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\DOUBLE.CPP >> TC.RSP
+if exist BUILDTC\DOUBLE.OBJ del BUILDTC\DOUBLE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DOUBLE.OBJ goto error
 
-echo [33/283] Compiling SRC\MAIN\JAVA\LANG\STRIBUIL.CPP
+echo [35/386] Compiling SRC\MAIN\JAVA\LANG\STRIBUIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\STRIBUIL.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\STRIBUIL.CPP >> TC.RSP
+if exist BUILDTC\STRIBUIL.OBJ del BUILDTC\STRIBUIL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\STRIBUIL.OBJ goto error
 
-echo [34/283] Compiling SRC\MAIN\JAVA\LANG\PROCBUIL.CPP
+echo [36/386] Compiling SRC\MAIN\JAVA\LANG\PROCBUIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PROCBUIL.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\PROCBUIL.CPP >> TC.RSP
+if exist BUILDTC\PROCBUIL.OBJ del BUILDTC\PROCBUIL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PROCBUIL.OBJ goto error
 
-echo [35/283] Compiling SRC\MAIN\JAVA\LANG\THREAD.CPP
+echo [37/386] Compiling SRC\MAIN\JAVA\LANG\THREAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\THREAD.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\LANG\THREAD.CPP >> TC.RSP
+if exist BUILDTC\THREAD.OBJ del BUILDTC\THREAD.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\THREAD.OBJ goto error
 
-echo [36/283] Compiling SRC\MAIN\JAVA\IO\INPUSTRE.CPP
+echo [38/386] Compiling SRC\MAIN\JAVA\IO\INPUSTRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INPUSTRE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\INPUSTRE.CPP >> TC.RSP
+if exist BUILDTC\INPUSTRE.OBJ del BUILDTC\INPUSTRE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INPUSTRE.OBJ goto error
 
-echo [37/283] Compiling SRC\MAIN\JAVA\IO\FILE.CPP
+echo [39/386] Compiling SRC\MAIN\JAVA\IO\FILE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FILE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\FILE.CPP >> TC.RSP
+if exist BUILDTC\FILE.OBJ del BUILDTC\FILE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FILE.OBJ goto error
 
-echo [38/283] Compiling SRC\MAIN\JAVA\IO\FILINPST.CPP
+echo [40/386] Compiling SRC\MAIN\JAVA\IO\FILINPST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FILINPST.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\FILINPST.CPP >> TC.RSP
+if exist BUILDTC\FILINPST.OBJ del BUILDTC\FILINPST.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FILINPST.OBJ goto error
 
-echo [39/283] Compiling SRC\MAIN\JAVA\IO\FILOUTST.CPP
+echo [41/386] Compiling SRC\MAIN\JAVA\IO\FILOUTST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FILOUTST.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\FILOUTST.CPP >> TC.RSP
+if exist BUILDTC\FILOUTST.OBJ del BUILDTC\FILOUTST.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FILOUTST.OBJ goto error
 
-echo [40/283] Compiling SRC\MAIN\JAVA\IO\BUFINPST.CPP
+echo [42/386] Compiling SRC\MAIN\JAVA\IO\BUFINPST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\BUFINPST.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\BUFINPST.CPP >> TC.RSP
+if exist BUILDTC\BUFINPST.OBJ del BUILDTC\BUFINPST.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\BUFINPST.OBJ goto error
 
-echo [41/283] Compiling SRC\MAIN\JAVA\IO\BUFOUTST.CPP
+echo [43/386] Compiling SRC\MAIN\JAVA\IO\BUFOUTST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\BUFOUTST.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\BUFOUTST.CPP >> TC.RSP
+if exist BUILDTC\BUFOUTST.OBJ del BUILDTC\BUFOUTST.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\BUFOUTST.OBJ goto error
 
-echo [42/283] Compiling SRC\MAIN\JAVA\IO\PRINSTRE.CPP
+echo [44/386] Compiling SRC\MAIN\JAVA\IO\PRINSTRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PRINSTRE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\PRINSTRE.CPP >> TC.RSP
+if exist BUILDTC\PRINSTRE.OBJ del BUILDTC\PRINSTRE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PRINSTRE.OBJ goto error
 
-echo [43/283] Compiling SRC\MAIN\JAVA\IO\BUFFREAD.CPP
+echo [45/386] Compiling SRC\MAIN\JAVA\IO\BUFFREAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\BUFFREAD.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\BUFFREAD.CPP >> TC.RSP
+if exist BUILDTC\BUFFREAD.OBJ del BUILDTC\BUFFREAD.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\BUFFREAD.OBJ goto error
 
-echo [44/283] Compiling SRC\MAIN\JAVA\IO\PRINWRIT.CPP
+echo [46/386] Compiling SRC\MAIN\JAVA\IO\PRINWRIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PRINWRIT.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\PRINWRIT.CPP >> TC.RSP
+if exist BUILDTC\PRINWRIT.OBJ del BUILDTC\PRINWRIT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PRINWRIT.OBJ goto error
 
-echo [45/283] Compiling SRC\MAIN\JAVA\IO\READER.CPP
+echo [47/386] Compiling SRC\MAIN\JAVA\IO\READER.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\READER.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\READER.CPP >> TC.RSP
+if exist BUILDTC\READER.OBJ del BUILDTC\READER.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\READER.OBJ goto error
 
-echo [46/283] Compiling SRC\MAIN\JAVA\IO\INPSTRRE.CPP
+echo [48/386] Compiling SRC\MAIN\JAVA\IO\INPSTRRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INPSTRRE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\INPSTRRE.CPP >> TC.RSP
+if exist BUILDTC\INPSTRRE.OBJ del BUILDTC\INPSTRRE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INPSTRRE.OBJ goto error
 
-echo [47/283] Compiling SRC\MAIN\JAVA\IO\FILEREAD.CPP
+echo [49/386] Compiling SRC\MAIN\JAVA\IO\FILEREAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FILEREAD.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\FILEREAD.CPP >> TC.RSP
+if exist BUILDTC\FILEREAD.OBJ del BUILDTC\FILEREAD.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FILEREAD.OBJ goto error
 
-echo [48/283] Compiling SRC\MAIN\JAVA\IO\STRETOKE.CPP
+echo [50/386] Compiling SRC\MAIN\JAVA\IO\STRETOKE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\STRETOKE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\IO\STRETOKE.CPP >> TC.RSP
+if exist BUILDTC\STRETOKE.OBJ del BUILDTC\STRETOKE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\STRETOKE.OBJ goto error
 
-echo [49/283] Compiling SRC\MAIN\JAVA\NIO\FILE\FILES.CPP
+echo [51/386] Compiling SRC\MAIN\JAVA\NIO\FILE\FILES.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FILES.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\NIO\FILE\FILES.CPP >> TC.RSP
+if exist BUILDTC\FILES.OBJ del BUILDTC\FILES.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FILES.OBJ goto error
 
-echo [50/283] Compiling SRC\MAIN\JAVA\UTIL\FORMATTE.CPP
+echo [52/386] Compiling SRC\MAIN\JAVA\UTIL\FORMATTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FORMATTE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\UTIL\FORMATTE.CPP >> TC.RSP
+if exist BUILDTC\FORMATTE.OBJ del BUILDTC\FORMATTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FORMATTE.OBJ goto error
 
-echo [51/283] Compiling SRC\MAIN\JAVA\UTIL\STRITOKE.CPP
+echo [53/386] Compiling SRC\MAIN\JAVA\UTIL\STRITOKE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\STRITOKE.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\UTIL\STRITOKE.CPP >> TC.RSP
+if exist BUILDTC\STRITOKE.OBJ del BUILDTC\STRITOKE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\STRITOKE.OBJ goto error
 
-echo [52/283] Compiling SRC\MAIN\JAVA\UTIL\CONCURRE\EXECUTOR.CPP
+echo [54/386] Compiling SRC\MAIN\JAVA\UTIL\CONCURRE\EXECUTOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\EXECUTOR.OBJ >> TC.RSP
 echo SRC\MAIN\JAVA\UTIL\CONCURRE\EXECUTOR.CPP >> TC.RSP
+if exist BUILDTC\EXECUTOR.OBJ del BUILDTC\EXECUTOR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\EXECUTOR.OBJ goto error
 
-echo [53/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\KEYEVENT.CPP
+echo [55/386] Compiling SRC\MAIN\V\T\GUI\KEYEVENT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\KEYEVENT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\KEYEVENT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\KEYEVENT.CPP >> TC.RSP
+if exist BUILDTC\KEYEVENT.OBJ del BUILDTC\KEYEVENT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\KEYEVENT.OBJ goto error
 
-echo [54/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\MOUSEVEN.CPP
+echo [56/386] Compiling SRC\MAIN\V\T\GUI\MOUSEVEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MOUSEVEN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\MOUSEVEN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\MOUSEVEN.CPP >> TC.RSP
+if exist BUILDTC\MOUSEVEN.OBJ del BUILDTC\MOUSEVEN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MOUSEVEN.OBJ goto error
 
-echo [55/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\LIGIOMBI.CPP
+echo [57/386] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FRAMEBUF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FRAMEBUF.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FRAMEBUF\FRAMEBUF.CPP >> TC.RSP
+if exist BUILDTC\FRAMEBUF.OBJ del BUILDTC\FRAMEBUF.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FRAMEBUF.OBJ goto error
+
+echo [58/386] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBTHEME.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FBTHEME.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FRAMEBUF\FBTHEME.CPP >> TC.RSP
+if exist BUILDTC\FBTHEME.OBJ del BUILDTC\FBTHEME.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FBTHEME.OBJ goto error
+
+echo [59/386] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBPAINT.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FBPAINT.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FRAMEBUF\FBPAINT.CPP >> TC.RSP
+if exist BUILDTC\FBPAINT.OBJ del BUILDTC\FBPAINT.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FBPAINT.OBJ goto error
+
+echo [60/386] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBSNAP.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FBSNAP.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FRAMEBUF\FBSNAP.CPP >> TC.RSP
+if exist BUILDTC\FBSNAP.OBJ del BUILDTC\FBSNAP.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FBSNAP.OBJ goto error
+
+echo [61/386] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENBAR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FBMENBAR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENBAR.CPP >> TC.RSP
+if exist BUILDTC\FBMENBAR.OBJ del BUILDTC\FBMENBAR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FBMENBAR.OBJ goto error
+
+echo [62/386] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENRD.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FBMENRD.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENRD.CPP >> TC.RSP
+if exist BUILDTC\FBMENRD.OBJ del BUILDTC\FBMENRD.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FBMENRD.OBJ goto error
+
+echo [63/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\LIGIOMBI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\LIGIOMBI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\LIGIOMBI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\LIGIOMBI.CPP >> TC.RSP
+if exist BUILDTC\LIGIOMBI.OBJ del BUILDTC\LIGIOMBI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\LIGIOMBI.OBJ goto error
 
-echo [56/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\INFPLAGI.CPP
+echo [64/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\INFPLAGI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INFPLAGI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\INFPLAGI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\INFPLAGI.CPP >> TC.RSP
+if exist BUILDTC\INFPLAGI.OBJ del BUILDTC\INFPLAGI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INFPLAGI.OBJ goto error
 
-echo [57/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\RAYGIZMO.CPP
+echo [65/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\RAYGIZMO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RAYGIZMO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\RAYGIZMO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\RAYGIZMO.CPP >> TC.RSP
+if exist BUILDTC\RAYGIZMO.OBJ del BUILDTC\RAYGIZMO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RAYGIZMO.OBJ goto error
 
-echo [58/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\RAGIINTE.CPP
+echo [66/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\RAGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RAGIINTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\RAGIINTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\RAGIINTE.CPP >> TC.RSP
+if exist BUILDTC\RAGIINTE.OBJ del BUILDTC\RAGIINTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RAGIINTE.OBJ goto error
 
-echo [59/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\TANGINTE\TANINTEV.CPP
+echo [67/386] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TANINTEV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TANINTEV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\TANGINTE\TANINTEV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\TANGINTE\TANINTEV.CPP >> TC.RSP
+if exist BUILDTC\TANINTEV.OBJ del BUILDTC\TANINTEV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TANINTEV.OBJ goto error
 
-echo [60/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\TANGINTE\TIE2IPGM.CPP
+echo [68/386] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TIE2IPGM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TIE2IPGM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\TANGINTE\TIE2IPGM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\TANGINTE\TIE2IPGM.CPP >> TC.RSP
+if exist BUILDTC\TIE2IPGM.OBJ del BUILDTC\TIE2IPGM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TIE2IPGM.OBJ goto error
 
-echo [61/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\TANGINTE\TAIE2RGM.CPP
+echo [69/386] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TAIE2RGM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TAIE2RGM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\TANGINTE\TAIE2RGM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\TANGINTE\TAIE2RGM.CPP >> TC.RSP
+if exist BUILDTC\TAIE2RGM.OBJ del BUILDTC\TAIE2RGM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TAIE2RGM.OBJ goto error
 
-echo [62/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\RENCONCO.CPP
+echo [70/386] Compiling SRC\MAIN\V\T\GUI\RENCONCO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RENCONCO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\RENCONCO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\RENCONCO.CPP >> TC.RSP
+if exist BUILDTC\RENCONCO.OBJ del BUILDTC\RENCONCO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RENCONCO.OBJ goto error
 
-echo [63/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PROMONCO.CPP
+echo [71/386] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PROMONCO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PROMONCO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PROMONCO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FEEDBACK\PROMONCO.CPP >> TC.RSP
+if exist BUILDTC\PROMONCO.OBJ del BUILDTC\PROMONCO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PROMONCO.OBJ goto error
 
-echo [64/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PRMOCOLF.CPP
+echo [72/386] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PRMOCOLF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PRMOCOLF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PRMOCOLF.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FEEDBACK\PRMOCOLF.CPP >> TC.RSP
+if exist BUILDTC\PRMOCOLF.OBJ del BUILDTC\PRMOCOLF.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PRMOCOLF.OBJ goto error
 
-echo [65/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PRMOINRA.CPP
+echo [73/386] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PRMOINRA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PRMOINRA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PRMOINRA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FEEDBACK\PRMOINRA.CPP >> TC.RSP
+if exist BUILDTC\PRMOINRA.OBJ del BUILDTC\PRMOINRA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PRMOINRA.OBJ goto error
 
-echo [66/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PARALLEL\PAPRMOPR.CPP
+echo [74/386] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOPR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PAPRMOPR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PARALLEL\PAPRMOPR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOPR.CPP >> TC.RSP
+if exist BUILDTC\PAPRMOPR.OBJ del BUILDTC\PAPRMOPR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PAPRMOPR.OBJ goto error
 
-echo [67/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PARALLEL\PAPRMOC1.CPP
+echo [75/386] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOC1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PAPRMOC1.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PARALLEL\PAPRMOC1.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOC1.CPP >> TC.RSP
+if exist BUILDTC\PAPRMOC1.OBJ del BUILDTC\PAPRMOC1.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PAPRMOC1.OBJ goto error
 
-echo [68/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\CAMERA\CAMERA.CPP
+echo [76/386] Compiling SRC\MAIN\V\T\ENVI\CAMERA\CAMERA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CAMERA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\CAMERA\CAMERA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\CAMERA\CAMERA.CPP >> TC.RSP
+if exist BUILDTC\CAMERA.OBJ del BUILDTC\CAMERA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CAMERA.OBJ goto error
 
-echo [69/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\SIMPBACK.CPP
+echo [77/386] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\SIMPBACK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SIMPBACK.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\SIMPBACK.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\BACKGROU\SIMPBACK.CPP >> TC.RSP
+if exist BUILDTC\SIMPBACK.OBJ del BUILDTC\SIMPBACK.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SIMPBACK.OBJ goto error
 
-echo [70/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\LIGHT.CPP
+echo [78/386] Compiling SRC\MAIN\V\T\ENVI\LIGHT\LIGHT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\LIGHT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\LIGHT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\LIGHT\LIGHT.CPP >> TC.RSP
+if exist BUILDTC\LIGHT.OBJ del BUILDTC\LIGHT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\LIGHT.OBJ goto error
 
-echo [71/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\AMBILIGH.CPP
+echo [79/386] Compiling SRC\MAIN\V\T\ENVI\LIGHT\AMBILIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\AMBILIGH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\AMBILIGH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\LIGHT\AMBILIGH.CPP >> TC.RSP
+if exist BUILDTC\AMBILIGH.OBJ del BUILDTC\AMBILIGH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\AMBILIGH.OBJ goto error
 
-echo [72/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\DIRELIGH.CPP
+echo [80/386] Compiling SRC\MAIN\V\T\ENVI\LIGHT\DIRELIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DIRELIGH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\DIRELIGH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\LIGHT\DIRELIGH.CPP >> TC.RSP
+if exist BUILDTC\DIRELIGH.OBJ del BUILDTC\DIRELIGH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DIRELIGH.OBJ goto error
 
-echo [73/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\POINLIGH.CPP
+echo [81/386] Compiling SRC\MAIN\V\T\ENVI\LIGHT\POINLIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POINLIGH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\POINLIGH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\LIGHT\POINLIGH.CPP >> TC.RSP
+if exist BUILDTC\POINLIGH.OBJ del BUILDTC\POINLIGH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POINLIGH.OBJ goto error
 
-echo [74/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\SPOTLIGH.CPP
+echo [82/386] Compiling SRC\MAIN\V\T\ENVI\LIGHT\SPOTLIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SPOTLIGH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\LIGHT\SPOTLIGH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\LIGHT\SPOTLIGH.CPP >> TC.RSP
+if exist BUILDTC\SPOTLIGH.OBJ del BUILDTC\SPOTLIGH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SPOTLIGH.OBJ goto error
 
-echo [75/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMPSCEN.CPP
+echo [83/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMPSCEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SIMPSCEN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMPSCEN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\SIMPSCEN.CPP >> TC.RSP
+if exist BUILDTC\SIMPSCEN.OBJ del BUILDTC\SIMPSCEN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SIMPSCEN.OBJ goto error
 
-echo [76/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMSCESN.CPP
+echo [84/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMSCESN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SIMSCESN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMSCESN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\SIMSCESN.CPP >> TC.RSP
+if exist BUILDTC\SIMSCESN.OBJ del BUILDTC\SIMSCESN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SIMSCESN.OBJ goto error
 
-echo [77/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMBODGR.CPP
+echo [85/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMBODGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SIMBODGR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMBODGR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\SIMBODGR.CPP >> TC.RSP
+if exist BUILDTC\SIMBODGR.OBJ del BUILDTC\SIMBODGR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SIMBODGR.OBJ goto error
 
-echo [78/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMPBODY.CPP
+echo [86/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMPBODY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SIMPBODY.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\SCENE\SIMPBODY.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\SIMPBODY.CPP >> TC.RSP
+if exist BUILDTC\SIMPBODY.OBJ del BUILDTC\SIMPBODY.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SIMPBODY.OBJ goto error
 
-echo [79/283] Compiling SRC\MAIN\VSDK\TOOL\PROCESSI\STOPWATC.CPP
+echo [87/386] Compiling SRC\MAIN\V\T\PROCESSI\STOPWATC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\STOPWATC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\PROCESSI\STOPWATC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\PROCESSI\STOPWATC.CPP >> TC.RSP
+if exist BUILDTC\STOPWATC.OBJ del BUILDTC\STOPWATC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\STOPWATC.OBJ goto error
 
-echo [80/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\SYMBALGE\ALGEEXPR.CPP
+echo [88/386] Compiling SRC\MAIN\V\T\COMMON\SYMBALGE\ALGEEXPR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ALGEEXPR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\SYMBALGE\ALGEEXPR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\SYMBALGE\ALGEEXPR.CPP >> TC.RSP
+if exist BUILDTC\ALGEEXPR.OBJ del BUILDTC\ALGEEXPR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ALGEEXPR.OBJ goto error
 
-echo [81/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\RAY.CPP
+echo [89/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RAY.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\RAY.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAY.CPP >> TC.RSP
+if exist BUILDTC\RAY.OBJ del BUILDTC\RAY.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RAY.OBJ goto error
 
-echo [82/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\RAYHIT.CPP
+echo [90/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYHIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RAYHIT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\RAYHIT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYHIT.CPP >> TC.RSP
+if exist BUILDTC\RAYHIT.OBJ del BUILDTC\RAYHIT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RAYHIT.OBJ goto error
 
-echo [83/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\TRIANGLE.CPP
+echo [91/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\TRIANGLE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRIANGLE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\TRIANGLE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\TRIANGLE.CPP >> TC.RSP
+if exist BUILDTC\TRIANGLE.OBJ del BUILDTC\TRIANGLE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRIANGLE.OBJ goto error
 
-echo [84/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\VERTEX.CPP
+echo [92/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VERTEX.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\VERTEX.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX.CPP >> TC.RSP
+if exist BUILDTC\VERTEX.OBJ del BUILDTC\VERTEX.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VERTEX.OBJ goto error
 
-echo [85/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\VERTEX2D.CPP
+echo [93/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX2D.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VERTEX2D.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\ELEMENT\VERTEX2D.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX2D.CPP >> TC.RSP
+if exist BUILDTC\VERTEX2D.OBJ del BUILDTC\VERTEX2D.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VERTEX2D.OBJ goto error
 
-echo [86/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\CURVE\CURVE.CPP
+echo [94/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\CURVE\CURVE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CURVE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\CURVE\CURVE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\CURVE\CURVE.CPP >> TC.RSP
+if exist BUILDTC\CURVE.OBJ del BUILDTC\CURVE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CURVE.OBJ goto error
 
-echo [87/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\CURVE\PARACURV.CPP
+echo [95/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\CURVE\PARACURV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PARACURV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\CURVE\PARACURV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\CURVE\PARACURV.CPP >> TC.RSP
+if exist BUILDTC\PARACURV.OBJ del BUILDTC\PARACURV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PARACURV.OBJ goto error
 
-echo [88/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEOMETRY.CPP
+echo [96/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEOMETRY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GEOMETRY.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEOMETRY.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEOMETRY.CPP >> TC.RSP
+if exist BUILDTC\GEOMETRY.OBJ del BUILDTC\GEOMETRY.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GEOMETRY.OBJ goto error
 
-echo [89/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\SURFACE.CPP
+echo [97/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SURFACE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SURFACE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\SURFACE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SURFACE.CPP >> TC.RSP
+if exist BUILDTC\SURFACE.OBJ del BUILDTC\SURFACE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SURFACE.OBJ goto error
 
-echo [90/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\HALFSPAC.CPP
+echo [98/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\HALFSPAC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\HALFSPAC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\HALFSPAC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\HALFSPAC.CPP >> TC.RSP
+if exist BUILDTC\HALFSPAC.OBJ del BUILDTC\HALFSPAC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\HALFSPAC.OBJ goto error
 
-echo [91/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\INFIPLAN.CPP
+echo [99/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\INFIPLAN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INFIPLAN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\INFIPLAN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\INFIPLAN.CPP >> TC.RSP
+if exist BUILDTC\INFIPLAN.OBJ del BUILDTC\INFIPLAN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INFIPLAN.OBJ goto error
 
-echo [92/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\FUNEXPSU.CPP
+echo [100/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\FUNEXPSU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FUNEXPSU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\FUNEXPSU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\FUNEXPSU.CPP >> TC.RSP
+if exist BUILDTC\FUNEXPSU.OBJ del BUILDTC\FUNEXPSU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FUNEXPSU.OBJ goto error
 
-echo [93/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\MD2MESH.CPP
+echo [101/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\MD2MESH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MD2MESH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\MD2MESH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\MD2MESH.CPP >> TC.RSP
+if exist BUILDTC\MD2MESH.OBJ del BUILDTC\MD2MESH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MD2MESH.OBJ goto error
 
-echo [94/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\PABICUPA.CPP
+echo [102/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\PABICUPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PABICUPA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\PABICUPA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\PABICUPA.CPP >> TC.RSP
+if exist BUILDTC\PABICUPA.OBJ del BUILDTC\PABICUPA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PABICUPA.OBJ goto error
 
-echo [95/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\_PABICPI.CPP
+echo [103/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\_PABICPI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PABICPI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\_PABICPI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\_PABICPI.CPP >> TC.RSP
+if exist BUILDTC\_PABICPI.OBJ del BUILDTC\_PABICPI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PABICPI.OBJ goto error
 
-echo [96/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\TRISTRME.CPP
+echo [104/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRISTRME.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRISTRME.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\TRISTRME.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRISTRME.CPP >> TC.RSP
+if exist BUILDTC\TRISTRME.OBJ del BUILDTC\TRISTRME.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRISTRME.OBJ goto error
 
-echo [97/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\TRIAMESH.CPP
+echo [105/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIAMESH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRIAMESH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\TRIAMESH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIAMESH.CPP >> TC.RSP
+if exist BUILDTC\TRIAMESH.OBJ del BUILDTC\TRIAMESH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRIAMESH.OBJ goto error
 
-echo [98/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\QUADMESH.CPP
+echo [106/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\QUADMESH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\QUADMESH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\QUADMESH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\QUADMESH.CPP >> TC.RSP
+if exist BUILDTC\QUADMESH.OBJ del BUILDTC\QUADMESH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\QUADMESH.OBJ goto error
 
-echo [99/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\TRIMESGR.CPP
+echo [107/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIMESGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRIMESGR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\TRIMESGR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIMESGR.CPP >> TC.RSP
+if exist BUILDTC\TRIMESGR.OBJ del BUILDTC\TRIMESGR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRIMESGR.OBJ goto error
 
-echo [100/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\VOXELIZA.CPP
+echo [108/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\VOXELIZA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VOXELIZA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\VOXELIZA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\VOXELIZA.CPP >> TC.RSP
+if exist BUILDTC\VOXELIZA.OBJ del BUILDTC\VOXELIZA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VOXELIZA.OBJ goto error
 
-echo [101/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\TRIMESVO.CPP
+echo [109/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\TRIMESVO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRIMESVO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\TRIMESVO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\TRIMESVO.CPP >> TC.RSP
+if exist BUILDTC\TRIMESVO.OBJ del BUILDTC\TRIMESVO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRIMESVO.OBJ goto error
 
-echo [102/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\TRMEGRVO.CPP
+echo [110/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\TRMEGRVO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRMEGRVO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\TRMEGRVO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\TRMEGRVO.CPP >> TC.RSP
+if exist BUILDTC\TRMEGRVO.OBJ del BUILDTC\TRMEGRVO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRMEGRVO.OBJ goto error
 
-echo [103/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\FUEXSUVO.CPP
+echo [111/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\FUEXSUVO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FUEXSUVO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\FUEXSUVO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\FUEXSUVO.CPP >> TC.RSP
+if exist BUILDTC\FUEXSUVO.OBJ del BUILDTC\FUEXSUVO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FUEXSUVO.OBJ goto error
 
-echo [104/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\SURRAYIN.CPP
+echo [112/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\SURRAYIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SURRAYIN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\SURRAYIN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\SURRAYIN.CPP >> TC.RSP
+if exist BUILDTC\SURRAYIN.OBJ del BUILDTC\SURRAYIN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SURRAYIN.OBJ goto error
 
-echo [105/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\GEOMTRIA.CPP
+echo [113/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\GEOMTRIA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GEOMTRIA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\GEOMTRIA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\GEOMTRIA.CPP >> TC.RSP
+if exist BUILDTC\GEOMTRIA.OBJ del BUILDTC\GEOMTRIA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GEOMTRIA.OBJ goto error
 
-echo [106/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDECTR.CPP
+echo [114/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDECTR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MONDECTR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDECTR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDECTR.CPP >> TC.RSP
+if exist BUILDTC\MONDECTR.OBJ del BUILDTC\MONDECTR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MONDECTR.OBJ goto error
 
-echo [107/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_COAWPOT.CPP
+echo [115/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_COAWPOT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_COAWPOT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_COAWPOT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_COAWPOT.CPP >> TC.RSP
+if exist BUILDTC\_COAWPOT.OBJ del BUILDTC\_COAWPOT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_COAWPOT.OBJ goto error
 
-echo [108/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_CONSTRU.CPP
+echo [116/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_CONSTRU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_CONSTRU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_CONSTRU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_CONSTRU.CPP >> TC.RSP
+if exist BUILDTC\_CONSTRU.OBJ del BUILDTC\_CONSTRU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_CONSTRU.OBJ goto error
 
-echo [109/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_INCSEIN.CPP
+echo [117/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INCSEIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_INCSEIN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_INCSEIN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INCSEIN.CPP >> TC.RSP
+if exist BUILDTC\_INCSEIN.OBJ del BUILDTC\_INCSEIN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_INCSEIN.OBJ goto error
 
-echo [110/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_INSBASC.CPP
+echo [118/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INSBASC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_INSBASC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_INSBASC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INSBASC.CPP >> TC.RSP
+if exist BUILDTC\_INSBASC.OBJ del BUILDTC\_INSBASC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_INSBASC.OBJ goto error
 
-echo [111/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_MONOTON.CPP
+echo [119/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_MONOTON.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_MONOTON.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_MONOTON.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_MONOTON.CPP >> TC.RSP
+if exist BUILDTC\_MONOTON.OBJ del BUILDTC\_MONOTON.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_MONOTON.OBJ goto error
 
-echo [112/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_RANSEOR.CPP
+echo [120/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_RANSEOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_RANSEOR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_RANSEOR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_RANSEOR.CPP >> TC.RSP
+if exist BUILDTC\_RANSEOR.OBJ del BUILDTC\_RANSEOR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_RANSEOR.OBJ goto error
 
-echo [113/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_SEGTABU.CPP
+echo [121/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_SEGTABU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_SEGTABU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_SEGTABU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_SEGTABU.CPP >> TC.RSP
+if exist BUILDTC\_SEGTABU.OBJ del BUILDTC\_SEGTABU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_SEGTABU.OBJ goto error
 
-echo [114/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_TRIATRA.CPP
+echo [122/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRIATRA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_TRIATRA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_TRIATRA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRIATRA.CPP >> TC.RSP
+if exist BUILDTC\_TRIATRA.OBJ del BUILDTC\_TRIATRA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_TRIATRA.OBJ goto error
 
-echo [115/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_TRTRQUN.CPP
+echo [123/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRTRQUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_TRTRQUN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLTR\MONDE\_TRTRQUN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRTRQUN.CPP >> TC.RSP
+if exist BUILDTC\_TRTRQUN.OBJ del BUILDTC\_TRTRQUN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_TRTRQUN.OBJ goto error
 
-echo [116/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\_POL2DWA.CPP
+echo [124/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\_POL2DWA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POL2DWA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\_POL2DWA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\_POL2DWA.CPP >> TC.RSP
+if exist BUILDTC\_POL2DWA.OBJ del BUILDTC\_POL2DWA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POL2DWA.OBJ goto error
 
-echo [117/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\POLYPROC.CPP
+echo [125/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\POLTOPME.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
-echo -ISRC;SRC\MAIN >> TC.RSP
-echo -oBUILDTC\POLYPROC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\POLYPROC.CPP >> TC.RSP
-tcc @TC.RSP > TC.LOG
-if errorlevel 1 goto error
-
-echo [118/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\POLTOPME.CPP
-echo -c > TC.RSP
-echo -ml >> TC.RSP
-echo -O1 >> TC.RSP
-echo -d >> TC.RSP
-echo -v- >> TC.RSP
-echo -w-inl >> TC.RSP
-echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
-echo -IC:\TURBOC\INCLUDE >> TC.RSP
-echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POLTOPME.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\POLTOPME.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\POLTOPME.CPP >> TC.RSP
+if exist BUILDTC\POLTOPME.OBJ del BUILDTC\POLTOPME.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POLTOPME.OBJ goto error
 
-echo [119/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\WEATPOCL.CPP
+echo [126/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\WEATPOCL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WEATPOCL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\POLYCLIP\WEATPOCL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\WEATPOCL.CPP >> TC.RSP
+if exist BUILDTC\WEATPOCL.OBJ del BUILDTC\WEATPOCL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WEATPOCL.OBJ goto error
 
-echo [120/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\POLYGON\_POL2DCO.CPP
+echo [127/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\_POL2DCO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POL2DCO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\POLYGON\_POL2DCO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\_POL2DCO.CPP >> TC.RSP
+if exist BUILDTC\_POL2DCO.OBJ del BUILDTC\_POL2DCO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POL2DCO.OBJ goto error
 
-echo [121/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\POLYGON\POLYGO2D.CPP
+echo [128/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\POLYGO2D.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POLYGO2D.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\SURFACE\POLYGON\POLYGO2D.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\POLYGO2D.CPP >> TC.RSP
+if exist BUILDTC\POLYGO2D.OBJ del BUILDTC\POLYGO2D.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POLYGO2D.OBJ goto error
 
-echo [122/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\VOLUME.CPP
+echo [129/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOLUME.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VOLUME.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\VOLUME.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOLUME.CPP >> TC.RSP
+if exist BUILDTC\VOLUME.OBJ del BUILDTC\VOLUME.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VOLUME.OBJ goto error
 
-echo [123/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\SOLID.CPP
+echo [130/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SOLID.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SOLID.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\SOLID.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SOLID.CPP >> TC.RSP
+if exist BUILDTC\SOLID.OBJ del BUILDTC\SOLID.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SOLID.OBJ goto error
 
-echo [124/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\SPHERE.CPP
+echo [131/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SPHERE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SPHERE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\SPHERE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SPHERE.CPP >> TC.RSP
+if exist BUILDTC\SPHERE.OBJ del BUILDTC\SPHERE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SPHERE.OBJ goto error
 
-echo [125/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\BOX.CPP
+echo [132/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BOX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\BOX.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\BOX.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BOX.CPP >> TC.RSP
+if exist BUILDTC\BOX.OBJ del BUILDTC\BOX.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\BOX.OBJ goto error
 
-echo [126/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\CONE.CPP
+echo [133/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\CONE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CONE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\CONE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\CONE.CPP >> TC.RSP
+if exist BUILDTC\CONE.OBJ del BUILDTC\CONE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CONE.OBJ goto error
 
-echo [127/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\ARROW.CPP
+echo [134/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ARROW.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ARROW.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\ARROW.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ARROW.CPP >> TC.RSP
+if exist BUILDTC\ARROW.OBJ del BUILDTC\ARROW.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ARROW.OBJ goto error
 
-echo [128/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\TORUS.CPP
+echo [135/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\TORUS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TORUS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\TORUS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\TORUS.CPP >> TC.RSP
+if exist BUILDTC\TORUS.OBJ del BUILDTC\TORUS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TORUS.OBJ goto error
 
-echo [129/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\VOXEVOLU.CPP
+echo [136/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOXEVOLU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VOXEVOLU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\VOXEVOLU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOXEVOLU.CPP >> TC.RSP
+if exist BUILDTC\VOXEVOLU.OBJ del BUILDTC\VOXEVOLU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VOXEVOLU.OBJ goto error
 
-echo [130/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POLBOUSO.CPP
+echo [137/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POLBOUSO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POLBOUSO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POLBOUSO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POLBOUSO.CPP >> TC.RSP
+if exist BUILDTC\POLBOUSO.OBJ del BUILDTC\POLBOUSO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POLBOUSO.OBJ goto error
 
-echo [131/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOEO.CPP
+echo [138/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOEO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOEO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEO.CPP >> TC.RSP
+if exist BUILDTC\POBOSOEO.OBJ del BUILDTC\POBOSOEO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOEO.OBJ goto error
 
-echo [132/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSONP.CPP
+echo [139/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSONP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSONP.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSONP.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSONP.CPP >> TC.RSP
+if exist BUILDTC\POBOSONP.OBJ del BUILDTC\POBOSONP.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSONP.OBJ goto error
 
-echo [133/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOPR.CPP
+echo [140/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOPR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOPR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOPR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOPR.CPP >> TC.RSP
+if exist BUILDTC\POBOSOPR.OBJ del BUILDTC\POBOSOPR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOPR.OBJ goto error
 
-echo [134/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOGV.CPP
+echo [141/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOGV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOGV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOGV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOGV.CPP >> TC.RSP
+if exist BUILDTC\POBOSOGV.OBJ del BUILDTC\POBOSOGV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOGV.OBJ goto error
 
-echo [135/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOVE.CPP
+echo [142/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOVE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOVE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOVE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOVE.CPP >> TC.RSP
+if exist BUILDTC\POBOSOVE.OBJ del BUILDTC\POBOSOVE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOVE.OBJ goto error
 
-echo [136/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOTE.CPP
+echo [143/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTE.CPP >> TC.RSP
+if exist BUILDTC\POBOSOTE.OBJ del BUILDTC\POBOSOTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOTE.OBJ goto error
 
-echo [137/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\_POBOSTV.CPP
+echo [144/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOFG.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\POBOSOFG.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOFG.CPP >> TC.RSP
+if exist BUILDTC\POBOSOFG.OBJ del BUILDTC\POBOSOFG.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOFG.OBJ goto error
+
+echo [145/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSORE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\POBOSORE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSORE.CPP >> TC.RSP
+if exist BUILDTC\POBOSORE.OBJ del BUILDTC\POBOSORE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\POBOSORE.OBJ goto error
+
+echo [146/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSTV.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSTV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\_POBOSTV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSTV.CPP >> TC.RSP
+if exist BUILDTC\_POBOSTV.OBJ del BUILDTC\_POBOSTV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSTV.OBJ goto error
 
-echo [138/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\_POBSBTP.CPP
+echo [147/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBSBTP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBSBTP.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\_POBSBTP.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBSBTP.CPP >> TC.RSP
+if exist BUILDTC\_POBSBTP.OBJ del BUILDTC\_POBSBTP.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBSBTP.OBJ goto error
 
-echo [139/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\_POBOSVS.CPP
+echo [148/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSVS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSVS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\_POBOSVS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSVS.CPP >> TC.RSP
+if exist BUILDTC\_POBOSVS.OBJ del BUILDTC\_POBOSVS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSVS.OBJ goto error
 
-echo [140/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOTS.CPP
+echo [149/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOTS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\POBOSOTS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTS.CPP >> TC.RSP
+if exist BUILDTC\POBOSOTS.OBJ del BUILDTC\POBOSOTS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOTS.OBJ goto error
 
-echo [141/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOE.CPP
+echo [150/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSOE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOE.CPP >> TC.RSP
+if exist BUILDTC\_POBOSOE.OBJ del BUILDTC\_POBOSOE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSOE.OBJ goto error
 
-echo [142/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSHE.CPP
+echo [151/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSHE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSHE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSHE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSHE.CPP >> TC.RSP
+if exist BUILDTC\_POBOSHE.OBJ del BUILDTC\_POBOSHE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSHE.OBJ goto error
 
-echo [143/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOL.CPP
+echo [152/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSOL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOL.CPP >> TC.RSP
+if exist BUILDTC\_POBOSOL.OBJ del BUILDTC\_POBOSOL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSOL.OBJ goto error
 
-echo [144/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOF.CPP
+echo [153/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSOF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOF.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOF.CPP >> TC.RSP
+if exist BUILDTC\_POBOSOF.OBJ del BUILDTC\_POBOSOF.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSOF.OBJ goto error
 
-echo [145/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBSNTS.CPP
+echo [154/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBSNTS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBSNTS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\VOLUM\POBS\NODE\_POBSNTS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBSNTS.CPP >> TC.RSP
+if exist BUILDTC\_POBSNTS.OBJ del BUILDTC\_POBSNTS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBSNTS.OBJ goto error
 
-echo [146/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\CAMCONAQ.CPP
+echo [155/386] Compiling SRC\MAIN\V\T\GUI\CAMCONAQ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CAMCONAQ.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\CAMCONAQ.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\CAMCONAQ.CPP >> TC.RSP
+if exist BUILDTC\CAMCONAQ.OBJ del BUILDTC\CAMCONAQ.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CAMCONAQ.OBJ goto error
 
-echo [147/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\CAMCONOR.CPP
+echo [156/386] Compiling SRC\MAIN\V\T\GUI\CAMCONOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CAMCONOR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\CAMCONOR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\CAMCONOR.CPP >> TC.RSP
+if exist BUILDTC\CAMCONOR.OBJ del BUILDTC\CAMCONOR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CAMCONOR.OBJ goto error
 
-echo [148/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\CAMCONBL.CPP
+echo [157/386] Compiling SRC\MAIN\V\T\GUI\CAMCONBL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CAMCONBL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\CAMCONBL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\CAMCONBL.CPP >> TC.RSP
+if exist BUILDTC\CAMCONBL.OBJ del BUILDTC\CAMCONBL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CAMCONBL.OBJ goto error
 
-echo [149/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\CACOGOEA.CPP
+echo [158/386] Compiling SRC\MAIN\V\T\GUI\CACOGOEA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CACOGOEA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\CACOGOEA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\CACOGOEA.CPP >> TC.RSP
+if exist BUILDTC\CACOGOEA.OBJ del BUILDTC\CACOGOEA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CACOGOEA.OBJ goto error
 
-echo [150/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\TRACWORK.CPP
+echo [159/386] Compiling SRC\MAIN\V\T\RENDER\TRACWORK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRACWORK.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\TRACWORK.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\TRACWORK.CPP >> TC.RSP
+if exist BUILDTC\TRACWORK.OBJ del BUILDTC\TRACWORK.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRACWORK.OBJ goto error
 
-echo [152/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\DEPBUFEN.CPP
+echo [160/386] Compiling SRC\MAIN\V\T\RENDER\SPHPOLCA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SPHPOLCA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SPHPOLCA.CPP >> TC.RSP
+if exist BUILDTC\SPHPOLCA.OBJ del BUILDTC\SPHPOLCA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SPHPOLCA.OBJ goto error
+
+echo [161/386] Compiling SRC\MAIN\V\T\RENDER\FRAMEBUF\FRGI2DDR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FRGI2DDR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\FRAMEBUF\FRGI2DDR.CPP >> TC.RSP
+if exist BUILDTC\FRGI2DDR.OBJ del BUILDTC\FRGI2DDR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FRGI2DDR.OBJ goto error
+
+echo [162/386] Compiling SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DDRL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\GIZ2DDRL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DDRL.CPP >> TC.RSP
+if exist BUILDTC\GIZ2DDRL.OBJ del BUILDTC\GIZ2DDRL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\GIZ2DDRL.OBJ goto error
+
+echo [163/386] Compiling SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DPRO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\GIZ2DPRO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DPRO.CPP >> TC.RSP
+if exist BUILDTC\GIZ2DPRO.OBJ del BUILDTC\GIZ2DPRO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\GIZ2DPRO.OBJ goto error
+
+echo [164/386] Compiling SRC\MAIN\V\T\RENDER\GIZMO\INGI2DPA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\INGI2DPA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\GIZMO\INGI2DPA.CPP >> TC.RSP
+if exist BUILDTC\INGI2DPA.OBJ del BUILDTC\INGI2DPA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\INGI2DPA.OBJ goto error
+
+echo [165/386] Compiling SRC\MAIN\V\T\RENDER\GIZMO\ROGI2DPA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\ROGI2DPA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\GIZMO\ROGI2DPA.CPP >> TC.RSP
+if exist BUILDTC\ROGI2DPA.OBJ del BUILDTC\ROGI2DPA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\ROGI2DPA.OBJ goto error
+
+echo [166/386] Compiling SRC\MAIN\V\T\RENDER\GIZMO\SCGI2DPA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SCGI2DPA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\GIZMO\SCGI2DPA.CPP >> TC.RSP
+if exist BUILDTC\SCGI2DPA.OBJ del BUILDTC\SCGI2DPA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SCGI2DPA.OBJ goto error
+
+echo [167/386] Compiling SRC\MAIN\V\T\RENDER\GIZMO\TRGI2DPA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\TRGI2DPA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\GIZMO\TRGI2DPA.CPP >> TC.RSP
+if exist BUILDTC\TRGI2DPA.OBJ del BUILDTC\TRGI2DPA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\TRGI2DPA.OBJ goto error
+
+echo [168/386] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\DEPBUFEN.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DEPBUFEN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\DEPBUFEN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\RAYTRACI\DEPBUFEN.CPP >> TC.RSP
+if exist BUILDTC\DEPBUFEN.OBJ del BUILDTC\DEPBUFEN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DEPBUFEN.OBJ goto error
 
-echo [153/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\PARARAYT.CPP
+echo [169/386] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\PARARAYT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PARARAYT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\PARARAYT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\RAYTRACI\PARARAYT.CPP >> TC.RSP
+if exist BUILDTC\PARARAYT.OBJ del BUILDTC\PARARAYT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PARARAYT.OBJ goto error
 
-echo [154/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\RASTILAR.CPP
+echo [170/386] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILAR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RASTILAR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\RASTILAR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILAR.CPP >> TC.RSP
+if exist BUILDTC\RASTILAR.OBJ del BUILDTC\RASTILAR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RASTILAR.OBJ goto error
 
-echo [155/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\RASTILGE.CPP
+echo [171/386] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILGE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RASTILGE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\RASTILGE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILGE.CPP >> TC.RSP
+if exist BUILDTC\RASTILGE.OBJ del BUILDTC\RASTILGE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RASTILGE.OBJ goto error
 
-echo [156/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\SIMPRAYT.CPP
+echo [172/386] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\SIMPRAYT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SIMPRAYT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\RAYTRACI\SIMPRAYT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\RAYTRACI\SIMPRAYT.CPP >> TC.RSP
+if exist BUILDTC\SIMPRAYT.OBJ del BUILDTC\SIMPRAYT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SIMPRAYT.OBJ goto error
 
-echo [157/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\AUTSTEGE.CPP
+echo [173/386] Compiling SRC\MAIN\V\T\RENDER\AUTSTEGE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\AUTSTEGE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\AUTSTEGE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\AUTSTEGE.CPP >> TC.RSP
+if exist BUILDTC\AUTSTEGE.OBJ del BUILDTC\AUTSTEGE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\AUTSTEGE.OBJ goto error
 
-echo [158/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\HIDDLINE\HIDLINRE.CPP
+echo [174/386] Compiling SRC\MAIN\V\T\RENDER\HIDDLINE\HIDLINRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\HIDLINRE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\HIDDLINE\HIDLINRE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\HIDDLINE\HIDLINRE.CPP >> TC.RSP
+if exist BUILDTC\HIDLINRE.OBJ del BUILDTC\HIDLINRE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\HIDLINRE.OBJ goto error
 
-echo [159/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\RASTER\RASTER2D.CPP
+echo [175/386] Compiling SRC\MAIN\V\T\RENDER\DITHERIN\DITHERIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\DITHERIN.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\DITHERIN\DITHERIN.CPP >> TC.RSP
+if exist BUILDTC\DITHERIN.OBJ del BUILDTC\DITHERIN.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\DITHERIN.OBJ goto error
+
+echo [176/386] Compiling SRC\MAIN\V\T\RENDER\RASTER\RASTER2D.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RASTER2D.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\RASTER\RASTER2D.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\RASTER\RASTER2D.CPP >> TC.RSP
+if exist BUILDTC\RASTER2D.OBJ del BUILDTC\RASTER2D.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RASTER2D.OBJ goto error
 
-echo [160/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\HIDDLINE\WIREREND.CPP
+echo [177/386] Compiling SRC\MAIN\V\T\RENDER\HIDDLINE\WIREREND.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIREREND.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\HIDDLINE\WIREREND.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\HIDDLINE\WIREREND.CPP >> TC.RSP
+if exist BUILDTC\WIREREND.OBJ del BUILDTC\WIREREND.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIREREND.OBJ goto error
 
-echo [161/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\POBOSODE.CPP
+echo [178/386] Compiling SRC\MAIN\V\T\RENDER\POBOSODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSODE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\POBOSODE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\POBOSODE.CPP >> TC.RSP
+if exist BUILDTC\POBOSODE.OBJ del BUILDTC\POBOSODE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSODE.OBJ goto error
 
-echo [162/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\CPTESACO.CPP
+echo [179/386] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CPTESACO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CPTESACO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\CPTESACO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SHADERS\CPTESACO.CPP >> TC.RSP
+if exist BUILDTC\CPTESACO.OBJ del BUILDTC\CPTESACO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CPTESACO.OBJ goto error
 
-echo [163/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\LIGHSHAD.CPP
+echo [180/386] Compiling SRC\MAIN\V\T\RENDER\SHADERS\LIGHSHAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\LIGHSHAD.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\LIGHSHAD.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SHADERS\LIGHSHAD.CPP >> TC.RSP
+if exist BUILDTC\LIGHSHAD.OBJ del BUILDTC\LIGHSHAD.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\LIGHSHAD.OBJ goto error
 
-echo [164/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\CONSSHAD.CPP
+echo [181/386] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CONSSHAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CONSSHAD.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\CONSSHAD.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SHADERS\CONSSHAD.CPP >> TC.RSP
+if exist BUILDTC\CONSSHAD.OBJ del BUILDTC\CONSSHAD.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CONSSHAD.OBJ goto error
 
-echo [165/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\CONTEXSH.CPP
+echo [182/386] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CONTEXSH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CONTEXSH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\CONTEXSH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SHADERS\CONTEXSH.CPP >> TC.RSP
+if exist BUILDTC\CONTEXSH.OBJ del BUILDTC\CONTEXSH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CONTEXSH.OBJ goto error
 
-echo [166/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\COOTORSH.CPP
+echo [183/386] Compiling SRC\MAIN\V\T\RENDER\SHADERS\COOTORSH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\COOTORSH.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\COOTORSH.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SHADERS\COOTORSH.CPP >> TC.RSP
+if exist BUILDTC\COOTORSH.OBJ del BUILDTC\COOTORSH.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\COOTORSH.OBJ goto error
 
-echo [167/283] Compiling SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\SHADSELE.CPP
+echo [184/386] Compiling SRC\MAIN\V\T\RENDER\SHADERS\SHADSELE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SHADSELE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\RENDER\SHADERS\SHADSELE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SHADERS\SHADSELE.CPP >> TC.RSP
+if exist BUILDTC\SHADSELE.OBJ del BUILDTC\SHADSELE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SHADSELE.OBJ goto error
 
-echo [168/283] Compiling SRC\MAIN\VSDK\TOOL\IO\PERSELEM.CPP
+echo [185/386] Compiling SRC\MAIN\V\T\IO\PERSELEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PERSELEM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\PERSELEM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\PERSELEM.CPP >> TC.RSP
+if exist BUILDTC\PERSELEM.OBJ del BUILDTC\PERSELEM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PERSELEM.OBJ goto error
 
-echo [169/283] Compiling SRC\MAIN\VSDK\TOOL\IO\FILELOCA.CPP
+echo [186/386] Compiling SRC\MAIN\V\T\IO\FILELOCA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FILELOCA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\FILELOCA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\FILELOCA.CPP >> TC.RSP
+if exist BUILDTC\FILELOCA.OBJ del BUILDTC\FILELOCA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FILELOCA.OBJ goto error
 
-echo [170/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GUI\DIALPERS.CPP
+echo [187/386] Compiling SRC\MAIN\V\T\IO\GUI\DIALPERS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DIALPERS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GUI\DIALPERS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GUI\DIALPERS.CPP >> TC.RSP
+if exist BUILDTC\DIALPERS.OBJ del BUILDTC\DIALPERS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DIALPERS.OBJ goto error
 
-echo [171/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\ENVIPERS.CPP
+echo [188/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\ENVIPERS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ENVIPERS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\ENVIPERS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\ENVIPERS.CPP >> TC.RSP
+if exist BUILDTC\ENVIPERS.OBJ del BUILDTC\ENVIPERS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ENVIPERS.OBJ goto error
 
-echo [172/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\WRITEOBJ.CPP
+echo [189/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEOBJ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WRITEOBJ.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\WRITEOBJ.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\WRITEOBJ.CPP >> TC.RSP
+if exist BUILDTC\WRITEOBJ.OBJ del BUILDTC\WRITEOBJ.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WRITEOBJ.OBJ goto error
 
-echo [173/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\WRITEGTS.CPP
+echo [190/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEGTS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WRITEGTS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\WRITEGTS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\WRITEGTS.CPP >> TC.RSP
+if exist BUILDTC\WRITEGTS.OBJ del BUILDTC\WRITEGTS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WRITEGTS.OBJ goto error
 
-echo [174/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\WRITEVTK.CPP
+echo [191/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEVTK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WRITEVTK.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\WRITEVTK.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\WRITEVTK.CPP >> TC.RSP
+if exist BUILDTC\WRITEVTK.OBJ del BUILDTC\WRITEVTK.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WRITEVTK.OBJ goto error
 
-echo [175/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\READEOBJ.CPP
+echo [192/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READEOBJ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\READEOBJ.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\READEOBJ.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\READEOBJ.CPP >> TC.RSP
+if exist BUILDTC\READEOBJ.OBJ del BUILDTC\READEOBJ.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\READEOBJ.OBJ goto error
 
-echo [176/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\READEPLY.CPP
+echo [193/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READEPLY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\READEPLY.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\READEPLY.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\READEPLY.CPP >> TC.RSP
+if exist BUILDTC\READEPLY.OBJ del BUILDTC\READEPLY.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\READEPLY.OBJ goto error
 
-echo [177/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\REAPLYRE.CPP
+echo [194/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REAPLYRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\REAPLYRE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\REAPLYRE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\REAPLYRE.CPP >> TC.RSP
+if exist BUILDTC\REAPLYRE.OBJ del BUILDTC\REAPLYRE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\REAPLYRE.OBJ goto error
 
-echo [178/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\REAMITSC.CPP
+echo [195/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REAMITSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\REAMITSC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\REAMITSC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\REAMITSC.CPP >> TC.RSP
+if exist BUILDTC\REAMITSC.OBJ del BUILDTC\REAMITSC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\REAMITSC.OBJ goto error
 
-echo [179/283] Compiling SRC\MAIN\VSDK\TOOL\IO\IMAGE\IMAGPERS.CPP
+echo [196/386] Compiling SRC\MAIN\V\T\IO\IMAGE\IMAGPERS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\IMAGPERS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\IMAGE\IMAGPERS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\IMAGE\IMAGPERS.CPP >> TC.RSP
+if exist BUILDTC\IMAGPERS.OBJ del BUILDTC\IMAGPERS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\IMAGPERS.OBJ goto error
 
-echo [180/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\TEXTUTIL.CPP
+echo [197/386] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\TEXTUTIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TEXTUTIL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\TEXTUTIL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SOLITEXT\TEXTUTIL.CPP >> TC.RSP
+if exist BUILDTC\TEXTUTIL.OBJ del BUILDTC\TEXTUTIL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TEXTUTIL.OBJ goto error
 
-echo [181/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\FROM2D\CORGIMHU.CPP
+echo [198/386] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\CORGIMHU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CORGIMHU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\FROM2D\CORGIMHU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\CORGIMHU.CPP >> TC.RSP
+if exist BUILDTC\CORGIMHU.OBJ del BUILDTC\CORGIMHU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CORGIMHU.OBJ goto error
 
-echo [182/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\FROM2D\IMAGTEXT.CPP
+echo [199/386] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\IMAGTEXT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\IMAGTEXT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\FROM2D\IMAGTEXT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\IMAGTEXT.CPP >> TC.RSP
+if exist BUILDTC\IMAGTEXT.OBJ del BUILDTC\IMAGTEXT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\IMAGTEXT.OBJ goto error
 
-echo [183/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\FROM2D\SOTECOMA.CPP
+echo [200/386] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\SOTECOMA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SOTECOMA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\FROM2D\SOTECOMA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\SOTECOMA.CPP >> TC.RSP
+if exist BUILDTC\SOTECOMA.OBJ del BUILDTC\SOTECOMA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SOTECOMA.OBJ goto error
 
-echo [184/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\PROCEDUR\BUMTEXFI.CPP
+echo [201/386] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\BUMTEXFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\BUMTEXFI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\PROCEDUR\BUMTEXFI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\BUMTEXFI.CPP >> TC.RSP
+if exist BUILDTC\BUMTEXFI.OBJ del BUILDTC\BUMTEXFI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\BUMTEXFI.OBJ goto error
 
-echo [185/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\PROCEDUR\COLTEXFI.CPP
+echo [202/386] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\COLTEXFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\COLTEXFI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\PROCEDUR\COLTEXFI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\COLTEXFI.CPP >> TC.RSP
+if exist BUILDTC\COLTEXFI.OBJ del BUILDTC\COLTEXFI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\COLTEXFI.OBJ goto error
 
-echo [186/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\PROCEDUR\PROCNOIS.CPP
+echo [203/386] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\PROCNOIS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PROCNOIS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SOLITEXT\PROCEDUR\PROCNOIS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\PROCNOIS.CPP >> TC.RSP
+if exist BUILDTC\PROCNOIS.OBJ del BUILDTC\PROCNOIS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PROCNOIS.OBJ goto error
 
-echo [187/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGBPIXEL.CPP
+echo [204/386] Compiling SRC\MAIN\V\T\MEDIA\RGBPIXEL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGBPIXEL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGBPIXEL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGBPIXEL.CPP >> TC.RSP
+if exist BUILDTC\RGBPIXEL.OBJ del BUILDTC\RGBPIXEL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGBPIXEL.OBJ goto error
 
-echo [188/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGBAPIXE.CPP
+echo [205/386] Compiling SRC\MAIN\V\T\MEDIA\RGBAPIXE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGBAPIXE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGBAPIXE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGBAPIXE.CPP >> TC.RSP
+if exist BUILDTC\RGBAPIXE.OBJ del BUILDTC\RGBAPIXE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGBAPIXE.OBJ goto error
 
-echo [189/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\SHAPDESC.CPP
+echo [206/386] Compiling SRC\MAIN\V\T\MEDIA\SHAPDESC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SHAPDESC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\SHAPDESC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\SHAPDESC.CPP >> TC.RSP
+if exist BUILDTC\SHAPDESC.OBJ del BUILDTC\SHAPDESC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SHAPDESC.OBJ goto error
 
-echo [190/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGBCOLP1.CPP
+echo [207/386] Compiling SRC\MAIN\V\T\MEDIA\RGBCOLP1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGBCOLP1.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGBCOLP1.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGBCOLP1.CPP >> TC.RSP
+if exist BUILDTC\RGBCOLP1.OBJ del BUILDTC\RGBCOLP1.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGBCOLP1.OBJ goto error
 
-echo [191/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGBCOLPA.CPP
+echo [208/386] Compiling SRC\MAIN\V\T\MEDIA\RGBCOLPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGBCOLPA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGBCOLPA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGBCOLPA.CPP >> TC.RSP
+if exist BUILDTC\RGBCOLPA.OBJ del BUILDTC\RGBCOLPA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGBCOLPA.OBJ goto error
 
-echo [192/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGPRCOPA.CPP
+echo [209/386] Compiling SRC\MAIN\V\T\MEDIA\RGPRCOPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGPRCOPA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGPRCOPA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGPRCOPA.CPP >> TC.RSP
+if exist BUILDTC\RGPRCOPA.OBJ del BUILDTC\RGPRCOPA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGPRCOPA.OBJ goto error
 
-echo [193/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\GRASCAPA.CPP
+echo [210/386] Compiling SRC\MAIN\V\T\MEDIA\GRASCAPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GRASCAPA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\GRASCAPA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\GRASCAPA.CPP >> TC.RSP
+if exist BUILDTC\GRASCAPA.OBJ del BUILDTC\GRASCAPA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GRASCAPA.OBJ goto error
 
-echo [194/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\IMAGE.CPP
+echo [211/386] Compiling SRC\MAIN\V\T\MEDIA\IMAGE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\IMAGE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\IMAGE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\IMAGE.CPP >> TC.RSP
+if exist BUILDTC\IMAGE.OBJ del BUILDTC\IMAGE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\IMAGE.OBJ goto error
 
-echo [195/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGBIMAU1.CPP
+echo [212/386] Compiling SRC\MAIN\V\T\MEDIA\RGBIMAU1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGBIMAU1.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGBIMAU1.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGBIMAU1.CPP >> TC.RSP
+if exist BUILDTC\RGBIMAU1.OBJ del BUILDTC\RGBIMAU1.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGBIMAU1.OBJ goto error
 
-echo [196/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGBIMAUN.CPP
+echo [213/386] Compiling SRC\MAIN\V\T\MEDIA\RGBIMAUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGBIMAUN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGBIMAUN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGBIMAUN.CPP >> TC.RSP
+if exist BUILDTC\RGBIMAUN.OBJ del BUILDTC\RGBIMAUN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGBIMAUN.OBJ goto error
 
-echo [197/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGIMHDUN.CPP
+echo [214/386] Compiling SRC\MAIN\V\T\MEDIA\RGIMHDUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGIMHDUN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGIMHDUN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGIMHDUN.CPP >> TC.RSP
+if exist BUILDTC\RGIMHDUN.OBJ del BUILDTC\RGIMHDUN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGIMHDUN.OBJ goto error
 
-echo [198/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\INCOIMUN.CPP
+echo [215/386] Compiling SRC\MAIN\V\T\MEDIA\INCOIMUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INCOIMUN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\INCOIMUN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\INCOIMUN.CPP >> TC.RSP
+if exist BUILDTC\INCOIMUN.OBJ del BUILDTC\INCOIMUN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INCOIMUN.OBJ goto error
 
-echo [199/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\INCOIMHU.CPP
+echo [216/386] Compiling SRC\MAIN\V\T\MEDIA\INCOIMHU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INCOIMHU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\INCOIMHU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\INCOIMHU.CPP >> TC.RSP
+if exist BUILDTC\INCOIMHU.OBJ del BUILDTC\INCOIMHU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INCOIMHU.OBJ goto error
 
-echo [200/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\RGBIMACO.CPP
+echo [217/386] Compiling SRC\MAIN\V\T\MEDIA\RGBIMACO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGBIMACO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\RGBIMACO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\RGBIMACO.CPP >> TC.RSP
+if exist BUILDTC\RGBIMACO.OBJ del BUILDTC\RGBIMACO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGBIMACO.OBJ goto error
 
-echo [201/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\ZBUFFER.CPP
+echo [218/386] Compiling SRC\MAIN\V\T\MEDIA\ZBUFFER.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ZBUFFER.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\ZBUFFER.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\ZBUFFER.CPP >> TC.RSP
+if exist BUILDTC\ZBUFFER.OBJ del BUILDTC\ZBUFFER.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ZBUFFER.OBJ goto error
 
-echo [202/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\NORMAMAP.CPP
+echo [219/386] Compiling SRC\MAIN\V\T\MEDIA\NORMAMAP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\NORMAMAP.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\NORMAMAP.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\NORMAMAP.CPP >> TC.RSP
+if exist BUILDTC\NORMAMAP.OBJ del BUILDTC\NORMAMAP.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\NORMAMAP.OBJ goto error
 
-echo [203/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\CAL2DBUF.CPP
+echo [220/386] Compiling SRC\MAIN\V\T\MEDIA\CAL2DBUF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CAL2DBUF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\CAL2DBUF.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\CAL2DBUF.CPP >> TC.RSP
+if exist BUILDTC\CAL2DBUF.OBJ del BUILDTC\CAL2DBUF.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CAL2DBUF.OBJ goto error
 
-echo [204/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\PRCOSHDE.CPP
+echo [221/386] Compiling SRC\MAIN\V\T\MEDIA\PRCOSHDE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PRCOSHDE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\PRCOSHDE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\PRCOSHDE.CPP >> TC.RSP
+if exist BUILDTC\PRCOSHDE.OBJ del BUILDTC\PRCOSHDE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PRCOSHDE.OBJ goto error
 
-echo [205/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\FOUSHADE.CPP
+echo [222/386] Compiling SRC\MAIN\V\T\MEDIA\FOUSHADE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FOUSHADE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\FOUSHADE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\FOUSHADE.CPP >> TC.RSP
+if exist BUILDTC\FOUSHADE.OBJ del BUILDTC\FOUSHADE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FOUSHADE.OBJ goto error
 
-echo [206/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\GEOMMETA.CPP
+echo [223/386] Compiling SRC\MAIN\V\T\MEDIA\GEOMMETA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GEOMMETA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\GEOMMETA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\GEOMMETA.CPP >> TC.RSP
+if exist BUILDTC\GEOMMETA.OBJ del BUILDTC\GEOMMETA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GEOMMETA.OBJ goto error
 
-echo [207/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\SIMPMATE.CPP
+echo [224/386] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SIMPMATE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SIMPMATE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\SIMPMATE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\MATERIAL\SIMPMATE.CPP >> TC.RSP
+if exist BUILDTC\SIMPMATE.OBJ del BUILDTC\SIMPMATE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SIMPMATE.OBJ goto error
 
-echo [208/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\MICFACMA.CPP
+echo [225/386] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\MICFACMA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MICFACMA.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\MICFACMA.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\MATERIAL\MICFACMA.CPP >> TC.RSP
+if exist BUILDTC\MICFACMA.OBJ del BUILDTC\MICFACMA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MICFACMA.OBJ goto error
 
-echo [209/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\SHADTYPE.CPP
+echo [226/386] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SHADTYPE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SHADTYPE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\SHADTYPE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\MATERIAL\SHADTYPE.CPP >> TC.RSP
+if exist BUILDTC\SHADTYPE.OBJ del BUILDTC\SHADTYPE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SHADTYPE.OBJ goto error
 
-echo [210/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\RENDCONF.CPP
+echo [227/386] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\RENDCONF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RENDCONF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\MATERIAL\RENDCONF.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\MATERIAL\RENDCONF.CPP >> TC.RSP
+if exist BUILDTC\RENDCONF.OBJ del BUILDTC\RENDCONF.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RENDCONF.OBJ goto error
 
-echo [211/283] Compiling SRC\MAIN\VSDK\TOOL\PROCESSI\CURVMODE.CPP
+echo [228/386] Compiling SRC\MAIN\V\T\PROCESSI\CURVMODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CURVMODE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\PROCESSI\CURVMODE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\PROCESSI\CURVMODE.CPP >> TC.RSP
+if exist BUILDTC\CURVMODE.OBJ del BUILDTC\CURVMODE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CURVMODE.OBJ goto error
 
-echo [212/283] Compiling SRC\MAIN\VSDK\TOOL\PROCESSI\IMAGPROC.CPP
+echo [229/386] Compiling SRC\MAIN\V\T\PROCESSI\IMAGPROC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\IMAGPROC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\PROCESSI\IMAGPROC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\PROCESSI\IMAGPROC.CPP >> TC.RSP
+if exist BUILDTC\IMAGPROC.OBJ del BUILDTC\IMAGPROC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\IMAGPROC.OBJ goto error
 
-echo [213/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\CUBEBACK.CPP
+echo [230/386] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\CUBEBACK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CUBEBACK.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\CUBEBACK.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\BACKGROU\CUBEBACK.CPP >> TC.RSP
+if exist BUILDTC\CUBEBACK.OBJ del BUILDTC\CUBEBACK.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CUBEBACK.OBJ goto error
 
-echo [214/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\FIXEBACK.CPP
+echo [231/386] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\FIXEBACK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\FIXEBACK.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\FIXEBACK.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\BACKGROU\FIXEBACK.CPP >> TC.RSP
+if exist BUILDTC\FIXEBACK.OBJ del BUILDTC\FIXEBACK.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\FIXEBACK.OBJ goto error
 
-echo [215/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\POBOSOMO.CPP
+echo [232/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\POBOSOMO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOMO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\POBOSOMO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\POBOSOMO.CPP >> TC.RSP
+if exist BUILDTC\POBOSOMO.OBJ del BUILDTC\POBOSOMO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOMO.OBJ goto error
 
-echo [216/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\_POBOSOO.CPP
+echo [233/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSOO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSOO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\_POBOSOO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSOO.CPP >> TC.RSP
+if exist BUILDTC\_POBOSOO.OBJ del BUILDTC\_POBOSOO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSOO.OBJ goto error
 
-echo [217/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSIN.CPP
+echo [234/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSIN.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSIN.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSIN.CPP >> TC.RSP
+if exist BUILDTC\_POBOSIN.OBJ del BUILDTC\_POBOSIN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSIN.OBJ goto error
 
-echo [218/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSFG.CPP
+echo [235/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
-echo -oBUILDTC\_POBOSFG.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSFG.CPP >> TC.RSP
+echo -oBUILDTC\POBOSOSC.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOSC.CPP >> TC.RSP
+if exist BUILDTC\POBOSOSC.OBJ del BUILDTC\POBOSOSC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOSC.OBJ goto error
 
-echo [219/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_PBSAACF.CPP
+echo [236/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSVN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
-echo -oBUILDTC\_PBSAACF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_PBSAACF.CPP >> TC.RSP
+echo -oBUILDTC\_POBOSVN.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSVN.CPP >> TC.RSP
+if exist BUILDTC\_POBOSVN.OBJ del BUILDTC\_POBOSVN.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSVN.OBJ goto error
 
-echo [220/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_POBSOCF.CPP
+echo [237/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_PBSSOA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
-echo -oBUILDTC\_POBSOCF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FALLBA\_POBSOCF.CPP >> TC.RSP
+echo -oBUILDTC\_PBSSOA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_PBSSOA.CPP >> TC.RSP
+if exist BUILDTC\_PBSSOA.OBJ del BUILDTC\_PBSSOA.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSOA.OBJ goto error
 
-echo [221/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\CONSTR\_POBSPDF.CPP
+echo [238/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSIO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
-echo -oBUILDTC\_POBSPDF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\CONSTR\_POBSPDF.CPP >> TC.RSP
+echo -oBUILDTC\_POBOSIO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSIO.CPP >> TC.RSP
+if exist BUILDTC\_POBOSIO.OBJ del BUILDTC\_POBOSIO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSIO.OBJ goto error
 
-echo [222/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\CONSTR\_POBSOPF.CPP
+echo [239/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\SLICIN\_POBOSOS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
-echo -ISRC;SRC\MAIN >> TC.RSP
-echo -oBUILDTC\_POBSOPF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\CONSTR\_POBSOPF.CPP >> TC.RSP
-tcc @TC.RSP > TC.LOG
-if errorlevel 1 goto error
-
-echo [223/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\SLICIN\_POBOSOS.CPP
-echo -c > TC.RSP
-echo -ml >> TC.RSP
-echo -O1 >> TC.RSP
-echo -d >> TC.RSP
-echo -v- >> TC.RSP
-echo -w-inl >> TC.RSP
-echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
-echo -IC:\TURBOC\INCLUDE >> TC.RSP
-echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSOS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\SLICIN\_POBOSOS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\SLICIN\_POBOSOS.CPP >> TC.RSP
+if exist BUILDTC\_POBOSOS.OBJ del BUILDTC\_POBOSOS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSOS.OBJ goto error
 
-echo [224/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\_SETOPTR.CPP
+echo [240/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_SETOPTR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_SETOPTR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\_SETOPTR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_SETOPTR.CPP >> TC.RSP
+if exist BUILDTC\_SETOPTR.OBJ del BUILDTC\_SETOPTR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_SETOPTR.OBJ goto error
 
-echo [225/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSONE.CPP
+echo [241/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSONE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSONE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSONE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSONE.CPP >> TC.RSP
+if exist BUILDTC\_PBSSONE.OBJ del BUILDTC\_PBSSONE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSONE.OBJ goto error
 
-echo [226/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSNEC.CPP
+echo [242/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSNEC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSNEC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSNEC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSNEC.CPP >> TC.RSP
+if exist BUILDTC\_PBSSNEC.OBJ del BUILDTC\_PBSSNEC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSNEC.OBJ goto error
 
-echo [227/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\TOP\_POBOSSF.CPP
+echo [243/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_POBOSSF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSSF.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\TOP\_POBOSSF.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_POBOSSF.CPP >> TC.RSP
+if exist BUILDTC\_POBOSSF.OBJ del BUILDTC\_POBOSSF.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSSF.OBJ goto error
 
-echo [228/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSICB.CPP
+echo [244/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSICB.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSICB.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSICB.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSICB.CPP >> TC.RSP
+if exist BUILDTC\_PBSSICB.OBJ del BUILDTC\_PBSSICB.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSICB.OBJ goto error
 
-echo [229/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\INT\_POBOSSI.CPP
+echo [245/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_POBOSSI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSSI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\INT\_POBOSSI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_POBOSSI.CPP >> TC.RSP
+if exist BUILDTC\_POBOSSI.OBJ del BUILDTC\_POBOSSI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSSI.OBJ goto error
 
-echo [230/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\_POBOSSO.CPP
+echo [246/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_POBOSSO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSSO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\_POBOSSO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_POBOSSO.CPP >> TC.RSP
+if exist BUILDTC\_POBOSSO.OBJ del BUILDTC\_POBOSSO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSSO.OBJ goto error
 
-echo [231/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSGPP.CPP
+echo [247/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSGPP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSGPP.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSGPP.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSGPP.CPP >> TC.RSP
+if exist BUILDTC\_PBSSGPP.OBJ del BUILDTC\_PBSSGPP.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSGPP.OBJ goto error
 
-echo [232/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSOSC.CPP
+echo [248/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSOSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSOSC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSOSC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSOSC.CPP >> TC.RSP
+if exist BUILDTC\_PBSSOSC.OBJ del BUILDTC\_PBSSOSC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSOSC.OBJ goto error
 
-echo [233/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVFC.CPP
+echo [249/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVFC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSVFC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVFC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVFC.CPP >> TC.RSP
+if exist BUILDTC\_PBSSVFC.OBJ del BUILDTC\_PBSSVFC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSVFC.OBJ goto error
 
-echo [234/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVVC.CPP
+echo [250/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVVC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSVVC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVVC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVVC.CPP >> TC.RSP
+if exist BUILDTC\_PBSSVVC.OBJ del BUILDTC\_PBSSVVC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSVVC.OBJ goto error
 
-echo [235/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSSC.CPP
+echo [251/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSSC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSSC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSSC.CPP >> TC.RSP
+if exist BUILDTC\_POBOSSC.OBJ del BUILDTC\_POBOSSC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSSC.OBJ goto error
 
-echo [236/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSNIC.CPP
+echo [252/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSNIC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_PBSSNIC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSNIC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSNIC.CPP >> TC.RSP
+if exist BUILDTC\_PBSSNIC.OBJ del BUILDTC\_PBSSNIC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_PBSSNIC.OBJ goto error
 
-echo [237/283] Compiling SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\POBOSOST.CPP
+echo [253/386] Compiling SRC\MAIN\V\T\COMMON\STATISTI\POBOSOST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\POBOSOST.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\COMMON\STATISTI\POBOSOST.CPP >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\STATISTI\POBOSOST.CPP >> TC.RSP
+if exist BUILDTC\POBOSOST.OBJ del BUILDTC\POBOSOST.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOST.OBJ goto error
 
-echo [238/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FIXTUR\SITEGELI.CPP
+echo [254/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\SITEGELI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SITEGELI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FIXTUR\SITEGELI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\SITEGELI.CPP >> TC.RSP
+if exist BUILDTC\SITEGELI.OBJ del BUILDTC\SITEGELI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SITEGELI.OBJ goto error
 
-echo [239/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FIXTUR\CSKUBOFI.CPP
+echo [255/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\CSKUBOFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CSKUBOFI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\FIXTUR\CSKUBOFI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\CSKUBOFI.CPP >> TC.RSP
+if exist BUILDTC\CSKUBOFI.OBJ del BUILDTC\CSKUBOFI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CSKUBOFI.OBJ goto error
 
-echo [240/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\VALIDA\_POBOSFV.CPP
+echo [256/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\VALIDA\_POBOSFV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\_POBOSFV.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\GEOM\GEP\PSO\VALIDA\_POBOSFV.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\VALIDA\_POBOSFV.CPP >> TC.RSP
+if exist BUILDTC\_POBOSFV.OBJ del BUILDTC\_POBOSFV.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\_POBOSFV.OBJ goto error
 
-echo [241/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\PARCURPE.CPP
+echo [257/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\PARCURPE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PARCURPE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\PARCURPE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\PARCURPE.CPP >> TC.RSP
+if exist BUILDTC\PARCURPE.OBJ del BUILDTC\PARCURPE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PARCURPE.OBJ goto error
 
-echo [242/283] Compiling SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\PABICUPP.CPP
+echo [258/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\PABICUPP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PABICUPP.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\GEOMETRY\PABICUPP.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\PABICUPP.CPP >> TC.RSP
+if exist BUILDTC\PABICUPP.OBJ del BUILDTC\PABICUPP.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PABICUPP.OBJ goto error
 
-echo [243/283] Compiling SRC\MAIN\VSDK\TOOL\IO\IMAGE\RGCOPAPE.CPP
+echo [259/386] Compiling SRC\MAIN\V\T\IO\IMAGE\RGCOPAPE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\RGCOPAPE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\IO\IMAGE\RGCOPAPE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\IO\IMAGE\RGCOPAPE.CPP >> TC.RSP
+if exist BUILDTC\RGCOPAPE.OBJ del BUILDTC\RGCOPAPE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\RGCOPAPE.OBJ goto error
 
-echo [244/283] Compiling SRC\MAIN\ORG\W3C\DOM\NODE.CPP
+echo [260/386] Compiling SRC\MAIN\ORG\W3C\DOM\NODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\NODE.OBJ >> TC.RSP
 echo SRC\MAIN\ORG\W3C\DOM\NODE.CPP >> TC.RSP
+if exist BUILDTC\NODE.OBJ del BUILDTC\NODE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\NODE.OBJ goto error
 
-echo [245/283] Compiling SRC\MAIN\JAVAX\XML\PARSERS\DOCUBUIL.CPP
+echo [261/386] Compiling SRC\MAIN\JAVAX\XML\PARSERS\DOCUBUIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DOCUBUIL.OBJ >> TC.RSP
 echo SRC\MAIN\JAVAX\XML\PARSERS\DOCUBUIL.CPP >> TC.RSP
+if exist BUILDTC\DOCUBUIL.OBJ del BUILDTC\DOCUBUIL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DOCUBUIL.OBJ goto error
 
-echo [246/283] Compiling SRC\MAIN\JAVAX\XML\TRANSFOR\TRANSFOR.CPP
+echo [262/386] Compiling SRC\MAIN\JAVAX\XML\TRANSFOR\TRANSFOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRANSFOR.OBJ >> TC.RSP
 echo SRC\MAIN\JAVAX\XML\TRANSFOR\TRANSFOR.CPP >> TC.RSP
+if exist BUILDTC\TRANSFOR.OBJ del BUILDTC\TRANSFOR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRANSFOR.OBJ goto error
 
-echo [247/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGET.CPP
+echo [263/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGET.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDGET.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGET.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDGET.CPP >> TC.RSP
+if exist BUILDTC\WIDGET.OBJ del BUILDTC\WIDGET.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDGET.OBJ goto error
 
-echo [248/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDBUTGR.CPP
+echo [264/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDBUTGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDBUTGR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDBUTGR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDBUTGR.CPP >> TC.RSP
+if exist BUILDTC\WIDBUTGR.OBJ del BUILDTC\WIDBUTGR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDBUTGR.OBJ goto error
 
-echo [249/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGCOMM.CPP
+echo [265/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGCOMM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDGCOMM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGCOMM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDGCOMM.CPP >> TC.RSP
+if exist BUILDTC\WIDGCOMM.OBJ del BUILDTC\WIDGCOMM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDGCOMM.OBJ goto error
 
-echo [250/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGDIAL.CPP
+echo [266/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGDIAL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDGDIAL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGDIAL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDGDIAL.CPP >> TC.RSP
+if exist BUILDTC\WIDGDIAL.OBJ del BUILDTC\WIDGDIAL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDGDIAL.OBJ goto error
 
-echo [251/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDDIAEL.CPP
+echo [267/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDDIAEL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDDIAEL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDDIAEL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDDIAEL.CPP >> TC.RSP
+if exist BUILDTC\WIDDIAEL.OBJ del BUILDTC\WIDDIAEL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDDIAEL.OBJ goto error
 
-echo [252/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\DIALOG\COMPONEN\DIAFILFI.CPP
+echo [268/386] Compiling SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIAFILFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DIAFILFI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\DIALOG\COMPONEN\DIAFILFI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIAFILFI.CPP >> TC.RSP
+if exist BUILDTC\DIAFILFI.OBJ del BUILDTC\DIAFILFI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DIAFILFI.OBJ goto error
 
-echo [253/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\DIALOG\COMPONEN\DIATRENO.CPP
+echo [269/386] Compiling SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIATRENO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DIATRENO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\DIALOG\COMPONEN\DIATRENO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIATRENO.CPP >> TC.RSP
+if exist BUILDTC\DIATRENO.OBJ del BUILDTC\DIATRENO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DIATRENO.OBJ goto error
 
-echo [254/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\DIALOG\RUNTIME\DIALSESS.CPP
+echo [270/386] Compiling SRC\MAIN\V\T\GUI\DIALOG\RUNTIME\DIALSESS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\DIALSESS.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\DIALOG\RUNTIME\DIALSESS.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\DIALOG\RUNTIME\DIALSESS.CPP >> TC.RSP
+if exist BUILDTC\DIALSESS.OBJ del BUILDTC\DIALSESS.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\DIALSESS.OBJ goto error
 
-echo [255/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGMENU.CPP
+echo [271/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGMENU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDGMENU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGMENU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDGMENU.CPP >> TC.RSP
+if exist BUILDTC\WIDGMENU.OBJ del BUILDTC\WIDGMENU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDGMENU.OBJ goto error
 
-echo [256/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDMENEL.CPP
+echo [272/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDMENEL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDMENEL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDMENEL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDMENEL.CPP >> TC.RSP
+if exist BUILDTC\WIDMENEL.OBJ del BUILDTC\WIDMENEL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDMENEL.OBJ goto error
 
-echo [257/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDMENIT.CPP
+echo [273/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDMENIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDMENIT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDMENIT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDMENIT.CPP >> TC.RSP
+if exist BUILDTC\WIDMENIT.OBJ del BUILDTC\WIDMENIT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDMENIT.OBJ goto error
 
-echo [258/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEWPORT.CPP
+echo [274/386] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPORT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VIEWPORT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEWPORT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPORT.CPP >> TC.RSP
+if exist BUILDTC\VIEWPORT.OBJ del BUILDTC\VIEWPORT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VIEWPORT.OBJ goto error
 
-echo [259/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEELESC.CPP
+echo [275/386] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEELESC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VIEELESC.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEELESC.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\VIEWPORT\VIEELESC.CPP >> TC.RSP
+if exist BUILDTC\VIEELESC.OBJ del BUILDTC\VIEELESC.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VIEELESC.OBJ goto error
 
-echo [260/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEWPSET.CPP
+echo [276/386] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPSET.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VIEWPSET.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEWPSET.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPSET.CPP >> TC.RSP
+if exist BUILDTC\VIEWPSET.OBJ del BUILDTC\VIEWPSET.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VIEWPSET.OBJ goto error
 
-echo [261/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VISEINTE.CPP
+echo [277/386] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VISEINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VISEINTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VISEINTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\VIEWPORT\VISEINTE.CPP >> TC.RSP
+if exist BUILDTC\VISEINTE.OBJ del BUILDTC\VISEINTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VISEINTE.OBJ goto error
 
-echo [262/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEINTTE.CPP
+echo [278/386] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEINTTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\VIEINTTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\VIEWPORT\VIEINTTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\VIEWPORT\VIEINTTE.CPP >> TC.RSP
+if exist BUILDTC\VIEINTTE.OBJ del BUILDTC\VIEINTTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\VIEINTTE.OBJ goto error
 
-echo [263/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\GIZSOLTE.CPP
+echo [279/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIZSOLTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GIZSOLTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\GIZSOLTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\GIZSOLTE.CPP >> TC.RSP
+if exist BUILDTC\GIZSOLTE.OBJ del BUILDTC\GIZSOLTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GIZSOLTE.OBJ goto error
 
-echo [264/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\GIVEARBU.CPP
+echo [280/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIVEARBU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GIVEARBU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\GIVEARBU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\GIVEARBU.CPP >> TC.RSP
+if exist BUILDTC\GIVEARBU.OBJ del BUILDTC\GIVEARBU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GIVEARBU.OBJ goto error
 
-echo [265/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\INPUGIZM.CPP
+echo [281/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\INPUGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INPUGIZM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\INPUGIZM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\INPUGIZM.CPP >> TC.RSP
+if exist BUILDTC\INPUGIZM.OBJ del BUILDTC\INPUGIZM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INPUGIZM.OBJ goto error
 
-echo [266/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\INGIVACR.CPP
+echo [282/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\INGIVACR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\INGIVACR.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\INGIVACR.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\INGIVACR.CPP >> TC.RSP
+if exist BUILDTC\INGIVACR.OBJ del BUILDTC\INGIVACR.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\INGIVACR.OBJ goto error
 
-echo [267/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\REFFRAGI.CPP
+echo [283/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\REFFRAGI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\REFFRAGI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\REFFRAGI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\REFFRAGI.CPP >> TC.RSP
+if exist BUILDTC\REFFRAGI.OBJ del BUILDTC\REFFRAGI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\REFFRAGI.OBJ goto error
 
-echo [268/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\TRANGIZM.CPP
+echo [284/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\TRANGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRANGIZM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\TRANGIZM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\TRANGIZM.CPP >> TC.RSP
+if exist BUILDTC\TRANGIZM.OBJ del BUILDTC\TRANGIZM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRANGIZM.OBJ goto error
 
-echo [269/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\TRGIINTE.CPP
+echo [285/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\TRGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\TRGIINTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\TRGIINTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\TRGIINTE.CPP >> TC.RSP
+if exist BUILDTC\TRGIINTE.OBJ del BUILDTC\TRGIINTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\TRGIINTE.OBJ goto error
 
-echo [270/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\ROTAGIZM.CPP
+echo [286/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\ROTAGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ROTAGIZM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\ROTAGIZM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\ROTAGIZM.CPP >> TC.RSP
+if exist BUILDTC\ROTAGIZM.OBJ del BUILDTC\ROTAGIZM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ROTAGIZM.OBJ goto error
 
-echo [271/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\ROGIINTE.CPP
+echo [287/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\ROGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\ROGIINTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\ROGIINTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\ROGIINTE.CPP >> TC.RSP
+if exist BUILDTC\ROGIINTE.OBJ del BUILDTC\ROGIINTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\ROGIINTE.OBJ goto error
 
-echo [272/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\SCALGIZM.CPP
+echo [288/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\SCALGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SCALGIZM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\SCALGIZM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\SCALGIZM.CPP >> TC.RSP
+if exist BUILDTC\SCALGIZM.OBJ del BUILDTC\SCALGIZM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SCALGIZM.OBJ goto error
 
-echo [273/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\SCGIINTE.CPP
+echo [289/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\SCGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\SCGIINTE.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\SCGIINTE.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\SCGIINTE.CPP >> TC.RSP
+if exist BUILDTC\SCGIINTE.OBJ del BUILDTC\SCGIINTE.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\SCGIINTE.OBJ goto error
 
-echo [274/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\PRESELEM.CPP
+echo [290/386] Compiling SRC\MAIN\V\T\GUI\PRESELEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PRESELEM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\PRESELEM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\PRESELEM.CPP >> TC.RSP
+if exist BUILDTC\PRESELEM.OBJ del BUILDTC\PRESELEM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PRESELEM.OBJ goto error
 
-echo [275/283] Compiling SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\BACKGROU.CPP
+echo [291/386] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\BACKGROU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\BACKGROU.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\ENVI\BACKGROU\BACKGROU.CPP >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\BACKGROU\BACKGROU.CPP >> TC.RSP
+if exist BUILDTC\BACKGROU.OBJ del BUILDTC\BACKGROU.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\BACKGROU.OBJ goto error
 
-echo [276/283] Compiling SRC\MAIN\VSDK\TOOL\MEDIA\MEDIENTI.CPP
+echo [292/386] Compiling SRC\MAIN\V\T\MEDIA\MEDIENTI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\MEDIENTI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\MEDIA\MEDIENTI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\MEDIA\MEDIENTI.CPP >> TC.RSP
+if exist BUILDTC\MEDIENTI.OBJ del BUILDTC\MEDIENTI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\MEDIENTI.OBJ goto error
 
-echo [277/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\CAMECONT.CPP
+echo [293/386] Compiling SRC\MAIN\V\T\GUI\CAMECONT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CAMECONT.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\CAMECONT.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\CAMECONT.CPP >> TC.RSP
+if exist BUILDTC\CAMECONT.OBJ del BUILDTC\CAMECONT.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CAMECONT.OBJ goto error
 
-echo [278/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\COMMLIST.CPP
+echo [294/386] Compiling SRC\MAIN\V\T\GUI\COMMLIST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\COMMLIST.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\COMMLIST.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\COMMLIST.CPP >> TC.RSP
+if exist BUILDTC\COMMLIST.OBJ del BUILDTC\COMMLIST.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\COMMLIST.OBJ goto error
 
-echo [279/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\CONTROLL.CPP
+echo [295/386] Compiling SRC\MAIN\V\T\GUI\CONTROLL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\CONTROLL.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\CONTROLL.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\CONTROLL.CPP >> TC.RSP
+if exist BUILDTC\CONTROLL.OBJ del BUILDTC\CONTROLL.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\CONTROLL.OBJ goto error
 
-echo [280/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\GIZMO\GIZMO.CPP
+echo [296/386] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIZMO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\GIZMO.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\GIZMO\GIZMO.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\GIZMO\GIZMO.CPP >> TC.RSP
+if exist BUILDTC\GIZMO.OBJ del BUILDTC\GIZMO.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\GIZMO.OBJ goto error
 
-echo [281/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PROGMONI.CPP
+echo [297/386] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PROGMONI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\PROGMONI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\FEEDBACK\PROGMONI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\FEEDBACK\PROGMONI.CPP >> TC.RSP
+if exist BUILDTC\PROGMONI.OBJ del BUILDTC\PROGMONI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\PROGMONI.OBJ goto error
 
-echo [282/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGELEM.CPP
+echo [298/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGELEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDGELEM.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\WIDGELEM.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\WIDGELEM.CPP >> TC.RSP
+if exist BUILDTC\WIDGELEM.OBJ del BUILDTC\WIDGELEM.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDGELEM.OBJ goto error
 
-echo [283/283] Compiling SRC\MAIN\VSDK\TOOL\GUI\WIDGET\VARIABLE\WIDGVARI.CPP
+echo [299/386] Compiling SRC\MAIN\V\T\GUI\WIDGET\VARIABLE\WIDGVARI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
 echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
 echo -ISRC;SRC\MAIN >> TC.RSP
 echo -oBUILDTC\WIDGVARI.OBJ >> TC.RSP
-echo SRC\MAIN\VSDK\TOOL\GUI\WIDGET\VARIABLE\WIDGVARI.CPP >> TC.RSP
+echo SRC\MAIN\V\T\GUI\WIDGET\VARIABLE\WIDGVARI.CPP >> TC.RSP
+if exist BUILDTC\WIDGVARI.OBJ del BUILDTC\WIDGVARI.OBJ
 tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
+if not exist BUILDTC\WIDGVARI.OBJ goto error
+
+echo [300/386] Compiling SRC\MAIN\V\T\COMMON\NUMERICS\FLOAINTE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FLOAINTE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\COMMON\NUMERICS\FLOAINTE.CPP >> TC.RSP
+if exist BUILDTC\FLOAINTE.OBJ del BUILDTC\FLOAINTE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FLOAINTE.OBJ goto error
+
+echo [301/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSS.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYCROSS.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSS.CPP >> TC.RSP
+if exist BUILDTC\RAYCROSS.OBJ del BUILDTC\RAYCROSS.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYCROSS.OBJ goto error
+
+echo [302/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROQU.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYCROQU.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROQU.CPP >> TC.RSP
+if exist BUILDTC\RAYCROQU.OBJ del BUILDTC\RAYCROQU.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYCROQU.OBJ goto error
+
+echo [303/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYCROSI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSI.CPP >> TC.RSP
+if exist BUILDTC\RAYCROSI.OBJ del BUILDTC\RAYCROSI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYCROSI.OBJ goto error
+
+echo [304/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYBOUND.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYBOUND.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYBOUND.CPP >> TC.RSP
+if exist BUILDTC\RAYBOUND.OBJ del BUILDTC\RAYBOUND.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYBOUND.OBJ goto error
+
+echo [305/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLBO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYSOLBO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLBO.CPP >> TC.RSP
+if exist BUILDTC\RAYSOLBO.OBJ del BUILDTC\RAYSOLBO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYSOLBO.OBJ goto error
+
+echo [306/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLCL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYSOLCL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLCL.CPP >> TC.RSP
+if exist BUILDTC\RAYSOLCL.OBJ del BUILDTC\RAYSOLCL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYSOLCL.OBJ goto error
+
+echo [307/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSPA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYINSPA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSPA.CPP >> TC.RSP
+if exist BUILDTC\RAYINSPA.OBJ del BUILDTC\RAYINSPA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYINSPA.OBJ goto error
+
+echo [308/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSST.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYINSST.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSST.CPP >> TC.RSP
+if exist BUILDTC\RAYINSST.OBJ del BUILDTC\RAYINSST.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYINSST.OBJ goto error
+
+echo [309/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOMBOUN.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\GEOMBOUN.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOMBOUN.CPP >> TC.RSP
+if exist BUILDTC\GEOMBOUN.OBJ del BUILDTC\GEOMBOUN.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\GEOMBOUN.OBJ goto error
+
+echo [310/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOQUEWO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\GEOQUEWO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOQUEWO.CPP >> TC.RSP
+if exist BUILDTC\GEOQUEWO.OBJ del BUILDTC\GEOQUEWO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\GEOQUEWO.OBJ goto error
+
+echo [311/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRMEININ.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\TRMEININ.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRMEININ.CPP >> TC.RSP
+if exist BUILDTC\TRMEININ.OBJ del BUILDTC\TRMEININ.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\TRMEININ.OBJ goto error
+
+echo [312/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFFELLDI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AFFELLDI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFFELLDI.CPP >> TC.RSP
+if exist BUILDTC\AFFELLDI.OBJ del BUILDTC\AFFELLDI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AFFELLDI.OBJ goto error
+
+echo [313/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDIBO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AFELDIBO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDIBO.CPP >> TC.RSP
+if exist BUILDTC\AFELDIBO.OBJ del BUILDTC\AFELDIBO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AFELDIBO.OBJ goto error
+
+echo [314/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDUBO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AFELDUBO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDUBO.CPP >> TC.RSP
+if exist BUILDTC\AFELDUBO.OBJ del BUILDTC\AFELDUBO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AFELDUBO.OBJ goto error
+
+echo [315/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELMIDI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AFELMIDI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELMIDI.CPP >> TC.RSP
+if exist BUILDTC\AFELMIDI.OBJ del BUILDTC\AFELMIDI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AFELMIDI.OBJ goto error
+
+echo [316/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ORTELLDI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\ORTELLDI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ORTELLDI.CPP >> TC.RSP
+if exist BUILDTC\ORTELLDI.OBJ del BUILDTC\ORTELLDI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\ORTELLDI.OBJ goto error
+
+echo [317/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUAINTBO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\QUAINTBO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUAINTBO.CPP >> TC.RSP
+if exist BUILDTC\QUAINTBO.OBJ del BUILDTC\QUAINTBO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\QUAINTBO.OBJ goto error
+
+echo [318/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEU.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\POBOSOEU.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEU.CPP >> TC.RSP
+if exist BUILDTC\POBOSOEU.OBJ del BUILDTC\POBOSOEU.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\POBOSOEU.OBJ goto error
+
+echo [319/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\AFFIPLAC.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AFFIPLAC.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\AFFIPLAC.CPP >> TC.RSP
+if exist BUILDTC\AFFIPLAC.OBJ del BUILDTC\AFFIPLAC.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AFFIPLAC.OBJ goto error
+
+echo [320/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\AFFTOLMA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AFFTOLMA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\AFFTOLMA.CPP >> TC.RSP
+if exist BUILDTC\AFFTOLMA.OBJ del BUILDTC\AFFTOLMA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AFFTOLMA.OBJ goto error
+
+echo [321/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\INRACRBU.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\INRACRBU.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\INRACRBU.CPP >> TC.RSP
+if exist BUILDTC\INRACRBU.OBJ del BUILDTC\INRACRBU.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\INRACRBU.OBJ goto error
+
+echo [322/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\SCENSOLI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SCENSOLI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\SCENSOLI.CPP >> TC.RSP
+if exist BUILDTC\SCENSOLI.OBJ del BUILDTC\SCENSOLI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SCENSOLI.OBJ goto error
+
+echo [323/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBINHI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AABBINHI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBINHI.CPP >> TC.RSP
+if exist BUILDTC\AABBINHI.OBJ del BUILDTC\AABBINHI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AABBINHI.OBJ goto error
+
+echo [324/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\TRIACCST.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\TRIACCST.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\TRIACCST.CPP >> TC.RSP
+if exist BUILDTC\TRIACCST.OBJ del BUILDTC\TRIACCST.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\TRIACCST.OBJ goto error
+
+echo [325/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BINSAHHI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\BINSAHHI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\BINSAHHI.CPP >> TC.RSP
+if exist BUILDTC\BINSAHHI.OBJ del BUILDTC\BINSAHHI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\BINSAHHI.OBJ goto error
+
+echo [326/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BISATRHI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\BISATRHI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\BISATRHI.CPP >> TC.RSP
+if exist BUILDTC\BISATRHI.OBJ del BUILDTC\BISATRHI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\BISATRHI.OBJ goto error
+
+echo [327/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BISAINHI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\BISAINHI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\BISAINHI.CPP >> TC.RSP
+if exist BUILDTC\BISAINHI.OBJ del BUILDTC\BISAINHI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\BISAINHI.OBJ goto error
+
+echo [328/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBOUVO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AABBOUVO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBOUVO.CPP >> TC.RSP
+if exist BUILDTC\AABBOUVO.OBJ del BUILDTC\AABBOUVO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AABBOUVO.OBJ goto error
+
+echo [329/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AXALBOBO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\AXALBOBO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\AXALBOBO.CPP >> TC.RSP
+if exist BUILDTC\AXALBOBO.OBJ del BUILDTC\AXALBOBO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\AXALBOBO.OBJ goto error
+
+echo [330/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BOUVOLHI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\BOUVOLHI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\BOUVOLHI.CPP >> TC.RSP
+if exist BUILDTC\BOUVOLHI.OBJ del BUILDTC\BOUVOLHI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\BOUVOLHI.OBJ goto error
+
+echo [331/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\PRRAHIEL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\PRRAHIEL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\PRRAHIEL.CPP >> TC.RSP
+if exist BUILDTC\PRRAHIEL.OBJ del BUILDTC\PRRAHIEL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\PRRAHIEL.OBJ goto error
+
+echo [332/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\RAYSLARE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\RAYSLARE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\BVH\RAYSLARE.CPP >> TC.RSP
+if exist BUILDTC\RAYSLARE.OBJ del BUILDTC\RAYSLARE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\RAYSLARE.OBJ goto error
+
+echo [333/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SUBBEZPA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SUBBEZPA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SUBBEZPA.CPP >> TC.RSP
+if exist BUILDTC\SUBBEZPA.OBJ del BUILDTC\SUBBEZPA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SUBBEZPA.OBJ goto error
+
+echo [334/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBCOMP.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\BLOBCOMP.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBCOMP.CPP >> TC.RSP
+if exist BUILDTC\BLOBCOMP.OBJ del BUILDTC\BLOBCOMP.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\BLOBCOMP.OBJ goto error
+
+echo [335/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBSOLI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\BLOBSOLI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBSOLI.CPP >> TC.RSP
+if exist BUILDTC\BLOBSOLI.OBJ del BUILDTC\BLOBSOLI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\BLOBSOLI.OBJ goto error
+
+echo [336/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\HEIFIESO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\HEIFIESO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\HEIFIESO.CPP >> TC.RSP
+if exist BUILDTC\HEIFIESO.OBJ del BUILDTC\HEIFIESO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\HEIFIESO.OBJ goto error
+
+echo [337/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\IMPLSOLI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\IMPLSOLI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\IMPLSOLI.CPP >> TC.RSP
+if exist BUILDTC\IMPLSOLI.OBJ del BUILDTC\IMPLSOLI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\IMPLSOLI.OBJ goto error
+
+echo [338/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\PLAHALSP.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\PLAHALSP.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\PLAHALSP.CPP >> TC.RSP
+if exist BUILDTC\PLAHALSP.OBJ del BUILDTC\PLAHALSP.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\PLAHALSP.OBJ goto error
+
+echo [339/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POLYSURF.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\POLYSURF.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POLYSURF.CPP >> TC.RSP
+if exist BUILDTC\POLYSURF.OBJ del BUILDTC\POLYSURF.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\POLYSURF.OBJ goto error
+
+echo [340/386] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUADSURF.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\QUADSURF.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUADSURF.CPP >> TC.RSP
+if exist BUILDTC\QUADSURF.OBJ del BUILDTC\QUADSURF.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\QUADSURF.OBJ goto error
+
+echo [341/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READALTI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\READALTI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\READALTI.CPP >> TC.RSP
+if exist BUILDTC\READALTI.OBJ del BUILDTC\READALTI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\READALTI.OBJ goto error
+
+echo [342/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REMIQUGR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\REMIQUGR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\REMIQUGR.CPP >> TC.RSP
+if exist BUILDTC\REMIQUGR.OBJ del BUILDTC\REMIQUGR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\REMIQUGR.OBJ goto error
+
+echo [343/386] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REMITRGR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\REMITRGR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\GEOMETRY\REMITRGR.CPP >> TC.RSP
+if exist BUILDTC\REMITRGR.OBJ del BUILDTC\REMITRGR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\REMITRGR.OBJ goto error
+
+echo [344/386] Compiling SRC\MAIN\V\T\PROCESSI\BEZPATTE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\BEZPATTE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\PROCESSI\BEZPATTE.CPP >> TC.RSP
+if exist BUILDTC\BEZPATTE.OBJ del BUILDTC\BEZPATTE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\BEZPATTE.OBJ goto error
+
+echo [345/386] Compiling SRC\MAIN\V\T\PROCESSI\SOBOTERE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SOBOTERE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\PROCESSI\SOBOTERE.CPP >> TC.RSP
+if exist BUILDTC\SOBOTERE.OBJ del BUILDTC\SOBOTERE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SOBOTERE.OBJ goto error
+
+echo [346/386] Compiling SRC\MAIN\V\T\PROCESSI\SOLBOUTE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SOLBOUTE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\PROCESSI\SOLBOUTE.CPP >> TC.RSP
+if exist BUILDTC\SOLBOUTE.OBJ del BUILDTC\SOLBOUTE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SOLBOUTE.OBJ goto error
+
+echo [347/386] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\SNELREFR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SNELREFR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\RAYTRACI\SNELREFR.CPP >> TC.RSP
+if exist BUILDTC\SNELREFR.OBJ del BUILDTC\SNELREFR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SNELREFR.OBJ goto error
+
+echo [348/386] Compiling SRC\MAIN\V\T\RENDER\SHADERS\SHADTRAN.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\SHADTRAN.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\RENDER\SHADERS\SHADTRAN.CPP >> TC.RSP
+if exist BUILDTC\SHADTRAN.OBJ del BUILDTC\SHADTRAN.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\SHADTRAN.OBJ goto error
+
+echo [349/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODY.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGBODY.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODY.CPP >> TC.RSP
+if exist BUILDTC\CSGBODY.OBJ del BUILDTC\CSGBODY.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGBODY.OBJ goto error
+
+echo [350/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODOP.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGBODOP.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODOP.CPP >> TC.RSP
+if exist BUILDTC\CSGBODOP.OBJ del BUILDTC\CSGBODOP.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGBODOP.OBJ goto error
+
+echo [351/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSCRMEFI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSCRMEFI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSCRMEFI.CPP >> TC.RSP
+if exist BUILDTC\CSCRMEFI.OBJ del BUILDTC\CSCRMEFI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSCRMEFI.OBJ goto error
+
+echo [352/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYADI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGDYADI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYADI.CPP >> TC.RSP
+if exist BUILDTC\CSGDYADI.OBJ del BUILDTC\CSGDYADI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGDYADI.OBJ goto error
+
+echo [353/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYASO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGDYASO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYASO.CPP >> TC.RSP
+if exist BUILDTC\CSGDYASO.OBJ del BUILDTC\CSGDYASO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGDYASO.OBJ goto error
+
+echo [354/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYATR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGDYATR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYATR.CPP >> TC.RSP
+if exist BUILDTC\CSGDYATR.OBJ del BUILDTC\CSGDYATR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGDYATR.OBJ goto error
+
+echo [355/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAAR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGEXAAR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAAR.CPP >> TC.RSP
+if exist BUILDTC\CSGEXAAR.OBJ del BUILDTC\CSGEXAAR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGEXAAR.OBJ goto error
+
+echo [356/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAPL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGEXAPL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAPL.CPP >> TC.RSP
+if exist BUILDTC\CSGEXAPL.OBJ del BUILDTC\CSGEXAPL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGEXAPL.OBJ goto error
+
+echo [357/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAQU.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGEXAQU.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAQU.CPP >> TC.RSP
+if exist BUILDTC\CSGEXAQU.OBJ del BUILDTC\CSGEXAQU.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGEXAQU.OBJ goto error
+
+echo [358/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXATR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGEXATR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXATR.CPP >> TC.RSP
+if exist BUILDTC\CSGEXATR.OBJ del BUILDTC\CSGEXATR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGEXATR.OBJ goto error
+
+echo [359/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPRE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGEXPRE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPRE.CPP >> TC.RSP
+if exist BUILDTC\CSGEXPRE.OBJ del BUILDTC\CSGEXPRE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGEXPRE.OBJ goto error
+
+echo [360/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPEQ.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGEXPEQ.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPEQ.CPP >> TC.RSP
+if exist BUILDTC\CSGEXPEQ.OBJ del BUILDTC\CSGEXPEQ.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGEXPEQ.OBJ goto error
+
+echo [361/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGOPEVI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGOPEVI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGOPEVI.CPP >> TC.RSP
+if exist BUILDTC\CSGOPEVI.OBJ del BUILDTC\CSGOPEVI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGOPEVI.OBJ goto error
+
+echo [362/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPLAEX.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPLAEX.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPLAEX.CPP >> TC.RSP
+if exist BUILDTC\CSGPLAEX.OBJ del BUILDTC\CSGPLAEX.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPLAEX.OBJ goto error
+
+echo [363/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIAT.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPOIAT.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIAT.CPP >> TC.RSP
+if exist BUILDTC\CSGPOIAT.OBJ del BUILDTC\CSGPOIAT.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPOIAT.OBJ goto error
+
+echo [364/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPOICA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICA.CPP >> TC.RSP
+if exist BUILDTC\CSGPOICA.OBJ del BUILDTC\CSGPOICA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPOICA.OBJ goto error
+
+echo [365/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPOICL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICL.CPP >> TC.RSP
+if exist BUILDTC\CSGPOICL.OBJ del BUILDTC\CSGPOICL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPOICL.OBJ goto error
+
+echo [366/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIEV.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPOIEV.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIEV.CPP >> TC.RSP
+if exist BUILDTC\CSGPOIEV.OBJ del BUILDTC\CSGPOIEV.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPOIEV.OBJ goto error
+
+echo [367/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIPR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPOIPR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIPR.CPP >> TC.RSP
+if exist BUILDTC\CSGPOIPR.OBJ del BUILDTC\CSGPOIPR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPOIPR.OBJ goto error
+
+echo [368/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPOIWI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWI.CPP >> TC.RSP
+if exist BUILDTC\CSGPOIWI.OBJ del BUILDTC\CSGPOIWI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPOIWI.OBJ goto error
+
+echo [369/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGPOIWO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWO.CPP >> TC.RSP
+if exist BUILDTC\CSGPOIWO.OBJ del BUILDTC\CSGPOIWO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGPOIWO.OBJ goto error
+
+echo [370/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYCL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGRAYCL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYCL.CPP >> TC.RSP
+if exist BUILDTC\CSGRAYCL.OBJ del BUILDTC\CSGRAYCL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGRAYCL.OBJ goto error
+
+echo [371/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVBA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRAEVBA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVBA.CPP >> TC.RSP
+if exist BUILDTC\CSRAEVBA.OBJ del BUILDTC\CSRAEVBA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRAEVBA.OBJ goto error
+
+echo [372/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVCU.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRAEVCU.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVCU.CPP >> TC.RSP
+if exist BUILDTC\CSRAEVCU.OBJ del BUILDTC\CSRAEVCU.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRAEVCU.OBJ goto error
+
+echo [373/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVGR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRAEVGR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVGR.CPP >> TC.RSP
+if exist BUILDTC\CSRAEVGR.OBJ del BUILDTC\CSRAEVGR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRAEVGR.OBJ goto error
+
+echo [374/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVQU.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRAEVQU.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVQU.CPP >> TC.RSP
+if exist BUILDTC\CSRAEVQU.OBJ del BUILDTC\CSRAEVQU.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRAEVQU.OBJ goto error
+
+echo [375/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVRE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRAEVRE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVRE.CPP >> TC.RSP
+if exist BUILDTC\CSRAEVRE.OBJ del BUILDTC\CSRAEVRE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRAEVRE.OBJ goto error
+
+echo [376/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYLE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGRAYLE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYLE.CPP >> TC.RSP
+if exist BUILDTC\CSGRAYLE.OBJ del BUILDTC\CSGRAYLE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGRAYLE.OBJ goto error
+
+echo [377/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEBA.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRALEBA.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEBA.CPP >> TC.RSP
+if exist BUILDTC\CSRALEBA.OBJ del BUILDTC\CSRALEBA.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRALEBA.OBJ goto error
+
+echo [378/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEQU.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRALEQU.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEQU.CPP >> TC.RSP
+if exist BUILDTC\CSRALEQU.OBJ del BUILDTC\CSRALEQU.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRALEQU.OBJ goto error
+
+echo [379/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYPL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGRAYPL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYPL.CPP >> TC.RSP
+if exist BUILDTC\CSGRAYPL.OBJ del BUILDTC\CSGRAYPL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGRAYPL.OBJ goto error
+
+echo [380/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRASUEV.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRASUEV.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRASUEV.CPP >> TC.RSP
+if exist BUILDTC\CSRASUEV.OBJ del BUILDTC\CSRASUEV.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRASUEV.OBJ goto error
+
+echo [381/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYWO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGRAYWO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYWO.CPP >> TC.RSP
+if exist BUILDTC\CSGRAYWO.OBJ del BUILDTC\CSGRAYWO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGRAYWO.OBJ goto error
+
+echo [382/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRORACL.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSRORACL.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRORACL.CPP >> TC.RSP
+if exist BUILDTC\CSRORACL.OBJ del BUILDTC\CSRORACL.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSRORACL.OBJ goto error
+
+echo [383/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLBO.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGSOLBO.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLBO.CPP >> TC.RSP
+if exist BUILDTC\CSGSOLBO.OBJ del BUILDTC\CSGSOLBO.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGSOLBO.OBJ goto error
+
+echo [384/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLEQ.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGSOLEQ.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLEQ.CPP >> TC.RSP
+if exist BUILDTC\CSGSOLEQ.OBJ del BUILDTC\CSGSOLEQ.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGSOLEQ.OBJ goto error
+
+echo [385/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGTREE.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGTREE.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGTREE.CPP >> TC.RSP
+if exist BUILDTC\CSGTREE.OBJ del BUILDTC\CSGTREE.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGTREE.OBJ goto error
+
+echo [386/386] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGVERST.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\CSGVERST.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGVERST.CPP >> TC.RSP
+if exist BUILDTC\CSGVERST.OBJ del BUILDTC\CSGVERST.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\CSGVERST.OBJ goto error
 
 echo Base objects compiled successfully.
 goto end

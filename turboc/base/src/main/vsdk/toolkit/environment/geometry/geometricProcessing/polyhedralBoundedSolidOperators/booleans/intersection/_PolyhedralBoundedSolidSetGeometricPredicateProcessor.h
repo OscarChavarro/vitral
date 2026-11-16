@@ -92,6 +92,13 @@ public:
                               BOOLEAN withDebug);
 
     /**
+    Two coplanar sectors overlap when some direction lies strictly inside
+    both (see the implementation).
+    */
+    static BOOLEAN sectorsShareInteriorDirection(const SectorOnVertex& na,
+                                                 const SectorOnVertex& nb);
+
+    /**
     Resolves the class to propagate for coplanar sector pairs when applying the
     8-way boundary-classification logic of section [MANT1988].15.3 and the
     vertex/vertex classifier of section [MANT1988].15.6.2.
@@ -117,13 +124,19 @@ public:
         _PolyhedralBoundedSolidFace* referenceFace);
 
 private:
+    /** Diagnostic trace of sectoroverlap calls; null when off. */
     static ArrayList<SectoroverlapTraceEntry>* sectoroverlapTrace;
-    static int sectoroverlapCallCounter;
 
     static void recordSectoroverlapCall(const SectorOnVertex& na,
                                         const SectorOnVertex& nb,
                                         double a1, double a2, double b1,
                                         double b2, BOOLEAN decision);
+    static Vector3Dd unit(const Vector3Dd& v);
+    static BOOLEAN touchOnlyAlongConcaveEdge(const SectorOnVertex& na,
+                                             const SectorOnVertex& nb);
+    static BOOLEAN sameDirection(const Vector3Dd& a, const Vector3Dd& b);
+    static BOOLEAN isFaceEdgeRay(const SectorOnVertex& n, const Vector3Dd& ray);
+    static BOOLEAN isConcaveEdgeRay(const SectorOnVertex& n, BOOLEAN firstRay);
     static double angleFromVectors(const Vector3Dd& u, const Vector3Dd& v,
                                    const Vector3Dd& a);
     static int resolveCoplanarSectorClass(int op, int BvsA,

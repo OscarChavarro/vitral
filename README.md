@@ -131,6 +131,13 @@ Prerequisites:
 - Java 17
 - Gradle (used to resolve and fetch dependencies)
 
+Java 19 or newer is recommended. Java 17 works, but its `Double.toString`
+sometimes prints more digits than the shortest text that reads back the same
+value (JDK-4511638, fixed in JDK 19), e.g. `-3.8518598887744717E-34` instead
+of `-3.851859888774472E-34`. The values are equal, but text outputs (i.e. the
+`--appelDump` JSON files of `PolyhedralBoundedSolidExample`) then differ from
+the C++ and TypeScript ports, which print the shortest text as JDK 19+ does.
+
 From the repository java folder:
 
 ```bash

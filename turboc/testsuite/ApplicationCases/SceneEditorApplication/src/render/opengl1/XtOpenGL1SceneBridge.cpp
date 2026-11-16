@@ -70,7 +70,7 @@ public:
     /// Finds the target of the modify panel
     SceneSelectionEditor* selectionEditor;
     /// Editor of the modify panel, or null
-    BodyEditFeedbackProvider* editFeedbackProvider;
+    BodyEditFeedbackProvider* bodyEditFeedbackProvider;
     ViewportActivator viewportActivator;
 
     Impl(OpenGL1LabelImageProvider* labels,
@@ -79,7 +79,7 @@ public:
           techniques(NULL), renderer(NULL), xlibRenderer(NULL),
           executor(NULL),
           menuViewport(NULL), selectionEditor(NULL),
-          editFeedbackProvider(NULL)
+          bodyEditFeedbackProvider(NULL)
     {
         createModel();
         selectionEditor = new SceneSelectionEditor(model->getScene());
@@ -232,7 +232,7 @@ public:
     }
     BodyEditFeedbackProvider* getBodyEditFeedbackProvider()
     {
-        return editFeedbackProvider;
+        return bodyEditFeedbackProvider;
     }
     /**
     Raytraces the view of a viewport in CPU render mode (see
@@ -539,5 +539,5 @@ SimpleBody* XtOpenGL1SceneBridge::getModifyPanelTarget()
 void XtOpenGL1SceneBridge::setBodyEditFeedbackProvider(
     BodyEditFeedbackProvider* provider)
 {
-    impl->editFeedbackProvider = provider;
+    impl->bodyEditFeedbackProvider = provider;
 }

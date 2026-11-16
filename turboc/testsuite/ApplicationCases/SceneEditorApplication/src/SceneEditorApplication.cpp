@@ -193,7 +193,7 @@ public:
         , visual(NULL)
         , visualDepth(0)
         , colormap(0)
-        , menuFontSet(NULL)
+        , panelFontSet(NULL)
         , sectionFontSet(NULL)
         , rightPanel(NULL)
         , creationPage(NULL)
@@ -289,9 +289,9 @@ public:
             XFreeFontSet(display, sectionFontSet);
             sectionFontSet = NULL;
         }
-        if (display != NULL && menuFontSet != NULL) {
-            XFreeFontSet(display, menuFontSet);
-            menuFontSet = NULL;
+        if (display != NULL && panelFontSet != NULL) {
+            XFreeFontSet(display, panelFontSet);
+            panelFontSet = NULL;
         }
         if (display != NULL) {
             // Frees the colors cached by the Xt converters in the colormap:
@@ -345,7 +345,7 @@ private:
     Visual* visual;
     int visualDepth;
     Colormap colormap;
-    XFontSet menuFontSet;
+    XFontSet panelFontSet;
     // Bold font set of the headers of the collapsible sections (the menu
     // one if the display has no bold font)
     XFontSet sectionFontSet;
@@ -569,7 +569,7 @@ private:
             binding->page = i;
             tabBindings.add(binding);
             panelWidgets->createPushButton(
-                rightPanel, text(tabs[i]), menuFontSet,
+                rightPanel, text(tabs[i]), panelFontSet,
                 i * SIDE_TAB_WIDTH, 0, SIDE_TAB_WIDTH, SIDE_TAB_HEIGHT - 4,
                 &SceneEditorApplication::selectSideTab, binding);
         }
@@ -593,7 +593,7 @@ private:
         for (i = 0; i < 3; ++i) {
             guiRenderer->buildButtonGroup(
                 pages[i], sceneBridge->getButtonGroup(groups[i]), executor,
-                menuFontSet, 0, 0, SIDE_PANEL_WIDTH);
+                panelFontSet, 0, 0, SIDE_PANEL_WIDTH);
         }
     }
 
@@ -612,11 +612,11 @@ private:
         for (int i = 0; i < 2; ++i) {
             XtCollapsibleSection* section = new XtCollapsibleSection(
                 panelWidgets, creationPage, text(titles[i]),
-                sectionFontSet != NULL ? sectionFontSet : menuFontSet,
+                sectionFontSet != NULL ? sectionFontSet : panelFontSet,
                 y, SIDE_PANEL_WIDTH, TRUE);
             section->setContent(guiRenderer->buildButtonGroup(
                 section->getContainer(), sceneBridge->getButtonGroup(groups[i]),
-                executor, menuFontSet, 0, 0, SIDE_PANEL_WIDTH));
+                executor, panelFontSet, 0, 0, SIDE_PANEL_WIDTH));
             section->setLayoutListener(
                 &SceneEditorApplication::creationSectionResized, this);
             creationSections.add(section);
@@ -670,7 +670,7 @@ private:
     {
         globalBar = guiRenderer->buildButtonGroup(
             workspace, sceneBridge->getButtonGroup("GLOBAL"), executor,
-            menuFontSet, 0, MENU_BAR_HEIGHT, width);
+            panelFontSet, 0, MENU_BAR_HEIGHT, width);
     }
 
     void rebuildGlobalBar()
@@ -683,7 +683,7 @@ private:
     void createStatusBar()
     {
         statusBar = panelWidgets->createLabel(
-            workspace, text("IDM_INTRO_MESSAGE"), menuFontSet,
+            workspace, text("IDM_INTRO_MESSAGE"), panelFontSet,
             XtPanelWidgets::LEFT, 3, height - STATUS_BAR_HEIGHT + 1,
             width - 6, STATUS_BAR_HEIGHT - 2);
     }
@@ -695,7 +695,7 @@ private:
     void createMenuBar()
     {
         menuBar = guiRenderer->buildMenubar(
-            workspace, sceneBridge->getMenubar(), executor, menuFontSet,
+            workspace, sceneBridge->getMenubar(), executor, panelFontSet,
             0, 0, width, MENU_BAR_HEIGHT, 112);
     }
 
@@ -725,9 +725,9 @@ private:
             XtDestroyWidget(menuBar);
             menuBar = NULL;
         }
-        if (menuFontSet != NULL) {
-            XFreeFontSet(display, menuFontSet);
-            menuFontSet = NULL;
+        if (panelFontSet != NULL) {
+            XFreeFontSet(display, panelFontSet);
+            panelFontSet = NULL;
         }
         if (sectionFontSet != NULL) {
             XFreeFontSet(display, sectionFontSet);
@@ -763,8 +763,8 @@ private:
             "fixed",
             NULL
         };
-        menuFontSet = createFirstFontSet(menuPatterns);
-        if (menuFontSet == NULL) {
+        panelFontSet = createFirstFontSet(menuPatterns);
+        if (panelFontSet == NULL) {
             throw VSDKFatalException("Could not create the menu font set");
         }
 
@@ -1409,7 +1409,7 @@ private:
             viewportMenuCommands.add(items[i].command);
         }
         viewportMenu = widgetSet->createChoiceMenu(
-            activeCanvas(), choices, menuFontSet,
+            activeCanvas(), choices, panelFontSet,
             &SceneEditorApplication::executeViewportMenuCommand, this);
 
         Position rootX = 0;
@@ -1909,7 +1909,7 @@ private:
 
     XFontSet getPanelFontSet()
     {
-        return menuFontSet;
+        return panelFontSet;
     }
 
     XtPanelWidgets* getPanelWidgets()

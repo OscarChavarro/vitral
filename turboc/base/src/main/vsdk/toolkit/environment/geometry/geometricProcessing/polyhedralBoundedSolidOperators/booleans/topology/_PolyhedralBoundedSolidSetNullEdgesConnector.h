@@ -10,12 +10,15 @@
 #include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersectionCurveBuilder.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetOperatorNullEdge.h"
 
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
+class _PolyhedralBoundedSolidEdge;
+class InfinitePlane;
 
 /**
 Connect stage (big phase 3) for set operations: null-edges pairing and joins,
@@ -33,31 +36,32 @@ public:
     typedef ArrayList<_PolyhedralBoundedSolidFace*> FaceList;
     typedef ArrayList<_PolyhedralBoundedSolidHalfEdge*> HalfEdgeList;
 
+    /**
+    C++ port note: Java keeps a reference to the connector to answer the
+    pair indexes; here the result keeps a copy of the connector's pair index
+    maps, so it does not depend on the connector lifetime.
+    */
     class ConnectResult {
     public:
-        ConnectResult(const FaceList& sonfa, const FaceList& sonfb);
+        ConnectResult();
+        ConnectResult(const FaceList& sonfa, const FaceList& sonfb,
+            const _PolyhedralBoundedSolidSetNullEdgesConnector& connector);
+        int pairIndexA(_PolyhedralBoundedSolidFace* face) const;
+        int pairIndexB(_PolyhedralBoundedSolidFace* face) const;
         const FaceList& sonfa() const;
         const FaceList& sonfb() const;
     private:
         FaceList sonfaValue;
         FaceList sonfbValue;
+        TreeMap<int, int> sonfaPairIndexByFaceId;
+        TreeMap<int, int> sonfbPairIndexByFaceId;
+        BOOLEAN hasPairIndexMaps;
     };
 
-    /**
-    Structural report of the intersection curves reconstructed from the
-    sonea/soneb pairs of the most recent `connect` call.
-    */
-    static _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report
-        lastCurveReport;
-
-    /**
-    Test-only injection point: when `hasTestOnlyForcedConnectOrder` is set and
-    the permutation matches the pair count, `sortNullEdges` reorders
-    sonea/soneb by this permutation (entry `position -> originalIndex`)
-    instead of the production ordering. Always unset in production.
-    */
-    static ArrayList<int> testOnlyForcedConnectOrder;
-    static BOOLEAN hasTestOnlyForcedConnectOrder;
+    /** Curve report of the most recent connect (NULL: Java null). */
+    static const _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report*
+        getLastCurveReport();
+    static void clearLastCurveReport();
 
     _PolyhedralBoundedSolidSetNullEdgesConnector();
 
@@ -74,8 +78,8 @@ public:
     ConnectResult connect(int op, int flags, NullEdgeList& inSonea,
         NullEdgeList& inSoneb);
 
-    static int getSonfaPairIndex(_PolyhedralBoundedSolidFace* face);
-    static int getSonfbPairIndex(_PolyhedralBoundedSolidFace* face);
+    int getSonfaPairIndex(_PolyhedralBoundedSolidFace* face);
+    int getSonfbPairIndex(_PolyhedralBoundedSolidFace* face);
     static int getLastLooseACount();
     static int getLastLooseBCount();
     static int getLastSonfaCount();
@@ -102,43 +106,65 @@ private:
     };
 
     static int debugFlags;
-    static int operation;
+    int operation;
     int nextNullEdgeIndex;
     NullEdgeList* sonea;
     NullEdgeList* soneb;
-    static HalfEdgeList endsa;
-    static HalfEdgeList endsb;
+    HalfEdgeList endsa;
+    HalfEdgeList endsb;
     FaceList sonfa;
     FaceList sonfb;
-    static TreeMap<int, int> sonfaPairIndexByFaceId;
-    static TreeMap<int, int> sonfbPairIndexByFaceId;
-    static BOOLEAN hasPairIndexMaps;
-    static int lastLooseACount;
-    static int lastLooseBCount;
-    static int lastSonfaCount;
-    static int lastSonfbCount;
-    static int lastPairCount;
-    static int currentConnectPairIndex;
-    static int nextSyntheticPairIndex;
+    TreeMap<int, int> sonfaPairIndexByFaceId;
+    TreeMap<int, int> sonfbPairIndexByFaceId;
+    BOOLEAN hasPairIndexMaps;
+
+    /**
+    Counters of the most recent `connect`, for tests and diagnostics. The
+    connector itself keeps all its working state in the instance.
+    C++ port note: Java keeps them per thread (ThreadLocal); here they are
+    a single static carrier.
+    */
+    struct Diagnostics {
+        Diagnostics();
+        int looseA;
+        int looseB;
+        int sonfaCount;
+        int sonfbCount;
+        int pairCount;
+        _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report curveReport;
+        BOOLEAN hasCurveReport;
+    };
+    static Diagnostics LAST;
+    int currentConnectPairIndex;
+    int nextSyntheticPairIndex;
+
+    /**
+    Structural report of the intersection curves reconstructed from the
+    sonea/soneb pairs of this connect. Captured unconditionally (the
+    reconstruction is cheap) so tests and diagnostics can audit curve
+    closure without enabling pipeline traces; see `getLastCurveReport`.
+    */
+    _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report curveReport;
 
     /**
     True when `sortNullEdges` already oriented every strut along the
     intersection curves, so the connect loop must respect that orientation
     instead of re-normalizing edge halves by vertex-id comparison.
     */
-    static BOOLEAN curveOrientationApplied;
+    BOOLEAN curveOrientationApplied;
 
     /**
     Junction adjacency in processing-position space when the curve order is
-    active; empty (Java null) otherwise.
+    active; empty (Java null) otherwise. `scanjoin` joins a null edge only
+    with a loose end left by one of its neighbours along the curve.
     */
-    static ArrayList<ArrayList<int> > curveNeighborPositions;
+    ArrayList<ArrayList<int> > curveNeighborPositions;
 
     /**
     Processing pair index that pushed each loose entry, parallel to
     `endsa`/`endsb`.
     */
-    static ArrayList<int> endsPairIndex;
+    ArrayList<int> endsPairIndex;
 
     static BOOLEAN isPipelineSummaryTraceEnabled();
     static BOOLEAN isKeepInsertionOrderEnabled();
@@ -146,8 +172,8 @@ private:
     static String summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
     static String summarizeNullEdge(
         const _PolyhedralBoundedSolidSetOperatorNullEdge& edge);
-    static void setCurrentConnectContext(int pairIndex);
-    static int allocateSyntheticPairIndex();
+    void setCurrentConnectContext(int pairIndex);
+    int allocateSyntheticPairIndex();
     static String summarizeLooseEnds(const HalfEdgeList& endsA,
         const HalfEdgeList& endsB);
     static BOOLEAN isSamePoint(_PolyhedralBoundedSolidHalfEdge* first,
@@ -168,7 +194,7 @@ private:
         _PolyhedralBoundedSolidHalfEdge* secondB);
     void finalizeCoincidentLooseA(_PolyhedralBoundedSolidHalfEdge* he);
     void finalizeCoincidentLooseB(_PolyhedralBoundedSolidHalfEdge* he);
-    static void removeLoosePair(int index);
+    void removeLoosePair(int index);
     void updateLastSnapshot();
     static BOOLEAN isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
     static BOOLEAN sharesParentFace(_PolyhedralBoundedSolidHalfEdge* first,
@@ -184,7 +210,7 @@ private:
         const HalfEdgeList& referenceEnds);
     static BOOLEAN isStrictRebindTargetFace(_PolyhedralBoundedSolidFace* targetFace,
         _PolyhedralBoundedSolidHalfEdge* currentTarget);
-    static void rebindClassicCurrentNullEdgeIfNeeded(
+    void rebindClassicCurrentNullEdgeIfNeeded(
         _PolyhedralBoundedSolidHalfEdge* currentTargetFirst,
         _PolyhedralBoundedSolidHalfEdge* currentTargetSecond,
         _PolyhedralBoundedSolidHalfEdge* currentReferenceFirst,
@@ -192,7 +218,7 @@ private:
         const HalfEdgeList& targetEnds,
         const HalfEdgeList& referenceEnds,
         const char* label);
-    static void rebindClassicCurrentNullEdgesIfNeeded(
+    void rebindClassicCurrentNullEdgesIfNeeded(
         _PolyhedralBoundedSolidHalfEdge* currentARight,
         _PolyhedralBoundedSolidHalfEdge* currentALeft,
         _PolyhedralBoundedSolidHalfEdge* currentBLeft,
@@ -207,20 +233,23 @@ private:
         _PolyhedralBoundedSolidHalfEdge* heb,
         _PolyhedralBoundedSolidHalfEdge** outA,
         _PolyhedralBoundedSolidHalfEdge** outB);
-    static BOOLEAN rolesOpposite(_PolyhedralBoundedSolidHalfEdge* h1,
-        _PolyhedralBoundedSolidHalfEdge* h2);
-    static BOOLEAN isPendingStrutRing(_PolyhedralBoundedSolidHalfEdge* he);
-    BOOLEAN rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
-        _PolyhedralBoundedSolidHalfEdge* heb,
-        _PolyhedralBoundedSolidHalfEdge** outA,
-        _PolyhedralBoundedSolidHalfEdge** outB);
-    static BOOLEAN isLooseA(_PolyhedralBoundedSolidHalfEdge* he);
-    static BOOLEAN isLooseB(_PolyhedralBoundedSolidHalfEdge* he);
+    BOOLEAN isCurveNeighborOfCurrentPair(int i);
+    BOOLEAN isLooseA(_PolyhedralBoundedSolidHalfEdge* he);
+    BOOLEAN isLooseB(_PolyhedralBoundedSolidHalfEdge* he);
     _PolyhedralBoundedSolidFace* cutA(_PolyhedralBoundedSolidHalfEdge* he);
     _PolyhedralBoundedSolidFace* cutB(_PolyhedralBoundedSolidHalfEdge* he);
     static void removeLastCutFaceIfSame(FaceList& faces,
         _PolyhedralBoundedSolidFace* face);
     void setOpConnect();
+    BOOLEAN dropIsolatedNodes();
+    BOOLEAN liesInCoplanarFaces(int index);
+    static BOOLEAN isVertexInCoplanarFace(
+        _PolyhedralBoundedSolidEdge* vertexEdge,
+        _PolyhedralBoundedSolidEdge* strut);
+    static BOOLEAN hasFaceOnPlane(
+        _PolyhedralBoundedSolidHalfEdge* start, const InfinitePlane& plane,
+        const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& context);
+    void dropIsolatedStruts();
 };
 
 #endif

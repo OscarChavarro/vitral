@@ -23,13 +23,13 @@
 #include "java/lang/String.h"
 #include "java/lang/System.h"
 
-int HiddenLineRenderer::DEBUG_EDGE_INDEX = -1;
+int HiddenLineRenderer::debugEdgeIndex = -1;
 
 namespace {
 
 void debugSplit(int edgeIndex, const java::String& message)
 {
-    if ( edgeIndex == HiddenLineRenderer::DEBUG_EDGE_INDEX ) {
+    if ( edgeIndex == HiddenLineRenderer::debugEdgeIndex ) {
         java::System::out.println((java::String("[AppelSplit e") +
             java::String::valueOf(edgeIndex) + "] " + message).c_str());
     }
@@ -454,7 +454,7 @@ void processLineToBeDrawn(
         ray = ray.withDirection(ray.getDirection().normalized());
         Intersection* hit = Triangle::doIntersectionWithTriangle(
             ray, sp1a, sp1b, sp1c);
-        if (inEdge.edgeIndex == HiddenLineRenderer::DEBUG_EDGE_INDEX &&
+        if (inEdge.edgeIndex == HiddenLineRenderer::debugEdgeIndex &&
             hit != 0) {
             debugSplit(inEdge.edgeIndex, java::String("contour cl.edgeIndex=") +
                 java::String::valueOf(cl->edgeIndex) + " sweepHit t=" +

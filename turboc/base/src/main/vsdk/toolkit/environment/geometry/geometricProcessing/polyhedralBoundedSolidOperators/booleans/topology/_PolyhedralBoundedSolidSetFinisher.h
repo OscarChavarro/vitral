@@ -9,6 +9,8 @@
 #include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
+#include "java/util/TreeSet.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetNullEdgesConnector.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
@@ -16,6 +18,7 @@ class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
 class _PolyhedralBoundedSolidLoop;
+class PolyhedralBoundedSolidFaceGeometry;
 
 /**
 Finish stage (big phase 4) for set operations, corresponding to the answer
@@ -26,12 +29,9 @@ C++ counterpart of Java's `_PolyhedralBoundedSolidSetFinisher`.
 class _PolyhedralBoundedSolidSetFinisher : public _PolyhedralBoundedSolidOperator {
 public:
     typedef ArrayList<_PolyhedralBoundedSolidFace*> FaceList;
-
-    /**
-    @return times the legacy-ordering fallback was taken in the most recent
-    finish (section 9.1 instrumentation)
-    */
-    static int getLastLegacyFallbackCount();
+    typedef _PolyhedralBoundedSolidSetNullEdgesConnector::ConnectResult
+        ConnectResult;
+    typedef ArrayList<PolyhedralBoundedSolidFaceGeometry*> FaceGeometryList;
 
     /**
     @return faces triangulated in the most recent finish (section 9.2
@@ -57,6 +57,7 @@ public:
     @param debugFlags debug flags
     @param sonfa faces cut from A by the connect stage (updated in place)
     @param sonfb faces cut from B by the connect stage (updated in place)
+    @param pairs pair indices of the null faces, as connect matched them
     */
     static void finish(PolyhedralBoundedSolid* inSolidA,
         PolyhedralBoundedSolid* inSolidB,
@@ -64,7 +65,8 @@ public:
         int op,
         int debugFlags,
         FaceList& sonfa,
-        FaceList& sonfb);
+        FaceList& sonfb,
+        const ConnectResult& pairs);
 
 private:
     enum {
@@ -72,7 +74,6 @@ private:
         DEBUG_06_FINISH = 0x20
     };
 
-    static int lastLegacyFallbackCount;
     static int lastTriangulatedFaceCount;
 
     _PolyhedralBoundedSolidSetFinisher();
@@ -81,8 +82,27 @@ private:
     static void tracePipelineSummary(const String& message);
     static BOOLEAN hasUsableIntegrationRing(_PolyhedralBoundedSolidFace* face);
     static BOOLEAN hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face);
-    static String integrationRingSummary(_PolyhedralBoundedSolidFace* face);
-    static int sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb);
+    static String integrationRingSummary(_PolyhedralBoundedSolidFace* face,
+        const ConnectResult& pairs);
+    static int sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb,
+        const ConnectResult& pairs);
+    static void exchange(FaceList& faces, int i, int j);
+    static void countSide(_PolyhedralBoundedSolidFace* face,
+        PolyhedralBoundedSolid* other, const FaceGeometryList& otherFaces,
+        int counts[2]);
+    static void sidesAcross(_PolyhedralBoundedSolidLoop* loop,
+        PolyhedralBoundedSolid* other, const FaceGeometryList& otherFaces,
+        int counts[2]);
+    static BOOLEAN isBand(_PolyhedralBoundedSolidFace* face);
+    static BOOLEAN sidesAreSwapped(_PolyhedralBoundedSolidFace* face,
+        PolyhedralBoundedSolid* other, const FaceGeometryList& otherFaces,
+        int cut, const char* name);
+    static void flood(_PolyhedralBoundedSolidFace* seed,
+        TreeSet<_PolyhedralBoundedSolidFace*>& reached,
+        FaceList* component);
+    static void untouchedShellsToKeep(PolyhedralBoundedSolid* solid,
+        const FaceList& cutFaces, PolyhedralBoundedSolid* other,
+        BOOLEAN keepInside, FaceList& seeds);
     static _PolyhedralBoundedSolidHalfEdge* findNonDegenerateEar(
         _PolyhedralBoundedSolidHalfEdge* start,
         int loopSize,

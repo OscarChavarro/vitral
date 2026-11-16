@@ -9,6 +9,7 @@ BOOLEAN Logger::withSystemExit = TRUE;
 BOOLEAN Logger::withFatalExceptions = TRUE;
 
 void Logger::setWithSystemExit(BOOLEAN flag) { withSystemExit = flag; }
+BOOLEAN Logger::isWithSystemExit() { return withSystemExit; }
 void Logger::setWithFatalExceptions(BOOLEAN flag) { withFatalExceptions = flag; }
 
 void Logger::processFatalError(const String& method, const String& message, const Throwable* cause)

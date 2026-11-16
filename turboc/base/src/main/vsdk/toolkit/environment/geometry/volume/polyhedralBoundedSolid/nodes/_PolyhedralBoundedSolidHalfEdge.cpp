@@ -12,12 +12,12 @@ _PolyhedralBoundedSolidHalfEdge::_PolyhedralBoundedSolidHalfEdge(_PolyhedralBoun
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidHalfEdge::previous()
 {
-    return (parentLoop != 0) ? parentLoop->previousOf(this) : 0;
+    return (parentLoop != 0) ? parentLoop->halfEdgesList.previousOf(this) : 0;
 }
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidHalfEdge::next()
 {
-    return (parentLoop != 0) ? parentLoop->nextOf(this) : 0;
+    return (parentLoop != 0) ? parentLoop->halfEdgesList.nextOf(this) : 0;
 }
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidHalfEdge::mirrorHalfEdge()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Checks that class attributes follow Vitral's naming rules in the Java, C++
-and TypeScript ports (see doc/attributesGettersAndSettersNames.md):
+(cpp and the legacy turboc) and TypeScript ports (see doc/attributesGettersAndSettersNames.md):
 
   - camelCase, without '_' as prefix or suffix and without snake_case,
   - semantic names, not 1-2 letter abbreviations.
@@ -28,7 +28,7 @@ import sys
 
 SKIP_DIRS = {"build", "dist", "node_modules", "build-cmake", ".gradle",
              "target", "_deps", "artifacts", ".angular", "cmake-build-debug",
-             "x86_64_smp_kernel"}  # Separate kernel with its own conventions
+             "x86_64_smp_kernel", "buildtc", "buildmk"}  # Separate kernel with its own conventions
 
 #- Exemptions (phase 0 decisions) ------------------------------------------
 
@@ -185,6 +185,9 @@ ACCESSOR_EXEMPTIONS = {
     "HeightFieldSolid:getColumnCount", "HeightFieldSolid:getRowCount",
     "CsgPlacedExpression:getChildExpression", "CsgPolicyTestOperand:getChildExpression",
     "ShadersGeometryFixture:getTessellationReport",
+    # Read-only view of the sample buffer (Java asReadOnlyBuffer, C++
+    # data()); turboc returns the raw pointer.
+    "NormalMapTexture:getFloatSamples",
 }
 GETTER_PATTERNS = {
     "java": re.compile(r"\b(?:public|protected)\s+[\w<>\[\],.? ]+\s+(get\w+)\s*\(\s*\)\s*\{\s*return\s+(?:this\.)?(\w+)\s*;\s*\}", re.S),
@@ -371,6 +374,8 @@ def scan(path, lang):
 PORTS = [
     ("java", "java", {".java"}),
     ("cpp", "cpp", {".h", ".hpp", ".cpp"}),
+    # The legacy (Turbo C++ / gcc 2.x) C++ port, with the C++ rules
+    ("cpp", "turboc", {".h", ".hpp", ".cpp", ".txx"}),
     ("ts", "typescript", {".ts"}),
 ]
 

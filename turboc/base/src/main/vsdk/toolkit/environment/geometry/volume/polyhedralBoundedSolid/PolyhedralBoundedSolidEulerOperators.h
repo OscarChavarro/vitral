@@ -33,6 +33,9 @@ public:
     static BOOLEAN mef(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4, int newFaceId);
     static BOOLEAN kemr(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4);
     static BOOLEAN kfmrh(PolyhedralBoundedSolid* solid, int f1, int f2);
+
+private:
+    static _PolyhedralBoundedSolidFace* lmefCircularFace(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he, int newFaceId);
 };
 
 #endif

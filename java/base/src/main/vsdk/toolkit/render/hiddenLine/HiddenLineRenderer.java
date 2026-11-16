@@ -95,11 +95,11 @@ public class HiddenLineRenderer extends RenderingElement
 {
     /// Diagnostic: when >= 0, processLineToBeDrawn logs the contour-crossing /
     /// segment-splitting decisions for the cached edge with this edgeIndex.
-    public static int DEBUG_EDGE_INDEX = -1;
+    public static int debugEdgeIndex = -1;
 
     private static void debugSplit(int edgeIndex, String message)
     {
-        if ( edgeIndex == DEBUG_EDGE_INDEX ) {
+        if ( edgeIndex == debugEdgeIndex ) {
             System.out.println("[AppelSplit e" + edgeIndex + "] " + message);
         }
     }
@@ -618,7 +618,7 @@ public class HiddenLineRenderer extends RenderingElement
             ray = ray.withDirection(ray.getDirection().normalized());
             Intersection hit =
                 Triangle.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
-            if ( inEdge.edgeIndex == DEBUG_EDGE_INDEX && hit != null ) {
+            if ( inEdge.edgeIndex == debugEdgeIndex && hit != null ) {
                 debugSplit(inEdge.edgeIndex, "contour cl.edgeIndex=" +
                     cl.edgeIndex + " sweepHit t=" +
                     String.format("%.5f", hit.getT()) + " t0=" +

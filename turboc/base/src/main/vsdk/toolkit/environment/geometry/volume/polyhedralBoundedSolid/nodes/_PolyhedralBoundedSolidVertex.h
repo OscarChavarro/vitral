@@ -2,12 +2,13 @@
 #define __PLYHDRL_BNDD_SLD_VRTX__
 
 #include "java/lang/String.h"
+#include "vsdk/toolkit/common/dataStructures/ArrayLinkable.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class _PolyhedralBoundedSolidHalfEdge;
 
-class _PolyhedralBoundedSolidVertex {
+class _PolyhedralBoundedSolidVertex : public ArrayLinkable {
 public:
     int id;
     Vector3Dd position;

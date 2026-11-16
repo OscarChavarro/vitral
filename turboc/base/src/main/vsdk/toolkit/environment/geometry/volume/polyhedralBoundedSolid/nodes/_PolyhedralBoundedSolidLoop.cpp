@@ -18,20 +18,18 @@ _PolyhedralBoundedSolidLoop::_PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolid
 _PolyhedralBoundedSolidLoop::~_PolyhedralBoundedSolidLoop()
 {
     for (long int i = 0; i < halfEdgesList.size(); ++i) {
-        if (halfEdgesList[i] != 0) {
-            delete halfEdgesList[i];
+        if (halfEdgesList.get(i) != 0) {
+            delete halfEdgesList.get(i);
         }
     }
 }
 
 void _PolyhedralBoundedSolidLoop::unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
-#ifdef __TURBOC__
-    halfEdgesList.remove2(he);
-#else
-    halfEdgesList.remove(he);
-#endif
-    boundaryStartHalfEdge = halfEdgesList.size() == 0 ? 0 : halfEdgesList[0];
+    if ( halfEdgesList.locateWindowAtElem(he) ) {
+        halfEdgesList.removeElemAtWindow();
+    }
+    boundaryStartHalfEdge = halfEdgesList.size() == 0 ? 0 : halfEdgesList.get(0);
 }
 
 /**
@@ -106,14 +104,8 @@ Note that current implementation is quite diferent from the original from
 */
 void _PolyhedralBoundedSolidLoop::delhe(_PolyhedralBoundedSolidHalfEdge* he)
 {
-    long int i;
-
-    for ( i = 0; i < halfEdgesList.size(); i++ ) {
-        if ( halfEdgesList.get(i) == he ) {
-            halfEdgesList.remove(i);
-            break;
-        }
-    }
+    halfEdgesList.locateWindowAtElem(he);
+    halfEdgesList.removeElemAtWindow();
 
     if ( halfEdgesList.size() > 0 ) {
         boundaryStartHalfEdge = halfEdgesList.get(0);
@@ -171,34 +163,5 @@ void _PolyhedralBoundedSolidLoop::revert()
     }
 
     //-----------------------------------------------------------------
-    for ( i = 0; i < n / 2; i++ ) {
-        _PolyhedralBoundedSolidHalfEdge* tmp = halfEdgesList.get(i);
-        halfEdgesList.set(i, halfEdgesList.get(n - 1 - i));
-        halfEdgesList.set(n - 1 - i, tmp);
-    }
-}
-
-_PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::previousOf(_PolyhedralBoundedSolidHalfEdge* he) const
-{
-    long int n = halfEdgesList.size();
-    if ( he == 0 || n == 0 ) return 0;
-    for (long int i = 0; i < n; ++i) {
-        if ( halfEdgesList.get(i) == he ) {
-            long int j = (i == 0) ? n - 1 : i - 1;
-            return halfEdgesList.get(j);
-        }
-    }
-    return 0;
-}
-
-_PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::nextOf(_PolyhedralBoundedSolidHalfEdge* he) const
-{
-    long int n = halfEdgesList.size();
-    if ( he == 0 || n == 0 ) return 0;
-    for (long int i = 0; i < n; ++i) {
-        if ( halfEdgesList.get(i) == he ) {
-            return halfEdgesList.get((i + 1) % n);
-        }
-    }
-    return 0;
+    halfEdgesList.reverse();
 }

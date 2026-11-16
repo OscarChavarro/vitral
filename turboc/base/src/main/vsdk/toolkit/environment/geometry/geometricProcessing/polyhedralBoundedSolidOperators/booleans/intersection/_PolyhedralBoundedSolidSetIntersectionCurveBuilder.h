@@ -76,13 +76,6 @@ public:
     };
 
     /**
-    For each processing position of the most recent `orderAndOrientAlongCurves`
-    result, the two processing positions of its cycle-adjacent pairs. Empty
-    (Java null) until an order is computed.
-    */
-    static ArrayList<IndexList> lastTraversalNeighborPositions;
-
-    /**
     Builds the intersection-curve report for the given index-aligned
     null-edge lists. The lists are not modified.
     @param sonea null edges on solid A, index-aligned with soneb
@@ -116,12 +109,15 @@ public:
     @param sonea null edges on solid A; struts may be flipped in place
     @param soneb null edges on solid B; struts may be flipped in place
     @param outPermutation receives `result[position] = originalIndex`
+    @param neighborsOut receives, for each processing position the two
+    processing positions of its cycle-adjacent pairs (its junction partners
+    along the curve), or is left empty (Java null)
     @return false (Java null) when the cycles do not cover the index range
     exactly, in which case nothing is mutated
     */
     static BOOLEAN orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
         int nodeCount, NullEdgeList& sonea, NullEdgeList& soneb,
-        IndexList& outPermutation);
+        IndexList& outPermutation, ArrayList<IndexList>& neighborsOut);
 
 private:
     _PolyhedralBoundedSolidSetIntersectionCurveBuilder();
@@ -147,6 +143,14 @@ private:
         _PolyhedralBoundedSolidSetOperatorNullEdge& current,
         const _PolyhedralBoundedSolidSetOperatorNullEdge& successor,
         BOOLEAN successorSideIsRight);
+    static void orientSameFaceStrut(
+        _PolyhedralBoundedSolidSetOperatorNullEdge& current,
+        BOOLEAN hasPredecessor, const Vector3Dd& predecessor,
+        BOOLEAN hasSuccessor, const Vector3Dd& successor,
+        BOOLEAN predecessorHalfIsRight);
+    static double ccwAngle(const Vector3Dd& from, const Vector3Dd& to,
+        const Vector3Dd& n);
+    static double clampToSector(double angle, double sectorEnd);
     static int minOf(const IndexList& values);
 
     // Sorting criteria (C++98 has no lambdas)

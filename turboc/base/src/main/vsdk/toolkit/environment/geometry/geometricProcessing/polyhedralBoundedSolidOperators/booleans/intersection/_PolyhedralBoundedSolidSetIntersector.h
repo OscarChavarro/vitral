@@ -16,6 +16,7 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexVertex.h"
 
 class PolyhedralBoundedSolid;
+class PolyhedralBoundedSolidFaceGeometry;
 class _PolyhedralBoundedSolidEdge;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -119,10 +120,14 @@ private:
     static void processEdge(_PolyhedralBoundedSolidEdge* e,
                             PolyhedralBoundedSolid* edgeSolid,
                             PolyhedralBoundedSolid* faceSolid,
+                            ArrayList<PolyhedralBoundedSolidFaceGeometry*>& faceBoxes,
+                            double boxMargin,
                             int BvsA,
                             VertexVertexList& sonvv,
                             VertexFaceList& sonva,
                             VertexFaceList& sonvb);
+    static double generateBoxMargin(
+        const ArrayList<PolyhedralBoundedSolidFaceGeometry*>& faceBoxes);
 };
 
 #endif

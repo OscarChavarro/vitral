@@ -153,7 +153,7 @@ static void processBrep(SimpleBody* body, const Matrix4x4d& proj,
 
     Matrix4x4d M = body->getTransformationMatrix();
     for (size_t i = 0; i < (size_t)brep->getEdgesList().size(); i++) {
-        _PolyhedralBoundedSolidEdge* e = brep->getEdgesList()[i];
+        _PolyhedralBoundedSolidEdge* e = brep->getEdgesList().get(i);
         if ( e == 0 || e->rightHalf == 0 || e->leftHalf == 0 ||
              e->rightHalf->startingVertex == 0 || e->leftHalf->startingVertex == 0 ) {
             continue;

@@ -3,6 +3,8 @@
 #include <stdio.h>
 
 #include "java/lang/Boolean.h"
+#include "java/lang/Double.h"
+#include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.h"
@@ -26,10 +28,53 @@ _PolyhedralBoundedSolidIdNamespace* _PolyhedralBoundedSolidOperator::idNamespace
     NULL;
 
 
+/**
+The outer loop of a face as `_PolyhedralBoundedSolidOperator::clearRingSide`
+needs it (Java private nested class `_OuterLoopShadow`).
+*/
+class _OuterLoopShadow {
+private:
+    /** False when the loop has no start half-edge or is not closed. */
+    BOOLEAN walkable;
+    /** False when the face has no plane. */
+    BOOLEAN planar;
+    int dropAxis;
+    ArrayList<Vector3Dd> points;
+    ArrayList<double> u;
+    ArrayList<double> v;
+
+public:
+    explicit _OuterLoopShadow(_PolyhedralBoundedSolidFace* f);
+    double clearance(const Vector3Dd& point) const;
+    int contains(const Vector3Dd& point) const;
+};
+
+/**
+`_PolyhedralBoundedSolidOperator::clearRingSide` for many rings of the same
+division (Java private nested class `_RingSideTest`).
+*/
+class _RingSideTest {
+private:
+    _PolyhedralBoundedSolidFace* firstFace;
+    _PolyhedralBoundedSolidFace* secondFace;
+    _OuterLoopShadow* shadow1;
+    _OuterLoopShadow* shadow2;
+    double tolerance;
+
+    _RingSideTest(const _RingSideTest& other);
+    _RingSideTest& operator=(const _RingSideTest& other);
+
+public:
+    _RingSideTest(_PolyhedralBoundedSolidFace* f1,
+        _PolyhedralBoundedSolidFace* f2);
+    ~_RingSideTest();
+    int side(_PolyhedralBoundedSolidLoop* l);
+};
+
 /// Name of the system property that enables the pipeline traces
 static const char* const TRACE_PIPELINE_SUMMARY = "vsdk.setop.tracePipelineSummary";
 
-static BOOLEAN searchForEdge(ArrayList<_PolyhedralBoundedSolidEdge*>& l,
+static BOOLEAN searchForEdge(CircularArrayList<_PolyhedralBoundedSolidEdge*>& l,
                    _PolyhedralBoundedSolidEdge* e)
 {
     long i;
@@ -40,7 +85,7 @@ static BOOLEAN searchForEdge(ArrayList<_PolyhedralBoundedSolidEdge*>& l,
     return FALSE;
 }
 
-static BOOLEAN searchForVertex(ArrayList<_PolyhedralBoundedSolidVertex*>& l,
+static BOOLEAN searchForVertex(CircularArrayList<_PolyhedralBoundedSolidVertex*>& l,
                      _PolyhedralBoundedSolidVertex* v)
 {
     long i;
@@ -127,11 +172,8 @@ void _PolyhedralBoundedSolidOperator::movefac(_PolyhedralBoundedSolidFace* f,
         return;
     }
 
-#ifdef __TURBOC__
-    f->parentSolid->getPolygonsList().remove2(f);
-#else
-    f->parentSolid->getPolygonsList().remove(f);
-#endif
+    f->parentSolid->getPolygonsList().locateWindowAtElem(f);
+    f->parentSolid->getPolygonsList().removeElemAtWindow();
     s->getPolygonsList().add(f);
     f->parentSolid = s;
 
@@ -221,23 +263,44 @@ the splitter algorithm is briefly described on section [MANT1988].14.7.2.
 void _PolyhedralBoundedSolidOperator::laringmv(_PolyhedralBoundedSolidFace* f1,
                                                _PolyhedralBoundedSolidFace* f2)
 {
+    laringmv(f1, f2, NULL);
+}
+
+/**
+As `laringmv(f1, f2)` but never moves `keep`. `join` passes the remainder
+of an inner ring it has just divided: that remainder is the hole the
+section polygon leaves in `f1`, while the divided-off part became the
+outer loop of `f2` (the disk). Both coincide geometrically, so no
+containment test can tell them apart; topology does (Fable5.2Analysis.md
+defect B-01).
+*/
+void _PolyhedralBoundedSolidOperator::laringmv(_PolyhedralBoundedSolidFace* f1,
+                                               _PolyhedralBoundedSolidFace* f2,
+                                               _PolyhedralBoundedSolidLoop* keep)
+{
     _PolyhedralBoundedSolidLoop* l;
     long i;
 
-    // It is supposed to move all (internal) rings from `f1` to `f2`
-    // using PolyhedralBoundedSolid.lringmv
-    // Legacy rule: move every ring. A geometric two-face containment
-    // rule was tried here (mythosPlan Phase 3) and regressed reference
-    // flows: mid-connect loops are not simple regions (bridge edges,
-    // spikes, half-built chains), so parity containment is unreliable
-    // at this point of the pipeline. The shadow trace below records
-    // what the geometric rule would have decided, for diagnosis only.
+    // [MANT1988].13.5 moves the rings that are not inside the outer loop
+    // of `f1`. A ring clearly inside `f1` only (clearRingSide) stays;
+    // every other ring follows the legacy rule and moves to `f2`. A
+    // containment test for every ring was tried (mythosPlan Phase 3) and
+    // regressed reference flows: mid-connect loops are not simple
+    // regions and pending strut rings usually sit on the dividing chord,
+    // so only unambiguous geometry overrides the legacy rule.
+    _RingSideTest sides(f1, f2);
     for ( i = 1; i < f1->boundariesList.size(); i++ ) {
         l = f1->boundariesList.get(i);
+        if ( l == keep ) {
+            continue;
+        }
         if ( Boolean::getBoolean(TRACE_PIPELINE_SUMMARY) ) {
             traceRingMoveShadowDecision(f1, f2, l,
                 String("laringmv MOVE wouldMove=") +
                 booleanName(ringBelongsToOtherHalf(f1, f2, l)));
+        }
+        if ( sides.side(l) == 1 ) {
+            continue;
         }
         if ( PolyhedralBoundedSolidEulerOperators::lringmv(f1->parentSolid, l, f2, FALSE) ) {
             i--;
@@ -308,6 +371,238 @@ BOOLEAN _PolyhedralBoundedSolidOperator::ringBelongsToOtherHalf(
 }
 
 /**
+Side of a face division on which a ring clearly lies: 1 when its
+representative point is inside the outer loop of `f1` only, 2 when
+inside that of `f2` only, both times farther than the tolerance from
+either outer loop; 0 otherwise (ambiguous: the caller keeps its legacy
+rule). A ring clearly inside one region cannot belong to the other,
+whatever the shape of the loops in the middle of the connect stage.
+*/
+int _PolyhedralBoundedSolidOperator::clearRingSide(
+    _PolyhedralBoundedSolidFace* f1,
+    _PolyhedralBoundedSolidFace* f2,
+    _PolyhedralBoundedSolidLoop* l)
+{
+    if ( f1 == NULL || f2 == NULL ) {
+        return 0;
+    }
+    _RingSideTest sides(f1, f2);
+    return sides.side(l);
+}
+
+/**
+The outer loop of a face as `clearRingSide` needs it: its vertices in
+order and the coordinate dropped to project it. Built once per face, so
+that testing many rings against the same division walks the loop and
+computes the plane once (performance.md P-04). The answers are those of
+`outerLoopClearance` and `outerLoopParityContains`.
+*/
+_OuterLoopShadow::_OuterLoopShadow(_PolyhedralBoundedSolidFace* f)
+{
+    _PolyhedralBoundedSolidLoop* outer = f->boundariesList.get(0);
+    _PolyhedralBoundedSolidHalfEdge* start = NULL;
+    if ( outer != NULL ) {
+        start = outer->boundaryStartHalfEdge;
+    }
+    _PolyhedralBoundedSolidHalfEdge* he = start;
+    BOOLEAN closed = start != NULL;
+    int guard = 0;
+
+    while ( closed ) {
+        if ( he->startingVertex == NULL ) {
+            closed = FALSE;
+            break;
+        }
+        points.add(he->startingVertex->position);
+        he = he->next();
+        guard++;
+        if ( he == NULL ) {
+            closed = FALSE;
+        }
+        else if ( he == start || guard >= 100000 ) {
+            break;
+        }
+    }
+    walkable = closed;
+    InfinitePlane* plane = f->getContainingPlane();
+    planar = plane != NULL;
+    int axis = 2;
+    if ( planar ) {
+        Vector3Dd normal = plane->getNormal();
+        double ax = fabs(normal.x());
+        double ay = fabs(normal.y());
+        double az = fabs(normal.z());
+        if ( ax >= ay && ax >= az ) {
+            axis = 0;
+        }
+        else if ( ay >= ax && ay >= az ) {
+            axis = 1;
+        }
+    }
+    delete plane;
+    dropAxis = axis;
+    for ( guard = 0; guard < points.size(); guard++ ) {
+        u.add(_PolyhedralBoundedSolidOperator::shadowProjectedU(
+            points[guard], dropAxis));
+        v.add(_PolyhedralBoundedSolidOperator::shadowProjectedV(
+            points[guard], dropAxis));
+    }
+}
+
+/**
+As `outerLoopClearance`, with the same arithmetic on plain numbers: no
+vector is allocated per segment.
+*/
+double _OuterLoopShadow::clearance(const Vector3Dd& point) const
+{
+    double best = DBL_MAX;
+    double px = point.x();
+    double py = point.y();
+    double pz = point.z();
+    long i;
+
+    if ( !walkable ) {
+        return 0.0;
+    }
+    for ( i = 0; i < points.size(); i++ ) {
+        const Vector3Dd& a = points[i];
+        const Vector3Dd& b = points[(i + 1) % points.size()];
+        double abx = b.x() - a.x();
+        double aby = b.y() - a.y();
+        double abz = b.z() - a.z();
+        double len2 = abx * abx + aby * aby + abz * abz;
+        double t = 0.0;
+        if ( len2 > 0.0 ) {
+            t = ((px - a.x()) * abx + (py - a.y()) * aby +
+                 (pz - a.z()) * abz) / len2;
+        }
+        t = Math::max(0.0, Math::min(1.0, t));
+        double dx = px - (a.x() + abx * t);
+        double dy = py - (a.y() + aby * t);
+        double dz = pz - (a.z() + abz * t);
+        best = Math::min(best, sqrt(dx * dx + dy * dy + dz * dz));
+    }
+    return best;
+}
+
+/**
+As `outerLoopParityContains`: 1 / 0 parity result, or -1 when not
+computable (Java returns a nullable `Boolean`).
+*/
+int _OuterLoopShadow::contains(const Vector3Dd& point) const
+{
+    double pu;
+    double pv;
+    BOOLEAN inside = FALSE;
+    long i;
+
+    if ( !planar || !walkable ) {
+        return -1;
+    }
+    pu = _PolyhedralBoundedSolidOperator::shadowProjectedU(point, dropAxis);
+    pv = _PolyhedralBoundedSolidOperator::shadowProjectedV(point, dropAxis);
+    for ( i = 0; i < points.size(); i++ ) {
+        long next = (i + 1) % points.size();
+        if ( (v[i] > pv) != (v[next] > pv) ) {
+            double crossingU = (u[next] - u[i]) * (pv - v[i]) /
+                (v[next] - v[i]) + u[i];
+            if ( pu < crossingU ) {
+                inside = !inside;
+            }
+        }
+    }
+    if ( inside ) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+`clearRingSide` for many rings of the same division: the two outer loops
+and the tolerance are prepared once. Moving a ring from one face to the
+other does not change their outer loops, so one instance serves a whole
+pass over the rings.
+*/
+_RingSideTest::_RingSideTest(_PolyhedralBoundedSolidFace* f1,
+    _PolyhedralBoundedSolidFace* f2)
+    : firstFace(f1), secondFace(f2), shadow1(NULL), shadow2(NULL),
+      tolerance(0.0)
+{
+}
+
+_RingSideTest::~_RingSideTest()
+{
+    delete shadow1;
+    delete shadow2;
+}
+
+/** See `clearRingSide`. */
+int _RingSideTest::side(_PolyhedralBoundedSolidLoop* l)
+{
+    if ( l == NULL || l->boundaryStartHalfEdge == NULL ||
+         l->boundaryStartHalfEdge->startingVertex == NULL ||
+         firstFace->boundariesList.size() == 0 ||
+         secondFace->boundariesList.size() == 0 ||
+         firstFace->boundariesList.get(0) == l ||
+         secondFace->boundariesList.get(0) == l ) {
+        return 0;
+    }
+    if ( shadow1 == NULL ) {
+        shadow1 = new _OuterLoopShadow(firstFace);
+        shadow2 = new _OuterLoopShadow(secondFace);
+        tolerance = PolyhedralBoundedSolidNumericPolicy
+            ::forSolid(firstFace->parentSolid).bigEpsilon();
+    }
+    Vector3Dd point = l->boundaryStartHalfEdge->startingVertex->position;
+    if ( shadow1->clearance(point) <= tolerance ||
+         shadow2->clearance(point) <= tolerance ) {
+        return 0;
+    }
+    int in1 = shadow1->contains(point);
+    int in2 = shadow2->contains(point);
+    if ( in1 < 0 || in2 < 0 || in1 == in2 ) {
+        return 0;
+    }
+    if ( in1 == 1 ) {
+        return 1;
+    }
+    return 2;
+}
+
+/** Distance from `point` to the outer loop of `f` (3D segments). */
+double _PolyhedralBoundedSolidOperator::outerLoopClearance(
+    _PolyhedralBoundedSolidFace* f, const Vector3Dd& point)
+{
+    _PolyhedralBoundedSolidLoop* outer = f->boundariesList.get(0);
+    _PolyhedralBoundedSolidHalfEdge* start = outer->boundaryStartHalfEdge;
+    if ( start == NULL ) {
+        return 0.0;
+    }
+    double best = DBL_MAX;
+    _PolyhedralBoundedSolidHalfEdge* he = start;
+    int guard = 0;
+    do {
+        _PolyhedralBoundedSolidHalfEdge* next = he->next();
+        if ( next == NULL ) {
+            return 0.0;
+        }
+        Vector3Dd a = he->startingVertex->position;
+        Vector3Dd ab = next->startingVertex->position.subtract(a);
+        double len2 = ab.dotProduct(ab);
+        double t = 0.0;
+        if ( len2 > 0.0 ) {
+            t = point.subtract(a).dotProduct(ab) / len2;
+        }
+        t = Math::max(0.0, Math::min(1.0, t));
+        best = Math::min(best,
+            point.subtract(a.add(ab.multiply(t))).length());
+        he = next;
+        guard++;
+    } while ( he != start && guard < 100000 );
+    return best;
+}
+
+/**
 2D parity (ray crossing) containment of a point against the outer loop
 of a face, on the dominant projection plane of the face normal.
 @param f face whose outer loop is tested
@@ -320,7 +615,7 @@ int _PolyhedralBoundedSolidOperator::outerLoopParityContains(
     const Vector3Dd& point)
 {
     if ( f == NULL || f->boundariesList.size() == 0 ||
-         f->getContainingPlane() == NULL ) {
+         f->hasContainingPlane() == FALSE ) {
         return -1;
     }
     _PolyhedralBoundedSolidLoop* outerLoop = f->boundariesList.get(0);
@@ -328,7 +623,7 @@ int _PolyhedralBoundedSolidOperator::outerLoopParityContains(
         return -1;
     }
 
-    Vector3Dd normal = f->getContainingPlane()->getNormal();
+    Vector3Dd normal = f->containingPlaneNormal();
     double ax = Cpp98Support::abs(normal.x());
     double ay = Cpp98Support::abs(normal.y());
     double az = Cpp98Support::abs(normal.z());
@@ -397,7 +692,7 @@ void _PolyhedralBoundedSolidOperator::traceRingMoveShadowDecision(
          f1->boundariesList.size() == 0 ||
          l->boundaryStartHalfEdge == NULL ||
          l->boundaryStartHalfEdge->startingVertex == NULL ||
-         f1->getContainingPlane() == NULL ) {
+         f1->hasContainingPlane() == FALSE ) {
 #ifdef __TURBOC__
         // TCC 3.0 cannot destroy a String temporary selected by ?: inside a
         // varargs call.  Materialize both alternatives before printf.
@@ -422,7 +717,7 @@ void _PolyhedralBoundedSolidOperator::traceRingMoveShadowDecision(
         return;
     }
 
-    Vector3Dd normal = f1->getContainingPlane()->getNormal();
+    Vector3Dd normal = f1->containingPlaneNormal();
     double ax = Cpp98Support::abs(normal.x());
     double ay = Cpp98Support::abs(normal.y());
     double az = Cpp98Support::abs(normal.z());
@@ -517,17 +812,115 @@ double _PolyhedralBoundedSolidOperator::shadowProjectedV(const Vector3Dd& p,
     return p.y();
 }
 
+/**
+After `join` divides an inner ring of `oldf` with `lmef`, one of the two
+coincident copies of the section polygon must stay in `oldf` as its hole
+and the other must be the outer loop of `newf` (the disk). `lmef` puts
+the h1 side in `newf` whatever its winding, so when the remainder left in
+`oldf` is wound as a disk and `newf`'s outer loop is wound as a hole, the
+two loops are exchanged. Returns the loop that is now the hole of `oldf`
+(and must not be moved by laringmv), or null when the division does not
+have that shape (Fable5.2Analysis.md defect B-01).
+*/
+_PolyhedralBoundedSolidLoop* _PolyhedralBoundedSolidOperator::holeLeftByDividedRing(
+    _PolyhedralBoundedSolidFace* oldf,
+    _PolyhedralBoundedSolidFace* newf,
+    _PolyhedralBoundedSolidLoop* dividedInnerRing)
+{
+    if ( dividedInnerRing == NULL || newf == NULL ||
+         dividedInnerRing->parentFace != oldf ||
+         newf->boundariesList.size() < 1 ) {
+        return NULL;
+    }
+    _PolyhedralBoundedSolidLoop* newOuter = newf->boundariesList.get(0);
+    if ( Boolean::getBoolean(TRACE_PIPELINE_SUMMARY) ) {
+        String dot = Double::toString(windingDot(dividedInnerRing, oldf));
+        String dotVsOldf = Double::toString(windingDot(newOuter, oldf));
+        printf("[RINGDIV] oldf=%d newf=%d remainder=%ld dot=%s newfLoops=%ld "
+            "newOuter=%ld dotVsOldf=%s\n", oldf->id, newf->id,
+            dividedInnerRing->halfEdgesList.size(), dot.c_str(),
+            newf->boundariesList.size(), newOuter->halfEdgesList.size(),
+            dotVsOldf.c_str());
+    }
+    if ( isWoundAsHole(dividedInnerRing, oldf) ) {
+        return dividedInnerRing;
+    }
+    // Both copies are measured against oldf's normal: newf's own plane
+    // follows whatever winding its outer loop got, so it cannot tell.
+    if ( newf->boundariesList.size() != 1 ||
+         !isWoundAsHole(newOuter, oldf) ||
+         !isWoundAsDisk(dividedInnerRing, oldf) ) {
+        return NULL;
+    }
+    PolyhedralBoundedSolid* s = oldf->parentSolid;
+    // newf keeps one loop only while the exchange happens: first move the
+    // disk in as outer loop, then send the hole piece to oldf.
+    if ( !PolyhedralBoundedSolidEulerOperators::lringmv(s,
+             dividedInnerRing, newf, TRUE) ) {
+        return NULL;
+    }
+    if ( !PolyhedralBoundedSolidEulerOperators::lringmv(s, newOuter, oldf,
+             FALSE) ) {
+        return NULL;
+    }
+    return newOuter;
+}
+
+BOOLEAN _PolyhedralBoundedSolidOperator::isWoundAsDisk(
+    _PolyhedralBoundedSolidLoop* loop, _PolyhedralBoundedSolidFace* face)
+{
+    return windingDot(loop, face) > VSDK::EPSILON * VSDK::EPSILON;
+}
+
+/**
+True when `loop` is a loop of `face` whose winding (Newell normal) is
+opposite to the face normal, i.e. it is wound as a hole. A loop with no
+measurable area answers false.
+*/
+BOOLEAN _PolyhedralBoundedSolidOperator::isWoundAsHole(
+    _PolyhedralBoundedSolidLoop* loop, _PolyhedralBoundedSolidFace* face)
+{
+    return windingDot(loop, face) < -VSDK::EPSILON * VSDK::EPSILON;
+}
+
+/** Newell normal of `loop` dotted with `face`'s normal (0 if unknown). */
+double _PolyhedralBoundedSolidOperator::windingDot(
+    _PolyhedralBoundedSolidLoop* loop, _PolyhedralBoundedSolidFace* face)
+{
+    if ( loop == NULL || face == NULL ) {
+        return 0.0;
+    }
+    InfinitePlane* plane = face->getContainingPlane();
+    if ( plane == NULL || loop->halfEdgesList.size() < 3 ) {
+        delete plane;
+        return 0.0;
+    }
+    double nx = 0.0;
+    double ny = 0.0;
+    double nz = 0.0;
+    long i;
+    long n = loop->halfEdgesList.size();
+    for ( i = 0; i < n; i++ ) {
+        Vector3Dd a = loop->halfEdgesList.get(i)->startingVertex->position;
+        Vector3Dd b = loop->halfEdgesList.get((i + 1) % n)
+            ->startingVertex->position;
+        nx += (a.y() - b.y()) * (a.z() + b.z());
+        ny += (a.z() - b.z()) * (a.x() + b.x());
+        nz += (a.x() - b.x()) * (a.y() + b.y());
+    }
+    // C++ port note: Java computes the face plane again here; the first
+    // one is kept, the result is the same
+    Vector3Dd normal = plane->getNormal();
+    delete plane;
+    return nx * normal.x() + ny * normal.y() + nz * normal.z();
+}
+
+/**
+Following section [MANT1988].14.7.2. and program [MANT1988].14.10.
+*/
 void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
                                            _PolyhedralBoundedSolidHalfEdge* h2,
                                            BOOLEAN withDebug)
-{
-    join(h1, h2, withDebug, TRUE);
-}
-
-void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
-                                           _PolyhedralBoundedSolidHalfEdge* h2,
-                                           BOOLEAN withDebug,
-                                           BOOLEAN allowRingMove)
 {
     PolyhedralBoundedSolidStatistics::recordJoinCall();
     _PolyhedralBoundedSolidFace* oldf;
@@ -543,7 +936,12 @@ void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
     oldf = h1->parentLoop->parentFace;
     newf = NULL;
     s = oldf->parentSolid;
+    _PolyhedralBoundedSolidLoop* dividedInnerRing = NULL;
     if ( h1->parentLoop == h2->parentLoop ) {
+        if ( oldf->boundariesList.size() > 1 &&
+             oldf->boundariesList.get(0) != h1->parentLoop ) {
+            dividedInnerRing = h1->parentLoop;
+        }
         if ( h1->previous()->previous() != h2 ) {
             int fid1 = (idNamespace != NULL)
                 ? idNamespace->nextFaceId(s)
@@ -559,11 +957,13 @@ void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
         int fid2 = (idNamespace != NULL)
             ? idNamespace->nextFaceId(s)
             : s->getMaxFaceId() + 1;
-        // Shadow diagnostics (mythosPlan Phase 3): capture which face
-        // the second division splits and the face it creates, so the
-        // rings that are never redistributed across this division stay
-        // observable. Applying laringmv here was tried and regressed
-        // MOON_BLOCK reference cases — behavior stays legacy.
+        // The second division used to leave every ring in the face it
+        // splits. That stranded strut rings far from their junction
+        // partners, which the connector then had to rescue (pending item
+        // 3 of Fable5.2Analysis.md). Moving every ring regressed
+        // MOON_BLOCK; moving only rings that clearly lie in the new half
+        // (below) removed every rescue of the reference corpus and the
+        // box fuzz.
         _PolyhedralBoundedSolidFace* splitFace2 =
             h2->parentLoop->parentFace;
         _PolyhedralBoundedSolidFace* newFace2 =
@@ -582,10 +982,31 @@ void _PolyhedralBoundedSolidOperator::join(_PolyhedralBoundedSolidHalfEdge* h1,
                         splitFace2->boundariesList.get(shadowI))));
             }
         }
-        if ( newf != NULL && oldf->boundariesList.size() >= 2 ) {
-            if ( allowRingMove ) {
-                laringmv(oldf, newf);
+        // Rings of the face divided by the second lmef that clearly lie
+        // in the new half follow it ([MANT1988].13.5).
+        if ( splitFace2 != NULL && newFace2 != NULL ) {
+            long k;
+            _RingSideTest sides(splitFace2, newFace2);
+            for ( k = 1; k < splitFace2->boundariesList.size(); k++ ) {
+                _PolyhedralBoundedSolidLoop* ring =
+                    splitFace2->boundariesList.get(k);
+                if ( sides.side(ring) == 2 &&
+                     PolyhedralBoundedSolidEulerOperators::lringmv(s,
+                         ring, newFace2, FALSE) ) {
+                    k--;
+                }
             }
+        }
+        if ( newf != NULL && oldf->boundariesList.size() >= 2 ) {
+            // Rings are redistributed on both solids and for every
+            // operation. Connect used to skip this on solid A unless
+            // the operation was an intersection; the rings that then
+            // stayed in the wrong half were what the ring rescue of
+            // connect moved back later, and a hole already cut by
+            // another curve was never moved back (plan-stage11 Phase
+            // F).
+            laringmv(oldf, newf,
+                holeLeftByDividedRing(oldf, newf, dividedInnerRing));
         }
     }
 }
@@ -595,7 +1016,7 @@ BOOLEAN _PolyhedralBoundedSolidOperator::checkWideness(
 {
     if ( he == NULL || he->parentLoop == NULL ||
          he->parentLoop->parentFace == NULL ||
-         he->parentLoop->parentFace->getContainingPlane() == NULL ||
+         he->parentLoop->parentFace->hasContainingPlane() == FALSE ||
          he->previous() == NULL || he->next() == NULL ) {
         return TRUE;
     }
@@ -609,11 +1030,13 @@ BOOLEAN _PolyhedralBoundedSolidOperator::checkWideness(
     ref2 = he->next()->startingVertex->position.subtract(
         he->startingVertex->position);
     ref12 = ref1.crossProduct(ref2);
-    if ( ref12.length() < VSDK::EPSILON ) {
+    // Collinear edges: |ref1 x ref2| is |ref1| |ref2| sin(angle), so the
+    // test compares the sine, not an area that shrinks with the model.
+    if ( ref12.length() < VSDK::EPSILON * ref1.length() * ref2.length() ) {
         return TRUE;
     }
     return ref12.dotProduct(
-        he->parentLoop->parentFace->getContainingPlane()->getNormal()) <= 0.0;
+        he->parentLoop->parentFace->containingPlaneNormal()) <= 0.0;
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a

@@ -2,7 +2,7 @@
 #include "vsdk/toolkit/media/XmsRgbImage.h"
 
 XmsRgbImage::XmsRgbImage()
-    : xSize(0), ySize(0), rowStride(0), imageBytes(0)
+    : xSize(0), ySize(0), rowStride(0), byteCount(0)
 {
 }
 
@@ -31,12 +31,12 @@ BOOLEAN XmsRgbImage::initNoFill(int width, int height)
     // length. The guard byte keeps the final RGB triplet inside the block.
     if ( !storage.allocate(bytes + 1UL) ) {
         xSize = ySize = 0;
-        rowStride = imageBytes = 0;
+        rowStride = byteCount = 0;
         return FALSE;
     }
     xSize = width;
     ySize = height;
-    imageBytes = bytes;
+    byteCount = bytes;
     return TRUE;
 }
 
@@ -103,12 +103,12 @@ int XmsRgbImage::getSizeInBytes() const
 {
     // Entity predates 32-bit framebuffers and exposes an int-sized result.
     // Call getByteCount when the exact XMS allocation size is needed.
-    return (int)imageBytes;
+    return (int)byteCount;
 }
 
 unsigned long XmsRgbImage::getByteCount() const
 {
-    return imageBytes;
+    return byteCount;
 }
 
 BOOLEAN XmsRgbImage::isXmsBacked() const

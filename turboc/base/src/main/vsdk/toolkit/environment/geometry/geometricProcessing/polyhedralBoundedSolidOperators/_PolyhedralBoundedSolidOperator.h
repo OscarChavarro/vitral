@@ -96,10 +96,6 @@ protected:
     static void join(_PolyhedralBoundedSolidHalfEdge* h1,
                      _PolyhedralBoundedSolidHalfEdge* h2, BOOLEAN withDebug);
 
-    static void join(_PolyhedralBoundedSolidHalfEdge* h1,
-                     _PolyhedralBoundedSolidHalfEdge* h2,
-                     BOOLEAN withDebug, BOOLEAN allowRingMove);
-
     /**
     This method checks whether the edges `he.previous().parentEdge` and
     `he.parentEdge` make a convex (less than 180 degrees) or concave
@@ -119,9 +115,30 @@ protected:
     static BOOLEAN checkWideness(_PolyhedralBoundedSolidHalfEdge* he);
 
 private:
+    friend class _OuterLoopShadow;
+    friend class _RingSideTest;
+
     static BOOLEAN canMoveFace(_PolyhedralBoundedSolidFace* f);
     static void laringmv(_PolyhedralBoundedSolidFace* f1,
                          _PolyhedralBoundedSolidFace* f2);
+    static void laringmv(_PolyhedralBoundedSolidFace* f1,
+                         _PolyhedralBoundedSolidFace* f2,
+                         _PolyhedralBoundedSolidLoop* keep);
+    static int clearRingSide(_PolyhedralBoundedSolidFace* f1,
+                             _PolyhedralBoundedSolidFace* f2,
+                             _PolyhedralBoundedSolidLoop* l);
+    static double outerLoopClearance(_PolyhedralBoundedSolidFace* f,
+                                     const Vector3Dd& point);
+    static _PolyhedralBoundedSolidLoop* holeLeftByDividedRing(
+        _PolyhedralBoundedSolidFace* oldf,
+        _PolyhedralBoundedSolidFace* newf,
+        _PolyhedralBoundedSolidLoop* dividedInnerRing);
+    static BOOLEAN isWoundAsDisk(_PolyhedralBoundedSolidLoop* loop,
+                                 _PolyhedralBoundedSolidFace* face);
+    static BOOLEAN isWoundAsHole(_PolyhedralBoundedSolidLoop* loop,
+                                 _PolyhedralBoundedSolidFace* face);
+    static double windingDot(_PolyhedralBoundedSolidLoop* loop,
+                             _PolyhedralBoundedSolidFace* face);
     static BOOLEAN ringBelongsToOtherHalf(_PolyhedralBoundedSolidFace* f1,
                                        _PolyhedralBoundedSolidFace* f2,
                                        _PolyhedralBoundedSolidLoop* l);

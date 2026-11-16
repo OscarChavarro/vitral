@@ -2,6 +2,7 @@
 #define __JAVA_UTIL_RANDOM__
 
 #include <stddef.h>
+#include <math.h>
 
 #ifdef __TURBOC__
 #include <sys/timeb.h>
@@ -23,6 +24,8 @@ private:
     static const unsigned long long MASK;
 
     unsigned long long seed;
+    double nextNextGaussian;
+    BOOLEAN haveNextNextGaussian;
 
     static unsigned long long initialScramble(long long value)
     {
@@ -55,17 +58,20 @@ public:
     Random()
         : seed(initialScramble((long long)(
               currentTimeNanoseconds() ^
-              (VSDK_ULL(8682522807148012) * VSDK_ULL(181783497276652981)))))
+              (VSDK_ULL(8682522807148012) * VSDK_ULL(181783497276652981))))),
+          nextNextGaussian(0.0), haveNextNextGaussian(FALSE)
     {
     }
 
-    explicit Random(long long seedValue) : seed(initialScramble(seedValue))
+    explicit Random(long long seedValue) : seed(initialScramble(seedValue)),
+        nextNextGaussian(0.0), haveNextNextGaussian(FALSE)
     {
     }
 
     void setSeed(long long seedValue)
     {
         seed = initialScramble(seedValue);
+        haveNextNextGaussian = FALSE;
     }
 
     int nextInt()
@@ -106,6 +112,33 @@ public:
     BOOLEAN nextBoolean()
     {
         return next(1) != 0;
+    }
+
+    /**
+    `java.util.Random.nextGaussian` (polar method). Java uses
+    `StrictMath.log` and `StrictMath.sqrt`: `sqrt` is exact in both; `log`
+    is the C library's, which may differ from fdlibm in the last bit.
+    */
+    double nextGaussian()
+    {
+        double v1;
+        double v2;
+        double s;
+        double multiplier;
+
+        if ( haveNextNextGaussian ) {
+            haveNextNextGaussian = FALSE;
+            return nextNextGaussian;
+        }
+        do {
+            v1 = 2 * nextDouble() - 1;
+            v2 = 2 * nextDouble() - 1;
+            s = v1 * v1 + v2 * v2;
+        } while ( s >= 1 || s == 0 );
+        multiplier = sqrt(-2 * log(s) / s);
+        nextNextGaussian = v2 * multiplier;
+        haveNextNextGaussian = TRUE;
+        return v1 * multiplier;
     }
 };
 

@@ -35,7 +35,7 @@ double _PolyhedralBoundedSolidFace::boundaryLoopAreaMagnitude(
 }
 
 _PolyhedralBoundedSolidLoop* _PolyhedralBoundedSolidFace::selectLoopForPlaneCalculation(
-    ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList)
+    CircularArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList)
 {
     if (boundariesList.size() < 1) {
         return 0;
@@ -55,7 +55,7 @@ _PolyhedralBoundedSolidLoop* _PolyhedralBoundedSolidFace::selectLoopForPlaneCalc
 }
 
 InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByNewell(
-    ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList,
+    CircularArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList,
     double tolerance)
 {
     _PolyhedralBoundedSolidLoop* loop =
@@ -92,9 +92,15 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByNewell(
     }
 
     Vector3Dd normal(nx, ny, nz);
-    if (normal.length() <= tolerance) {
+    double length = normal.length();
+    if (length <= tolerance) {
         return 0;
     }
+    // The Newell normal measures twice the area. Vector3Dd.normalized()
+    // leaves vectors shorter than VSDK.EPSILON unchanged, so a face of a
+    // model at 10^-3 got a plane with a normal of length 10^-6 and every
+    // distance to it shrank a millionfold. Normalize explicitly.
+    normal = normal.multiply(1.0 / length);
 
     Vector3Dd centroid(cx / count, cy / count, cz / count);
     return new InfinitePlane(normal, centroid);
@@ -110,7 +116,7 @@ _PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(
 _PolyhedralBoundedSolidFace::~_PolyhedralBoundedSolidFace()
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
-        delete boundariesList[i];
+        delete boundariesList.get(i);
     }
 }
 
@@ -120,7 +126,7 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
         _PolyhedralBoundedSolidHalfEdge* he =
-            boundariesList[i]->halfEdgeVertices(vn1, vn2);
+            boundariesList.get(i)->halfEdgeVertices(vn1, vn2);
         if (he != 0) return he;
     }
     return 0;
@@ -131,7 +137,7 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
         _PolyhedralBoundedSolidHalfEdge* he =
-            boundariesList[i]->firstHalfEdgeAtVertex(vn1);
+            boundariesList.get(i)->firstHalfEdgeAtVertex(vn1);
         if (he != 0) return he;
     }
     return 0;
@@ -139,7 +145,23 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(
 
 BOOLEAN _PolyhedralBoundedSolidFace::calculatePlane()
 {
-    return getContainingPlane() == 0;
+    return !hasContainingPlane();
+}
+
+Vector3Dd _PolyhedralBoundedSolidFace::containingPlaneNormal()
+{
+    InfinitePlane* plane = getContainingPlane();
+    Vector3Dd normal = plane->getNormal();
+    delete plane;
+    return normal;
+}
+
+BOOLEAN _PolyhedralBoundedSolidFace::hasContainingPlane()
+{
+    InfinitePlane* plane = getContainingPlane();
+    BOOLEAN present = plane != NULL;
+    delete plane;
+    return present;
 }
 
 InfinitePlane* _PolyhedralBoundedSolidFace::getContainingPlane()
@@ -459,6 +481,6 @@ Vector3Dd _PolyhedralBoundedSolidFace::dropCoordinate(
 void _PolyhedralBoundedSolidFace::revert()
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
-        if (boundariesList[i] != 0) boundariesList[i]->revert();
+        if (boundariesList.get(i) != 0) boundariesList.get(i)->revert();
     }
 }
