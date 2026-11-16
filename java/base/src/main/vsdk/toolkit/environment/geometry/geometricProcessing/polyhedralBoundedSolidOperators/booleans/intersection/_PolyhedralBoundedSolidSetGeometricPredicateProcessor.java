@@ -608,8 +608,8 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
                 traceCoplanarTangential(
                     "  resolved vertexFace coplanar overlap sameOrientation=" +
                     sameOrientation + " class=" + resolvedClass);
-                nbr.get(i).cl = resolvedClass;
-                nbr.get((i+1)%nnbr).cl = resolvedClass;
+                nbr.get(i).classification = resolvedClass;
+                nbr.get((i+1)%nnbr).classification = resolvedClass;
             }
         }
     }

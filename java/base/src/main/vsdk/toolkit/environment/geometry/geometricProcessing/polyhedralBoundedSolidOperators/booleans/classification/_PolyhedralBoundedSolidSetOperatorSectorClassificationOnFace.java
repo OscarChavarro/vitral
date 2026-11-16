@@ -49,7 +49,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     {
         this.sector = other.sector;
         this.referencePlane = other.referencePlane;
-        this.cl = other.cl;
+        this.classification = other.classification;
         this.isWide = other.isWide;
         this.position = other.position;
         this.situation = other.situation;
@@ -65,27 +65,27 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     public void applyRules(int op)
     {
         if ( op == UNION ) {
-            switch ( cl ) {
-              case AonBplus:     cl = AoutB;    break;
-              case AonBminus:    cl = AinB;    break;
-              case BonAplus:     cl = BinA;    break;
-              case BonAminus:    cl = BinA;    break;
+            switch ( classification ) {
+              case AonBplus:     classification = AoutB;    break;
+              case AonBminus:    classification = AinB;    break;
+              case BonAplus:     classification = BinA;    break;
+              case BonAminus:    classification = BinA;    break;
             }
         }
         else if ( op == INTERSECTION ) {
-            switch ( cl ) {
-              case AonBplus:     cl = AinB;    break;
-              case AonBminus:    cl = AoutB;    break;
-              case BonAplus:     cl = BoutA;    break;
-              case BonAminus:    cl = BoutA;    break;
+            switch ( classification ) {
+              case AonBplus:     classification = AinB;    break;
+              case AonBminus:    classification = AoutB;    break;
+              case BonAplus:     classification = BoutA;    break;
+              case BonAminus:    classification = BoutA;    break;
             }
         }
         else if ( op == SUBTRACT) {
-            switch ( cl ) {
-              case AonBplus:     cl = AinB;    break;
-              case AonBminus:    cl = AoutB;    break;
-              case BonAplus:     cl = BoutA;    break;
-              case BonAminus:    cl = BoutA;    break;
+            switch ( classification ) {
+              case AonBplus:     classification = AinB;    break;
+              case AonBminus:    classification = AoutB;    break;
+              case BonAplus:     classification = BoutA;    break;
+              case BonAminus:    classification = BoutA;    break;
             }
         }
     }
@@ -96,37 +96,37 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
         InfinitePlane b = referencePlane;
 
         if ( BvsA == 0 ) {
-            switch ( cl ) {
-              case ABOVE: cl = AoutB; break;
-              case BELOW: cl = AinB; break;
+            switch ( classification ) {
+              case ABOVE: classification = AoutB; break;
+              case BELOW: classification = AinB; break;
               case ON:
                 if ( coplanarRelation != COPLANAR_UNKNOWN &&
                      coplanarRelation != COPLANAR_OVERLAP ) {
-                    cl = AoutB;
+                    classification = AoutB;
                 }
                 else if ( a.overlapsWith(b, numericContext.bigEpsilon()) ) {
-                    cl = AonBplus;
+                    classification = AonBplus;
                 }
                 else {
-                    cl = AonBminus;
+                    classification = AonBminus;
                 }
                 break;
             }
         }
         else {
-            switch ( cl ) {
-              case ABOVE: cl = BoutA; break;
-              case BELOW: cl = BinA; break;
+            switch ( classification ) {
+              case ABOVE: classification = BoutA; break;
+              case BELOW: classification = BinA; break;
               case ON:
                 if ( coplanarRelation != COPLANAR_UNKNOWN &&
                      coplanarRelation != COPLANAR_OVERLAP ) {
-                    cl = BoutA;
+                    classification = BoutA;
                 }
                 else if ( a.overlapsWith(b, numericContext.bigEpsilon()) ) {
-                    cl = BonAplus;
+                    classification = BonAplus;
                 }
                 else {
-                    cl = BonAminus;
+                    classification = BonAminus;
                 }
                 break;
             }
@@ -137,7 +137,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     {
         String msg = "Sector(";
         msg = msg + sector + " | ";
-        switch ( cl ) {
+        switch ( classification ) {
           case ABOVE: msg = msg + " ABOVE"; break;
           case BELOW: msg = msg + " BELOW"; break;
           case ON: msg = msg + " ON"; break;

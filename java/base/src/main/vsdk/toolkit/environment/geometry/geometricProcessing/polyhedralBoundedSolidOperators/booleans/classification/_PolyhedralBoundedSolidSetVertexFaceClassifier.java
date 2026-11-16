@@ -129,19 +129,19 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
                 referencePlane.getNormal());
             if ( compareToZero(d) == 1 ) {
                 if ( BvsA != 0 ) {
-                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                    nbr.get(i).classification = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get((i + 1) % nnbr).classification =
                         (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                 }
                 else {
-                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                    nbr.get(i).classification = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get((i + 1) % nnbr).classification =
                         (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT :
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
@@ -149,19 +149,19 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
             }
             else {
                 if ( BvsA != 0 ) {
-                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                    nbr.get(i).classification = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get((i + 1) % nnbr).classification =
                         (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
                 }
                 else {
-                    nbr.get(i).cl = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
+                    nbr.get(i).classification = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-                    nbr.get((i + 1) % nnbr).cl =
+                    nbr.get((i + 1) % nnbr).classification =
                         (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN :
                             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
@@ -174,13 +174,13 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
                 " face=" + referenceFace.id +
                 " localFace=" + localFace.id +
                 " sectorIndex=" + i +
-                " class=" + nbr.get(i).cl);
+                " class=" + nbr.get(i).classification);
         }
 
         int ins = 0;
         int outs = 0;
         for ( i = 0; i < nnbr; i++ ) {
-            if ( nbr.get(i).cl ==
+            if ( nbr.get(i).classification ==
                  _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) {
                 outs++;
             }
@@ -190,7 +190,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         }
         if ( outs == nnbr || ins == nnbr ) {
             for ( i = 0; i < nnbr; i++ ) {
-                nbr.get(i).cl = backup.get(i).cl;
+                nbr.get(i).classification = backup.get(i).classification;
             }
         }
     }
@@ -330,13 +330,13 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         n = nbr.get(0);
 
         i = 0;
-        while ( !((nbr.get(i).cl ==
+        while ( !((nbr.get(i).classification ==
                    _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB ||
-                   nbr.get(i).cl ==
+                   nbr.get(i).classification ==
                    _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) &&
-                  ((nbr.get((i + 1) % nnbr).cl ==
+                  ((nbr.get((i + 1) % nnbr).classification ==
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB) ||
-                   nbr.get((i + 1) % nnbr).cl ==
+                   nbr.get((i + 1) % nnbr).classification ==
                    _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA)) ) {
             i++;
             if ( i >= nnbr ) {
@@ -347,13 +347,13 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         head = nbr.get(i).sector;
 
         while ( true ) {
-            while ( !((nbr.get(i).cl ==
+            while ( !((nbr.get(i).classification ==
                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB ||
-                       nbr.get(i).cl ==
+                       nbr.get(i).classification ==
                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA) &&
-                      (nbr.get((i + 1) % nnbr).cl ==
+                      (nbr.get((i + 1) % nnbr).classification ==
                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB ||
-                       nbr.get((i + 1) % nnbr).cl ==
+                       nbr.get((i + 1) % nnbr).classification ==
                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA)) ) {
                 i = (i + 1) % nnbr;
             }
@@ -385,13 +385,13 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
 
             makeRing(f, v, BvsA, inSolidA, inSolidB);
 
-            while ( !((nbr.get(i).cl ==
+            while ( !((nbr.get(i).classification ==
                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB ||
-                       nbr.get(i).cl ==
+                       nbr.get(i).classification ==
                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) &&
-                      ((nbr.get((i + 1) % nnbr).cl ==
+                      ((nbr.get((i + 1) % nnbr).classification ==
                         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB) ||
-                       nbr.get((i + 1) % nnbr).cl ==
+                       nbr.get((i + 1) % nnbr).classification ==
                        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA)) ) {
                 i = (i + 1) % nnbr;
                 if ( i == start ) {

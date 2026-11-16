@@ -211,10 +211,6 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
-        if ( cache.hasInteriorOverlap() ) {
-            return false;
-        }
-
         if ( cache.hasEdgeFaceIntersectionAB() ) {
             return false;
         }
@@ -223,6 +219,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         }
 
         if ( hasPartialCoplanarFaceAreaOverlap(inSolidA, inSolidB) ) {
+            return false;
+        }
+
+        if ( cache.hasInteriorOverlap() ) {
             return false;
         }
 
@@ -341,8 +341,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
 
-        if ( cache.hasInteriorOverlap() ||
-             cache.hasEdgeFaceIntersectionAB() ||
+        if ( cache.hasEdgeFaceIntersectionAB() ||
              cache.hasEdgeFaceIntersectionBA() ) {
             return null;
         }
@@ -350,6 +349,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         contactPolygons = partialCoplanarFaceAreaOverlapPolygons(inSolidA,
             inSolidB);
         if ( contactPolygons.isEmpty() ) {
+            return null;
+        }
+        if ( cache.hasInteriorOverlap() ) {
             return null;
         }
 

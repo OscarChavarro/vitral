@@ -27,7 +27,7 @@ public class _PolyhedralBoundedSolidSectorClassification
     public static final int UNDEFINED = 40;
 
     public _PolyhedralBoundedSolidHalfEdge sector;
-    public int cl;
+    public int classification;
 
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.

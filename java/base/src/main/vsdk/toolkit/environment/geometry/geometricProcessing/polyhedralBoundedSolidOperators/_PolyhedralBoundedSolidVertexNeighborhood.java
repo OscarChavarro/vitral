@@ -54,7 +54,7 @@ final class _PolyhedralBoundedSolidVertexNeighborhood
                 Vector3Dd bisect = inwardReflexBisector(he);
                 c = factory.get();
                 c.sector = he;
-                c.cl = compareToZero(plane.pointDistance(bisect));
+                c.classification = compareToZero(plane.pointDistance(bisect));
                 c.isWide = true;
                 c.position = new Vector3Dd(bisect);
                 c.situation =
@@ -64,10 +64,10 @@ final class _PolyhedralBoundedSolidVertexNeighborhood
             Vector3Dd far = he.next().startingVertex.position;
             c = factory.get();
             c.sector = he;
-            c.cl = compareToZero(plane.pointDistance(far));
+            c.classification = compareToZero(plane.pointDistance(far));
             c.isWide = false;
             c.position = new Vector3Dd(far);
-            c.situation = c.cl == _PolyhedralBoundedSolidSectorClassification.ON
+            c.situation = c.classification == _PolyhedralBoundedSolidSectorClassification.ON
                 ? _PolyhedralBoundedSolidSectorClassification.INPLANE_EDGE
                 : _PolyhedralBoundedSolidSectorClassification.UNDEFINED;
             neighbors.add(c);

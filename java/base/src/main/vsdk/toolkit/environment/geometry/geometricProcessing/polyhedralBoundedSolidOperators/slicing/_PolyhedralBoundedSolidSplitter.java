@@ -38,7 +38,7 @@ class _PolyhedralBoundedSolidSplitterSectorClassification
     {
         String msg = "{";
         msg = msg + sector;
-        switch ( cl ) {
+        switch ( classification ) {
           case ABOVE: msg = msg + " ABOVE"; break;
           case BELOW: msg = msg + " BELOW"; break;
           case ON: msg = msg + " ON"; break;
@@ -305,14 +305,14 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
                 // Entering this means "faces are coplanar"
                 d = f.getContainingPlane().getNormal().dotProduct(inSplittingPlane.getNormal());
                 if ( compareToZero(d) == 1 ) {
-                    l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
+                    l.classification = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
                     l.situation = _PolyhedralBoundedSolidSplitterSectorClassification.COPLANAR_FACE;
-                    nbr.get((i+nbr.size()-1)%nbr.size()).cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
+                    nbr.get((i+nbr.size()-1)%nbr.size()).classification = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
                 }
                 else {
-                    l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
+                    l.classification = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
                     l.situation = _PolyhedralBoundedSolidSplitterSectorClassification.COPLANAR_FACE;
-                    nbr.get((i+nbr.size()-1)%nbr.size()).cl = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
+                    nbr.get((i+nbr.size()-1)%nbr.size()).classification = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
                 }
             }
         }
@@ -350,21 +350,21 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
 
         for ( i = 0; i < n; i++ ) {
             l = nbr.get(i);
-            if ( l.cl != _PolyhedralBoundedSolidSplitterSectorClassification.ON ) {
+            if ( l.classification != _PolyhedralBoundedSolidSplitterSectorClassification.ON ) {
                 continue;
             }
-            prev = nbr.get((n+i-1) % n).cl;
-            next = nbr.get((i+1) % n).cl;
+            prev = nbr.get((n+i-1) % n).classification;
+            next = nbr.get((i+1) % n).classification;
             if ( prev == next && !l.isWide &&
                  isConvexEdge(l.sector) ) {
-                l.cl = prev;
+                l.classification = prev;
             }
             else if ( prev == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW &&
                       next == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW ) {
-                l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
+                l.classification = _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE;
             }
             else {
-                l.cl = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
+                l.classification = _PolyhedralBoundedSolidSplitterSectorClassification.BELOW;
             }
         }
     }
@@ -435,8 +435,8 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
 
         //- Locate the head of an ABOVE-sequence --------------------------
         i = 0;
-        while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW &&
-                   nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE )  ) {
+        while ( !( nbr.get(i).classification == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW &&
+                   nbr.get( (i+1)%nnbr ).classification == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE )  ) {
             i++;
             if ( i >= nnbr ) {
                 return;
@@ -448,8 +448,8 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         //-----------------------------------------------------------------
         while ( true ) {
             //- Locate the final sector of the sequence ------------------
-            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE &&
-                       nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW ) ) {
+            while ( !( nbr.get(i).classification == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE &&
+                       nbr.get( (i+1)%nnbr ).classification == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW ) ) {
                 i = (i+1) % nnbr;
             }
             tail = nbr.get((i+1) % nnbr).sector;
@@ -486,8 +486,8 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
                 tail.previous().parentEdge, numericContext));
 
             //- Locate the start of the next sequence --------------------
-            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW &&
-                       nbr.get( (i+1) % nnbr ).cl == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE ) ) {
+            while ( !( nbr.get(i).classification == _PolyhedralBoundedSolidSplitterSectorClassification.BELOW &&
+                       nbr.get( (i+1) % nnbr ).classification == _PolyhedralBoundedSolidSplitterSectorClassification.ABOVE ) ) {
                 i = (i+1) % nnbr;
                 if ( i == start ) {
                     return;
