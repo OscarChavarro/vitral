@@ -17,6 +17,9 @@ export class TriangleMeshIntersectionIndex {
         return this.value;
     }
     public set(index: number): void {
-        this.value = index;
+        // Every traced ray stores its result here: skipping the write when
+        // the value is already there (most often -1, a miss) mirrors C++,
+        // where it keeps the shared cache line from bouncing between cores.
+        if (this.value !== index) this.value = index;
     }
 }

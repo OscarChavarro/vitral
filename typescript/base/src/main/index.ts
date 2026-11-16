@@ -322,6 +322,13 @@ export { AxisAlignedBoundingBox } from "./vsdk/toolkit/environment/geometry/boun
 export { BoundingVolumeHierarchy } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BoundingVolumeHierarchy.js";
 export { PreRayHitElement } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/PreRayHitElement.js";
 export { RaySlabReciprocals } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/RaySlabReciprocals.js";
+export { BinnedSahHierarchy } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.js";
+export { BinnedSahHierarchyNode } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchyNode.js";
+export type { BinnedSahLeafVisitor } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahLeafVisitor.js";
+export { BinnedSahTriangleHierarchy } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
+export { TriangleAccelerationStructure } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.js";
+export { TriangleMeshAccelerationMethod } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
+export { TriangleMeshAccelerationMethodUtil } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethodUtil.js";
 export { Box } from "./vsdk/toolkit/environment/geometry/volume/Box.js";
 export { VoxelVolume } from "./vsdk/toolkit/environment/geometry/volume/VoxelVolume.js";
 export { Cone } from "./vsdk/toolkit/environment/geometry/volume/Cone.js";

@@ -15,6 +15,8 @@ import { SimpleScene } from "@vitral/base";
 import type { SimpleSceneSnapshot } from "@vitral/base";
 import { ProgressMonitorConsole } from "@vitral/base";
 import { SimpleRaytracer } from "@vitral/base";
+import { TriangleMeshAccelerationMethodUtil } from "@vitral/base";
+import type { TriangleMeshAccelerationMethod } from "@vitral/base";
 import { ParallelRaytracer } from "@vitral/base";
 import type { ParallelRaytracerTileRequest, ParallelRaytracerTileResult } from "@vitral/base";
 import { NodeWorkerExecutor } from "@vitral/fs";
@@ -68,6 +70,7 @@ export class RaytracerSimple {
         save: boolean,
         outputFileName: string,
         parallel: boolean,
+        meshAccelerationMethod: TriangleMeshAccelerationMethod,
     ): Promise<void> {
         let resultingImage: RGBImageUncompressed;
 
@@ -100,6 +103,7 @@ export class RaytracerSimple {
         const reporter: ProgressMonitorConsole = new ProgressMonitorConsole();
         const rendererConfiguration: RendererConfiguration = new RendererConfiguration();
         this.optimizeRendererConfigurationForScene(rendererConfiguration);
+        rendererConfiguration.setMeshAccelerationMethod(meshAccelerationMethod);
 
         const visualizationEngine: SimpleRaytracer = new SimpleRaytracer();
         const cameraSnapshot: CameraSnapshot = activeCamera.exportToCameraSnapshot(
@@ -109,6 +113,20 @@ export class RaytracerSimple {
         const sceneSnapshot: SimpleSceneSnapshot = this.scene.exportToSimpleSceneSnapshot(
             cameraSnapshot,
             this.scene.getActiveBackground(),
+        );
+
+        // Acceleration structures are built here so their time is reported
+        // apart; the raytracers find them built and do not rebuild them.
+        const buildClock: StopWatch = new StopWatch();
+        buildClock.start();
+        SimpleRaytracer.prepareAccelerationStructures(sceneSnapshot.getSimpleBodies(), rendererConfiguration);
+        buildClock.stop();
+        platformPrintln(
+            'Mesh acceleration "' +
+                TriangleMeshAccelerationMethodUtil.name(meshAccelerationMethod) +
+                '" prepared in ' +
+                VSDK.formatDouble(buildClock.getElapsedRealTime(), RaytracerSimple.ELAPSED_TIME_DECIMALS) +
+                " seconds.",
         );
 
         const clock: StopWatch = new StopWatch();
@@ -160,6 +178,7 @@ export class RaytracerSimple {
             options.shouldSave(),
             options.getOutputFile(),
             options.shouldUseParallelExecutor(),
+            options.getMeshAccelerationMethod(),
         );
     }
 }

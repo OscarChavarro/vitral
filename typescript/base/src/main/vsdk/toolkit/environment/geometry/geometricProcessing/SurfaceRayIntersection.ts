@@ -20,7 +20,13 @@ export class SurfaceRayIntersection {
         return geometry.doIntersectionFirstHit(ray, out);
     }
     private static rayIntersectsGeometryBounds(geometry: Geometry, ray: Ray): boolean {
-        const mm = geometry.getMinMax();
+        // Meshes with a prepared acceleration structure keep their bounds;
+        // getMinMax() walks every vertex, on every ray.
+        const prepared: number[] = [0, 0, 0, 0, 0, 0];
+        const usePrepared =
+            (geometry instanceof TriangleMesh && geometry.getPreparedMinMax(prepared)) ||
+            (geometry instanceof TriangleMeshGroup && geometry.getPreparedMinMax(prepared));
+        const mm = usePrepared ? prepared : geometry.getMinMax();
         const size = new Vector3Dd(mm[3]! - mm[0]!, mm[4]! - mm[1]!, mm[5]! - mm[2]!);
         const center = new Vector3Dd((mm[3]! + mm[0]!) / 2, (mm[4]! + mm[1]!) / 2, (mm[5]! + mm[2]!) / 2);
         return new Box(size).doIntersectionFirstHit(

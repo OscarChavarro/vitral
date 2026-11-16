@@ -32,6 +32,13 @@ export interface ParallelRaytracerTileRequest {
     readonly shadingType: number;
     readonly texture: boolean;
     readonly bumpMap: boolean;
+    /**
+    `RendererConfiguration.getMeshAccelerationMethod` (a
+    `TriangleMeshAccelerationMethod`). C++ builds the acceleration structures
+    once before starting its threads; a worker has its own copy of the scene,
+    so it builds them on its first band (see `SimpleRaytracer.execute`).
+    */
+    readonly meshAccelerationMethod: number;
     readonly startX: number;
     readonly startY: number;
     readonly width: number;
@@ -392,6 +399,7 @@ export class ParallelRaytracer {
                     shadingType: rendererConfiguration.getShadingType(),
                     texture: rendererConfiguration.isTextureSet(),
                     bumpMap: rendererConfiguration.isBumpMapSet(),
+                    meshAccelerationMethod: rendererConfiguration.getMeshAccelerationMethod(),
                     startX: tile.getStartX(),
                     startY: tile.getStartY(),
                     width: tile.getWidth(),

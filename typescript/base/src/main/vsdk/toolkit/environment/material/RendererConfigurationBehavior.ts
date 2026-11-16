@@ -1,4 +1,5 @@
 import { RendererConfiguration } from "./RendererConfiguration.js";
+import { TriangleMeshAccelerationMethodUtil } from "../geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethodUtil.js";
 
 declare module "./RendererConfiguration.js" {
     interface RendererConfiguration {
@@ -36,5 +37,5 @@ RendererConfiguration.prototype.toString = function (): string {
             this.getShadingType()
         ] ?? "INVALID!";
     const state = (value: boolean): string => (value ? "ON" : "OFF");
-    return `<RendererConfiguration>:\n  - Shading type: ${shading}\n  - Draw points: ${state(this.isPointsSet())}\n  - Draw wires: ${state(this.isWiresSet())}\n  - Draw surfaces: ${state(this.isSurfacesSet())}\n  - Draw bounding volume: ${state(this.isBoundingVolumeSet())}\n  - Draw selection corners: ${state(this.isSelectionCornersSet())}\n  - Draw normals: ${state(this.isNormalsSet())}\n  - Draw triangles normals: ${state(this.isTrianglesNormalsSet())}\n  - With texture: ${state(this.isTextureSet())}\n  - With bump map: ${state(this.isBumpMapSet())}\n  - Vertex normal smoothing threshold: ${this.getVertexNormalSmoothingThresholdDegrees()} deg\n`;
+    return `<RendererConfiguration>:\n  - Shading type: ${shading}\n  - Draw points: ${state(this.isPointsSet())}\n  - Draw wires: ${state(this.isWiresSet())}\n  - Draw surfaces: ${state(this.isSurfacesSet())}\n  - Draw bounding volume: ${state(this.isBoundingVolumeSet())}\n  - Draw selection corners: ${state(this.isSelectionCornersSet())}\n  - Draw normals: ${state(this.isNormalsSet())}\n  - Draw triangles normals: ${state(this.isTrianglesNormalsSet())}\n  - With texture: ${state(this.isTextureSet())}\n  - With bump map: ${state(this.isBumpMapSet())}\n  - Vertex normal smoothing threshold: ${this.getVertexNormalSmoothingThresholdDegrees()} deg\n  - Mesh acceleration method: ${TriangleMeshAccelerationMethodUtil.name(this.getMeshAccelerationMethod())}\n`;
 };

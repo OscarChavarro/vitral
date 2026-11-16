@@ -22,6 +22,10 @@ import { Double } from "../../../../../java/lang/Double.js";
 import { Math as JavaMath } from "../../../../../java/lang/Math.js";
 import { ArrayList } from "../../../../../java/util/ArrayList.js";
 import { TriangleMeshGroup } from "./TriangleMeshGroup.js";
+import { TriangleAccelerationStructure } from "../boundingVolumeHierarchy/TriangleAccelerationStructure.js";
+import { TriangleMeshAccelerationMethod } from "../boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
+// Installs `TriangleAccelerationStructure.create` for WALD2007_BINNED_SAH.
+import "../boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
 
 /** Indexed triangle mesh with optional vertex attributes and material spans. */
 export class TriangleMesh extends Surface<Ray, RayHit> {
@@ -41,6 +45,8 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     private textureRanges: number[][] | null = null;
     private materialRanges: number[][] | null = null;
     private readonly intersectionTriangleIndex = new TriangleMeshIntersectionIndex();
+    // Optional ray acceleration structure, see prepareAccelerationStructure
+    private accelerationStructure: TriangleAccelerationStructure | null = null;
     public getName(): string {
         return this.name;
     }
@@ -71,9 +77,11 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.textures = other.textures?.slice() ?? null;
         this.textureRanges = other.textureRanges?.map((x) => x.slice()) ?? null;
         this.materialRanges = other.materialRanges?.map((x) => x.slice()) ?? null;
+        this.accelerationStructure = other.accelerationStructure !== null ? other.accelerationStructure.copy() : null;
         this.calculateNormals();
     }
     public initVertexPositionsArray(n: number): void {
+        this.accelerationStructure = null;
         this.vertexPositions = new Float64Array(n * 3);
     }
     public initVertexNormalsArray(): void {
@@ -95,6 +103,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.incidentTrianglesPerVertexArray = Array.from({ length: this.getNumVertices() }, () => []);
     }
     public initTriangleArrays(n: number): void {
+        this.accelerationStructure = null;
         this.triangleIndexes = new Int32Array(n * 3);
         this.triangleNormals = new Float64Array(n * 3);
     }
@@ -137,10 +146,12 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         }
     }
     public setVertexAt(i: number, vertex: Vertex): void {
+        this.accelerationStructure = null;
         this.assertVertex(i);
         this.writeVertex(i, vertex);
     }
     public setTriangleAt(i: number, triangle: Triangle): void {
+        this.accelerationStructure = null;
         if (this.triangleIndexes === null || i < 0 || i >= this.getNumTriangles())
             throw new RangeError("Triangle index out of bounds");
         const indices = [triangle.getPoint0(), triangle.getPoint1(), triangle.getPoint2()];
@@ -538,6 +549,55 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     public doIntersectionInformation(): number {
         return this.intersectionTriangleIndex.get();
     }
+    /**
+    Makes `doIntersectionFirstHit` use the given method: builds its
+    acceleration structure (single threaded) unless one of the same method
+    is already built for the current sizes; `BRUTE_FORCE` releases it. Also
+    computes missing triangle normals. Call it before tracing from several
+    threads: afterwards, calls with the same method only read. The result of
+    the intersection does not depend on the method.
+
+    The structure is a snapshot: the mutators of this class release it, but
+    writes through the array getters (`getVertexPositions`,
+    `getTriangleIndexes`) do not, so call `releaseAccelerationStructure` or
+    this method again after them.
+    */
+    public prepareAccelerationStructure(method: TriangleMeshAccelerationMethod): void {
+        // Done here, single threaded, instead of lazily from the tracing threads.
+        if (this.triangleNormals === null || this.triangleNormals.length < this.getNumTriangles() * 3)
+            this.calculateNormals();
+        if (method === TriangleMeshAccelerationMethod.BRUTE_FORCE) {
+            if (this.accelerationStructure !== null) this.accelerationStructure = null;
+            return;
+        }
+        const current = this.accelerationStructure;
+        if (
+            current !== null &&
+            current.getMethod() === method &&
+            current.matches(this.getNumVertices(), this.getNumTriangles())
+        )
+            return;
+        const structure = TriangleAccelerationStructure.create(method);
+        if (structure !== null)
+            structure.build(this.vertexPositions ?? new Float64Array(0), this.triangleIndexes ?? new Int32Array(0));
+        this.accelerationStructure = structure;
+    }
+    public releaseAccelerationStructure(): void {
+        this.accelerationStructure = null;
+    }
+    /** Current structure, null when the brute force loop is used */
+    public getAccelerationStructure(): TriangleAccelerationStructure | null {
+        return this.accelerationStructure;
+    }
+    /** When a structure built for the current sizes exists: writes what
+    `getMinMax` would return, without walking the vertices, and returns
+    true */
+    public getPreparedMinMax(outMinMax: number[] | Float64Array): boolean {
+        const structure = this.accelerationStructure;
+        if (structure === null || !structure.matches(this.getNumVertices(), this.getNumTriangles())) return false;
+        structure.getVertexBounds(outMinMax);
+        return true;
+    }
     public doIntersectionFirstHit(ray: Ray, out: RayHit, triangleInformation?: Int32Array | number[]): boolean {
         return this.doIntersectionInternal(ray, out, triangleInformation);
     }
@@ -552,26 +612,33 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         if (this.triangleNormals === null || this.triangleNormals.length < this.getNumTriangles() * 3)
             this.calculateNormals();
 
-        let found = false;
-        let bestT = 1e308;
-        let bestTri = -1;
-        let bestU = 0,
-            bestV = 0;
-        const t = [0],
-            u = [0],
-            v = [0];
-        for (let i = 0; i < this.getNumTriangles(); i++) {
-            const [i0, i1, i2] = this.triangle(i);
-            if (
-                Triangle.intersectRay(ray, this.position(i0), this.position(i1), this.position(i2), t, u, v) &&
-                t[0]! < bestT
-            ) {
-                bestT = t[0]!;
-                bestTri = i;
-                bestU = u[0]!;
-                bestV = v[0]!;
-                found = true;
-            }
+        const bestT = [1e308];
+        const bestTri = [-1];
+        const bestU = [0],
+            bestV = [0];
+        let found: boolean;
+
+        const structure = this.accelerationStructure;
+        if (structure !== null && structure.matches(this.getNumVertices(), this.getNumTriangles())) {
+            found = structure.firstHit(
+                ray,
+                this.vertexPositions ?? new Float64Array(0),
+                this.triangleIndexes ?? new Int32Array(0),
+                bestT,
+                bestU,
+                bestV,
+                bestTri,
+            );
+        } else {
+            found = TriangleAccelerationStructure.firstHitBruteForce(
+                ray,
+                this.vertexPositions ?? new Float64Array(0),
+                this.triangleIndexes ?? new Int32Array(0),
+                bestT,
+                bestU,
+                bestV,
+                bestTri,
+            );
         }
 
         if (!found) {
@@ -579,18 +646,18 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
             if (triangleInformation !== undefined) triangleInformation[0] = -1;
             return false;
         }
-        this.intersectionTriangleIndex.set(bestTri);
-        if (triangleInformation !== undefined) triangleInformation[0] = bestTri;
+        this.intersectionTriangleIndex.set(bestTri[0]!);
+        if (triangleInformation !== undefined) triangleInformation[0] = bestTri[0]!;
 
         if (out !== null) {
-            out.setRay(ray.withT(bestT));
-            out.point = ray.getOrigin().add(ray.getDirection().multiply(bestT));
-            out.normal = this.vector(this.triangleNormals!, bestTri).normalized();
+            out.setRay(ray.withT(bestT[0]!));
+            out.point = ray.getOrigin().add(ray.getDirection().multiply(bestT[0]!));
+            out.normal = this.vector(this.triangleNormals!, bestTri[0]!).normalized();
             out.tangent = new Vector3Dd();
             out.u = 0;
             out.v = 0;
-            this.interpolateTriangleData(bestTri, bestU, bestV, out, ray.getDirection());
-            this.fillMaterialAndTexture(bestTri, out);
+            this.interpolateTriangleData(bestTri[0]!, bestU[0]!, bestV[0]!, out, ray.getDirection());
+            this.fillMaterialAndTexture(bestTri[0]!, out);
         }
         return true;
     }
@@ -625,6 +692,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         return new TriangleMeshGroup([this]);
     }
     public compact(): void {
+        this.accelerationStructure = null;
         if (this.vertexPositions === null || this.triangleIndexes === null) return;
         const used = new Set<number>();
         const valid: number[][] = [];
@@ -658,6 +726,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
 
     /** Retains the Java clipping algorithm and its original case ordering. */
     public slice(plane: import("./InfinitePlane.js").InfinitePlane): void {
+        this.accelerationStructure = null;
         if (this.vertexPositions === null || this.triangleIndexes === null) return;
         const extraVertices: number[] = [],
             extraTriangles: number[] = [],
@@ -826,6 +895,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.triangleIndexes!.set([-1, -1, -1], 3 * index);
     }
     public removeSelectedVertices(): void {
+        this.accelerationStructure = null;
         if (this.vertexSelections === null || this.triangleIndexes === null) return;
         for (let i = 0; i < this.getNumTriangles(); i++) {
             const indices = this.triangle(i);

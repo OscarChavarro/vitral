@@ -20,6 +20,9 @@ import { InfinitePlane } from "../../environment/geometry/surface/InfinitePlane.
 import { ParametricBiCubicPatch } from "../../environment/geometry/surface/ParametricBiCubicPatch.js";
 import { TriangleMesh } from "../../environment/geometry/surface/TriangleMesh.js";
 import { TriangleMeshGroup } from "../../environment/geometry/surface/TriangleMeshGroup.js";
+import { BinnedSahHierarchy } from "../../environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.js";
+import { BinnedSahHierarchyNode } from "../../environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchyNode.js";
+import { BinnedSahTriangleHierarchy } from "../../environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
 import { Arrow } from "../../environment/geometry/volume/Arrow.js";
 import { Box } from "../../environment/geometry/volume/Box.js";
 import { Cone } from "../../environment/geometry/volume/Cone.js";
@@ -136,6 +139,10 @@ function sceneTransfer(): ObjectGraphTransfer {
             TriangleMesh,
             TriangleMeshIntersectionIndex,
             TriangleMeshGroup,
+            // Ray acceleration structures prepared on meshes and groups
+            BinnedSahTriangleHierarchy,
+            BinnedSahHierarchy,
+            BinnedSahHierarchyNode,
             PlanarHalfSpace,
             QuadricSurface,
             PolynomialSurface,

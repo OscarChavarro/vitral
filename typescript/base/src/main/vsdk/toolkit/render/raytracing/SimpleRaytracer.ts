@@ -36,6 +36,9 @@ import type { Light } from "../../environment/light/Light.js";
 import type { SimpleMaterial } from "../../environment/material/SimpleMaterial.js";
 import type { Background } from "../../environment/background/Background.js";
 import { RayHit } from "../../environment/geometry/element/RayHit.js";
+import { TriangleMesh } from "../../environment/geometry/surface/TriangleMesh.js";
+import { TriangleMeshGroup } from "../../environment/geometry/surface/TriangleMeshGroup.js";
+import type { TriangleMeshAccelerationMethod } from "../../environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
 import type { SimpleBody } from "../../environment/scene/SimpleBody.js";
 import type { SimpleSceneSnapshot } from "../../environment/scene/SimpleSceneSnapshot.js";
 import type { ProgressMonitor } from "../../gui/feedback/ProgressMonitor.js";
@@ -633,6 +636,31 @@ export class SimpleRaytracer extends RenderingElement {
         }
     }
 
+    /**
+    Builds (single threaded) the ray acceleration structures of the triangle
+    meshes of the bodies for `RendererConfiguration.getMeshAccelerationMethod`
+    (null configuration: the default method). `execute` calls it; a
+    caller tracing from several threads calls it before starting them, so
+    the calls from the threads find everything built and only read.
+    */
+    public static prepareAccelerationStructures(
+        bodies: List<SimpleBody>,
+        qualitySelection: RendererConfiguration | null,
+    ): void {
+        const method: TriangleMeshAccelerationMethod =
+            qualitySelection !== null
+                ? qualitySelection.getMeshAccelerationMethod()
+                : new RendererConfiguration().getMeshAccelerationMethod();
+        for (let i = 0; i < bodies.size(); i++) {
+            const geometry = bodies.get(i).getGeometry();
+            if (geometry instanceof TriangleMesh) {
+                geometry.prepareAccelerationStructure(method);
+                continue;
+            }
+            if (geometry instanceof TriangleMeshGroup) geometry.prepareAccelerationStructures(method);
+        }
+    }
+
     public execute(
         inoutViewport: RGBImageUncompressed,
         inQualitySelection: RendererConfiguration,
@@ -783,6 +811,7 @@ export class SimpleRaytracer extends RenderingElement {
         let rayo: Ray;
         let color: ColorRgb;
         const outputPixel: RGBPixel = new RGBPixel();
+        SimpleRaytracer.prepareAccelerationStructures(inSimpleBodiesArray, inQualitySelection);
         const renderContext: RenderContext = SimpleRaytracer.buildRenderContext(inQualitySelection, inLightsArray);
         const sceneRenderCache: _SceneRenderCache = new _SceneRenderCache(inSimpleBodiesArray, renderContext);
         const workspace: TraceWorkspace = this.traceWorkspace.get()!;

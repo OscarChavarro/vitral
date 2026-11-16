@@ -1,5 +1,6 @@
 import type { WorkerTransferValue } from "../../../../java/concurrent/WorkerProtocol.js";
 import { RendererConfiguration } from "../../environment/material/RendererConfiguration.js";
+import type { TriangleMeshAccelerationMethod } from "../../environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
 import type { SimpleSceneSnapshot } from "../../environment/scene/SimpleSceneSnapshot.js";
 import { ProgressMonitor } from "../../gui/feedback/ProgressMonitor.js";
 import { RGBImageUncompressed } from "../../media/RGBImageUncompressed.js";
@@ -87,6 +88,7 @@ export class ParallelRaytracerTileRenderer {
         configuration.setShadingType(request.shadingType);
         configuration.setTexture(request.texture);
         configuration.setBumpMap(request.bumpMap);
+        configuration.setMeshAccelerationMethod(request.meshAccelerationMethod as TriangleMeshAccelerationMethod);
 
         let depthEncoder: DepthBufferEncoder | null = null;
         if (request.depthMode !== DepthBufferMode.NONE) {

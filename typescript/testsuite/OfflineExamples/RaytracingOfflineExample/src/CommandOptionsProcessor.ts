@@ -1,3 +1,5 @@
+import { TriangleMeshAccelerationMethod, TriangleMeshAccelerationMethodUtil } from "@vitral/base";
+
 /**
 Package-private `final class` in Java; TypeScript has no package visibility, so
 the class is exported and simply not part of any published package surface.
@@ -11,6 +13,7 @@ export class CommandOptionsProcessor {
     private save = true;
     private parallel = false;
     private showHelp = false;
+    private meshAccelerationMethod: TriangleMeshAccelerationMethod = TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
 
     private constructor() {}
 
@@ -39,6 +42,22 @@ export class CommandOptionsProcessor {
                     return options;
                 }
                 options.sceneFile = args[++i]!;
+                continue;
+            }
+            if ("--mesh-acceleration" === arg || "-m" === arg) {
+                if (i + 1 >= args.length) {
+                    console.error("Missing value for " + arg);
+                    options.showHelp = true;
+                    return options;
+                }
+                const value: string = args[++i]!;
+                const method: TriangleMeshAccelerationMethod[] = [options.meshAccelerationMethod];
+                if (!TriangleMeshAccelerationMethodUtil.fromName(value, method)) {
+                    console.error("Unknown mesh acceleration method: " + value);
+                    options.showHelp = true;
+                    return options;
+                }
+                options.meshAccelerationMethod = method[0]!;
                 continue;
             }
             if ("--output" === arg || "-o" === arg) {
@@ -78,6 +97,10 @@ export class CommandOptionsProcessor {
         console.log("  --output, -o <file>    Output image file (.ppm/.png/.jpg)");
         console.log("  --nosave, -n           Render only, no image file");
         console.log("  -parallel, --parallel  Render tiles in parallel");
+        console.log("  --mesh-acceleration, -m <method>");
+        console.log("                         Triangle mesh ray acceleration:");
+        console.log("                         bruteforce (none) or wald2007 (binned SAH");
+        console.log("                         BVH, default)");
         console.log("  --help, -h             Show this help");
         console.log();
         console.log("Legacy compatibility:");
@@ -102,5 +125,9 @@ export class CommandOptionsProcessor {
 
     public shouldShowHelp(): boolean {
         return this.showHelp;
+    }
+
+    public getMeshAccelerationMethod(): TriangleMeshAccelerationMethod {
+        return this.meshAccelerationMethod;
     }
 }

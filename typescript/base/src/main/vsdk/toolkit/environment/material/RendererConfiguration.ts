@@ -1,6 +1,8 @@
 import { FundamentalEntity } from "../../common/FundamentalEntity.js";
 import { ColorRgb } from "../../common/color/ColorRgb.js";
 import { ShadingType } from "./ShadingType.js";
+import { TriangleMeshAccelerationMethod } from "../geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
+import { TriangleMeshAccelerationMethodUtil } from "../geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethodUtil.js";
 export class RendererConfiguration extends FundamentalEntity {
     public static readonly SHADING_TYPE_NOLIGHT = 0;
     public static readonly SHADING_TYPE_FLAT = 1;
@@ -22,6 +24,7 @@ export class RendererConfiguration extends FundamentalEntity {
     private wireColor = new ColorRgb(1, 1, 1);
     private boundingVolumeColor = new ColorRgb(1, 1, 0);
     private lodHint = 0;
+    private meshAccelerationMethod: TriangleMeshAccelerationMethod = TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
     public compareTo(other: RendererConfiguration): number {
         const value = (configuration: RendererConfiguration): number =>
             (configuration.surfaces ? 0x0001 : 0) +
@@ -68,6 +71,18 @@ export class RendererConfiguration extends FundamentalEntity {
     }
     public getBoundingVolumeColor() {
         return this.boundingVolumeColor;
+    }
+
+    /**
+    Method used by the raytracers to intersect rays with triangle meshes
+    (default `WALD2007_BINNED_SAH`). It changes only the speed: every method
+    gives the same image.
+    */
+    public setMeshAccelerationMethod(method: TriangleMeshAccelerationMethod): void {
+        this.meshAccelerationMethod = method;
+    }
+    public getMeshAccelerationMethod(): TriangleMeshAccelerationMethod {
+        return this.meshAccelerationMethod;
     }
     public setShadingType(s: number | ShadingType | null) {
         this.shadingType = s === null ? RendererConfiguration.SHADING_TYPE_GOURAUD : s;
@@ -187,6 +202,7 @@ export class RendererConfiguration extends FundamentalEntity {
         message += `  - With texture: ${this.texture ? "ON" : "OFF"}\n`;
         message += `  - With bump map: ${this.bumpMap ? "ON" : "OFF"}\n`;
         message += `  - Vertex normal smoothing threshold: ${this.vertexNormalSmoothingThresholdDegrees} deg\n`;
+        message += `  - Mesh acceleration method: ${TriangleMeshAccelerationMethodUtil.name(this.meshAccelerationMethod)}\n`;
         return message;
     }
 }
