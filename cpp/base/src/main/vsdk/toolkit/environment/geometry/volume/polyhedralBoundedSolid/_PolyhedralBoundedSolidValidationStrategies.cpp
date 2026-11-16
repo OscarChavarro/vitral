@@ -1,4 +1,5 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricCollapsedLaminaStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricFaceOrientationStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricPlanarityStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricStrictFaceIntersectionsStrategy.h"
@@ -15,8 +16,12 @@ bool _TopologicalIntegrityStrategy::validate(PolyhedralBoundedSolid* solid,
     java::String* msg)
 {
     (void)numericContext;
-    _PolyhedralBoundedSolidTopologicalValidator
-        ::remakeEmanatingHalfedgesReferences(solid);
+    // Validation only reads. A dangling pointer left by an operator is
+    // reported; repairing it is PolyhedralBoundedSolidRepair's job, on
+    // request (plan-stage11 Phase C).
+    java::String localMsg;
+    bool backPointersOk = _PolyhedralBoundedSolidTopologicalValidator
+        ::validateBackPointers(solid, msg != 0 ? msg : &localMsg);
     if ( !_PolyhedralBoundedSolidTopologicalValidator
         ::validateTopologicalIntegrity(solid) ) {
         if ( msg != 0 ) {
@@ -24,7 +29,7 @@ bool _TopologicalIntegrityStrategy::validate(PolyhedralBoundedSolid* solid,
         }
         return false;
     }
-    return true;
+    return backPointersOk;
 }
 
 /**
@@ -63,6 +68,18 @@ bool _GeometricStrictLoopsStrategy::validate(PolyhedralBoundedSolid* solid,
 {
     return PolyhedralBoundedSolidGeometricValidator
         ::validateLoopsStrict(solid, numericContext, msg);
+}
+
+/**
+Rejects collapsed laminae: two-face shells whose area is below
+`PolyhedralBoundedSolidGeometricValidator::collapsedFaceAreaThreshold`.
+*/
+bool _GeometricCollapsedLaminaStrategy::validate(PolyhedralBoundedSolid* solid,
+    const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
+    java::String* msg)
+{
+    return PolyhedralBoundedSolidGeometricValidator
+        ::validateNoCollapsedLaminae(solid, numericContext, msg);
 }
 
 /**

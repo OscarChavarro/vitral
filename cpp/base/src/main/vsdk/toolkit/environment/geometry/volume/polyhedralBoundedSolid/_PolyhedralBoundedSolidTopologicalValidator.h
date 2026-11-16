@@ -1,6 +1,7 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGICAL_VALIDATOR__
 #define __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGICAL_VALIDATOR__
 
+#include "java/lang/String.h"
 class PolyhedralBoundedSolid;
 
 /**
@@ -20,13 +21,16 @@ public:
     static bool validateTopologicalIntegrity(PolyhedralBoundedSolid* solid);
 
     /**
-    Rebuilds the vertex-to-emanating-halfedge links required by the vertex
-    node definition of [MANT1988].10.2.1 and used throughout the
-    Euler-operator programs of chapter [MANT1988].11. Vertices not reached by
-    any half-edge are removed from the solid vertex list.
-    @param solid solid to update
+    Back-pointer invariants of the half-edge structure ([MANT1988] Sec.
+    10.2): loop start half-edges and parent loops, and the emanating
+    half-edge of every vertex. Validation never repairs them: see
+    `PolyhedralBoundedSolidRepair::remakeEmanatingHalfEdgeReferences`.
+    @param solid solid to check
+    @param msg receives one line per violation
+    @return true when all hold
     */
-    static void remakeEmanatingHalfedgesReferences(PolyhedralBoundedSolid* solid);
+    static bool validateBackPointers(PolyhedralBoundedSolid* solid,
+        java::String* msg);
 
 private:
     _PolyhedralBoundedSolidTopologicalValidator();

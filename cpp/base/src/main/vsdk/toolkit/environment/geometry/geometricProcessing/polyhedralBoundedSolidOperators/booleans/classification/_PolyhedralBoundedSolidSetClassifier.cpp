@@ -2,6 +2,7 @@
 #include <cstdio>
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_SetOperationContext.h"
@@ -302,7 +303,7 @@ Vector3Dd Classifier::inside(_PolyhedralBoundedSolidHalfEdge* he)
     a = a.normalized();
     b = b.normalized();
 
-    n = he->parentLoop->parentFace->getContainingPlane()->getNormal();
+    n = he->parentLoop->parentFace->containingPlaneNormal();
 
     middle = n.crossProduct(a);
     middle = middle.normalized();
@@ -371,16 +372,16 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
     }
 
     if ( from == nullptr || to == nullptr ) {
-        Logger::reportMessage("null", Logger::FATAL_ERROR, "separateEdgeSequence",
-            "Unexpected case: null halfedges!");
+        throw VSDKFatalException(
+            "separateEdgeSequence: Unexpected case: null halfedges!");
     }
 
     PolyhedralBoundedSolid* s;
     s = from->parentLoop->parentFace->parentSolid;
 
     if ( s != to->parentLoop->parentFace->parentSolid ) {
-        Logger::reportMessage("null", Logger::FATAL_ERROR, "separateEdgeSequence",
-            "Unexpected case: halfedges on different solids!");
+        throw VSDKFatalException(
+            "separateEdgeSequence: Unexpected case: halfedges on different solids!");
     }
 
     //-----------------------------------------------------------------
@@ -451,9 +452,8 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
     } while ( changed );
 
     if ( from->startingVertex != to->startingVertex ) {
-        Logger::reportMessage("null", Logger::FATAL_ERROR, "separateEdgeSequence",
-            "Unable to recover endpoint pairing after A-E normalization.");
-        return;
+        throw VSDKFatalException(
+            "separateEdgeSequence: Unable to recover endpoint pairing after A-E normalization.");
     }
 
     //-----------------------------------------------------------------
@@ -580,8 +580,8 @@ bool Classifier::convexedg(_PolyhedralBoundedSolidHalfEdge* he)
         h2 = h2->next();
     }
     dir = h2->startingVertex->position.subtract(he->startingVertex->position);
-    cr = he->parentLoop->parentFace->getContainingPlane()->getNormal().crossProduct(
-        he->mirrorHalfEdge()->parentLoop->parentFace->getContainingPlane()->getNormal());
+    cr = he->parentLoop->parentFace->containingPlaneNormal().crossProduct(
+        he->mirrorHalfEdge()->parentLoop->parentFace->containingPlaneNormal());
     if ( cr.length() < numericContext.unitVectorTolerance() ) {
         return true;
     }

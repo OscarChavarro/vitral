@@ -5,18 +5,18 @@
 static int pbs_half_edge_current_id = 1;
 
 _PolyhedralBoundedSolidHalfEdge::_PolyhedralBoundedSolidHalfEdge(_PolyhedralBoundedSolidVertex* v, _PolyhedralBoundedSolidLoop* inParentLoop)
-    : parentLoop(inParentLoop), parentEdge(0), startingVertex(v), id(pbs_half_edge_current_id++)
+    : listOwner(nullptr), listIndex(-1), parentLoop(inParentLoop), parentEdge(0), startingVertex(v), id(pbs_half_edge_current_id++)
 {
 }
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidHalfEdge::previous()
 {
-    return (parentLoop != 0) ? parentLoop->previousOf(this) : 0;
+    return (parentLoop != 0) ? parentLoop->halfEdgesList.previousOf(this) : 0;
 }
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidHalfEdge::next()
 {
-    return (parentLoop != 0) ? parentLoop->nextOf(this) : 0;
+    return (parentLoop != 0) ? parentLoop->halfEdgesList.nextOf(this) : 0;
 }
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidHalfEdge::mirrorHalfEdge()

@@ -2,6 +2,7 @@
 #define __POLYHEDRAL_BOUNDED_SOLID__
 
 #include "java/util/ArrayList.h"
+#include "vsdk/toolkit/common/dataStructures/CircularArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 class Ray;
@@ -11,6 +12,8 @@ class InfinitePlane;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidEdge;
 class _PolyhedralBoundedSolidVertex;
+class _PolyhedralBoundedSolidLoop;
+class _PolyhedralBoundedSolidHalfEdge;
 
 class PolyhedralBoundedSolid : public Solid {
 public:
@@ -18,12 +21,20 @@ public:
     static const int MINUS = 0;
 
 private:
-    java::ArrayList<_PolyhedralBoundedSolidFace*> polygonsList;
-    java::ArrayList<_PolyhedralBoundedSolidEdge*> edgesList;
-    java::ArrayList<_PolyhedralBoundedSolidVertex*> verticesList;
+    CircularArrayList<_PolyhedralBoundedSolidFace*> polygonsList;
+    CircularArrayList<_PolyhedralBoundedSolidEdge*> edgesList;
+    CircularArrayList<_PolyhedralBoundedSolidVertex*> verticesList;
     int maxVertexId;
     int maxFaceId;
     bool modelIsValid;
+
+    // C++ port: nodes unlinked by the Euler operators (see retire*). Java
+    // leaves them to its garbage collector.
+    java::ArrayList<_PolyhedralBoundedSolidFace*> retiredFaces;
+    java::ArrayList<_PolyhedralBoundedSolidLoop*> retiredLoops;
+    java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> retiredHalfEdges;
+    java::ArrayList<_PolyhedralBoundedSolidEdge*> retiredEdges;
+    java::ArrayList<_PolyhedralBoundedSolidVertex*> retiredVertices;
 
     InfinitePlane** queryPlaneCache;
     double* queryFaceAabb;
@@ -45,15 +56,35 @@ public:
     PolyhedralBoundedSolid();
     virtual ~PolyhedralBoundedSolid() override;
 
+    // C++ port: the Euler operators hand the nodes they unlink to these
+    // methods instead of deleting them, since the callers may still read
+    // them after the operator returns (Java leaves them to its garbage
+    // collector). The solid deletes them when it is deleted. A retired face
+    // or loop must not hold nodes anymore: its list is emptied here, without
+    // deleting the elements.
+    void retireFace(_PolyhedralBoundedSolidFace* face);
+    void retireLoop(_PolyhedralBoundedSolidLoop* loop);
+    void retireHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    void retireEdge(_PolyhedralBoundedSolidEdge* edge);
+    void retireVertex(_PolyhedralBoundedSolidVertex* vertex);
+    /**
+    C++ port: a boolean operation moves nodes between the copies of its
+    operands and its result, and a node can stay listed in more than one of
+    them for a while. This removes, from the lists of this solid (live and
+    retired), every node that `reference` lists (live or retired), so that
+    each node has one owner.
+    */
+    void unlistNodesOwnedBy(PolyhedralBoundedSolid* reference);
+
     _PolyhedralBoundedSolidFace* findFace(int id);
     _PolyhedralBoundedSolidVertex* findVertex(int id);
 
-    java::ArrayList<_PolyhedralBoundedSolidFace*>& getPolygonsList();
-    void setPolygonsList(java::ArrayList<_PolyhedralBoundedSolidFace*>& polygonsList);
-    java::ArrayList<_PolyhedralBoundedSolidEdge*>& getEdgesList();
-    void setEdgesList(java::ArrayList<_PolyhedralBoundedSolidEdge*>& edgesList);
-    java::ArrayList<_PolyhedralBoundedSolidVertex*>& getVerticesList();
-    void setVerticesList(java::ArrayList<_PolyhedralBoundedSolidVertex*>& verticesList);
+    CircularArrayList<_PolyhedralBoundedSolidFace*>& getPolygonsList();
+    void setPolygonsList(CircularArrayList<_PolyhedralBoundedSolidFace*>& polygonsList);
+    CircularArrayList<_PolyhedralBoundedSolidEdge*>& getEdgesList();
+    void setEdgesList(CircularArrayList<_PolyhedralBoundedSolidEdge*>& edgesList);
+    CircularArrayList<_PolyhedralBoundedSolidVertex*>& getVerticesList();
+    void setVerticesList(CircularArrayList<_PolyhedralBoundedSolidVertex*>& verticesList);
 
     int getMaxVertexId() const;
     void setMaxVertexId(int maxVertexId);

@@ -4,8 +4,6 @@
 #include "java/lang/StringBuilder.h"
 #include <gtest/gtest.h>
 #include "java/lang/Math.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -326,9 +324,13 @@ TopologicalSummary expectedMANT1988_6_13Intersection() { return of(1, 12, 30, 20
 TopologicalSummary expectedMANT1988_6_13DifferenceAB() { return of(1, 7, 15, 10, 7, 0, 2, listOf<int>(7), listOf<int>(1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 5, 5), listOf<long long>(0LL, 243243LL, 81081LL, 837838LL, 756757LL, 324324LL)); }
 TopologicalSummary expectedMANT1988_6_13DifferenceBA() { return of(1, 12, 30, 20, 12, 0, 2, listOf<int>(12), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 8, 8), listOf<long long>(432432LL, 0LL, 0LL, 1000000LL, 1000000LL, 324324LL)); }
 TopologicalSummary expectedMANT1988_15_2HoledUnion() { return of(1, 14, 30, 20, 16, 2, 4, listOf<int>(14), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 0LL, 0LL, 775000LL, 1000000LL, 600000LL)); }
-TopologicalSummary expectedMANT1988_15_2HoledIntersection() { return of(1, 7, 15, 12, 9, 2, 4, listOf<int>(7), listOf<int>(1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 3, 3, 3, 3, 4, 4, 4), listOf<long long>(137500LL, 225000LL, 250000LL, 637500LL, 775000LL, 550000LL)); }
+// Refreshed 2026-11-16 (Fable5.2Analysis.md B-01): the wedge pierces the
+// block through two faces; the old snapshot kept two zero-area ring
+// faces. Exact volume 0.04125 is asserted in PolyhedralBoundedSolidSetOperatorTest.
+TopologicalSummary expectedMANT1988_15_2HoledIntersection() { return of(1, 5, 9, 6, 5, 0, 2, listOf<int>(5), listOf<int>(1, 1, 1, 1, 1), listOf<int>(3, 3, 4, 4, 4), listOf<long long>(137500LL, 225000LL, 250000LL, 637500LL, 775000LL, 550000LL)); }
 TopologicalSummary expectedMANT1988_15_2HoledDifferenceAB() { return of(1, 9, 21, 14, 11, 2, 2, listOf<int>(9), listOf<int>(1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4), listOf<long long>(137500LL, 0LL, 0LL, 637500LL, 1000000LL, 600000LL)); }
-TopologicalSummary expectedMANT1988_15_2HoledDifferenceBA() { return of(2, 12, 24, 18, 14, 2, 6, listOf<int>(6, 6), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 225000LL, 250000LL, 775000LL, 775000LL, 550000LL)); }
+// Refreshed 2026-11-16 (B-01): two prism stubs, no zero-area rings.
+TopologicalSummary expectedMANT1988_15_2HoledDifferenceBA() { return of(2, 10, 18, 12, 10, 0, 4, listOf<int>(5, 5), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(3, 3, 3, 3, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 225000LL, 250000LL, 775000LL, 775000LL, 550000LL)); }
 TopologicalSummary expectedMANT1988_15_1Union() { return of(1, 10, 24, 16, 10, 0, 2, listOf<int>(10), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(3, 3, 4, 4, 4, 4, 6, 6, 6, 8), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL)); }
 TopologicalSummary expectedMANT1988_15_1Intersection() { return of(1, 10, 24, 16, 10, 0, 2, listOf<int>(10), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6, 6, 6), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL)); }
 TopologicalSummary expectedMANT1988_15_1DifferenceAB() { return of(2, 10, 18, 12, 10, 0, 4, listOf<int>(5, 5), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(3, 3, 3, 3, 4, 4, 4, 4, 4, 4), listOf<long long>(0LL, 0LL, 583333LL, 333333LL, 1000000LL, 1000000LL)); }
@@ -339,129 +341,6 @@ TopologicalSummary expectedMANT1988_3DifferenceAB() { return of(1, 11, 27, 18, 1
 TopologicalSummary expectedMANT1988_3DifferenceBA() { return of(1, 8, 18, 12, 8, 0, 2, listOf<int>(8), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1), listOf<int>(4, 4, 4, 4, 4, 4, 6, 6), listOf<long long>(390000LL, -160000LL, 230000LL, 970000LL, 260000LL, 410000LL)); }
 TopologicalSummary expectedLampShellSummary() { return of(1, 13, 24, 14, 14, 1, 3, listOf<int>(13), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2), listOf<int>(3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4), listOf<long long>(300000LL, 116987LL, 50000LL, 1050000LL, 983013LL, 850000LL)); }
 TopologicalSummary expectedFeaturedObjectSummary() { return of(2, 32, 84, 54, 34, 2, 2, listOf<int>(16, 16), listOf<int>(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2), listOf<int>(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 8, 8, 8, 8, 10, 10), listOf<long long>(0LL, 0LL, 0LL, 1000000LL, 1000000LL, 1000000LL)); }
-
-/**
-C++ counterpart of the Java test's local `KurlanderBowlBuilder`.
-*/
-class KurlanderBowlBuilder {
-public:
-    static PolyhedralBoundedSolid* create()
-    {
-        PolyhedralBoundedSolid* outer = createSphere(s(10.0), Vector3Dd(0, 0, s(10.0)));
-        PolyhedralBoundedSolid* inner = createSphere(s(9.5), Vector3Dd(0, 0, s(10.0)));
-        PolyhedralBoundedSolid* shell = booleanOp(outer, inner, Modeler::SUBTRACT);
-
-        int i;
-        for ( i = 1; i <= 4; i++ ) {
-            double base = -90.0 * i;
-            shell = booleanOp(shell, placeMotif(createMoon(), 4.0, base), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createMoon(), 14.0, base), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createMoon(), 11.5, base - 22.5), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createMoon(), 9.0, base - 45.0), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createMoon(), 6.5, base - 67.5), Modeler::SUBTRACT);
-        }
-
-        for ( i = 1; i <= 4; i++ ) {
-            double base = -90.0 * i;
-            shell = booleanOp(shell, placeMotif(createStar(), 9.0, base), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createStar(), 6.5, base - 22.5), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createStar(), 14.0, base - 45.0), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createStar(), 4.0, base - 45.0), Modeler::SUBTRACT);
-            shell = booleanOp(shell, placeMotif(createStar(), 11.5, base - 67.5), Modeler::SUBTRACT);
-        }
-
-        PolyhedralBoundedSolid* guide = createCylinder(s(10.5), s(16.5), Vector3Dd(0, 0, 0));
-        return booleanOp(shell, guide, Modeler::INTERSECTION);
-    }
-
-private:
-    static const int CYLINDER_SIDES = 30;
-
-    static double s(double value)
-    {
-        return value * 0.1;
-    }
-
-    static PolyhedralBoundedSolid* booleanOp(PolyhedralBoundedSolid* a,
-        PolyhedralBoundedSolid* b, int op)
-    {
-        return setOpAndRelease(a, b, op, true);
-    }
-
-    static PolyhedralBoundedSolid* createSphere(double radius, const Vector3Dd& center)
-    {
-        Sphere sphere(radius);
-        PolyhedralBoundedSolid* solid = sphere.exportToPolyhedralBoundedSolid();
-        Matrix4x4d t;
-        t = t.translation(center);
-        Modeler::applyTransformation(solid, t);
-        return solid;
-    }
-
-    static PolyhedralBoundedSolid* createCylinder(double radius, double height,
-        const Vector3Dd& translation)
-    {
-        Cone cylinder(radius, radius, height);
-        PolyhedralBoundedSolid* solid =
-            cylinder.exportToPolyhedralBoundedSolid(CYLINDER_SIDES, 1);
-        Matrix4x4d move;
-        move = move.translation(translation);
-        Modeler::applyTransformation(solid, move);
-        return solid;
-    }
-
-    static PolyhedralBoundedSolid* createExtrudedPolygon(
-        const java::ArrayList<Vector3Dd>& points, double thickness)
-    {
-        int n = (int)points.size();
-        PolyhedralBoundedSolid* solid = new PolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators::mvfs(solid, points[0], 1, 1);
-        for ( int i = 1; i < n; i++ ) {
-            PolyhedralBoundedSolidEulerOperators::smev(solid, 1, i, i + 1, points[i]);
-        }
-        PolyhedralBoundedSolidEulerOperators::smef(solid, 1, n, 1, 2);
-        Matrix4x4d t;
-        t = t.translation(0.0, 0.0, thickness);
-        PolyhedralBoundedSolidEulerConstructions::translationalSweepExtrudeFacePlanar(solid, solid->findFace(1), t);
-        return solid;
-    }
-
-    static PolyhedralBoundedSolid* createStar()
-    {
-        int n = 10;
-        double outerR = s(2.0);
-        double innerR = s(0.77);
-        double start = java::Math::toRadians(-90.0);
-        java::ArrayList<Vector3Dd> points;
-        for ( int i = 0; i < n; i++ ) {
-            double a = start + i * M_PI / 5.0;
-            double r = (i % 2 == 0) ? outerR : innerR;
-            points.add(Vector3Dd(r * std::cos(a), r * std::sin(a), 0.0));
-        }
-        return createExtrudedPolygon(points, s(5.5));
-    }
-
-    static PolyhedralBoundedSolid* createMoon()
-    {
-        PolyhedralBoundedSolid* a = createCylinder(s(1.5), s(5.0), Vector3Dd(0, 0, 0));
-        PolyhedralBoundedSolid* b = createCylinder(s(1.5), s(5.0), Vector3Dd(s(1.1), 0, s(0.6)));
-        return booleanOp(a, b, Modeler::SUBTRACT);
-    }
-
-    static PolyhedralBoundedSolid* placeMotif(PolyhedralBoundedSolid* motif,
-        double z, double azimuthDeg)
-    {
-        Matrix4x4d t;
-        Matrix4x4d ry;
-        Matrix4x4d rz;
-        t = t.translation(s(6.0), 0.0, s(z));
-        ry = ry.axisRotation(java::Math::toRadians(90.0), 0, 1, 0);
-        rz = rz.axisRotation(java::Math::toRadians(azimuthDeg), 0, 0, 1);
-        Matrix4x4d m = rz.multiply(ry.multiply(t));
-        Modeler::applyTransformation(motif, m);
-        return motif;
-    }
-};
 
 struct ReferencePairCase {
     const char* sample;
@@ -536,14 +415,4 @@ TEST(BooleansFromReferenceObjectPairsTest, FeaturedObjectMatchesJavaTopologySumm
     EXPECT_TRUE(PolyhedralBoundedSolidValidationEngine::validateIntermediate(result));
     EXPECT_EQ(expectedFeaturedObjectSummary(), summaryFrom(result));
     delete result;
-}
-
-// As Java: `CSG_KURLANDER_BOWL` is marked as failing in the current legacy
-// matrix and remains pending explicit revalidation (no hardcoded reference
-// summary yet)
-TEST(BooleansFromReferenceObjectPairsTest, DISABLED_CsgKurlanderBowlMatchesReferenceTopologySummary) {
-    PolyhedralBoundedSolid* result = KurlanderBowlBuilder::create();
-    EXPECT_TRUE(PolyhedralBoundedSolidValidationEngine::validateIntermediate(result));
-    delete result;
-    FAIL() << "Missing hardcoded reference summary: CSG_KURLANDER_BOWL";
 }

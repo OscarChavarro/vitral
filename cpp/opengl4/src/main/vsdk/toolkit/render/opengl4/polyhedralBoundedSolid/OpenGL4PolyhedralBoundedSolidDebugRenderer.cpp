@@ -467,8 +467,8 @@ void buildDebugEdgeLines(PolyhedralBoundedSolid* solid, Camera* camera,
 
         if ( edgeIndex > -1 && camera != nullptr ) {
             Vector3Dd middle = start.add(end).multiply(0.5);
-            Vector3Dd n1 = face1->getContainingPlane()->getNormal();
-            Vector3Dd n2 = face2->getContainingPlane()->getNormal();
+            Vector3Dd n1 = face1->containingPlaneNormal();
+            Vector3Dd n2 = face2->containingPlaneNormal();
             appendLine(out.positions, out.colors, middle,
                 middle.add(n1.multiply(0.1)), ColorRgb(1, 1, 0));
             appendLine(out.positions, out.colors, middle,

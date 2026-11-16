@@ -2,6 +2,11 @@
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/SolidOperationFailedException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_PolyhedralBoundedSolidSetOperandAligner.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetNonIntersectingClassifier.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidStructuralCopy.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
@@ -346,16 +351,35 @@ PolyhedralBoundedSolidModeler::createBrepFromParametricCurve(
     return state.solid;
 }
 
+/**
+Serializes the public set operations and splits: the kernel keeps per-call
+state in static fields (Fable5.2Analysis.md Stage F step 3).
+*/
+java::ReentrantLock* const PolyhedralBoundedSolidModeler::KERNEL_LOCK =
+    new java::ReentrantLock();
+
 void PolyhedralBoundedSolidModeler::split(
     PolyhedralBoundedSolid* inSolid,
     const InfinitePlane& inSplittingPlane,
     java::ArrayList<PolyhedralBoundedSolid*>& outSolidsAbove,
     java::ArrayList<PolyhedralBoundedSolid*>& outSolidsBelow)
 {
-    _PolyhedralBoundedSolidSplitter::split(inSolid, inSplittingPlane,
-                                           outSolidsAbove, outSolidsBelow);
+    java::ReentrantLockGuard guard(*KERNEL_LOCK);
+    try {
+        _PolyhedralBoundedSolidSplitter::split(inSolid,
+            inSplittingPlane, outSolidsAbove, outSolidsBelow);
+    }
+    catch ( const VSDKFatalException& e ) {
+        throw SolidOperationFailedException(
+            java::String("Split failed: ") + e.getMessage(), e);
+    }
 }
 
+/**
+Regularized set operation ([MANT1988] Ch. 15) with configurable strict
+result validation. The operands are not modified: the operation runs on
+structural copies of them ([MANT1988] Sec. 15.8, `scopy`).
+*/
 PolyhedralBoundedSolid* PolyhedralBoundedSolidModeler::setOp(
     PolyhedralBoundedSolid* inSolidA,
     PolyhedralBoundedSolid* inSolidB,
@@ -364,7 +388,158 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidModeler::setOp(
     bool maximizeResultFaces,
     bool doStrictValidation)
 {
+    java::ReentrantLockGuard guard(*KERNEL_LOCK);
+    PolyhedralBoundedSolid* result;
+
     PolyhedralBoundedSolidStatistics::recordSetOpCall(op);
-    return _PolyhedralBoundedSolidSetOperator::setOp(inSolidA, inSolidB, op,
-        withDebug, maximizeResultFaces, doStrictValidation);
+    PolyhedralBoundedSolid* copyA =
+        PolyhedralBoundedSolidStructuralCopy::copy(inSolidA);
+    PolyhedralBoundedSolid* copyB =
+        PolyhedralBoundedSolidStructuralCopy::copy(inSolidB);
+    try {
+        result = runSetOp(copyA, copyB, op, withDebug, maximizeResultFaces,
+            doStrictValidation);
+    }
+    catch ( ... ) {
+        // C++ ownership: the copies are released (Java: garbage collector)
+        delete copyA;
+        delete copyB;
+        throw;
+    }
+    // C++ ownership: setOp left the result as the only owner of its nodes
+    delete copyA;
+    delete copyB;
+    if ( isEmptyResult(result) &&
+         resultCannotBeEmpty(inSolidA, inSolidB, op) ) {
+        delete result;
+        const java::String* path = getLastSetOpResultPath();
+        throw SolidOperationFailedException(
+            java::String("Boolean operation lost the solid: op=") +
+            operationName(op) + " returned an empty solid but " +
+            "the operands prove the result is not empty (path=" +
+            (path != nullptr ? *path : java::String("null")) + ")");
+    }
+    return result;
+}
+
+/**
+Destructive form of `setOp`: no copies are made and the operands are
+consumed ([MANT1988] Sec. 15.8: "the parts of A and B not required in the
+final result will remain in the original solids"). After the call the
+operands hold fragments and must not be used. The empty-result witness
+check is not done, since it needs intact operands.
+*/
+PolyhedralBoundedSolid* PolyhedralBoundedSolidModeler::setOpDestructive(
+    PolyhedralBoundedSolid* inSolidA,
+    PolyhedralBoundedSolid* inSolidB,
+    int op,
+    bool withDebug,
+    bool maximizeResultFaces,
+    bool doStrictValidation)
+{
+    java::ReentrantLockGuard guard(*KERNEL_LOCK);
+    PolyhedralBoundedSolidStatistics::recordSetOpCall(op);
+    return runSetOp(inSolidA, inSolidB, op, withDebug,
+        maximizeResultFaces, doStrictValidation);
+}
+
+/**
+True for the empty solid a set operation or a split returns when the
+regularized result is empty: no faces at all.
+*/
+bool PolyhedralBoundedSolidModeler::isEmptyResult(PolyhedralBoundedSolid* result)
+{
+    return result != nullptr && result->getPolygonsList().size() == 0;
+}
+
+PolyhedralBoundedSolid* PolyhedralBoundedSolidModeler::runSetOp(
+    PolyhedralBoundedSolid* inSolidA,
+    PolyhedralBoundedSolid* inSolidB,
+    int op,
+    bool withDebug,
+    bool maximizeResultFaces,
+    bool doStrictValidation)
+{
+    try {
+        return _PolyhedralBoundedSolidSetOperator::setOp(inSolidA,
+            inSolidB, op, withDebug, maximizeResultFaces,
+            doStrictValidation);
+    }
+    catch ( const VSDKFatalException& e ) {
+        const java::String* path = getLastSetOpResultPath();
+        throw SolidOperationFailedException(
+            java::String("Boolean operation failed: op=") + operationName(op) +
+            " (path=" + (path != nullptr ? *path : java::String("null")) +
+            "): " + e.getMessage(), e);
+    }
+}
+
+/**
+Witnesses that the regularized result of `op` on the intact operands is
+not empty. Only sufficient conditions are used, so false means "could be
+empty", never "is empty".
+*/
+bool PolyhedralBoundedSolidModeler::resultCannotBeEmpty(
+    PolyhedralBoundedSolid* inSolidA,
+    PolyhedralBoundedSolid* inSolidB,
+    int op)
+{
+    bool emptyA = inSolidA == nullptr || isEmptyResult(inSolidA);
+    bool emptyB = inSolidB == nullptr || isEmptyResult(inSolidB);
+    PolyhedralBoundedSolid* copyA = nullptr;
+    PolyhedralBoundedSolid* copyB = nullptr;
+    bool answer = false;
+
+    if ( op == UNION ) {
+        return !emptyA || !emptyB;
+    }
+    if ( emptyA || (emptyB && op == INTERSECTION) ) {
+        return false;
+    }
+    if ( !emptyB ) {
+        // The operation aligned B with A inside the tolerance band
+        // before deciding anything; the witnesses are looked for in
+        // the same operands, on copies. Judged on the operands as
+        // given, a solid that sticks out of the other by one tolerance
+        // "proved" that an empty difference was wrong.
+        copyA = PolyhedralBoundedSolidStructuralCopy::copy(inSolidA);
+        copyB = PolyhedralBoundedSolidStructuralCopy::copy(inSolidB);
+        inSolidA = copyA;
+        inSolidB = copyB;
+        delete _PolyhedralBoundedSolidSetOperandAligner::align(inSolidA,
+            inSolidB);
+    }
+    if ( op == INTERSECTION ) {
+        answer = _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            ::interiorsOverlap(inSolidA, inSolidB);
+    }
+    else if ( op == SUBTRACT ) {
+        answer = emptyB ||
+            _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                ::hasBoundaryPointOutside(inSolidA, inSolidB);
+    }
+    // C++ ownership: the copies are released
+    delete copyA;
+    delete copyB;
+    return answer;
+}
+
+java::String PolyhedralBoundedSolidModeler::operationName(int op)
+{
+    switch ( op ) {
+      case UNION: return "UNION";
+      case INTERSECTION: return "INTERSECTION";
+      case SUBTRACT: return "SUBTRACT";
+      default: return java::String("op#") + java::String::valueOf(op);
+    }
+}
+
+/**
+Reports which path produced the last `setOp` result on the calling thread.
+@return null before the first call or when the last call failed before
+producing a result
+*/
+const java::String* PolyhedralBoundedSolidModeler::getLastSetOpResultPath()
+{
+    return _PolyhedralBoundedSolidSetOperator::getLastResultPath();
 }

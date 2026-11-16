@@ -17,14 +17,22 @@ const double PolyhedralBoundedSolidNumericPolicy::BREP_BIG_EPSILON =
     10.0 * 1e-6;
 
 namespace {
-const double MIN_SCALE = 1.0;
+/** Scale of an empty or degenerate model (no extent to measure). */
+const double DEFAULT_SCALE = 1.0;
+/**
+Smallest model scale. Tolerances follow the model down to this size, so
+a part modelled in metres at 10^-3 gets 10^-3 times the tolerances of
+the same part at unit size. They used to stop at scale 1: below it the
+tolerances were absolute and, at 10^-3, a tenth of the features.
+*/
+const double MIN_SCALE = 1.0e-9;
 const double MAX_UNIT_INTERVAL_TOLERANCE = 1.0e-3;
 }
 
 double PolyhedralBoundedSolidNumericPolicy::sanitizeScale(double scale)
 {
-    if ( !std::isfinite(scale) ) {
-        return MIN_SCALE;
+    if ( !std::isfinite(scale) || scale <= 0.0 ) {
+        return DEFAULT_SCALE;
     }
     if ( scale < MIN_SCALE ) {
         return MIN_SCALE;
@@ -48,12 +56,12 @@ double PolyhedralBoundedSolidNumericPolicy::estimateSolidScale(
     PolyhedralBoundedSolid* solid)
 {
     if ( solid == nullptr ) {
-        return MIN_SCALE;
+        return DEFAULT_SCALE;
     }
 
     double* minMax = solid->getMinMax();
     if ( minMax == nullptr ) {
-        return MIN_SCALE;
+        return DEFAULT_SCALE;
     }
     double scale = diagonalSize(minMax[0], minMax[1], minMax[2],
                                 minMax[3], minMax[4], minMax[5]);
@@ -65,7 +73,7 @@ double PolyhedralBoundedSolidNumericPolicy::estimatePointsScale(
     const java::ArrayList<Vector3Dd>& points)
 {
     if ( points.size() < 2 ) {
-        return MIN_SCALE;
+        return DEFAULT_SCALE;
     }
 
     double minX = HUGE_VAL;
@@ -99,7 +107,7 @@ double PolyhedralBoundedSolidNumericPolicy::diagonalSize(double minX, double min
 double PolyhedralBoundedSolidNumericPolicy::estimateFaceScale(_PolyhedralBoundedSolidFace* face)
 {
     if ( face == 0 ) {
-        return MIN_SCALE;
+        return DEFAULT_SCALE;
     }
 
     double minX = HUGE_VAL;
@@ -132,14 +140,14 @@ double PolyhedralBoundedSolidNumericPolicy::estimateFaceScale(_PolyhedralBounded
     }
 
     if ( !found ) {
-        return MIN_SCALE;
+        return DEFAULT_SCALE;
     }
     return diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
 }
 
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext::ToleranceContext()
 {
-    *this = PolyhedralBoundedSolidNumericPolicy::fromScale(MIN_SCALE);
+    *this = PolyhedralBoundedSolidNumericPolicy::fromScale(DEFAULT_SCALE);
 }
 
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext::ToleranceContext(double modelScale, double epsilon, double bigEpsilon,
@@ -158,7 +166,7 @@ double PolyhedralBoundedSolidNumericPolicy::ToleranceContext::unitIntervalTolera
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext
 PolyhedralBoundedSolidNumericPolicy::defaultContext()
 {
-    return fromScale(MIN_SCALE);
+    return fromScale(DEFAULT_SCALE);
 }
 
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext
@@ -260,8 +268,12 @@ int PolyhedralBoundedSolidNumericPolicy::testPointInside(
 bool PolyhedralBoundedSolidNumericPolicy::vectorsColinear(const Vector3Dd& a,
     const Vector3Dd& b, const ToleranceContext& context)
 {
-    double scale = java::Math::max(1.0, java::Math::max(a.length(), b.length()));
-    return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
+    (void)context;
+    // |a x b| = |a| |b| sin(angle): compare the sine, so that the test
+    // does not depend on the length of the vectors (it used to accept
+    // angles up to bigEpsilon / length, half a degree at 10^-3).
+    return a.crossProduct(b).length() <=
+        BREP_BIG_EPSILON * a.length() * b.length();
 }
 
 bool PolyhedralBoundedSolidNumericPolicy::unitVectorsParallel(
@@ -294,7 +306,11 @@ double PolyhedralBoundedSolidNumericPolicy::orientationTolerance2D(
     double ly = java::Math::max(java::Math::max(std::abs(a.y - b.y),
                                   std::abs(a.y - c.y)),
                          std::abs(b.y - c.y));
-    double span = java::Math::max(1.0, java::Math::max(lx, ly));
+    // The orientation is a cross product, |b - a| times the distance of
+    // c from the line: a distance tolerance times the span. The span
+    // used to be at least 1, which below unit size made the tolerance
+    // an angle of bigEpsilon / span (half a degree at 10^-3).
+    double span = java::Math::max(lx, ly);
     return context.bigEpsilon() * span;
 }
 

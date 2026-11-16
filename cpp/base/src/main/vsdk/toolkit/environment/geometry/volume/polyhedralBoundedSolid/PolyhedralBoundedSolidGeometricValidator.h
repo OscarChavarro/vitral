@@ -69,6 +69,32 @@ public:
     @return true when ids are consistent
     */
     static bool validateUniqueFaceAndVertexIds(PolyhedralBoundedSolid* solid, java::String* msg);
+
+    /**
+    Area below which a face is collapsed: VSDK::EPSILON scaled by the square
+    of the model scale, so that it equals EPSILON for models of unit size
+    and is invariant under a uniform change of units.
+    */
+    static double collapsedFaceAreaThreshold(const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
+
+    /**
+    Area of a face: half the length of the Newell vector summed over all
+    its loops, so inner loops (holes, oriented the other way) are
+    subtracted.
+    */
+    static double faceArea(_PolyhedralBoundedSolidFace* face);
+
+    /**
+    Rejects collapsed laminae. A lamina is a shell made of exactly two
+    faces (which then share all their edges, back to back); it has zero
+    volume and is a valid result. It is collapsed when its area is below
+    collapsedFaceAreaThreshold. Small faces of shells that enclose volume
+    (slivers of a tessellation) are not judged by this rule.
+    */
+    static bool validateNoCollapsedLaminae(PolyhedralBoundedSolid* solid, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext, java::String* msg);
+
+private:
+    static double solidDiagonal(PolyhedralBoundedSolid* solid);
 };
 
 #endif

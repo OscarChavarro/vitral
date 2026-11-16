@@ -243,12 +243,12 @@ void buildSmoothedVertexNormals(PolyhedralBoundedSolid* solid,
 
     for ( long i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
-        if ( face == nullptr || face->getContainingPlane() == nullptr ||
+        if ( face == nullptr || face->hasContainingPlane() == false ||
              _PolyhedralBoundedSolidFaceValidator::isSurfaceDegenerate(face) ) {
             continue;
         }
 
-        Vector3Dd faceNormal = face->getContainingPlane()->getNormal();
+        Vector3Dd faceNormal = face->containingPlaneNormal();
         if ( faceNormal.length() <= VSDK::EPSILON ) {
             continue;
         }

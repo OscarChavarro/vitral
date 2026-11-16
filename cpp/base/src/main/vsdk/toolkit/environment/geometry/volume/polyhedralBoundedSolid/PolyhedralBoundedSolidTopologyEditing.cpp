@@ -8,11 +8,13 @@
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidRepair.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidBooleanTopologyPredicates.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidTopologicalValidator.h"
@@ -326,17 +328,6 @@ void removeEdgeRecord(
     }
 }
 
-template <typename T>
-void removeFirst(java::ArrayList<T>& list, T elem)
-{
-    for ( long int i = 0; i < list.size(); i++ ) {
-        if ( list.get(i) == elem ) {
-            list.remove(i);
-            return;
-        }
-    }
-}
-
 void removeEmptyLoopAndFaceIfNeeded(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidFace* face,
@@ -347,11 +338,13 @@ void removeEmptyLoopAndFaceIfNeeded(
     }
 
     if ( loop->halfEdgesList.size() == 0 ) {
-        removeFirst(face->boundariesList, loop);
+        face->boundariesList.locateWindowAtElem(loop);
+        face->boundariesList.removeElemAtWindow();
     }
 
     if ( face->boundariesList.size() == 0 ) {
-        removeFirst(solid->getPolygonsList(), face);
+        solid->getPolygonsList().locateWindowAtElem(face);
+        solid->getPolygonsList().removeElemAtWindow();
     }
 }
 
@@ -504,8 +497,7 @@ bool zipConsecutiveGeometricDanglingEdgePairs(
 
 void remakeEmanatingHalfedgesReferences(PolyhedralBoundedSolid* solid)
 {
-    _PolyhedralBoundedSolidTopologicalValidator
-        ::remakeEmanatingHalfedgesReferences(solid);
+    PolyhedralBoundedSolidRepair::remakeEmanatingHalfEdgeReferences(solid);
 }
 
 void appendLoopPoints(_PolyhedralBoundedSolidHalfEdge* start,
@@ -916,20 +908,25 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
         //- Merge coplanar overlapping faces when one lies entirely over
         //- another that already carries rings. This completes the
         //- "maximal face" reduction expected by [MANT1988].15.5.
+        // Which faces have a plane is computed once per sweep (Stage G):
+        // the sweep restarts as soon as a reduction changes the solid.
+        java::ArrayList<bool> hasPlane;
+        for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
+            InfinitePlane* plane = solid->getPolygonsList().get(i)
+                ->getContainingPlane();
+            hasPlane.add(plane != 0);
+            delete plane;
+        }
         for ( i = 0; i < solid->getPolygonsList().size() && !restart; i++ ) {
             _PolyhedralBoundedSolidFace* faceA = solid->getPolygonsList().get(i);
-            InfinitePlane* planeA = faceA->getContainingPlane();
-            if ( planeA == 0 ) {
+            if ( !hasPlane.get(i) ) {
                 continue;
             }
-            delete planeA;
             for ( j = i + 1; j < solid->getPolygonsList().size(); j++ ) {
                 _PolyhedralBoundedSolidFace* faceB = solid->getPolygonsList().get(j);
-                InfinitePlane* planeB = faceB->getContainingPlane();
-                if ( planeB == 0 ) {
+                if ( !hasPlane.get(j) ) {
                     continue;
                 }
-                delete planeB;
 
                 if ( reduceCoincidentSimpleFaceOnMultiLoopFace(
                          solid, faceA, faceB, numericContext) ||
@@ -963,10 +960,8 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
                 if ( nedges > 2 ) break;
 
                 if ( he == 0 ) {
-                    Logger::reportMessage(CLASS_NAME, Logger::FATAL_ERROR,
-                        "maximizeFaces",
-                        "Inconsistent model! Null HalfEdge. Check.");
-                    return;
+                    throw VSDKFatalException(
+            "maximizeFaces: Inconsistent model! Null HalfEdge. Check.");
                 }
 
                 heMirror = he->mirrorHalfEdge();
@@ -977,10 +972,8 @@ void PolyhedralBoundedSolidTopologyEditing::maximizeFaces(PolyhedralBoundedSolid
 
                 he = heMirror->next();
                 if ( he == 0 ) {
-                    Logger::reportMessage(CLASS_NAME, Logger::FATAL_ERROR,
-                        "maximizeFaces",
-                        "Inconsistent model! HalfEdge without next. Check.");
-                    return;
+                    throw VSDKFatalException(
+            "maximizeFaces: Inconsistent model! HalfEdge without next. Check.");
                 }
                 j++;
             } while ( he != heStart );

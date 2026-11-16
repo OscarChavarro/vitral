@@ -456,9 +456,8 @@ TEST(CsgKurlanderBowlFirstStarRegressionTest, BowlMinusFifthStarIsValidAndPairIn
     EXPECT_GT(result->getPolygonsList().size(), 0);
     EXPECT_GT(result->getEdgesList().size(), 0);
     EXPECT_GT(result->getVerticesList().size(), 0);
-    // Section 9.1: pairIndex matching must work for the curved-surface case
-    EXPECT_EQ(0, _PolyhedralBoundedSolidSetFinisher::getLastLegacyFallbackCount())
-        << "sanitizePairedFaces must not fall back to legacy ordering for star 5";
+    // Section 9.1: pairIndex matching worked for the curved-surface case;
+    // otherwise finish would have thrown SolidOperationFailedException.
     EXPECT_TRUE(PolyhedralBoundedSolidValidationEngine::validateIntermediate(result))
         << "result of bowl minus star 5 must pass intermediate validation";
     delete result;

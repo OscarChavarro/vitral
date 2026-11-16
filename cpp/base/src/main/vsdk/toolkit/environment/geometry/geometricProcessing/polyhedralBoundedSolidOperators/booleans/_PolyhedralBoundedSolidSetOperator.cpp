@@ -26,15 +26,18 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersector.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetFinisher.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetNullEdgesConnector.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidOrthogonalProfileFallback.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidProfileDifferenceFallback.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidAxisAlignedCellFallback.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidFallbackGeometry.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidIdNamespace.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidOffsetCylinderFallback.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/InvalidOperandException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/InvalidSolidResultException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/NonManifoldBooleanResultException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/SolidOperationFailedException.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_PolyhedralBoundedSolidSetOperandAligner.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersectionCurveBuilder.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidStructuralCopy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologySummary.h"
@@ -50,6 +53,12 @@ typedef _PolyhedralBoundedSolidSetOperator SetOperator;
 int SetOperator::debugFlags = 0;
 SetOperator::DebugSolidExporter SetOperator::debugSolidExporter = 0;
 _PolyhedralBoundedSolidIdNamespace* SetOperator::ownedNamespace = 0;
+const char* const SetOperator::REJECTED_NON_MANIFOLD_PATH =
+    "rejected-non-manifold-union";
+thread_local java::String SetOperator::lastResultPath;
+thread_local bool SetOperator::hasLastResultPath = false;
+thread_local java::ArrayList<java::String> SetOperator::lastConnectInvariantViolations;
+thread_local bool SetOperator::hasLastConnectInvariantViolations = false;
 
 namespace {
 
@@ -82,6 +91,15 @@ java::String str(long long value)
     return java::String::valueOf(value);
 }
 
+/** Java `"" + vector` (Vector3Dd.toString). */
+java::String vectorText(const Vector3Dd& v)
+{
+    java::String* text = v.toString();
+    java::String result(text->c_str());
+    delete text;
+    return result;
+}
+
 void tracePipelineSummary(const java::String& message)
 {
     _SetOperationTrace::tracePipelineSummary(message.c_str());
@@ -105,26 +123,6 @@ java::String boundsText(const double* bounds)
         text += java::Double::toString(bounds[i]).c_str();
     }
     return text + "]";
-}
-
-template <typename T>
-void unlistShared(java::ArrayList<T*>& from, const java::ArrayList<T*>& reference)
-{
-    java::TreeSet<T*> referenced;
-    long int i;
-
-    for ( i = 0; i < reference.size(); i++ ) {
-        referenced.add(reference.get(i));
-    }
-    i = 0;
-    while ( i < from.size() ) {
-        if ( referenced.contains(from.get(i)) ) {
-            from.remove(i);
-        }
-        else {
-            i++;
-        }
-    }
 }
 
 }
@@ -590,6 +588,7 @@ void SetOperator::setOpConnect(_SetOperationContext& ctx, int op)
         connector.connect(op, debugFlags, ctx.sonea, ctx.soneb);
     ctx.sonfa = result.sonfa();
     ctx.sonfb = result.sonfb();
+    ctx.connected = result;
 }
 
 /**
@@ -601,7 +600,54 @@ void SetOperator::setOpFinish(_SetOperationContext& ctx,
     PolyhedralBoundedSolid* outRes, int op)
 {
     _PolyhedralBoundedSolidSetFinisher::finish(
-        inSolidA, inSolidB, outRes, op, debugFlags, ctx.sonfa, ctx.sonfb);
+        inSolidA, inSolidB, outRes, op, debugFlags, ctx.sonfa, ctx.sonfb,
+        ctx.connected);
+}
+
+void SetOperator::weldCoincidentVerticesOfOperand(
+    PolyhedralBoundedSolid* solid, const char* name)
+{
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
+    java::String ignored;
+
+    if ( PolyhedralBoundedSolidGeometricValidator
+            ::validateNoCoincidentVertices(solid, context, &ignored) ) {
+        return;
+    }
+    int welded = PolyhedralBoundedSolidTopologyEditing
+        ::weldCoincidentVertices(solid, context);
+    tracePipelineSummary(java::String("setOp operand ") + name +
+        " had coincident vertices; welded " + str(welded) + " pair(s)");
+}
+
+PolyhedralBoundedSolid* SetOperator::setOpNoIntersectionCase(
+    PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+    PolyhedralBoundedSolid* outRes, int op)
+{
+    try {
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            ::runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op);
+    }
+    catch ( const NonManifoldBooleanResultException& e ) {
+        setLastResultPath(REJECTED_NON_MANIFOLD_PATH);
+        throw;
+    }
+}
+
+PolyhedralBoundedSolid* SetOperator::setOpNoIntersectionCase(
+    PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+    PolyhedralBoundedSolid* outRes, int op, PreflightCache& cache)
+{
+    try {
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            ::runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op,
+                cache);
+    }
+    catch ( const NonManifoldBooleanResultException& e ) {
+        setLastResultPath(REJECTED_NON_MANIFOLD_PATH);
+        throw;
+    }
 }
 
 void SetOperator::debugSolid(PolyhedralBoundedSolid* solid, const char* pattern)
@@ -635,6 +681,231 @@ void SetOperator::postProcessResult(PolyhedralBoundedSolid* res,
     PolyhedralBoundedSolidValidationEngine::validateIntermediate(res);
 }
 
+void SetOperator::setLastResultPath(const char* path)
+{
+    if ( path == nullptr ) {
+        hasLastResultPath = false;
+        lastResultPath = java::String();
+        return;
+    }
+    hasLastResultPath = true;
+    lastResultPath = path;
+}
+
+/**
+Name of the path that produced the last setOp result on the calling
+thread: "normal-pipeline" for the [MANT1988] Ch. 15 pipeline, or the name
+of the preflight that answered instead. Recorded before the strict
+postcondition runs, so it is also available after a strict validation
+failure. Fable5.2Analysis.md Stage A step 4.
+@return null when no path was recorded
+*/
+const java::String* SetOperator::getLastResultPath()
+{
+    return hasLastResultPath ? &lastResultPath : nullptr;
+}
+
+/**
+Violations of the post-connect invariant found on the last setOp of the
+calling thread that reached connect (empty list: none; null: connect was
+not reached). See `checkConnectInvariant`.
+*/
+const java::ArrayList<java::String>* SetOperator::getLastConnectInvariantViolations()
+{
+    return hasLastConnectInvariantViolations ?
+        &lastConnectInvariantViolations : nullptr;
+}
+
+/**
+Post-connect invariant ([MANT1988] Sec. 14.7 and 15.7; Fable5.2Analysis.md
+Stage C step 1), checked when connect left no loose ends:
+- every null face recorded for finish (sonfa, sonfb) has exactly two loops,
+  the two copies of its section curve;
+- no other face carries two loops that coincide vertex by vertex. A section
+  ring strictly inside a face must leave that face with the ring as a hole
+  and the disk as a separate face; two coincident loops in one face mean
+  the hole was moved into the disk (B-01).
+*/
+java::ArrayList<java::String> SetOperator::checkConnectInvariant(
+    PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+    _SetOperationContext& ctx)
+{
+    java::ArrayList<java::String> violations;
+
+    if ( hasIncompleteConnectState() ) {
+        return violations;
+    }
+    collectNullFaceViolations("A", ctx.sonfa, violations);
+    collectNullFaceViolations("B", ctx.sonfb, violations);
+    collectCoincidentLoopViolations("A", inSolidA, ctx.sonfa, violations);
+    collectCoincidentLoopViolations("B", inSolidB, ctx.sonfb, violations);
+    return violations;
+}
+
+void SetOperator::collectNullFaceViolations(const char* label,
+    const java::ArrayList<_PolyhedralBoundedSolidFace*>& nullFaces,
+    java::ArrayList<java::String>& violations)
+{
+    int i;
+
+    for ( i = 0; i < nullFaces.size(); i++ ) {
+        _PolyhedralBoundedSolidFace* f = nullFaces.get(i);
+        // A null face collapsed to a single point (only zero-length
+        // strut rings, left where the section curve runs straight
+        // through a vertex of one face) bounds no section and is
+        // discarded by finish; it is not a section-curve face.
+        if ( f->boundariesList.size() != 2 && !isPointLikeFace(f) ) {
+            violations.add(java::String(label) + ": null face " +
+                str(f->id) + " has " + str(f->boundariesList.size()) +
+                " loops instead of 2");
+        }
+    }
+}
+
+bool SetOperator::isPointLikeFace(_PolyhedralBoundedSolidFace* f)
+{
+    Vector3Dd first;
+    bool hasFirst = false;
+    int i;
+
+    for ( i = 0; i < f->boundariesList.size(); i++ ) {
+        _PolyhedralBoundedSolidHalfEdge* start =
+            f->boundariesList.get(i)->boundaryStartHalfEdge;
+        _PolyhedralBoundedSolidHalfEdge* he = start;
+        if ( start == nullptr ) {
+            continue;
+        }
+        do {
+            Vector3Dd p = he->startingVertex->position;
+            if ( !hasFirst ) {
+                first = p;
+                hasFirst = true;
+            }
+            else if ( Vector3Dd::distance(first, p) >
+                      numericContext.bigEpsilon() ) {
+                return false;
+            }
+            he = he->next();
+        } while ( he != start );
+    }
+    return true;
+}
+
+void SetOperator::collectCoincidentLoopViolations(const char* label,
+    PolyhedralBoundedSolid* solid,
+    const java::ArrayList<_PolyhedralBoundedSolidFace*>& nullFaces,
+    java::ArrayList<java::String>& violations)
+{
+    int i;
+    int j;
+    int k;
+
+    for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
+        _PolyhedralBoundedSolidFace* f = solid->getPolygonsList().get(i);
+        if ( f->boundariesList.size() < 2 || nullFaces.contains(f) ) {
+            continue;
+        }
+        for ( j = 0; j < f->boundariesList.size(); j++ ) {
+            for ( k = j + 1; k < f->boundariesList.size(); k++ ) {
+                if ( loopsCoincide(f->boundariesList.get(j),
+                         f->boundariesList.get(k)) ) {
+                    violations.add(java::String(label) + ": face " +
+                        str(f->id) + " has coincident loops " + str(j) +
+                        " and " + str(k));
+                }
+            }
+        }
+    }
+}
+
+bool SetOperator::loopsCoincide(_PolyhedralBoundedSolidLoop* a,
+    _PolyhedralBoundedSolidLoop* b)
+{
+    int i;
+    int j;
+
+    if ( a->halfEdgesList.size() != b->halfEdgesList.size() ||
+         a->halfEdgesList.size() < 3 ) {
+        return false;
+    }
+    for ( i = 0; i < a->halfEdgesList.size(); i++ ) {
+        Vector3Dd p = a->halfEdgesList.get(i)->startingVertex->position;
+        bool found = false;
+        for ( j = 0; j < b->halfEdgesList.size() && !found; j++ ) {
+            found = PolyhedralBoundedSolidNumericPolicy::pointsCoincident(
+                p, b->halfEdgesList.get(j)->startingVertex->position,
+                numericContext);
+        }
+        if ( !found ) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+Detects result pieces that touch only along an edge or at a vertex: two
+distinct vertices at the same point, or two distinct edges joining the
+same two points. A manifold boundary has neither.
+@return false (Java null) when there is no contact; otherwise true, with a
+short description of the first contact found in `description`
+*/
+bool SetOperator::findNonManifoldContact(PolyhedralBoundedSolid* result,
+    java::String* description)
+{
+    double tolerance = numericContext.bigEpsilon();
+    int nv = result->getVerticesList().size();
+    int ne = result->getEdgesList().size();
+    int i;
+    int j;
+
+    for ( i = 0; i < nv; i++ ) {
+        Vector3Dd p = result->getVerticesList().get(i)->position;
+        for ( j = i + 1; j < nv; j++ ) {
+            if ( Vector3Dd::distance(p,
+                     result->getVerticesList().get(j)->position) <=
+                 tolerance ) {
+                *description = java::String("vertices ") +
+                    str(result->getVerticesList().get(i)->id) + " and " +
+                    str(result->getVerticesList().get(j)->id) +
+                    " coincide at " + vectorText(p);
+                return true;
+            }
+        }
+    }
+    for ( i = 0; i < ne; i++ ) {
+        _PolyhedralBoundedSolidEdge* e = result->getEdgesList().get(i);
+        for ( j = i + 1; j < ne; j++ ) {
+            _PolyhedralBoundedSolidEdge* f = result->getEdgesList().get(j);
+            if ( sameEndpoints(e, f) ) {
+                *description = java::String("edges ") + str(e->id) +
+                    " and " + str(f->id) + " join the same points " +
+                    vectorText(e->rightHalf->startingVertex->position) +
+                    " - " +
+                    vectorText(e->leftHalf->startingVertex->position);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool SetOperator::sameEndpoints(_PolyhedralBoundedSolidEdge* e,
+    _PolyhedralBoundedSolidEdge* f)
+{
+    _PolyhedralBoundedSolidVertex* e1 = e->rightHalf->startingVertex;
+    _PolyhedralBoundedSolidVertex* e2 = e->leftHalf->startingVertex;
+    _PolyhedralBoundedSolidVertex* f1 = f->rightHalf->startingVertex;
+    _PolyhedralBoundedSolidVertex* f2 = f->leftHalf->startingVertex;
+
+    return (e1 == f1 && e2 == f2) || (e1 == f2 && e2 == f1);
+}
+
+/**
+C++ port note: on every exception thrown here the result is deleted (Java
+leaves it to the garbage collector); the caller has already unlisted its
+nodes from the operands.
+*/
 PolyhedralBoundedSolid* SetOperator::completeSetOpResult(
     PolyhedralBoundedSolid* result,
     const java::String& operandADiagnostics,
@@ -644,12 +915,22 @@ PolyhedralBoundedSolid* SetOperator::completeSetOpResult(
     bool maximizeResultFaces,
     bool doStrictValidation)
 {
+    setLastResultPath(resultPath);
     if ( result == 0 ) {
-        throw java::IllegalStateException(java::String("Boolean operation returned null: op=") +
+        throw SolidOperationFailedException(java::String("Boolean operation returned null: op=") +
             operationName(op).c_str() + ", path=" + resultPath);
     }
     if ( result->getPolygonsList().size() > 0 ) {
         postProcessResult(result, maximizeResultFaces);
+    }
+    java::String contact;
+    if ( findNonManifoldContact(result, &contact) ) {
+        delete result;
+        // Same policy as B-04: pieces of the result that touch only
+        // along an edge or at a vertex form a non-manifold solid.
+        throw NonManifoldBooleanResultException(
+            operationName(op) + " result is non-manifold (" + contact +
+            "); rejected (path=" + resultPath + ")");
     }
     if ( doStrictValidation ) {
         java::String strictMessage;
@@ -657,14 +938,16 @@ PolyhedralBoundedSolid* SetOperator::completeSetOpResult(
                  result, &strictMessage) ) {
             PolyhedralBoundedSolidTopologySummary topology =
                 PolyhedralBoundedSolidTopologySummary::from(result);
-            throw java::IllegalStateException(
+            java::String message =
                 java::String("Strict boolean result validation failed: op=") +
                 operationName(op).c_str() + ", path=" + resultPath +
                 ", operandA=" + operandADiagnostics.c_str() +
                 ", operandB=" + operandBDiagnostics.c_str() +
                 ", result=" + cardinalitiesAndBounds(result).c_str() +
                 ", " + topology.toString().c_str() + "\n" +
-                strictMessage.c_str());
+                strictMessage.c_str();
+            delete result;
+            throw InvalidSolidResultException(message);
         }
     }
     return result;
@@ -699,138 +982,18 @@ java::String SetOperator::cardinalitiesAndBounds(PolyhedralBoundedSolid* solid)
 }
 
 /**
-Deep copy of a solid, preserving ids, list orders and the half-edge
-structure (Java uses object serialization for this).
-@return a new solid owned by the caller, or null
+Independent copy of `solid` for the recovery paths. It used to be a Java
+serialization round trip, which recursed over the linked structure and
+could overflow the stack on large solids; it is now the linear structural
+copy of [MANT1988] Sec. 15.8 (`scopy`, Stage F). The label is kept for the
+callers' diagnostics.
+@return a new solid owned by the caller
 */
 PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* solid,
     const char* solidLabel)
 {
-    java::TreeMap<_PolyhedralBoundedSolidVertex*, _PolyhedralBoundedSolidVertex*> vertexMap;
-    java::TreeMap<_PolyhedralBoundedSolidEdge*, _PolyhedralBoundedSolidEdge*> edgeMap;
-    java::TreeMap<_PolyhedralBoundedSolidHalfEdge*, _PolyhedralBoundedSolidHalfEdge*> halfEdgeMap;
-    long int i;
-    long int j;
-    long int k;
-
     (void)solidLabel;
-    if ( solid == 0 ) {
-        return 0;
-    }
-
-    PolyhedralBoundedSolid* copy = new PolyhedralBoundedSolid();
-    copy->setMaxVertexId(solid->getMaxVertexId());
-    copy->setMaxFaceId(solid->getMaxFaceId());
-    copy->setValidationState(solid->isValid());
-
-    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
-        _PolyhedralBoundedSolidVertex* v = solid->getVerticesList().get(i);
-        _PolyhedralBoundedSolidVertex* nv =
-            new _PolyhedralBoundedSolidVertex(v->position, v->id);
-        nv->debugColor = v->debugColor;
-        copy->getVerticesList().add(nv);
-        vertexMap.put(v, nv);
-    }
-    for ( i = 0; i < solid->getEdgesList().size(); i++ ) {
-        _PolyhedralBoundedSolidEdge* e = solid->getEdgesList().get(i);
-        _PolyhedralBoundedSolidEdge* ne = new _PolyhedralBoundedSolidEdge();
-        ne->id = e->id;
-        ne->debugColor = e->debugColor;
-        copy->getEdgesList().add(ne);
-        edgeMap.put(e, ne);
-    }
-    for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
-        _PolyhedralBoundedSolidFace* f = solid->getPolygonsList().get(i);
-        _PolyhedralBoundedSolidFace* nf =
-            new _PolyhedralBoundedSolidFace(copy, f->id);
-        copy->getPolygonsList().add(nf);
-        for ( j = 0; j < f->boundariesList.size(); j++ ) {
-            _PolyhedralBoundedSolidLoop* l = f->boundariesList.get(j);
-            _PolyhedralBoundedSolidLoop* nl = new _PolyhedralBoundedSolidLoop(nf);
-            for ( k = 0; k < l->halfEdgesList.size(); k++ ) {
-                _PolyhedralBoundedSolidHalfEdge* he = l->halfEdgesList.get(k);
-                _PolyhedralBoundedSolidHalfEdge* nhe =
-                    new _PolyhedralBoundedSolidHalfEdge(
-                        he->startingVertex != 0 ? vertexMap.getOrDefault(he->startingVertex, nullptr) : 0,
-                        nl);
-                nhe->id = he->id;
-                if ( he->parentEdge != 0 ) {
-                    _PolyhedralBoundedSolidEdge** found =
-                        edgeMap.get(he->parentEdge);
-                    if ( found == nullptr ) {
-                        // Edge not listed by the solid: copy it on demand
-                        _PolyhedralBoundedSolidEdge* ne = new _PolyhedralBoundedSolidEdge();
-                        ne->id = he->parentEdge->id;
-                        ne->debugColor = he->parentEdge->debugColor;
-                        edgeMap.put(he->parentEdge, ne);
-                        nhe->parentEdge = ne;
-                    }
-                    else {
-                        nhe->parentEdge = *found;
-                    }
-                }
-                nl->halfEdgesList.add(nhe);
-                halfEdgeMap.put(he, nhe);
-            }
-            nl->boundaryStartHalfEdge = l->boundaryStartHalfEdge != 0 ?
-                halfEdgeMap.getOrDefault(l->boundaryStartHalfEdge, nullptr) : 0;
-        }
-    }
-
-    // Edge halves and vertex emanating references, now that half-edges exist
-    for ( long int it = 0; it < edgeMap.size(); it++ ) {
-        _PolyhedralBoundedSolidEdge* e = edgeMap.getKey(it);
-        _PolyhedralBoundedSolidEdge* ne = edgeMap.getValue(it);
-        ne->rightHalf = (e->rightHalf != 0 && halfEdgeMap.containsKey(e->rightHalf)) ?
-            *halfEdgeMap.get(e->rightHalf) : 0;
-        ne->leftHalf = (e->leftHalf != 0 && halfEdgeMap.containsKey(e->leftHalf)) ?
-            *halfEdgeMap.get(e->leftHalf) : 0;
-    }
-    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
-        _PolyhedralBoundedSolidVertex* v = solid->getVerticesList().get(i);
-        _PolyhedralBoundedSolidVertex* nv = vertexMap.getOrDefault(v, nullptr);
-        nv->emanatingHalfEdge = (v->emanatingHalfEdge != 0 &&
-            halfEdgeMap.containsKey(v->emanatingHalfEdge)) ?
-            *halfEdgeMap.get(v->emanatingHalfEdge) : 0;
-    }
-    return copy;
-}
-
-bool SetOperator::hasDegenerateFace(PolyhedralBoundedSolid* solid)
-{
-    long int i;
-
-    if ( solid == 0 ) {
-        return true;
-    }
-    for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
-        _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
-        if ( face->boundariesList.size() < 1 ||
-             face->boundariesList.get(0)->halfEdgesList.size() < 3 ) {
-            return true;
-        }
-        InfinitePlane* plane = face->getContainingPlane();
-        if ( plane == 0 ) {
-            return true;
-        }
-        delete plane;
-    }
-    return false;
-}
-
-bool SetOperator::shouldUseAxisAlignedCellBooleanFallback(
-    PolyhedralBoundedSolid* fallback, PolyhedralBoundedSolid* result)
-{
-    if ( fallback == 0 || fallback->getPolygonsList().size() <= 0 ) {
-        return false;
-    }
-    if ( result == 0 || result->getPolygonsList().size() <= 0 ) {
-        return true;
-    }
-    if ( hasDegenerateFace(result) ) {
-        return true;
-    }
-    return false;
+    return PolyhedralBoundedSolidStructuralCopy::copy(solid);
 }
 
 bool SetOperator::hasIncompleteConnectState()
@@ -839,61 +1002,20 @@ bool SetOperator::hasIncompleteConnectState()
         _PolyhedralBoundedSolidSetNullEdgesConnector::getLastLooseBCount() > 0;
 }
 
-bool SetOperator::isStructurallyUsableSetOpResult(PolyhedralBoundedSolid* result)
-{
-    if ( result == 0 ||
-         result->getPolygonsList().size() <= 0 ||
-         hasDegenerateFace(result) ) {
-        return false;
-    }
-    return PolyhedralBoundedSolidValidationEngine::validateIntermediate(result);
-}
-
-bool SetOperator::hasBasicSetOpShapeData(PolyhedralBoundedSolid* result)
-{
-    return result != 0 &&
-        result->getPolygonsList().size() > 0 &&
-        result->getEdgesList().size() > 0 &&
-        result->getVerticesList().size() > 0;
-}
-
-bool SetOperator::hasSameShapeData(PolyhedralBoundedSolid* first,
-    PolyhedralBoundedSolid* second)
-{
-    if ( !hasBasicSetOpShapeData(first) || !hasBasicSetOpShapeData(second) ||
-         first->getPolygonsList().size() != second->getPolygonsList().size() ||
-         first->getEdgesList().size() != second->getEdgesList().size() ||
-         first->getVerticesList().size() != second->getVerticesList().size() ) {
-        return false;
-    }
-    double* a = first->getMinMax();
-    double* b = second->getMinMax();
-    bool same = _PolyhedralBoundedSolidFallbackGeometry::boundsMatch(a, b);
-    delete[] a;
-    delete[] b;
-    return same;
-}
-
 void SetOperator::unlistSharedNodes(PolyhedralBoundedSolid* from,
     PolyhedralBoundedSolid* reference)
 {
     if ( from == 0 || reference == 0 || from == reference ) {
         return;
     }
-    unlistShared(from->getPolygonsList(), reference->getPolygonsList());
-    unlistShared(from->getEdgesList(), reference->getEdgesList());
-    unlistShared(from->getVerticesList(), reference->getVerticesList());
+    from->unlistNodesOwnedBy(reference);
 }
 
-void SetOperator::discardIntermediateResult(PolyhedralBoundedSolid* result,
-    PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB)
+void SetOperator::releaseCopy(PolyhedralBoundedSolid* copy,
+    PolyhedralBoundedSolid* result)
 {
-    if ( result == 0 ) {
-        return;
-    }
-    unlistSharedNodes(result, inSolidA);
-    unlistSharedNodes(result, inSolidB);
-    delete result;
+    unlistSharedNodes(copy, result);
+    delete copy;
 }
 
 //= Main algorithm ==================================================
@@ -910,6 +1032,9 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     bool maximizeResultFaces,
     bool doStrictValidation)
 {
+    setLastResultPath(nullptr);
+    hasLastConnectInvariantViolations = false;
+    lastConnectInvariantViolations.clear();
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
         PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
     setNumericContext(&context);
@@ -943,20 +1068,11 @@ PolyhedralBoundedSolid* SetOperator::setOp(
 
     //-----------------------------------------------------------------
     PolyhedralBoundedSolid* res = new PolyhedralBoundedSolid();
-    _PolyhedralBoundedSolidProfileDifferenceFallbackSpec* profileDifferenceFallback;
-    _PolyhedralBoundedSolidOffsetCylinderFallback::OffsetCylinderDifferenceFallbackSpec*
-        offsetCylinderDifferenceFallbackSpec;
-    PolyhedralBoundedSolid* offsetCylinderDifferenceFallback;
-    PolyhedralBoundedSolid* axisAlignedCellBooleanFallback;
-    PolyhedralBoundedSolid* orthogonalProfileBooleanFallback;
-    bool fallbackProvidedResult;
     java::String resultPath;
     java::String operandADiagnostics;
     java::String operandBDiagnostics;
 
     _SetOperationContext ctx;
-    offsetCylinderDifferenceFallback = 0;
-    fallbackProvidedResult = false;
     resultPath = "normal-pipeline";
     operandADiagnostics = cardinalitiesAndBounds(inSolidA);
     operandBDiagnostics = cardinalitiesAndBounds(inSolidB);
@@ -973,13 +1089,33 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     PolyhedralBoundedSolidTopologyEditing::maximizeFaces(inSolidB);
     PolyhedralBoundedSolidTopologyEditing::compactIds(inSolidA);
     PolyhedralBoundedSolidTopologyEditing::compactIds(inSolidB);
-    java::String booleanInputMsg;
-    if ( !PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
-             inSolidA, inSolidB, &booleanInputMsg) ) {
-        Logger::reportMessage(java::String(), Logger::WARNING, "setOp",
-            java::String("Boolean input validation failed:\n") + booleanInputMsg);
+    // Operand preparation, on the copies this operation owns: edges
+    // shorter than the tolerance are collapsed, so that generate does
+    // not meet two vertices at one point. Validation, below, only
+    // reads (plan-stage11 Phase C).
+    weldCoincidentVerticesOfOperand(inSolidA, "A");
+    weldCoincidentVerticesOfOperand(inSolidB, "B");
+    // Faces of B inside the tolerance band of a parallel face of A are
+    // put on its plane, so that every stage below takes the same
+    // decision about them (see the aligner).
+    Vector3Dd* alignment =
+        _PolyhedralBoundedSolidSetOperandAligner::align(inSolidA, inSolidB);
+    if ( alignment != nullptr ) {
+        tracePipelineSummary(java::String("setOp operand B moved by ") +
+            vectorText(*alignment) +
+            " to align faces inside the tolerance band");
+        delete alignment;
     }
-    else if ( booleanInputMsg.length() > 0 ) {
+    java::String booleanInputMsg;
+    bool validInputs = PolyhedralBoundedSolidValidationEngine
+        ::validateBooleanInputs(inSolidA, inSolidB, &booleanInputMsg);
+    if ( !validInputs ) {
+        delete res;
+        throw InvalidOperandException(
+            java::String("Boolean operands are not valid solids:\n") +
+            booleanInputMsg);
+    }
+    if ( booleanInputMsg.length() > 0 ) {
         Logger::reportMessage(java::String(), Logger::DEBUG, "setOp",
             java::String("Boolean input pre-processing:\n") + booleanInputMsg);
     }
@@ -995,17 +1131,6 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     context = PolyhedralBoundedSolidNumericPolicy::forSolids(inSolidA, inSolidB);
     setNumericContext(&context);
     _PolyhedralBoundedSolidSetOperatorNullEdge::setNumericContext(&numericContext);
-    profileDifferenceFallback = _PolyhedralBoundedSolidProfileDifferenceFallback
-        ::prepareProfileDifferenceFallbackSpec(inSolidA, inSolidB, op);
-    offsetCylinderDifferenceFallbackSpec =
-        _PolyhedralBoundedSolidOffsetCylinderFallback
-            ::prepareOffsetCylinderDifferenceFallbackSpec(inSolidA, inSolidB, op);
-    axisAlignedCellBooleanFallback =
-        _PolyhedralBoundedSolidAxisAlignedCellFallback
-            ::buildAxisAlignedCellBooleanFallback(inSolidA, inSolidB, op);
-    orthogonalProfileBooleanFallback =
-        _PolyhedralBoundedSolidOrthogonalProfileFallback
-            ::buildOrthogonalProfileBooleanFallback(inSolidA, inSolidB, op);
 
     if ( withDebug ) {
         debugSolid(inSolidA, "outputA_stage01");
@@ -1021,22 +1146,28 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             ::newPreflightCache(inSolidA, inSolidB);
     bool preflightResolved = false;
 
-    PolyhedralBoundedSolid* coplanarAreaContactResult =
+    // A union of solids that touch along a face is one solid, glued
+    // along the AonB- faces ([MANT1988] Eq. 15.2): leave it to the
+    // pipeline. Edge or vertex contact would leave two shells sharing
+    // a boundary point: rejected as non-manifold (B-04).
+    bool unionGluesAlongAFace = op == UNION &&
         _PolyhedralBoundedSolidSetNonIntersectingClassifier
-            ::runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, res, op,
-                preflightCache);
-    if ( coplanarAreaContactResult != 0 ) {
-        res = coplanarAreaContactResult;
-        resultPath = "partial-coplanar-area-preflight";
-        preflightResolved = true;
-    }
-
-    if ( !preflightResolved &&
+            ::hasOppositeCoplanarFaceAreaContact(inSolidA, inSolidB);
+    if ( !unionGluesAlongAFace &&
          _PolyhedralBoundedSolidSetNonIntersectingClassifier
              ::runTouchingOnlyPreflightCase(inSolidA, inSolidB, preflightCache) ) {
-        res = _PolyhedralBoundedSolidSetNonIntersectingClassifier
-            ::runSetOpNoIntersectionCase(inSolidA, inSolidB, res, op,
+        try {
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op,
                 preflightCache);
+        }
+        catch ( ... ) {
+            // C++ ownership: the operands keep their nodes, the partial
+            // result is released (Java: garbage collector)
+            inSolidA->unlistNodesOwnedBy(res);
+            inSolidB->unlistNodesOwnedBy(res);
+            delete res;
+            throw;
+        }
         resultPath = "touching-only-preflight";
         preflightResolved = true;
     }
@@ -1068,18 +1199,44 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     // contained inside the other without real edge/face intersections,
     // the regular pipeline produces empty. Dispatch to a dedicated
     // containment table per [MANT1988] chapter 15.1.
+    // A solid inside the other and touching its boundary is not a plain
+    // containment for the difference: A - B is then A with a pocket open
+    // to the outside, not A with a cavity, and only the pipeline builds it.
     if ( !preflightResolved &&
          _PolyhedralBoundedSolidSetNonIntersectingClassifier
              ::runContainmentOnlyPreflightCase(inSolidA, inSolidB,
-                 preflightCache) ) {
-        res = _PolyhedralBoundedSolidSetNonIntersectingClassifier
-            ::runSetOpNoIntersectionCase(inSolidA, inSolidB, res, op,
+                 preflightCache) &&
+         !(op == SUBTRACT &&
+           _PolyhedralBoundedSolidSetNonIntersectingClassifier
+               ::touchesBoundaryFromInside(inSolidB, inSolidA)) ) {
+        try {
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op,
                 preflightCache);
+        }
+        catch ( ... ) {
+            // C++ ownership: the operands keep their nodes, the partial
+            // result is released (Java: garbage collector)
+            inSolidA->unlistNodesOwnedBy(res);
+            inSolidB->unlistNodesOwnedBy(res);
+            delete res;
+            throw;
+        }
         resultPath = "containment-only-preflight";
         preflightResolved = true;
     }
 
     if ( !preflightResolved ) {
+        // Generate and classify edit the operands (vertices on edges and
+        // faces, null edges). When they find no intersection the answer is
+        // one of the operands, or their contact: it is taken from these
+        // copies, made before any edit (plan-stage11 Phase E). Taken from
+        // the edited operands it carried their extra vertices, and failed
+        // strict validation for contacts inside the tolerance band.
+        PolyhedralBoundedSolid* untouchedA =
+            PolyhedralBoundedSolidStructuralCopy::copy(inSolidA);
+        PolyhedralBoundedSolid* untouchedB =
+            PolyhedralBoundedSolidStructuralCopy::copy(inSolidB);
+
         setOpGenerate(ctx, inSolidA, inSolidB);
 
         if ( withDebug ) {
@@ -1101,13 +1258,35 @@ PolyhedralBoundedSolid* SetOperator::setOp(
         // null-edge struts (size-2 loops with coincident endpoints);
         // genuine self-touch is only meaningful after Generate.
 
-        if ( ctx.sonea.isEmpty() && ctx.sonvv.isEmpty() ) {
+        // [MANT1988] Sec. 15.4: what matters is whether classification
+        // produced null edges. Vertex/vertex contacts that yield none (a
+        // solid tangent inside the other along whole faces, for instance)
+        // leave nothing to connect, so the result follows from containment
+        // as in the no-intersection case; running connect and finish on
+        // them returned an empty solid.
+        if ( ctx.sonea.isEmpty() && ctx.soneb.isEmpty() ) {
             // No intersections found
-            res = _PolyhedralBoundedSolidSetNonIntersectingClassifier
-                ::runSetOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+            try {
+                res = setOpNoIntersectionCase(untouchedA, untouchedB, res,
+                    op);
+            }
+            catch ( ... ) {
+                // C++ ownership: as below, then the partial result is
+                // released (Java: garbage collector)
+                releaseCopy(untouchedA, res);
+                releaseCopy(untouchedB, res);
+                inSolidA->unlistNodesOwnedBy(res);
+                inSolidB->unlistNodesOwnedBy(res);
+                delete res;
+                throw;
+            }
             resultPath = "no-intersection-after-classify";
             preflightResolved = true;
         }
+        // C++ ownership: the copies give the result the nodes it took
+        // from them and are released (Java leaves them to the collector)
+        releaseCopy(untouchedA, res);
+        releaseCopy(untouchedB, res);
     }
 
     if ( !preflightResolved ) {
@@ -1117,145 +1296,55 @@ PolyhedralBoundedSolid* SetOperator::setOp(
         }
 
         setOpConnect(ctx, op);
+        lastConnectInvariantViolations =
+            checkConnectInvariant(inSolidA, inSolidB, ctx);
+        hasLastConnectInvariantViolations = true;
+        // [MANT1988] Program 15.14: connect ends with every null edge
+        // joined. Loose ends mean that part of the intersection curve was
+        // not cut: a crossing was missed or misclassified, or two ends that
+        // belong together sat in different faces. The null faces found so
+        // far then describe only part of the result. Finishing with them
+        // returned a solid with a piece missing and no error (plan-stage11
+        // Phase B, near-degenerate fuzz), or a solid with coincident,
+        // unjoined vertices that the non-manifold check rejected for the
+        // wrong reason.
+        int looseA = _PolyhedralBoundedSolidSetNullEdgesConnector
+            ::getLastLooseACount();
+        int looseB = _PolyhedralBoundedSolidSetNullEdgesConnector
+            ::getLastLooseBCount();
+        const _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report*
+            curveReport = _PolyhedralBoundedSolidSetNullEdgesConnector
+                ::getLastCurveReport();
+        if ( looseA > 0 || looseB > 0 ) {
+            setLastResultPath("normal-pipeline");
+            delete res;
+            throw SolidOperationFailedException(
+                java::String("Boolean operation could not close the intersection curve: ") +
+                "op=" + operationName(op) + ", " + str(looseA) +
+                " loose null edge end(s) on A and " + str(looseB) + " on B " +
+                "after connect (" +
+                (curveReport != nullptr ? curveReport->summarize() :
+                 java::String("null")) + ")");
+        }
 
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage05");
             debugSolid(inSolidB, "outputB_stage05");
         }
 
-        if ( hasIncompleteConnectState() &&
-             offsetCylinderDifferenceFallbackSpec != 0 ) {
-            offsetCylinderDifferenceFallback =
-                _PolyhedralBoundedSolidOffsetCylinderFallback
-                    ::buildOffsetCylinderDifferenceFallback(
-                        offsetCylinderDifferenceFallbackSpec);
-            if ( offsetCylinderDifferenceFallback != 0 ) {
-                tracePipelineSummary(
-                    "offset cylinder fallback replacing incomplete connect");
-                delete res;
-                res = offsetCylinderDifferenceFallback;
-                offsetCylinderDifferenceFallback = 0;
-                fallbackProvidedResult = true;
-                resultPath = "offset-cylinder-fallback-incomplete-connect";
-            }
-        }
-
-        if ( !fallbackProvidedResult &&
-             axisAlignedCellBooleanFallback != 0 &&
-             hasIncompleteConnectState() ) {
-            tracePipelineSummary(
-                "axis-aligned cell fallback replacing incomplete connect");
-            delete res;
-            res = axisAlignedCellBooleanFallback;
-            axisAlignedCellBooleanFallback = 0;
-            fallbackProvidedResult = true;
-            resultPath = "axis-aligned-cell-fallback-incomplete-connect";
-        }
-        else if ( !fallbackProvidedResult &&
-                  orthogonalProfileBooleanFallback != 0 &&
-                  hasIncompleteConnectState() ) {
-            tracePipelineSummary(
-                "orthogonal profile fallback replacing incomplete connect");
-            delete res;
-            res = orthogonalProfileBooleanFallback;
-            orthogonalProfileBooleanFallback = 0;
-            fallbackProvidedResult = true;
-            resultPath = "orthogonal-profile-fallback-incomplete-connect";
-        }
-        if ( !fallbackProvidedResult ) {
-            try {
-                setOpFinish(ctx, inSolidA, inSolidB, res, op);
-            }
-            catch ( const java::Exception& e ) {
-                PolyhedralBoundedSolid* offsetCylinderExceptionFallback =
-                    _PolyhedralBoundedSolidOffsetCylinderFallback
-                        ::buildOffsetCylinderDifferenceFallback(
-                            offsetCylinderDifferenceFallbackSpec);
-                if ( isStructurallyUsableSetOpResult(
-                         offsetCylinderExceptionFallback) ) {
-                    tracePipelineSummary(
-                        java::String("offset cylinder fallback replacing finish exception: ") +
-                        e.getMessage().c_str());
-                    discardIntermediateResult(res, inSolidA, inSolidB);
-                    res = offsetCylinderExceptionFallback;
-                    delete axisAlignedCellBooleanFallback;
-                    axisAlignedCellBooleanFallback = 0;
-                    delete orthogonalProfileBooleanFallback;
-                    orthogonalProfileBooleanFallback = 0;
-                    resultPath = "offset-cylinder-fallback-finish-exception";
-                }
-                else {
-                    delete offsetCylinderExceptionFallback;
-                    if ( axisAlignedCellBooleanFallback == 0 &&
-                         orthogonalProfileBooleanFallback == 0 ) {
-                        delete profileDifferenceFallback;
-                        delete offsetCylinderDifferenceFallbackSpec;
-                        throw;
-                    }
-                    else if ( axisAlignedCellBooleanFallback != 0 ) {
-                        tracePipelineSummary(
-                            java::String("axis-aligned cell fallback replacing finish exception: ") +
-                            e.getMessage().c_str());
-                        discardIntermediateResult(res, inSolidA, inSolidB);
-                        res = axisAlignedCellBooleanFallback;
-                        axisAlignedCellBooleanFallback = 0;
-                        resultPath = "axis-aligned-cell-fallback-finish-exception";
-                    }
-                    else {
-                        tracePipelineSummary(
-                            java::String("orthogonal profile fallback replacing finish exception: ") +
-                            e.getMessage().c_str());
-                        discardIntermediateResult(res, inSolidA, inSolidB);
-                        res = orthogonalProfileBooleanFallback;
-                        orthogonalProfileBooleanFallback = 0;
-                        resultPath = "orthogonal-profile-fallback-finish-exception";
-                    }
-                }
-            }
-        }
+        // [MANT1988] Sec. 15.8: finish builds the result from the null
+        // faces. Every answer comes from this pipeline; there is no
+        // shape-specific fallback behind it.
+        setOpFinish(ctx, inSolidA, inSolidB, res, op);
 
         if ( withDebug ) {
             debugSolid(inSolidA, "outputA_stage06");
             debugSolid(inSolidB, "outputB_stage06");
             debugSolid(res, "outputR_stage06");
         }
-
-        if ( shouldUseAxisAlignedCellBooleanFallback(
-                 axisAlignedCellBooleanFallback, res) ) {
-            tracePipelineSummary(
-                "axis-aligned cell fallback replacing incomplete result");
-            discardIntermediateResult(res, inSolidA, inSolidB);
-            res = axisAlignedCellBooleanFallback;
-            axisAlignedCellBooleanFallback = 0;
-            resultPath = "axis-aligned-cell-fallback-incomplete-result";
-        }
-        if ( shouldUseAxisAlignedCellBooleanFallback(
-                 orthogonalProfileBooleanFallback, res) ) {
-            tracePipelineSummary(
-                "orthogonal profile fallback replacing incomplete result");
-            discardIntermediateResult(res, inSolidA, inSolidB);
-            res = orthogonalProfileBooleanFallback;
-            orthogonalProfileBooleanFallback = 0;
-            resultPath = "orthogonal-profile-fallback-incomplete-result";
-        }
-
-        PolyhedralBoundedSolid* resultBeforeProfileFallback = res;
-        res = _PolyhedralBoundedSolidProfileDifferenceFallback
-            ::applyProfileDifferenceFallbackIfNeeded(profileDifferenceFallback, res);
-        if ( res != resultBeforeProfileFallback ) {
-            discardIntermediateResult(resultBeforeProfileFallback, inSolidA,
-                inSolidB);
-            resultPath = "profile-difference-fallback";
-        }
     }
 
-    // C++ ownership: release the fallbacks that were not used and leave the
-    // result as the only owner of its nodes
-    delete axisAlignedCellBooleanFallback;
-    delete orthogonalProfileBooleanFallback;
-    delete offsetCylinderDifferenceFallback;
-    delete profileDifferenceFallback;
-    delete offsetCylinderDifferenceFallbackSpec;
+    // C++ ownership: leave the result as the only owner of its nodes
     unlistSharedNodes(inSolidA, res);
     unlistSharedNodes(inSolidB, res);
 

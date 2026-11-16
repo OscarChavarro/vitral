@@ -116,7 +116,9 @@ StringBuilder::append(const char *text) {
         return *this;
     }
     ensureCapacity(lengthValue + textLength);
-    std::strcat(value, text);
+    // Copied at the known end (`strcat` would scan the whole text on each
+    // append, making long builders quadratic)
+    std::memcpy(value + lengthValue, text, static_cast<std::size_t>(textLength) + 1);
     lengthValue += textLength;
     return *this;
 }
@@ -127,7 +129,7 @@ StringBuilder::append(const char *text, int textLength) {
         return *this;
     }
     ensureCapacity(lengthValue + textLength);
-    std::strncat(value, text, static_cast<std::size_t>(textLength));
+    std::memcpy(value + lengthValue, text, static_cast<std::size_t>(textLength));
     lengthValue += textLength;
     value[lengthValue] = '\0';
     return *this;

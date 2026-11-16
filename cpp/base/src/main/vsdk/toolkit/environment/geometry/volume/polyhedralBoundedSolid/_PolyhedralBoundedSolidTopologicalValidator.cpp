@@ -91,45 +91,77 @@ bool _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
     return true;
 }
 
-void _PolyhedralBoundedSolidTopologicalValidator::remakeEmanatingHalfedgesReferences(
-    PolyhedralBoundedSolid* solid)
+/**
+Back-pointer invariants of the half-edge structure ([MANT1988] Sec.
+10.2; Fable5.2Analysis.md Stage B step 3):
+- every loop's `boundaryStartHalfEdge` is a member of the loop, and every
+  member half-edge names that loop as `parentLoop`;
+- every vertex has a non-null emanating half-edge that starts at the
+  vertex and is a member of its loop (for the lone vertex of an empty
+  loop, that is the loop's edge-less half-edge).
+Validation never repairs them: see
+`PolyhedralBoundedSolidRepair::remakeEmanatingHalfEdgeReferences`.
+@return true when all hold; violations are appended to `msg`.
+*/
+bool _PolyhedralBoundedSolidTopologicalValidator::validateBackPointers(
+    PolyhedralBoundedSolid* solid,
+    java::String* msg)
 {
-    long int i;
-    long int j;
-
-    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
-        solid->getVerticesList().get(i)->emanatingHalfEdge = 0;
-    }
+    bool ok = true;
+    int i;
+    int j;
+    int k;
 
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
         for ( j = 0; j < face->boundariesList.size(); j++ ) {
-            _PolyhedralBoundedSolidLoop* loop;
-            _PolyhedralBoundedSolidHalfEdge* he;
-            _PolyhedralBoundedSolidHalfEdge* heStart;
-
-            loop = face->boundariesList.get(j);
-            he = loop->boundaryStartHalfEdge;
-            if ( he == 0 ) {
-                continue;
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(j);
+            if ( loop->boundaryStartHalfEdge == 0 ||
+                 !loop->halfEdgesList.contains(
+                     loop->boundaryStartHalfEdge) ) {
+                *msg += java::String("  - Face [") +
+                    java::String::valueOf(face->id) +
+                    "] has a loop whose start half-edge is not" +
+                    " a member of the loop.\n";
+                ok = false;
             }
-            heStart = he;
-            do {
-                he->startingVertex->emanatingHalfEdge = he;
-                he = he->next();
-                if ( he == 0 ) {
+            for ( k = 0; k < loop->halfEdgesList.size(); k++ ) {
+                if ( loop->halfEdgesList.get(k)->parentLoop != loop ) {
+                    *msg += java::String("  - Face [") +
+                        java::String::valueOf(face->id) +
+                        "] has a half-edge whose parent loop" +
+                        " is another loop.\n";
+                    ok = false;
                     break;
                 }
-            } while ( he != heStart );
+            }
         }
     }
 
-    // C++ port note: as the Java version, unreferenced vertices are only
-    // unlisted from the solid; they are not deleted here
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
-        if ( solid->getVerticesList().get(i)->emanatingHalfEdge == 0 ) {
-            solid->getVerticesList().remove(i);
-            i--;
+        _PolyhedralBoundedSolidVertex* v = solid->getVerticesList().get(i);
+        _PolyhedralBoundedSolidHalfEdge* he = v->emanatingHalfEdge;
+        if ( he == 0 ) {
+            *msg += java::String("  - Vertex [") +
+                java::String::valueOf(v->id) +
+                "] has no emanating half-edge.\n";
+            ok = false;
+        }
+        else if ( he->startingVertex != v ) {
+            *msg += java::String("  - Vertex [") +
+                java::String::valueOf(v->id) +
+                "] emanating half-edge starts at another" +
+                " vertex.\n";
+            ok = false;
+        }
+        else if ( he->parentLoop == 0 ||
+                  !he->parentLoop->halfEdgesList.contains(he) ) {
+            *msg += java::String("  - Vertex [") +
+                java::String::valueOf(v->id) +
+                "] emanating half-edge is not a member of its" +
+                " loop.\n";
+            ok = false;
         }
     }
+    return ok;
 }

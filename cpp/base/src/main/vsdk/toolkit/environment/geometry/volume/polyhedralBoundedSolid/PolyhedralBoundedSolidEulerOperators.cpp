@@ -8,6 +8,7 @@
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
@@ -41,76 +42,6 @@ java::String str(int value)
     return java::String(java::String::valueOf(value).c_str());
 }
 
-/**
-Emulates `CircularDoubleLinkedList.locateWindowAtElem`.
-@param list list to search
-@param elem element to locate
-@return element index, or -1 when it is not in the list
-*/
-template <typename T>
-long indexOf(const java::ArrayList<T>& list, T elem)
-{
-    for ( long i = 0; i < list.size(); ++i ) {
-        if ( list.get(i) == elem ) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-/**
-Emulates `CircularDoubleLinkedList.insertBefore`: when `pivot` is not in
-the list or is its head, `elem` becomes the new head.
-@param list target list
-@param elem element to insert
-@param pivot element before which `elem` is inserted
-*/
-template <typename T>
-void insertBefore(java::ArrayList<T>& list, T elem, T pivot)
-{
-    long pos = indexOf(list, pivot);
-    if ( pos < 0 ) {
-        pos = 0;
-    }
-    list.add(pos, elem);
-}
-
-/**
-Emulates `locateWindowAtElem` followed by `removeElemAtWindow`.
-@param list target list
-@param elem element to remove
-@return true if the element was found and removed
-*/
-template <typename T>
-bool removeElem(java::ArrayList<T>& list, T elem)
-{
-    long pos = indexOf(list, elem);
-    if ( pos < 0 ) {
-        return false;
-    }
-    list.remove(pos);
-    return true;
-}
-
-/**
-Emulates `CircularDoubleLinkedList.swapElements`.
-@param list target list
-@param a first element
-@param b second element
-*/
-template <typename T>
-void swapElems(java::ArrayList<T>& list, T a, T b)
-{
-    long ia = indexOf(list, a);
-    long ib = indexOf(list, b);
-    if ( ia < 0 || ib < 0 || ia == ib ) {
-        return;
-    }
-    T tmp = list.get(ia);
-    list.set(ia, list.get(ib));
-    list.set(ib, tmp);
-}
-
 _PolyhedralBoundedSolidHalfEdge* addhe(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidEdge* e,
@@ -142,7 +73,7 @@ _PolyhedralBoundedSolidHalfEdge* addhe(
     }
     else {
         he = new _PolyhedralBoundedSolidHalfEdge(v, where->parentLoop);
-        insertBefore(where->parentLoop->halfEdgesList, he, where);
+        where->parentLoop->halfEdgesList.insertBefore(he, where);
         he->startingVertex = v;
     }
     he->parentEdge = e;
@@ -253,7 +184,7 @@ void promoteLoopAsOuter(
     if ( numberOfLoops <= 0 || face->boundariesList.get(0) == loop ) {
         return;
     }
-    swapElems(face->boundariesList, loop, face->boundariesList.get(0));
+    face->boundariesList.swapElements(loop, face->boundariesList.get(0));
 }
 
 bool demoteLoopAsInner(
@@ -267,7 +198,7 @@ bool demoteLoopAsInner(
     if ( face->boundariesList.get(0) != loop ) {
         return true;
     }
-    swapElems(face->boundariesList, loop, face->boundariesList.get(1));
+    face->boundariesList.swapElements(loop, face->boundariesList.get(1));
     return true;
 }
 
@@ -276,7 +207,7 @@ bool reorderLoopInSameFace(
     _PolyhedralBoundedSolidFace* face,
     bool setAsOuterLoop)
 {
-    if ( indexOf(face->boundariesList, loop) < 0 ) {
+    if ( !face->boundariesList.locateWindowAtElem(loop) ) {
         return failLringmv(
             "Given loop was not found in its parent face boundaries.");
     }
@@ -300,15 +231,16 @@ bool moveLoopAcrossFaces(
         return failLringmv(
             "Cannot insert an inner loop into a face without outer loop.");
     }
-    if ( !removeElem(sourceFace->boundariesList, loop) ) {
+    if ( !sourceFace->boundariesList.locateWindowAtElem(loop) ) {
         return failLringmv(
             "Given loop was not found in source face boundaries.");
     }
 
+    sourceFace->boundariesList.removeElemAtWindow();
     loop->parentFace = destinationFace;
 
     if ( setAsOuterLoop ) {
-        destinationFace->boundariesList.add(0L, loop);
+        destinationFace->boundariesList.push(loop);
     }
     else {
         destinationFace->boundariesList.add(loop);
@@ -343,6 +275,9 @@ void PolyhedralBoundedSolidEulerOperators::mvfs(PolyhedralBoundedSolid* solid, c
     newHalfEdge = new _PolyhedralBoundedSolidHalfEdge(newVertex, newLoop);
     newLoop->halfEdgesList.add(newHalfEdge);
     newLoop->boundaryStartHalfEdge = newHalfEdge;
+    // The lone vertex of an empty loop points at the loop's edge-less
+    // half-edge, so every vertex has a live emanating half-edge.
+    newVertex->emanatingHalfEdge = newHalfEdge;
 }
 
 /**
@@ -352,22 +287,34 @@ kvfs: KillVertexFaceSolid, inverse of mvfs, as described in sections
 void PolyhedralBoundedSolidEulerOperators::kvfs(PolyhedralBoundedSolid* solid)
 {
     if ( solid->getPolygonsList().size() != 1 ) {
-        report(Logger::FATAL_ERROR, "kvfs",
-            "Not skeletal solid, not having exactly one loop!");
-        return;
+        throw VSDKFatalException(
+            "kvfs: Not skeletal solid, not having exactly one loop!");
     }
     if ( solid->getEdgesList().size() != 0 ) {
-        report(Logger::FATAL_ERROR, "kvfs",
-            "Not skeletal solid, having some edges!");
-        return;
+        throw VSDKFatalException(
+            "kvfs: Not skeletal solid, having some edges!");
     }
     if ( solid->getVerticesList().size() != 1 ) {
-        report(Logger::FATAL_ERROR, "kvfs",
-            "Not skeletal solid, not having exactly one vertex !");
-        return;
+        throw VSDKFatalException(
+            "kvfs: Not skeletal solid, not having exactly one vertex !");
     }
-    solid->getPolygonsList().remove(0L);
-    solid->getVerticesList().remove(0L);
+    _PolyhedralBoundedSolidFace* killedFace = solid->getPolygonsList().get(0);
+    _PolyhedralBoundedSolidVertex* killedVertex = solid->getVerticesList().get(0);
+    solid->getPolygonsList().remove(0);
+    solid->getVerticesList().remove(0);
+    // C++ port: the solid keeps the unlinked nodes (Java leaves them to
+    // its garbage collector)
+    long i;
+    for ( i = 0; i < killedFace->boundariesList.size(); i++ ) {
+        _PolyhedralBoundedSolidLoop* loop = killedFace->boundariesList.get(i);
+        long j;
+        for ( j = 0; j < loop->halfEdgesList.size(); j++ ) {
+            solid->retireHalfEdge(loop->halfEdgesList.get(j));
+        }
+        solid->retireLoop(loop);
+    }
+    solid->retireFace(killedFace);
+    solid->retireVertex(killedVertex);
 }
 
 /**
@@ -392,9 +339,8 @@ void PolyhedralBoundedSolidEulerOperators::lmev(
     }
     if ( he1->startingVertex != he2->startingVertex ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
-        report(Logger::FATAL_ERROR, "lmev",
-            "Half-edges not starting at the same vertex. Not supported case!");
-        return;
+        throw VSDKFatalException(
+            "lmev: Half-edges not starting at the same vertex. Not supported case!");
     }
     if ( he1 == he2 ) {
         PolyhedralBoundedSolidStatistics::recordHe1EqualsHe2Case();
@@ -424,10 +370,10 @@ void PolyhedralBoundedSolidEulerOperators::lkev(
             "Two half-edges are needed for this Euler operator two work!");
         return;
     }
-    if ( he1->parentEdge != he2->parentEdge ) {
+    if ( he1->parentEdge == 0 || he1->parentEdge != he2->parentEdge ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
         report(Logger::WARNING, "lkev",
-            "Given half-edges must lie over the same edge!");
+            "Given half-edges must be the two halves of one edge!");
         return;
     }
     if ( he1 == he2 ) {
@@ -449,22 +395,48 @@ void PolyhedralBoundedSolidEulerOperators::lkev(
         he = he->mirrorHalfEdge()->next();
     }
 
+    // The surviving vertex must keep a live emanating half-edge
+    // (defect E-05): he1.next() starts at he2's vertex; when that is he2
+    // itself (strut seen from the other side) use he2.next() instead.
+    _PolyhedralBoundedSolidHalfEdge* he1next;
+    he1next = he1->next();
     he2next = he2->next();
     he1->parentLoop->unlistHalfEdge(he1);
     he2->parentLoop->unlistHalfEdge(he2);
-    he2->startingVertex->emanatingHalfEdge = he2next;
-    if ( he2->parentLoop->halfEdgesList.size() < 1 ) {
-        he2->startingVertex->emanatingHalfEdge = 0;
+    if ( he1next != he1 && he1next != he2 ) {
+        he2->startingVertex->emanatingHalfEdge = he1next;
+    }
+    else if ( he2next != he1 && he2next != he2 ) {
+        he2->startingVertex->emanatingHalfEdge = he2next;
+    }
+    else {
+        // Loop becomes empty; he2 survives below as its edge-less
+        // half-edge.
+        he2->startingVertex->emanatingHalfEdge = he2;
     }
 
-    removeElem(solid->getEdgesList(), he1->parentEdge);
-    removeElem(solid->getVerticesList(), he1->startingVertex);
+    _PolyhedralBoundedSolidEdge* killedEdge = he1->parentEdge;
+    _PolyhedralBoundedSolidVertex* killedVertex = he1->startingVertex;
+    solid->getEdgesList().locateWindowAtElem(he1->parentEdge);
+    solid->getEdgesList().removeElemAtWindow();
+    solid->getVerticesList().locateWindowAtElem(he1->startingVertex);
+    solid->getVerticesList().removeElemAtWindow();
 
+    bool he2Survives = false;
     if ( he2->parentLoop->halfEdgesList.size() <= 0 ) {
         he2->parentEdge = 0;
         he2->parentLoop->halfEdgesList.add(he2);
         he2->parentLoop->boundaryStartHalfEdge = he2;
+        he2Survives = true;
     }
+    // C++ port: the solid keeps the unlinked nodes (Java leaves them to
+    // its garbage collector)
+    solid->retireHalfEdge(he1);
+    if ( !he2Survives ) {
+        solid->retireHalfEdge(he2);
+    }
+    solid->retireEdge(killedEdge);
+    solid->retireVertex(killedVertex);
 }
 
 /**
@@ -479,15 +451,13 @@ void PolyhedralBoundedSolidEulerOperators::lkef(
     PolyhedralBoundedSolidStatistics::recordLkefCall();
     if ( he1->parentEdge != he2->parentEdge ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
-        report(Logger::FATAL_ERROR, "lkef",
-            "Given half-edges must lie over the same edge. Operation aborted.");
-        return;
+        throw VSDKFatalException(
+            "lkef: Given half-edges must lie over the same edge. Operation aborted.");
     }
     if ( he1->parentLoop->parentFace == he2->parentLoop->parentFace ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
-        report(Logger::FATAL_ERROR, "lkef",
-            "Given half-edges must belong to different faces. Operation aborted.");
-        return;
+        throw VSDKFatalException(
+            "lkef: Given half-edges must belong to different faces. Operation aborted.");
     }
 
     _PolyhedralBoundedSolidEdge* edgeToBeKilled;
@@ -496,6 +466,8 @@ void PolyhedralBoundedSolidEulerOperators::lkef(
     _PolyhedralBoundedSolidHalfEdge* halfEdgePivot;
 
     halfEdgePivot = he1->next();
+    _PolyhedralBoundedSolidHalfEdge* he1nextBeforeKill = halfEdgePivot;
+    _PolyhedralBoundedSolidHalfEdge* he2nextBeforeKill = he2->next();
     edgeToBeKilled = he1->parentEdge;
     loopToBeKilled = he2->parentLoop;
     faceToBeKilled = loopToBeKilled->parentFace;
@@ -504,15 +476,15 @@ void PolyhedralBoundedSolidEulerOperators::lkef(
 
     _PolyhedralBoundedSolidHalfEdge* he;
     he = he2->next();
-    long maxTraversal = he2->parentLoop->halfEdgesList.size() + 1;
-    long traversed = 0;
+    int maxTraversal = he2->parentLoop->halfEdgesList.size() + 1;
+    int traversed = 0;
     while ( he != he2 ) {
         if ( he == 0 || traversed > maxTraversal ) {
             PolyhedralBoundedSolidStatistics::recordConsistencyWarningCase();
             report(Logger::WARNING, "lkef",
                 "Detected inconsistent next-chain; falling back to halfEdgesList order.");
             migratedHalfEdges.clear();
-            long idx;
+            int idx;
             for ( idx = 0; idx < he2->parentLoop->halfEdgesList.size(); idx++ ) {
                 _PolyhedralBoundedSolidHalfEdge* candidate;
                 candidate = he2->parentLoop->halfEdgesList.get(idx);
@@ -529,16 +501,19 @@ void PolyhedralBoundedSolidEulerOperators::lkef(
 
     he1->parentLoop->unlistHalfEdge(he1);
     he2->parentLoop->unlistHalfEdge(he2);
-    removeElem(solid->getEdgesList(), edgeToBeKilled);
+    solid->getEdgesList().locateWindowAtElem(edgeToBeKilled);
+    solid->getEdgesList().removeElemAtWindow();
 
-    removeElem(faceToBeKilled->boundariesList, loopToBeKilled);
-    removeElem(solid->getPolygonsList(), faceToBeKilled);
+    faceToBeKilled->boundariesList.locateWindowAtElem(loopToBeKilled);
+    faceToBeKilled->boundariesList.removeElemAtWindow();
+    solid->getPolygonsList().locateWindowAtElem(faceToBeKilled);
+    solid->getPolygonsList().removeElemAtWindow();
 
     long i;
     for ( i = migratedHalfEdges.size() - 1; i >= 0; i-- ) {
         he = migratedHalfEdges.get(i);
         he->parentLoop = he1->parentLoop;
-        insertBefore(he1->parentLoop->halfEdgesList, he, halfEdgePivot);
+        he1->parentLoop->halfEdgesList.insertBefore(he, halfEdgePivot);
         halfEdgePivot = he;
     }
 
@@ -548,9 +523,27 @@ void PolyhedralBoundedSolidEulerOperators::lkef(
         _PolyhedralBoundedSolidLoop* orphanedLoop;
         orphanedLoop = faceToBeKilled->boundariesList.get(0);
         orphanedLoop->parentFace = he1->parentLoop->parentFace;
-        faceToBeKilled->boundariesList.remove(0L);
+        faceToBeKilled->boundariesList.remove(0);
         he1->parentLoop->parentFace->boundariesList.add(orphanedLoop);
     }
+
+    // Redirect vertex back-pointers away from the killed half-edges:
+    // he2.next() starts at he1's vertex and he1.next() at he2's.
+    if ( he1->startingVertex->emanatingHalfEdge == he1 ||
+         he1->startingVertex->emanatingHalfEdge == he2 ) {
+        he1->startingVertex->emanatingHalfEdge = he2nextBeforeKill;
+    }
+    if ( he2->startingVertex->emanatingHalfEdge == he1 ||
+         he2->startingVertex->emanatingHalfEdge == he2 ) {
+        he2->startingVertex->emanatingHalfEdge = he1nextBeforeKill;
+    }
+    // C++ port: the solid keeps the unlinked nodes (Java leaves them to
+    // its garbage collector)
+    solid->retireHalfEdge(he1);
+    solid->retireHalfEdge(he2);
+    solid->retireEdge(edgeToBeKilled);
+    solid->retireLoop(loopToBeKilled);
+    solid->retireFace(faceToBeKilled);
 }
 
 /**
@@ -599,8 +592,20 @@ _PolyhedralBoundedSolidFace* PolyhedralBoundedSolidEulerOperators::lmef(
             "Cannot split face because one input half-edge has null starting vertex.");
         return 0;
     }
+    if ( he1->parentLoop != he2->parentLoop ) {
+        // [MANT1988] Sec. 11.3.3 precondition (defect E-06): rejected
+        // before any change to the solid.
+        PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
+        report(Logger::WARNING, "lmef",
+            "Cannot split face because the half-edges belong to different loops.");
+        return 0;
+    }
 
     if ( newFaceId > solid->getMaxFaceId() ) solid->setMaxFaceId(newFaceId);
+
+    if ( he1 == he2 ) {
+        return lmefCircularFace(solid, he1, newFaceId);
+    }
 
     newFace = new _PolyhedralBoundedSolidFace(solid, newFaceId);
     solid->getPolygonsList().add(newFace);
@@ -642,6 +647,58 @@ _PolyhedralBoundedSolidFace* PolyhedralBoundedSolidEulerOperators::lmef(
 }
 
 /**
+`lmef(he, he)`: the "circular" face of Program 11.7 (defect E-04). The new
+edge starts and ends at `he.startingVertex`; one half lies alone in the
+new face's loop, the other is inserted before `he` in the old loop. When
+`he` is the edge-less half-edge of an empty loop it becomes the new
+face's half-edge, as `addhe` reuses it in the book.
+*/
+_PolyhedralBoundedSolidFace* PolyhedralBoundedSolidEulerOperators::lmefCircularFace(
+    PolyhedralBoundedSolid* solid,
+    _PolyhedralBoundedSolidHalfEdge* he,
+    int newFaceId)
+{
+    _PolyhedralBoundedSolidFace* newFace;
+    _PolyhedralBoundedSolidLoop* newLoop;
+    _PolyhedralBoundedSolidLoop* oldLoop;
+    _PolyhedralBoundedSolidEdge* newEdge;
+    _PolyhedralBoundedSolidHalfEdge* nhe1;
+    _PolyhedralBoundedSolidHalfEdge* nhe2;
+    _PolyhedralBoundedSolidVertex* v;
+
+    oldLoop = he->parentLoop;
+    v = he->startingVertex;
+    newFace = new _PolyhedralBoundedSolidFace(solid, newFaceId);
+    solid->getPolygonsList().add(newFace);
+    newLoop = new _PolyhedralBoundedSolidLoop(newFace);
+    newEdge = new _PolyhedralBoundedSolidEdge();
+    solid->getEdgesList().add(newEdge);
+
+    if ( he->parentEdge == 0 ) {
+        oldLoop->unlistHalfEdge(he);
+        nhe1 = he;
+        nhe1->parentLoop = newLoop;
+        newLoop->halfEdgesList.add(nhe1);
+        nhe2 = new _PolyhedralBoundedSolidHalfEdge(v, oldLoop);
+        oldLoop->halfEdgesList.add(nhe2);
+    }
+    else {
+        nhe1 = new _PolyhedralBoundedSolidHalfEdge(v, newLoop);
+        newLoop->halfEdgesList.add(nhe1);
+        nhe2 = new _PolyhedralBoundedSolidHalfEdge(v, oldLoop);
+        oldLoop->halfEdgesList.insertBefore(nhe2, he);
+    }
+    nhe1->parentEdge = newEdge;
+    nhe2->parentEdge = newEdge;
+    newEdge->rightHalf = nhe1;
+    newEdge->leftHalf = nhe2;
+    newLoop->boundaryStartHalfEdge = nhe1;
+    oldLoop->boundaryStartHalfEdge = nhe2;
+    v->emanatingHalfEdge = nhe2;
+    return newFace;
+}
+
+/**
 lkemr: low level kill edge make ring (loop splitting operator), as
 described in sections [MANT1988].9.2.3 and [MANT1988].11.3.4, following
 sample program [MANT1988].11.8.
@@ -653,57 +710,85 @@ void PolyhedralBoundedSolidEulerOperators::lkemr(
 {
     PolyhedralBoundedSolidStatistics::recordLkemrCall();
     //-----------------------------------------------------------------
-    _PolyhedralBoundedSolidHalfEdge* he3;
-    _PolyhedralBoundedSolidHalfEdge* he4;
+    if ( he1 == 0 || he2 == 0 || he1 == he2 ||
+         he1->parentEdge == 0 || he1->parentEdge != he2->parentEdge ||
+         he1->parentLoop != he2->parentLoop ) {
+        PolyhedralBoundedSolidStatistics::recordOperationFailureCase();
+        report(Logger::WARNING, "lkemr",
+            java::String("Given half-edges must be the two halves of one edge in one loop. ")
+            + "Operation aborted.");
+        return;
+    }
+
+    //-----------------------------------------------------------------
+    // Following Program 11.8: the loop he1, R, he2, O (R and O being the
+    // half-edges strictly between he1 and he2, and between he2 and he1)
+    // becomes the old loop {he1, O} and the new ring {he2, R}; then the
+    // two halves of the bridge are deleted. A component that ends up
+    // without half-edges keeps its bridge half as the edge-less
+    // half-edge of an empty loop (the book's delhe), so both "one
+    // resulting loop empty" cases of Sec. 11.3.4 are handled (defect
+    // E-02). Every vertex keeps a live emanating half-edge (E-03).
+    _PolyhedralBoundedSolidHalfEdge* he;
     _PolyhedralBoundedSolidLoop* newLoop;
     _PolyhedralBoundedSolidLoop* oldLoop;
     _PolyhedralBoundedSolidEdge* killedEdge;
+    java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> ring;
+    int i;
 
     oldLoop = he1->parentLoop;
-    newLoop = new _PolyhedralBoundedSolidLoop(oldLoop->parentFace);
     killedEdge = he1->parentEdge;
+    for ( he = he1->next(); he != he2; he = he->next() ) {
+        ring.add(he);
+    }
+    newLoop = new _PolyhedralBoundedSolidLoop(oldLoop->parentFace);
 
-    //-----------------------------------------------------------------
-    java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> migratedHalfEdges;
+    for ( i = 0; i < ring.size(); i++ ) {
+        he = ring.get(i);
+        oldLoop->halfEdgesList.locateWindowAtElem(he);
+        oldLoop->halfEdgesList.removeElemAtWindow();
+        newLoop->halfEdgesList.add(he);
+        he->parentLoop = newLoop;
+    }
 
-    he4 = he1->next();
-    do {
-        migratedHalfEdges.add(he4);
-        if ( he4 == he2 ) break;
-    } while ( (he4 = he4->next()) != he2 );
-
-    //-----------------------------------------------------------------
-    long i;
-
-    for ( i = 0; i < migratedHalfEdges.size(); i++ ) {
-        he3 = migratedHalfEdges.get(i);
-        removeElem(oldLoop->halfEdgesList, he3);
-        newLoop->halfEdgesList.add(he3);
-        he3->parentLoop = newLoop;
+    // he2 always leaves the old loop.
+    oldLoop->halfEdgesList.locateWindowAtElem(he2);
+    oldLoop->halfEdgesList.removeElemAtWindow();
+    if ( ring.isEmpty() ) {
+        he2->parentEdge = 0;
+        he2->parentLoop = newLoop;
+        newLoop->halfEdgesList.add(he2);
     }
     newLoop->boundaryStartHalfEdge = newLoop->halfEdgesList.get(0);
+    he2->startingVertex->emanatingHalfEdge = newLoop->boundaryStartHalfEdge;
 
-    //-----------------------------------------------------------------
-    oldLoop->delhe(he1);
-    oldLoop->delhe(he2);
-
-    if ( newLoop->halfEdgesList.size() <= 1 ) {
-        newLoop->boundaryStartHalfEdge->parentEdge = 0;
-        if ( newLoop->halfEdgesList.size() <= 0 ) {
-            report(Logger::FATAL_ERROR, "lkemr", "Case A Should not happen!");
-        }
-        newLoop->halfEdgesList.get(0)->startingVertex->emanatingHalfEdge = 0;
-    }
-
+    bool he1Survives = true;
     if ( oldLoop->halfEdgesList.size() <= 1 ) {
-        oldLoop->boundaryStartHalfEdge->parentEdge = 0;
-        if ( oldLoop->halfEdgesList.size() <= 0 ) {
-            report(Logger::FATAL_ERROR, "lkemr", "Case B Should not happen!");
-        }
-        oldLoop->halfEdgesList.get(0)->startingVertex->emanatingHalfEdge = 0;
+        // Only he1 is left: it becomes the edge-less half-edge.
+        he1->parentEdge = 0;
+        oldLoop->boundaryStartHalfEdge = he1;
+        he1->startingVertex->emanatingHalfEdge = he1;
+    }
+    else {
+        _PolyhedralBoundedSolidHalfEdge* he1next = he1->next();
+        oldLoop->halfEdgesList.locateWindowAtElem(he1);
+        oldLoop->halfEdgesList.removeElemAtWindow();
+        oldLoop->boundaryStartHalfEdge = he1next;
+        he1->startingVertex->emanatingHalfEdge = he1next;
+        he1Survives = false;
     }
 
-    removeElem(solid->getEdgesList(), killedEdge);
+    solid->getEdgesList().locateWindowAtElem(killedEdge);
+    solid->getEdgesList().removeElemAtWindow();
+    // C++ port: the solid keeps the unlinked nodes (Java leaves them to
+    // its garbage collector)
+    if ( !he1Survives ) {
+        solid->retireHalfEdge(he1);
+    }
+    if ( !ring.isEmpty() ) {
+        solid->retireHalfEdge(he2);
+    }
+    solid->retireEdge(killedEdge);
 }
 
 /**
@@ -715,6 +800,12 @@ void PolyhedralBoundedSolidEulerOperators::lkfmrh(
     _PolyhedralBoundedSolidFace* face1,
     _PolyhedralBoundedSolidFace* face2)
 {
+    if ( face1 == 0 || face2 == 0 || face1 == face2 ||
+         face1->parentSolid != solid || face2->parentSolid != solid ) {
+        report(Logger::WARNING, "lkfmrh",
+            "Faces must be two distinct faces of the given solid!");
+        return;
+    }
     if ( face2->boundariesList.size() > 1 ) {
         report(Logger::WARNING, "lkfmrh",
             "Internal face to form new loop must have just one boundary!");
@@ -736,7 +827,12 @@ void PolyhedralBoundedSolidEulerOperators::lkfmrh(
     }
     newLoop->boundaryStartHalfEdge = newLoop->halfEdgesList.get(0);
 
-    removeElem(solid->getPolygonsList(), face2);
+    solid->getPolygonsList().locateWindowAtElem(face2);
+    solid->getPolygonsList().removeElemAtWindow();
+    // C++ port: the solid keeps the unlinked nodes (Java leaves them to
+    // its garbage collector)
+    solid->retireLoop(oldLoop);
+    solid->retireFace(face2);
 }
 
 /**
@@ -754,7 +850,8 @@ _PolyhedralBoundedSolidFace* PolyhedralBoundedSolidEulerOperators::lmfkrh(
 
     if ( newFaceId > solid->getMaxFaceId() ) solid->setMaxFaceId(newFaceId);
 
-    removeElem(l->parentFace->boundariesList, l);
+    l->parentFace->boundariesList.locateWindowAtElem(l);
+    l->parentFace->boundariesList.removeElemAtWindow();
     l->parentFace = newFace;
     newFace->boundariesList.add(l);
 
@@ -846,9 +943,24 @@ void PolyhedralBoundedSolidEulerOperators::lmekr(
     //-----------------------------------------------------------------
     long i;
 
-    // The ring is discarded: its half-edges migrate to `he1` loop below
+    // The loop of `he2` is the one removed. When it is the outer loop of
+    // the face (`he1` is on a ring and `he2` on the outer boundary), the
+    // merged loop is the outer boundary from now on and must take its
+    // place. It used to stay where the ring of `he1` was, and whatever
+    // other ring came first in the list was taken for the outer loop
+    // (plan-stage11 Phase F).
+    bool killsOuterLoop =
+        ringToKill->parentFace->boundariesList.get(0) == ringToKill;
+
     ringToKill->halfEdgesList.clear();
-    removeElem(ringToKill->parentFace->boundariesList, ringToKill);
+    ringToKill->parentFace->boundariesList.locateWindowAtElem(ringToKill);
+    ringToKill->parentFace->boundariesList.removeElemAtWindow();
+    // C++ port: the solid keeps the unlinked nodes (Java leaves them to
+    // its garbage collector)
+    solid->retireLoop(ringToKill);
+    if ( killsOuterLoop ) {
+        promoteLoopAsOuter(he1->parentLoop->parentFace, he1->parentLoop);
+    }
 
     //-----------------------------------------------------------------
     _PolyhedralBoundedSolidEdge* newEdge;
@@ -875,8 +987,11 @@ void PolyhedralBoundedSolidEulerOperators::lmekr(
           i++ ) {
         he = migratedHalfEdges.get(i);
         he->parentLoop = he1->parentLoop;
-        insertBefore(he1->parentLoop->halfEdgesList, he, heLast);
+        he1->parentLoop->halfEdgesList.insertBefore(he, heLast);
     }
+    // heLast starts at v2 and is always in the merged loop; a lone ring
+    // vertex had its edge-less half-edge dropped above (defect E-03).
+    v2->emanatingHalfEdge = heLast;
 }
 
 //= HIGH LEVEL EULER OPERATIONS ===================================

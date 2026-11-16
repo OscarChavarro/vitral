@@ -11,6 +11,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFaceGeometry.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
@@ -62,7 +63,8 @@ _PolyhedralBoundedSolidSetIntersector::findNearbyBoundaryHit(
         return BoundaryHit();
     }
 
-    tolerance = java::Math::max(numericContext.bigEpsilon() * 10.0, 1.0e-7);
+    tolerance = java::Math::max(numericContext.bigEpsilon() * 2.0,
+        1.0e-7 * numericContext.modelScale());
     for ( i = 0; i < face->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidHalfEdge* start;
         _PolyhedralBoundedSolidHalfEdge* current;
@@ -224,7 +226,9 @@ void _PolyhedralBoundedSolidSetIntersector::doVertexOnFace(
     _PolyhedralBoundedSolidHalfEdge* intersectedHalfedge;
     _PolyhedralBoundedSolidVertex* intersectedVertex;
 
-    d = f->getContainingPlane()->pointDistance(v->position);
+    InfinitePlane* facePlane = f->getContainingPlane();
+    d = facePlane->pointDistance(v->position);
+    delete facePlane;
     if ( compareToZero(d) == 0 ) {
         _PolyhedralBoundedSolidFace::PointInsideResult containment =
             f->testPointInsideDetailed(v->position, numericContext.bigEpsilon());
@@ -293,8 +297,11 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
 
     v1 = e->rightHalf->startingVertex;
     v2 = e->leftHalf->startingVertex;
-    d1 = f->getContainingPlane()->pointDistance(v1->position);
-    d2 = f->getContainingPlane()->pointDistance(v2->position);
+    // Computed once per pair (Stage G): nothing below changes face f
+    // before its last use, the snaps move vertices of the edge solid.
+    InfinitePlane* fPlane = f->getContainingPlane();
+    d1 = fPlane->pointDistance(v1->position);
+    d2 = fPlane->pointDistance(v2->position);
 
     // Snap vertices in the (epsilon, bigEpsilon] gap onto the face plane.
     // Without this, such a vertex triggers the crossing branch and produces
@@ -311,7 +318,7 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
     // falls outside the bounded face cannot contribute an intersection
     // inside that face, so skipping the snap there is always safe.
     if ( isZeroBig(d1) && !isZero(d1) ) {
-        Vector3Dd snapped1 = f->getContainingPlane()->projectPoint(v1->position);
+        Vector3Dd snapped1 = fPlane->projectPoint(v1->position);
         if ( f->testPointInsideDetailed(snapped1, numericContext.bigEpsilon())
                  .status() != Geometry::OUTSIDE ) {
             v1->position = snapped1;
@@ -319,7 +326,7 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
         }
     }
     if ( isZeroBig(d2) && !isZero(d2) ) {
-        Vector3Dd snapped2 = f->getContainingPlane()->projectPoint(v2->position);
+        Vector3Dd snapped2 = fPlane->projectPoint(v2->position);
         if ( f->testPointInsideDetailed(snapped2, numericContext.bigEpsilon())
                  .status() != Geometry::OUTSIDE ) {
             v2->position = snapped2;
@@ -334,9 +341,9 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
         t = d1 / (d1 - d2);
         p = v1->position.add((v2->position.subtract(v1->position)).multiply(t));
 
-        d3 = f->getContainingPlane()->pointDistance(p);
+        d3 = fPlane->pointDistance(p);
         if ( compareToZero(d3) == 0 ) {
-            InfinitePlane* facePlane = f->getContainingPlane();
+            InfinitePlane* facePlane = fPlane;
             p = facePlane->projectPoint(p);
 
             // Snap p to the intersection line of f's plane and the edge's
@@ -359,6 +366,7 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
                         p = p.subtract(n1Perp.multiply(dEdge / denom));
                     }
                 }
+                delete edgeFacePlane;
             }
 
             _PolyhedralBoundedSolidFace::PointInsideResult containment =
@@ -418,6 +426,7 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
                     addsovv(e->rightHalf->startingVertex, intersectedVertex,
                         BvsA, sonvv);
                 }
+                delete fPlane;
                 return e->rightHalf->previous()->parentEdge;
             }
         }
@@ -433,6 +442,7 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
         }
     }
 
+    delete fPlane;
     return nullptr;
 }
 
@@ -440,6 +450,8 @@ void _PolyhedralBoundedSolidSetIntersector::processEdge(
     _PolyhedralBoundedSolidEdge* e,
     PolyhedralBoundedSolid* edgeSolid,
     PolyhedralBoundedSolid* faceSolid,
+    const java::ArrayList<PolyhedralBoundedSolidFaceGeometry*>& faceBoxes,
+    double boxMargin,
     int BvsA,
     VertexVertexList& sonvv,
     VertexFaceList& sonva,
@@ -450,14 +462,47 @@ void _PolyhedralBoundedSolidSetIntersector::processEdge(
     long i;
 
     for ( i = 0; i < faceSolid->getPolygonsList().size(); i++ ) {
+        if ( i < faceBoxes.size() &&
+             faceBoxes.get(i)->segmentSeparatedFrom(
+                 e->rightHalf->startingVertex->position,
+                 e->leftHalf->startingVertex->position, boxMargin) ) {
+            continue;
+        }
         f = faceSolid->getPolygonsList().get(i);
         generatedEdge = doSetOpGenerate(e, f, BvsA, edgeSolid,
             faceSolid, sonvv, sonva, sonvb);
         if ( generatedEdge != nullptr ) {
-            processEdge(generatedEdge, edgeSolid, faceSolid, BvsA,
-                sonvv, sonva, sonvb);
+            processEdge(generatedEdge, edgeSolid, faceSolid, faceBoxes,
+                boxMargin, BvsA, sonvv, sonva, sonvb);
         }
     }
+}
+
+/**
+Box margin for the edge/face rejection of generate (Stage G). An
+edge/face pair can only act when some point near the edge is accepted
+by the point-in-face test of `f`: the crossing point, an endpoint on
+the face plane, or a vertex snapped onto it. That point lies in the box
+of the edge and, grown by the point-test tolerances, in the box of the
+face. The margin also covers the snaps of doSetOpGenerate (a vertex
+moves at most bigEpsilon; the crossing point moves along the face plane
+at most bigEpsilon / sqrt(epsilon) toward the edge face line), the
+boundary-hit radius (10 bigEpsilon) and the vertices that generate
+itself adds to face boundaries during the pass.
+*/
+double _PolyhedralBoundedSolidSetIntersector::generateBoxMargin(
+    const java::ArrayList<PolyhedralBoundedSolidFaceGeometry*>& faceBoxes)
+{
+    double deviation = 0.0;
+    int i;
+
+    for ( i = 0; i < faceBoxes.size(); i++ ) {
+        deviation = java::Math::max(deviation,
+            faceBoxes.get(i)->getPlaneDeviation());
+    }
+    return 32.0 * numericContext.bigEpsilon() + 2.0 * deviation +
+        numericContext.bigEpsilon() /
+        java::Math::sqrt(java::Math::max(numericContext.epsilon(), 1.0e-300));
 }
 
 _PolyhedralBoundedSolidSetIntersector::GenerationResult
@@ -468,18 +513,31 @@ _PolyhedralBoundedSolidSetIntersector::setOpGenerate(
     VertexVertexList sonvv;
     VertexFaceList sonva;
     VertexFaceList sonvb;
+    java::ArrayList<PolyhedralBoundedSolidFaceGeometry*> faceBoxes;
+    double boxMargin;
     long i;
 
     intersectionTrace.clear();
 
+    // Face boxes are taken at the start of each pass: generate adds no
+    // faces, and the positions it changes in the face solid stay within
+    // generateBoxMargin of them.
+    faceBoxes = PolyhedralBoundedSolidFaceGeometry::of(inSolidB);
+    boxMargin = generateBoxMargin(faceBoxes);
     for ( i = 0; i < inSolidA->getEdgesList().size(); i++ ) {
         e = inSolidA->getEdgesList().get(i);
-        processEdge(e, inSolidA, inSolidB, 0, sonvv, sonva, sonvb);
+        processEdge(e, inSolidA, inSolidB, faceBoxes, boxMargin, 0,
+            sonvv, sonva, sonvb);
     }
+    PolyhedralBoundedSolidFaceGeometry::release(faceBoxes);
+    faceBoxes = PolyhedralBoundedSolidFaceGeometry::of(inSolidA);
+    boxMargin = generateBoxMargin(faceBoxes);
     for ( i = 0; i < inSolidB->getEdgesList().size(); i++ ) {
         e = inSolidB->getEdgesList().get(i);
-        processEdge(e, inSolidB, inSolidA, 1, sonvv, sonva, sonvb);
+        processEdge(e, inSolidB, inSolidA, faceBoxes, boxMargin, 1,
+            sonvv, sonva, sonvb);
     }
+    PolyhedralBoundedSolidFaceGeometry::release(faceBoxes);
 
     return GenerationResult(sonvv, sonva, sonvb);
 }

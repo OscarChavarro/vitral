@@ -565,7 +565,7 @@ OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     PolyhedralBoundedSolid& solid, const RendererConfiguration* quality,
     bool doubleSided)
 {
-    java::ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid.getPolygonsList();
+    CircularArrayList<_PolyhedralBoundedSolidFace*>& faces = solid.getPolygonsList();
     bool smoothNormals =
         quality->getShadingType() != RendererConfiguration::SHADING_TYPE_FLAT &&
         quality->getShadingType() != RendererConfiguration::SHADING_TYPE_NOLIGHT;
@@ -574,7 +574,7 @@ OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     java::TreeMap<java::String, java::ArrayList<Vector3Dd> > incident;
     java::ArrayList<Vector3Dd> faceNormals = java::Collections::nCopies<Vector3Dd>((size_t)faces.size(), Vector3Dd());
     for ( long f = 0; f < faces.size(); f++ ) {
-        _PolyhedralBoundedSolidFace* face = faces[f];
+        _PolyhedralBoundedSolidFace* face = faces.get((int)f);
         InfinitePlane* plane = face != nullptr ? face->getContainingPlane() : nullptr;
         if ( plane == nullptr || !(plane->getNormal().length() > 1e-12) ) {
             continue;
@@ -584,7 +584,7 @@ OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
             continue;
         }
         for ( long l = 0; l < face->boundariesList.size(); l++ ) {
-            _PolyhedralBoundedSolidLoop* loop = face->boundariesList[l];
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(l);
             if ( loop == nullptr || loop->boundaryStartHalfEdge == nullptr ) {
                 continue;
             }
@@ -612,7 +612,7 @@ OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     OpenGL1MeshBuilder builder(maxAbsExtent(solid.getMinMax()));
     builder.setDoubleSided(doubleSided);
     for ( long f = 0; f < faces.size(); f++ ) {
-        _PolyhedralBoundedSolidFace* face = faces[f];
+        _PolyhedralBoundedSolidFace* face = faces.get((int)f);
         const Vector3Dd& normal = faceNormals[(size_t)f];
         if ( face == nullptr || !(normal.length() > 1e-12) ) {
             continue;
@@ -622,7 +622,7 @@ OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
         gluTessNormal(tess, normal.x(), normal.y(), normal.z());
         gluTessBeginPolygon(tess, &t);
         for ( long l = 0; l < face->boundariesList.size(); l++ ) {
-            _PolyhedralBoundedSolidLoop* loop = face->boundariesList[l];
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(l);
             if ( loop == nullptr || loop->boundaryStartHalfEdge == nullptr ) {
                 continue;
             }

@@ -4,7 +4,7 @@
 static int pbs_edge_current_id = 1;
 
 _PolyhedralBoundedSolidEdge::_PolyhedralBoundedSolidEdge()
-    : rightHalf(0), leftHalf(0), id(pbs_edge_current_id++), debugColor(1,1,1)
+    : listOwner(nullptr), listIndex(-1), rightHalf(0), leftHalf(0), id(pbs_edge_current_id++), debugColor(1,1,1)
 {
 }
 

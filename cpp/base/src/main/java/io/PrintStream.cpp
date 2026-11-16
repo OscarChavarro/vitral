@@ -6,7 +6,12 @@
 namespace java {
 
 PrintStream::PrintStream(OutputStream *stream):
-    stream(stream)
+    stream(stream), autoFlush(false)
+{
+}
+
+PrintStream::PrintStream(OutputStream *stream, bool autoFlush):
+    stream(stream), autoFlush(autoFlush)
 {
 }
 
@@ -59,6 +64,9 @@ PrintStream::printf(const char *format, ...) {
     va_start(arguments, format);
     writeFormatted(stream, format, arguments);
     va_end(arguments);
+    if ( autoFlush ) {
+        stream->flush();
+    }
     return *this;
 }
 
@@ -74,6 +82,9 @@ PrintStream::println(const char *text) const {
     }
     writeText(stream, text);
     stream->write('\n');
+    if ( autoFlush ) {
+        stream->flush();
+    }
 }
 
 void
@@ -82,6 +93,9 @@ PrintStream::println() const {
         return;
     }
     stream->write('\n');
+    if ( autoFlush ) {
+        stream->flush();
+    }
 }
 
 void

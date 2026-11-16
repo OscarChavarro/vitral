@@ -72,6 +72,12 @@ public:
         return Vector3Dd(x_ / vTemp, y_ / vTemp, z_ / vTemp);
     }
     inline double length() const { return std::sqrt(x_ * x_ + y_ * y_ + z_ * z_); }
+    static inline double distance(const Vector3Dd& a, const Vector3Dd& b)
+    {
+        return std::sqrt((a.x_ - b.x_)*(a.x_ - b.x_) +
+                         (a.y_ - b.y_)*(a.y_ - b.y_) +
+                         (a.z_ - b.z_)*(a.z_ - b.z_));
+    }
     inline Vector3Dd add(const Vector3Dd& b) const
     {
         return Vector3Dd(x_ + b.x_, y_ + b.y_, z_ + b.z_);

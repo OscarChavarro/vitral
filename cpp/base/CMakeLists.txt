@@ -124,6 +124,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/element/RayCrossing.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayCrossingSink.cpp
     src/main/vsdk/toolkit/render/dithering/Dithering.cpp
+    src/main/vsdk/toolkit/animation/AnimationEventGenerator.cpp
     src/main/vsdk/toolkit/common/VSDK.cpp
     src/main/vsdk/toolkit/common/Entity.cpp
     src/main/vsdk/toolkit/common/EntityControlAccessor.cpp
@@ -273,6 +274,9 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFaceGeometry.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidRepair.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidStructuralCopy.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidTopologicalValidator.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidBooleanTopologyPredicates.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategies.cpp
@@ -320,6 +324,13 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/io/geometry/ReaderMitScene.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderMitTriangleGroup.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderMitQuadGroup.cpp
+    src/main/vsdk/toolkit/io/geometry/stepCad/reader/StepReader.cpp
+    src/main/vsdk/toolkit/io/geometry/stepCad/reader/_StepSolidBuilder.cpp
+    src/main/vsdk/toolkit/io/geometry/stepCad/reader/_StepTokenizer.cpp
+    src/main/vsdk/toolkit/io/geometry/stl/StlWriter.cpp
+    src/main/vsdk/toolkit/io/geometry/stl/_StlFaceTriangulator.cpp
+    src/main/vsdk/toolkit/io/geometry/stl/_StlFacetEmitter.cpp
+    src/main/vsdk/toolkit/io/geometry/stl/_StlSolidValidator.cpp
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp
     src/main/java/io/BufferedOutputStream.cpp
     src/main/vsdk/toolkit/media/MediaEntity.h
@@ -363,12 +374,10 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/background/FixedBackground.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidVertexNeighborhood.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_PolyhedralBoundedSolidSetOperandAligner.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidInteriorOverlap.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidIdNamespace.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidFallbackGeometry.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidAxisAlignedCellFallback.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidOffsetCylinderFallback.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidProfileDifferenceFallback.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidOrthogonalProfileFallback.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/slicing/_PolyhedralBoundedSolidSplitter.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_SetOperationTrace.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetOperatorNullEdge.cpp
@@ -557,6 +566,19 @@ if(VITRAL_BUILD_TESTS)
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(googletest)
 
+  # Test support (oracles, fixtures, fuzz drivers), shared by the default
+  # and the slow test executables
+  set(VITRAL_BASE_TEST_SUPPORT_SOURCES
+    src/test/PolyhedralBoundedSolidVolumeOracle.cpp
+    src/test/PolyhedralBoundedSolidTestFixtures.cpp
+    src/test/CsgSampleCorpusFixtures.cpp
+    src/test/PrismFixtures.cpp
+    src/test/CompositeShapeOracle.cpp
+    src/test/BooleanOracleFuzz.cpp
+    src/test/BooleanCompositeOracleFuzz.cpp
+    src/test/BooleanVolumeIdentityFuzz.cpp
+    src/test/NearDegenerateBooleanFuzz.cpp
+  )
   add_executable(vitral_base_tests
     src/test/normal_map_texture_tests.cpp
     src/test/vector_tests.cpp
@@ -568,6 +590,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/entity_tests.cpp
     src/test/generic_editor_tests.cpp
     src/test/dialog_persistence_tests.cpp
+    src/test/circular_array_list_tests.cpp
     src/test/java_emulation_tests.cpp
     src/test/image_persistence_tests.cpp
     src/test/GeometryWorkspaceTestWorker.cpp
@@ -610,6 +633,30 @@ if(VITRAL_BUILD_TESTS)
     src/test/polyhedral_bounded_solid_set_connect_finish_tests.cpp
     src/test/polyhedral_bounded_solid_booleans_reference_pairs_tests.cpp
     src/test/polyhedral_bounded_solid_kurlander_bowl_tests.cpp
+    src/test/boolean_composite_oracle_fuzz_gate_tests.cpp
+    src/test/boolean_volume_identity_fuzz_gate_tests.cpp
+    src/test/near_degenerate_boolean_fuzz_gate_tests.cpp
+    src/test/polyhedral_bounded_solid_face_geometry_tests.cpp
+    src/test/polyhedral_bounded_solid_structural_copy_tests.cpp
+    src/test/set_operand_aligner_tests.cpp
+    src/test/interior_overlap_predicate_tests.cpp
+    src/test/set_op_contract_tests.cpp
+    src/test/set_op_result_path_tests.cpp
+    src/test/set_op_determinism_tests.cpp
+    src/test/set_op_reentrancy_tests.cpp
+    src/test/set_op_whole_shell_tests.cpp
+    src/test/set_op_connect_ring_invariant_tests.cpp
+    src/test/lamina_policy_tests.cpp
+    src/test/validation_does_not_modify_tests.cpp
+    src/test/polyhedral_bounded_solid_splitter_degenerate_plane_tests.cpp
+    src/test/splitter_oracle_fuzz_tests.cpp
+    src/test/splitter_general_plane_oracle_fuzz_tests.cpp
+    src/test/polyhedral_bounded_solid_euler_operators_tests.cpp
+    src/test/polyhedral_bounded_solid_euler_operators_edge_cases_tests.cpp
+    src/test/euler_operator_sequence_fuzz_tests.cpp
+    src/test/set_op_finish_and_connect_invariants_tests.cpp
+    src/test/boolean_volume_oracle_tests.cpp
+    ${VITRAL_BASE_TEST_SUPPORT_SOURCES}
     src/test/freetype2_font_reader_tests.cpp
   )
   target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
@@ -622,4 +669,21 @@ if(VITRAL_BUILD_TESTS)
   endif()
   include(GoogleTest)
   gtest_discover_tests(vitral_base_tests DISCOVERY_TIMEOUT 60)
+
+  # Slow tests (Java `@Tag("slow")`, excluded from Gradle's `test` task and
+  # run by `slowTest`). Always built; registered with ctest, with the label
+  # `slow`, only when VITRAL_SLOW_TESTS is ON, so the default ctest run stays
+  # fast. See `cpp/scripts/testAllWithSlowCases.sh`.
+  option(VITRAL_SLOW_TESTS "Register the slow tests with ctest" OFF)
+  add_executable(vitral_base_slow_tests
+    src/test/boolean_oracle_fuzz_gate_tests.cpp
+    src/test/rigid_motion_invariance_gate_tests.cpp
+    src/test/csg_kurlander_bowl_full_model_tests.cpp
+    ${VITRAL_BASE_TEST_SUPPORT_SOURCES}
+  )
+  target_link_libraries(vitral_base_slow_tests PRIVATE vitral_base GTest::gtest_main)
+  if(VITRAL_SLOW_TESTS)
+    gtest_discover_tests(vitral_base_slow_tests DISCOVERY_TIMEOUT 60
+      PROPERTIES LABELS slow)
+  endif()
 endif()

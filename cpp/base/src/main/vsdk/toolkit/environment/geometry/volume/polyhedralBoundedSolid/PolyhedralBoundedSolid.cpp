@@ -5,6 +5,7 @@
 #include "java/lang/StringBuilder.h"
 
 #include "java/util/ArrayList.txx"
+#include "java/util/TreeSet.txx"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
@@ -154,16 +155,115 @@ PolyhedralBoundedSolid::PolyhedralBoundedSolid()
 PolyhedralBoundedSolid::~PolyhedralBoundedSolid()
 {
     clearVisibilityQueryCache();
-    for (long int i = 0; i < polygonsList.size(); ++i) delete polygonsList[i];
-    for (long int i = 0; i < edgesList.size(); ++i) delete edgesList[i];
-    for (long int i = 0; i < verticesList.size(); ++i) delete verticesList[i];
+    for (long int i = 0; i < polygonsList.size(); ++i) delete polygonsList.get(i);
+    for (long int i = 0; i < edgesList.size(); ++i) delete edgesList.get(i);
+    for (long int i = 0; i < verticesList.size(); ++i) delete verticesList.get(i);
+    for (long int i = 0; i < retiredFaces.size(); ++i) delete retiredFaces.get(i);
+    for (long int i = 0; i < retiredLoops.size(); ++i) delete retiredLoops.get(i);
+    for (long int i = 0; i < retiredHalfEdges.size(); ++i) delete retiredHalfEdges.get(i);
+    for (long int i = 0; i < retiredEdges.size(); ++i) delete retiredEdges.get(i);
+    for (long int i = 0; i < retiredVertices.size(); ++i) delete retiredVertices.get(i);
+}
+
+namespace {
+
+template <typename T>
+void collectNodes(java::TreeSet<T*>& set, const CircularArrayList<T*>& live,
+    const java::ArrayList<T*>& retired)
+{
+    long int i;
+    for ( i = 0; i < live.size(); i++ ) set.add(live.get(i));
+    for ( i = 0; i < retired.size(); i++ ) set.add(retired.get(i));
+}
+
+template <typename T>
+void removeListed(CircularArrayList<T*>& list, java::TreeSet<T*>& set)
+{
+    int i = 0;
+    while ( i < list.size() ) {
+        if ( set.contains(list.get(i)) ) list.remove(i);
+        else i++;
+    }
+}
+
+template <typename T>
+void removeListed(java::ArrayList<T*>& list, java::TreeSet<T*>& set)
+{
+    int i = 0;
+    while ( i < list.size() ) {
+        if ( set.contains(list.get(i)) ) list.remove(i);
+        else i++;
+    }
+}
+
+} // namespace
+
+void PolyhedralBoundedSolid::unlistNodesOwnedBy(PolyhedralBoundedSolid* reference)
+{
+    if ( reference == 0 || reference == this ) return;
+    java::TreeSet<_PolyhedralBoundedSolidFace*> faces;
+    java::TreeSet<_PolyhedralBoundedSolidEdge*> edges;
+    java::TreeSet<_PolyhedralBoundedSolidVertex*> vertices;
+    java::TreeSet<_PolyhedralBoundedSolidLoop*> loops;
+    java::TreeSet<_PolyhedralBoundedSolidHalfEdge*> halfEdges;
+    long int i;
+
+    collectNodes(faces, reference->polygonsList, reference->retiredFaces);
+    collectNodes(edges, reference->edgesList, reference->retiredEdges);
+    collectNodes(vertices, reference->verticesList, reference->retiredVertices);
+    for ( i = 0; i < reference->retiredLoops.size(); i++ ) {
+        loops.add(reference->retiredLoops.get(i));
+    }
+    for ( i = 0; i < reference->retiredHalfEdges.size(); i++ ) {
+        halfEdges.add(reference->retiredHalfEdges.get(i));
+    }
+    removeListed(polygonsList, faces);
+    removeListed(edgesList, edges);
+    removeListed(verticesList, vertices);
+    removeListed(retiredFaces, faces);
+    removeListed(retiredEdges, edges);
+    removeListed(retiredVertices, vertices);
+    removeListed(retiredLoops, loops);
+    removeListed(retiredHalfEdges, halfEdges);
+}
+
+void PolyhedralBoundedSolid::retireFace(_PolyhedralBoundedSolidFace* face)
+{
+    if ( face == 0 ) return;
+    face->boundariesList.clear();
+    retiredFaces.add(face);
+}
+
+void PolyhedralBoundedSolid::retireLoop(_PolyhedralBoundedSolidLoop* loop)
+{
+    if ( loop == 0 ) return;
+    loop->halfEdgesList.clear();
+    retiredLoops.add(loop);
+}
+
+void PolyhedralBoundedSolid::retireHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
+{
+    if ( he == 0 ) return;
+    retiredHalfEdges.add(he);
+}
+
+void PolyhedralBoundedSolid::retireEdge(_PolyhedralBoundedSolidEdge* edge)
+{
+    if ( edge == 0 ) return;
+    retiredEdges.add(edge);
+}
+
+void PolyhedralBoundedSolid::retireVertex(_PolyhedralBoundedSolidVertex* vertex)
+{
+    if ( vertex == 0 ) return;
+    retiredVertices.add(vertex);
 }
 
 _PolyhedralBoundedSolidFace* PolyhedralBoundedSolid::findFace(int id)
 {
     for (long int i = 0; i < polygonsList.size(); ++i) {
-        if (polygonsList[i] != 0 && polygonsList[i]->id == id) {
-            return polygonsList[i];
+        if (polygonsList.get(i) != 0 && polygonsList.get(i)->id == id) {
+            return polygonsList.get(i);
         }
     }
     return 0;
@@ -172,21 +272,21 @@ _PolyhedralBoundedSolidFace* PolyhedralBoundedSolid::findFace(int id)
 _PolyhedralBoundedSolidVertex* PolyhedralBoundedSolid::findVertex(int id)
 {
     for (long int i = 0; i < verticesList.size(); ++i) {
-        if (verticesList[i] != 0 && verticesList[i]->id == id) {
-            return verticesList[i];
+        if (verticesList.get(i) != 0 && verticesList.get(i)->id == id) {
+            return verticesList.get(i);
         }
     }
     return 0;
 }
 
-java::ArrayList<_PolyhedralBoundedSolidFace*>&
+CircularArrayList<_PolyhedralBoundedSolidFace*>&
 PolyhedralBoundedSolid::getPolygonsList()
 {
     return polygonsList;
 }
 
 void PolyhedralBoundedSolid::setPolygonsList(
-    java::ArrayList<_PolyhedralBoundedSolidFace*>& v)
+    CircularArrayList<_PolyhedralBoundedSolidFace*>& v)
 {
     polygonsList.clear();
     for (long int i = 0; i < v.size(); ++i) {
@@ -194,14 +294,14 @@ void PolyhedralBoundedSolid::setPolygonsList(
     }
 }
 
-java::ArrayList<_PolyhedralBoundedSolidEdge*>&
+CircularArrayList<_PolyhedralBoundedSolidEdge*>&
 PolyhedralBoundedSolid::getEdgesList()
 {
     return edgesList;
 }
 
 void PolyhedralBoundedSolid::setEdgesList(
-    java::ArrayList<_PolyhedralBoundedSolidEdge*>& v)
+    CircularArrayList<_PolyhedralBoundedSolidEdge*>& v)
 {
     edgesList.clear();
     for (long int i = 0; i < v.size(); ++i) {
@@ -209,14 +309,14 @@ void PolyhedralBoundedSolid::setEdgesList(
     }
 }
 
-java::ArrayList<_PolyhedralBoundedSolidVertex*>&
+CircularArrayList<_PolyhedralBoundedSolidVertex*>&
 PolyhedralBoundedSolid::getVerticesList()
 {
     return verticesList;
 }
 
 void PolyhedralBoundedSolid::setVerticesList(
-    java::ArrayList<_PolyhedralBoundedSolidVertex*>& v)
+    CircularArrayList<_PolyhedralBoundedSolidVertex*>& v)
 {
     verticesList.clear();
     for (long int i = 0; i < v.size(); ++i) {
@@ -343,26 +443,25 @@ void PolyhedralBoundedSolid::merge(PolyhedralBoundedSolid* other)
     int offsetVertexId = getMaxVertexId();
 
     while (other->getPolygonsList().size() != 0) {
-        _PolyhedralBoundedSolidFace* f = other->getPolygonsList()[0];
+        _PolyhedralBoundedSolidFace* f = other->getPolygonsList().get(0);
         f->id += offsetFacesId;
-        // C++ port note: the merged face now belongs to this solid. Java
-        // keeps `parentSolid` pointing to the drained `other` (kept alive by
-        // the garbage collector); in C++ `other` may be deleted by its owner
+        // The merged face now belongs to this solid: Euler operators
+        // (i.e. `lkfmrh` when gluing) check `parentSolid`
         f->parentSolid = this;
         if (f->id > maxFaceId) maxFaceId = f->id;
         polygonsList.add(f);
-        other->getPolygonsList().remove(0L);
+        other->getPolygonsList().remove(0);
     }
     while (other->getEdgesList().size() != 0) {
-        edgesList.add(other->getEdgesList()[0]);
-        other->getEdgesList().remove(0L);
+        edgesList.add(other->getEdgesList().get(0));
+        other->getEdgesList().remove(0);
     }
     while (other->getVerticesList().size() != 0) {
-        _PolyhedralBoundedSolidVertex* v = other->getVerticesList()[0];
+        _PolyhedralBoundedSolidVertex* v = other->getVerticesList().get(0);
         v->id += offsetVertexId;
         if (v->id > maxVertexId) maxVertexId = v->id;
         verticesList.add(v);
-        other->getVerticesList().remove(0L);
+        other->getVerticesList().remove(0);
     }
 }
 
@@ -614,8 +713,8 @@ int PolyhedralBoundedSolid::compareValue(double a, double b, double tolerance)
 void PolyhedralBoundedSolid::revert()
 {
     for (long int i = 0; i < polygonsList.size(); ++i) {
-        if (polygonsList[i] != 0) {
-            polygonsList[i]->revert();
+        if (polygonsList.get(i) != 0) {
+            polygonsList.get(i)->revert();
         }
     }
 }

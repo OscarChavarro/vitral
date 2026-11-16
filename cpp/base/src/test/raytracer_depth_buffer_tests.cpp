@@ -151,9 +151,11 @@ TEST(RaytracerDepthBufferTest, given_depthModeNone_when_raytracing_then_depthBuf
     raytrace(snapshot, DepthBufferMode::NONE, &depth);
 
     // Assert
+    float* depthValues = depth.getZBuffer();
     for ( int i = 0; i < WIDTH * HEIGHT; i++ ) {
-        EXPECT_EQ(depth.getZBuffer()[i], 0.0f);
+        EXPECT_EQ(depthValues[i], 0.0f);
     }
+    delete[] depthValues;
     delete snapshot;
 }
 
@@ -181,11 +183,15 @@ TEST(RaytracerDepthBufferTest, given_depthMode_when_raytracingInParallel_then_de
         ASSERT_NE(parallel.getDepthBuffer(), (ZBuffer*)0);
         EXPECT_EQ(parallel.getDepthBuffer()->getXSize(), WIDTH);
         EXPECT_EQ(parallel.getDepthBuffer()->getYSize(), HEIGHT);
+        float* serialValues = serial.getZBuffer();
+        float* parallelValues = parallel.getDepthBuffer()->getZBuffer();
         for ( int i = 0; i < WIDTH * HEIGHT; i++ ) {
-            float expected = serial.getZBuffer()[i];
-            float actual = parallel.getDepthBuffer()->getZBuffer()[i];
+            float expected = serialValues[i];
+            float actual = parallelValues[i];
             EXPECT_TRUE(expected == actual) << "pixel " << i;
         }
+        delete[] serialValues;
+        delete[] parallelValues;
     }
     parallel.setDepthBufferMode(DepthBufferMode::NONE);
     EXPECT_EQ(parallel.getDepthBuffer(), (ZBuffer*)0);
@@ -211,10 +217,14 @@ TEST(RaytracerDepthBufferTest, given_customDepthRange_when_raytracingInParallel_
     parallel.execute(&image, &quality, snapshot, false);
 
     // Assert
+    float* remappedValues = parallel.getDepthBuffer()->getZBuffer();
+    float* standardValues = standard.getZBuffer();
     for ( int i = 0; i < WIDTH * HEIGHT; i++ ) {
-        EXPECT_NEAR((double)parallel.getDepthBuffer()->getZBuffer()[i],
-            0.25 + 0.5 * standard.getZBuffer()[i], 1e-6);
+        EXPECT_NEAR((double)remappedValues[i],
+            0.25 + 0.5 * standardValues[i], 1e-6);
     }
+    delete[] remappedValues;
+    delete[] standardValues;
     parallel.dispose();
     delete snapshot;
 }

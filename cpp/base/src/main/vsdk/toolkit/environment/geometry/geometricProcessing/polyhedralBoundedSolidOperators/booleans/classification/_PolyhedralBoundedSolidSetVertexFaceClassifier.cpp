@@ -4,6 +4,7 @@
 #include "java/lang/Boolean.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/Collections.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidVertexNeighborhood.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetVertexFaceClassifier.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetGeometricPredicateProcessor.h"
@@ -111,33 +112,33 @@ void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
             }
         }
         localFace = he->parentLoop->parentFace;
-        if ( localFace->getContainingPlane() == nullptr ||
+        if ( localFace->hasContainingPlane() == false ||
              referencePlane == nullptr ) {
             continue;
         }
 
-        c = localFace->getContainingPlane()->getNormal().crossProduct(
+        c = localFace->containingPlaneNormal().crossProduct(
             referencePlane->getNormal());
         d = c.dotProduct(c);
         if ( compareToZero(d) != 0 ) {
             continue;
         }
 
-        d = localFace->getContainingPlane()->getNormal().dotProduct(
+        d = localFace->containingPlaneNormal().dotProduct(
             referencePlane->getNormal());
         if ( compareToZero(d) == 1 ) {
             if ( BvsA != 0 ) {
-                nbr[i].cl = classFor(op, true);
-                nbr[(i + 1) % nnbr].cl = classFor(op, true);
+                nbr[i].classification = classFor(op, true);
+                nbr[(i + 1) % nnbr].classification = classFor(op, true);
             }
             else {
-                nbr[i].cl = classFor(op, false);
-                nbr[(i + 1) % nnbr].cl = classFor(op, false);
+                nbr[i].classification = classFor(op, false);
+                nbr[(i + 1) % nnbr].classification = classFor(op, false);
             }
         }
         else {
-            nbr[i].cl = classFor(op, true);
-            nbr[(i + 1) % nnbr].cl = classFor(op, true);
+            nbr[i].classification = classFor(op, true);
+            nbr[(i + 1) % nnbr].classification = classFor(op, true);
         }
 
         traceCoplanarTangential(
@@ -146,13 +147,13 @@ void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
             " face=" + java::String::valueOf(referenceFace->id) +
             " localFace=" + java::String::valueOf(localFace->id) +
             " sectorIndex=" + java::String::valueOf(i) +
-            " class=" + java::String::valueOf(nbr[i].cl));
+            " class=" + java::String::valueOf(nbr[i].classification));
     }
 
     size_t ins = 0;
     size_t outs = 0;
     for ( i = 0; i < nnbr; i++ ) {
-        if ( nbr[i].cl == OnSector::OUT ) {
+        if ( nbr[i].classification == OnSector::OUT ) {
             outs++;
         }
         else {
@@ -161,7 +162,7 @@ void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
     }
     if ( outs == nnbr || ins == nnbr ) {
         for ( i = 0; i < nnbr; i++ ) {
-            nbr[i].cl = backup[i].cl;
+            nbr[i].classification = backup[i].classification;
         }
     }
 }
@@ -184,33 +185,6 @@ int Classifier::nextVertexId(PolyhedralBoundedSolid* current,
 }
 
 /**
-Constructs a vector along the bisector of the sector defined by `he`.
-This is the inward-oriented variant of the bisector from problem
-[MANT1988].14.1 used by the vertex/face classifier.
-*/
-Vector3Dd Classifier::inside(_PolyhedralBoundedSolidHalfEdge* he)
-{
-    Vector3Dd middle;
-    Vector3Dd a;
-    Vector3Dd b;
-    Vector3Dd n;
-
-    a = (he->next())->startingVertex->position.subtract(
-        he->startingVertex->position);
-    b = (he->previous())->startingVertex->position.subtract(
-        he->startingVertex->position);
-    a = a.normalized();
-    b = b.normalized();
-
-    n = he->parentLoop->parentFace->getContainingPlane()->getNormal();
-
-    middle = n.crossProduct(a);
-    middle = middle.normalized();
-
-    return middle;
-}
-
-/**
 Current method is the first step for the initial vertex/face
 classification of sectors (vertex neighborhood) for `vtx`, as indicated on
 section [MANT1988].14.5.2 and program [MANT1988].14.4, but biased towards
@@ -222,51 +196,13 @@ java::ArrayList<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
     InfinitePlane* referencePlane,
     int /*BvsA*/)
 {
-    _PolyhedralBoundedSolidHalfEdge* he;
-    Vector3Dd bisect;
-    double d;
-    java::ArrayList<SectorOnFace> neighborSectorsInfo;
-
-    he = vtx->emanatingHalfEdge;
-    do {
-        SectorOnFace c;
-        c.sector = he;
-        d = referencePlane->pointDistance((he->next())->startingVertex->position);
-        c.cl = compareToZero(d);
-        c.isWide = false;
-        c.position = (he->next())->startingVertex->position;
-        c.situation = SectorOnFace::UNDEFINED;
-        c.referencePlane = referencePlane;
-        if ( checkWideness(he) ) {
-            bisect = inside(he).add(vtx->position);
-            c.situation = SectorOnFace::CROSSING_EDGE;
-            neighborSectorsInfo.add(c);
-
-            SectorOnFace wide;
-            wide.sector = he;
-            d = referencePlane->pointDistance(bisect);
-            wide.cl = compareToZero(d);
-            wide.isWide = true;
-            wide.position = bisect;
-            wide.situation = SectorOnFace::CROSSING_EDGE;
-            wide.referencePlane = referencePlane;
-            neighborSectorsInfo.add(wide);
-        }
-        else {
-            neighborSectorsInfo.add(c);
-        }
-        he = (he->mirrorHalfEdge())->next();
-    } while ( he != vtx->emanatingHalfEdge );
-
-    size_t i;
-
+    java::ArrayList<SectorOnFace> neighborSectorsInfo =
+        _PolyhedralBoundedSolidVertexNeighborhood::classify<SectorOnFace>(
+            vtx, *referencePlane);
+    int i;
     for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
-        SectorOnFace& c = neighborSectorsInfo[i];
-        if ( c.cl == SectorOnFace::ON && c.situation == SectorOnFace::UNDEFINED ) {
-            c.situation = SectorOnFace::INPLANE_EDGE;
-        }
+        neighborSectorsInfo[i].referencePlane = referencePlane;
     }
-
     return neighborSectorsInfo;
 }
 
@@ -368,7 +304,7 @@ void Classifier::vertexFaceInsertNullEdges(java::ArrayList<SectorOnFace>& nbr,
     }
 
     i = 0;
-    while ( !(isInClass(nbr[i].cl) && isOutClass(nbr[(i + 1) % nnbr].cl)) ) {
+    while ( !(isInClass(nbr[i].classification) && isOutClass(nbr[(i + 1) % nnbr].classification)) ) {
         i++;
         if ( i >= nnbr ) {
             return;
@@ -378,7 +314,7 @@ void Classifier::vertexFaceInsertNullEdges(java::ArrayList<SectorOnFace>& nbr,
     head = nbr[i].sector;
 
     while ( true ) {
-        while ( !(isOutClass(nbr[i].cl) && isInClass(nbr[(i + 1) % nnbr].cl)) ) {
+        while ( !(isOutClass(nbr[i].classification) && isInClass(nbr[(i + 1) % nnbr].classification)) ) {
             i = (i + 1) % nnbr;
         }
         tail = nbr[i].sector;
@@ -409,12 +345,17 @@ void Classifier::vertexFaceInsertNullEdges(java::ArrayList<SectorOnFace>& nbr,
 
         makeRing(f, v, BvsA, inSolidA, inSolidB);
 
-        while ( !(isInClass(nbr[i].cl) && isOutClass(nbr[(i + 1) % nnbr].cl)) ) {
+        while ( !(isInClass(nbr[i].classification) && isOutClass(nbr[(i + 1) % nnbr].classification)) ) {
             i = (i + 1) % nnbr;
             if ( i == start ) {
                 return;
             }
         }
+        // Next in->out transition: its sector heads the next null
+        // edge. The previous lmev moved the old head to the new
+        // vertex, so reusing it would split the wrong vertex when the
+        // neighbourhood alternates more than once (B-03).
+        head = nbr[i].sector;
     }
 }
 
@@ -437,7 +378,8 @@ void Classifier::vertexFaceClassify(_PolyhedralBoundedSolidVertex* v,
         printf("Vertex/face pair V[%d] / f[%d]\n", v->id, f->id);
     }
 
-    nbr = vertexFaceGetNeighborhood(v, f->getContainingPlane(), BvsA);
+    InfinitePlane* neighborhoodPlane = f->getContainingPlane();
+    nbr = vertexFaceGetNeighborhood(v, neighborhoodPlane, BvsA);
     if ( inplaneEdgesOn(nbr) ) {
         java::Collections::reverse(nbr);
     }
@@ -447,7 +389,8 @@ void Classifier::vertexFaceClassify(_PolyhedralBoundedSolidVertex* v,
         printNbr(nbr);
     }
 
-    vertexFaceReclassifyOnSectors(nbr, f, f->getContainingPlane(), BvsA, op);
+    InfinitePlane* reclassifyPlane = f->getContainingPlane();
+    vertexFaceReclassifyOnSectors(nbr, f, reclassifyPlane, BvsA, op);
 
     size_t i;
     for ( i = 0; i < nbr.size(); i++ ) {
@@ -467,6 +410,9 @@ void Classifier::vertexFaceClassify(_PolyhedralBoundedSolidVertex* v,
     }
 
     vertexFaceInsertNullEdges(nbr, f, v, BvsA, inSolidA, inSolidB);
+    // C++ port: the sectors of nbr keep these planes until here
+    delete neighborhoodPlane;
+    delete reclassifyPlane;
 }
 
 void Classifier::makeRing(_PolyhedralBoundedSolidFace* f,

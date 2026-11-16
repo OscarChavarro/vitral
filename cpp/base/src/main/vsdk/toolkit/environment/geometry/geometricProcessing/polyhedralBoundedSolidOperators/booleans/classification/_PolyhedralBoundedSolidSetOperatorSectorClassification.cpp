@@ -162,35 +162,36 @@ java::String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::toS
 
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::
 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace()
-    : sector(nullptr), referencePlane(nullptr), cl(0), isWide(false),
-      situation(UNDEFINED), reverse(false), coplanarRelation(COPLANAR_UNKNOWN)
+    : _PolyhedralBoundedSolidSectorClassification(),
+      referencePlane(nullptr), reverse(false),
+      coplanarRelation(COPLANAR_UNKNOWN)
 {
 }
 
 void _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::applyRules(int op)
 {
     if ( op == UNION ) {
-        switch ( cl ) {
-          case AonBplus:     cl = AoutB;    break;
-          case AonBminus:    cl = AinB;    break;
-          case BonAplus:     cl = BinA;    break;
-          case BonAminus:    cl = BinA;    break;
+        switch ( classification ) {
+          case AonBplus:     classification = AoutB;    break;
+          case AonBminus:    classification = AinB;    break;
+          case BonAplus:     classification = BinA;    break;
+          case BonAminus:    classification = BinA;    break;
         }
     }
     else if ( op == INTERSECTION ) {
-        switch ( cl ) {
-          case AonBplus:     cl = AinB;    break;
-          case AonBminus:    cl = AoutB;    break;
-          case BonAplus:     cl = BoutA;    break;
-          case BonAminus:    cl = BoutA;    break;
+        switch ( classification ) {
+          case AonBplus:     classification = AinB;    break;
+          case AonBminus:    classification = AoutB;    break;
+          case BonAplus:     classification = BoutA;    break;
+          case BonAminus:    classification = BoutA;    break;
         }
     }
     else if ( op == SUBTRACT ) {
-        switch ( cl ) {
-          case AonBplus:     cl = AinB;    break;
-          case AonBminus:    cl = AoutB;    break;
-          case BonAplus:     cl = BoutA;    break;
-          case BonAminus:    cl = BoutA;    break;
+        switch ( classification ) {
+          case AonBplus:     classification = AinB;    break;
+          case AonBminus:    classification = AoutB;    break;
+          case BonAplus:     classification = BoutA;    break;
+          case BonAminus:    classification = BoutA;    break;
         }
     }
 }
@@ -201,48 +202,49 @@ void _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::updateLabel(i
     InfinitePlane* b = referencePlane;
 
     if ( BvsA == 0 ) {
-        switch ( cl ) {
-          case ABOVE: cl = AoutB; break;
-          case BELOW: cl = AinB; break;
+        switch ( classification ) {
+          case ABOVE: classification = AoutB; break;
+          case BELOW: classification = AinB; break;
           case ON:
             if ( coplanarRelation != COPLANAR_UNKNOWN &&
                  coplanarRelation != COPLANAR_OVERLAP ) {
-                cl = AoutB;
+                classification = AoutB;
             }
             else if ( a->overlapsWith(*b, numericContext.bigEpsilon()) ) {
-                cl = AonBplus;
+                classification = AonBplus;
             }
             else {
-                cl = AonBminus;
+                classification = AonBminus;
             }
             break;
         }
     }
     else {
-        switch ( cl ) {
-          case ABOVE: cl = BoutA; break;
-          case BELOW: cl = BinA; break;
+        switch ( classification ) {
+          case ABOVE: classification = BoutA; break;
+          case BELOW: classification = BinA; break;
           case ON:
             if ( coplanarRelation != COPLANAR_UNKNOWN &&
                  coplanarRelation != COPLANAR_OVERLAP ) {
-                cl = BoutA;
+                classification = BoutA;
             }
             else if ( a->overlapsWith(*b, numericContext.bigEpsilon()) ) {
-                cl = BonAplus;
+                classification = BonAplus;
             }
             else {
-                cl = BonAminus;
+                classification = BonAminus;
             }
             break;
         }
     }
+    delete a;
 }
 
 java::String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::toString() const
 {
     java::String msg = "Sector(";
     msg += java::String(sector->toString().c_str()) + " | ";
-    switch ( cl ) {
+    switch ( classification ) {
       case ABOVE: msg += " ABOVE"; break;
       case BELOW: msg += " BELOW"; break;
       case ON: msg += " ON"; break;

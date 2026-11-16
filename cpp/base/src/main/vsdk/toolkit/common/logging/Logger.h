@@ -12,6 +12,7 @@ public:
     static const int DEBUG = 4;
     static const int VERBOSE = 5;
 
+    static bool isWithSystemExit();
     static void setWithSystemExit(bool flag);
     static void setWithFatalExceptions(bool flag);
 
@@ -21,6 +22,9 @@ public:
 private:
     static bool withSystemExit;
     static bool withFatalExceptions;
+    /// C++ port note: emulates the lazy Java static initializer.
+    static bool staticInitialized;
+    static void staticInitialize();
     static void processFatalError(const java::String& method, const java::String& message, const java::Exception* cause);
 };
 

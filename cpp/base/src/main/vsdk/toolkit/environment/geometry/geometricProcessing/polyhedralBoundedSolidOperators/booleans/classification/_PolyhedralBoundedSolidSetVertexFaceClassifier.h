@@ -64,7 +64,6 @@ private:
         bool useMirrorFace);
     static int nextVertexId(PolyhedralBoundedSolid* current,
                             PolyhedralBoundedSolid* other);
-    static Vector3Dd inside(_PolyhedralBoundedSolidHalfEdge* he);
     static java::ArrayList<SectorOnFace> vertexFaceGetNeighborhood(
         _PolyhedralBoundedSolidVertex* vtx,
         InfinitePlane* referencePlane,

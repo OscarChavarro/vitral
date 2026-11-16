@@ -3,15 +3,32 @@
 
 #include "java/lang/String.h"
 
-#include "java/util/ArrayList.h"
+#include "vsdk/toolkit/common/dataStructures/ArrayLinkable.h"
+#include "vsdk/toolkit/common/dataStructures/CircularArrayList.h"
+
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
 
-class _PolyhedralBoundedSolidLoop {
+class _PolyhedralBoundedSolidLoop : public ArrayLinkable {
+private:
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    const void* listOwner;
+    int listIndex;
+
+public:
+    virtual const void* getListOwner() const override { return listOwner; }
+    virtual int getListIndex() const override { return listIndex; }
+    virtual void setListSlot(const void* owner, int index) override
+    {
+        listOwner = owner;
+        listIndex = index;
+    }
+
 public:
     _PolyhedralBoundedSolidFace* parentFace;
     _PolyhedralBoundedSolidHalfEdge* boundaryStartHalfEdge;
-    java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> halfEdgesList;
+    CircularArrayList<_PolyhedralBoundedSolidHalfEdge*> halfEdgesList;
 
     explicit _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace* parent);
     ~_PolyhedralBoundedSolidLoop();
@@ -21,9 +38,6 @@ public:
     _PolyhedralBoundedSolidHalfEdge* firstHalfEdgeAtVertex(int a);
     void delhe(_PolyhedralBoundedSolidHalfEdge* he);
     void revert();
-
-    _PolyhedralBoundedSolidHalfEdge* previousOf(_PolyhedralBoundedSolidHalfEdge* he) const;
-    _PolyhedralBoundedSolidHalfEdge* nextOf(_PolyhedralBoundedSolidHalfEdge* he) const;
 
     /**
     @return a description of the node, as Java `toString`

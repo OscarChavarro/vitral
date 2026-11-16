@@ -20,8 +20,8 @@ typedef _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector OnSector;
 typedef _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace OnFace;
 typedef PolyhedralBoundedSolidNumericPolicy::ToleranceContext ToleranceContext;
 
-java::ArrayList<Processor::SectoroverlapTraceEntry>* Processor::sectoroverlapTrace = nullptr;
-int Processor::sectoroverlapCallCounter = 0;
+thread_local java::ArrayList<Processor::SectoroverlapTraceEntry>*
+    Processor::sectoroverlapTrace = nullptr;
 
 namespace {
 
@@ -507,7 +507,6 @@ void Processor::enableSectoroverlapTrace()
 {
     delete sectoroverlapTrace;
     sectoroverlapTrace = new java::ArrayList<SectoroverlapTraceEntry>();
-    sectoroverlapCallCounter = 0;
 }
 
 void Processor::disableSectoroverlapTrace()
@@ -527,11 +526,12 @@ void Processor::recordSectoroverlapCall(const SectorOnVertex& na,
                                         double a1, double a2, double b1,
                                         double b2, bool decision)
 {
-    if ( sectoroverlapTrace == nullptr ) {
+    java::ArrayList<SectoroverlapTraceEntry>* trace = sectoroverlapTrace;
+    if ( trace == nullptr ) {
         return;
     }
     SectoroverlapTraceEntry entry;
-    entry.callIndex = sectoroverlapCallCounter++;
+    entry.callIndex = trace->size();
     entry.faceA = (na.he != nullptr && na.he->parentLoop != nullptr
                    && na.he->parentLoop->parentFace != nullptr)
         ? na.he->parentLoop->parentFace->id : -1;
@@ -559,7 +559,7 @@ void Processor::recordSectoroverlapCall(const SectorOnVertex& na,
     entry.boundaryRayContact = std::abs(entry.diffA2B1) < 1.0e-12
         || std::abs(entry.diffB2A1) < 1.0e-12;
     entry.decision = decision;
-    sectoroverlapTrace->add(entry);
+    trace->add(entry);
 }
 
 int Processor::compareToZero(double value)
@@ -614,9 +614,22 @@ bool Processor::sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
         ref2, dir, numericContext) ) {
         return (ref2.dotProduct(dir) > 0.0);
     }
-    t1 = compareToZero(c1.dotProduct(ref12));
-    t2 = compareToZero(c2.dotProduct(ref12));
+    // Signs of unit quantities: the raw products grow with the cube of
+    // the model size while the tolerance grows linearly, so at 10^-3
+    // they were noise.
+    t1 = PolyhedralBoundedSolidNumericPolicy::compare(
+        unit(c1).dotProduct(unit(ref12)), 0.0,
+        PolyhedralBoundedSolidNumericPolicy::BREP_EPSILON);
+    t2 = PolyhedralBoundedSolidNumericPolicy::compare(
+        unit(c2).dotProduct(unit(ref12)), 0.0,
+        PolyhedralBoundedSolidNumericPolicy::BREP_EPSILON);
     return ( t1 < 0.0 && t2 < 0.0 );
+}
+
+Vector3Dd Processor::unit(const Vector3Dd& v)
+{
+    double length = v.length();
+    return length > 0.0 ? v.multiply(1.0 / length) : v;
 }
 
 bool Processor::sctrwitthinProper(const Vector3Dd& dir, const Vector3Dd& ref1,
@@ -643,7 +656,7 @@ bool Processor::sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb
     Vector3Dd c;
     Vector3Dd n;
 
-    n = na.he->parentLoop->parentFace->getContainingPlane()->getNormal();
+    n = na.he->parentLoop->parentFace->containingPlaneNormal();
     u = na.ref1.normalized();
     v = n.crossProduct(u).normalized();
 
@@ -667,18 +680,159 @@ bool Processor::sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb
         b2 = t;
     }
 
-    // Closed-set (epsilon-tolerant) interval-overlap check.
-    // Intentionally returns true for touching sectors (a2 ≈ b1) because the
-    // setop pipeline requires a null-edge strut even at coplanar boundary-ray
-    // contact — a strict open-set check breaks MANT1988 §15.1 reference geometry.
-    // The symmetric disjoint case (B entirely left of A) is not yet fixed here;
-    // that requires a deeper restructuring of the coplanar V/V path.
-    bool decision = (a2 + VSDK::EPSILON > b1 - VSDK::EPSILON);
+    // Closed-set (epsilon-tolerant) interval-overlap check on signed
+    // angles. Intentionally returns true for touching sectors (a2 ≈ b1
+    // or b2 ≈ a1) because the setop pipeline requires a null-edge strut
+    // even at coplanar boundary-ray contact — a strict open-set check
+    // breaks MANT1988 §15.1 reference geometry. Both ends are tested:
+    // the check used to miss B entirely on the negative side of A.
+    bool decision = (a2 + VSDK::EPSILON > b1 - VSDK::EPSILON) &&
+                    (b2 + VSDK::EPSILON > a1 - VSDK::EPSILON);
+    if ( decision && touchOnlyAlongConcaveEdge(na, nb) ) {
+        decision = false;
+    }
     recordSectoroverlapCall(na, nb, a1, a2, b1, b2, decision);
     if ( withDebug ) {
         printf(decision ? " <TRUE>" : " <FALSE>");
     }
     return decision;
+}
+
+/**
+True when two coplanar sectors meet only along a boundary ray that is an
+edge of both faces, and that edge is concave in at least one of the two
+solids: a concave edge of one solid lying on an edge of the other, as at
+the shared corner of two bars. The sectors lie on opposite sides of the
+edge and share no area, so treating them as an "on" pair would propagate
+a coplanar class across a face that does not touch the other solid.
+Contact along a convex edge of both solids (blocks glued face to face)
+and contact along the bisector that splits a wide sector keep the
+closed-set behavior of [MANT1988].15.6.2.
+*/
+bool Processor::touchOnlyAlongConcaveEdge(const SectorOnVertex& na,
+    const SectorOnVertex& nb)
+{
+    bool firstA[2] = { true, false };
+    bool firstB[2] = { true, false };
+    int i;
+    int j;
+
+    if ( sectorsShareInteriorDirection(na, nb) ) {
+        return false;
+    }
+    for ( i = 0; i < 2; i++ ) {
+        bool fa = firstA[i];
+        for ( j = 0; j < 2; j++ ) {
+            bool fb = firstB[j];
+            Vector3Dd ra = fa ? na.ref1 : na.ref2;
+            Vector3Dd rb = fb ? nb.ref1 : nb.ref2;
+            if ( !sameDirection(ra, rb) ) {
+                continue;
+            }
+            if ( !isFaceEdgeRay(na, ra) || !isFaceEdgeRay(nb, rb) ) {
+                return false;
+            }
+            return isConcaveEdgeRay(na, fa) || isConcaveEdgeRay(nb, fb);
+        }
+    }
+    return false;
+}
+
+bool Processor::sameDirection(const Vector3Dd& a, const Vector3Dd& b)
+{
+    Vector3Dd na = Vector3Dd(a).normalized();
+    Vector3Dd nb = Vector3Dd(b).normalized();
+    return na.dotProduct(nb) > 1.0 - VSDK::EPSILON;
+}
+
+bool Processor::isFaceEdgeRay(const SectorOnVertex& n, const Vector3Dd& ray)
+{
+    Vector3Dd origin = n.he->startingVertex->position;
+    return sameDirection(ray,
+               n.he->previous()->startingVertex->position.subtract(origin)) ||
+           sameDirection(ray,
+               n.he->next()->startingVertex->position.subtract(origin));
+}
+
+/**
+Whether the edge along the sector's first (ref1, edge he.previous()) or
+second (ref2, edge he) ray is concave: the sector's face, next to the
+edge, lies in front of the plane of the face across the edge.
+*/
+bool Processor::isConcaveEdgeRay(const SectorOnVertex& n, bool firstRay)
+{
+    _PolyhedralBoundedSolidHalfEdge* edgeHalf;
+    Vector3Dd ray;
+    Vector3Dd other;
+    Vector3Dd inside;
+    Vector3Dd acrossNormal;
+
+    edgeHalf = firstRay ? n.he->previous() : n.he;
+    ray = firstRay ? n.ref1 : n.ref2;
+    other = firstRay ? n.ref2 : n.ref1;
+    if ( edgeHalf->mirrorHalfEdge() == nullptr ||
+         edgeHalf->mirrorHalfEdge()->parentLoop == nullptr ) {
+        return false;
+    }
+    InfinitePlane* acrossPlane = edgeHalf->mirrorHalfEdge()->parentLoop
+        ->parentFace->getContainingPlane();
+    acrossNormal = acrossPlane->getNormal();
+    delete acrossPlane;
+    inside = Vector3Dd(ray).normalized().add(
+        Vector3Dd(other).normalized().multiply(1.0e-3));
+    return inside.dotProduct(acrossNormal) > VSDK::EPSILON * 1.0e-3;
+}
+
+/**
+Two coplanar sectors overlap when some direction lies strictly inside
+both. Every sector is the minor arc from ref1 to ref2 (wide sectors are
+split at their bisector by the neighborhood preprocessing), so it is
+enough to test the middle direction of each gap between consecutive
+boundary rays.
+*/
+bool Processor::sectorsShareInteriorDirection(const SectorOnVertex& na,
+    const SectorOnVertex& nb)
+{
+    InfinitePlane* plane = na.he->parentLoop->parentFace->getContainingPlane();
+    Vector3Dd n = plane->getNormal();
+    delete plane;
+    Vector3Dd u = Vector3Dd(na.ref1).normalized();
+    Vector3Dd v = n.crossProduct(u).normalized();
+    double angles[4];
+    Vector3Dd rays[4] = { na.ref1, na.ref2, nb.ref1, nb.ref2 };
+    int i;
+    int j;
+
+    for ( i = 0; i < 4; i++ ) {
+        Vector3Dd r = Vector3Dd(rays[i]).normalized();
+        angles[i] = std::atan2(r.dotProduct(v), r.dotProduct(u));
+    }
+    // java.util.Arrays.sort(double[]) (no NaN here): insertion sort.
+    for ( i = 1; i < 4; i++ ) {
+        double moving = angles[i];
+        for ( j = i - 1; j >= 0 && angles[j] > moving; j-- ) {
+            angles[j + 1] = angles[j];
+        }
+        angles[j + 1] = moving;
+    }
+    for ( i = 0; i < 4; i++ ) {
+        double from = angles[i];
+        double to = (i == 3) ? angles[0] + 2.0 * M_PI : angles[i + 1];
+        double middle;
+        Vector3Dd dir;
+
+        if ( to - from < VSDK::EPSILON ) {
+            continue;
+        }
+        middle = (from + to) / 2.0;
+        dir = u.multiply(java::Math::cos(middle)).add(
+            v.multiply(java::Math::sin(middle)));
+        if ( sctrwitthinProper(dir, na.ref1, na.ref2, na.ref12) &&
+             sctrwitthinProper(dir, nb.ref1, nb.ref2, nb.ref12) ) {
+            return true;
+        }
+    }
+    return false;
 }
 
 double Processor::angleFromVectors(const Vector3Dd& u, const Vector3Dd& v,
@@ -749,12 +903,12 @@ void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
         else {
             localFace = he->parentLoop->parentFace;
         }
-        if ( localFace == nullptr || localFace->getContainingPlane() == nullptr ||
+        if ( localFace == nullptr || localFace->hasContainingPlane() == false ||
              referencePlane == nullptr ) {
             continue;
         }
 
-        c = localFace->getContainingPlane()->getNormal().crossProduct(
+        c = localFace->containingPlaneNormal().crossProduct(
             referencePlane->getNormal());
         d = c.dotProduct(c);
         if ( compareToZero(d) != 0 ) {
@@ -773,7 +927,7 @@ void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
             " relation=" + java::String::valueOf(relation));
 
         if ( relation == SectorOnFace::COPLANAR_OVERLAP ) {
-            d = localFace->getContainingPlane()->getNormal().dotProduct(
+            d = localFace->containingPlaneNormal().dotProduct(
                 referencePlane->getNormal());
             sameOrientation = (compareToZero(d) == 1);
             resolvedClass = resolveCoplanarSectorClass(op, BvsA,
@@ -782,8 +936,8 @@ void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
                 java::String("  resolved vertexFace coplanar overlap sameOrientation=") +
                 booleanName(sameOrientation) + " class=" +
                 java::String::valueOf(resolvedClass));
-            nbr[i].cl = resolvedClass;
-            nbr[(i+1)%nnbr].cl = resolvedClass;
+            nbr[i].classification = resolvedClass;
+            nbr[(i+1)%nnbr].classification = resolvedClass;
         }
     }
 }
@@ -822,7 +976,7 @@ int Processor::classifyCoplanarSectorRelation(
     }
 
     basis = buildCoplanarAngleBasis(
-        he->parentLoop->parentFace->getContainingPlane()->getNormal(),
+        he->parentLoop->parentFace->containingPlaneNormal(),
         MaybeVector(he->next()->startingVertex->position.subtract(start)),
         MaybeVector(he->previous()->startingVertex->position.subtract(start)),
         numericContext);
@@ -836,7 +990,7 @@ int Processor::classifyCoplanarSectorRelation(
         return classifyCoplanarIntervalRelation(currentInterval,
             buildIntervalForCoplanarEdge(basis,
                 intersectedHalfedge,
-                referenceFace->getContainingPlane()->getNormal(),
+                referenceFace->containingPlaneNormal(),
                 numericContext),
             numericContext);
     }

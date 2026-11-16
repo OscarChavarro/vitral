@@ -5,6 +5,7 @@
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexFace.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexVertex.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetNullEdgesConnector.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetOperatorNullEdge.h"
 
 class _PolyhedralBoundedSolidFace;
@@ -44,6 +45,9 @@ public:
 
     /** Following variable `sonfb` from program [MANT1988].15.1. */
     java::ArrayList<_PolyhedralBoundedSolidFace*> sonfb;
+
+    /** Pair indices of the null faces, as the connect stage matched them. */
+    _PolyhedralBoundedSolidSetNullEdgesConnector::ConnectResult connected;
 };
 
 #endif

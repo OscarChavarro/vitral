@@ -75,6 +75,15 @@ private:
                                      _PolyhedralBoundedSolidVertex* vb);
     void vertexVertexReclassifyOnSectors(int op);
     void vertexVertexReclassifyOnEdges(int op);
+    void resolveOnEdgesByLocalNeighborhood();
+    int classifyRayWithoutCrossing(const java::ArrayList<SectorOnVertex>& own,
+        int index, bool firstRay,
+        const java::ArrayList<SectorOnVertex>& other);
+    static Vector3Dd directionNextToRay(const Vector3Dd& ray,
+        const Vector3Dd& otherRay);
+    static const Vector3Dd PROBE_RAYS[3];
+    int classifyDirectionInNeighborhood(const Vector3Dd& d,
+        const java::ArrayList<SectorOnVertex>& nb);
 };
 
 #endif

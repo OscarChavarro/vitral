@@ -111,13 +111,27 @@ public:
         int BvsA, int op,
         bool useMirrorFace);
 
+    /**
+    Two coplanar sectors overlap when some direction lies strictly inside
+    both (see the implementation).
+    */
+    static bool sectorsShareInteriorDirection(const SectorOnVertex& na,
+                                              const SectorOnVertex& nb);
+
     static int classifyCoplanarSectorRelation(
         const SectorOnFace* sectorInfo,
         _PolyhedralBoundedSolidFace* referenceFace);
 
 private:
-    static java::ArrayList<SectoroverlapTraceEntry>* sectoroverlapTrace;
-    static int sectoroverlapCallCounter;
+    /** Diagnostic trace of sectoroverlap calls, per thread; null when off. */
+    static thread_local java::ArrayList<SectoroverlapTraceEntry>* sectoroverlapTrace;
+
+    static Vector3Dd unit(const Vector3Dd& v);
+    static bool touchOnlyAlongConcaveEdge(const SectorOnVertex& na,
+                                          const SectorOnVertex& nb);
+    static bool sameDirection(const Vector3Dd& a, const Vector3Dd& b);
+    static bool isFaceEdgeRay(const SectorOnVertex& n, const Vector3Dd& ray);
+    static bool isConcaveEdgeRay(const SectorOnVertex& n, bool firstRay);
 
     static void recordSectoroverlapCall(const SectorOnVertex& na,
                                         const SectorOnVertex& nb,

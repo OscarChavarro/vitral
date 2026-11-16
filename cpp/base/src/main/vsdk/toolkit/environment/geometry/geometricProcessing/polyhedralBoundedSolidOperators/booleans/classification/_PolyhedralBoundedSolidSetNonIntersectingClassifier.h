@@ -13,6 +13,7 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
 
 class InfinitePlane;
+class PolyhedralBoundedSolidFaceGeometry;
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -36,7 +37,7 @@ public:
     predicates. Within a single Boolean operation the operand solids are not
     mutated until the Mantyla generate stage runs, so each predicate is a pure
     function of `(a, b)` and may be computed once and reused across
-    runPartialCoplanarFaceAreaCase, runTouchingOnlyPreflightCase,
+    runTouchingOnlyPreflightCase,
     runContainmentOnlyPreflightCase and runSetOpNoIntersectionCase. The cache
     does not change any decision.
     */
@@ -129,41 +130,67 @@ public:
         _PreflightCache& cache);
 
     /**
-    Resolves operands that only share partial coplanar face areas: the
-    intersection yields laminas over the contact polygons and the
-    subtraction keeps `inSolidA`.
-    @param inSolidA first operand
-    @param inSolidB second operand
-    @param outRes result solid
-    @param op UNION, INTERSECTION or SUBTRACT
-    @return `outRes`, or null when the case does not apply
+    Witness test used to tell a right empty result from a lost solid
+    (Fable5.2Analysis.md Stage F step 4): true when some point is interior
+    to both solids, so their intersection cannot be empty. The operands
+    must be intact (not consumed by a set operation).
     */
-    static PolyhedralBoundedSolid* runPartialCoplanarFaceAreaCase(
-        PolyhedralBoundedSolid* inSolidA,
-        PolyhedralBoundedSolid* inSolidB,
-        PolyhedralBoundedSolid* outRes,
-        int op);
-    static PolyhedralBoundedSolid* runPartialCoplanarFaceAreaCase(
-        PolyhedralBoundedSolid* inSolidA,
-        PolyhedralBoundedSolid* inSolidB,
-        PolyhedralBoundedSolid* outRes,
-        int op,
-        _PreflightCache& cache);
+    static bool interiorsOverlap(PolyhedralBoundedSolid* solidA,
+        PolyhedralBoundedSolid* solidB);
+
+    /**
+    Witness test for A \ B: true when a vertex or a face interior witness
+    of `solidA` lies strictly outside `solidB`.
+    */
+    static bool hasBoundaryPointOutside(PolyhedralBoundedSolid* solidA,
+        PolyhedralBoundedSolid* solidB);
+
+    /**
+    True when some vertex of `inner`, or a point inside one of its faces,
+    lies on the boundary of `outer`. Meant for a solid already known to be
+    contained in `outer`.
+    */
+    static bool touchesBoundaryFromInside(PolyhedralBoundedSolid* inner,
+        PolyhedralBoundedSolid* outer);
+
+    /**
+    A point strictly inside the face (see the implementation).
+    @return false when there is none (Java null)
+    */
+    static bool faceInteriorWitness(_PolyhedralBoundedSolidFace* face,
+        Vector3Dd* out);
+
+    /**
+    True when a face of A and a face of B lie on the same plane with
+    opposite orientation and share a region of positive area.
+    */
+    static bool hasOppositeCoplanarFaceAreaContact(
+        PolyhedralBoundedSolid* solidA,
+        PolyhedralBoundedSolid* solidB);
+
+    /**
+    Classifies `point` against `solid` (INSIDE, OUTSIDE or LIMIT), with the
+    face snapshots `facePlanes` of `solid`.
+    */
+    static int classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
+        const java::ArrayList<PolyhedralBoundedSolidFaceGeometry*>& facePlanes,
+        const Vector3Dd& point);
 
 private:
     typedef java::ArrayList<Vector3Dd> Polygon;
 
     /**
-    Containing planes of every face of a solid, indexed by face position,
-    owned by this holder. Only valid while the solid is not mutated.
+    Face snapshots of every face of a solid, indexed by face position,
+    owned by this holder (the Java `precomputeFacePlanes` array). Only
+    valid while the solid is not mutated.
     */
     class FacePlanes {
     public:
         explicit FacePlanes(PolyhedralBoundedSolid* solid);
         ~FacePlanes();
-        InfinitePlane* get(long int i) const;
+        const java::ArrayList<PolyhedralBoundedSolidFaceGeometry*>& list() const;
     private:
-        java::ArrayList<InfinitePlane*> planes;
+        java::ArrayList<PolyhedralBoundedSolidFaceGeometry*> planes;
         FacePlanes(const FacePlanes&);
         FacePlanes& operator=(const FacePlanes&);
     };
@@ -178,36 +205,25 @@ private:
     static int compareToZero(double value);
     static int pointInFace(_PolyhedralBoundedSolidFace* face,
         const Vector3Dd& point);
+    static void appendContactLaminae(PolyhedralBoundedSolid* inSolidA,
+        PolyhedralBoundedSolid* inSolidB, PolyhedralBoundedSolid* outRes);
     static int classifyPointAgainstSolid(PolyhedralBoundedSolid* solid,
-        const FacePlanes& facePlanes, const Vector3Dd& point);
-    static java::ArrayList<double> overlappingBounds(PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
-    static bool hasPositiveOverlapVolume(const java::ArrayList<double>& bounds);
-    static bool hasInteriorOverlapWitnessInAabb(
-        const java::ArrayList<double>& bounds,
-        PolyhedralBoundedSolid* solidA,
-        PolyhedralBoundedSolid* solidB,
-        const FacePlanes& planesA,
-        const FacePlanes& planesB);
-    static java::ArrayList<double> axisProbeCoordinates(double min, double max);
-    static double vertexCoordinate(_PolyhedralBoundedSolidVertex* vertex,
-        int axis);
-    static void appendInteriorVertexCoordinates(java::ArrayList<double>& coords,
-        PolyhedralBoundedSolid* solid, int axis, double min, double max,
-        double eps);
-    static void appendUniqueInteriorSample(java::ArrayList<double>& samples,
-        double value, double min, double max, double eps);
-    static java::ArrayList<double> sampleCoordinates(double min, double max,
-        PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB,
-        int axis);
+        const Vector3Dd& point);
     static bool hasConfirmedInteriorOverlap(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB);
+    static bool isTangentlyContained(PolyhedralBoundedSolid* inner,
+        PolyhedralBoundedSolid* outer);
+    static bool someFaceWitnessIsOutside(PolyhedralBoundedSolid* solidA,
+        PolyhedralBoundedSolid* solidB,
+        const java::ArrayList<PolyhedralBoundedSolidFaceGeometry*>& planesB);
+    static bool witnessInsideFace(_PolyhedralBoundedSolidFace* source,
+        _PolyhedralBoundedSolidFace* target);
+    static double polygonArea(const Polygon& points);
     static int classifySolidAgainstSolid(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB);
     static int classifyNoIntersectionRelation(int aInB, int bInA);
     static bool hasProperEdgeFaceIntersection(PolyhedralBoundedSolid* current,
         PolyhedralBoundedSolid* other);
-    static bool hasPartialCoplanarFaceAreaOverlap(
-        PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
     static java::ArrayList<Polygon> partialCoplanarFaceAreaOverlapPolygons(PolyhedralBoundedSolid* solidA, PolyhedralBoundedSolid* solidB);
     static bool coplanarFaces(_PolyhedralBoundedSolidFace* faceA,
         _PolyhedralBoundedSolidFace* faceB);

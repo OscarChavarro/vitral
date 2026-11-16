@@ -9,6 +9,9 @@ class _PolyhedralBoundedSolidHalfEdge;
 class _PolyhedralBoundedSolidVertex;
 
 class PolyhedralBoundedSolidEulerOperators {
+private:
+    static _PolyhedralBoundedSolidFace* lmefCircularFace(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he, int newFaceId);
+
 public:
     static void mvfs(PolyhedralBoundedSolid* solid, const Vector3Dd& pos, int vertexId, int faceId);
     static void kvfs(PolyhedralBoundedSolid* solid);

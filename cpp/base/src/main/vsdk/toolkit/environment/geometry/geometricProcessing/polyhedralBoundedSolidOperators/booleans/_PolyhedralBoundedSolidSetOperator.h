@@ -20,7 +20,10 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetNonIntersectingClassifier.h"
 
 class PolyhedralBoundedSolid;
+class _PolyhedralBoundedSolidEdge;
+class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
+class _PolyhedralBoundedSolidLoop;
 class _SetOperationContext;
 class _PolyhedralBoundedSolidIdNamespace;
 class _PolyhedralBoundedSolidSetOperatorVertexFace;
@@ -46,7 +49,8 @@ C++ port notes:
   result), but before returning, every node used by the result is unlisted
   from the operands, so the caller can delete the operands and the result
   independently.
-- Java `IllegalStateException` is thrown as `java::IllegalStateException`.
+- On the exceptions of `completeSetOpResult` and of the connect stage the
+  partial result is deleted (Java leaves it to the garbage collector).
 
 C++ counterpart of Java's `_PolyhedralBoundedSolidSetOperator`.
 */
@@ -110,10 +114,32 @@ public:
         PolyhedralBoundedSolid* inSolidB);
 
     /**
-    @return true when `result` has faces, none degenerate, and passes the
-    intermediate validation
+    Result path recorded when the operation is rejected with
+    NonManifoldBooleanResultException.
     */
-    static bool isStructurallyUsableSetOpResult(PolyhedralBoundedSolid* result);
+    static const char* const REJECTED_NON_MANIFOLD_PATH;
+
+    /**
+    Name of the path that produced the last setOp result on the calling
+    thread ("normal-pipeline" or the preflight that answered instead).
+    @return null when none was recorded
+    */
+    static const java::String* getLastResultPath();
+
+    /**
+    Violations of the post-connect invariant found on the last setOp of the
+    calling thread that reached connect.
+    @return null when connect was not reached
+    */
+    static const java::ArrayList<java::String>* getLastConnectInvariantViolations();
+
+    /**
+    Detects result pieces that touch only along an edge or at a vertex.
+    @return false (Java null) when there is none; otherwise true and the
+    description of the first contact in `description`
+    */
+    static bool findNonManifoldContact(PolyhedralBoundedSolid* result,
+        java::String* description);
 
     /**
     Following program [MANT1988].15.1.
@@ -124,8 +150,12 @@ public:
     @param maximizeResultFaces true to maximize the faces of the result
     @param doStrictValidation true to enforce strict validation of the result
     @return the result solid, owned by the caller
-    @throws java::IllegalStateException (Java IllegalStateException) when
-    `doStrictValidation` is true and the result fails strict validation
+    @throws InvalidOperandException when the operands are not valid solids
+    @throws SolidOperationFailedException when the intersection curve can
+    not be closed
+    @throws NonManifoldBooleanResultException for a non-manifold result
+    @throws InvalidSolidResultException when `doStrictValidation` is true
+    and the result fails strict validation
     */
     static PolyhedralBoundedSolid* setOp(
         PolyhedralBoundedSolid* inSolidA,
@@ -150,6 +180,37 @@ private:
 
     /** Namespace installed by the most recent setOp (owned here). */
     static _PolyhedralBoundedSolidIdNamespace* ownedNamespace;
+
+    /** Java ThreadLocal<String>: the value and whether it is set. */
+    static thread_local java::String lastResultPath;
+    static thread_local bool hasLastResultPath;
+    static thread_local java::ArrayList<java::String> lastConnectInvariantViolations;
+    static thread_local bool hasLastConnectInvariantViolations;
+
+    static void setLastResultPath(const char* path);
+    static void weldCoincidentVerticesOfOperand(PolyhedralBoundedSolid* solid,
+        const char* name);
+    static PolyhedralBoundedSolid* setOpNoIntersectionCase(
+        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+        PolyhedralBoundedSolid* outRes, int op);
+    static PolyhedralBoundedSolid* setOpNoIntersectionCase(
+        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+        PolyhedralBoundedSolid* outRes, int op, PreflightCache& cache);
+    static java::ArrayList<java::String> checkConnectInvariant(
+        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB,
+        _SetOperationContext& ctx);
+    static void collectNullFaceViolations(const char* label,
+        const java::ArrayList<_PolyhedralBoundedSolidFace*>& nullFaces,
+        java::ArrayList<java::String>& violations);
+    static bool isPointLikeFace(_PolyhedralBoundedSolidFace* f);
+    static void collectCoincidentLoopViolations(const char* label,
+        PolyhedralBoundedSolid* solid,
+        const java::ArrayList<_PolyhedralBoundedSolidFace*>& nullFaces,
+        java::ArrayList<java::String>& violations);
+    static bool loopsCoincide(_PolyhedralBoundedSolidLoop* a,
+        _PolyhedralBoundedSolidLoop* b);
+    static bool sameEndpoints(_PolyhedralBoundedSolidEdge* e,
+        _PolyhedralBoundedSolidEdge* f);
 
     static int nextVertexId(PolyhedralBoundedSolid* current,
         PolyhedralBoundedSolid* other);
@@ -191,13 +252,7 @@ private:
     static java::String cardinalitiesAndBounds(PolyhedralBoundedSolid* solid);
     static PolyhedralBoundedSolid* deepCloneSolid(PolyhedralBoundedSolid* solid,
         const char* solidLabel);
-    static bool hasDegenerateFace(PolyhedralBoundedSolid* solid);
-    static bool shouldUseAxisAlignedCellBooleanFallback(
-        PolyhedralBoundedSolid* fallback, PolyhedralBoundedSolid* result);
     static bool hasIncompleteConnectState();
-    static bool hasBasicSetOpShapeData(PolyhedralBoundedSolid* result);
-    static bool hasSameShapeData(PolyhedralBoundedSolid* first,
-        PolyhedralBoundedSolid* second);
 
     /**
     C++ ownership helper: removes from the lists of `from` every face, edge
@@ -207,11 +262,11 @@ private:
         PolyhedralBoundedSolid* reference);
 
     /**
-    C++ ownership helper: deletes an intermediate result that is being
-    replaced, after unlisting the nodes it shares with the operands.
+    C++ ownership helper: deletes a structural copy of an operand, after
+    unlisting the nodes the result took from it.
     */
-    static void discardIntermediateResult(PolyhedralBoundedSolid* result,
-        PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
+    static void releaseCopy(PolyhedralBoundedSolid* copy,
+        PolyhedralBoundedSolid* result);
 };
 
 #endif

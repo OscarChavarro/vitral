@@ -5,46 +5,28 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SPLITTER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SPLITTER__
 
-
-#include "java/util/Collections.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/util/HashMap.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSectorClassification.h"
 
 class InfinitePlane;
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidEdge;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
+class _PolyhedralBoundedSolidLoop;
 class _PolyhedralBoundedSolidVertex;
 
 /**
 This class is used to store vertex / halfedge neigborhood information, as presented
 in section [MANT1988].14.5, and program [MANT1988].14.3.
 */
-class _PolyhedralBoundedSolidSplitterSectorClassification : public _PolyhedralBoundedSolidOperator {
+class _PolyhedralBoundedSolidSplitterSectorClassification
+    : public _PolyhedralBoundedSolidSectorClassification {
 public:
-    static const int ABOVE = 1;
-    static const int BELOW = -1;
-    static const int ON = 0;
-
-    static const int COPLANAR_FACE = 10;
-    static const int INPLANE_EDGE = 20;
-    static const int CROSSING_EDGE = 30;
-    static const int UNDEFINED = 40;
-
-    _PolyhedralBoundedSolidHalfEdge* sector;
-    int cl;
-
-    // Following attributes are not taken from [MANT1988], and all operations
-    // on them are fine tunning options aditional to original algorithm.
-    bool isWide;
-    Vector3Dd position;
-    int situation;
-
-    _PolyhedralBoundedSolidSplitterSectorClassification();
-
     java::String toString() const;
 };
 
@@ -54,17 +36,19 @@ design patern for class `_PolyhedralBoundedSolidEdge`, and adds sort-ability.
 */
 class _PolyhedralBoundedSolidSplitterNullEdge : public _PolyhedralBoundedSolidOperator {
 private:
-    static PolyhedralBoundedSolidNumericPolicy::ToleranceContext nullEdgeNumericContext;
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext;
 
 public:
     _PolyhedralBoundedSolidEdge* e;
 
     // Default constructible, as the elements of `java::ArrayList`
     _PolyhedralBoundedSolidSplitterNullEdge() : e(nullptr) {}
-    explicit _PolyhedralBoundedSolidSplitterNullEdge(_PolyhedralBoundedSolidEdge* e);
 
-    static void setNumericContext(
-        const PolyhedralBoundedSolidNumericPolicy::ToleranceContext* context);
+    /**
+    @param numericContext tolerances, or null for the default ones
+    */
+    _PolyhedralBoundedSolidSplitterNullEdge(_PolyhedralBoundedSolidEdge* e,
+        const PolyhedralBoundedSolidNumericPolicy::ToleranceContext* numericContext);
 
     /**
     As Java `compareTo`: orders by the position of the starting vertex of
@@ -88,18 +72,28 @@ public:
     /**
     Given the input `inSolid` and the cutting plane `inSplittingPlane`,
     this method appends to the `outSolidsAbove` list the solids resulting
-    from cutting the solid with the plane and resulting above the plane,
+    from cutting the solid with the plane and resulting above the plane
+    (positive signed distance, on the side the plane normal points to),
     similarly, `outSolidsBelow` will be appended with solid pieces
     resulting below the plane.
+
+    At least one solid is appended to each list. Disjoint pieces on one
+    side stay together as shells of one solid; pieces that touch at a
+    vertex or along an edge come out as separate solids. When the plane
+    does not cut the solid (it misses it, touches it, or contains one of
+    its faces), a copy of the solid goes to the list of its side and an
+    empty solid to the other one.
+
+    `inSolid` is not modified: the algorithm runs on a structural copy
+    (Fable5.2Analysis.md Stage E), and the output lists never receive the
+    input object.
 
     Current macro-algorithm follows the strategy outlined on sections
     [MANT1988].14.1, [MANT1988].14.2 and [MANT1988].14.3 and program
     [MANT1988].14.1.
 
-    C++ port note: the caller owns the solids appended to the lists. When
-    the plane does not cut the solid, `inSolid` itself is appended to
-    `outSolidsAbove` (as in Java); otherwise its faces, edges and vertices
-    are moved to the new solids and `inSolid` is left empty.
+    C++ port note: the caller owns the solids appended to the lists, and
+    keeps owning `inSolid`.
     */
     static void split(PolyhedralBoundedSolid* inSolid,
                       const InfinitePlane& inSplittingPlane,
@@ -110,61 +104,117 @@ private:
     typedef _PolyhedralBoundedSolidSplitterSectorClassification SectorClassification;
 
     /**
-    Following variable `soov` ("set of ON-vertices") from program [MANT1988].14.1.
-    */
-    static java::ArrayList<_PolyhedralBoundedSolidVertex*> soov;
+    Working state of one split call. The global variables of program
+    [MANT1988].14.1 live here instead of in static fields, so that split is
+    reentrant and leaves nothing behind (Fable5.2Analysis.md Stage E).
 
-    /**
-    Following variable `sone` ("set of null edges") from program [MANT1988].14.1.
+    C++ port note: the Java identity set `struts` is a `java::HashMap`
+    keyed by pointer whose values are not used.
     */
-    static java::ArrayList<_PolyhedralBoundedSolidSplitterNullEdge> sone;
+    class _SplitContext
+    {
+      public:
+        /**
+        Variable `soov` ("set of ON-vertices") from program [MANT1988].14.1.
+        */
+        java::ArrayList<_PolyhedralBoundedSolidVertex*> soov;
 
-    /**
-    Following variable `sonf` ("set of null faces") from program [MANT1988].14.1.
-    */
-    static java::ArrayList<_PolyhedralBoundedSolidFace*> sonf;
+        /**
+        Variable `sone` ("set of null edges") from program [MANT1988].14.1.
+        */
+        java::ArrayList<_PolyhedralBoundedSolidSplitterNullEdge> sone;
 
-    static java::ArrayList<_PolyhedralBoundedSolidFace*> facesToFixAbove;
-    static java::ArrayList<_PolyhedralBoundedSolidFace*> facesToFixBelow;
+        /**
+        Variable `sonf` ("set of null faces") from program [MANT1988].14.1.
+        */
+        java::ArrayList<_PolyhedralBoundedSolidFace*> sonf;
 
-    /**
-    Following variable `ends` from program [MANT1988].14.9.
-    */
-    static java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> ends;
-    static java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> tieds;
+        java::ArrayList<_PolyhedralBoundedSolidFace*> facesToFixAbove;
+        java::ArrayList<_PolyhedralBoundedSolidFace*> facesToFixBelow;
+
+        /**
+        Variable `ends` from program [MANT1988].14.9.
+        */
+        java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> ends;
+        java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> tieds;
+
+        /**
+        Null edges created by lmev(he, he) (struts): both halves lie in the
+        same face. Their halves are paired by geometry in `splitConnect`.
+        */
+        java::HashMap<_PolyhedralBoundedSolidEdge*, bool> struts;
+    };
 
     static int compareToZero(double value);
-    static void addsoov(_PolyhedralBoundedSolidVertex* v);
-    static void splitGenerate(PolyhedralBoundedSolid* inSolid,
+    static void addsoov(_SplitContext& ctx, _PolyhedralBoundedSolidVertex* v);
+    static void splitGenerate(_SplitContext& ctx,
+                              PolyhedralBoundedSolid* inSolid,
                               const InfinitePlane& inSplittingPlane);
-    static java::ArrayList<SectorClassification> getNeighborhood(_PolyhedralBoundedSolidVertex* vtx, const InfinitePlane& inSplittingPlane);
-    static bool checkSplitterSectorWideness(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool inplaneEdgesOn(const java::ArrayList<SectorClassification>& nbr);
+    static java::ArrayList<SectorClassification> getNeighborhood(
+        _PolyhedralBoundedSolidVertex* vtx,
+        const InfinitePlane& inSplittingPlane);
     static void reclassifyOnSectors(java::ArrayList<SectorClassification>& nbr,
                                     const InfinitePlane& inSplittingPlane);
     static void reclassifyOnEdges(java::ArrayList<SectorClassification>& nbr);
-    static void insertNullEdges(java::ArrayList<SectorClassification>& nbr,
+    static bool isConvexEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    static void insertNullEdges(_SplitContext& ctx,
+                                java::ArrayList<SectorClassification>& nbr,
                                 PolyhedralBoundedSolid* inSolid,
                                 const InfinitePlane& inSplittingPlane);
-    static void splitClassify(PolyhedralBoundedSolid* inSolid,
+    static void splitClassify(_SplitContext& ctx,
+                              PolyhedralBoundedSolid* inSolid,
                               const InfinitePlane& inSplittingPlane);
-    static _PolyhedralBoundedSolidHalfEdge* canJoin(_PolyhedralBoundedSolidHalfEdge* he);
+    static _PolyhedralBoundedSolidHalfEdge* canJoin(_SplitContext& ctx,
+        _PolyhedralBoundedSolidHalfEdge* he);
     static void printNbr(const java::ArrayList<SectorClassification>& neighborSectorsInfo);
-    static void printEnds();
-    static void cut(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool isLoose(_PolyhedralBoundedSolidHalfEdge* he);
-    static void splitConnect();
-    static void classify(PolyhedralBoundedSolid* s,
+    static void printEnds(_SplitContext& ctx);
+    static void cut(_SplitContext& ctx, _PolyhedralBoundedSolidHalfEdge* he);
+    static bool isLoose(_SplitContext& ctx, _PolyhedralBoundedSolidHalfEdge* he);
+    static void splitConnect(_SplitContext& ctx);
+    static void orientStrut(_SplitContext& ctx,
+                            _PolyhedralBoundedSolidEdge* strut);
+    static double ccwAngle(const Vector3Dd& a, const Vector3Dd& b,
+                           const Vector3Dd& n);
+    static void classify(_SplitContext& ctx,
                          PolyhedralBoundedSolid* above,
                          PolyhedralBoundedSolid* below);
-    static bool isNullFace(_PolyhedralBoundedSolidFace* f);
-    static void destroy(PolyhedralBoundedSolid* inSolid);
     static bool faceInsideFace(_PolyhedralBoundedSolidFace* a,
                                _PolyhedralBoundedSolidFace* b);
     static void fixNullFaces(java::ArrayList<_PolyhedralBoundedSolidFace*>& l);
-    static void splitFinish(PolyhedralBoundedSolid* inSolid,
+    static void splitFinish(_SplitContext& ctx,
+                            PolyhedralBoundedSolid* inSolid,
+                            const InfinitePlane& inSplittingPlane,
                             java::ArrayList<PolyhedralBoundedSolid*>& outSolidsAbove,
                             java::ArrayList<PolyhedralBoundedSolid*>& outSolidsBelow);
+    static void resolvePinchedLoops(PolyhedralBoundedSolid* piece);
+    static bool resolveOnePinch(PolyhedralBoundedSolid* piece,
+                                _PolyhedralBoundedSolidLoop* loop);
+    static bool rotatesInto(_PolyhedralBoundedSolidHalfEdge* from,
+                            _PolyhedralBoundedSolidHalfEdge* to);
+    static java::ArrayList<PolyhedralBoundedSolid*> separateShells(
+        PolyhedralBoundedSolid* piece);
+    static bool hasTouchingShells(PolyhedralBoundedSolid* solid);
+    static void updateMaximumIds(PolyhedralBoundedSolid* solid);
+    static bool straddles(PolyhedralBoundedSolid* solid,
+                          const InfinitePlane& plane);
+    static int sideOf(PolyhedralBoundedSolid* piece,
+                      const InfinitePlane& plane);
+
+    /**
+    C++ port note, no Java counterpart: frees the intermediate solid
+    `s` (the working copy, or a piece that `separateShells` emptied) as the
+    Java garbage collector does. Nodes that a solid of `results` holds are
+    kept; the others are deleted.
+    */
+    static void releaseIntermediate(PolyhedralBoundedSolid* s,
+        const java::ArrayList<PolyhedralBoundedSolid*>& results);
+
+    /**
+    C++ port note, no Java counterpart: after `classify`, drops from the
+    lists of the working copy the edges and vertices that `cleanup` listed
+    in the pieces, so that no list keeps a node another solid may delete.
+    */
+    static void forgetMovedNodes(PolyhedralBoundedSolid* s);
 };
 
 #endif

@@ -20,7 +20,25 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
+#include "java/lang/String.h"
+#include "java/lang/System.h"
+
+int HiddenLineRenderer::DEBUG_EDGE_INDEX = -1;
+
 namespace {
+
+void debugSplit(int edgeIndex, const java::String& message)
+{
+    if ( edgeIndex == HiddenLineRenderer::DEBUG_EDGE_INDEX ) {
+        java::System::out.println((java::String("[AppelSplit e") +
+            java::String::valueOf(edgeIndex) + "] " + message).c_str());
+    }
+}
+
+java::String format5(double value)
+{
+    return java::String::format("%.5f", value);
+}
 
 class AppelEdgeSegment {
 public:
@@ -305,7 +323,7 @@ void buildCache(
 
     Vector3Dd prevEnd;
     bool hasPrevEnd = false;
-    java::ArrayList<_PolyhedralBoundedSolidEdge*>& edges = solid->getEdgesList();
+    CircularArrayList<_PolyhedralBoundedSolidEdge*>& edges = solid->getEdgesList();
 
     for (long int i = 0; i < edges.size(); ++i) {
         _PolyhedralBoundedSolidEdge* edge = edges.get(i);
@@ -389,6 +407,20 @@ bool isUnitInterval(double t)
     return t >= VSDK::EPSILON && t <= 1.0 - VSDK::EPSILON;
 }
 
+HiddenLineRenderer::AppelEdgeDump* createEdgeDump(const AppelEdgeCache& edge)
+{
+    HiddenLineRenderer::AppelEdgeDump* dump =
+        new HiddenLineRenderer::AppelEdgeDump();
+    dump->edgeIndex = edge.edgeIndex;
+    dump->edgeType = edge.edgeType;
+    dump->edgeTypeName = HiddenLineRenderer::edgeTypeName(edge.edgeType);
+    dump->face1Id = edge.leftFace != 0 ? edge.leftFace->id : -1;
+    dump->face2Id = edge.rightFace != 0 ? edge.rightFace->id : -1;
+    dump->start = Vector3Dd(edge.start);
+    dump->end = Vector3Dd(edge.end);
+    return dump;
+}
+
 void processLineToBeDrawn(
     java::ArrayList<HiddenLineQuerySolid>& solids,
     AppelEdgeCache& inEdge,
@@ -396,7 +428,8 @@ void processLineToBeDrawn(
     Calligraphic2DBuffer* outVisibleContourLineSet,
     Calligraphic2DBuffer* outVisibleNonContourLineSet,
     Calligraphic2DBuffer* outHiddenLineSet,
-    java::ArrayList<AppelEdgeCache*>& contourCache)
+    java::ArrayList<AppelEdgeCache*>& contourCache,
+    HiddenLineRenderer::AppelEdgeDump* edgeDump)
 {
     Vector3Dd sp1a = inEdge.start;
     Vector3Dd sp1b = inEdge.end;
@@ -412,21 +445,44 @@ void processLineToBeDrawn(
             continue;
         }
 
-        Ray ray(
-            cl->start.add(cl->direction.multiply(3 * VSDK::EPSILON)),
-            cl->direction);
+        // As Java, `withDirection` keeps the contour direction unnormalized
+        // (the constructors normalize it), so `t0` is the contour length
+        Ray ray = Ray()
+            .withOrigin(cl->start.add(cl->direction.multiply(3 * VSDK::EPSILON)))
+            .withDirection(cl->direction);
         double t0 = ray.getDirection().length() - 6 * VSDK::EPSILON;
         ray = ray.withDirection(ray.getDirection().normalized());
         Intersection* hit = Triangle::doIntersectionWithTriangle(
             ray, sp1a, sp1b, sp1c);
+        if (inEdge.edgeIndex == HiddenLineRenderer::DEBUG_EDGE_INDEX &&
+            hit != 0) {
+            debugSplit(inEdge.edgeIndex, java::String("contour cl.edgeIndex=") +
+                java::String::valueOf(cl->edgeIndex) + " sweepHit t=" +
+                format5(hit->t) + " t0=" + format5(t0) + " accepted=" +
+                (hit->t < t0 ? "true" : "false"));
+        }
         if (hit != 0 && hit->t < t0) {
             InfinitePlane plane(cl->start, cl->end, sp2c);
             Ray edgeRay(inEdge.start, inEdge.direction.normalized());
             Ray* planeHit = plane.doIntersectionFirstHit(edgeRay);
-            if (planeHit != 0) {
+            if (planeHit == 0) {
+                debugSplit(inEdge.edgeIndex, java::String("  cl=") +
+                    java::String::valueOf(cl->edgeIndex) +
+                    " DISCARDED: edge/SP2 plane intersection null");
+            }
+            else {
                 AppelEdgeSegment segment;
                 segment.lineParameter = planeHit->getT() / inEdge.direction.length();
-                if (isUnitInterval(segment.lineParameter)) {
+                if (!isUnitInterval(segment.lineParameter)) {
+                    debugSplit(inEdge.edgeIndex, java::String("  cl=") +
+                        java::String::valueOf(cl->edgeIndex) +
+                        " DISCARDED: split t=" + format5(segment.lineParameter) +
+                        " outside unit interval");
+                }
+                else {
+                    debugSplit(inEdge.edgeIndex, java::String("  cl=") +
+                        java::String::valueOf(cl->edgeIndex) +
+                        " ADDED split t=" + format5(segment.lineParameter));
                     segments.add(segment);
                 }
                 delete planeHit;
@@ -476,6 +532,18 @@ void processLineToBeDrawn(
         }
         else {
             addProjectedLine(outHiddenLineSet, pos1, pos2, inCamera);
+        }
+
+        if (edgeDump != 0) {
+            HiddenLineRenderer::AppelSegmentDump segmentDump;
+            segmentDump.tStart = t1;
+            segmentDump.tEnd = t2;
+            segmentDump.start = Vector3Dd(pos1);
+            segmentDump.end = Vector3Dd(pos2);
+            segmentDump.midpoint = Vector3Dd(midpoint);
+            segmentDump.midpointQuantitativeInvisibility = midpointQi;
+            segmentDump.classification = midpointQi == 0 ? "visible" : "hidden";
+            edgeDump->segments.add(segmentDump);
         }
     }
 }
@@ -534,12 +602,56 @@ int HiddenLineRenderer::isFaceVisibleFromCamera(
     return -1;
 }
 
+java::String HiddenLineRenderer::edgeTypeName(int edgeType)
+{
+    switch ( edgeType ) {
+      case AppelEdgeCache::HIDDEN_LINE: return "hidden";
+      case AppelEdgeCache::CONTOUR_LINE: return "contour";
+      case AppelEdgeCache::VISIBLE_LINE: return "visible";
+      default: return "unknown";
+    }
+}
+
+/**
+Given a viewing camera and a set of bodies, this method generates three
+sets of lines for visible/hidden line rendering, as described in
+paper [APPE1967] and section [FOLE1992].15.3.2. The resulting line sets
+are projected to 2D calligraphic buffers and separated into visible
+contour, visible non-contour and hidden segments.
+*/
 void HiddenLineRenderer::executeAppelAlgorithm(
     java::ArrayList<SimpleBody*>& inSimpleBodyArray,
     const Camera* inCamera,
     Calligraphic2DBuffer* outVisibleContourLineSet,
     Calligraphic2DBuffer* outVisibleNonContourLineSet,
     Calligraphic2DBuffer* outHiddenLineSet)
+{
+    // Rendering path: do not collect the per-edge diagnostic dump
+    AppelAlgorithmDump unusedDump;
+    runAppelAlgorithm(inSimpleBodyArray, inCamera, outVisibleContourLineSet,
+        outVisibleNonContourLineSet, outHiddenLineSet, false, unusedDump);
+}
+
+void HiddenLineRenderer::executeAppelAlgorithmWithDiagnostics(
+    java::ArrayList<SimpleBody*>& inSimpleBodyArray,
+    const Camera* inCamera,
+    Calligraphic2DBuffer* outVisibleContourLineSet,
+    Calligraphic2DBuffer* outVisibleNonContourLineSet,
+    Calligraphic2DBuffer* outHiddenLineSet,
+    AppelAlgorithmDump& outDump)
+{
+    runAppelAlgorithm(inSimpleBodyArray, inCamera, outVisibleContourLineSet,
+        outVisibleNonContourLineSet, outHiddenLineSet, true, outDump);
+}
+
+void HiddenLineRenderer::runAppelAlgorithm(
+    java::ArrayList<SimpleBody*>& inSimpleBodyArray,
+    const Camera* inCamera,
+    Calligraphic2DBuffer* outVisibleContourLineSet,
+    Calligraphic2DBuffer* outVisibleNonContourLineSet,
+    Calligraphic2DBuffer* outHiddenLineSet,
+    bool collectDiagnostics,
+    AppelAlgorithmDump& outDump)
 {
     if (inCamera == 0 || outVisibleContourLineSet == 0 ||
         outVisibleNonContourLineSet == 0 || outHiddenLineSet == 0) {
@@ -584,16 +696,22 @@ void HiddenLineRenderer::executeAppelAlgorithm(
 
     for (long int i = 0; i < cache.size(); ++i) {
         AppelEdgeCache& edge = *cache[i];
+        AppelEdgeDump* edgeDump =
+            collectDiagnostics ? createEdgeDump(edge) : 0;
         switch (edge.edgeType) {
           case AppelEdgeCache::HIDDEN_LINE:
           case AppelEdgeCache::CONTOUR_LINE:
           case AppelEdgeCache::VISIBLE_LINE:
             processLineToBeDrawn(querySolids, edge, inCamera,
                 outVisibleContourLineSet, outVisibleNonContourLineSet,
-                outHiddenLineSet, contourCache);
+                outHiddenLineSet, contourCache, edgeDump);
             break;
           default:
             break;
+        }
+        if (edgeDump != 0) {
+            outDump.edges.add(*edgeDump);
+            delete edgeDump;
         }
     }
 

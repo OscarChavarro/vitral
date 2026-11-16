@@ -8,10 +8,13 @@
 #include "java/lang/System.h"
 namespace java {
 
-java::FileOutputStream System::standardOutput("/dev/stdout");
-java::FileOutputStream System::standardError("/dev/stderr");
-java::PrintStream System::out(&System::standardOutput);
-java::PrintStream System::err(&System::standardError);
+// The C standard streams, shared with `printf` and `fprintf(stderr, ...)`
+// (opening "/dev/stdout" again would give a second file position that
+// overwrites the output redirected to a regular file); autoflush as Java's
+java::FileOutputStream System::standardOutput(stdout);
+java::FileOutputStream System::standardError(stderr);
+java::PrintStream System::out(&System::standardOutput, true);
+java::PrintStream System::err(&System::standardError, true);
 
 [[noreturn]] void
 System::exit(int status) {

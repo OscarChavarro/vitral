@@ -11,6 +11,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologySummary.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricCollapsedLaminaStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricPlanarityStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricStrictFaceIntersectionsStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricStrictLoopsStrategy.h"
@@ -78,16 +79,24 @@ bool PolyhedralBoundedSolidValidationEngine::validateIntermediate(PolyhedralBoun
     return ok;
 }
 
+/**
+Validates both operands of a boolean operation before the pipeline
+starts: validateIntermediate on each solid, no coincident vertices, and
+unique face and vertex ids. Returns true only when both solids pass all
+checks; the reasons go to `msg`.
+
+It only reads. Until plan-stage11 Phase C it welded the coincident
+vertices it found and validated again, so validating could change the
+operands. The set operator now prepares its own copies of the operands
+before calling this (see
+`PolyhedralBoundedSolidTopologyEditing::weldCoincidentVertices`).
+*/
 bool PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
     PolyhedralBoundedSolid* solidA,
     PolyhedralBoundedSolid* solidB,
     java::String* msg)
 {
-    bool ok;
-    java::String sub;
-    int welded;
-
-    ok = true;
+    bool ok = true;
 
     if ( !validateIntermediate(solidA) ) {
         append(msg, "solidA failed validateIntermediate\n");
@@ -100,56 +109,32 @@ bool PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
     if ( !ok ) {
         return false;
     }
+    ok &= validateBooleanInput("solidA", solidA, msg);
+    ok &= validateBooleanInput("solidB", solidB, msg);
+    return ok;
+}
 
-    PolyhedralBoundedSolidNumericPolicy::ToleranceContext ctxA =
-        PolyhedralBoundedSolidNumericPolicy::forSolid(solidA);
-    PolyhedralBoundedSolidNumericPolicy::ToleranceContext ctxB =
-        PolyhedralBoundedSolidNumericPolicy::forSolid(solidB);
+bool PolyhedralBoundedSolidValidationEngine::validateBooleanInput(
+    const java::String& name,
+    PolyhedralBoundedSolid* solid,
+    java::String* msg)
+{
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext context =
+        PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
+    java::String sub;
+    bool ok = true;
 
-    sub = "";
-    if ( !PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(
-            solidA, ctxA, &sub) ) {
-        welded = PolyhedralBoundedSolidTopologyEditing::weldCoincidentVertices(
-            solidA, ctxA);
-        append(msg, java::String("solidA had coincident vertices; welded ") +
-            java::String::valueOf(welded).c_str() + " pair(s)\n");
-        if ( !validateIntermediate(solidA) ) {
-            append(msg, "solidA failed validateIntermediate after weld\n");
-            throw java::IllegalArgumentException(java::String(
-                "solidA is topologically invalid after coincident-vertex weld:\n") +
-                (msg != 0 ? msg->c_str() : ""));
-        }
-    }
-
-    sub = "";
-    if ( !PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(
-            solidB, ctxB, &sub) ) {
-        welded = PolyhedralBoundedSolidTopologyEditing::weldCoincidentVertices(
-            solidB, ctxB);
-        append(msg, java::String("solidB had coincident vertices; welded ") +
-            java::String::valueOf(welded).c_str() + " pair(s)\n");
-        if ( !validateIntermediate(solidB) ) {
-            append(msg, "solidB failed validateIntermediate after weld\n");
-            throw java::IllegalArgumentException(java::String(
-                "solidB is topologically invalid after coincident-vertex weld:\n") +
-                (msg != 0 ? msg->c_str() : ""));
-        }
-    }
-
-    sub = "";
-    if ( !PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
-            solidA, &sub) ) {
-        append(msg, java::String("solidA has ID violations:\n") + sub);
+    if ( !PolyhedralBoundedSolidGeometricValidator
+            ::validateNoCoincidentVertices(solid, context, &sub) ) {
+        append(msg, name + " has coincident vertices:\n" + sub);
         ok = false;
     }
-
     sub = "";
-    if ( !PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(
-            solidB, &sub) ) {
-        append(msg, java::String("solidB has ID violations:\n") + sub);
+    if ( !PolyhedralBoundedSolidGeometricValidator
+            ::validateUniqueFaceAndVertexIds(solid, &sub) ) {
+        append(msg, name + " has ID violations:\n" + sub);
         ok = false;
     }
-
     return ok;
 }
 
@@ -178,6 +163,7 @@ bool PolyhedralBoundedSolidValidationEngine::validateStrict(
     strategies.add(new _GeometricPlanarityStrategy());
     strategies.add(new _TopologicalIntegrityStrategy());
     strategies.add(new _GeometricStrictLoopsStrategy());
+    strategies.add(new _GeometricCollapsedLaminaStrategy());
     strategies.add(new _GeometricStrictFaceIntersectionsStrategy());
     ok = runStrategies(strategies, solid, numericContext, msg);
 

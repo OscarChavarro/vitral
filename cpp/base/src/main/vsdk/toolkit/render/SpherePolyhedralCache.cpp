@@ -89,7 +89,7 @@ namespace {
     java::ArrayList<Vector3Dd> collectTriangles(PolyhedralBoundedSolid* solid)
     {
         java::ArrayList<Vector3Dd> triangles;
-        java::ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
+        CircularArrayList<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
 
         for (long int f = 0; f < faces.size(); f++) {
             _PolyhedralBoundedSolidFace* face = faces.get(f);

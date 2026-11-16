@@ -3,6 +3,9 @@
 
 #include "java/lang/String.h"
 
+#include "vsdk/toolkit/common/dataStructures/ArrayLinkable.h"
+#include "vsdk/toolkit/common/dataStructures/CircularArrayList.h"
+
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class PolyhedralBoundedSolid;
@@ -11,7 +14,22 @@ class _PolyhedralBoundedSolidLoop;
 class _PolyhedralBoundedSolidHalfEdge;
 class _PolyhedralBoundedSolidVertex;
 
-class _PolyhedralBoundedSolidFace {
+class _PolyhedralBoundedSolidFace : public ArrayLinkable {
+private:
+    /// Place of this element in the list that holds it, kept up to date by
+    /// the list (see `ArrayLinkable`).
+    const void* listOwner;
+    int listIndex;
+
+public:
+    virtual const void* getListOwner() const override { return listOwner; }
+    virtual int getListIndex() const override { return listIndex; }
+    virtual void setListSlot(const void* owner, int index) override
+    {
+        listOwner = owner;
+        listIndex = index;
+    }
+
 public:
     class PointInsideResult {
     private:
@@ -43,7 +61,7 @@ public:
 
     int id;
     PolyhedralBoundedSolid* parentSolid;
-    java::ArrayList<_PolyhedralBoundedSolidLoop*> boundariesList;
+    CircularArrayList<_PolyhedralBoundedSolidLoop*> boundariesList;
 
     _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid* parent, int id);
     ~_PolyhedralBoundedSolidFace();
@@ -52,6 +70,10 @@ public:
     _PolyhedralBoundedSolidHalfEdge* findHalfEdge(int vn1);
     bool calculatePlane();
     InfinitePlane* getContainingPlane();
+    // C++ port: Java's getContainingPlane().getNormal() and
+    // getContainingPlane() == null, without leaking the plane the call returns
+    Vector3Dd containingPlaneNormal();
+    bool hasContainingPlane();
     int testPointInside(const Vector3Dd& point, double tolerance);
     int testPointInside(
         const Vector3Dd& point,
@@ -74,9 +96,9 @@ public:
 private:
     static double boundaryLoopAreaMagnitude(_PolyhedralBoundedSolidLoop* loop);
     static _PolyhedralBoundedSolidLoop* selectLoopForPlaneCalculation(
-        java::ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList);
+        CircularArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList);
     static InfinitePlane* calculatePlaneByNewell(
-        java::ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList,
+        CircularArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList,
         double tolerance);
     InfinitePlane* calculatePlaneByCorner(double tolerance);
     Vector3Dd dropCoordinate(const Vector3Dd& in, int coord) const;

@@ -9,6 +9,7 @@ namespace java {
 class PrintStream {
   private:
     OutputStream *stream;
+    bool autoFlush;
 
     static void
     writeText(OutputStream *stream, const char *text);
@@ -18,6 +19,12 @@ class PrintStream {
 
   public:
     explicit PrintStream(OutputStream *stream);
+
+    /**
+    @param autoFlush as Java: when true, the stream is flushed after each
+    `println` and each `printf`
+    */
+    PrintStream(OutputStream *stream, bool autoFlush);
 
     PrintStream &
     printf(const char *format, ...);

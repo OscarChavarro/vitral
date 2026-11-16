@@ -7,7 +7,7 @@
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSectorClassification.h"
 
 class InfinitePlane;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -20,16 +20,12 @@ operation algorithm as proposed on section [MANT1988].15..1. and problem
 [MANT1988].15.4.
 
 C++ counterpart of Java's
-`_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace`. It derives
-from the operator family, as in Java, because `updateLabel` uses its
-numeric context.
+`_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace`. The Java
+copy constructor is the implicit C++ one.
 */
 class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
-    : public _PolyhedralBoundedSolidOperator {
+    : public _PolyhedralBoundedSolidSectorClassification {
 public:
-    static const int ABOVE = 1;
-    static const int BELOW = -1;
-    static const int ON = 0;
 
     static const int AinB = 11;
     static const int AoutB = 12;
@@ -40,26 +36,16 @@ public:
     static const int BonAplus = 17;
     static const int BonAminus = 18;
 
-    static const int COPLANAR_FACE = 10;
-    static const int INPLANE_EDGE = 20;
-    static const int CROSSING_EDGE = 30;
-    static const int UNDEFINED = 40;
-
     static const int COPLANAR_UNKNOWN = 0;
     static const int COPLANAR_DISJOINT = 1;
     static const int COPLANAR_TOUCHING = 2;
     static const int COPLANAR_OVERLAP = 3;
 
-    _PolyhedralBoundedSolidHalfEdge* sector;
     /** Referenced, not owned */
     InfinitePlane* referencePlane;
-    int cl;
 
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
-    bool isWide;
-    Vector3Dd position;
-    int situation;
     bool reverse;
     int coplanarRelation;
 

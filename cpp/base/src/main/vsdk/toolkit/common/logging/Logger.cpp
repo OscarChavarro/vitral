@@ -3,16 +3,44 @@
 #include <cstdlib>
 
 #include "java/lang/String.h"
+#include "java/lang/System.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 bool Logger::withSystemExit = true;
 bool Logger::withFatalExceptions = true;
+bool Logger::staticInitialized = false;
 
-void Logger::setWithSystemExit(bool flag) { withSystemExit = flag; }
-void Logger::setWithFatalExceptions(bool flag) { withFatalExceptions = flag; }
+/**
+C++ port note: Java runs the static initializer on first use of the class,
+after the command line properties are set; this is called at the start of
+every static method.
+*/
+void Logger::staticInitialize()
+{
+    if ( staticInitialized ) {
+        return;
+    }
+    staticInitialized = true;
+    // The system property lets a test JVM turn process termination off
+    // once for every class (-Dvsdk.withSystemExit=false), instead of each
+    // test class toggling it.
+    withSystemExit = !java::String("false").equalsIgnoreCase(
+        java::System::getProperty("vsdk.withSystemExit", "true"));
+    withFatalExceptions = true;
+}
+
+bool Logger::isWithSystemExit()
+{
+    staticInitialize();
+    return withSystemExit;
+}
+
+void Logger::setWithSystemExit(bool flag) { staticInitialize(); withSystemExit = flag; }
+void Logger::setWithFatalExceptions(bool flag) { staticInitialize(); withFatalExceptions = flag; }
 
 void Logger::processFatalError(const java::String& method, const java::String& message, const java::Exception* cause)
 {
+    staticInitialize();
     if ( withSystemExit ) {
         std::exit(1);
     }

@@ -12,6 +12,9 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidIdNamespace.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologySummary.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.h"
 
@@ -74,13 +77,13 @@ PolyhedralBoundedSolidTopologySummary runPipeline(PolyhedralBoundedSolid* a,
     ctx.sonfb = connected.sonfb();
     EXPECT_EQ(0, _PolyhedralBoundedSolidSetNullEdgesConnector::getLastLooseACount());
     EXPECT_EQ(0, _PolyhedralBoundedSolidSetNullEdgesConnector::getLastLooseBCount());
-    EXPECT_TRUE(_PolyhedralBoundedSolidSetNullEdgesConnector::lastCurveReport
-        .isCleanlyClosed());
+    EXPECT_TRUE(_PolyhedralBoundedSolidSetNullEdgesConnector::getLastCurveReport() != nullptr &&
+        _PolyhedralBoundedSolidSetNullEdgesConnector::getLastCurveReport()
+            ->isCleanlyClosed());
 
     PolyhedralBoundedSolid* result = new PolyhedralBoundedSolid();
     _PolyhedralBoundedSolidSetFinisher::finish(a, b, result, op, 0,
-        ctx.sonfa, ctx.sonfb);
-    EXPECT_EQ(0, _PolyhedralBoundedSolidSetFinisher::getLastLegacyFallbackCount());
+        ctx.sonfa, ctx.sonfb, connected);
     PipelineAccess::release();
 
     *outValid = PolyhedralBoundedSolidValidationEngine::validateIntermediate(result);

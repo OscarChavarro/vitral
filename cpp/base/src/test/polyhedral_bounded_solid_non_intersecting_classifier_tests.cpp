@@ -76,22 +76,6 @@ TEST(PolyhedralBoundedSolidSetNonIntersectingClassifierTest, FaceTouchingBoxesAr
     delete b;
 }
 
-TEST(PolyhedralBoundedSolidSetNonIntersectingClassifierTest, PartialCoplanarContactGivesLamina) {
-    PolyhedralBoundedSolid* a = createBox(1.0, Vector3Dd(0, 0, 0));
-    PolyhedralBoundedSolid* b = createBox(1.0, Vector3Dd(1, 0.5, 0.25));
-    PolyhedralBoundedSolid* result = new PolyhedralBoundedSolid();
-
-    EXPECT_FALSE(Classifier::runTouchingOnlyPreflightCase(a, b));
-    ASSERT_EQ(result, Classifier::runPartialCoplanarFaceAreaCase(
-        a, b, result, Classifier::INTERSECTION));
-    // One rectangular lamina: two faces sharing a four vertex loop
-    EXPECT_EQ(2, result->getPolygonsList().size());
-    EXPECT_EQ(4, result->getVerticesList().size());
-    delete result;
-    delete a;
-    delete b;
-}
-
 TEST(PolyhedralBoundedSolidSetNonIntersectingClassifierTest, OverlappingBoxesAreNotPreflighted) {
     PolyhedralBoundedSolid* a = createBox(1.0, Vector3Dd(0, 0, 0));
     PolyhedralBoundedSolid* b = createBox(1.0, Vector3Dd(0.5, 0.4, 0.3));
@@ -101,8 +85,6 @@ TEST(PolyhedralBoundedSolidSetNonIntersectingClassifierTest, OverlappingBoxesAre
     EXPECT_TRUE(cache.hasInteriorOverlap());
     EXPECT_FALSE(Classifier::runContainmentOnlyPreflightCase(a, b, cache));
     EXPECT_FALSE(Classifier::runTouchingOnlyPreflightCase(a, b, cache));
-    EXPECT_EQ(0, Classifier::runPartialCoplanarFaceAreaCase(
-        a, b, result, Classifier::INTERSECTION, cache));
     delete result;
     delete a;
     delete b;

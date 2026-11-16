@@ -1,7 +1,9 @@
 #include "java/lang/String.h"
 #include <cstdio>
 
+#include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_SetOperationTrace.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetClassifier.h"
@@ -48,13 +50,13 @@ int Classifier::coplanarSameOrientationForSectorPair(int secta, int sectb)
          ha->parentLoop == nullptr || hb->parentLoop == nullptr ||
          ha->parentLoop->parentFace == nullptr ||
          hb->parentLoop->parentFace == nullptr ||
-         ha->parentLoop->parentFace->getContainingPlane() == nullptr ||
-         hb->parentLoop->parentFace->getContainingPlane() == nullptr ) {
+         ha->parentLoop->parentFace->hasContainingPlane() == false ||
+         hb->parentLoop->parentFace->hasContainingPlane() == false ) {
         return -1;
     }
 
-    n1 = ha->parentLoop->parentFace->getContainingPlane()->getNormal();
-    n2 = hb->parentLoop->parentFace->getContainingPlane()->getNormal();
+    n1 = ha->parentLoop->parentFace->containingPlaneNormal();
+    n2 = hb->parentLoop->parentFace->containingPlaneNormal();
     if ( !_PolyhedralBoundedSolidSetGeometricPredicateProcessor::colinearVectors(n1, n2) ) {
         return -1;
     }
@@ -143,7 +145,7 @@ java::ArrayList<Classifier::SectorOnVertex> Classifier::nbrpreproc(
         if ( PolyhedralBoundedSolidNumericPolicy::vectorsColinear(
                  n.ref1, n.ref2, numericContext) ||
              (n.ref12.dotProduct(
-                 he->parentLoop->parentFace->getContainingPlane()->getNormal()) > 0.0 ) ) {
+                 he->parentLoop->parentFace->containingPlaneNormal()) > 0.0 ) ) {
             if ( PolyhedralBoundedSolidNumericPolicy::vectorsColinear(
                      n.ref1, n.ref2, numericContext) ) {
                 bisec = _PolyhedralBoundedSolidSetClassifier::inside(he);
@@ -218,8 +220,8 @@ bool Classifier::vertexVertexSectorIntersectionTest(int i, int j)
     Vector3Dd n2;
     Vector3Dd intrs;
 
-    n1 = h1->parentLoop->parentFace->getContainingPlane()->getNormal();
-    n2 = h2->parentLoop->parentFace->getContainingPlane()->getNormal();
+    n1 = h1->parentLoop->parentFace->containingPlaneNormal();
+    n2 = h2->parentLoop->parentFace->containingPlaneNormal();
     intrs = n1.crossProduct(n2);
 
     if ( PolyhedralBoundedSolidNumericPolicy::unitVectorsParallel(
@@ -311,8 +313,8 @@ void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
                 s.wa = xa.wide;
                 s.wb = xb.wide;
 
-                na = xa.he->parentLoop->parentFace->getContainingPlane()->getNormal();
-                nb = xb.he->parentLoop->parentFace->getContainingPlane()->getNormal();
+                na = xa.he->parentLoop->parentFace->containingPlaneNormal();
+                nb = xb.he->parentLoop->parentFace->containingPlaneNormal();
                 d1 = nb.dotProduct(xa.ref1);
                 d2 = nb.dotProduct(xa.ref2);
                 d3 = na.dotProduct(xb.ref1);
@@ -369,8 +371,8 @@ void Classifier::vertexVertexReclassifyOnSectors(int op)
             nextsectb = (sectb == nbbSize - 1) ? 0 : sectb + 1;
             ha = nba[(size_t)secta].he;
             hb = nbb[(size_t)sectb].he;
-            n1 = ha->parentLoop->parentFace->getContainingPlane()->getNormal();
-            n2 = hb->parentLoop->parentFace->getContainingPlane()->getNormal();
+            n1 = ha->parentLoop->parentFace->containingPlaneNormal();
+            n2 = hb->parentLoop->parentFace->containingPlaneNormal();
             d = n1.subtract(n2).length();
             nonopposite = ( d < VSDK::EPSILON );
             if ( nonopposite ) {
@@ -426,6 +428,181 @@ void Classifier::vertexVertexReclassifyOnSectors(int op)
 }
 
 /**
+Resolves "on" edge classes from the local geometry of both vertex
+neighborhoods before the operation-biased rules of figures
+[MANT1988].15.10 to 15.12 are applied.
+
+A sector edge is classified "on" when it lies in the plane of the other
+sector. The biased rules assume that the surface crosses the other solid
+along that edge. When the surface on both sides of the edge has the same
+class with respect to the other solid (for instance a concave edge of one
+solid lying on a convex edge of the other, with the faces interleaved),
+there is no crossing and the edge takes that class. When the two sides
+differ, the curve runs along the edge and it stays "on" for the biased
+rules.
+*/
+void Classifier::resolveOnEdgesByLocalNeighborhood()
+{
+    int ON = OnSector::ON;
+    int k;
+
+    for ( k = 0; k < sectors.size(); k++ ) {
+        SectorOnSector& s = sectors[k];
+        if ( !s.intersect ) {
+            continue;
+        }
+        if ( s.s1a == ON ) {
+            s.s1a = classifyRayWithoutCrossing(nba, s.secta, true, nbb);
+        }
+        if ( s.s2a == ON ) {
+            s.s2a = classifyRayWithoutCrossing(nba, s.secta, false, nbb);
+        }
+        if ( s.s1b == ON ) {
+            s.s1b = classifyRayWithoutCrossing(nbb, s.sectb, true, nba);
+        }
+        if ( s.s2b == ON ) {
+            s.s2b = classifyRayWithoutCrossing(nbb, s.sectb, false, nba);
+        }
+        if ( (s.s1a == s.s2a && s.s1a != ON) ||
+             (s.s1b == s.s2b && s.s1b != ON) ) {
+            s.intersect = false;
+        }
+    }
+}
+
+/**
+Class of the surface next to a boundary ray of sector `index` in `own`,
+measured against the `other` neighborhood on both sides of the ray (in
+this sector and in the adjacent one that shares the ray). ON when the
+sides differ or either side lies on the other solid's surface.
+*/
+int Classifier::classifyRayWithoutCrossing(
+    const java::ArrayList<SectorOnVertex>& own,
+    int index, bool firstRay,
+    const java::ArrayList<SectorOnVertex>& other)
+{
+    int ON = OnSector::ON;
+    Vector3Dd ray;
+    Vector3Dd adjacentRay;
+    Vector3Dd adjacentOther;
+    int here;
+    int there;
+
+    const SectorOnVertex& n = own[index];
+    if ( firstRay ) {
+        const SectorOnVertex& adjacent =
+            own[index == 0 ? own.size() - 1 : index - 1];
+        ray = n.ref1;
+        here = classifyDirectionInNeighborhood(
+            directionNextToRay(n.ref1, n.ref2), other);
+        adjacentRay = adjacent.ref2;
+        adjacentOther = adjacent.ref1;
+    }
+    else {
+        const SectorOnVertex& adjacent =
+            own[index == own.size() - 1 ? 0 : index + 1];
+        ray = n.ref2;
+        here = classifyDirectionInNeighborhood(
+            directionNextToRay(n.ref2, n.ref1), other);
+        adjacentRay = adjacent.ref1;
+        adjacentOther = adjacent.ref2;
+    }
+    if ( here == ON ||
+         Vector3Dd(ray).normalized().dotProduct(
+             Vector3Dd(adjacentRay).normalized()) <
+             1.0 - VSDK::EPSILON ) {
+        return ON;
+    }
+    there = classifyDirectionInNeighborhood(
+        directionNextToRay(adjacentRay, adjacentOther), other);
+    return there == here ? here : ON;
+}
+
+/**
+A direction inside a (minor arc) sector, next to its boundary ray.
+*/
+Vector3Dd Classifier::directionNextToRay(const Vector3Dd& ray,
+    const Vector3Dd& otherRay)
+{
+    Vector3Dd r = Vector3Dd(ray).normalized();
+    Vector3Dd o = Vector3Dd(otherRay).normalized();
+    return r.add(o.multiply(1.0e-3)).normalized();
+}
+
+const Vector3Dd Classifier::PROBE_RAYS[3] = {
+    Vector3Dd(0.5773, 0.3341, 0.7452).normalized(),
+    Vector3Dd(-0.2311, 0.8817, 0.4113).normalized(),
+    Vector3Dd(0.7061, -0.6129, 0.3549).normalized()
+};
+
+/**
+Classifies a direction leaving the common vertex against the cone that
+the given neighborhood sectors bound: IN, OUT, or ON when the direction
+lies on one of those sectors or no probe ray gives an unambiguous count.
+Ray parity over the sectors, each a planar minor arc through the vertex.
+*/
+int Classifier::classifyDirectionInNeighborhood(const Vector3Dd& d,
+    const java::ArrayList<SectorOnVertex>& nb)
+{
+    int ON = OnSector::ON;
+    double planeTolerance = 1.0e-9;
+    int k;
+    int m;
+
+    for ( k = 0; k < nb.size(); k++ ) {
+        const SectorOnVertex& n = nb[k];
+        InfinitePlane* plane = n.he->parentLoop->parentFace->getContainingPlane();
+        Vector3Dd normal = plane->getNormal();
+        delete plane;
+        if ( java::Math::abs(d.dotProduct(normal)) < planeTolerance &&
+             sctrwitthin(d, n.ref1, n.ref2, n.ref12) ) {
+            return ON;
+        }
+    }
+
+    for ( m = 0; m < 3; m++ ) {
+        const Vector3Dd& w = PROBE_RAYS[m];
+        int crossings = 0;
+        bool ambiguous = false;
+
+        for ( k = 0; k < nb.size(); k++ ) {
+            const SectorOnVertex& n = nb[k];
+            InfinitePlane* plane =
+                n.he->parentLoop->parentFace->getContainingPlane();
+            Vector3Dd normal = plane->getNormal();
+            delete plane;
+            double denominator = w.dotProduct(normal);
+            double t;
+            Vector3Dd q;
+
+            if ( java::Math::abs(denominator) < 1.0e-9 ) {
+                continue;
+            }
+            t = -d.dotProduct(normal) / denominator;
+            if ( t <= 0.0 ) {
+                continue;
+            }
+            q = d.add(w.multiply(t));
+            if ( q.length() < 1.0e-9 ||
+                 PolyhedralBoundedSolidNumericPolicy::vectorsColinear(
+                     q, n.ref1, numericContext) ||
+                 PolyhedralBoundedSolidNumericPolicy::vectorsColinear(
+                     q, n.ref2, numericContext) ) {
+                ambiguous = true;
+                break;
+            }
+            if ( sctrwitthin(q, n.ref1, n.ref2, n.ref12) ) {
+                crossings++;
+            }
+        }
+        if ( !ambiguous ) {
+            return (crossings % 2) == 1 ? OnSector::IN : OnSector::OUT;
+        }
+    }
+    return ON;
+}
+
+/**
 Reclassification procedure for "on"-edges on the vertex/vertex classifier,
 as expected from the high-level description of section [MANT1988].15.6.2
 and the case structures of figures [MANT1988].15.10, [MANT1988].15.11,
@@ -443,6 +620,8 @@ void Classifier::vertexVertexReclassifyOnEdges(int op)
     int prevsectb;
     int nbaSize = (int)nba.size();
     int nbbSize = (int)nbb.size();
+
+    resolveOnEdgesByLocalNeighborhood();
 
     for ( i = 0; i < sectors.size(); i++ ) {
         if ( sectors[i].intersect &&

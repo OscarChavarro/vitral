@@ -24,15 +24,20 @@ public:
     static bool validateIntermediate(PolyhedralBoundedSolid* solid);
 
     /**
-    Validates both operands of a boolean operation before the pipeline starts:
-    runs validateIntermediate on each solid, welds coincident vertices and
-    checks ids uniqueness.
+    Validates both operands of a boolean operation before the pipeline
+    starts: validateIntermediate on each solid, no coincident vertices, and
+    unique face and vertex ids. Returns true only when both solids pass all
+    checks; the reasons go to `msg`.
+
+    It only reads. Until plan-stage11 Phase C it welded the coincident
+    vertices it found and validated again, so validating could change the
+    operands. The set operator now prepares its own copies of the operands
+    before calling this (see
+    `PolyhedralBoundedSolidTopologyEditing::weldCoincidentVertices`).
     @param solidA first operand
     @param solidB second operand
     @param msg receives failure details, can be null
     @return true only when both solids pass all checks
-    @throws java::IllegalArgumentException (Java IllegalArgumentException) when a
-    solid remains invalid after the automated repair
     */
     static bool validateBooleanInputs(PolyhedralBoundedSolid* solidA,
         PolyhedralBoundedSolid* solidB, java::String* msg);
@@ -79,6 +84,9 @@ public:
 
 private:
     static java::AtomicLong strictValidationInvocationCount;
+
+    static bool validateBooleanInput(const java::String& name,
+        PolyhedralBoundedSolid* solid, java::String* msg);
     PolyhedralBoundedSolidValidationEngine();
 };
 
