@@ -6,6 +6,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 import { VSDK } from "../../../../common/VSDK.js";
+import { Logger } from "../../../../common/logging/Logger.js";
 import { Vertex2D } from "../../element/Vertex2D.js";
 import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
 import { CircularArrayList } from "../../../../common/dataStructures/CircularArrayList.js";
@@ -679,6 +680,31 @@ export class PolyhedralBoundedSolid extends Solid {
             point.z() >= aabb[o + 2]! - pad &&
             point.z() <= aabb[o + 5]! + pad
         );
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest. Delegated to the robust predicate layer
+    (`PolyhedralBoundedSolidPredicates.classifyPoint`): a point on a face is
+    `LIMIT`, any other is classified by a ray-cast parity test.
+    (Ported from Java commit 402415f4, as a dependency of the free line
+    piercing test of `HiddenLineRenderer`.)
+    @param p point to classify, in the space of the solid
+    @param distanceTolerance distance to the faces under which the point is
+    classified as `LIMIT`
+    @return INSIDE, OUTSIDE or LIMIT constant value
+    */
+    public override doContainmentTest(p: Vector3Dd | null, distanceTolerance: number): number {
+        if (p === null) {
+            Logger.reportMessage(
+                this,
+                VSDK.WARNING,
+                "doContainmentTest",
+                "Null point given: it is classified as OUTSIDE.",
+            );
+            return PolyhedralBoundedSolid.OUTSIDE;
+        }
+        return PolyhedralBoundedSolidPredicates.classifyPoint(this, p, distanceTolerance);
     }
 
     /**

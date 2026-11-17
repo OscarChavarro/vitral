@@ -15,8 +15,9 @@ import { HtmlWebGLSceneEditorApplication } from './application/html-webgl-scene-
  * Hosts `SceneEditorApplication` in the workspace of the testsuite container.
  *
  * Java's command line arguments are read from the `arg` parameters of the
- * page URL (i.e. `?arg=-s` installs the agent API, `window.vitralEditorMCP`),
- * as a page has no command line. When the application closes itself (Java's
+ * page URL, as a page has no command line. The agent API,
+ * `window.vitralEditorMCP`, is always installed (`?arg=-s` is still accepted,
+ * but no longer needed). When the application closes itself (Java's
  * `System.exit`), the module is deactivated.
  */
 @Component({

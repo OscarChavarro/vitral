@@ -9,7 +9,7 @@ interface TessellationEdge {
 
 /**
 Browser replacement for the GLU tessellator that
-`vsdk.toolkit.render.jogl.Jogl4Polygon2DRenderer` drives.
+`vsdk.toolkit.render.jogl.surface.polygon.Jogl4Polygon2DRenderer` drives.
 
 Java fills a `Polygon2D` surface by handing every contour to
 `GLU.gluNewTess()` and collecting the triangles the callbacks emit. GLU is a

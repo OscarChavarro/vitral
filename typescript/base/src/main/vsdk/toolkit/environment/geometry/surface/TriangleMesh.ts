@@ -30,6 +30,12 @@ import "../boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
 /** Indexed triangle mesh with optional vertex attributes and material spans. */
 export class TriangleMesh extends Surface<Ray, RayHit> {
     private name = "default";
+    /**
+    Whether raster renderers must draw both windings of this surface.
+    MIT .ray scenes use two-sided triangle intersection, so their imported
+    meshes set this flag to keep the GPU result consistent with raytracing.
+    */
+    private doubleSided = false;
     private vertexPositions: Float64Array | null = null;
     private vertexNormals: Float64Array | null = null;
     private vertexBinormals: Float64Array | null = null;
@@ -53,6 +59,12 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     public setName(name: string): void {
         this.name = name;
     }
+    public isDoubleSided(): boolean {
+        return this.doubleSided;
+    }
+    public setDoubleSided(doubleSided: boolean): void {
+        this.doubleSided = doubleSided;
+    }
     public override clone(other?: TriangleMesh): TriangleMesh | void {
         if (other !== undefined) {
             this.copyFrom(other);
@@ -64,6 +76,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     }
     private copyFrom(other: TriangleMesh): void {
         this.name = other.name;
+        this.doubleSided = other.doubleSided;
         this.vertexPositions = other.vertexPositions?.slice() ?? null;
         this.vertexNormals = other.vertexNormals?.slice() ?? null;
         this.vertexBinormals = other.vertexBinormals?.slice() ?? null;

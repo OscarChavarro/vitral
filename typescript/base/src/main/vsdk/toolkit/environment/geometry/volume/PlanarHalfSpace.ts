@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 import { Double } from "../../../../../java/lang/Double.js";
 import { IllegalStateException } from "../../../../../java/lang/IllegalStateException.js";
 import { Math as JavaMath } from "../../../../../java/lang/Math.js";
@@ -19,6 +23,9 @@ import type { RaySolidClassification } from "../element/RaySolidClassification.j
 import { RaySolidQueryStatus } from "../element/RaySolidQueryStatus.js";
 import type { Geometry } from "../Geometry.js";
 import { InfinitePlane } from "../surface/InfinitePlane.js";
+import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
+import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
+import { Box } from "./Box.js";
 import { Solid } from "./Solid.js";
 
 // The closed solid n dot p + d <= 0. The plane owns its mathematical
@@ -31,6 +38,51 @@ export class PlanarHalfSpace extends Solid {
     public constructor(a: number | InfinitePlane, b?: number, c?: number, d?: number) {
         super();
         this.plane = a instanceof InfinitePlane ? new InfinitePlane(a) : new InfinitePlane(a, b!, c!, d!);
+        this.addControlSpecifications();
+    }
+
+    /**
+    The state is the equation ax + by + cz + d = 0 of the boundary plane, with
+    its raw (not normalized) coefficients. Any real value is valid for each
+    one, but (a, b, c) must not be all zero.
+    */
+    private addControlSpecifications(): void {
+        this.getControlSpecifications().push("double;a;(-INFINITE, INFINITE)");
+        this.getControlSpecifications().push("double;b;(-INFINITE, INFINITE)");
+        this.getControlSpecifications().push("double;c;(-INFINITE, INFINITE)");
+        this.getControlSpecifications().push("double;d;(-INFINITE, INFINITE)");
+    }
+
+    public getA(): number {
+        return this.plane.getA();
+    }
+
+    public getB(): number {
+        return this.plane.getB();
+    }
+
+    public getC(): number {
+        return this.plane.getC();
+    }
+
+    public getD(): number {
+        return this.plane.getD();
+    }
+
+    public setA(a: number): void {
+        this.plane.setA(a);
+    }
+
+    public setB(b: number): void {
+        this.plane.setB(b);
+    }
+
+    public setC(c: number): void {
+        this.plane.setC(c);
+    }
+
+    public setD(d: number): void {
+        this.plane.setD(d);
     }
 
     public override copyGeometry(): Geometry | null {
@@ -258,5 +310,71 @@ export class PlanarHalfSpace extends Solid {
 
     public override doExtraInformation(ray: Ray, t: number, hit: RayHit): void {
         this.plane.doExtraInformation(ray, t, hit);
+    }
+
+    //= Boundary representation =============================================
+
+    /// Default half side of the square of the plane kept by the export
+    public static readonly DEFAULT_EXPORT_HALF_SIZE = 2.0;
+    /// Default thickness of the slab kept by the export
+    public static readonly DEFAULT_EXPORT_DEPTH = 0.5;
+
+    /**
+    Java overloads `exportToPolyhedralBoundedSolid()` (bounded part of the
+    half space with the default size) and
+    `exportToPolyhedralBoundedSolid(double halfSize, double depth)`.
+
+    The half space is unbounded, so its boundary representation is a bounded
+    part of it: the slab under a square of its plane, centered at the point
+    of the plane nearest to the origin. It is the boundary representation of
+    a `Box` (built with Euler operators, [MANT1988].12.4) placed in the frame
+    of the plane: its top face on the plane, its outward normal along the
+    normal of the plane.
+    @param halfSize half the side of the square of the plane
+    @param depth thickness of the slab, below the plane
+    @return a new polyhedral solid, or null if the plane is not valid
+    */
+    public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(halfSize: number, depth: number): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(halfSize?: number, depth?: number): PolyhedralBoundedSolid | null {
+        if (halfSize === undefined || depth === undefined) {
+            return this.exportToPolyhedralBoundedSolid(
+                PlanarHalfSpace.DEFAULT_EXPORT_HALF_SIZE,
+                PlanarHalfSpace.DEFAULT_EXPORT_DEPTH,
+            );
+        }
+        const n = new Vector3Dd(this.plane.getA(), this.plane.getB(), this.plane.getC());
+        const length = n.length();
+        if (
+            !(length > 0) ||
+            !Double.isFinite(length) ||
+            !Double.isFinite(this.plane.getD()) ||
+            !(halfSize > 0) ||
+            !(depth > 0)
+        ) {
+            return null;
+        }
+        const u = n.multiply(1.0 / length);
+        const center = u.multiply(-this.plane.getD() / length);
+        // Tangents of the plane: (t1, t2, u) is a right handed frame
+        const axis = Math.abs(u.x()) < 0.9 ? new Vector3Dd(1, 0, 0) : new Vector3Dd(0, 1, 0);
+        const t1 = axis.subtract(u.multiply(axis.dotProduct(u))).normalized();
+        const t2 = u.crossProduct(t1);
+        const frame = new Matrix4x4d([
+            [t1.x(), t2.x(), u.x(), center.x()],
+            [t1.y(), t2.y(), u.y(), center.y()],
+            [t1.z(), t2.z(), u.z(), center.z()],
+            [0, 0, 0, 1],
+        ]);
+
+        const solid = new Box(
+            new Vector3Dd(-halfSize, -halfSize, -depth),
+            new Vector3Dd(halfSize, halfSize, 0),
+        ).exportToPolyhedralBoundedSolid();
+        let i: number;
+        for (i = 0; i < solid.getVerticesList().size(); i++) {
+            solid.getVerticesList().get(i)!.position = frame.multiply(solid.getVerticesList().get(i)!.position);
+        }
+        return solid;
     }
 }

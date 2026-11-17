@@ -1,5 +1,6 @@
 import type { Image } from "../../../media/Image.js";
 import { _AnimationInfo } from "./_AnimationInfo.js";
+import { TriangleMesh } from "./TriangleMesh.js";
 
 /** In-memory MD2 model data and animation-range metadata. Binary loading remains in the server FS package. */
 export class Md2Mesh {
@@ -64,6 +65,40 @@ export class Md2Mesh {
     public setElapsedTimeSeg(value: number): void {
         this.elapsedTimeSeg = value;
     }
+    /**
+    The triangles of a key frame of the model (without interpolation between
+    frames), as a triangle mesh with the positions of the frame.
+    @param frame index of the frame, from 0 to `frameVertices.size() - 1`
+    @return a new mesh with positions and triangles only, or null if the
+    model has no such frame or no triangles
+    */
+    public exportToTriangleMesh(frame: number): TriangleMesh | null {
+        if (frame < 0 || frame >= this.frameVertices.length || this.triangles === null) {
+            return null;
+        }
+        const vertices = this.frameVertices[frame]!;
+        const mesh = new TriangleMesh();
+        const count = Math.min(this.numTriangles, Math.trunc(this.triangles.length / 2));
+        let i: number;
+        let j: number;
+
+        mesh.initVertexPositionsArray(Math.trunc(vertices.length / 3));
+        const positions = mesh.getVertexPositions()!;
+        for (i = 0; i < positions.length; i++) {
+            positions[i] = vertices[i]!;
+        }
+        mesh.initTriangleArrays(count);
+        const indexes = mesh.getTriangleIndexes()!;
+        for (i = 0; i < count; i++) {
+            // triangles[2*i] are the vertex indexes, triangles[2*i+1] the
+            // texture coordinate indexes
+            for (j = 0; j < 3; j++) {
+                indexes[3 * i + j] = this.triangles[2 * i]![j]!;
+            }
+        }
+        return mesh;
+    }
+
     public returnStartEndAnim(index: number, out: Int16Array | number[]): void;
     public returnStartEndAnim(name: string, out: Int16Array | number[]): void;
     public returnStartEndAnim(query: number | string, out: Int16Array | number[]): void {

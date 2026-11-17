@@ -9,11 +9,11 @@ import {
     Vector3Dd,
     type Image,
 } from "@vitral/base";
-import { WebGLImageRenderer } from "./WebGLImageRenderer.js";
-import { WebGLRendererConfigurationShaderSelector } from "./WebGLRendererConfigurationShaderSelector.js";
+import { WebGLImageRenderer } from "../WebGLImageRenderer.js";
+import { WebGLRendererConfigurationShaderSelector } from "../WebGLRendererConfigurationShaderSelector.js";
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4Md2MeshRenderer`.
+Port of `vsdk.toolkit.render.jogl.surface.Jogl4Md2MeshRenderer`.
 
 An MD2 model is a stack of vertex frames plus a list of OpenGL commands
 (triangle strips and fans) that index into them. Every draw call interpolates

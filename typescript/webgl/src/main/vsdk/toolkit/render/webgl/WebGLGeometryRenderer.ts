@@ -1,78 +1,85 @@
 import {
     Arrow,
-    BezierPatchTessellator,
     Box,
     Cone,
     FunctionalExplicitSurface,
-    GeometryBounds,
     HeightFieldSolid,
-    identityHashCode,
     ImplicitSolid,
     InfinitePlane,
     Logger,
     ParametricBiCubicPatch,
     ParametricCurve,
+    PlanarHalfSpace,
+    PolyhedralBoundedSolid,
+    QuadMesh,
     QuadricSurface,
-    RendererConfiguration,
-    SimpleBody,
-    SolidBoundaryTessellationReport,
-    SolidBoundaryTessellator,
     Sphere,
     SubdividedBezierPatch,
     Torus,
     TriangleMesh,
-    Vector3Dd,
+    TriangleMeshGroup,
+    TriangleStripMesh,
+    Volume,
     VSDK,
     type Camera,
     type Geometry,
     type Light,
     type Matrix4x4d,
+    type RendererConfiguration,
     type RGBImageUncompressed,
     type SimpleMaterial,
 } from "@vitral/base";
-import { WebGLFunctionalExplicitSurfaceRenderer } from "./WebGLFunctionalExplicitSurfaceRenderer.js";
-import { WebGLInfinitePlaneRenderer } from "./WebGLInfinitePlaneRenderer.js";
-import { WebGLMeshBuilder } from "./WebGLMeshBuilder.js";
+import { WebGLParametricCurveRenderer } from "./curve/WebGLParametricCurveRenderer.js";
+import { WebGLFunctionalExplicitSurfaceRenderer } from "./surface/WebGLFunctionalExplicitSurfaceRenderer.js";
+import { WebGLInfinitePlaneRenderer } from "./surface/WebGLInfinitePlaneRenderer.js";
+import { WebGLParametricBiCubicPatchRenderer } from "./surface/WebGLParametricBiCubicPatchRenderer.js";
+import { WebGLQuadMeshRenderer } from "./surface/WebGLQuadMeshRenderer.js";
+import { WebGLSubdividedBezierPatchRenderer } from "./surface/WebGLSubdividedBezierPatchRenderer.js";
+import { WebGLTriangleMeshGroupRenderer } from "./surface/WebGLTriangleMeshGroupRenderer.js";
+import { WebGLTriangleMeshRenderer } from "./surface/WebGLTriangleMeshRenderer.js";
+import { WebGLTriangleStripMeshRenderer } from "./surface/WebGLTriangleStripMeshRenderer.js";
 import { WebGLMeshRenderer, type WebGLMesh } from "./WebGLMeshRenderer.js";
-import { WebGLMinMaxRenderer } from "./WebGLMinMaxRenderer.js";
-import { WebGLParametricBiCubicPatchRenderer } from "./WebGLParametricBiCubicPatchRenderer.js";
-import { WebGLParametricCurveRenderer } from "./WebGLParametricCurveRenderer.js";
-import { WebGLSelectionCornersRenderer } from "./WebGLSelectionCornersRenderer.js";
-import { WebGLSphereRenderer } from "./WebGLSphereRenderer.js";
+import { WebGLArrowRenderer } from "./volume/WebGLArrowRenderer.js";
+import { WebGLBoxRenderer } from "./volume/WebGLBoxRenderer.js";
+import { WebGLConeRenderer } from "./volume/WebGLConeRenderer.js";
+import { WebGLHeightFieldSolidRenderer } from "./volume/WebGLHeightFieldSolidRenderer.js";
+import { WebGLImplicitSolidRenderer } from "./volume/WebGLImplicitSolidRenderer.js";
+import { WebGLPlanarHalfSpaceRenderer } from "./volume/WebGLPlanarHalfSpaceRenderer.js";
+import { WebGLPolyhedralBoundedSolidRenderer } from "./volume/polyhedralBoundedSolid/WebGLPolyhedralBoundedSolidRenderer.js";
+import { WebGLQuadricSurfaceRenderer } from "./volume/WebGLQuadricSurfaceRenderer.js";
+import { WebGLSphereRenderer } from "./volume/WebGLSphereRenderer.js";
+import { WebGLTorusRenderer } from "./volume/WebGLTorusRenderer.js";
+import { WebGLVolumeRenderer } from "./volume/WebGLVolumeRenderer.js";
 
 /**
 Port of `vsdk.toolkit.render.jogl.Jogl4GeometryRenderer`.
 
-Renders the geometries of the toolkit with the WebGL pipeline: each one is
-tessellated once into a mesh (cached by its parameters) that is drawn by
-`WebGLMeshRenderer`, so every geometry honors every bit of the
-`RendererConfiguration` in the same way (surfaces, wires, points, normals,
-bounding volume, texture, bump map and shading).
-
-Supported geometries: `Sphere`, `Cone` (also cylinders and truncated cones),
-`Arrow`, `Box`, `Torus`, `TriangleMesh`, and the open surfaces
-`FunctionalExplicitSurface`, `ParametricBiCubicPatch` and `InfinitePlane`
-(tessellated by their `WebGL*Renderer`, visible from both sides). Quadrics,
-implicit solids and height fields with finite bounds are drawn from their
-`SolidBoundaryTessellator` mesh, and a `SubdividedBezierPatch` from its
-`BezierPatchTessellator` mesh, visible from both sides. A
-`ParametricCurve` has no surface: it is drawn as lines by
-`WebGLParametricCurveRenderer`.
+Renders the geometries of the toolkit with the WebGL pipeline, dispatching
+each one to the renderer of its class (in the `curve`, `surface` and `volume`
+subpackages). Most of them are tessellated once into a mesh by the
+`buildMesh` of their renderer, cached here by the `meshKey` the renderer
+gives, and drawn by `WebGLMeshRenderer`, so every geometry honors every bit
+of the `RendererConfiguration` in the same way (surfaces, wires, points,
+normals, bounding volume, texture, bump map and shading). A `Sphere` keeps
+its own mesh cache, a `ParametricCurve` is drawn as lines, a
+`TriangleMeshGroup` member by member, a `PlanarHalfSpace` by its boundary
+plane, and a `PolyhedralBoundedSolid` by its own renderer, which is also the
+last resort for the other volumes (see `WebGLVolumeRenderer`).
 
 Java's overloads for a single light and for a list of lights are one method
 here, taken by the kind of the `lights` argument (see
-`WebGLMeshRenderer.draw`). `System.identityHashCode` comes from the
-`identityHashCode` emulation of the base module.
+`WebGLMeshRenderer.draw`). Drawing is asynchronous because a GLSL source
+arrives over `fetch`. A `PolyhedralBoundedSolid` and the volumes drawn by
+their boundary representation need a camera, which Java dereferences without
+a check; it is narrowed the same way here.
+
+Java also dispatches `VoxelVolume` to `Jogl4VoxelVolumeRenderer`; that
+renderer, and the `VoxelVolume` interface it relies on (Java commit
+402415f4), have not been ported, so a voxel volume reaches the boundary
+representation fallback instead.
 */
 export class WebGLGeometryRenderer {
-    private static readonly SLICES: number = 32;
-    private static readonly TORUS_MAJOR_SEGMENTS: number = 48;
-    private static readonly TORUS_MINOR_SEGMENTS: number = 24;
     private static readonly MAX_CACHED_MESHES: number = 256;
-    /** Cells along the longest side of the bounds of a tessellated solid */
-    private static readonly SOLID_TESSELLATION_RESOLUTION: number = 64;
-    /** Parameter steps of a tessellated Bezier patch along u and v */
-    private static readonly PATCH_TESSELLATION_STEPS: number = 24;
 
     private static readonly MESHES: Map<string, WebGLMesh> = new Map<string, WebGLMesh>();
     private static readonly REPORTED_UNSUPPORTED: Set<string> = new Set<string>();
@@ -86,19 +93,12 @@ export class WebGLGeometryRenderer {
     public static isSupported(geometry: Geometry | null): boolean {
         return (
             geometry instanceof Sphere ||
-            geometry instanceof Cone ||
-            geometry instanceof Arrow ||
-            geometry instanceof Box ||
-            geometry instanceof Torus ||
-            geometry instanceof TriangleMesh ||
-            geometry instanceof FunctionalExplicitSurface ||
-            geometry instanceof ParametricBiCubicPatch ||
-            geometry instanceof InfinitePlane ||
-            geometry instanceof ImplicitSolid ||
-            geometry instanceof QuadricSurface ||
-            geometry instanceof HeightFieldSolid ||
-            geometry instanceof SubdividedBezierPatch ||
-            geometry instanceof ParametricCurve
+            geometry instanceof ParametricCurve ||
+            geometry instanceof TriangleMeshGroup ||
+            geometry instanceof PlanarHalfSpace ||
+            geometry instanceof PolyhedralBoundedSolid ||
+            (geometry !== null && WebGLGeometryRenderer.keyOf(geometry) !== null) ||
+            (geometry instanceof Volume && WebGLVolumeRenderer.exportedSolid(geometry) !== null)
         );
     }
 
@@ -141,8 +141,8 @@ export class WebGLGeometryRenderer {
                 textureMap,
                 normalMap,
                 localTransform ?? undefined,
-                WebGLGeometryRenderer.SLICES,
-                WebGLGeometryRenderer.SLICES / 2,
+                WebGLSphereRenderer.SLICES,
+                WebGLSphereRenderer.SLICES / 2,
             );
             return;
         }
@@ -150,12 +150,59 @@ export class WebGLGeometryRenderer {
             await WebGLParametricCurveRenderer.draw(gl, geometry, camera, quality, localTransform);
             return;
         }
-        const mesh: WebGLMesh | null = WebGLGeometryRenderer.obtainMesh(geometry);
+        if (geometry instanceof TriangleMeshGroup) {
+            await WebGLTriangleMeshGroupRenderer.draw(
+                gl,
+                geometry,
+                camera,
+                lights,
+                material,
+                quality,
+                textureMap,
+                normalMap,
+                localTransform,
+            );
+            return;
+        }
+        if (geometry instanceof PlanarHalfSpace) {
+            await WebGLPlanarHalfSpaceRenderer.draw(
+                gl,
+                geometry,
+                camera,
+                lights,
+                material,
+                quality,
+                textureMap,
+                normalMap,
+                localTransform,
+            );
+            return;
+        }
+        if (geometry instanceof PolyhedralBoundedSolid) {
+            await WebGLPolyhedralBoundedSolidRenderer.draw(
+                gl,
+                geometry,
+                camera as Camera,
+                lights,
+                material,
+                quality,
+                localTransform,
+            );
+            return;
+        }
+        if (
+            WebGLGeometryRenderer.keyOf(geometry) === null &&
+            geometry instanceof Volume &&
+            (await WebGLVolumeRenderer.draw(gl, geometry, camera as Camera, lights, material, quality, localTransform))
+        ) {
+            return;
+        }
+        const mesh: WebGLMesh | null = WebGLGeometryRenderer.obtainMesh(gl, geometry);
         if (mesh === null) {
             return;
         }
         if (geometry instanceof InfinitePlane && quality !== null) {
-            await WebGLGeometryRenderer.drawInfinitePlaneMesh(
+            await WebGLInfinitePlaneRenderer.drawMesh(
                 gl,
                 mesh,
                 geometry,
@@ -184,56 +231,13 @@ export class WebGLGeometryRenderer {
     }
 
     /**
-    Draws the mesh of the square shown for an infinite plane. Its bounding
-    volume is infinite, so the bounding volume and the selection corners are
-    drawn around the square instead.
-    */
-    private static async drawInfinitePlaneMesh(
-        gl: WebGL2RenderingContext,
-        mesh: WebGLMesh,
-        plane: InfinitePlane,
-        camera: Camera | null,
-        lights: Light | Iterable<Light | null> | null,
-        material: SimpleMaterial | null,
-        quality: RendererConfiguration,
-        textureMap: RGBImageUncompressed | null,
-        normalMap: RGBImageUncompressed | null,
-        localTransform: Matrix4x4d | null,
-    ): Promise<void> {
-        const meshQuality: RendererConfiguration = new RendererConfiguration();
-
-        meshQuality.clone(quality);
-        meshQuality.setBoundingVolume(false);
-        meshQuality.setSelectionCorners(false);
-        await WebGLMeshRenderer.draw(
-            gl,
-            mesh,
-            plane,
-            camera,
-            lights,
-            material,
-            meshQuality,
-            textureMap,
-            normalMap,
-            localTransform,
-        );
-
-        const shown: number[] = WebGLInfinitePlaneRenderer.calculateShownMinMax(plane);
-        if (quality.isBoundingVolumeSet()) {
-            await WebGLMinMaxRenderer.drawMinMax(gl, shown, camera, localTransform ?? undefined);
-        }
-        if (quality.isSelectionCornersSet()) {
-            await WebGLSelectionCornersRenderer.drawMinMax(gl, shown, camera, localTransform);
-        }
-    }
-
-    /**
     Releases the WebGL resources of the meshes. PRE: the context that created
     them is the given one.
     @param gl WebGL context
     */
     public static dispose(gl: WebGL2RenderingContext): void {
         WebGLGeometryRenderer.releaseMeshes(gl);
+        WebGLVolumeRenderer.dispose();
         WebGLSphereRenderer.dispose(gl);
     }
 
@@ -244,7 +248,7 @@ export class WebGLGeometryRenderer {
         WebGLGeometryRenderer.MESHES.clear();
     }
 
-    private static obtainMesh(geometry: Geometry): WebGLMesh | null {
+    private static obtainMesh(gl: WebGL2RenderingContext, geometry: Geometry): WebGLMesh | null {
         const key: string | null = WebGLGeometryRenderer.keyOf(geometry);
 
         if (key === null) {
@@ -269,9 +273,8 @@ export class WebGLGeometryRenderer {
             }
             if (WebGLGeometryRenderer.MESHES.size >= WebGLGeometryRenderer.MAX_CACHED_MESHES) {
                 // Stale meshes (i.e. from geometries edited many times) are
-                // recreated on demand; their GPU objects are freed with the
-                // context
-                WebGLGeometryRenderer.MESHES.clear();
+                // released, and recreated on demand
+                WebGLGeometryRenderer.releaseMeshes(gl);
             }
             WebGLGeometryRenderer.MESHES.set(key, mesh);
         }
@@ -279,36 +282,31 @@ export class WebGLGeometryRenderer {
     }
 
     /**
-    @return a string that identifies the mesh of the geometry, or null if the
-    geometry is not supported. Parametric geometries are identified by their
-    parameters; triangle meshes by identity, as they are not edited while
-    shown.
+    @return a string that identifies the mesh of the geometry (given by the
+    `meshKey` of its renderer), or null if the geometry is not tessellated to
+    a mesh
     */
     private static keyOf(geometry: Geometry): string | null {
         if (geometry instanceof Cone) {
-            return "cone/" + geometry.getBottomRadius() + "/" + geometry.getTopRadius() + "/" + geometry.getHeight();
+            return WebGLConeRenderer.meshKey(geometry);
         }
         if (geometry instanceof Arrow) {
-            return (
-                "arrow/" +
-                geometry.getBaseLength() +
-                "/" +
-                geometry.getHeadLength() +
-                "/" +
-                geometry.getBaseRadius() +
-                "/" +
-                geometry.getHeadRadius()
-            );
+            return WebGLArrowRenderer.meshKey(geometry);
         }
         if (geometry instanceof Box) {
-            const s: Vector3Dd = geometry.getSize();
-            return "box/" + s.x() + "/" + s.y() + "/" + s.z();
+            return WebGLBoxRenderer.meshKey(geometry);
         }
         if (geometry instanceof Torus) {
-            return "torus/" + geometry.getMajorRadius() + "/" + geometry.getMinorRadius();
+            return WebGLTorusRenderer.meshKey(geometry);
         }
         if (geometry instanceof TriangleMesh) {
-            return "trianglemesh/" + identityHashCode(geometry);
+            return WebGLTriangleMeshRenderer.meshKey(geometry);
+        }
+        if (geometry instanceof QuadMesh) {
+            return WebGLQuadMeshRenderer.meshKey(geometry);
+        }
+        if (geometry instanceof TriangleStripMesh) {
+            return WebGLTriangleStripMeshRenderer.meshKey(geometry);
         }
         if (geometry instanceof FunctionalExplicitSurface) {
             return WebGLFunctionalExplicitSurfaceRenderer.meshKey(geometry);
@@ -316,47 +314,49 @@ export class WebGLGeometryRenderer {
         if (geometry instanceof ParametricBiCubicPatch) {
             return WebGLParametricBiCubicPatchRenderer.meshKey(geometry);
         }
+        if (geometry instanceof SubdividedBezierPatch) {
+            return WebGLSubdividedBezierPatchRenderer.meshKey(geometry);
+        }
         if (geometry instanceof InfinitePlane) {
             return WebGLInfinitePlaneRenderer.meshKey(geometry);
         }
-        if (
-            geometry instanceof ImplicitSolid ||
-            geometry instanceof QuadricSurface ||
-            geometry instanceof HeightFieldSolid
-        ) {
-            return (
-                "tessellatedsolid/" +
-                identityHashCode(geometry) +
-                "/" +
-                WebGLGeometryRenderer.SOLID_TESSELLATION_RESOLUTION
-            );
+        if (geometry instanceof QuadricSurface) {
+            return WebGLQuadricSurfaceRenderer.meshKey(geometry);
         }
-        if (geometry instanceof SubdividedBezierPatch) {
-            return (
-                "subdividedbezierpatch/" +
-                identityHashCode(geometry) +
-                "/" +
-                WebGLGeometryRenderer.PATCH_TESSELLATION_STEPS
-            );
+        if (geometry instanceof ImplicitSolid) {
+            return WebGLImplicitSolidRenderer.meshKey(geometry);
+        }
+        if (geometry instanceof HeightFieldSolid) {
+            return WebGLHeightFieldSolidRenderer.meshKey(geometry);
         }
         return null;
     }
 
+    /**
+    @return the mesh of the geometry, built by its renderer, or null if it
+    can not be tessellated
+    */
     private static buildMesh(geometry: Geometry): WebGLMesh | null {
         if (geometry instanceof Cone) {
-            return WebGLGeometryRenderer.buildCone(geometry);
+            return WebGLConeRenderer.buildMesh(geometry);
         }
         if (geometry instanceof Arrow) {
-            return WebGLGeometryRenderer.buildArrow(geometry);
+            return WebGLArrowRenderer.buildMesh(geometry);
         }
         if (geometry instanceof Box) {
-            return WebGLGeometryRenderer.buildBox(geometry);
+            return WebGLBoxRenderer.buildMesh(geometry);
         }
         if (geometry instanceof Torus) {
-            return WebGLGeometryRenderer.buildTorus(geometry);
+            return WebGLTorusRenderer.buildMesh(geometry);
         }
         if (geometry instanceof TriangleMesh) {
-            return WebGLGeometryRenderer.buildTriangleMesh(geometry);
+            return WebGLTriangleMeshRenderer.buildMesh(geometry);
+        }
+        if (geometry instanceof QuadMesh) {
+            return WebGLQuadMeshRenderer.buildMesh(geometry);
+        }
+        if (geometry instanceof TriangleStripMesh) {
+            return WebGLTriangleStripMeshRenderer.buildMesh(geometry);
         }
         if (geometry instanceof FunctionalExplicitSurface) {
             return WebGLFunctionalExplicitSurfaceRenderer.buildMesh(geometry);
@@ -364,303 +364,21 @@ export class WebGLGeometryRenderer {
         if (geometry instanceof ParametricBiCubicPatch) {
             return WebGLParametricBiCubicPatchRenderer.buildMesh(geometry);
         }
+        if (geometry instanceof SubdividedBezierPatch) {
+            return WebGLSubdividedBezierPatchRenderer.buildMesh(geometry);
+        }
         if (geometry instanceof InfinitePlane) {
             return WebGLInfinitePlaneRenderer.buildMesh(geometry);
         }
-        if (
-            geometry instanceof ImplicitSolid ||
-            geometry instanceof QuadricSurface ||
-            geometry instanceof HeightFieldSolid
-        ) {
-            return WebGLGeometryRenderer.buildTessellatedSolid(geometry);
+        if (geometry instanceof QuadricSurface) {
+            return WebGLQuadricSurfaceRenderer.buildMesh(geometry);
         }
-        if (geometry instanceof SubdividedBezierPatch) {
-            return WebGLGeometryRenderer.buildBezierPatch(geometry);
+        if (geometry instanceof ImplicitSolid) {
+            return WebGLImplicitSolidRenderer.buildMesh(geometry);
+        }
+        if (geometry instanceof HeightFieldSolid) {
+            return WebGLHeightFieldSolidRenderer.buildMesh(geometry);
         }
         return null;
-    }
-
-    private static buildCone(cone: Cone): WebGLMesh {
-        const r1: number = cone.getBottomRadius();
-        const r2: number = cone.getTopRadius();
-        const h: number = cone.getHeight();
-        const slices: number = WebGLGeometryRenderer.SLICES;
-        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(Math.max(Math.max(r1, r2), h));
-
-        builder.addFrustum(0, r1, h, r2, slices);
-        builder.addDisk(0, 0, r1, false, slices);
-        if (r2 > 0.0) {
-            builder.addDisk(h, 0, r2, true, slices);
-        }
-        return builder.build();
-    }
-
-    private static buildArrow(arrow: Arrow): WebGLMesh {
-        const h1: number = arrow.getBaseLength();
-        const h2: number = arrow.getHeadLength();
-        const r1: number = arrow.getBaseRadius();
-        const r2: number = arrow.getHeadRadius();
-        const slices: number = WebGLGeometryRenderer.SLICES;
-        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(h1 + h2);
-
-        builder.addFrustum(0, r1, h1, r1, slices);
-        builder.addDisk(0, 0, r1, false, slices);
-        builder.addFrustum(h1, r2, h1 + h2, 0, slices);
-        builder.addDisk(h1, r1, r2, false, slices);
-        return builder.build();
-    }
-
-    private static buildBox(box: Box): WebGLMesh {
-        const size: Vector3Dd = box.getSize();
-        const hx: number = size.x() / 2;
-        const hy: number = size.y() / 2;
-        const hz: number = size.z() / 2;
-        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(Math.max(hx, Math.max(hy, hz)) * 2);
-
-        // Each face is given counterclockwise seen from outside
-        WebGLGeometryRenderer.addBoxFace(
-            builder,
-            new Vector3Dd(0, 0, -1),
-            new Vector3Dd(-hx, -hy, -hz),
-            new Vector3Dd(-hx, hy, -hz),
-            new Vector3Dd(hx, hy, -hz),
-            new Vector3Dd(hx, -hy, -hz),
-        );
-        WebGLGeometryRenderer.addBoxFace(
-            builder,
-            new Vector3Dd(0, 0, 1),
-            new Vector3Dd(-hx, -hy, hz),
-            new Vector3Dd(hx, -hy, hz),
-            new Vector3Dd(hx, hy, hz),
-            new Vector3Dd(-hx, hy, hz),
-        );
-        WebGLGeometryRenderer.addBoxFace(
-            builder,
-            new Vector3Dd(0, -1, 0),
-            new Vector3Dd(-hx, -hy, hz),
-            new Vector3Dd(-hx, -hy, -hz),
-            new Vector3Dd(hx, -hy, -hz),
-            new Vector3Dd(hx, -hy, hz),
-        );
-        WebGLGeometryRenderer.addBoxFace(
-            builder,
-            new Vector3Dd(-1, 0, 0),
-            new Vector3Dd(-hx, hy, hz),
-            new Vector3Dd(-hx, hy, -hz),
-            new Vector3Dd(-hx, -hy, -hz),
-            new Vector3Dd(-hx, -hy, hz),
-        );
-        WebGLGeometryRenderer.addBoxFace(
-            builder,
-            new Vector3Dd(0, 1, 0),
-            new Vector3Dd(hx, hy, hz),
-            new Vector3Dd(hx, hy, -hz),
-            new Vector3Dd(-hx, hy, -hz),
-            new Vector3Dd(-hx, hy, hz),
-        );
-        WebGLGeometryRenderer.addBoxFace(
-            builder,
-            new Vector3Dd(1, 0, 0),
-            new Vector3Dd(hx, -hy, hz),
-            new Vector3Dd(hx, -hy, -hz),
-            new Vector3Dd(hx, hy, -hz),
-            new Vector3Dd(hx, hy, hz),
-        );
-        return builder.build();
-    }
-
-    /**
-    Adds a face whose vertices are given in the order upper left, lower left,
-    lower right, upper right as seen from outside (the Jogl2 texture layout),
-    and which is wound so its front side looks outside.
-    */
-    private static addBoxFace(
-        builder: WebGLMeshBuilder,
-        n: Vector3Dd,
-        a: Vector3Dd,
-        b: Vector3Dd,
-        c: Vector3Dd,
-        d: Vector3Dd,
-    ): void {
-        const winding: Vector3Dd = b.subtract(a).crossProduct(c.subtract(b));
-
-        if (winding.dotProduct(n) >= 0) {
-            builder.addQuad(a, n, 0, 1, b, n, 0, 0, c, n, 1, 0, d, n, 1, 1);
-        } else {
-            builder.addQuad(d, n, 1, 1, c, n, 1, 0, b, n, 0, 0, a, n, 0, 1);
-        }
-    }
-
-    private static buildTorus(torus: Torus): WebGLMesh {
-        const bigR: number = torus.getMajorRadius();
-        const smallR: number = torus.getMinorRadius();
-        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(bigR + smallR);
-        const nw: number = WebGLGeometryRenderer.TORUS_MAJOR_SEGMENTS;
-        const nv: number = WebGLGeometryRenderer.TORUS_MINOR_SEGMENTS;
-
-        for (let i: number = 0; i < nw; i++) {
-            const w0: number = (2 * Math.PI * i) / nw;
-            const w1: number = (2 * Math.PI * (i + 1)) / nw;
-
-            for (let j: number = 0; j < nv; j++) {
-                const v0: number = (2 * Math.PI * j) / nv;
-                const v1: number = (2 * Math.PI * (j + 1)) / nv;
-                const p00: Vector3Dd = WebGLGeometryRenderer.torusPoint(bigR, smallR, w0, v0);
-                const p01: Vector3Dd = WebGLGeometryRenderer.torusPoint(bigR, smallR, w0, v1);
-                const p11: Vector3Dd = WebGLGeometryRenderer.torusPoint(bigR, smallR, w1, v1);
-                const p10: Vector3Dd = WebGLGeometryRenderer.torusPoint(bigR, smallR, w1, v0);
-                const n00: Vector3Dd = WebGLGeometryRenderer.torusNormal(w0, v0);
-                const n01: Vector3Dd = WebGLGeometryRenderer.torusNormal(w0, v1);
-                const n11: Vector3Dd = WebGLGeometryRenderer.torusNormal(w1, v1);
-                const n10: Vector3Dd = WebGLGeometryRenderer.torusNormal(w1, v0);
-
-                builder.addQuad(
-                    p00,
-                    n00,
-                    i / nw,
-                    j / nv,
-                    p10,
-                    n10,
-                    (i + 1) / nw,
-                    j / nv,
-                    p11,
-                    n11,
-                    (i + 1) / nw,
-                    (j + 1) / nv,
-                    p01,
-                    n01,
-                    i / nw,
-                    (j + 1) / nv,
-                );
-            }
-        }
-        return builder.build();
-    }
-
-    private static torusPoint(bigR: number, smallR: number, w: number, v: number): Vector3Dd {
-        return new Vector3Dd(
-            (bigR + smallR * Math.cos(v)) * Math.cos(w),
-            (bigR + smallR * Math.cos(v)) * Math.sin(w),
-            smallR * Math.sin(v),
-        );
-    }
-
-    private static torusNormal(w: number, v: number): Vector3Dd {
-        return new Vector3Dd(Math.cos(v) * Math.cos(w), Math.cos(v) * Math.sin(w), Math.sin(v));
-    }
-
-    private static buildTriangleMesh(mesh: TriangleMesh): WebGLMesh | null {
-        const p: Float64Array | null = mesh.getVertexPositions();
-        const idx: Int32Array | null = mesh.getTriangleIndexes();
-
-        if (p === null || idx === null) {
-            return null;
-        }
-        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(WebGLGeometryRenderer.maxAbsExtent(mesh.getMinMax()));
-        WebGLGeometryRenderer.addTriangleMesh(builder, mesh);
-        return builder.build();
-    }
-
-    private static maxAbsExtent(minmax: ArrayLike<number> | null): number {
-        let size: number = 1.0;
-        if (minmax !== null && minmax.length >= 6) {
-            size = Math.max(
-                Math.abs(minmax[3]! - minmax[0]!),
-                Math.max(Math.abs(minmax[4]! - minmax[1]!), Math.abs(minmax[5]! - minmax[2]!)),
-            );
-        }
-        return size;
-    }
-
-    private static addTriangleMesh(builder: WebGLMeshBuilder, mesh: TriangleMesh): void {
-        const p: Float64Array | null = mesh.getVertexPositions();
-        const n: Float64Array | null = mesh.getVertexNormals();
-        const uv: Float64Array | null = mesh.getVertexUvs();
-        const idx: Int32Array | null = mesh.getTriangleIndexes();
-
-        if (p === null || idx === null) {
-            return;
-        }
-        for (let t: number = 0; t + 2 < idx.length; t += 3) {
-            const pos: Vector3Dd[] = [];
-            const nor: Vector3Dd[] = [];
-            const u: number[] = [0, 0, 0];
-            const v: number[] = [0, 0, 0];
-
-            for (let k: number = 0; k < 3; k++) {
-                const i: number = idx[t + k]!;
-                pos.push(new Vector3Dd(p[3 * i]!, p[3 * i + 1]!, p[3 * i + 2]!));
-                nor.push(
-                    n !== null && n.length >= 3 * i + 3
-                        ? new Vector3Dd(n[3 * i]!, n[3 * i + 1]!, n[3 * i + 2]!)
-                        : new Vector3Dd(0, 0, 1),
-                );
-                if (uv !== null && uv.length >= 2 * i + 2) {
-                    u[k] = uv[2 * i]!;
-                    v[k] = uv[2 * i + 1]!;
-                }
-            }
-            builder.addTriangle(
-                pos[0]!,
-                nor[0]!,
-                u[0]!,
-                v[0]!,
-                pos[1]!,
-                nor[1]!,
-                u[1]!,
-                v[1]!,
-                pos[2]!,
-                nor[2]!,
-                u[2]!,
-                v[2]!,
-            );
-        }
-    }
-
-    /**
-    Quadrics, implicit solids and height fields are drawn from the
-    `SolidBoundaryTessellator` mesh of their finite bounds; unbounded ones are
-    not supported.
-    */
-    private static buildTessellatedSolid(geometry: Geometry): WebGLMesh | null {
-        const bounds: GeometryBounds = new GeometryBounds();
-        geometry.getBounds(bounds);
-        if (bounds.getKind() !== GeometryBounds.Kind.Finite) {
-            return null;
-        }
-        const body: SimpleBody = new SimpleBody();
-        // cpp setGeometryReference (borrowed); the same under garbage collection.
-        body.setGeometry(geometry);
-        const report: SolidBoundaryTessellationReport = new SolidBoundaryTessellationReport();
-        // The margin keeps the extreme points of the solid inside the region
-        const mesh: TriangleMesh | null = SolidBoundaryTessellator.tessellate(
-            body,
-            bounds.inflated(1e-3 * WebGLGeometryRenderer.maxAbsExtent(geometry.getMinMax())),
-            WebGLGeometryRenderer.SOLID_TESSELLATION_RESOLUTION,
-            report,
-        );
-        if (mesh === null) {
-            return null;
-        }
-        return WebGLGeometryRenderer.buildTriangleMesh(mesh);
-    }
-
-    /**
-    A Bezier patch is drawn from the `BezierPatchTessellator` mesh of its
-    surface, visible from both sides.
-    */
-    private static buildBezierPatch(patch: SubdividedBezierPatch): WebGLMesh | null {
-        const mesh: TriangleMesh | null = BezierPatchTessellator.tessellate(
-            patch,
-            WebGLGeometryRenderer.PATCH_TESSELLATION_STEPS,
-            WebGLGeometryRenderer.PATCH_TESSELLATION_STEPS,
-        );
-        if (mesh === null) {
-            return null;
-        }
-        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(WebGLGeometryRenderer.maxAbsExtent(mesh.getMinMax()));
-        builder.setDoubleSided(true);
-        WebGLGeometryRenderer.addTriangleMesh(builder, mesh);
-        return builder.build();
     }
 }

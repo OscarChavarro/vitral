@@ -6,12 +6,12 @@ import {
     type RendererConfiguration,
     type Vector3Dd,
 } from "@vitral/base";
-import { WebGLLineRenderer } from "./WebGLLineRenderer.js";
-import { WebGLMinMaxRenderer } from "./WebGLMinMaxRenderer.js";
-import { WebGLSelectionCornersRenderer } from "./WebGLSelectionCornersRenderer.js";
+import { WebGLLineRenderer } from "../WebGLLineRenderer.js";
+import { WebGLMinMaxRenderer } from "../WebGLMinMaxRenderer.js";
+import { WebGLSelectionCornersRenderer } from "../WebGLSelectionCornersRenderer.js";
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4ParametricCurveRenderer`.
+Port of `vsdk.toolkit.render.jogl.curve.Jogl4ParametricCurveRenderer`.
 
 Renders a `ParametricCurve` with the WebGL pipeline. As in
 `Jogl2ParametricCurveRenderer`, each segment of the curve (segments ending at

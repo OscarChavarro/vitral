@@ -35,6 +35,10 @@ export class Arrow extends Solid {
         this.baseCylinder = new Cone(baseRadius, baseRadius, baseLength);
         this.headCone = new Cone(headRadius, 0, headLength);
         this.lastElement = this.baseCylinder;
+        this.getControlSpecifications().push("double;baseLength;(0, INFINITE)");
+        this.getControlSpecifications().push("double;headLength;(0, INFINITE)");
+        this.getControlSpecifications().push("double;baseRadius;(0, INFINITE)");
+        this.getControlSpecifications().push("double;headRadius;(0, INFINITE)");
     }
 
     public getBaseLength(): number {

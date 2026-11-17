@@ -185,6 +185,22 @@ export class WebGLMeshBuilder {
         }
     }
 
+    /**
+    @param minmax bounding box as given by `Geometry.getMinMax()`, or null
+    @return the longest side of the box (1 if there is no box), to be used as
+    the characteristic size of a mesh
+    */
+    public static characteristicSize(minmax: ArrayLike<number> | null): number {
+        let size: number = 1.0;
+        if (minmax !== null && minmax.length >= 6) {
+            size = Math.max(
+                Math.abs(minmax[3]! - minmax[0]!),
+                Math.max(Math.abs(minmax[4]! - minmax[1]!), Math.abs(minmax[5]! - minmax[2]!)),
+            );
+        }
+        return size;
+    }
+
     private addVertex(p: Vector3Dd, n: Vector3Dd, u: number, v: number): void {
         const normal: Vector3Dd = n.normalized();
         const reference: Vector3Dd = Math.abs(normal.z()) < 0.9 ? new Vector3Dd(0, 0, 1) : new Vector3Dd(1, 0, 0);

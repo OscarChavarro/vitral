@@ -17,7 +17,7 @@ export interface WebGLPolygon2DRendererResources {
 }
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4Polygon2DRenderer`.
+Port of `vsdk.toolkit.render.jogl.surface.polygon.Jogl4Polygon2DRenderer`.
 
 The three passes are the Java ones and run in the Java order: the filled
 surface first, then one wire loop per contour, then every contour vertex as a

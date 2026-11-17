@@ -14,10 +14,10 @@ import {
     type Geometry,
     type RollIndicatorMesh,
 } from "@vitral/base";
-import { WebGLArrowRenderer } from "./WebGLArrowRenderer.js";
+import { WebGLArrowRenderer } from "./volume/WebGLArrowRenderer.js";
 import { WebGLCameraRenderer } from "./WebGLCameraRenderer.js";
 import { WebGLRendererConfigurationShaderSelector } from "./WebGLRendererConfigurationShaderSelector.js";
-import { WebGLSphereRenderer } from "./WebGLSphereRenderer.js";
+import { WebGLSphereRenderer } from "./volume/WebGLSphereRenderer.js";
 
 interface IndicatorResources {
     vertexArray: WebGLVertexArrayObject;

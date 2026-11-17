@@ -3,6 +3,7 @@ import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import { ParametricCurve } from "../curve/ParametricCurve.js";
 import { Ray } from "../element/Ray.js";
 import { RayHit } from "../element/RayHit.js";
+import { QuadMesh } from "./QuadMesh.js";
 import { Surface } from "./Surface.js";
 import { VSDK } from "../../../common/VSDK.js";
 
@@ -211,5 +212,43 @@ export class ParametricBiCubicPatch extends Surface<Ray, RayHit> {
             mesh.some((row) => row.length !== 4 || row.some((point) => !(point instanceof Vector3Dd)))
         )
             throw new RangeError("A bicubic Bezier patch requires a 4 by 4 control mesh");
+    }
+
+    /**
+    Exports an approximation of the patch as a mesh of quadrilaterals: the
+    patch is evaluated on a grid of `getApproximationSteps()` x
+    `getApproximationSteps()` cells of its parameters (s, t) in [0, 1] x
+    [0, 1], so the lines of the mesh are isoparametric lines of the patch.
+    @return a new mesh
+    */
+    public exportToQuadMesh(): QuadMesh {
+        const steps = Math.max(1, this.getApproximationSteps());
+        const n = steps + 1;
+        const mesh = new QuadMesh();
+        let i: number;
+        let j: number;
+        let index: number;
+
+        mesh.initVertexPositionsArray(n * n);
+        const positions = mesh.getVertexPositions()!;
+        for (i = 0; i < n; i++) {
+            const s = i / steps;
+            for (j = 0; j < n; j++) {
+                const p = this.evaluate(s, j / steps);
+                index = i * n + j;
+                positions[3 * index] = p.x();
+                positions[3 * index + 1] = p.y();
+                positions[3 * index + 2] = p.z();
+            }
+        }
+        mesh.initQuadArrays(steps * steps);
+        index = 0;
+        for (i = 0; i < steps; i++) {
+            for (j = 0; j < steps; j++) {
+                mesh.setQuadAt(index, i * n + j, (i + 1) * n + j, (i + 1) * n + j + 1, i * n + j + 1);
+                index++;
+            }
+        }
+        return mesh;
     }
 }

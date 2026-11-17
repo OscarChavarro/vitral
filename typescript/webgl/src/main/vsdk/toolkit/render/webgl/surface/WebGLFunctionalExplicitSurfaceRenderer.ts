@@ -10,12 +10,12 @@ import {
     type SimpleMaterial,
     type TriangleMesh,
 } from "@vitral/base";
-import { WebGLGeometryRenderer } from "./WebGLGeometryRenderer.js";
-import { WebGLMeshBuilder } from "./WebGLMeshBuilder.js";
-import type { WebGLMesh } from "./WebGLMeshRenderer.js";
+import { WebGLGeometryRenderer } from "../WebGLGeometryRenderer.js";
+import { WebGLMeshBuilder } from "../WebGLMeshBuilder.js";
+import type { WebGLMesh } from "../WebGLMeshRenderer.js";
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4FunctionalExplicitSurfaceRenderer`.
+Port of `vsdk.toolkit.render.jogl.surface.Jogl4FunctionalExplicitSurfaceRenderer`.
 
 Renders a `FunctionalExplicitSurface` (a height field z = f(x, y)) with the
 WebGL pipeline. As in `Jogl2FunctionalExplicitSurfaceRenderer`, the surface is

@@ -2,8 +2,15 @@ import { describe, expect, it } from "vitest";
 import { Entity } from "vsdk/toolkit/common/Entity.js";
 import { EntityEvent, EntityEventType } from "vsdk/toolkit/common/EntityEvent.js";
 import type { EntityListener } from "vsdk/toolkit/common/EntityListener.js";
+import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
+import { Arrow } from "vsdk/toolkit/environment/geometry/volume/Arrow.js";
+import { BlobSolid } from "vsdk/toolkit/environment/geometry/volume/BlobSolid.js";
+import { Box } from "vsdk/toolkit/environment/geometry/volume/Box.js";
 import { Cone } from "vsdk/toolkit/environment/geometry/volume/Cone.js";
+import { PlanarHalfSpace } from "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.js";
+import { QuadricSurface } from "vsdk/toolkit/environment/geometry/volume/QuadricSurface.js";
 import { Sphere } from "vsdk/toolkit/environment/geometry/volume/Sphere.js";
+import { Torus } from "vsdk/toolkit/environment/geometry/volume/Torus.js";
 
 class RecordingListener implements EntityListener {
     public readonly events: EntityEvent[] = [];
@@ -64,7 +71,16 @@ describe("Entity", () => {
     });
 
     it("has getX/setX accessors for every declared control specification", () => {
-        for (const entity of [new Sphere(1), new Cone(1, 0, 2)]) {
+        for (const entity of [
+            new Sphere(1),
+            new Cone(1, 0, 2),
+            new Box(1, 2, 3),
+            new Arrow(1, 0.5, 0.1, 0.2),
+            new Torus(1, 0.25),
+            new PlanarHalfSpace(0, 0, 1, 0),
+            new QuadricSurface(new Vector3Dd(1, 1, 1), new Vector3Dd(), new Vector3Dd(), -1),
+            new BlobSolid(0.5, false),
+        ]) {
             for (const specification of entity.getControlSpecifications()) {
                 const name = specification.split(";")[1]!.trim();
                 const label = name.charAt(0).toUpperCase() + name.slice(1);

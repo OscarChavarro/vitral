@@ -20,6 +20,32 @@ export class Math {
     }
 
     /**
+    `Math.rint(double)`: the closest integer value, with ties rounding to the
+    even one (so `rint(2.5)` is `2` and `rint(-2.5)` is `-2`), and NaN,
+    infinities and signed zeros returned as given. A result of zero keeps the
+    sign of the argument, as in the JDK (`rint(-0.4)` is `-0.0`).
+    */
+    public static rint(a: number): number {
+        if (!globalThis.Number.isFinite(a) || a === 0) {
+            return a;
+        }
+        const f = globalThis.Math.floor(a);
+        const fraction = a - f;
+        let result: number;
+        if (fraction < 0.5) {
+            result = f;
+        } else if (fraction > 0.5) {
+            result = f + 1;
+        } else {
+            result = f % 2 === 0 ? f : f + 1;
+        }
+        if (result === 0) {
+            return a < 0 ? -0 : 0;
+        }
+        return result;
+    }
+
+    /**
     `Math.round(double)`: the closest integer, with ties rounding towards
     positive infinity (so `round(-2.5)` is `-2`, not `-3`), `0` for NaN, and
     saturation at the `long` range. JavaScript's `Math.round` already uses the

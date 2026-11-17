@@ -9,10 +9,10 @@ import {
     type SimpleMaterial,
     type Sphere,
 } from "@vitral/base";
-import { WebGLMesh, WebGLMeshRenderer } from "./WebGLMeshRenderer.js";
+import { WebGLMesh, WebGLMeshRenderer } from "../WebGLMeshRenderer.js";
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4SphereRenderer`.
+Port of `vsdk.toolkit.render.jogl.volume.Jogl4SphereRenderer`.
 
 Renders a `Sphere` as a tessellated mesh (see `WebGLMeshRenderer`). The
 tessellation comes from `SpherePolyhedralCache`: the sphere is converted, in
@@ -28,7 +28,8 @@ the camera. Drawing is asynchronous because a GLSL source arrives over
 `fetch`.
 */
 export class WebGLSphereRenderer {
-    private static readonly DEFAULT_SLICES = 32;
+    /// Divisions around the axis of a sphere drawn with the default tessellation
+    public static readonly SLICES = 32;
     private static readonly DEFAULT_STACKS = 16;
 
     private static readonly MESHES = new Map<string, WebGLMesh>();
@@ -45,7 +46,7 @@ export class WebGLSphereRenderer {
         textureMap: RGBImageUncompressed | null = null,
         normalMap: RGBImageUncompressed | null = null,
         modelViewLocal: Matrix4x4d = Matrix4x4d.identityMatrix(),
-        slices: number = WebGLSphereRenderer.DEFAULT_SLICES,
+        slices: number = WebGLSphereRenderer.SLICES,
         stacks: number = WebGLSphereRenderer.DEFAULT_STACKS,
     ): Promise<void> {
         if (sphere === null || camera === null || material === null || quality === null) {

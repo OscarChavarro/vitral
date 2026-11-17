@@ -2,6 +2,7 @@ import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import { AlgebraicExpression } from "../../../common/symbolicAlgebra/AlgebraicExpression.js";
 import { Ray } from "../element/Ray.js";
 import { RayHit } from "../element/RayHit.js";
+import { QuadMesh } from "./QuadMesh.js";
 import { Surface } from "./Surface.js";
 import { TriangleMesh } from "./TriangleMesh.js";
 
@@ -129,5 +130,58 @@ export class FunctionalExplicitSurface extends Surface<Ray, RayHit> {
             }
         mesh.calculateNormals();
         this.internalTriangleMesh = mesh;
+    }
+
+    /**
+    Java private helper `coord`: index of the vertex (ix, iy) of the grid.
+    */
+    private coord(tesselationHintX: number, _tesselationHintY: number, ix: number, iy: number): number {
+        return (tesselationHintX + 1) * iy + ix;
+    }
+
+    /**
+    Exports the tessellation of the surface as a mesh of quadrilaterals: the
+    same grid of `getTesselationHintX()` x `getTesselationHintY()` cells of
+    the internal triangle mesh, without the diagonals that split each cell
+    in two triangles, so the lines of the mesh are the lines of constant x
+    and y of the surface.
+    @return a new mesh, or null if the surface has no valid tessellation
+    (i.e. its function could not be evaluated)
+    */
+    public exportToQuadMesh(): QuadMesh | null {
+        if (
+            this.internalTriangleMesh === null ||
+            this.internalTriangleMesh.getVertexPositions() === null ||
+            this.internalTriangleMesh.getTriangleIndexes() === null
+        ) {
+            return null;
+        }
+        const source = this.internalTriangleMesh.getVertexPositions()!;
+        const n = (this.tesselationHintX + 1) * (this.tesselationHintY + 1);
+        const mesh = new QuadMesh();
+        let ix: number;
+        let iy: number;
+        let index: number;
+
+        if (source.length < 3 * n) {
+            return null;
+        }
+        mesh.initVertexPositionsArray(n);
+        mesh.getVertexPositions()!.set(source.subarray(0, 3 * n), 0);
+        mesh.initQuadArrays(this.tesselationHintX * this.tesselationHintY);
+        index = 0;
+        for (iy = 0; iy < this.tesselationHintY; iy++) {
+            for (ix = 0; ix < this.tesselationHintX; ix++) {
+                mesh.setQuadAt(
+                    index,
+                    this.coord(this.tesselationHintX, this.tesselationHintY, ix, iy),
+                    this.coord(this.tesselationHintX, this.tesselationHintY, ix + 1, iy),
+                    this.coord(this.tesselationHintX, this.tesselationHintY, ix + 1, iy + 1),
+                    this.coord(this.tesselationHintX, this.tesselationHintY, ix, iy + 1),
+                );
+                index++;
+            }
+        }
+        return mesh;
     }
 }

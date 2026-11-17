@@ -63,7 +63,8 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
   /**
    * Creates the application inside an element (Java's constructor).
    * @param root element where the GUI is built
-   * @param args Java's command line arguments (`-s` installs the agent API)
+   * @param args Java's command line arguments (none is used here; `-s` is
+   * still accepted, but no longer needed)
    * @param onClose called when the application closes itself
    * @return the application, with its GUI built
    */
@@ -85,13 +86,11 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
     await application.createModel();
     await application.createGUI();
 
-    for (const arg of args) {
-      if (arg === '-s') {
-        // Installs the agent API of the page (Java starts its TCP listener)
-        const mcpModule = await import('./mcp/html-webgl-vitral-editor-mcp');
-        application.mcp = new mcpModule.HtmlWebGLVitralEditorMCP(application);
-      }
-    }
+    // The automation service is always installed (the former "-s" argument
+    // is still accepted, but no longer needed): the agent API of the page,
+    // where Java starts its TCP listener
+    const mcpModule = await import('./mcp/html-webgl-vitral-editor-mcp');
+    application.mcp = new mcpModule.HtmlWebGLVitralEditorMCP(application);
     return application;
   }
 

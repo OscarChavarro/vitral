@@ -19,6 +19,8 @@ import { RayHit } from "../element/RayHit.js";
 import { RaySolidBoundary } from "../element/RaySolidBoundary.js";
 import type { RaySolidClassification } from "../element/RaySolidClassification.js";
 import { RaySolidQueryStatus } from "../element/RaySolidQueryStatus.js";
+import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
+import { PolyhedralBoundedSolidFieldConstructions } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.js";
 import { Solid } from "./Solid.js";
 
 // Solid F(p) < 0 of a continuous scalar field F whose ray restriction a
@@ -446,5 +448,72 @@ export abstract class ImplicitSolid extends Solid {
                 bounds.getMaximum().z(),
             );
         return Float64Array.of(-1e308, -1e308, -1e308, 1e308, 1e308, 1e308);
+    }
+
+    //= Boundary representation =============================================
+
+    /// Default number of grid cells along the largest side of the box
+    /// polygonized by `exportToPolyhedralBoundedSolid`
+    public static readonly DEFAULT_POLYGONIZATION_DIVISIONS = 16;
+    /// Half the side of the cube, centered at the origin, that clips an
+    /// unbounded solid when exported to a boundary representation
+    public static readonly DEFAULT_CLIPPING_HALF_SIZE = 3.0;
+
+    /**
+    Java overloads `exportToPolyhedralBoundedSolid()` (with the default
+    number of divisions), `exportToPolyhedralBoundedSolid(int divisions)` and
+    `exportToPolyhedralBoundedSolid(int divisions, Vector3Dd minimum, Vector3Dd maximum)`.
+
+    Polyhedral approximation of the solid F &lt; 0, built with Euler
+    operators by `PolyhedralBoundedSolidFieldConstructions`. A bounded solid
+    is polygonized inside its bounds; an unbounded one is clipped by the
+    cube of half side `DEFAULT_CLIPPING_HALF_SIZE` centered at the origin.
+    With a box, it is the polyhedral approximation of the part of the solid
+    F &lt; 0 inside it.
+    @param divisions number of grid cells along the largest side of the
+    polygonized box (at least 1)
+    @param minimum minimum corner of the box
+    @param maximum maximum corner of the box
+    @return a new polyhedral approximation, or null if the solid is empty or
+    its bounds can not be determined
+    */
+    public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(divisions: number): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(
+        divisions: number,
+        minimum: Vector3Dd,
+        maximum: Vector3Dd,
+    ): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(
+        divisions?: number,
+        minimum?: Vector3Dd,
+        maximum?: Vector3Dd,
+    ): PolyhedralBoundedSolid | null {
+        if (divisions === undefined) {
+            return this.exportToPolyhedralBoundedSolid(ImplicitSolid.DEFAULT_POLYGONIZATION_DIVISIONS);
+        }
+        if (minimum !== undefined && maximum !== undefined) {
+            return PolyhedralBoundedSolidFieldConstructions.createFromScalarField(
+                (point: Vector3Dd) => this.evaluateField(point),
+                minimum,
+                maximum,
+                Math.max(1, divisions),
+            );
+        }
+        const bounds = new GeometryBounds();
+        this.getBounds(bounds);
+        if (bounds.getKind() === GeometryBounds.Kind.Finite) {
+            return PolyhedralBoundedSolidFieldConstructions.createFromBoundedScalarField(
+                (point: Vector3Dd) => this.evaluateField(point),
+                bounds.getMinimum(),
+                bounds.getMaximum(),
+                Math.max(1, divisions),
+            );
+        }
+        if (bounds.getKind() === GeometryBounds.Kind.Unbounded) {
+            const c = ImplicitSolid.DEFAULT_CLIPPING_HALF_SIZE;
+            return this.exportToPolyhedralBoundedSolid(divisions, new Vector3Dd(-c, -c, -c), new Vector3Dd(c, c, c));
+        }
+        return null;
     }
 }

@@ -48,6 +48,7 @@ export class Box extends Solid {
         super();
         if (a instanceof Vector3Dd && b instanceof Vector3Dd) {
             this.bounds = [a, b];
+            this.addControlSpecifications();
             return;
         }
         const s = a instanceof Vector3Dd ? a : new Vector3Dd(a, b as number, dz!);
@@ -55,6 +56,17 @@ export class Box extends Solid {
             new Vector3Dd(-s.x() / 2, -s.y() / 2, -s.z() / 2),
             new Vector3Dd(s.x() / 2, s.y() / 2, s.z() / 2),
         ];
+        this.addControlSpecifications();
+    }
+
+    /**
+    The state edited is the size along each axis; the center is kept (moving
+    the box is a transformation of its body, not a change of the box).
+    */
+    private addControlSpecifications(): void {
+        this.getControlSpecifications().push("double;sizeX;(0, INFINITE)");
+        this.getControlSpecifications().push("double;sizeY;(0, INFINITE)");
+        this.getControlSpecifications().push("double;sizeZ;(0, INFINITE)");
     }
 
     /** C++ returns the two-element array itself; elements may be replaced in place. */
@@ -798,6 +810,30 @@ export class Box extends Solid {
         const half = a.multiply(0.5);
         this.bounds[0] = center.subtract(half);
         this.bounds[1] = center.add(half);
+    }
+
+    public getSizeX(): number {
+        return this.bounds[1]!.x() - this.bounds[0]!.x();
+    }
+
+    public getSizeY(): number {
+        return this.bounds[1]!.y() - this.bounds[0]!.y();
+    }
+
+    public getSizeZ(): number {
+        return this.bounds[1]!.z() - this.bounds[0]!.z();
+    }
+
+    public setSizeX(dx: number): void {
+        this.setSize(this.getSize().withX(dx));
+    }
+
+    public setSizeY(dy: number): void {
+        this.setSize(this.getSize().withY(dy));
+    }
+
+    public setSizeZ(dz: number): void {
+        this.setSize(this.getSize().withZ(dz));
     }
 
     public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid {

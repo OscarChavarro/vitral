@@ -16,9 +16,9 @@ import {
     type _PolyhedralBoundedSolidLoop,
     type _PolyhedralBoundedSolidVertex,
 } from "@vitral/base";
-import { WebGLLineRenderer } from "../WebGLLineRenderer.js";
-import { WebGLRendererConfigurationShaderSelector } from "../WebGLRendererConfigurationShaderSelector.js";
-import { WebGLSimpleMaterialRenderer } from "../WebGLSimpleMaterialRenderer.js";
+import { WebGLLineRenderer } from "../../WebGLLineRenderer.js";
+import { WebGLRendererConfigurationShaderSelector } from "../../WebGLRendererConfigurationShaderSelector.js";
+import { WebGLSimpleMaterialRenderer } from "../../WebGLSimpleMaterialRenderer.js";
 import { WebGLPolyhedralBoundedSolidRenderer } from "./WebGLPolyhedralBoundedSolidRenderer.js";
 
 /** Java's private nested `DebugLines`. */

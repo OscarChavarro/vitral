@@ -1,20 +1,28 @@
 import {
   Arrow,
+  BlobComponent,
+  BlobSolid,
   Box,
   ByteArrayOutputStream,
   CommandListener,
   Cone,
   EnvironmentPersistence,
   FunctionalExplicitSurface,
+  HeightFieldSolid,
   InfinitePlane,
   Logger,
   Matrix4x4d,
+  Md2Mesh,
+  Md2Persistence,
   ParametricBiCubicPatch,
   ParametricCurve,
+  PlanarHalfSpace,
   PolyhedralBoundedSolidEulerOperators,
   PolyhedralBoundedSolidModeler,
   PolyhedralBoundedSolidValidationEngine,
+  PolynomialSurface,
   ProgressMonitorConsole,
+  QuadricSurface,
   RGBAImageUncompressed,
   RGBColorPalettePersistence,
   SimpleBody,
@@ -29,9 +37,11 @@ import {
   type Geometry,
   type Light,
   type PolyhedralBoundedSolid,
+  type TriangleMesh,
 } from '@vitral/base';
 import { WebEnvironmentPersistence } from '@vitral/webgl';
 import type { ChosenFile } from '../io/chosen-file';
+import { FileSuffixFilter } from '../io/file-suffix-filter';
 import { ImageFiles } from '../io/image-files';
 import type { ApplicationModel } from '../model/application-model';
 import type { SceneHistory } from '../model/history/scene-history';
@@ -152,6 +162,16 @@ export class GuiEventExecutor extends CommandListener {
       this.scene().addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
     } else if (label === 'IDC_CREATE_TORUS') {
       this.scene().addThing(new Torus(2, 1));
+    } else if (label === 'IDC_CREATE_BLOB') {
+      this.createBlob();
+    } else if (label === 'IDC_CREATE_QUADRIC') {
+      this.createQuadric();
+    } else if (label === 'IDC_CREATE_POLYNOMIAL') {
+      this.createPolynomial();
+    } else if (label === 'IDC_CREATE_HEIGHTFIELD') {
+      this.createHeightField();
+    } else if (label === 'IDC_CREATE_HALFSPACE') {
+      this.scene().addThing(new PlanarHalfSpace(0, 0, 1, 0));
     } else if (label === 'IDC_CREATE_PLANE') {
       const plane: InfinitePlane = new InfinitePlane(
         new Vector3Dd(-0.2, 0, 1),
@@ -363,6 +383,94 @@ export class GuiEventExecutor extends CommandListener {
     newThing.setScale(size);
   }
 
+  /**
+   * A blob shaped as a triangular molecule with a hole: three components at
+   * the vertices of an equilateral triangle (at distance 1 from its center,
+   * on the plane z = 0). Each component reaches 1.25 units, so neighbors
+   * overlap; the threshold 0.46 is above the density at the center of the
+   * triangle (0.39) and below the one half way between two components
+   * (0.54), so the three of them merge in a ring around an empty center
+   * (of radius 0.25, wide enough to be kept by the default polygonization).
+   */
+  private createBlob(): void {
+    const blob: BlobSolid = new BlobSolid(0.46, false);
+    let i: number;
+
+    for (i = 0; i < 3; i++) {
+      const angle: number = Math.PI / 2 + (2 * Math.PI * i) / 3;
+      blob.addComponent(
+        new BlobComponent(new Vector3Dd(Math.cos(angle), Math.sin(angle), 0), 1.25, 1.0),
+      );
+    }
+    this.scene().addThing(blob);
+  }
+
+  /**
+   * An ellipsoid of semiaxes 1.5, 1 and 0.7: x^2/1.5^2 + y^2 + z^2/0.7^2 - 1
+   * <= 0.
+   */
+  private createQuadric(): void {
+    this.scene().addThing(
+      new QuadricSurface(
+        new Vector3Dd(1.0 / (1.5 * 1.5), 1.0, 1.0 / (0.7 * 0.7)),
+        new Vector3Dd(0, 0, 0),
+        new Vector3Dd(0, 0, 0),
+        -1.0,
+      ),
+    );
+  }
+
+  /**
+   * The quartic "tangle cube" x^4 - 5x^2 + y^4 - 5y^2 + z^4 - 5z^2 + 11.8 < 0,
+   * a solid of genus 5 that fits in a cube of side 4.6, scaled to 0.4.
+   */
+  private createPolynomial(): void {
+    const order: number = 4;
+    const polynomial: PolynomialSurface = new PolynomialSurface(order, false);
+    const c: number[] = polynomial.getCoefficients();
+
+    c[PolynomialSurface.getTermIndex(order, 4, 0, 0)] = 1;
+    c[PolynomialSurface.getTermIndex(order, 0, 4, 0)] = 1;
+    c[PolynomialSurface.getTermIndex(order, 0, 0, 4)] = 1;
+    c[PolynomialSurface.getTermIndex(order, 2, 0, 0)] = -5;
+    c[PolynomialSurface.getTermIndex(order, 0, 2, 0)] = -5;
+    c[PolynomialSurface.getTermIndex(order, 0, 0, 2)] = -5;
+    c[PolynomialSurface.getTermIndex(order, 0, 0, 0)] = 11.8;
+    const body: SimpleBody = this.scene().addThing(polynomial);
+    body.setScale(new Vector3Dd(0.4, 0.4, 0.4));
+  }
+
+  /**
+   * A terrain of 17 x 17 heights (waves between 0.7 and 2.3) over a box of
+   * height 3. Height fields grow along their Y axis: the body is rotated so
+   * they grow along Z, scaled to 0.25 and centered at the origin.
+   */
+  private createHeightField(): void {
+    const n: number = 17;
+    const field: HeightFieldSolid = new HeightFieldSolid(
+      n,
+      n,
+      new Vector3Dd(0, 0, 0),
+      new Vector3Dd(n - 1, 3, n - 1),
+    );
+    let x: number;
+    let z: number;
+
+    for (z = 0; z < n; z++) {
+      for (x = 0; x < n; x++) {
+        field.setHeight(x, z, 1.5 + 0.8 * Math.sin(x / 2.5) * Math.cos(z / 3.0));
+      }
+    }
+    const body: SimpleBody = this.scene().addThing(field);
+    let rotation: Matrix4x4d = new Matrix4x4d();
+    rotation = rotation.axisRotation(Math.PI / 2, 1, 0, 0);
+    const scale: number = 0.25;
+    body.setRotation(rotation);
+    body.setScale(new Vector3Dd(scale, scale, scale));
+    // Rotated, the center of the grid (8, y, 8) goes to (8, -8, y)
+    body.setPosition(new Vector3Dd((-scale * (n - 1)) / 2.0, (scale * (n - 1)) / 2.0, 0));
+  }
+
   private createBrep(): void {
     const brep: PolyhedralBoundedSolid = new Box(0.9, 0.9, 0.9).exportToPolyhedralBoundedSolid();
     let R: Matrix4x4d = new Matrix4x4d();
@@ -492,8 +600,9 @@ export class GuiEventExecutor extends CommandListener {
   }
 
   /**
-   * Adds the objects of a file to the scene.
-   * @param file 3ds, vtk, gts, obj or ply file
+   * Adds the objects of a file to the scene. Of a MD2 animated model, the
+   * first key frame is added, as a triangle mesh.
+   * @param file 3ds, vtk, gts, obj, ply or md2 file
    * @throws Error if the file can not be read
    */
   async importObjects(file: ChosenFile): Promise<void> {
@@ -501,7 +610,9 @@ export class GuiEventExecutor extends CommandListener {
 
     history.begin();
     try {
-      if (file.path !== null) {
+      if ('md2' === FileSuffixFilter.getSuffix(file.name)) {
+        await this.importMd2FirstFrame(file);
+      } else if (file.path !== null) {
         await WebEnvironmentPersistence.importEnvironment(file.path, this.scene().scene);
       } else {
         await WebEnvironmentPersistence.importEnvironmentFromBytes(
@@ -513,6 +624,21 @@ export class GuiEventExecutor extends CommandListener {
     } finally {
       history.end('Import of ' + file.name, false);
     }
+  }
+
+  private async importMd2FirstFrame(file: ChosenFile): Promise<void> {
+    const model: Md2Mesh = new Md2Mesh();
+    if (!new Md2Persistence().read(await file.readBytes(), null, model)) {
+      throw new Error('Not a MD2 version 8 file: ' + file.name);
+    }
+    const mesh: TriangleMesh | null = model.exportToTriangleMesh(0);
+    if (mesh === null) {
+      throw new Error('MD2 file without frames: ' + file.name);
+    }
+    const body: SimpleBody = new SimpleBody();
+    body.setName(file.name);
+    body.setGeometry(mesh);
+    this.scene().scene.getSimpleBodies().add(body);
   }
 
   /**

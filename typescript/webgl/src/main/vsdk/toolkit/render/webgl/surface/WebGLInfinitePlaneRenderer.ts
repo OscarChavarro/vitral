@@ -1,19 +1,21 @@
 import {
+    RendererConfiguration,
     Vector3Dd,
     type Camera,
     type InfinitePlane,
     type Light,
     type Matrix4x4d,
-    type RendererConfiguration,
     type RGBImageUncompressed,
     type SimpleMaterial,
 } from "@vitral/base";
-import { WebGLGeometryRenderer } from "./WebGLGeometryRenderer.js";
-import { WebGLMeshBuilder } from "./WebGLMeshBuilder.js";
-import type { WebGLMesh } from "./WebGLMeshRenderer.js";
+import { WebGLGeometryRenderer } from "../WebGLGeometryRenderer.js";
+import { WebGLMeshBuilder } from "../WebGLMeshBuilder.js";
+import { WebGLMeshRenderer, type WebGLMesh } from "../WebGLMeshRenderer.js";
+import { WebGLMinMaxRenderer } from "../WebGLMinMaxRenderer.js";
+import { WebGLSelectionCornersRenderer } from "../WebGLSelectionCornersRenderer.js";
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4InfinitePlaneRenderer`.
+Port of `vsdk.toolkit.render.jogl.surface.Jogl4InfinitePlaneRenderer`.
 
 Renders an `InfinitePlane` with the WebGL pipeline. As in
 `Jogl2InfinitePlaneRenderer`, a finite part of the plane is shown: a square
@@ -48,10 +50,10 @@ export class WebGLInfinitePlaneRenderer {
     public static async draw(
         gl: WebGL2RenderingContext,
         plane: InfinitePlane,
-        camera: Camera,
+        camera: Camera | null,
         lights: Light | Iterable<Light | null> | null,
-        material: SimpleMaterial,
-        quality: RendererConfiguration,
+        material: SimpleMaterial | null,
+        quality: RendererConfiguration | null,
         textureMap: RGBImageUncompressed | null,
         normalMap: RGBImageUncompressed | null,
         localTransform: Matrix4x4d | null,
@@ -67,6 +69,60 @@ export class WebGLInfinitePlaneRenderer {
             normalMap,
             localTransform,
         );
+    }
+
+    /**
+    Draws the mesh of the square shown for a plane. Its bounding volume is
+    infinite, so the bounding volume and the selection corners are drawn
+    around the square instead.
+    @param gl WebGL context
+    @param mesh mesh of the plane, built by `buildMesh`
+    @param plane plane to draw
+    @param camera camera that views the plane
+    @param lights lights of the scene, or null or empty to use a light at the camera
+    @param material material of the plane
+    @param quality bits of rendering configuration
+    @param textureMap texture, or null
+    @param normalMap normal (bump) map, or null
+    @param localTransform transformation from plane space to world space
+    */
+    public static async drawMesh(
+        gl: WebGL2RenderingContext,
+        mesh: WebGLMesh,
+        plane: InfinitePlane,
+        camera: Camera | null,
+        lights: Light | Iterable<Light | null> | null,
+        material: SimpleMaterial | null,
+        quality: RendererConfiguration,
+        textureMap: RGBImageUncompressed | null,
+        normalMap: RGBImageUncompressed | null,
+        localTransform: Matrix4x4d | null,
+    ): Promise<void> {
+        const meshQuality: RendererConfiguration = new RendererConfiguration();
+
+        meshQuality.clone(quality);
+        meshQuality.setBoundingVolume(false);
+        meshQuality.setSelectionCorners(false);
+        await WebGLMeshRenderer.draw(
+            gl,
+            mesh,
+            plane,
+            camera,
+            lights,
+            material,
+            meshQuality,
+            textureMap,
+            normalMap,
+            localTransform,
+        );
+
+        const shown: number[] = WebGLInfinitePlaneRenderer.calculateShownMinMax(plane);
+        if (quality.isBoundingVolumeSet()) {
+            await WebGLMinMaxRenderer.drawMinMax(gl, shown, camera, localTransform ?? undefined);
+        }
+        if (quality.isSelectionCornersSet()) {
+            await WebGLSelectionCornersRenderer.drawMinMax(gl, shown, camera, localTransform);
+        }
     }
 
     /**

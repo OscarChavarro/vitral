@@ -17,10 +17,11 @@ import {
     type _PolyhedralBoundedSolidHalfEdge,
     type _PolyhedralBoundedSolidLoop,
 } from "@vitral/base";
-import { WebGLLightRenderer } from "../WebGLLightRenderer.js";
-import { WebGLRendererConfigurationShaderSelector } from "../WebGLRendererConfigurationShaderSelector.js";
-import { WebGLShaderProgramUtil } from "../WebGLShaderProgramUtil.js";
-import { WebGLSimpleMaterialRenderer } from "../WebGLSimpleMaterialRenderer.js";
+import { WebGLLightRenderer } from "../../WebGLLightRenderer.js";
+import { WebGLRendererConfigurationShaderSelector } from "../../WebGLRendererConfigurationShaderSelector.js";
+import { WebGLSelectionCornersRenderer } from "../../WebGLSelectionCornersRenderer.js";
+import { WebGLShaderProgramUtil } from "../../WebGLShaderProgramUtil.js";
+import { WebGLSimpleMaterialRenderer } from "../../WebGLSimpleMaterialRenderer.js";
 import { WebGLPolyhedralBoundedSolidDebugRenderer } from "./WebGLPolyhedralBoundedSolidDebugRenderer.js";
 
 interface PolyhedralBoundedSolidRendererResources {
@@ -36,7 +37,7 @@ interface PolyhedralBoundedSolidRendererResources {
 
 /**
 Port of
-`vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer`.
+`vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer`.
 
 The surface pass is the Java one: a mesh built every call from the faces of the
 solid, skipping the degenerate ones, with vertex normals smoothed across the
@@ -107,13 +108,83 @@ export class WebGLPolyhedralBoundedSolidRenderer {
         }
     }
 
+    /**
+    Java overloads `draw(GL4, PolyhedralBoundedSolid, Camera,
+    RendererConfiguration, Matrix4x4d)` and `draw(GL4, PolyhedralBoundedSolid,
+    Camera, List<Light>, SimpleMaterial, RendererConfiguration, Matrix4x4d)`,
+    taken by the number of arguments.
+
+    The second one draws a brep with the given material and lights. This
+    renderer takes them from the active ones, so they are activated only while
+    the solid is drawn. Textures and normal maps are not supported. The
+    bounding volume is drawn with the debug overlays, the selection corners
+    here.
+
+    @param gl WebGL context
+    @param solid solid to draw
+    @param camera camera that views the solid
+    @param lights light or lights of the scene, or null for none
+    @param material material of the solid
+    @param quality bits of rendering configuration
+    @param modelMatrix transformation from solid space to world space
+    */
     public static async draw(
         gl: WebGL2RenderingContext | null,
         solid: PolyhedralBoundedSolid | null,
         camera: Camera,
         quality: RendererConfiguration | null,
         modelMatrix: Matrix4x4d | null,
+    ): Promise<void>;
+    public static async draw(
+        gl: WebGL2RenderingContext | null,
+        solid: PolyhedralBoundedSolid | null,
+        camera: Camera,
+        lights: Light | Iterable<Light | null> | null,
+        material: SimpleMaterial | null,
+        quality: RendererConfiguration | null,
+        modelMatrix: Matrix4x4d | null,
+    ): Promise<void>;
+    public static async draw(
+        gl: WebGL2RenderingContext | null,
+        solid: PolyhedralBoundedSolid | null,
+        camera: Camera,
+        ...rest:
+            | [RendererConfiguration | null, Matrix4x4d | null]
+            | [
+                  Light | Iterable<Light | null> | null,
+                  SimpleMaterial | null,
+                  RendererConfiguration | null,
+                  Matrix4x4d | null,
+              ]
     ): Promise<void> {
+        if (rest.length === 4) {
+            const [lights, material, quality, modelMatrix] = rest;
+            if (gl === null || solid === null || quality === null) {
+                return;
+            }
+            WebGLSimpleMaterialRenderer.activate(gl, material);
+            WebGLLightRenderer.deactivateAll(gl);
+            // Java's single light overload of the callers arrives here as a
+            // light instead of a list of one light
+            if (lights instanceof Light) {
+                WebGLLightRenderer.activate(gl, lights);
+            } else if (lights !== null) {
+                for (const light of lights) {
+                    WebGLLightRenderer.activate(gl, light);
+                }
+            }
+
+            await WebGLPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality, modelMatrix);
+
+            WebGLLightRenderer.deactivateAll(gl);
+            WebGLSimpleMaterialRenderer.activate(gl, null);
+
+            if (quality.isSelectionCornersSet()) {
+                await WebGLSelectionCornersRenderer.drawMinMax(gl, solid.getMinMax(), camera, modelMatrix);
+            }
+            return;
+        }
+        const [quality, modelMatrix] = rest;
         if (gl === null) {
             return;
         }

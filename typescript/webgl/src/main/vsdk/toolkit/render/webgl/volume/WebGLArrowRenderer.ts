@@ -8,7 +8,9 @@ import {
     SimpleMaterial,
     Vector3Dd,
 } from "@vitral/base";
-import { WebGLRendererConfigurationShaderSelector } from "./WebGLRendererConfigurationShaderSelector.js";
+import { WebGLMeshBuilder } from "../WebGLMeshBuilder.js";
+import type { WebGLMesh } from "../WebGLMeshRenderer.js";
+import { WebGLRendererConfigurationShaderSelector } from "../WebGLRendererConfigurationShaderSelector.js";
 
 interface ArrowMesh {
     positions: Float32Array;
@@ -26,7 +28,13 @@ interface ArrowResources {
 }
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4ArrowRenderer`.
+Port of `vsdk.toolkit.render.jogl.volume.Jogl4ArrowRenderer`.
+
+Renders an `Arrow` with the WebGL pipeline, in two ways: `draw` with its own
+mesh of `SLICES` divisions (as needed by the gizmos), and, through
+`WebGLGeometryRenderer`, from the mesh built by `buildMesh` (cached by its
+parameters), that honors every bit of the `RendererConfiguration` as the
+other geometries.
 
 The procedurally tessellated arrow — shaft side, shaft bottom cap, annular head
 cap and cone side, sixteen slices each, with the cone's slant normals — is the
@@ -48,6 +56,8 @@ this renderer builds all of its arrows from one `Arrow` instance.
 */
 export class WebGLArrowRenderer {
     private static readonly SLICES = 16;
+    /// Divisions around the axis of the mesh built by `buildMesh`
+    public static readonly MESH_SLICES = 32;
     private static readonly SURFACE_POLYGON_OFFSET_FACTOR = 1.0;
     private static readonly SURFACE_POLYGON_OFFSET_UNITS = 1.0;
 
@@ -474,5 +484,40 @@ export class WebGLArrowRenderer {
         if (loc !== null) {
             gl.uniform1f(loc, value);
         }
+    }
+
+    /**
+    @param arrow an arrow
+    @return a string that identifies the mesh of the arrow
+    */
+    public static meshKey(arrow: Arrow): string {
+        return (
+            "arrow/" +
+            arrow.getBaseLength() +
+            "/" +
+            arrow.getHeadLength() +
+            "/" +
+            arrow.getBaseRadius() +
+            "/" +
+            arrow.getHeadRadius()
+        );
+    }
+
+    /**
+    @param arrow arrow to tessellate
+    @return the mesh of the base cylinder and the head cone of the arrow
+    */
+    public static buildMesh(arrow: Arrow): WebGLMesh {
+        const h1: number = arrow.getBaseLength();
+        const h2: number = arrow.getHeadLength();
+        const r1: number = arrow.getBaseRadius();
+        const r2: number = arrow.getHeadRadius();
+        const builder: WebGLMeshBuilder = new WebGLMeshBuilder(h1 + h2);
+
+        builder.addFrustum(0, r1, h1, r1, WebGLArrowRenderer.MESH_SLICES);
+        builder.addDisk(0, 0, r1, false, WebGLArrowRenderer.MESH_SLICES);
+        builder.addFrustum(h1, r2, h1 + h2, 0, WebGLArrowRenderer.MESH_SLICES);
+        builder.addDisk(h1, r1, r2, false, WebGLArrowRenderer.MESH_SLICES);
+        return builder.build();
     }
 }

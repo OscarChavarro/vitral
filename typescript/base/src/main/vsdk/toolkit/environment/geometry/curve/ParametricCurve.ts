@@ -2,6 +2,7 @@ import { Curve } from "./Curve.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import { VSDK } from "../../../common/VSDK.js";
 import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
+import { Calligraphic3DBuffer } from "../../../media/Calligraphic3DBuffer.js";
 export class ParametricCurve extends Curve {
     public static readonly BREAK = 1;
     public static readonly CORNER = 2;
@@ -159,5 +160,30 @@ export class ParametricCurve extends Curve {
             for (const q of this.calculatePoints(i, false))
                 if (Vector3Dd.distance(q, p) < t) return ParametricCurve.LIMIT;
         return ParametricCurve.OUTSIDE;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Curve.exportToCalligraphic3DBuffer. Each curve segment is approximated by
+    the polyline of `calculatePoints` (with `getApproximationSteps()` steps),
+    as when it is drawn with a 3D graphics API; break points start a new
+    piece of the curve.
+    @return a new buffer with the segments approximating the curve
+    */
+    public override exportToCalligraphic3DBuffer(): Calligraphic3DBuffer {
+        const lines = new Calligraphic3DBuffer();
+        let i: number, j: number;
+
+        for (i = 1; i < this.types.length; i++) {
+            if (this.types[i] === ParametricCurve.BREAK) {
+                i++;
+                continue;
+            }
+            const polyline = this.calculatePoints(i, false);
+            for (j = 0; j + 1 < polyline.length; j++) {
+                lines.add3DLine(polyline[j]!, polyline[j + 1]!);
+            }
+        }
+        return lines;
     }
 }

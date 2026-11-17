@@ -24,6 +24,8 @@ import { RaySolidQueryStatus } from "../element/RaySolidQueryStatus.js";
 import { HeightFieldBlock } from "./HeightFieldBlock.js";
 import { HeightFieldTraceResult } from "./HeightFieldTraceResult.js";
 import { HeightFieldTraversal } from "./HeightFieldTraversal.js";
+import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
+import { PolyhedralBoundedSolidMeshConstructions } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidMeshConstructions.js";
 import { Solid } from "./Solid.js";
 
 /**
@@ -1492,5 +1494,146 @@ export class HeightFieldSolid extends Solid {
                 bounds.getMaximum().z(),
             );
         return Float64Array.of(-1e308, -1e308, -1e308, 1e308, 1e308, 1e308);
+    }
+
+    //= Boundary representation =============================================
+
+    /**
+    Boundary representation of the height field, built with Euler operators
+    by `PolyhedralBoundedSolidMeshConstructions` from its polygons:
+      - The surface: the two triangles of each grid cell inside the box,
+        split along the same diagonal as `evaluateHeight` (from (x+1, z) to
+        (x, z+1)). Cells cut by the box are sampled at the box sides.
+      - Four sides, each one a planar polygon under the profile of the
+        surface, and the bottom of the box.
+    It is exact for heights inside the box. Heights above the box are taken
+    at its top, and heights at or below its bottom just above it, so a part
+    of the box where the solid is empty is approximated by a thin layer.
+    @return a new polyhedral solid, or null if the height field is not valid
+    */
+    public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid | null {
+        if (!this.isValid()) {
+            return null;
+        }
+        const xs = HeightFieldSolid.boxGridCoordinates(this.minimum.x(), this.maximum.x());
+        const zs = HeightFieldSolid.boxGridCoordinates(this.minimum.z(), this.maximum.z());
+        const nx = xs.length;
+        const nz = zs.length;
+        const bottom = this.minimum.y();
+        const lowest = bottom + 1.0e-3 * (this.maximum.y() - this.minimum.y());
+        const positions = new ArrayList<Vector3Dd>();
+        const polygons = new ArrayList<number[]>();
+
+        // Surface vertices (i, k) at index i + nx*k
+        for (let k = 0; k < nz; k++) {
+            for (let i = 0; i < nx; i++) {
+                let h = this.evaluateHeight(xs[i]!, zs[k]!);
+                h = Math.max(lowest, Math.min(this.maximum.y(), h));
+                positions.add(new Vector3Dd(xs[i]!, h, zs[k]!));
+            }
+        }
+        // Bottom corners
+        const b00 = positions.size();
+        positions.add(new Vector3Dd(xs[0]!, bottom, zs[0]!));
+        const b10 = positions.size();
+        positions.add(new Vector3Dd(xs[nx - 1]!, bottom, zs[0]!));
+        const b01 = positions.size();
+        positions.add(new Vector3Dd(xs[0]!, bottom, zs[nz - 1]!));
+        const b11 = positions.size();
+        positions.add(new Vector3Dd(xs[nx - 1]!, bottom, zs[nz - 1]!));
+
+        const up = new Vector3Dd(0, 1, 0);
+        for (let k = 0; k < nz - 1; k++) {
+            for (let i = 0; i < nx - 1; i++) {
+                const v00 = i + nx * k;
+                const v10 = i + 1 + nx * k;
+                const v01 = i + nx * (k + 1);
+                const v11 = i + 1 + nx * (k + 1);
+                HeightFieldSolid.addPolygon(positions, polygons, [v00, v01, v10], up);
+                HeightFieldSolid.addPolygon(positions, polygons, [v10, v01, v11], up);
+            }
+        }
+
+        // Sides: the profile of the surface and two bottom corners
+        let side = new Array<number>(nz + 2).fill(0);
+        for (let k = 0; k < nz; k++) {
+            side[k] = nx * k;
+        }
+        side[nz] = b01;
+        side[nz + 1] = b00;
+        HeightFieldSolid.addPolygon(positions, polygons, side, new Vector3Dd(-1, 0, 0));
+        side = new Array<number>(nz + 2).fill(0);
+        for (let k = 0; k < nz; k++) {
+            side[k] = nx - 1 + nx * k;
+        }
+        side[nz] = b11;
+        side[nz + 1] = b10;
+        HeightFieldSolid.addPolygon(positions, polygons, side, new Vector3Dd(1, 0, 0));
+        side = new Array<number>(nx + 2).fill(0);
+        for (let i = 0; i < nx; i++) {
+            side[i] = i;
+        }
+        side[nx] = b10;
+        side[nx + 1] = b00;
+        HeightFieldSolid.addPolygon(positions, polygons, side, new Vector3Dd(0, 0, -1));
+        side = new Array<number>(nx + 2).fill(0);
+        for (let i = 0; i < nx; i++) {
+            side[i] = i + nx * (nz - 1);
+        }
+        side[nx] = b11;
+        side[nx + 1] = b01;
+        HeightFieldSolid.addPolygon(positions, polygons, side, new Vector3Dd(0, 0, 1));
+        HeightFieldSolid.addPolygon(positions, polygons, [b00, b10, b11, b01], new Vector3Dd(0, -1, 0));
+
+        return PolyhedralBoundedSolidMeshConstructions.createFromPolygonMesh(positions, polygons);
+    }
+
+    /**
+    @return the box limits and the grid lines strictly between them
+    */
+    private static boxGridCoordinates(low: number, high: number): Float64Array {
+        const list = new ArrayList<number>();
+        list.add(low);
+        for (let c = Math.floor(low) + 1; c < high; c += 1.0) {
+            if (c - low > 1.0e-9 && high - c > 1.0e-9) {
+                list.add(c);
+            }
+        }
+        list.add(high);
+        const coordinates = new Float64Array(list.size());
+        for (let i = 0; i < coordinates.length; i++) {
+            coordinates[i] = list.get(i);
+        }
+        return coordinates;
+    }
+
+    /**
+    Adds a polygon, reversing it if needed so it is counterclockwise as seen
+    from outside (its normal along `outward`).
+    */
+    private static addPolygon(
+        positions: ArrayList<Vector3Dd>,
+        polygons: ArrayList<number[]>,
+        polygon: number[],
+        outward: Vector3Dd,
+    ): void {
+        let x = 0;
+        let y = 0;
+        let z = 0;
+        for (let i = 0; i < polygon.length; i++) {
+            const p = positions.get(polygon[i]!);
+            const q = positions.get(polygon[(i + 1) % polygon.length]!);
+            x += (p.y() - q.y()) * (p.z() + q.z());
+            y += (p.z() - q.z()) * (p.x() + q.x());
+            z += (p.x() - q.x()) * (p.y() + q.y());
+        }
+        if (new Vector3Dd(x, y, z).dotProduct(outward) < 0) {
+            for (let i = 0, j = polygon.length - 1; i < j; i++, j--) {
+                const tmp = polygon[i]!;
+                polygon[i] = polygon[j]!;
+                polygon[j] = tmp;
+            }
+        }
+        polygons.add(polygon);
     }
 }

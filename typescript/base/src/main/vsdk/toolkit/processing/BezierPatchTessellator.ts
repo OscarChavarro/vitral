@@ -2,6 +2,7 @@ import { Double } from "../../../java/lang/Double.js";
 import { ArrayList } from "../../../java/util/ArrayList.js";
 import { Vector3Dd } from "../common/linealAlgebra/Vector3Dd.js";
 import type { SubdividedBezierPatch } from "../environment/geometry/surface/SubdividedBezierPatch.js";
+import { QuadMesh } from "../environment/geometry/surface/QuadMesh.js";
 import { TriangleMesh } from "../environment/geometry/surface/TriangleMesh.js";
 
 // Drawable triangle mesh of the Bezier surface of a patch's control net:
@@ -139,6 +140,52 @@ export class BezierPatchTessellator {
             normals[index * 3] = n.x();
             normals[index * 3 + 1] = n.y();
             normals[index * 3 + 2] = n.z();
+        }
+        return mesh;
+    }
+
+    /**
+    Same grid of (uSteps + 1) x (vSteps + 1) points of the Bezier surface as
+    `tessellate`, joined by one quadrilateral per parameter cell (without the
+    diagonals of the triangles), with positions only: the lines of its edges
+    are the curves of constant u and v of the surface.
+    @return a new mesh, or null when a step count is outside
+    1..MAXIMUM_STEPS
+    */
+    public static tessellateQuads(patch: SubdividedBezierPatch, uSteps: number, vSteps: number): QuadMesh | null {
+        if (
+            uSteps < 1 ||
+            vSteps < 1 ||
+            uSteps > BezierPatchTessellator.MAXIMUM_STEPS ||
+            vSteps > BezierPatchTessellator.MAXIMUM_STEPS
+        )
+            return null;
+        const columns = vSteps + 1;
+        const mesh = new QuadMesh();
+        mesh.initVertexPositionsArray((uSteps + 1) * columns);
+        const positions = mesh.getVertexPositions()!;
+        for (let i = 0; i <= uSteps; i++) {
+            const u = i / uSteps;
+            for (let j = 0; j <= vSteps; j++) {
+                const index = i * columns + j;
+                const p = patch.evaluate(u, j / vSteps);
+                positions[index * 3] = p.x();
+                positions[index * 3 + 1] = p.y();
+                positions[index * 3 + 2] = p.z();
+            }
+        }
+        mesh.initQuadArrays(uSteps * vSteps);
+        let q = 0;
+        for (let i = 0; i < uSteps; i++) {
+            for (let j = 0; j < vSteps; j++, q++) {
+                mesh.setQuadAt(
+                    q,
+                    i * columns + j,
+                    (i + 1) * columns + j,
+                    (i + 1) * columns + j + 1,
+                    i * columns + j + 1,
+                );
+            }
         }
         return mesh;
     }

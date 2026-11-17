@@ -57,6 +57,15 @@ export class WebGLLightRenderer {
     }
 
     /**
+    Forgets all the lights activated so far, so `getActiveLights` reports
+    the default light until other lights are activated.
+    @param gl WebGL context
+    */
+    public static deactivateAll(gl: WebGL2RenderingContext): void {
+        WebGLLightRenderer.activeLights.get(gl)?.clear();
+    }
+
+    /**
     Draws the gizmo of a light. A selected light is drawn in the selection
     color and with thicker lines, instead of with its own emission color
     (Java's overloads are one method with optional arguments).

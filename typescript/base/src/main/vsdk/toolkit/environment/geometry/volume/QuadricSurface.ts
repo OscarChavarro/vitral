@@ -18,6 +18,9 @@ import { RaySolidBoundary } from "../element/RaySolidBoundary.js";
 import type { RaySolidClassification } from "../element/RaySolidClassification.js";
 import { RaySolidQueryStatus } from "../element/RaySolidQueryStatus.js";
 import type { Geometry } from "../Geometry.js";
+import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
+import { PolyhedralBoundedSolidFieldConstructions } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.js";
+import { ImplicitSolid } from "./ImplicitSolid.js";
 import { Solid } from "./Solid.js";
 
 // F(x,y,z) = square dot (x*x,y*y,z*z) + mixed dot (xy,xz,yz)
@@ -34,6 +37,91 @@ export class QuadricSurface extends Solid {
         this.mixed = m;
         this.linear = l;
         this.constant = c;
+        this.addControlSpecifications();
+    }
+
+    /**
+    The state is the ten coefficients of
+    Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0, any real
+    value being valid for each one.
+    */
+    private addControlSpecifications(): void {
+        for (const name of [
+            "squareX",
+            "squareY",
+            "squareZ",
+            "mixedXY",
+            "mixedXZ",
+            "mixedYZ",
+            "linearX",
+            "linearY",
+            "linearZ",
+            "constant",
+        ]) {
+            this.getControlSpecifications().push("double;" + name + ";(-INFINITE, INFINITE)");
+        }
+    }
+
+    public getSquareX(): number {
+        return this.square.x();
+    }
+    public getSquareY(): number {
+        return this.square.y();
+    }
+    public getSquareZ(): number {
+        return this.square.z();
+    }
+    public getMixedXY(): number {
+        return this.mixed.x();
+    }
+    public getMixedXZ(): number {
+        return this.mixed.y();
+    }
+    public getMixedYZ(): number {
+        return this.mixed.z();
+    }
+    public getLinearX(): number {
+        return this.linear.x();
+    }
+    public getLinearY(): number {
+        return this.linear.y();
+    }
+    public getLinearZ(): number {
+        return this.linear.z();
+    }
+    public getConstant(): number {
+        return this.constant;
+    }
+
+    public setSquareX(value: number): void {
+        this.square = this.square.withX(value);
+    }
+    public setSquareY(value: number): void {
+        this.square = this.square.withY(value);
+    }
+    public setSquareZ(value: number): void {
+        this.square = this.square.withZ(value);
+    }
+    public setMixedXY(value: number): void {
+        this.mixed = this.mixed.withX(value);
+    }
+    public setMixedXZ(value: number): void {
+        this.mixed = this.mixed.withY(value);
+    }
+    public setMixedYZ(value: number): void {
+        this.mixed = this.mixed.withZ(value);
+    }
+    public setLinearX(value: number): void {
+        this.linear = this.linear.withX(value);
+    }
+    public setLinearY(value: number): void {
+        this.linear = this.linear.withY(value);
+    }
+    public setLinearZ(value: number): void {
+        this.linear = this.linear.withZ(value);
+    }
+    public setConstant(value: number): void {
+        this.constant = value;
     }
 
     // The evaluation order matches the historical POV implementation.
@@ -558,5 +646,67 @@ export class QuadricSurface extends Solid {
                 bounds.getMaximum().z(),
             );
         return Float64Array.of(-1e308, -1e308, -1e308, 1e308, 1e308, 1e308);
+    }
+
+    //= Boundary representation =============================================
+
+    /**
+    Java overloads `exportToPolyhedralBoundedSolid()` (with the default
+    number of divisions of `ImplicitSolid`),
+    `exportToPolyhedralBoundedSolid(int divisions)` and
+    `exportToPolyhedralBoundedSolid(int divisions, Vector3Dd minimum, Vector3Dd maximum)`.
+
+    Polyhedral approximation of the solid F &lt;= 0, built with Euler
+    operators by `PolyhedralBoundedSolidFieldConstructions`. A bounded
+    quadric (an ellipsoid) is polygonized inside its bounds; an unbounded one
+    (i.e. a cylinder or a paraboloid) is clipped by the cube of half side
+    `ImplicitSolid.DEFAULT_CLIPPING_HALF_SIZE` centered at the origin.
+    With a box, it is the polyhedral approximation of the part of the solid
+    F &lt;= 0 inside it.
+    @param divisions number of grid cells along the largest side of the
+    polygonized box (at least 1)
+    @param minimum minimum corner of the box
+    @param maximum maximum corner of the box
+    @return a new polyhedral approximation, or null if the solid is empty or
+    its bounds can not be determined
+    */
+    public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(divisions: number): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(
+        divisions: number,
+        minimum: Vector3Dd,
+        maximum: Vector3Dd,
+    ): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(
+        divisions?: number,
+        minimum?: Vector3Dd,
+        maximum?: Vector3Dd,
+    ): PolyhedralBoundedSolid | null {
+        if (divisions === undefined) {
+            return this.exportToPolyhedralBoundedSolid(ImplicitSolid.DEFAULT_POLYGONIZATION_DIVISIONS);
+        }
+        if (minimum !== undefined && maximum !== undefined) {
+            return PolyhedralBoundedSolidFieldConstructions.createFromScalarField(
+                (point: Vector3Dd) => this.evaluate(point),
+                minimum,
+                maximum,
+                Math.max(1, divisions),
+            );
+        }
+        const bounds = new GeometryBounds();
+        this.getBounds(bounds);
+        if (bounds.getKind() === GeometryBounds.Kind.Finite) {
+            return PolyhedralBoundedSolidFieldConstructions.createFromBoundedScalarField(
+                (point: Vector3Dd) => this.evaluate(point),
+                bounds.getMinimum(),
+                bounds.getMaximum(),
+                Math.max(1, divisions),
+            );
+        }
+        if (bounds.getKind() === GeometryBounds.Kind.Unbounded) {
+            const c = ImplicitSolid.DEFAULT_CLIPPING_HALF_SIZE;
+            return this.exportToPolyhedralBoundedSolid(divisions, new Vector3Dd(-c, -c, -c), new Vector3Dd(c, c, c));
+        }
+        return null;
     }
 }

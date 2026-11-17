@@ -1,4 +1,4 @@
-import { WebGLArrowRenderer } from "./WebGLArrowRenderer.js";
+import { WebGLArrowRenderer } from "./volume/WebGLArrowRenderer.js";
 import { WebGLCameraRenderer } from "./WebGLCameraRenderer.js";
 import { WebGLColorDepthImageRenderer } from "./WebGLColorDepthImageRenderer.js";
 import { WebGLColoredPrimitiveRenderer } from "./WebGLColoredPrimitiveRenderer.js";

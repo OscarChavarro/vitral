@@ -9,12 +9,12 @@ import {
     type SimpleMaterial,
     type Vector3Dd,
 } from "@vitral/base";
-import { WebGLGeometryRenderer } from "./WebGLGeometryRenderer.js";
-import { WebGLMeshBuilder } from "./WebGLMeshBuilder.js";
-import type { WebGLMesh } from "./WebGLMeshRenderer.js";
+import { WebGLGeometryRenderer } from "../WebGLGeometryRenderer.js";
+import { WebGLMeshBuilder } from "../WebGLMeshBuilder.js";
+import type { WebGLMesh } from "../WebGLMeshRenderer.js";
 
 /**
-Port of `vsdk.toolkit.render.jogl.Jogl4ParametricBiCubicPatchRenderer`.
+Port of `vsdk.toolkit.render.jogl.surface.Jogl4ParametricBiCubicPatchRenderer`.
 
 Renders a `ParametricBiCubicPatch` (Bezier, Hermite or Ferguson) with the
 WebGL pipeline. As in `Jogl2ParametricBiCubicPatchRenderer`, the patch is

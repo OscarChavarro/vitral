@@ -27,7 +27,7 @@ export class BlobSolid extends ImplicitSolid {
     public static readonly GRAZING_LIMIT = 1.0e-5;
 
     private readonly components: ArrayList<BlobComponent> = new ArrayList<BlobComponent>();
-    private readonly threshold: number;
+    private threshold: number;
     private readonly sturm: boolean;
 
     public constructor(threshold: number, useSturmSequences: boolean);
@@ -40,10 +40,22 @@ export class BlobSolid extends ImplicitSolid {
             for (let i = 0; i < other.components.size(); i++) this.components.add(other.components.get(i));
             this.threshold = other.threshold;
             this.sturm = other.sturm;
+            this.addControlSpecifications();
             return;
         }
         this.threshold = thresholdOrOther;
         this.sturm = useSturmSequences as boolean;
+        this.addControlSpecifications();
+    }
+
+    /**
+    The state edited here is the threshold. The components are a list of
+    their own, and using Sturm sequences is a choice of the intersection
+    algorithm, not part of the shape. A density above a nonpositive
+    threshold would fill the whole space, so it must be positive.
+    */
+    private addControlSpecifications(): void {
+        this.getControlSpecifications().push("double;threshold;(0, INFINITE)");
     }
 
     public override copyGeometry(): Geometry {
@@ -64,6 +76,10 @@ export class BlobSolid extends ImplicitSolid {
 
     public getThreshold(): number {
         return this.threshold;
+    }
+
+    public setThreshold(value: number): void {
+        this.threshold = value;
     }
 
     public usesSturmSequences(): boolean {
