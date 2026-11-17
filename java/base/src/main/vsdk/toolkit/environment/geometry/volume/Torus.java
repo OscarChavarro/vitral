@@ -53,6 +53,8 @@ public class Torus extends Solid
     {
         majorRadius = inMajorRadius;
         minorRadius = inMinorRadius;
+        getControlSpecifications().add("double;majorRadius;(0, INFINITE)");
+        getControlSpecifications().add("double;minorRadius;(0, INFINITE)");
     }
 
     /**

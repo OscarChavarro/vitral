@@ -49,11 +49,23 @@ public class Box extends Solid {
     public Box(Vector3Dd s) {
         bounds[0] = new Vector3Dd(-s.x()/2,-s.y()/2,-s.z()/2);
         bounds[1] = new Vector3Dd(s.x()/2,s.y()/2,s.z()/2);
+        addControlSpecifications();
     }
 
     public Box(Vector3Dd minimum, Vector3Dd maximum) {
         bounds[0] = minimum;
         bounds[1] = maximum;
+        addControlSpecifications();
+    }
+
+    /**
+    The state edited is the size along each axis; the center is kept (moving
+    the box is a transformation of its body, not a change of the box).
+    */
+    private void addControlSpecifications() {
+        getControlSpecifications().add("double;sizeX;(0, INFINITE)");
+        getControlSpecifications().add("double;sizeY;(0, INFINITE)");
+        getControlSpecifications().add("double;sizeZ;(0, INFINITE)");
     }
 
     public Vector3Dd[] getRawBounds() { return bounds; }
@@ -642,6 +654,18 @@ public class Box extends Solid {
         final Vector3Dd half = s.multiply(0.5);
         bounds[0] = center.subtract(half); bounds[1] = center.add(half);
     }
+
+    public double getSizeX() { return bounds[1].x() - bounds[0].x(); }
+
+    public double getSizeY() { return bounds[1].y() - bounds[0].y(); }
+
+    public double getSizeZ() { return bounds[1].z() - bounds[0].z(); }
+
+    public void setSizeX(double dx) { setSize(getSize().withX(dx)); }
+
+    public void setSizeY(double dy) { setSize(getSize().withY(dy)); }
+
+    public void setSizeZ(double dz) { setSize(getSize().withZ(dz)); }
 
     @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()

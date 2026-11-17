@@ -34,11 +34,41 @@ public class PlanarHalfSpace extends Solid {
 
     public PlanarHalfSpace(double a, double b, double c, double d) {
         plane = new InfinitePlane(a,b,c,d);
+        addControlSpecifications();
     }
 
     public PlanarHalfSpace(InfinitePlane boundary) {
         plane = new InfinitePlane(boundary);
+        addControlSpecifications();
     }
+
+    /**
+    The state is the equation ax + by + cz + d = 0 of the boundary plane, with
+    its raw (not normalized) coefficients. Any real value is valid for each
+    one, but (a, b, c) must not be all zero.
+    */
+    private void addControlSpecifications() {
+        getControlSpecifications().add("double;a;(-INFINITE, INFINITE)");
+        getControlSpecifications().add("double;b;(-INFINITE, INFINITE)");
+        getControlSpecifications().add("double;c;(-INFINITE, INFINITE)");
+        getControlSpecifications().add("double;d;(-INFINITE, INFINITE)");
+    }
+
+    public double getA() { return plane.getA(); }
+
+    public double getB() { return plane.getB(); }
+
+    public double getC() { return plane.getC(); }
+
+    public double getD() { return plane.getD(); }
+
+    public void setA(double a) { plane.setA(a); }
+
+    public void setB(double b) { plane.setB(b); }
+
+    public void setC(double c) { plane.setC(c); }
+
+    public void setD(double d) { plane.setD(d); }
 
     @Override
     public Geometry copyGeometry() { return new PlanarHalfSpace(plane); }

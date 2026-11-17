@@ -5,8 +5,15 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.volume.Arrow;
+import vsdk.toolkit.environment.geometry.volume.BlobSolid;
+import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.PlanarHalfSpace;
+import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
+import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.gui.editor.ControlSpecification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,7 +28,14 @@ class EntityControlSpecificationsTest
 {
     private static final List<Entity> SAMPLES = List.of(
         new Sphere(1.0),
-        new Cone(1.0, 0.0, 2.0));
+        new Cone(1.0, 0.0, 2.0),
+        new Box(1.0, 2.0, 3.0),
+        new Arrow(1.0, 0.5, 0.1, 0.2),
+        new Torus(1.0, 0.25),
+        new PlanarHalfSpace(0.0, 0.0, 1.0, 0.0),
+        new QuadricSurface(new Vector3Dd(1, 1, 1), new Vector3Dd(),
+            new Vector3Dd(), -1.0),
+        new BlobSolid(0.5, false));
 
     @Test
     void everyControlSpecificationHasMatchingAccessors() throws Exception

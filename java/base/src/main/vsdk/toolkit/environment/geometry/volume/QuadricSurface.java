@@ -73,7 +73,45 @@ public class QuadricSurface extends Solid {
         this.square = s;
         this.mixed = m;
         this.linear = l;
-        this.constant = c;}
+        this.constant = c;
+        addControlSpecifications();
+    }
+
+    /**
+    The state is the ten coefficients of
+    Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0, any real
+    value being valid for each one.
+    */
+    private void addControlSpecifications() {
+        for ( String name : new String[] {"squareX", "squareY", "squareZ",
+            "mixedXY", "mixedXZ", "mixedYZ", "linearX", "linearY", "linearZ",
+            "constant"} ) {
+            getControlSpecifications().add("double;" + name +
+                ";(-INFINITE, INFINITE)");
+        }
+    }
+
+    public double getSquareX() { return square.x(); }
+    public double getSquareY() { return square.y(); }
+    public double getSquareZ() { return square.z(); }
+    public double getMixedXY() { return mixed.x(); }
+    public double getMixedXZ() { return mixed.y(); }
+    public double getMixedYZ() { return mixed.z(); }
+    public double getLinearX() { return linear.x(); }
+    public double getLinearY() { return linear.y(); }
+    public double getLinearZ() { return linear.z(); }
+    public double getConstant() { return constant; }
+
+    public void setSquareX(double value) { square = square.withX(value); }
+    public void setSquareY(double value) { square = square.withY(value); }
+    public void setSquareZ(double value) { square = square.withZ(value); }
+    public void setMixedXY(double value) { mixed = mixed.withX(value); }
+    public void setMixedXZ(double value) { mixed = mixed.withY(value); }
+    public void setMixedYZ(double value) { mixed = mixed.withZ(value); }
+    public void setLinearX(double value) { linear = linear.withX(value); }
+    public void setLinearY(double value) { linear = linear.withY(value); }
+    public void setLinearZ(double value) { linear = linear.withZ(value); }
+    public void setConstant(double value) { constant = value; }
 
     /** cpp copy constructor. */
     public QuadricSurface(QuadricSurface other) {

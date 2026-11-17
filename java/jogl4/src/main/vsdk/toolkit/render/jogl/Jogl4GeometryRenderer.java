@@ -1,6 +1,7 @@
 package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +27,10 @@ import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.HeightFieldSolid;
+import vsdk.toolkit.environment.geometry.volume.BlobComponent;
+import vsdk.toolkit.environment.geometry.volume.BlobSolid;
 import vsdk.toolkit.environment.geometry.volume.ImplicitSolid;
+import vsdk.toolkit.environment.geometry.volume.PolynomialSurface;
 import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
@@ -313,8 +317,8 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     /**
     @return a string that identifies the mesh of the geometry, or null if the
     geometry is not supported. Parametric geometries are identified by their
-    parameters; triangle meshes by identity, as they are not edited while
-    shown.
+    parameters (so editing them produces a new mesh); triangle meshes by
+    identity, as they are not edited while shown.
     */
     private static String keyOf(Geometry geometry)
     {
@@ -347,8 +351,29 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         if ( geometry instanceof VoxelVolume v ) {
             return Jogl4VoxelVolumeRenderer.meshKey(v);
         }
+        if ( geometry instanceof QuadricSurface q ) {
+            return "quadric/" + keyOf(q.squareCoefficients()) + "/" +
+                keyOf(q.mixedCoefficients()) + "/" +
+                keyOf(q.linearCoefficients()) + "/" +
+                q.constantCoefficient() + "/" + SOLID_TESSELLATION_RESOLUTION;
+        }
+        if ( geometry instanceof BlobSolid b ) {
+            StringBuilder key = new StringBuilder("blob/");
+            key.append(b.getThreshold());
+            for ( long i = 0; i < b.getComponentCount(); i++ ) {
+                BlobComponent c = b.getComponent(i);
+                key.append('/').append(keyOf(c.getCenter())).append('/')
+                    .append(c.getRadius()).append('/').append(c.getStrength());
+            }
+            return key.append('/').append(SOLID_TESSELLATION_RESOLUTION)
+                .toString();
+        }
+        if ( geometry instanceof PolynomialSurface p ) {
+            return "polynomial/" + p.getOrder() + "/" +
+                Arrays.toString(p.getCoefficients()) + "/" +
+                SOLID_TESSELLATION_RESOLUTION;
+        }
         if ( geometry instanceof ImplicitSolid ||
-             geometry instanceof QuadricSurface ||
              geometry instanceof HeightFieldSolid ) {
             return "tessellatedsolid/" + System.identityHashCode(geometry) + "/" +
                 SOLID_TESSELLATION_RESOLUTION;
@@ -358,6 +383,12 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
                 PATCH_TESSELLATION_STEPS;
         }
         return null;
+    }
+
+    /** Exact text of the coordinates, as `Vector3Dd.toString` rounds them */
+    private static String keyOf(Vector3Dd v)
+    {
+        return v.x() + "," + v.y() + "," + v.z();
     }
 
     private static Jogl4MeshRenderer.Mesh buildMesh(Geometry geometry)

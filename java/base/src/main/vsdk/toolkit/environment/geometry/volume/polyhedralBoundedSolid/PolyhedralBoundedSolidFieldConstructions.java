@@ -80,26 +80,26 @@ public class PolyhedralBoundedSolidFieldConstructions
             return null;
         }
         double h = largest / divisions;
-        int nx = Math.max(2, (int)Math.ceil(size.x() / h - 1.0e-9) + 1);
-        int ny = Math.max(2, (int)Math.ceil(size.y() / h - 1.0e-9) + 1);
-        int nz = Math.max(2, (int)Math.ceil(size.z() / h - 1.0e-9) + 1);
+        int nodesX = Math.max(2, (int)Math.ceil(size.x() / h - 1.0e-9) + 1);
+        int nodesY = Math.max(2, (int)Math.ceil(size.y() / h - 1.0e-9) + 1);
+        int nodesZ = Math.max(2, (int)Math.ceil(size.z() / h - 1.0e-9) + 1);
         // Grid centered on the box, slightly shifted
         Vector3Dd origin = new Vector3Dd(
-            minimum.x() + 0.5 * (size.x() - (nx - 1) * h) + GRID_SHIFT * h,
-            minimum.y() + 0.5 * (size.y() - (ny - 1) * h) + GRID_SHIFT * h,
-            minimum.z() + 0.5 * (size.z() - (nz - 1) * h) + GRID_SHIFT * h);
-        double[] values = new double[nx * ny * nz];
+            minimum.x() + 0.5 * (size.x() - (nodesX - 1) * h) + GRID_SHIFT * h,
+            minimum.y() + 0.5 * (size.y() - (nodesY - 1) * h) + GRID_SHIFT * h,
+            minimum.z() + 0.5 * (size.z() - (nodesZ - 1) * h) + GRID_SHIFT * h);
+        double[] values = new double[nodesX * nodesY * nodesZ];
 
-        for ( int k = 0; k < nz; k++ ) {
-            for ( int j = 0; j < ny; j++ ) {
-                for ( int i = 0; i < nx; i++ ) {
-                    values[i + nx * (j + ny * k)] = field.applyAsDouble(
+        for ( int k = 0; k < nodesZ; k++ ) {
+            for ( int j = 0; j < nodesY; j++ ) {
+                for ( int i = 0; i < nodesX; i++ ) {
+                    values[i + nodesX * (j + nodesY * k)] = field.applyAsDouble(
                         new Vector3Dd(origin.x() + i * h, origin.y() + j * h,
                             origin.z() + k * h));
                 }
             }
         }
-        return createFromSampledField(nx, ny, nz, origin,
+        return createFromSampledField(nodesX, nodesY, nodesZ, origin,
             new Vector3Dd(h, h, h), values);
     }
 
@@ -129,27 +129,27 @@ public class PolyhedralBoundedSolidFieldConstructions
 
     /**
     Builds the solid where a sampled field is negative.
-    @param nx number of grid nodes along X (at least 2)
-    @param ny number of grid nodes along Y (at least 2)
-    @param nz number of grid nodes along Z (at least 2)
+    @param nodesX number of grid nodes along X (at least 2)
+    @param nodesY number of grid nodes along Y (at least 2)
+    @param nodesZ number of grid nodes along Z (at least 2)
     @param origin position of node (0, 0, 0)
     @param spacing distance between nodes along each axis
-    @param values field at each node (i, j, k), at index i + nx*(j + ny*k);
+    @param values field at each node (i, j, k), at index i + nodesX*(j + nodesY*k);
     nodes on the border of the grid are taken as outside
     @return the polyhedral approximation of the solid, or null if it is empty
     */
     public static PolyhedralBoundedSolid createFromSampledField(
-        int nx, int ny, int nz, Vector3Dd origin, Vector3Dd spacing,
+        int nodesX, int nodesY, int nodesZ, Vector3Dd origin, Vector3Dd spacing,
         double[] values)
     {
-        return new _Polygonizer(nx, ny, nz, origin, spacing, values).build();
+        return new _Polygonizer(nodesX, nodesY, nodesZ, origin, spacing, values).build();
     }
 
     private static final class _Polygonizer
     {
-        private final int nx;
-        private final int ny;
-        private final int nz;
+        private final int nodesX;
+        private final int nodesY;
+        private final int nodesZ;
         private final Vector3Dd origin;
         private final Vector3Dd spacing;
         private final double[] values;
@@ -157,12 +157,12 @@ public class PolyhedralBoundedSolidFieldConstructions
         private final ArrayList<int[]> polygons = new ArrayList<int[]>();
         private final HashMap<Long, Integer> edgeVertices = new HashMap<Long, Integer>();
 
-        _Polygonizer(int nx, int ny, int nz, Vector3Dd origin,
+        _Polygonizer(int nodesX, int nodesY, int nodesZ, Vector3Dd origin,
             Vector3Dd spacing, double[] values)
         {
-            this.nx = nx;
-            this.ny = ny;
-            this.nz = nz;
+            this.nodesX = nodesX;
+            this.nodesY = nodesY;
+            this.nodesZ = nodesZ;
             this.origin = origin;
             this.spacing = spacing;
             this.values = separateFromZero(values);
@@ -175,9 +175,9 @@ public class PolyhedralBoundedSolidFieldConstructions
         private double[] separateFromZero(double[] original)
         {
             double[] separated = original.clone();
-            for ( int k = 1; k < nz - 1; k++ ) {
-                for ( int j = 1; j < ny - 1; j++ ) {
-                    for ( int i = 1; i < nx - 1; i++ ) {
+            for ( int k = 1; k < nodesZ - 1; k++ ) {
+                for ( int j = 1; j < nodesY - 1; j++ ) {
+                    for ( int i = 1; i < nodesX - 1; i++ ) {
                         int node = nodeIndex(i, j, k);
                         double v = original[node];
                         if ( !Double.isFinite(v) ) {
@@ -204,25 +204,25 @@ public class PolyhedralBoundedSolidFieldConstructions
 
         private int nodeIndex(int i, int j, int k)
         {
-            return i + nx * (j + ny * k);
+            return i + nodesX * (j + nodesY * k);
         }
 
         private Vector3Dd nodePosition(int node)
         {
-            int i = node % nx;
-            int j = (node / nx) % ny;
-            int k = node / (nx * ny);
+            int i = node % nodesX;
+            int j = (node / nodesX) % nodesY;
+            int k = node / (nodesX * nodesY);
             return new Vector3Dd(origin.x() + i * spacing.x(),
                 origin.y() + j * spacing.y(), origin.z() + k * spacing.z());
         }
 
         private boolean isBorder(int node)
         {
-            int i = node % nx;
-            int j = (node / nx) % ny;
-            int k = node / (nx * ny);
+            int i = node % nodesX;
+            int j = (node / nodesX) % nodesY;
+            int k = node / (nodesX * nodesY);
             return i == 0 || j == 0 || k == 0 ||
-                i == nx - 1 || j == ny - 1 || k == nz - 1;
+                i == nodesX - 1 || j == nodesY - 1 || k == nodesZ - 1;
         }
 
         private boolean isInside(int node)
@@ -271,9 +271,9 @@ public class PolyhedralBoundedSolidFieldConstructions
         {
             int[] corners = new int[8];
 
-            for ( int k = 0; k < nz - 1; k++ ) {
-                for ( int j = 0; j < ny - 1; j++ ) {
-                    for ( int i = 0; i < nx - 1; i++ ) {
+            for ( int k = 0; k < nodesZ - 1; k++ ) {
+                for ( int j = 0; j < nodesY - 1; j++ ) {
+                    for ( int i = 0; i < nodesX - 1; i++ ) {
                         for ( int c = 0; c < 8; c++ ) {
                             corners[c] = nodeIndex(i + (c & 1),
                                 j + ((c >> 1) & 1), k + ((c >> 2) & 1));

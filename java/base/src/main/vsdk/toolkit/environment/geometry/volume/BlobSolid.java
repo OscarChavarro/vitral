@@ -99,13 +99,25 @@ public class BlobSolid extends ImplicitSolid {
     public BlobSolid(double thresholdValue, boolean useSturmSequences) {
         this.threshold = thresholdValue;
         this.sturm = useSturmSequences;
+        addControlSpecifications();
 }
+
+    /**
+    The state edited here is the threshold. The components are a list of
+    their own, and using Sturm sequences is a choice of the intersection
+    algorithm, not part of the shape. A density above a nonpositive
+    threshold would fill the whole space, so it must be positive.
+    */
+    private void addControlSpecifications() {
+        getControlSpecifications().add("double;threshold;(0, INFINITE)");
+    }
 
     /** cpp copy constructor; BlobComponent values are immutable and shared. */
     public BlobSolid(BlobSolid other) {
         this.components.addAll(other.components);
         this.threshold = other.threshold;
         this.sturm = other.sturm;
+        addControlSpecifications();
     }
 
     public void addComponent(BlobComponent component) {
@@ -117,6 +129,8 @@ public class BlobSolid extends ImplicitSolid {
     public BlobComponent getComponent(long index) { return components.get((int)(index)); }
 
     public double getThreshold() { return threshold; }
+
+    public void setThreshold(double value) { threshold = value; }
 
     public boolean usesSturmSequences() { return sturm; }
 

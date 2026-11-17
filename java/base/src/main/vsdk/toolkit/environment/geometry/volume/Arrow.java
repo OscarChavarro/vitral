@@ -37,6 +37,10 @@ public class Arrow extends Solid {
         baseCylinder = new Cone(baseRadius, baseRadius, baseLength);
         headCone = new Cone(headRadius, 0, headLength);
         lastElement = baseCylinder;
+        getControlSpecifications().add("double;baseLength;(0, INFINITE)");
+        getControlSpecifications().add("double;headLength;(0, INFINITE)");
+        getControlSpecifications().add("double;baseRadius;(0, INFINITE)");
+        getControlSpecifications().add("double;headRadius;(0, INFINITE)");
     }
 
     public double getBaseLength()
