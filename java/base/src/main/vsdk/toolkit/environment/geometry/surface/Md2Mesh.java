@@ -92,6 +92,43 @@ public class Md2Mesh {
 //        return currentFrame;
 //    };
     
+    /**
+    The triangles of a key frame of the model (without interpolation between
+    frames), as a triangle mesh with the positions of the frame.
+    @param frame index of the frame, from 0 to `frameVertices.size() - 1`
+    @return a new mesh with positions and triangles only, or null if the
+    model has no such frame or no triangles
+    */
+    public TriangleMesh exportToTriangleMesh(int frame)
+    {
+        if ( frame < 0 || frame >= frameVertices.size() || triangles == null ) {
+            return null;
+        }
+        float[] vertices = frameVertices.get(frame);
+        TriangleMesh mesh = new TriangleMesh();
+        double[] positions;
+        int[] indexes;
+        int count = Math.min(numTriangles, triangles.length / 2);
+        int i;
+        int j;
+
+        mesh.initVertexPositionsArray(vertices.length / 3);
+        positions = mesh.getVertexPositions();
+        for ( i = 0; i < positions.length; i++ ) {
+            positions[i] = vertices[i];
+        }
+        mesh.initTriangleArrays(count);
+        indexes = mesh.getTriangleIndexes();
+        for ( i = 0; i < count; i++ ) {
+            // triangles[2*i] are the vertex indexes, triangles[2*i+1] the
+            // texture coordinate indexes
+            for ( j = 0; j < 3; j++ ) {
+                indexes[3*i+j] = triangles[2*i][j];
+            }
+        }
+        return mesh;
+    }
+
     // If frameNames is empty return 0 and 0 in outStartEnd array.
     public void returnStartEndAnim(short inIndex, short[] outStartEnd) {
         if(frameNames.isEmpty ()) {

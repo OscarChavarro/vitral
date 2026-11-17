@@ -155,7 +155,8 @@ recorded in the scene history, so they can be undone as the ones of the user
   that need the user interface, i.e. file dialogs) and the status `message`.
   Scene changes are recorded in the scene history.
 - `gui.import_scene_dialog`: opens the native Swing selector used by **File →
-  Import**. The MCP request remains pending while the dialog is open and
+  Import**. Files `.ray` replace the scene; `.md2` models add their first
+  key frame as a triangle mesh; other mesh formats add their objects. The MCP request remains pending while the dialog is open and
   returns after the user selects a file or cancels it.
 - `gui.dialog.choose_file`: on a second MCP connection, selects `path` in the
   open import chooser. An empty path cancels it. This completes the pending
@@ -241,7 +242,11 @@ has not been created`).
   are drawn with AWT 2D operations, as lines (Appel hidden line removal for
   the solids, i.e. every volume, as all of them export a boundary
   representation, when `surfaces` is on, with hidden lines dashed when `wires` is
-  also on; a plain wireframe of every body when `surfaces` is off) or as
+  also on; a plain wireframe of every body when `surfaces` is off; curves,
+  the edges of the meshes the surfaces are exported to, and the reference
+  grid are lines hidden by the solids, but hide nothing; an infinite plane is
+  a square of 10 x 10 cells of 2 units, centered at the point of the plane
+  viewed by the camera) or as
   raytraced images. The translation, rotation and
   scale gizmos and the input boxes are drawn there as 2D primitives (painter's
   algorithm, see `vsdk.toolkit.render.gizmo`); the visual debug ray is not.

@@ -334,6 +334,72 @@ public class InfinitePlane extends HalfSpace {
         return minmax;
     }
 
+    /**
+    A finite part of the plane, to present it: a square of side `size`
+    divided into `tiles` x `tiles` cells, centered near a given point (i.e.
+    the point of the plane viewed by a camera). The center is the projection
+    of the point onto the plane, moved to the nearest corner of the cells of
+    a grid fixed on the plane (with a corner at the point of the plane
+    closest to the origin), so the lines of the square stay in the same
+    places of the plane as the point moves. The sides follow two orthonormal
+    directions (u, v) on the plane, with (u, v, normal) right handed: u is
+    perpendicular to z (to x if the normal is almost along z).
+    @param near point near which the square is centered
+    @param size side of the square
+    @param tiles cells along each side of the square, at least 1
+    @return a mesh of `tiles` x `tiles` quadrilaterals, or null if the plane
+    is degenerated (zero normal)
+    */
+    public QuadMesh exportToQuadMesh(Vector3Dd near, double size, int tiles)
+    {
+        double length = Math.sqrt(a*a + b*b + c*c);
+        if ( !(length > 0) || tiles < 1 ) {
+            return null;
+        }
+        Vector3Dd n = getNormal();
+        Vector3Dd origin = n.multiply(-d / length);
+        Vector3Dd reference = Math.abs(n.z()) < 0.9 ?
+            new Vector3Dd(0, 0, 1) : new Vector3Dd(1, 0, 0);
+        Vector3Dd u = reference.crossProduct(n).normalized();
+        Vector3Dd v = n.crossProduct(u).normalized();
+        double cell = size / tiles;
+        Vector3Dd offset = projectPoint(near).subtract(origin);
+        double cu = Math.rint(offset.dotProduct(u) / cell) * cell;
+        double cv = Math.rint(offset.dotProduct(v) / cell) * cell;
+        Vector3Dd corner = origin.add(u.multiply(cu - size/2))
+            .add(v.multiply(cv - size/2));
+        int vertices = tiles + 1;
+        QuadMesh mesh = new QuadMesh();
+        double[] positions;
+        int i;
+        int j;
+        int index;
+
+        mesh.initVertexPositionsArray(vertices*vertices);
+        positions = mesh.getVertexPositions();
+        for ( i = 0; i < vertices; i++ ) {
+            for ( j = 0; j < vertices; j++ ) {
+                Vector3Dd p = corner.add(u.multiply(i * cell))
+                    .add(v.multiply(j * cell));
+                index = i*vertices + j;
+                positions[3*index] = p.x();
+                positions[3*index+1] = p.y();
+                positions[3*index+2] = p.z();
+            }
+        }
+        mesh.initQuadArrays(tiles*tiles);
+        index = 0;
+        for ( i = 0; i < tiles; i++ ) {
+            for ( j = 0; j < tiles; j++ ) {
+                // Counterclockwise seen from the normal
+                mesh.setQuadAt(index, i*vertices + j, (i+1)*vertices + j,
+                    (i+1)*vertices + j+1, i*vertices + j+1);
+                index++;
+            }
+        }
+        return mesh;
+    }
+
     public Vector3Dd getNormal()
     {
         Vector3Dd n = new Vector3Dd(a, b, c);

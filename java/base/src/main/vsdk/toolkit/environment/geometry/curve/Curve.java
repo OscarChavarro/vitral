@@ -4,6 +4,7 @@ import java.io.Serial;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.element.RayHit;
+import vsdk.toolkit.media.Calligraphic3DBuffer;
 
 public abstract class Curve extends Geometry {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
@@ -55,4 +56,13 @@ public abstract class Curve extends Geometry {
     {
         
     }
+
+    /**
+    Exports a line approximation of current curve, as the 3D segments of a
+    polyline per curve segment, in the coordinates of the curve. It is the
+    generic representation used to draw curves without a 3D graphics API,
+    and to remove their hidden parts (see `HiddenLineRenderer`).
+    @return a new buffer with the segments approximating the curve
+    */
+    public abstract Calligraphic3DBuffer exportToCalligraphic3DBuffer();
 }

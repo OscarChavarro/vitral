@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.media.Calligraphic3DBuffer;
 
 /**
 This class represents a set of curve segments, forming a poly-line.
@@ -648,5 +649,32 @@ public class ParametricCurve extends Curve {
 
 
         return OUTSIDE;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Curve.exportToCalligraphic3DBuffer. Each curve segment is approximated by
+    the polyline of `calculatePoints` (with `getApproximationSteps()` steps),
+    as when it is drawn with a 3D graphics API; break points start a new
+    piece of the curve.
+    @return a new buffer with the segments approximating the curve
+    */
+    @Override
+    public Calligraphic3DBuffer exportToCalligraphic3DBuffer()
+    {
+        Calligraphic3DBuffer lines = new Calligraphic3DBuffer();
+        int i, j;
+
+        for ( i = 1; i < types.size(); i++ ) {
+            if ( types.get(i).intValue() == BREAK ) {
+                i++;
+                continue;
+            }
+            ArrayList<Vector3Dd> polyline = calculatePoints(i, false);
+            for ( j = 0; j + 1 < polyline.size(); j++ ) {
+                lines.add3DLine(polyline.get(j), polyline.get(j + 1));
+            }
+        }
+        return lines;
     }
 }

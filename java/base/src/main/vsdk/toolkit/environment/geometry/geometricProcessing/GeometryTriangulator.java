@@ -5,6 +5,7 @@ import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
+import vsdk.toolkit.environment.geometry.surface.TriangleStripMesh;
 
 public class GeometryTriangulator {
     public static TriangleMeshGroup exportToTriangleMeshGroup(Geometry geometry)
@@ -23,6 +24,15 @@ public class GeometryTriangulator {
         }
         if ( geometry instanceof QuadMesh ) {
             return ((QuadMesh)geometry).exportToTriangleMeshGroup();
+        }
+        if ( geometry instanceof TriangleStripMesh strips ) {
+            TriangleMesh mesh = strips.exportToTriangleMesh();
+            if ( mesh == null ) {
+                return null;
+            }
+            TriangleMeshGroup group = new TriangleMeshGroup();
+            group.addMesh(mesh);
+            return group;
         }
         if ( geometry instanceof FunctionalExplicitSurface ) {
             TriangleMeshGroup group = new TriangleMeshGroup();

@@ -760,4 +760,45 @@ public class ParametricBiCubicPatch extends Surface {
         }
     }
 
+
+    /**
+    Exports an approximation of the patch as a mesh of quadrilaterals: the
+    patch is evaluated on a grid of `getApproximationSteps()` x
+    `getApproximationSteps()` cells of its parameters (s, t) in [0, 1] x
+    [0, 1], so the lines of the mesh are isoparametric lines of the patch.
+    @return a new mesh
+    */
+    public QuadMesh exportToQuadMesh()
+    {
+        int steps = Math.max(1, getApproximationSteps());
+        int n = steps + 1;
+        QuadMesh mesh = new QuadMesh();
+        double[] positions;
+        int i;
+        int j;
+        int index;
+
+        mesh.initVertexPositionsArray(n*n);
+        positions = mesh.getVertexPositions();
+        for ( i = 0; i < n; i++ ) {
+            double s = (double)i / steps;
+            for ( j = 0; j < n; j++ ) {
+                Vector3Dd p = evaluate(s, (double)j / steps);
+                index = i*n + j;
+                positions[3*index] = p.x();
+                positions[3*index+1] = p.y();
+                positions[3*index+2] = p.z();
+            }
+        }
+        mesh.initQuadArrays(steps*steps);
+        index = 0;
+        for ( i = 0; i < steps; i++ ) {
+            for ( j = 0; j < steps; j++ ) {
+                mesh.setQuadAt(index, i*n + j, (i+1)*n + j, (i+1)*n + j+1,
+                    i*n + j+1);
+                index++;
+            }
+        }
+        return mesh;
+    }
 }

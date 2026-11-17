@@ -10,7 +10,11 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.gui.CommandListener;
+import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
+import vsdk.toolkit.io.geometry.Md2Persistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 
 // Application classes
@@ -179,8 +183,9 @@ public class GuiEventExecutor extends CommandListener
 
     /**
     Adds the objects of a file to the scene, or replaces it with a complete
-    MIT raytracing scene for `.ray` files.
-    @param file 3ds, vtk, gts, obj, ply or MIT .ray file
+    MIT raytracing scene for `.ray` files. Of a MD2 animated model, the first
+    key frame is added, as a triangle mesh.
+    @param file 3ds, vtk, gts, obj, ply, md2 or MIT .ray file
     @throws Exception if the file can not be read
     */
     public void importObjects(File file) throws Exception
@@ -194,11 +199,32 @@ public class GuiEventExecutor extends CommandListener
 
         history.begin();
         try {
-            EnvironmentPersistence.importEnvironment(file, scene().scene);
+            if ( "md2".equals(FileSuffixFilter.getSuffix(file.getName())) ) {
+                importMd2FirstFrame(file);
+            }
+            else {
+                EnvironmentPersistence.importEnvironment(file, scene().scene);
+            }
         }
         finally {
             history.end("Import of " + file.getName(), false);
         }
+    }
+
+    private void importMd2FirstFrame(File file) throws Exception
+    {
+        Md2Mesh model = new Md2Mesh();
+        if ( !new Md2Persistence().read(file.getAbsolutePath(), null, model) ) {
+            throw new Exception("Not a MD2 version 8 file: " + file.getName());
+        }
+        TriangleMesh mesh = model.exportToTriangleMesh(0);
+        if ( mesh == null ) {
+            throw new Exception("MD2 file without frames: " + file.getName());
+        }
+        SimpleBody body = new SimpleBody();
+        body.setName(file.getName());
+        body.setGeometry(mesh);
+        scene().scene.getSimpleBodies().add(body);
     }
 
     private void importMitScene(File file) throws Exception

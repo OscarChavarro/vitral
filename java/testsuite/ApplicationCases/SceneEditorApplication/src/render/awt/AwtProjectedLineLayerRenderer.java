@@ -5,7 +5,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
@@ -26,6 +26,9 @@ style of each layer and with sub-pixel (antialiased) precision.
 */
 public class AwtProjectedLineLayerRenderer
 {
+    /// Distance, in pixels, under which a segment continues the previous one
+    private static final double CHAIN_TOLERANCE = 0.01;
+
     private AwtProjectedLineLayerRenderer()
     {
     }
@@ -70,19 +73,38 @@ public class AwtProjectedLineLayerRenderer
         g.setStroke(previousStroke);
     }
 
+    /**
+    Consecutive segments where one starts at the end of the previous one (i.e.
+    the polyline approximating a curve, or a line broken by the hidden line
+    algorithm) are drawn as one path, so the pattern of a dashed stroke
+    continues along it instead of starting again at each (maybe very short)
+    segment, which would draw it as a continuous line.
+    */
     private static void drawLines(Graphics2D g, Calligraphic2DBuffer lines,
                                   int x0, int y0, int width, int height)
     {
-        Line2D.Double line = new Line2D.Double();
+        Path2D.Double path = new Path2D.Double();
+        double lastX = Double.NaN;
+        double lastY = Double.NaN;
         int i;
 
         for ( i = 0; i < lines.getNumLines(); i++ ) {
             Vector3Dd[] segment = lines.get2DLine(i);
-            line.setLine(
-                toPixelX(segment[0].x(), x0, width), toPixelY(segment[0].y(), y0, height),
-                toPixelX(segment[1].x(), x0, width), toPixelY(segment[1].y(), y0, height));
-            g.draw(line);
+            double ax = toPixelX(segment[0].x(), x0, width);
+            double ay = toPixelY(segment[0].y(), y0, height);
+            double bx = toPixelX(segment[1].x(), x0, width);
+            double by = toPixelY(segment[1].y(), y0, height);
+
+            if ( Math.abs(ax - lastX) > CHAIN_TOLERANCE ||
+                 Math.abs(ay - lastY) > CHAIN_TOLERANCE ||
+                 Double.isNaN(lastX) ) {
+                path.moveTo(ax, ay);
+            }
+            path.lineTo(bx, by);
+            lastX = bx;
+            lastY = by;
         }
+        g.draw(path);
     }
 
     private static void drawPoints(Graphics2D g, Calligraphic2DBuffer lines,

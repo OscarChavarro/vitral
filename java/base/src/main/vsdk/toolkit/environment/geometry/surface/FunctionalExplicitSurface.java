@@ -271,4 +271,47 @@ public class FunctionalExplicitSurface extends Surface
         return internalTriangleMesh.doContainmentTest(p, distanceTolerance);
     }
 
+
+    /**
+    Exports the tessellation of the surface as a mesh of quadrilaterals: the
+    same grid of `getTesselationHintX()` x `getTesselationHintY()` cells of
+    the internal triangle mesh, without the diagonals that split each cell
+    in two triangles, so the lines of the mesh are the lines of constant x
+    and y of the surface.
+    @return a new mesh, or null if the surface has no valid tessellation
+    (i.e. its function could not be evaluated)
+    */
+    public QuadMesh exportToQuadMesh()
+    {
+        if ( internalTriangleMesh == null ||
+             internalTriangleMesh.getVertexPositions() == null ||
+             internalTriangleMesh.getTriangleIndexes() == null ) {
+            return null;
+        }
+        double[] source = internalTriangleMesh.getVertexPositions();
+        int n = (tesselationHintX+1)*(tesselationHintY+1);
+        QuadMesh mesh = new QuadMesh();
+        int ix;
+        int iy;
+        int index;
+
+        if ( source.length < 3*n ) {
+            return null;
+        }
+        mesh.initVertexPositionsArray(n);
+        System.arraycopy(source, 0, mesh.getVertexPositions(), 0, 3*n);
+        mesh.initQuadArrays(tesselationHintX*tesselationHintY);
+        index = 0;
+        for ( iy = 0; iy < tesselationHintY; iy++ ) {
+            for ( ix = 0; ix < tesselationHintX; ix++ ) {
+                mesh.setQuadAt(index,
+                    coord(tesselationHintX, tesselationHintY, ix, iy),
+                    coord(tesselationHintX, tesselationHintY, ix+1, iy),
+                    coord(tesselationHintX, tesselationHintY, ix+1, iy+1),
+                    coord(tesselationHintX, tesselationHintY, ix, iy+1));
+                index++;
+            }
+        }
+        return mesh;
+    }
 }

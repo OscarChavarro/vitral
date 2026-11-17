@@ -31,6 +31,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
+import vsdk.toolkit.media.Calligraphic3DBuffer;
 import vsdk.toolkit.render.RenderingElement;
 
 class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
@@ -96,6 +97,8 @@ public class HiddenLineRenderer extends RenderingElement
     /// Diagnostic: when >= 0, processLineToBeDrawn logs the contour-crossing /
     /// segment-splitting decisions for the cached edge with this edgeIndex.
     public static int debugEdgeIndex = -1;
+    /// `edgeIndex` of the free lines, which are not edges of any solid
+    private static final int FREE_LINE_EDGE_INDEX = -2;
 
     private static void debugSplit(int edgeIndex, String message)
     {
@@ -338,6 +341,7 @@ public class HiddenLineRenderer extends RenderingElement
     also more robust.
     */
     private static void buildCache(ArrayList <SimpleBody> solids,
+                                   ArrayList <PolyhedralBoundedSolid> breps,
                                    SimpleBody body, 
                                    ArrayList <_AppelEdgeCache> cache,
                                    ArrayList <_AppelEdgeCache> contourCache,
@@ -359,6 +363,7 @@ public class HiddenLineRenderer extends RenderingElement
 
         solids.add(body);
         PolyhedralBoundedSolid solid = (PolyhedralBoundedSolid)g;
+        breps.add(solid);
 
         int i;
         long l = 0;
@@ -566,26 +571,24 @@ public class HiddenLineRenderer extends RenderingElement
         lineSet.add2DLine(ndc0.x(), ndc0.y(), ndc1.x(), ndc1.y());
     }
 
-    private static void
-    processLineToBeDrawn(
-        List <SimpleBody> solids,
+    /**
+    Adds to `segments` the line parameters where an edge (or a free line) is
+    crossed in the image by a contour line: the piercing points of the
+    sweeping planes "SP2" of the contours (from the eye along each contour
+    line, figure [APPE1967].5) with the edge, for the contours that pierce
+    the sweeping plane "SP1" of the edge (the triangle `sp1a`, `sp1b`,
+    `sp1c`). The quantitative invisibility of a line of a solid can only
+    change at those points.
+    */
+    private static void addContourCrossings(
         _AppelEdgeCache inEdge,
+        Vector3Dd sp1a,
+        Vector3Dd sp1b,
+        Vector3Dd sp1c,
         Camera inCamera,
-        Calligraphic2DBuffer outVisibleContourLineSet,
-        Calligraphic2DBuffer outVisibleNonContourLineSet,
-        Calligraphic2DBuffer outHiddenLineSet,
         List <_AppelEdgeCache> contourCache,
-        AppelEdgeDump edgeDump)
+        ArrayList<_AppelEdgeSegment> segments)
     {
-        //- 1. Compute the sweep plane triangle ---------------------------
-        // Defines plane "SP1" on figure [APPE1967].5.
-        Vector3Dd sp1a, sp1b, sp1c;
-
-        sp1a = inEdge.start;
-        sp1b = inEdge.end;
-        sp1c = inCamera.getPosition();
-
-        //- 2. Break current edge into segments ---------------------------
         // Defines plane "SP2" on figure [APPE1967].5.
         Vector3Dd sp2a, sp2b, sp2c;
         Vector3Dd K; // Preceding point "K" on figure [APPE1967].5.
@@ -593,17 +596,10 @@ public class HiddenLineRenderer extends RenderingElement
         Ray ray = new Ray(new Vector3Dd(), new Vector3Dd());
         double t0;
         int i;
-        int pos;
         _AppelEdgeCache cl;          // Line "CL" on figure 5 of [APPE1967]
-        ArrayList<_AppelEdgeSegment> segments;
         _AppelEdgeSegment segment;
         InfinitePlane plane;
 
-        segments = new ArrayList<_AppelEdgeSegment>();
-        segment = new _AppelEdgeSegment();
-        segment.lineParameter = 0;
-        segment.deltaQI = 0;
-        segments.add(segment);
         sp2c = inCamera.getPosition();
 
         for ( i = 0; i < contourCache.size(); i++ ) {
@@ -664,11 +660,15 @@ public class HiddenLineRenderer extends RenderingElement
                 segments.add(segment);
             }
         }
-        segment = new _AppelEdgeSegment();
-        segment.lineParameter = 1;
-        segments.add(segment);
+    }
 
-        //- 3. Sort segment set -------------------------------------------
+    /**
+    Sorts the breaking points of a line by their line parameter.
+    */
+    private static void sortAndMergeSegments(ArrayList<_AppelEdgeSegment> segments)
+    {
+        int i;
+
         Collections.sort(segments);
 
         // Merge coincident boundaries: when two crossings fall within tolerance
@@ -683,6 +683,173 @@ public class HiddenLineRenderer extends RenderingElement
                 i--;
             }
         }
+    }
+
+    /**
+    Adds to `segments` the line parameters where a free line pierces the
+    boundary of a solid: unlike the edges of the solids, which never cross
+    other faces (see `buildCache`), a free line can pass through a solid (i.e.
+    a reference grid through the solids standing on it), and its quantitative
+    invisibility also changes there, where its visible part enters into the
+    solid.
+    The test is made in the coordinates of each solid, where the line
+    parameter is the same (it is preserved by affine transformations): the
+    crossing with the containing plane of each face is a piercing point if it
+    lies on the boundary of the solid.
+    */
+    private static void addSolidPiercings(
+        List <SimpleBody> solids,
+        List <PolyhedralBoundedSolid> breps,
+        _AppelEdgeCache inLine,
+        ArrayList<_AppelEdgeSegment> segments)
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < solids.size(); i++ ) {
+            SimpleBody body = solids.get(i);
+            PolyhedralBoundedSolid brep = breps.get(i);
+            Vector3Dd a = transformToLocal(body, inLine.start);
+            Vector3Dd b = transformToLocal(body, inLine.end);
+
+            if ( !segmentOverlapsMinMax(a, b, brep.getMinMax()) ) {
+                continue;
+            }
+            for ( j = 0; j < brep.getPolygonsList().size(); j++ ) {
+                InfinitePlane plane =
+                    brep.getPolygonsList().get(j).getContainingPlane();
+                if ( plane == null ) {
+                    continue;
+                }
+                double da = plane.pointDistance(a);
+                double db = plane.pointDistance(b);
+                if ( da * db >= 0.0 ) {
+                    // Both ends at the same side, or one of them on the plane
+                    // (then it is a breaking point of the line already)
+                    continue;
+                }
+                double t = da / (da - db);
+                if ( !isUnitInterval(t) ) {
+                    continue;
+                }
+                Vector3Dd p = a.add(b.subtract(a).multiply(t));
+                if ( brep.doContainmentTest(p, 10*VSDK.EPSILON) != Geometry.LIMIT ) {
+                    continue;
+                }
+                _AppelEdgeSegment segment = new _AppelEdgeSegment();
+                segment.lineParameter = t;
+                segments.add(segment);
+            }
+        }
+    }
+
+    private static boolean segmentOverlapsMinMax(Vector3Dd a, Vector3Dd b,
+                                                 double[] minmax)
+    {
+        double tolerance = 10*VSDK.EPSILON;
+
+        if ( minmax == null || minmax.length < 6 ) {
+            return true;
+        }
+        return Math.max(a.x(), b.x()) >= minmax[0] - tolerance &&
+               Math.min(a.x(), b.x()) <= minmax[3] + tolerance &&
+               Math.max(a.y(), b.y()) >= minmax[1] - tolerance &&
+               Math.min(a.y(), b.y()) <= minmax[4] + tolerance &&
+               Math.max(a.z(), b.z()) >= minmax[2] - tolerance &&
+               Math.min(a.z(), b.z()) <= minmax[5] + tolerance;
+    }
+
+    /**
+    Draws a free line: a line that is not an edge of any of the solids (i.e.
+    a curve or a reference grid), so it is hidden by the solids but does not
+    hide anything, nor is a contour. As the lines of the solids, it is broken
+    where its quantitative invisibility can change (where contour lines cross
+    it in the image, and where it pierces a solid), and each sub-segment is
+    classified by the quantitative invisibility of its midpoint.
+    */
+    private static void processFreeLineToBeDrawn(
+        List <SimpleBody> solids,
+        List <PolyhedralBoundedSolid> breps,
+        _AppelEdgeCache inLine,
+        Camera inCamera,
+        Calligraphic2DBuffer outVisibleLineSet,
+        Calligraphic2DBuffer outHiddenLineSet,
+        List <_AppelEdgeCache> contourCache)
+    {
+        ArrayList<_AppelEdgeSegment> segments;
+        _AppelEdgeSegment segment;
+        int i;
+
+        if ( inLine.direction.length() < VSDK.EPSILON ) {
+            return;
+        }
+
+        segments = new ArrayList<_AppelEdgeSegment>();
+        segment = new _AppelEdgeSegment();
+        segment.lineParameter = 0;
+        segments.add(segment);
+        addContourCrossings(inLine, inLine.start, inLine.end,
+            inCamera.getPosition(), inCamera, contourCache, segments);
+        addSolidPiercings(solids, breps, inLine, segments);
+        segment = new _AppelEdgeSegment();
+        segment.lineParameter = 1;
+        segments.add(segment);
+        sortAndMergeSegments(segments);
+
+        for ( i = 0; i < segments.size()-1; i++ ) {
+            double val1 = segments.get(i).lineParameter;
+            double val2 = segments.get(i+1).lineParameter;
+            Vector3Dd pos1 = inLine.start.add(inLine.direction.multiply(val1));
+            Vector3Dd pos2 = inLine.start.add(inLine.direction.multiply(val2));
+            Vector3Dd posx = inLine.start.add(inLine.direction.multiply((val1+val2)/2));
+
+            if ( computeMidpointQuantitativeInvisibility(solids, inCamera,
+                     posx) == 0 ) {
+                addProjectedLine(outVisibleLineSet, pos1, pos2, inCamera);
+            }
+            else {
+                addProjectedLine(outHiddenLineSet, pos1, pos2, inCamera);
+            }
+        }
+    }
+
+    private static void
+    processLineToBeDrawn(
+        List <SimpleBody> solids,
+        _AppelEdgeCache inEdge,
+        Camera inCamera,
+        Calligraphic2DBuffer outVisibleContourLineSet,
+        Calligraphic2DBuffer outVisibleNonContourLineSet,
+        Calligraphic2DBuffer outHiddenLineSet,
+        List <_AppelEdgeCache> contourCache,
+        AppelEdgeDump edgeDump)
+    {
+        //- 1. Compute the sweep plane triangle ---------------------------
+        // Defines plane "SP1" on figure [APPE1967].5.
+        Vector3Dd sp1a, sp1b, sp1c;
+
+        sp1a = inEdge.start;
+        sp1b = inEdge.end;
+        sp1c = inCamera.getPosition();
+
+        //- 2. Break current edge into segments ---------------------------
+        ArrayList<_AppelEdgeSegment> segments;
+        _AppelEdgeSegment segment;
+        int i;
+
+        segments = new ArrayList<_AppelEdgeSegment>();
+        segment = new _AppelEdgeSegment();
+        segment.lineParameter = 0;
+        segment.deltaQI = 0;
+        segments.add(segment);
+        addContourCrossings(inEdge, sp1a, sp1b, sp1c, inCamera, contourCache,
+            segments);
+        segment = new _AppelEdgeSegment();
+        segment.lineParameter = 1;
+        segments.add(segment);
+
+        //- 3. Sort segment set -------------------------------------------
+        sortAndMergeSegments(segments);
 
         //- 4. Determine visibility of each sub-segment by its midpoint Q.I. -
         // The contour crossings (step 2) partition the edge into sub-segments of
@@ -755,7 +922,32 @@ public class HiddenLineRenderer extends RenderingElement
         // also lets each edge skip the diagnostic-only seed Q.I. sample and the
         // image-space deltaQI projection.
         runAppelAlgorithm(inSimpleBodyArray, inCamera, outVisibleContourLineSet,
-            outVisibleNonContourLineSet, outHiddenLineSet, false);
+            outVisibleNonContourLineSet, outHiddenLineSet, false,
+            null, null, null);
+    }
+
+    /**
+    As `executeAppelAlgorithm`, also presenting sets of free lines: lines
+    that are not edges of the solids (i.e. curves, or a reference grid), given
+    in world coordinates, which are hidden by the solids but do not hide
+    anything. The visible and hidden parts of the lines of
+    `inFreeLineSets.get(i)` are reported in `outVisibleFreeLineSets.get(i)` and
+    `outHiddenFreeLineSets.get(i)`, so each set can be drawn with its own
+    style.
+    */
+    public static void executeAppelAlgorithm(
+        List<SimpleBody> inSimpleBodyArray,
+        Camera inCamera,
+        Calligraphic2DBuffer outVisibleContourLineSet,
+        Calligraphic2DBuffer outVisibleNonContourLineSet,
+        Calligraphic2DBuffer outHiddenLineSet,
+        List<Calligraphic3DBuffer> inFreeLineSets,
+        List<Calligraphic2DBuffer> outVisibleFreeLineSets,
+        List<Calligraphic2DBuffer> outHiddenFreeLineSets)
+    {
+        runAppelAlgorithm(inSimpleBodyArray, inCamera, outVisibleContourLineSet,
+            outVisibleNonContourLineSet, outHiddenLineSet, false,
+            inFreeLineSets, outVisibleFreeLineSets, outHiddenFreeLineSets);
     }
 
     public static AppelAlgorithmDump executeAppelAlgorithmWithDiagnostics(
@@ -767,7 +959,37 @@ public class HiddenLineRenderer extends RenderingElement
     {
         return runAppelAlgorithm(inSimpleBodyArray, inCamera,
             outVisibleContourLineSet, outVisibleNonContourLineSet,
-            outHiddenLineSet, true);
+            outHiddenLineSet, true, null, null, null);
+    }
+
+    private static void processFreeLineSets(
+        List<SimpleBody> solids,
+        List<PolyhedralBoundedSolid> breps,
+        Camera inCamera,
+        List<_AppelEdgeCache> contourCache,
+        List<Calligraphic3DBuffer> inFreeLineSets,
+        List<Calligraphic2DBuffer> outVisibleFreeLineSets,
+        List<Calligraphic2DBuffer> outHiddenFreeLineSets)
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < inFreeLineSets.size(); i++ ) {
+            Calligraphic3DBuffer lines = inFreeLineSets.get(i);
+            for ( j = 0; j < lines.getNumLines(); j++ ) {
+                Vector3Dd[] ends = lines.get3DLine(j);
+                _AppelEdgeCache freeLine = new _AppelEdgeCache();
+                freeLine.setStart(ends[0]);
+                freeLine.setEnd(ends[1]);
+                freeLine.direction = freeLine.end.subtract(freeLine.start);
+                freeLine.edgeType = _AppelEdgeCache.VISIBLE_LINE;
+                // Not an edge of a solid (nor selectable by debugEdgeIndex)
+                freeLine.edgeIndex = FREE_LINE_EDGE_INDEX;
+                processFreeLineToBeDrawn(solids, breps, freeLine, inCamera,
+                    outVisibleFreeLineSets.get(i), outHiddenFreeLineSets.get(i),
+                    contourCache);
+            }
+        }
     }
 
     private static AppelAlgorithmDump runAppelAlgorithm(
@@ -776,7 +998,10 @@ public class HiddenLineRenderer extends RenderingElement
         Calligraphic2DBuffer outVisibleContourLineSet,
         Calligraphic2DBuffer outVisibleNonContourLineSet,
         Calligraphic2DBuffer outHiddenLineSet,
-        boolean collectDiagnostics)
+        boolean collectDiagnostics,
+        List<Calligraphic3DBuffer> inFreeLineSets,
+        List<Calligraphic2DBuffer> outVisibleFreeLineSets,
+        List<Calligraphic2DBuffer> outHiddenFreeLineSets)
     {
         //-----------------------------------------------------------------
         ArrayList <_AppelEdgeCache> cache;
@@ -787,12 +1012,15 @@ public class HiddenLineRenderer extends RenderingElement
 
         //-----------------------------------------------------------------
         ArrayList <SimpleBody> solids;
+        ArrayList <PolyhedralBoundedSolid> breps;
         int i;
 
         solids = new ArrayList <SimpleBody>();
+        breps = new ArrayList <PolyhedralBoundedSolid>();
 
         for ( i = 0; i < inSimpleBodyArray.size(); i++ ) {
-            buildCache(solids, inSimpleBodyArray.get(i), cache, contourCache, inCamera);
+            buildCache(solids, breps, inSimpleBodyArray.get(i), cache,
+                contourCache, inCamera);
         }
 
         // Snapshot each solid's face planes and tolerance once: every edge below
@@ -839,6 +1067,10 @@ public class HiddenLineRenderer extends RenderingElement
             if ( edgeDump != null ) {
                 dump.edges.add(edgeDump);
             }
+        }
+        if ( inFreeLineSets != null ) {
+            processFreeLineSets(solids, breps, inCamera, contourCache,
+                inFreeLineSets, outVisibleFreeLineSets, outHiddenFreeLineSets);
         }
         }
         finally {

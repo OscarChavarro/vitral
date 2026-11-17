@@ -16,7 +16,9 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.geometricProcessing.GeometryCalligraphicExporter;
 import vsdk.toolkit.environment.geometry.geometricProcessing.GeometryTriangulator;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -28,6 +30,8 @@ import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.media.Calligraphic2DBuffer;
+import vsdk.toolkit.media.Calligraphic3DBuffer;
 import vsdk.toolkit.render.SelectionCorners;
 import vsdk.toolkit.render.hiddenLine.HiddenLineRenderer;
 
@@ -47,17 +51,25 @@ The bodies follow the `RendererConfiguration` of the viewport:
     contour lines are thicker than the other visible lines, and hidden lines
     are dashed if wires are also asked for. The occlusion is computed among
     all those solids.
+  - Curves and surfaces are exported to 3D lines
+    (`GeometryCalligraphicExporter`: the surfaces through a mesh, whose
+    edges are the lines). With surfaces they are "free lines" of the hidden
+    line algorithm: they are hidden by the solids (dashed if wires are asked
+    for), but do not hide anything, not even themselves: by design, the
+    hidden line removal is limited to the solids, as in [APPE1967]. The
+    reference grid is also drawn as free lines. An infinite plane is
+    presented as a square of it, centered at the point of the plane viewed
+    by the camera (as a hint of its position).
   - Without surfaces, every body is a plain wireframe with no hidden line
     removal (whether wires are asked for or not): the edges of its boundary
-    representation, or of its triangle mesh.
-  - Bodies with no boundary representation nor mesh are always drawn as
-    wireframes (with surfaces they neither hide nor are hidden), and bodies
-    with none of them are represented by their bounding box.
+    representation, or its lines as above. It is the simplest and fastest
+    presentation without a 3D graphics API.
+  - Bodies with none of them are represented by their bounding box.
   - Points, bounding volumes and the selection corners of selected bodies
     are added over them.
 
-The reference grid, the light gizmos, the visual debug entities and the
-feedback of the body editor are also presented as lines.
+The light gizmos, the visual debug entities and the feedback of the body
+editor are also presented as lines, over the bodies.
 */
 public class ProjectedLinesViewBuilder
 {
@@ -76,6 +88,22 @@ public class ProjectedLinesViewBuilder
     private static final double ORTHOGONAL_EYE_DISTANCE = 1000.0;
 
     private final BrepExportCache brepCache = new BrepExportCache();
+
+    /**
+    Lines in world coordinates that are not edges of the solids (the
+    reference grid, the curves), drawn with one color: with hidden line
+    removal they are hidden by the solids, but do not hide anything.
+    */
+    private static final class FreeLineSet
+    {
+        final Calligraphic3DBuffer lines = new Calligraphic3DBuffer();
+        final ColorRgb color;
+
+        FreeLineSet(ColorRgb color)
+        {
+            this.color = color;
+        }
+    }
 
     /**
     Builds the lines presenting the scene in a viewport.
@@ -99,13 +127,14 @@ public class ProjectedLinesViewBuilder
         ClipSpaceLineProjector projector = new ClipSpaceLineProjector(camera);
 
         if ( withBodies ) {
+            List<FreeLineSet> freeLines = new ArrayList<FreeLineSet>();
             if ( viewport.isShowGrid() ) {
-                addGrid(layers, projector, camera);
+                addGrid(freeLines, camera);
             }
-            addBodies(layers, projector, scene, camera, quality);
+            addBodies(layers, freeLines, projector, scene, camera, quality);
         }
-        addAnnotations(layers, projector, scene, quality, editor);
-        addDebugEntities(layers, projector, scene);
+        addAnnotations(layers, projector, camera, scene, quality, editor);
+        addDebugEntities(layers, projector, camera, scene);
         addLights(layers, projector, scene);
         return layers;
     }
@@ -115,10 +144,9 @@ public class ProjectedLinesViewBuilder
     /**
     Same reference grid as the OpenGL presentation: 14x14 unit cells on the
     plane z = 0, or on the vertical plane facing the camera for orthogonal
-    side views.
+    side views. Its lines are free lines (the solids hide them).
     */
-    private void addGrid(List<ProjectedLineLayer> layers,
-                         ClipSpaceLineProjector projector, Camera camera)
+    private void addGrid(List<FreeLineSet> freeLines, Camera camera)
     {
         Matrix4x4d gridTransform = new Matrix4x4d();
         Matrix4x4d rotation = camera.getRotation();
@@ -135,34 +163,38 @@ public class ProjectedLinesViewBuilder
             }
         }
 
-        ProjectedLineLayer grid = new ProjectedLineLayer(GRID_COLOR, 1.0,
-            ProjectedLineLayer.Style.SOLID);
-        ProjectedLineLayer axes = new ProjectedLineLayer(GRID_AXIS_COLOR, 1.0,
-            ProjectedLineLayer.Style.SOLID);
+        FreeLineSet grid = new FreeLineSet(GRID_COLOR);
+        FreeLineSet axes = new FreeLineSet(GRID_AXIS_COLOR);
         int n = 14;
         double half = n / 2.0;
         int i;
 
         for ( i = 0; i <= n; i++ ) {
             double c = -half + i;
-            ProjectedLineLayer target = (i == n / 2) ? axes : grid;
-            projector.addSegment(target.getLines(), gridTransform,
-                new Vector3Dd(c, -half, 0), new Vector3Dd(c, half, 0));
-            projector.addSegment(target.getLines(), gridTransform,
-                new Vector3Dd(-half, c, 0), new Vector3Dd(half, c, 0));
+            FreeLineSet target = (i == n / 2) ? axes : grid;
+            target.lines.add3DLine(gridTransform.multiply(new Vector3Dd(c, -half, 0)),
+                gridTransform.multiply(new Vector3Dd(c, half, 0)));
+            target.lines.add3DLine(gridTransform.multiply(new Vector3Dd(-half, c, 0)),
+                gridTransform.multiply(new Vector3Dd(half, c, 0)));
         }
-        addIfNotEmpty(layers, grid);
-        addIfNotEmpty(layers, axes);
+        freeLines.add(grid);
+        freeLines.add(axes);
     }
 
     //= Bodies ============================================================
 
+    /**
+    @param freeLines the free lines already collected (i.e. the grid), to
+    which the curves are added; they are drawn here, with the solids
+    */
     private void addBodies(List<ProjectedLineLayer> layers,
+                           List<FreeLineSet> freeLines,
                            ClipSpaceLineProjector projector, Scene scene,
                            Camera camera, RendererConfiguration quality)
     {
         List<SimpleBody> bodies = scene.scene.getSimpleBodies();
         List<SimpleBody> solids = new ArrayList<SimpleBody>();
+        int firstBodyLayer = layers.size();
         ProjectedLineLayer points = new ProjectedLineLayer(POINT_COLOR, 3.0,
             ProjectedLineLayer.Style.POINTS);
 
@@ -175,9 +207,18 @@ public class ProjectedLinesViewBuilder
                 continue;
             }
             PolyhedralBoundedSolid brep = exportToBrep(geometry);
+            Calligraphic3DBuffer lines = null;
+            if ( quality.isSurfacesSet() && brep == null ) {
+                lines = exportToLines(geometry, body.getTransformationMatrix(),
+                    camera);
+            }
             if ( quality.isSurfacesSet() && brep != null ) {
                 // Drawn below, all at once: they occlude each other
                 solids.add(brepBody(body, brep));
+            }
+            else if ( lines != null ) {
+                // Curves and surfaces: hidden by the solids, hide nothing
+                addFreeLines(freeLines, lines, body);
             }
             else {
                 // Without surfaces (or without a boundary representation to
@@ -185,7 +226,7 @@ public class ProjectedLinesViewBuilder
                 ProjectedLineLayer wires = new ProjectedLineLayer(
                     wireColor(body.getMaterial()), 1.0,
                     ProjectedLineLayer.Style.SOLID);
-                addWireframe(wires, projector, geometry, brep,
+                addWireframe(wires, projector, camera, geometry, brep,
                     body.getTransformationMatrix());
                 addIfNotEmpty(layers, wires);
             }
@@ -196,17 +237,71 @@ public class ProjectedLinesViewBuilder
         }
 
         if ( !solids.isEmpty() ) {
-            addHiddenLineDrawing(layers, solids, camera, quality.isWiresSet());
+            addHiddenLineDrawing(layers, solids, freeLines, camera,
+                quality.isWiresSet());
+        }
+        else {
+            addFreeLinesWithoutHiding(layers, firstBodyLayer, freeLines,
+                projector);
         }
         addIfNotEmpty(layers, points);
     }
 
     /**
-    Presents a set of solids with the hidden line removal of [APPE1967].
+    The lines of a curve or a surface, in world coordinates, with the wire
+    color of its body.
+    @param local the lines, in the coordinates of the body
+    */
+    private static void addFreeLines(List<FreeLineSet> freeLines,
+                                     Calligraphic3DBuffer local, SimpleBody body)
+    {
+        Matrix4x4d transform = body.getTransformationMatrix();
+        FreeLineSet set = new FreeLineSet(wireColor(body.getMaterial()));
+        int i;
+
+        for ( i = 0; i < local.getNumLines(); i++ ) {
+            Vector3Dd[] ends = local.get3DLine(i);
+            set.lines.add3DLine(transform.multiply(ends[0]),
+                transform.multiply(ends[1]));
+        }
+        freeLines.add(set);
+    }
+
+    /**
+    Without solids to hide them, the free lines are simply projected, below
+    the wireframes of the bodies.
+    @param position index in `layers` where their layers are inserted
+    */
+    private static void addFreeLinesWithoutHiding(List<ProjectedLineLayer> layers,
+                                                  int position,
+                                                  List<FreeLineSet> freeLines,
+                                                  ClipSpaceLineProjector projector)
+    {
+        for ( FreeLineSet set : freeLines ) {
+            ProjectedLineLayer layer = new ProjectedLineLayer(set.color, 1.0,
+                ProjectedLineLayer.Style.SOLID);
+            int i;
+            for ( i = 0; i < set.lines.getNumLines(); i++ ) {
+                Vector3Dd[] ends = set.lines.get3DLine(i);
+                projector.addSegment(layer.getLines(), ends[0], ends[1]);
+            }
+            if ( !layer.isEmpty() ) {
+                layers.add(position, layer);
+                position++;
+            }
+        }
+    }
+
+    /**
+    Presents a set of solids with the hidden line removal of [APPE1967],
+    and the free lines hidden by them. The hidden parts of all the lines are
+    drawn first (dashed, only if asked for), then the visible free lines and
+    finally the visible lines of the solids.
     */
     private void addHiddenLineDrawing(List<ProjectedLineLayer> layers,
-                                      List<SimpleBody> solids, Camera camera,
-                                      boolean withHiddenLines)
+                                      List<SimpleBody> solids,
+                                      List<FreeLineSet> freeLines,
+                                      Camera camera, boolean withHiddenLines)
     {
         ProjectedLineLayer contours = new ProjectedLineLayer(VISIBLE_LINE_COLOR,
             2.0, ProjectedLineLayer.Style.SOLID);
@@ -215,12 +310,36 @@ public class ProjectedLinesViewBuilder
         ProjectedLineLayer hidden = new ProjectedLineLayer(HIDDEN_LINE_COLOR,
             1.0, ProjectedLineLayer.Style.DASHED);
 
+        List<Calligraphic3DBuffer> freeInput = new ArrayList<Calligraphic3DBuffer>();
+        List<Calligraphic2DBuffer> freeVisibleOutput = new ArrayList<Calligraphic2DBuffer>();
+        List<Calligraphic2DBuffer> freeHiddenOutput = new ArrayList<Calligraphic2DBuffer>();
+        List<ProjectedLineLayer> freeVisible = new ArrayList<ProjectedLineLayer>();
+        List<ProjectedLineLayer> freeHidden = new ArrayList<ProjectedLineLayer>();
+
+        for ( FreeLineSet set : freeLines ) {
+            ProjectedLineLayer setVisible = new ProjectedLineLayer(set.color,
+                1.0, ProjectedLineLayer.Style.SOLID);
+            ProjectedLineLayer setHidden = new ProjectedLineLayer(set.color,
+                1.0, ProjectedLineLayer.Style.DASHED);
+            freeInput.add(set.lines);
+            freeVisibleOutput.add(setVisible.getLines());
+            freeHiddenOutput.add(setHidden.getLines());
+            freeVisible.add(setVisible);
+            freeHidden.add(setHidden);
+        }
+
         HiddenLineRenderer.executeAppelAlgorithm(solids,
             lineOfSightCamera(camera), contours.getLines(), visible.getLines(),
-            hidden.getLines());
+            hidden.getLines(), freeInput, freeVisibleOutput, freeHiddenOutput);
 
         if ( withHiddenLines ) {
+            for ( ProjectedLineLayer layer : freeHidden ) {
+                addIfNotEmpty(layers, layer);
+            }
             addIfNotEmpty(layers, hidden);
+        }
+        for ( ProjectedLineLayer layer : freeVisible ) {
+            addIfNotEmpty(layers, layer);
         }
         addIfNotEmpty(layers, visible);
         addIfNotEmpty(layers, contours);
@@ -282,13 +401,63 @@ public class ProjectedLinesViewBuilder
     }
 
     /**
+    @param geometry a geometry
+    @param transform transformation from the coordinates of the geometry to
+    world coordinates
+    @param camera camera of the view
+    @return the lines of a curve or of the mesh of a surface, in the
+    coordinates of the geometry (see `GeometryCalligraphicExporter`), or null
+    if it has none
+    */
+    private static Calligraphic3DBuffer exportToLines(Geometry geometry,
+                                                      Matrix4x4d transform,
+                                                      Camera camera)
+    {
+        if ( geometry instanceof InfinitePlane plane ) {
+            return GeometryCalligraphicExporter.exportToCalligraphic3DBuffer(
+                plane, viewedPoint(plane, transform, camera));
+        }
+        return GeometryCalligraphicExporter.exportToCalligraphic3DBuffer(geometry);
+    }
+
+    /**
+    The point of a plane viewed by a camera: where the line of sight through
+    the center of the view meets the plane, or, if it does not meet it in
+    front of the camera and before its far plane, the point of the plane
+    closest to the camera.
+    @param transform transformation from the coordinates of the plane to
+    world coordinates
+    @return the point, in the coordinates of the plane
+    */
+    private static Vector3Dd viewedPoint(InfinitePlane plane,
+                                         Matrix4x4d transform, Camera camera)
+    {
+        Matrix4x4d inverse = transform.inverse();
+        Vector3Dd eye = inverse.multiply(camera.getPosition());
+        Vector3Dd direction = inverse.multiply(
+            camera.getPosition().add(camera.getFront())).subtract(eye);
+        double towards = plane.getCoefficients().dotProduct(direction);
+        double length = direction.length();
+
+        if ( towards != 0 && length > 0 ) {
+            double t = -plane.pointDistance(eye) / towards;
+            if ( t > 0 && t * length <= camera.getFarPlaneDistance() ) {
+                return eye.add(direction.multiply(t));
+            }
+        }
+        return plane.projectPoint(eye);
+    }
+
+    /**
     Adds the wireframe of a geometry: the edges of its boundary
-    representation, else the edges of the triangles of its mesh, else its
-    bounding box.
+    representation, else the lines of a curve or of the mesh of a surface
+    (`GeometryCalligraphicExporter`), else its bounding box.
+    @param camera camera of the view (to center the square shown of an
+    infinite plane)
     @param brep boundary representation of the geometry, or null
     */
     private void addWireframe(ProjectedLineLayer layer,
-                              ClipSpaceLineProjector projector,
+                              ClipSpaceLineProjector projector, Camera camera,
                               Geometry geometry, PolyhedralBoundedSolid brep,
                               Matrix4x4d transform)
     {
@@ -309,38 +478,17 @@ public class ProjectedLinesViewBuilder
             return;
         }
 
-        TriangleMeshGroup meshes = GeometryTriangulator.exportToTriangleMeshGroup(geometry);
-        if ( meshes != null ) {
-            for ( TriangleMesh mesh : meshes.getMeshes() ) {
-                addMeshWireframe(layer, projector, mesh, transform);
+        Calligraphic3DBuffer lines = exportToLines(geometry, transform, camera);
+        if ( lines != null ) {
+            int i;
+            for ( i = 0; i < lines.getNumLines(); i++ ) {
+                Vector3Dd[] ends = lines.get3DLine(i);
+                projector.addSegment(layer.getLines(), transform, ends[0], ends[1]);
             }
             return;
         }
 
         addBox(layer, projector, geometry.getMinMax(), transform);
-    }
-
-    private void addMeshWireframe(ProjectedLineLayer layer,
-                                  ClipSpaceLineProjector projector,
-                                  TriangleMesh mesh, Matrix4x4d transform)
-    {
-        double[] v = mesh.getVertexPositions();
-        int[] triangles = mesh.getTriangleIndexes();
-        int t;
-
-        if ( v == null || triangles == null ) {
-            return;
-        }
-        for ( t = 0; t < mesh.getNumTriangles(); t++ ) {
-            int i;
-            for ( i = 0; i < 3; i++ ) {
-                int a = triangles[3*t + i];
-                int b = triangles[3*t + (i + 1) % 3];
-                projector.addSegment(layer.getLines(), transform,
-                    new Vector3Dd(v[3*a], v[3*a + 1], v[3*a + 2]),
-                    new Vector3Dd(v[3*b], v[3*b + 1], v[3*b + 2]));
-            }
-        }
     }
 
     private void addPoints(ProjectedLineLayer layer,
@@ -384,7 +532,8 @@ public class ProjectedLinesViewBuilder
     //= Annotations =======================================================
 
     private void addAnnotations(List<ProjectedLineLayer> layers,
-                                ClipSpaceLineProjector projector, Scene scene,
+                                ClipSpaceLineProjector projector,
+                                Camera camera, Scene scene,
                                 RendererConfiguration quality,
                                 BodyEditFeedbackProvider editor)
     {
@@ -423,7 +572,7 @@ public class ProjectedLinesViewBuilder
             for ( RenderPrimitive primitive : editor.buildEditFeedback() ) {
                 Geometry geometry = primitive.getGeometry();
                 if ( geometry != null ) {
-                    addWireframe(feedback, projector, geometry,
+                    addWireframe(feedback, projector, camera, geometry,
                         exportToBrep(geometry), primitive.getTransform());
                 }
             }
@@ -482,7 +631,8 @@ public class ProjectedLinesViewBuilder
     //= Debug entities and lights =========================================
 
     private void addDebugEntities(List<ProjectedLineLayer> layers,
-                                  ClipSpaceLineProjector projector, Scene scene)
+                                  ClipSpaceLineProjector projector,
+                                  Camera camera, Scene scene)
     {
         ProjectedLineLayer debug = new ProjectedLineLayer(DEBUG_COLOR, 1.0,
             ProjectedLineLayer.Style.SOLID);
@@ -492,7 +642,7 @@ public class ProjectedLinesViewBuilder
             for ( SimpleBody body : group.getBodies() ) {
                 Geometry geometry = body.getGeometry();
                 if ( geometry != null ) {
-                    addWireframe(debug, projector, geometry, exportToBrep(geometry),
+                    addWireframe(debug, projector, camera, geometry, exportToBrep(geometry),
                         groupTransform.multiply(body.getTransformationMatrix()));
                 }
             }

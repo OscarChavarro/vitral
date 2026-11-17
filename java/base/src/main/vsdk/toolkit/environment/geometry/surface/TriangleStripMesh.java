@@ -91,6 +91,62 @@ public class TriangleStripMesh extends Surface {
     }
 
     /**
+    The triangles of the strips, as a triangle mesh sharing the vertex
+    positions: in each strip, every vertex after the first two closes a
+    triangle with the two before it, alternating their order so all the
+    triangles keep the orientation of the first one. Triangles with a
+    repeated vertex (used to join strips) are skipped.
+    @return a new mesh with positions and triangles only, or null if there
+    are no vertexes or strips
+    */
+    public TriangleMesh exportToTriangleMesh()
+    {
+        if ( vertexes == null || strips == null ) {
+            return null;
+        }
+        TriangleMesh mesh = new TriangleMesh();
+        double[] positions;
+        int[] indexes;
+        int count = 0;
+        int i;
+        int j;
+
+        for ( i = 0; i < strips.length; i++ ) {
+            if ( strips[i] != null && strips[i].length > 2 ) {
+                count += strips[i].length - 2;
+            }
+        }
+        mesh.initVertexPositionsArray(vertexes.length);
+        positions = mesh.getVertexPositions();
+        for ( i = 0; i < vertexes.length; i++ ) {
+            positions[3*i] = vertexes[i].getPosition().x();
+            positions[3*i+1] = vertexes[i].getPosition().y();
+            positions[3*i+2] = vertexes[i].getPosition().z();
+        }
+        int[] all = new int[3*count];
+        count = 0;
+        for ( i = 0; i < strips.length; i++ ) {
+            int[] strip = strips[i];
+            for ( j = 2; strip != null && j < strip.length; j++ ) {
+                int p0 = (j % 2 == 0) ? strip[j-2] : strip[j-1];
+                int p1 = (j % 2 == 0) ? strip[j-1] : strip[j-2];
+                int p2 = strip[j];
+                if ( p0 == p1 || p1 == p2 || p0 == p2 ) {
+                    continue;
+                }
+                all[3*count] = p0;
+                all[3*count+1] = p1;
+                all[3*count+2] = p2;
+                count++;
+            }
+        }
+        mesh.initTriangleArrays(count);
+        indexes = mesh.getTriangleIndexes();
+        System.arraycopy(all, 0, indexes, 0, 3*count);
+        return mesh;
+    }
+
+    /**
     Check the general interface contract in superclass method
     Geometry.doIntersectionFirstHit.
 

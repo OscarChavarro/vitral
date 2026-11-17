@@ -3,6 +3,7 @@ package vsdk.toolkit.processing;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.SubdividedBezierPatch;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 
@@ -129,6 +130,42 @@ public class BezierPatchTessellator {
             normals[index*3] = n.x();
             normals[index*3 + 1] = n.y();
             normals[index*3 + 2] = n.z();
+        }
+        return mesh;
+    }
+
+    /**
+    Same grid of (uSteps + 1) x (vSteps + 1) points of the Bezier surface as
+    `tessellate`, joined by one quadrilateral per parameter cell (without the
+    diagonals of the triangles), with positions only: the lines of its edges
+    are the curves of constant u and v of the surface.
+    @return a new mesh, or null when a step count is outside
+    1..MAXIMUM_STEPS
+    */
+    public static QuadMesh tessellateQuads(SubdividedBezierPatch patch, int uSteps, int vSteps)
+    {
+        if (uSteps < 1 || vSteps < 1 || uSteps > MAXIMUM_STEPS || vSteps > MAXIMUM_STEPS) return null;
+        final int columns = vSteps + 1;
+        QuadMesh mesh = new QuadMesh();
+        mesh.initVertexPositionsArray((uSteps + 1)*columns);
+        double[] positions = mesh.getVertexPositions();
+        for (int i = 0; i <= uSteps; i++) {
+            final double u = (double)i/uSteps;
+            for (int j = 0; j <= vSteps; j++) {
+                final int index = i*columns + j;
+                final Vector3Dd p = patch.evaluate(u, (double)j/vSteps);
+                positions[index*3] = p.x();
+                positions[index*3 + 1] = p.y();
+                positions[index*3 + 2] = p.z();
+            }
+        }
+        mesh.initQuadArrays(uSteps*vSteps);
+        int q = 0;
+        for (int i = 0; i < uSteps; i++) {
+            for (int j = 0; j < vSteps; j++, q++) {
+                mesh.setQuadAt(q, i*columns + j, (i + 1)*columns + j,
+                    (i + 1)*columns + j + 1, i*columns + j + 1);
+            }
         }
         return mesh;
     }
