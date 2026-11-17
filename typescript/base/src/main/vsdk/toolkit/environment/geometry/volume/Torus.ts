@@ -264,10 +264,10 @@ export class Torus extends Solid {
 
         minmax[0] = -(this.majorRadius + this.minorRadius);
         minmax[1] = -(this.majorRadius + this.minorRadius);
-        minmax[2] = this.minorRadius;
+        minmax[2] = -this.minorRadius;
         minmax[3] = this.majorRadius + this.minorRadius;
         minmax[4] = this.majorRadius + this.minorRadius;
-        minmax[5] = -this.minorRadius;
+        minmax[5] = this.minorRadius;
 
         return minmax;
     }

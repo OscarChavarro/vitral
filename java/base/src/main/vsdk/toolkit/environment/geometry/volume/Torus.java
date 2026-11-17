@@ -1539,10 +1539,10 @@ public class Torus extends Solid
         
         minmax[0] = -(majorRadius + minorRadius);
         minmax[1] = -(majorRadius+minorRadius);
-        minmax[2] = minorRadius;
+        minmax[2] = -minorRadius;
         minmax[3] = majorRadius + minorRadius;
         minmax[4] = majorRadius + minorRadius;
-        minmax[5] = -minorRadius;
+        minmax[5] = minorRadius;
 
         return minmax;
     }    

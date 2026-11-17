@@ -16,6 +16,12 @@ import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
+import vsdk.toolkit.environment.geometry.volume.BlobComponent;
+import vsdk.toolkit.environment.geometry.volume.BlobSolid;
+import vsdk.toolkit.environment.geometry.volume.HeightFieldSolid;
+import vsdk.toolkit.environment.geometry.volume.PlanarHalfSpace;
+import vsdk.toolkit.environment.geometry.volume.PolynomialSurface;
+import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
@@ -64,6 +70,21 @@ class GeometryCreationCommandsExecutor
         else if ( label.equals("IDC_CREATE_TORUS") ) {
             scene().addThing(new Torus(2, 1));
         }
+        else if ( label.equals("IDC_CREATE_BLOB") ) {
+            createBlob();
+        }
+        else if ( label.equals("IDC_CREATE_QUADRIC") ) {
+            createQuadric();
+        }
+        else if ( label.equals("IDC_CREATE_POLYNOMIAL") ) {
+            createPolynomial();
+        }
+        else if ( label.equals("IDC_CREATE_HEIGHTFIELD") ) {
+            createHeightField();
+        }
+        else if ( label.equals("IDC_CREATE_HALFSPACE") ) {
+            scene().addThing(new PlanarHalfSpace(0, 0, 1, 0));
+        }
         else if ( label.equals("IDC_CREATE_PLANE") ) {
             createPlane();
         }
@@ -91,6 +112,90 @@ class GeometryCreationCommandsExecutor
             return CommandResult.NOT_HANDLED;
         }
         return CommandResult.DONE;
+    }
+
+    /**
+    A blob shaped as a triangular molecule with a hole: three components at
+    the vertices of an equilateral triangle (at distance 1 from its center,
+    on the plane z = 0). Each component reaches 1.25 units, so neighbors
+    overlap; the threshold 0.46 is above the density at the center of the
+    triangle (0.39) and below the one half way between two components
+    (0.54), so the three of them merge in a ring around an empty center
+    (of radius 0.25, wide enough to be kept by the default polygonization).
+    */
+    private void createBlob()
+    {
+        BlobSolid blob = new BlobSolid(0.46, false);
+        int i;
+
+        for ( i = 0; i < 3; i++ ) {
+            double angle = Math.PI / 2 + 2 * Math.PI * i / 3;
+            blob.addComponent(new BlobComponent(
+                new Vector3Dd(Math.cos(angle), Math.sin(angle), 0), 1.25, 1.0));
+        }
+        scene().addThing(blob);
+    }
+
+    /**
+    An ellipsoid of semiaxes 1.5, 1 and 0.7: x^2/1.5^2 + y^2 + z^2/0.7^2 - 1
+    <= 0.
+    */
+    private void createQuadric()
+    {
+        scene().addThing(new QuadricSurface(
+            new Vector3Dd(1.0 / (1.5 * 1.5), 1.0, 1.0 / (0.7 * 0.7)),
+            new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 0), -1.0));
+    }
+
+    /**
+    The quartic "tangle cube" x^4 - 5x^2 + y^4 - 5y^2 + z^4 - 5z^2 + 11.8 < 0,
+    a solid of genus 5 that fits in a cube of side 4.6, scaled to 0.4.
+    */
+    private void createPolynomial()
+    {
+        int order = 4;
+        PolynomialSurface polynomial = new PolynomialSurface(order, false);
+        double[] c = polynomial.getCoefficients();
+
+        c[PolynomialSurface.getTermIndex(order, 4, 0, 0)] = 1;
+        c[PolynomialSurface.getTermIndex(order, 0, 4, 0)] = 1;
+        c[PolynomialSurface.getTermIndex(order, 0, 0, 4)] = 1;
+        c[PolynomialSurface.getTermIndex(order, 2, 0, 0)] = -5;
+        c[PolynomialSurface.getTermIndex(order, 0, 2, 0)] = -5;
+        c[PolynomialSurface.getTermIndex(order, 0, 0, 2)] = -5;
+        c[PolynomialSurface.getTermIndex(order, 0, 0, 0)] = 11.8;
+        SimpleBody body = scene().addThing(polynomial);
+        body.setScale(new Vector3Dd(0.4, 0.4, 0.4));
+    }
+
+    /**
+    A terrain of 17 x 17 heights (waves between 0.7 and 2.3) over a box of
+    height 3. Height fields grow along their Y axis: the body is rotated so
+    they grow along Z, scaled to 0.25 and centered at the origin.
+    */
+    private void createHeightField()
+    {
+        int n = 17;
+        HeightFieldSolid field = new HeightFieldSolid(n, n,
+            new Vector3Dd(0, 0, 0), new Vector3Dd(n - 1, 3, n - 1));
+        int x;
+        int z;
+
+        for ( z = 0; z < n; z++ ) {
+            for ( x = 0; x < n; x++ ) {
+                field.setHeight(x, z,
+                    1.5 + 0.8 * Math.sin(x / 2.5) * Math.cos(z / 3.0));
+            }
+        }
+        SimpleBody body = scene().addThing(field);
+        Matrix4x4d rotation = new Matrix4x4d();
+        rotation = rotation.axisRotation(Math.PI / 2, 1, 0, 0);
+        double scale = 0.25;
+        body.setRotation(rotation);
+        body.setScale(new Vector3Dd(scale, scale, scale));
+        // Rotated, the center of the grid (8, y, 8) goes to (8, -8, y)
+        body.setPosition(new Vector3Dd(-scale * (n - 1) / 2.0,
+            scale * (n - 1) / 2.0, 0));
     }
 
     private void createPlane()

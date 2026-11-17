@@ -18,6 +18,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidFieldConstructions;
 
 /**
 VoxelVolume represents a voxelized paralelogram volume in memory, as the
@@ -623,4 +625,82 @@ public class VoxelVolume extends Solid {
         return new Vector3Dd(cmx / M, cmy / M, cmz / M);
     }
 
+
+    //= Boundary representation =============================================
+
+    /// The default export samples at most this number of voxels along each
+    /// axis
+    public static final int DEFAULT_EXPORT_MAXIMUM_SAMPLES = 32;
+
+    /**
+    Polyhedral approximation sampling at most
+    `DEFAULT_EXPORT_MAXIMUM_SAMPLES` voxels along each axis (see
+    `exportToPolyhedralBoundedSolid(int)`).
+    */
+    @Override
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        int largest = Math.max(getXSize(), Math.max(getYSize(), getZSize()));
+        return exportToPolyhedralBoundedSolid(Math.max(1,
+            (largest + DEFAULT_EXPORT_MAXIMUM_SAMPLES - 1) /
+            DEFAULT_EXPORT_MAXIMUM_SAMPLES));
+    }
+
+    /**
+    Polyhedral approximation of the voxels that reach the threshold, built
+    with Euler operators by `PolyhedralBoundedSolidFieldConstructions`: the
+    voxel values are taken as samples at the voxel centers (the field is
+    `threshold - 0.5 - value`, negative for the filled voxels), surrounded by
+    a layer of empty samples, so the surface is closed and passes half way
+    between filled and empty voxel centers.
+    @param step sampling step (at least 1): 1 uses every voxel, 2 every other
+    one along each axis, and so on, for coarser approximations
+    @return a new polyhedral approximation, or null if there are no filled
+    voxels
+    */
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(int step)
+    {
+        int xs = getXSize();
+        int ys = getYSize();
+        int zs = getZSize();
+        if ( xs <= 0 || ys <= 0 || zs <= 0 ) {
+            return null;
+        }
+        if ( step < 1 ) {
+            step = 1;
+        }
+        int sx = (xs + step - 1) / step;
+        int sy = (ys + step - 1) / step;
+        int sz = (zs + step - 1) / step;
+        int nx = sx + 2;
+        int ny = sy + 2;
+        int nz = sz + 2;
+        double[] values = new double[nx * ny * nz];
+        double level = threshold - 0.5;
+
+        for ( int k = 0; k < nz; k++ ) {
+            for ( int j = 0; j < ny; j++ ) {
+                for ( int i = 0; i < nx; i++ ) {
+                    double value = 1.0;
+                    if ( i > 0 && j > 0 && k > 0 &&
+                         i < nx - 1 && j < ny - 1 && k < nz - 1 ) {
+                        value = level - getVoxel((i - 1) * step, (j - 1) * step,
+                            (k - 1) * step);
+                    }
+                    values[i + nx * (j + ny * k)] = value;
+                }
+            }
+        }
+
+        // Samples at the voxel centers (see getVoxelPosition), one step
+        // before the first one for the empty layer
+        Vector3Dd spacing = new Vector3Dd(2.0 * step / xs, 2.0 * step / ys,
+            2.0 * step / zs);
+        Vector3Dd origin = new Vector3Dd(
+            (0.5 / xs) * 2 - 1 - spacing.x(),
+            (0.5 / ys) * 2 - 1 - spacing.y(),
+            (0.5 / zs) * 2 - 1 - spacing.z());
+        return PolyhedralBoundedSolidFieldConstructions.createFromSampledField(
+            nx, ny, nz, origin, spacing, values);
+    }
 }

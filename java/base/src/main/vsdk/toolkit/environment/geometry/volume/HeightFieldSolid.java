@@ -19,6 +19,9 @@ import vsdk.toolkit.environment.geometry.element.RaySolidBoundary;
 import vsdk.toolkit.environment.geometry.element.RaySolidClassification;
 import vsdk.toolkit.environment.geometry.element.RaySolidQueryStatus;
 import vsdk.toolkit.environment.geometry.surface.Surface;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidMeshConstructions;
+import java.util.List;
 
 /**
 Height field: heights h(x, z) on the integer grid 0 <= x < columns,
@@ -1171,4 +1174,147 @@ public class HeightFieldSolid extends Solid {
             bounds.getMaximum().x(), bounds.getMaximum().y(), bounds.getMaximum().z()};
     return new double[]{-1e308,-1e308,-1e308,1e308,1e308,1e308};
 }
+
+    //= Boundary representation =============================================
+
+    /**
+    Boundary representation of the height field, built with Euler operators
+    by `PolyhedralBoundedSolidMeshConstructions` from its polygons:
+      - The surface: the two triangles of each grid cell inside the box,
+        split along the same diagonal as `evaluateHeight` (from (x+1, z) to
+        (x, z+1)). Cells cut by the box are sampled at the box sides.
+      - Four sides, each one a planar polygon under the profile of the
+        surface, and the bottom of the box.
+    It is exact for heights inside the box. Heights above the box are taken
+    at its top, and heights at or below its bottom just above it, so a part
+    of the box where the solid is empty is approximated by a thin layer.
+    @return a new polyhedral solid, or null if the height field is not valid
+    */
+    @Override
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        if ( !isValid() ) {
+            return null;
+        }
+        double[] xs = boxGridCoordinates(minimum.x(), maximum.x());
+        double[] zs = boxGridCoordinates(minimum.z(), maximum.z());
+        int nx = xs.length;
+        int nz = zs.length;
+        double bottom = minimum.y();
+        double lowest = bottom + 1.0e-3 * (maximum.y() - minimum.y());
+        ArrayList<Vector3Dd> positions = new ArrayList<Vector3Dd>();
+        ArrayList<int[]> polygons = new ArrayList<int[]>();
+
+        // Surface vertices (i, k) at index i + nx*k
+        for ( int k = 0; k < nz; k++ ) {
+            for ( int i = 0; i < nx; i++ ) {
+                double h = evaluateHeight(xs[i], zs[k]);
+                h = Math.max(lowest, Math.min(maximum.y(), h));
+                positions.add(new Vector3Dd(xs[i], h, zs[k]));
+            }
+        }
+        // Bottom corners
+        int b00 = positions.size();
+        positions.add(new Vector3Dd(xs[0], bottom, zs[0]));
+        int b10 = positions.size();
+        positions.add(new Vector3Dd(xs[nx - 1], bottom, zs[0]));
+        int b01 = positions.size();
+        positions.add(new Vector3Dd(xs[0], bottom, zs[nz - 1]));
+        int b11 = positions.size();
+        positions.add(new Vector3Dd(xs[nx - 1], bottom, zs[nz - 1]));
+
+        Vector3Dd up = new Vector3Dd(0, 1, 0);
+        for ( int k = 0; k < nz - 1; k++ ) {
+            for ( int i = 0; i < nx - 1; i++ ) {
+                int v00 = i + nx * k;
+                int v10 = (i + 1) + nx * k;
+                int v01 = i + nx * (k + 1);
+                int v11 = (i + 1) + nx * (k + 1);
+                addPolygon(positions, polygons, new int[] {v00, v01, v10}, up);
+                addPolygon(positions, polygons, new int[] {v10, v01, v11}, up);
+            }
+        }
+
+        // Sides: the profile of the surface and two bottom corners
+        int[] side = new int[nz + 2];
+        for ( int k = 0; k < nz; k++ ) {
+            side[k] = nx * k;
+        }
+        side[nz] = b01;
+        side[nz + 1] = b00;
+        addPolygon(positions, polygons, side, new Vector3Dd(-1, 0, 0));
+        side = new int[nz + 2];
+        for ( int k = 0; k < nz; k++ ) {
+            side[k] = (nx - 1) + nx * k;
+        }
+        side[nz] = b11;
+        side[nz + 1] = b10;
+        addPolygon(positions, polygons, side, new Vector3Dd(1, 0, 0));
+        side = new int[nx + 2];
+        for ( int i = 0; i < nx; i++ ) {
+            side[i] = i;
+        }
+        side[nx] = b10;
+        side[nx + 1] = b00;
+        addPolygon(positions, polygons, side, new Vector3Dd(0, 0, -1));
+        side = new int[nx + 2];
+        for ( int i = 0; i < nx; i++ ) {
+            side[i] = i + nx * (nz - 1);
+        }
+        side[nx] = b11;
+        side[nx + 1] = b01;
+        addPolygon(positions, polygons, side, new Vector3Dd(0, 0, 1));
+        addPolygon(positions, polygons, new int[] {b00, b10, b11, b01},
+            new Vector3Dd(0, -1, 0));
+
+        return PolyhedralBoundedSolidMeshConstructions.createFromPolygonMesh(
+            positions, polygons);
+    }
+
+    /**
+    @return the box limits and the grid lines strictly between them
+    */
+    private static double[] boxGridCoordinates(double low, double high)
+    {
+        ArrayList<Double> list = new ArrayList<Double>();
+        list.add(low);
+        for ( double c = Math.floor(low) + 1; c < high; c += 1.0 ) {
+            if ( c - low > 1.0e-9 && high - c > 1.0e-9 ) {
+                list.add(c);
+            }
+        }
+        list.add(high);
+        double[] coordinates = new double[list.size()];
+        for ( int i = 0; i < coordinates.length; i++ ) {
+            coordinates[i] = list.get(i);
+        }
+        return coordinates;
+    }
+
+    /**
+    Adds a polygon, reversing it if needed so it is counterclockwise as seen
+    from outside (its normal along `outward`).
+    */
+    private static void addPolygon(List<Vector3Dd> positions,
+        List<int[]> polygons, int[] polygon, Vector3Dd outward)
+    {
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        for ( int i = 0; i < polygon.length; i++ ) {
+            Vector3Dd p = positions.get(polygon[i]);
+            Vector3Dd q = positions.get(polygon[(i + 1) % polygon.length]);
+            x += (p.y() - q.y()) * (p.z() + q.z());
+            y += (p.z() - q.z()) * (p.x() + q.x());
+            z += (p.x() - q.x()) * (p.y() + q.y());
+        }
+        if ( new Vector3Dd(x, y, z).dotProduct(outward) < 0 ) {
+            for ( int i = 0, j = polygon.length - 1; i < j; i++, j-- ) {
+                int tmp = polygon[i];
+                polygon[i] = polygon[j];
+                polygon[j] = tmp;
+            }
+        }
+        polygons.add(polygon);
+    }
 }

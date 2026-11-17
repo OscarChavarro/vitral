@@ -760,6 +760,26 @@
       "name": "Toroide"
     },
     {
+      "id": "IDC_CREATE_BLOB",
+      "name": "Blob (molécula)"
+    },
+    {
+      "id": "IDC_CREATE_QUADRIC",
+      "name": "Cuádrica"
+    },
+    {
+      "id": "IDC_CREATE_POLYNOMIAL",
+      "name": "Superficie polinomial"
+    },
+    {
+      "id": "IDC_CREATE_HEIGHTFIELD",
+      "name": "Campo de alturas"
+    },
+    {
+      "id": "IDC_CREATE_HALFSPACE",
+      "name": "Semiespacio"
+    },
+    {
       "id": "IDC_CREATE_PLANE",
       "name": "Plano"
     },
@@ -968,6 +988,11 @@
         "IDC_CREATE_CUBE",
         "IDC_CREATE_BOX",
         "IDC_CREATE_TORUS",
+        "IDC_CREATE_BLOB",
+        "IDC_CREATE_QUADRIC",
+        "IDC_CREATE_POLYNOMIAL",
+        "IDC_CREATE_HEIGHTFIELD",
+        "IDC_CREATE_HALFSPACE",
         "IDC_CREATE_ARROW",
         "IDC_CREATE_VOLUME",
         "IDC_CREATE_BREP",

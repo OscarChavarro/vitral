@@ -87,7 +87,13 @@ values documented below.
     (`InfinitePlane`); `functionExpression`, `minimum`, `maximum`,
     `tesselationHintX`, `tesselationHintY` (`FunctionalExplicitSurface`);
     `xSize`, `ySize`, `zSize`, `threshold` (`VoxelVolume`, without its
-    voxels). Geometries defined by data report only a summary: the number
+    voxels); `threshold`, `sturm` and `components` (`center`, `radius`,
+    `strength`) (`BlobSolid`); `order`, `sturm` and `coefficients`, in the
+    order of `PolynomialSurface.getTermIndex` (`PolynomialSurface`);
+    `square`, `mixed`, `linear`, `constant` (`QuadricSurface`); `a`, `b`,
+    `c`, `d` of the solid a*x + b*y + c*z + d <= 0 (`PlanarHalfSpace`);
+    `columns`, `rows`, `minimum`, `maximum` (`HeightFieldSolid`, whose
+    `heights` are serialized, at index x + columns*z). Geometries defined by data report only a summary: the number
     of vertices, edges and faces of a `PolyhedralBoundedSolid`, of vertices
     and triangles of each mesh, of points of a `ParametricCurve`, and the
     `type` of a `ParametricBiCubicPatch`. Other geometries report `null`.
@@ -136,7 +142,15 @@ recorded in the scene history, so they can be undone as the ones of the user
   over the model, as its menu item or button does: the `IDC_` commands of the
   I18N files in `etc/gui` that need no dialog, i.e. `IDC_CREATE_SPHERE`,
   `IDC_CREATE_FUNCTIONALEXPLICITSURFACE`, `IDC_CREATE_PARAMETRICBICUBICPATCH`,
-  `IDC_CREATE_OMNILIGHT`, `IDC_TOOLS_RAY` or `IDC_OTHERS_CYCLE_BACKGROUND`. Arguments:
+  `IDC_CREATE_OMNILIGHT`, `IDC_TOOLS_RAY` or `IDC_OTHERS_CYCLE_BACKGROUND`.
+  The samples of each kind of volume are created by `IDC_CREATE_SPHERE`,
+  `IDC_CREATE_CONE`, `IDC_CREATE_CYLINDER`, `IDC_CREATE_CUBE`,
+  `IDC_CREATE_BOX`, `IDC_CREATE_TORUS`, `IDC_CREATE_ARROW`,
+  `IDC_CREATE_BLOB` (three components in a triangle with a hole, as a
+  molecule), `IDC_CREATE_QUADRIC` (an ellipsoid), `IDC_CREATE_POLYNOMIAL`
+  (the quartic "tangle cube", of genus 5), `IDC_CREATE_HEIGHTFIELD` (a
+  terrain of 17 x 17 heights), `IDC_CREATE_HALFSPACE` (z <= 0),
+  `IDC_CREATE_BREP` and `IDC_CREATE_VOLUME` (voxels of the selected body). Arguments:
   `command`. Returns `result` (`DONE`, `FAILED`, or `NOT_HANDLED` for commands
   that need the user interface, i.e. file dialogs) and the status `message`.
   Scene changes are recorded in the scene history.
@@ -225,7 +239,8 @@ has not been created`).
   rebuilding the GUI (wait about a second before the next call). Arguments:
   `technology` (`opengl4` or `awt`). With `awt` no OpenGL is used: viewports
   are drawn with AWT 2D operations, as lines (Appel hidden line removal for
-  the solids when `surfaces` is on, with hidden lines dashed when `wires` is
+  the solids, i.e. every volume, as all of them export a boundary
+  representation, when `surfaces` is on, with hidden lines dashed when `wires` is
   also on; a plain wireframe of every body when `surfaces` is off) or as
   raytraced images. The translation, rotation and
   scale gizmos and the input boxes are drawn there as 2D primitives (painter's

@@ -12,6 +12,12 @@ import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
+import vsdk.toolkit.environment.geometry.volume.BlobComponent;
+import vsdk.toolkit.environment.geometry.volume.BlobSolid;
+import vsdk.toolkit.environment.geometry.volume.HeightFieldSolid;
+import vsdk.toolkit.environment.geometry.volume.PlanarHalfSpace;
+import vsdk.toolkit.environment.geometry.volume.PolynomialSurface;
+import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
@@ -216,6 +222,76 @@ class MCPSceneSerializer
                 .append(",\"tesselationHintX\":").append(surface.getTesselationHintX())
                 .append(",\"tesselationHintY\":").append(surface.getTesselationHintY())
                 .append('}');
+        }
+        else if ( geometry instanceof BlobSolid blob ) {
+            // BlobSolid(threshold, sturm) and addComponent(BlobComponent(
+            // center, radius, strength))
+            sb.append("{\"threshold\":").append(blob.getThreshold())
+                .append(",\"sturm\":").append(blob.usesSturmSequences())
+                .append(",\"components\":[");
+            for ( long i = 0; i < blob.getComponentCount(); i++ ) {
+                BlobComponent component = blob.getComponent(i);
+                if ( i > 0 ) {
+                    sb.append(',');
+                }
+                sb.append("{\"center\":").append(MCPJson.vector(component.getCenter()))
+                    .append(",\"radius\":").append(component.getRadius())
+                    .append(",\"strength\":").append(component.getStrength())
+                    .append('}');
+            }
+            sb.append("]}");
+        }
+        else if ( geometry instanceof PolynomialSurface polynomial ) {
+            // Coefficients in the order of PolynomialSurface.getTermIndex
+            sb.append("{\"order\":").append(polynomial.getOrder())
+                .append(",\"sturm\":").append(polynomial.usesSturmSequences())
+                .append(",\"coefficients\":[");
+            double[] coefficients = polynomial.getCoefficients();
+            int count = PolynomialSurface.getTermCount(polynomial.getOrder());
+            for ( int i = 0; i < count; i++ ) {
+                if ( i > 0 ) {
+                    sb.append(',');
+                }
+                sb.append(coefficients[i]);
+            }
+            sb.append("]}");
+        }
+        else if ( geometry instanceof QuadricSurface quadric ) {
+            // QuadricSurface(square, mixed, linear, constant)
+            sb.append("{\"square\":").append(MCPJson.vector(quadric.squareCoefficients()))
+                .append(",\"mixed\":").append(MCPJson.vector(quadric.mixedCoefficients()))
+                .append(",\"linear\":").append(MCPJson.vector(quadric.linearCoefficients()))
+                .append(",\"constant\":").append(quadric.constantCoefficient())
+                .append('}');
+        }
+        else if ( geometry instanceof PlanarHalfSpace halfSpace ) {
+            // The solid a*x + b*y + c*z + d <= 0
+            InfinitePlane plane = halfSpace.getBoundaryPlane();
+            sb.append("{\"a\":").append(plane.getA())
+                .append(",\"b\":").append(plane.getB())
+                .append(",\"c\":").append(plane.getC())
+                .append(",\"d\":").append(plane.getD())
+                .append('}');
+        }
+        else if ( geometry instanceof HeightFieldSolid field ) {
+            sb.append("{\"columns\":").append(field.getColumnCount())
+                .append(",\"rows\":").append(field.getRowCount())
+                .append(",\"minimum\":").append(MCPJson.vector(field.getMinimum()))
+                .append(",\"maximum\":").append(MCPJson.vector(field.getMaximum()));
+            if ( full ) {
+                // Height of point (x, z) at index x + columns*z
+                sb.append(",\"heights\":[");
+                for ( long z = 0; z < field.getRowCount(); z++ ) {
+                    for ( long x = 0; x < field.getColumnCount(); x++ ) {
+                        if ( x > 0 || z > 0 ) {
+                            sb.append(',');
+                        }
+                        sb.append(field.getHeight(x, z));
+                    }
+                }
+                sb.append(']');
+            }
+            sb.append('}');
         }
         else if ( geometry instanceof VoxelVolume volume ) {
             // The voxels are not presented: they come from the voxelization

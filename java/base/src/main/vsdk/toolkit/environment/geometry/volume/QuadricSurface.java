@@ -17,6 +17,8 @@ import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.element.RaySolidBoundary;
 import vsdk.toolkit.environment.geometry.element.RaySolidClassification;
 import vsdk.toolkit.environment.geometry.element.RaySolidQueryStatus;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidFieldConstructions;
 
 /**
 F(x,y,z) = square dot (x*x,y*y,z*z) + mixed dot (xy,xz,yz)
@@ -411,4 +413,59 @@ public class QuadricSurface extends Solid {
             bounds.getMaximum().x(), bounds.getMaximum().y(), bounds.getMaximum().z()};
     return new double[]{-1e308,-1e308,-1e308,1e308,1e308,1e308};
 }
+
+    //= Boundary representation =============================================
+
+    /**
+    Polyhedral approximation with the default number of divisions of
+    `ImplicitSolid` (see `exportToPolyhedralBoundedSolid(int)`).
+    */
+    @Override
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        return exportToPolyhedralBoundedSolid(
+            ImplicitSolid.DEFAULT_POLYGONIZATION_DIVISIONS);
+    }
+
+    /**
+    Polyhedral approximation of the solid F &lt;= 0, built with Euler
+    operators by `PolyhedralBoundedSolidFieldConstructions`. A bounded
+    quadric (an ellipsoid) is polygonized inside its bounds; an unbounded one
+    (i.e. a cylinder or a paraboloid) is clipped by the cube of half side
+    `ImplicitSolid.DEFAULT_CLIPPING_HALF_SIZE` centered at the origin.
+    @param divisions number of grid cells along the largest side of the
+    polygonized box (at least 1)
+    @return a new polyhedral approximation, or null if the solid is empty or
+    its bounds can not be determined
+    */
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(int divisions)
+    {
+        GeometryBounds bounds = new GeometryBounds();
+        getBounds(bounds);
+        if ( bounds.getKind() == GeometryBounds.Kind.Finite ) {
+            return PolyhedralBoundedSolidFieldConstructions.createFromBoundedScalarField(
+                this::evaluate, bounds.getMinimum(), bounds.getMaximum(),
+                Math.max(1, divisions));
+        }
+        if ( bounds.getKind() == GeometryBounds.Kind.Unbounded ) {
+            double c = ImplicitSolid.DEFAULT_CLIPPING_HALF_SIZE;
+            return exportToPolyhedralBoundedSolid(divisions,
+                new Vector3Dd(-c, -c, -c), new Vector3Dd(c, c, c));
+        }
+        return null;
+    }
+
+    /**
+    Polyhedral approximation of the part of the solid F &lt;= 0 inside a box.
+    @param divisions number of grid cells along the largest side of the box
+    @param minimum minimum corner of the box
+    @param maximum maximum corner of the box
+    @return a new polyhedral approximation, or null if it is empty
+    */
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(int divisions,
+        Vector3Dd minimum, Vector3Dd maximum)
+    {
+        return PolyhedralBoundedSolidFieldConstructions.createFromScalarField(
+            this::evaluate, minimum, maximum, Math.max(1, divisions));
+    }
 }

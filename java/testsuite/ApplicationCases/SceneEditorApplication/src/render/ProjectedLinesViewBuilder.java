@@ -19,7 +19,6 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.geometricProcessing.GeometryTriangulator;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
-import vsdk.toolkit.environment.geometry.volume.Volume;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
@@ -75,6 +74,8 @@ public class ProjectedLinesViewBuilder
     private static final double LIGHT_GIZMO_SIZE = 0.15;
     /// Distance an orthogonal camera is moved back for the Appel lines of sight
     private static final double ORTHOGONAL_EYE_DISTANCE = 1000.0;
+
+    private final BrepExportCache brepCache = new BrepExportCache();
 
     /**
     Builds the lines presenting the scene in a viewport.
@@ -273,17 +274,11 @@ public class ProjectedLinesViewBuilder
     /**
     @param geometry
     @return the boundary representation of the geometry, or null if it is
-    not a volume that can be exported to one
+    not a volume that can be exported to one (see `BrepExportCache`)
     */
-    private static PolyhedralBoundedSolid exportToBrep(Geometry geometry)
+    private PolyhedralBoundedSolid exportToBrep(Geometry geometry)
     {
-        if ( geometry instanceof PolyhedralBoundedSolid ) {
-            return (PolyhedralBoundedSolid)geometry;
-        }
-        if ( geometry instanceof Volume ) {
-            return ((Volume)geometry).exportToPolyhedralBoundedSolid();
-        }
-        return null;
+        return brepCache.get(geometry);
     }
 
     /**

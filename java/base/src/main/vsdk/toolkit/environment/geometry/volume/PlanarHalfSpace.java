@@ -1,3 +1,7 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 package vsdk.toolkit.environment.geometry.volume;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -18,6 +22,8 @@ import vsdk.toolkit.environment.geometry.element.RaySolidBoundary;
 import vsdk.toolkit.environment.geometry.element.RaySolidClassification;
 import vsdk.toolkit.environment.geometry.element.RaySolidQueryStatus;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 
 /**
 The closed solid n dot p + d <= 0. The plane owns its mathematical
@@ -204,4 +210,67 @@ public class PlanarHalfSpace extends Solid {
 
     @Override
     public double[] getMinMax() { return plane.getMinMax(); }
+
+    //= Boundary representation =============================================
+
+    /// Default half side of the square of the plane kept by the export
+    public static final double DEFAULT_EXPORT_HALF_SIZE = 2.0;
+    /// Default thickness of the slab kept by the export
+    public static final double DEFAULT_EXPORT_DEPTH = 0.5;
+
+    /**
+    Bounded part of the half space with the default size (see
+    `exportToPolyhedralBoundedSolid(double, double)`).
+    */
+    @Override
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        return exportToPolyhedralBoundedSolid(DEFAULT_EXPORT_HALF_SIZE,
+            DEFAULT_EXPORT_DEPTH);
+    }
+
+    /**
+    The half space is unbounded, so its boundary representation is a bounded
+    part of it: the slab under a square of its plane, centered at the point
+    of the plane nearest to the origin. It is the boundary representation of
+    a `Box` (built with Euler operators, [MANT1988].12.4) placed in the frame
+    of the plane: its top face on the plane, its outward normal along the
+    normal of the plane.
+    @param halfSize half the side of the square of the plane
+    @param depth thickness of the slab, below the plane
+    @return a new polyhedral solid, or null if the plane is not valid
+    */
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(double halfSize,
+        double depth)
+    {
+        Vector3Dd n = new Vector3Dd(plane.getA(), plane.getB(), plane.getC());
+        double length = n.length();
+        if ( !(length > 0) || !Double.isFinite(length) ||
+             !Double.isFinite(plane.getD()) || !(halfSize > 0) || !(depth > 0) ) {
+            return null;
+        }
+        Vector3Dd u = n.multiply(1.0 / length);
+        Vector3Dd center = u.multiply(-plane.getD() / length);
+        // Tangents of the plane: (t1, t2, u) is a right handed frame
+        Vector3Dd axis = Math.abs(u.x()) < 0.9 ? new Vector3Dd(1, 0, 0) :
+            new Vector3Dd(0, 1, 0);
+        Vector3Dd t1 = axis.subtract(u.multiply(axis.dotProduct(u))).normalized();
+        Vector3Dd t2 = u.crossProduct(t1);
+        Matrix4x4d frame = new Matrix4x4d(new double[][] {
+            {t1.x(), t2.x(), u.x(), center.x()},
+            {t1.y(), t2.y(), u.y(), center.y()},
+            {t1.z(), t2.z(), u.z(), center.z()},
+            {0, 0, 0, 1}
+        });
+
+        PolyhedralBoundedSolid solid = new Box(
+            new Vector3Dd(-halfSize, -halfSize, -depth),
+            new Vector3Dd(halfSize, halfSize, 0)).exportToPolyhedralBoundedSolid();
+        int i;
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            solid.getVerticesList().get(i).position =
+                frame.multiply(solid.getVerticesList().get(i).position);
+        }
+        return solid;
+    }
 }
