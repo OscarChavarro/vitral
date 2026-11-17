@@ -20,6 +20,7 @@ import vsdk.toolkit.environment.geometry.volume.PolynomialSurface;
 import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.Tube;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
@@ -183,6 +184,12 @@ class MCPSceneSerializer
             sb.append("{\"bottomRadius\":").append(cone.getBottomRadius())
                 .append(",\"topRadius\":").append(cone.getTopRadius())
                 .append(",\"height\":").append(cone.getHeight())
+                .append('}');
+        }
+        else if ( geometry instanceof Tube tube ) {
+            sb.append("{\"internalRadius\":").append(tube.getInternalRadius())
+                .append(",\"externalRadius\":").append(tube.getExternalRadius())
+                .append(",\"height\":").append(tube.getHeight())
                 .append('}');
         }
         else if ( geometry instanceof Box box ) {

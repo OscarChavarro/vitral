@@ -200,6 +200,13 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
         if ( inputGizmo != null && view.isSelected() ) {
             view.drawInputGizmo(gl, inputGizmo);
         }
+
+        // The camera control gizmo (ViewCube), as a HUD of the selected view
+        if ( view.isSelected() ) {
+            model.getCameraControlGizmo().placeInViewport(view.getViewport(),
+                viewportSet.getElementScaler());
+            view.drawCameraControlGizmo(gl, model.getCameraControlGizmo());
+        }
     }
 
     @Override

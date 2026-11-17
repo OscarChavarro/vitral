@@ -16,6 +16,7 @@ import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.gui.gizmo.CameraControlGizmo;
 import vsdk.toolkit.gui.gizmo.RayGizmo;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -34,6 +35,8 @@ public class ApplicationModel
     private int raytracedImageHeight;
     private RGBColorPalette palette;
     private RayGizmo rayGizmo;
+    /// ViewCube shown over the selected viewport, controlling its camera
+    private final CameraControlGizmo cameraControlGizmo = new CameraControlGizmo();
     private final List<ViewportSet> viewportSets;
     private int activeViewportSetIndex;
     private Widget i18nContext;
@@ -324,6 +327,15 @@ public class ApplicationModel
         if ( rayGizmo != null ) {
             rayGizmo.setMaxNumOfReflections(visualDebugRayLevels);
         }
+    }
+
+    /**
+    @return the camera control gizmo (ViewCube) presented over the selected
+    viewport
+    */
+    public CameraControlGizmo getCameraControlGizmo()
+    {
+        return cameraControlGizmo;
     }
 
     public RayGizmo getRayGizmo()

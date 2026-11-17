@@ -164,6 +164,17 @@ public class Gizmo2DDrawList
     }
 
     /**
+    Adds a screen space line (overlay), i.e. a line whose visibility was
+    already solved (as the hidden line removal of a HUD).
+    */
+    public void addOverlayLine(double x0, double y0, double x1, double y1,
+                               ColorRgb color, double width)
+    {
+        primitives.add(new Primitive(Kind.LINE, new double[] {x0, x1},
+            new double[] {y0, y1}, color, 1.0, width, 0, true, null, 0, null));
+    }
+
+    /**
     Adds an opaque screen space rectangle (overlay).
     @param x left pixel
     @param y top pixel

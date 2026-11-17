@@ -2,6 +2,7 @@ package application;
 
 // Java classes
 import java.util.List;
+import java.awt.GraphicsEnvironment;
 import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 
@@ -258,7 +259,37 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
         return awtModel;
     }
 
+    /**
+    The editor needs a graphical display: without one (i.e. on Unix with no
+    DISPLAY variable defined), the reason is reported in a short message,
+    instead of the stack trace of the `HeadlessException` AWT would throw
+    when creating the first window, and the application ends.
+    */
+    private static void exitIfNoDisplayIsAvailable()
+    {
+        if ( !GraphicsEnvironment.isHeadless() ) {
+            return;
+        }
+        String display = System.getenv("DISPLAY");
+
+        if ( display == null || display.isEmpty() ) {
+            System.err.println("ERROR: No graphical display is available: the " +
+                "DISPLAY environment variable is not defined.");
+            System.err.println("The scene editor needs a display. Define DISPLAY " +
+                "(i.e. export DISPLAY=:0), connect with X11 forwarding " +
+                "(ssh -X), or use a virtual display (i.e. xvfb-run ./run.sh).");
+        }
+        else {
+            System.err.println("ERROR: No graphical display is available (Java " +
+                "is running in headless mode, i.e. with -Djava.awt.headless=true).");
+            System.err.println("The scene editor needs a display: run it " +
+                "without the headless mode.");
+        }
+        System.exit(1);
+    }
+
     public static void main(String[] args) {
+        exitIfNoDisplayIsAvailable();
         AwtJogl4MainThread mainThread = new AwtJogl4MainThread(args);
         SwingUtilities.invokeLater(mainThread);
     }

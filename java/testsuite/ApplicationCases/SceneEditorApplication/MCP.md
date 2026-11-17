@@ -127,6 +127,10 @@ values documented below.
 - `scene.add_cylinder`: creates a cylinder. Arguments: `radius` (default 1),
   `height` (default 2), `x`, `y`, `z` (default 0). Returns the scene
   description.
+- `scene.add_tube`: creates a tube (a washer, a circular lamina with a hole,
+  if `height` is 0). Arguments: `internalRadius` (default 0.5),
+  `externalRadius` (default 1), `height` (default 2), `x`, `y`, `z` (default
+  0). Returns the scene description.
 - `scene.move_body`: sets the position of a body. Arguments: `index` (default:
   the last body), `x`, `y`, `z` (missing coordinates are kept). Returns the
   scene description.
@@ -145,7 +149,7 @@ recorded in the scene history, so they can be undone as the ones of the user
   `IDC_CREATE_OMNILIGHT`, `IDC_TOOLS_RAY` or `IDC_OTHERS_CYCLE_BACKGROUND`.
   The samples of each kind of volume are created by `IDC_CREATE_SPHERE`,
   `IDC_CREATE_CONE`, `IDC_CREATE_CYLINDER`, `IDC_CREATE_CUBE`,
-  `IDC_CREATE_BOX`, `IDC_CREATE_TORUS`, `IDC_CREATE_ARROW`,
+  `IDC_CREATE_BOX`, `IDC_CREATE_TUBE`, `IDC_CREATE_WASHER`, `IDC_CREATE_TORUS`, `IDC_CREATE_ARROW`,
   `IDC_CREATE_BLOB` (three components in a triangle with a hole, as a
   molecule), `IDC_CREATE_QUADRIC` (an ellipsoid), `IDC_CREATE_POLYNOMIAL`
   (the quartic "tangle cube", of genus 5), `IDC_CREATE_HEIGHTFIELD` (a

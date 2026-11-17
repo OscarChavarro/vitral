@@ -6,6 +6,7 @@ import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.Tube;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.PointLight;
@@ -154,6 +155,21 @@ class MCPSceneTools
         double height = MCPJson.numberProperty(request, "height", 2.0);
         recordSceneChange("scene.add_cylinder",
             () -> placeNewBody(new Cone(radius, radius, height), request));
+    }
+
+    /**
+    Adds a tube, or a washer when its height is 0 (tool `scene.add_tube`).
+    @param request request with the arguments
+    internalRadius,externalRadius,height,x,y,z
+    */
+    void addTube(String request)
+    {
+        double internalRadius = MCPJson.numberProperty(request, "internalRadius", 0.5);
+        double externalRadius = MCPJson.numberProperty(request, "externalRadius", 1.0);
+        double height = MCPJson.numberProperty(request, "height", 2.0);
+        recordSceneChange("scene.add_tube",
+            () -> placeNewBody(new Tube(internalRadius, externalRadius, height),
+                request));
     }
 
     private void placeNewBody(Geometry geometry, String request)

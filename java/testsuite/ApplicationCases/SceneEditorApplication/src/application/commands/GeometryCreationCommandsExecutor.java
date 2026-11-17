@@ -9,6 +9,7 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.Tube;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.geometricProcessing.Voxelization;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
@@ -57,6 +58,14 @@ class GeometryCreationCommandsExecutor
         }
         else if ( label.equals("IDC_CREATE_CYLINDER") ) {
             scene().addThing(new Cone(1, 1, 2));
+        }
+        else if ( label.equals("IDC_CREATE_TUBE") ) {
+            scene().addThing(new Tube(0.6, 1, 2));
+        }
+        else if ( label.equals("IDC_CREATE_WASHER") ) {
+            // A tube of height 0: a circular lamina with a hole
+            SimpleBody body = scene().addThing(new Tube(0.6, 1, 0));
+            body.setMaterial(body.getMaterial().withDoubleSided(true));
         }
         else if ( label.equals("IDC_CREATE_CUBE") ) {
             scene().addThing(new Box(1, 1, 1));

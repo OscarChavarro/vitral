@@ -20,12 +20,14 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.gui.gizmo.CameraControlGizmo;
 import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.ReferenceFrameGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4CameraControlGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4InputGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4ReferenceFrameGizmoRenderer;
 
@@ -51,6 +53,7 @@ public class Jogl4ViewportWindow
     private static final int BASE_TITLE_BORDER_Y = 1;
     // A bit smaller than the titles
     private static final int BASE_REFERENCE_FRAME_LABEL_FONT_SIZE = 12;
+    private static final int BASE_CAMERA_CONTROL_GIZMO_LABEL_FONT_SIZE = 9;
     private static final int BASE_TRANSLATE_GIZMO_LABEL_FONT_SIZE = Jogl4LabelImageProvider.DEFAULT_FONT_SIZE;
     // Position of the labels of the translate gizmo, with respect to the tip
     // of its arrows
@@ -84,6 +87,10 @@ public class Jogl4ViewportWindow
     private ColorRgb rotateGizmoArcLabelColor;
     private int rotateGizmoArcLabelFontSize;
     private final Jogl4InputGizmoRenderer inputGizmoRenderer;
+    // Labels of the faces of the camera control gizmo, by text
+    private final java.util.Map<String, RGBAImageUncompressed> cameraControlGizmoLabelImages =
+        new java.util.HashMap<String, RGBAImageUncompressed>();
+    private int cameraControlGizmoLabelFontSize;
 
     // Each Jogl4ViewportWindow can call a different visualization algorithm
     public static final int RENDER_MODE_ZBUFFER = Viewport.RENDER_MODE_Z_BUFFER;
@@ -517,6 +524,38 @@ public class Jogl4ViewportWindow
             }
             titleImage = labelImageProvider.createLabelImage(title, titleColor, titleFontSize);
         }
+    }
+
+    /**
+    Draws a camera control gizmo (ViewCube) as a HUD over this viewport, with
+    the labels of its faces. The gizmo must be already placed in this
+    viewport (see `CameraControlGizmo.placeInViewport`).
+    @param gl OpenGL context
+    @param gizmo the gizmo
+    */
+    public void drawCameraControlGizmo(GL4 gl, CameraControlGizmo gizmo)
+    {
+        ViewportElementScaler elementScaler = viewportSet.getElementScaler();
+        int fontSize = elementScaler.scaleSize(BASE_CAMERA_CONTROL_GIZMO_LABEL_FONT_SIZE);
+
+        if ( fontSize != cameraControlGizmoLabelFontSize ) {
+            discardedLabelImages.addAll(cameraControlGizmoLabelImages.values());
+            cameraControlGizmoLabelImages.clear();
+            cameraControlGizmoLabelFontSize = fontSize;
+        }
+        Jogl4CameraControlGizmoRenderer.draw(gl, gizmo,
+            viewport.getPixelStartX(), viewport.getPixelStartY(),
+            viewport.getPixelSizeY(),
+            (float)elementScaler.scaleLength(1.0),
+            (glContext, label, x, y) -> {
+                RGBAImageUncompressed image = cameraControlGizmoLabelImages
+                    .computeIfAbsent(label, text -> labelImageProvider
+                        .createLabelImage(text, gizmo.getLabelColor(), fontSize));
+                // Centered; the y given is the lower edge of the image
+                drawTextureString2D(glContext,
+                    (int)Math.round(x - image.getXSize() / 2.0),
+                    (int)Math.round(y + image.getYSize() / 2.0), image);
+            });
     }
 
     public void drawLabelsForTranslateGizmo(GL4 gl, TranslateGizmo gizmo)

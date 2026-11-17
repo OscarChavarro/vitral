@@ -21,6 +21,8 @@ import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.render.awt.AwtGizmo2DDrawListRenderer;
 import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;
+import vsdk.toolkit.render.gizmo.CameraControlGizmo2DPainter;
+import vsdk.toolkit.gui.gizmo.CameraControlGizmo;
 import vsdk.toolkit.render.gizmo.Gizmo2DDrawList;
 import vsdk.toolkit.render.gizmo.InputGizmo2DPainter;
 import vsdk.toolkit.render.gizmo.RotateGizmo2DPainter;
@@ -52,6 +54,10 @@ modes AWT offers (see `model.RenderTechnology.AWT`):
     annotations (selection corners, lights...) are drawn over it as lines,
     without depth test.
 
+Over the selected viewport the camera control gizmo (ViewCube) is drawn as
+a HUD at its upper right corner, with the hidden lines of its parts removed
+by Appel's algorithm (see `CameraControlGizmo2DPainter`).
+
 Over both, the manipulation gizmo of the interaction mode and the input
 gizmo (numeric boxes) of the selected viewport are drawn as 2D primitives
 computed by the gizmo painters of `vsdk.toolkit.render.gizmo` (hidden
@@ -78,6 +84,8 @@ public class AwtDrawingAreaRenderer
     private final AwtViewportSetRenderer viewportSetRenderer;
     private final DrawingAreaGizmoPresenter gizmoPresenter;
     private final Gizmo2DDrawList gizmoDrawList;
+    private final Gizmo2DDrawList cameraControlDrawList;
+    private final CameraControlGizmo2DPainter cameraControlPainter;
     private BufferedImage frame;
 
     /**
@@ -107,6 +115,8 @@ public class AwtDrawingAreaRenderer
         this.gizmoPresenter = new DrawingAreaGizmoPresenter(drawingArea,
             new SceneSelectionEditor(theScene), translationGizmo, rotateGizmo, scaleGizmo);
         this.gizmoDrawList = new Gizmo2DDrawList();
+        this.cameraControlDrawList = new Gizmo2DDrawList();
+        this.cameraControlPainter = new CameraControlGizmo2DPainter();
 
         viewportSetRenderer = new AwtViewportSetRenderer(viewportSet,
             new AwtViewportSetRenderer.ViewRenderer() {
@@ -257,6 +267,17 @@ public class AwtDrawingAreaRenderer
                 AwtGizmo2DDrawListRenderer.TEXT_MEASURER);
         }
         AwtGizmo2DDrawListRenderer.draw(g, gizmoDrawList, x, y);
+
+        // The HUD of the selected viewport is over everything
+        if ( viewportSet.isSelected(viewport) ) {
+            CameraControlGizmo cameraControl = model.getCameraControlGizmo();
+
+            cameraControlDrawList.clear();
+            cameraControl.placeInViewport(viewport, viewportSet.getElementScaler());
+            cameraControlPainter.paint(cameraControlDrawList, cameraControl,
+                viewportSet.getElementScaler());
+            AwtGizmo2DDrawListRenderer.draw(g, cameraControlDrawList, x, y);
+        }
     }
 
     /**

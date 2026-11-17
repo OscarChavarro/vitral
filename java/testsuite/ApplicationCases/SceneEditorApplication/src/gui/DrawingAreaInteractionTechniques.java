@@ -9,6 +9,7 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.MouseEvent;
+import vsdk.toolkit.gui.gizmo.CameraControlGizmoInteractionTechnique;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.RayGizmoInteractionTechniques;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
@@ -55,6 +56,13 @@ toggle a sample texture / bump map on the selected body; `h` shows the object
 selector; `ESC` closes the application. Commands of the visual debug ray and
 of the viewport set are processed by their own techniques.
 
+The camera control gizmo (ViewCube) of the selected viewport has priority
+over every interaction mode (see `CameraControlGizmoInteractionTechnique`):
+hovering highlights its regions, a click turns the camera smoothly to the
+view of a region (the animation is driven by the listener, see
+`DrawingAreaInteractionListener.animationRequested`, and recorded in the
+view history when it ends), and a drag over it orbits the camera.
+
 Undo and redo (see `UndoRedoInteractionTechnique`): `Ctrl+Z` / `Ctrl+Y` over
 the scene (creation, deletion and transformation of things), `Ctrl+Shift+Z`
 / `Ctrl+Shift+Y` over the view of the selected viewport (camera placement,
@@ -86,6 +94,13 @@ public class DrawingAreaInteractionTechniques
     private boolean viewportTitleGesture;
     /** Suppresses the synthetic click after a title press/release. */
     private boolean viewportTitleClickConsumed;
+    private final CameraControlGizmoInteractionTechnique cameraControlTechnique;
+    /** Viewport of the camera control gizmo gesture in course, or null. */
+    private Viewport cameraControlViewport;
+    /** Suppresses the synthetic click after a camera control gizmo gesture. */
+    private boolean cameraControlClickConsumed;
+    /** The gesture that started the camera animation is still recorded. */
+    private boolean cameraAnimationRecording;
 
     /**
     @param model application model, providing the scene to interact with
@@ -112,6 +127,79 @@ public class DrawingAreaInteractionTechniques
         scaleGizmo = interactionTechniques.getScaleGizmo();
         editRecorder = new InteractionEditRecorder(model.getEditHistory(), viewportSet);
         undoRedoTechnique = new UndoRedoInteractionTechnique(model.getEditHistory());
+        cameraControlTechnique = new CameraControlGizmoInteractionTechnique(
+            model.getCameraControlGizmo());
+        cameraControlViewport = null;
+        cameraControlClickConsumed = false;
+        cameraAnimationRecording = false;
+    }
+
+    //= Camera control gizmo ==============================================
+
+    /**
+    Places the camera control gizmo over a viewport (as the renderers do),
+    controlling its camera.
+    */
+    private void placeCameraControlGizmo(Viewport viewport)
+    {
+        model.getCameraControlGizmo().placeInViewport(viewport,
+            viewportSet.getElementScaler());
+    }
+
+    /**
+    Advances the camera animation started by the camera control gizmo. When
+    it ends, the gesture that started it is recorded (so the whole turn is
+    one view operation).
+    @return true while the animation goes on
+    */
+    public boolean advanceCameraAnimation()
+    {
+        cameraControlTechnique.advanceAnimation(System.nanoTime());
+        if ( cameraControlTechnique.isAnimating() ) {
+            return true;
+        }
+        if ( cameraAnimationRecording ) {
+            cameraAnimationRecording = false;
+            editRecorder.endGesture();
+        }
+        return false;
+    }
+
+    /**
+    Stops the camera animation where it is (other interaction takes the
+    camera), recording what it did.
+    */
+    private void stopCameraAnimation()
+    {
+        cameraControlTechnique.cancelAnimation();
+        if ( cameraAnimationRecording ) {
+            cameraAnimationRecording = false;
+            editRecorder.endGesture();
+        }
+    }
+
+    /**
+    Lets the camera control gizmo of the selected viewport show what is under
+    the pointer.
+    @return true if the pointer is over the gizmo
+    */
+    private boolean processCameraControlMouseMovedEvent(MouseEvent event,
+                                                        Viewport mouseView)
+    {
+        boolean changed;
+
+        if ( mouseView != null && viewportSet.isSelected(mouseView) ) {
+            placeCameraControlGizmo(mouseView);
+            changed = cameraControlTechnique.processMouseMovedEvent(
+                toViewportEvent(event, mouseView));
+        }
+        else {
+            changed = cameraControlTechnique.processMouseExitedEvent();
+        }
+        if ( changed ) {
+            listener.repaintRequested();
+        }
+        return model.getCameraControlGizmo().isActive();
     }
 
     public ViewportSetInteractionTechniques getViewportSetTechniques()
@@ -396,12 +484,17 @@ public class DrawingAreaInteractionTechniques
     public void processMousePressedEvent(MouseEvent event)
     {
         viewportTitleClickConsumed = false;
+        cameraControlClickConsumed = false;
         Viewport mouseView = getViewportAtPointer(event);
         InteractionMode mode = drawingArea.getInteractionMode();
 
+        // Any press takes the camera: a turn in course stops where it is
+        stopCameraAnimation();
         if ( mouseView == null ) {
             return;
         }
+        // The gizmo is shown only over the selected viewport
+        boolean selectedBefore = viewportSet.isSelected(mouseView);
         // Everything the gesture changes, up to its release, is one operation
         editRecorder.beginGesture(sceneOperationName(mode));
         viewportSetTechniques.processMousePressedEvent(drawingArea.toSurfaceEvent(event));
@@ -416,6 +509,18 @@ public class DrawingAreaInteractionTechniques
             requestCursorForPointer(event, PointerCursor.VIEWPORT_TITLE);
             listener.repaintRequested();
             return;
+        }
+
+        // The camera control gizmo has priority over the interaction modes
+        if ( selectedBefore ) {
+            placeCameraControlGizmo(mouseView);
+            if ( cameraControlTechnique.processMousePressedEvent(
+                     toViewportEvent(event, mouseView)) ) {
+                cameraControlViewport = mouseView;
+                listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
+                listener.repaintRequested();
+                return;
+            }
         }
 
         //-----------------------------------------------------------------
@@ -510,6 +615,10 @@ public class DrawingAreaInteractionTechniques
 
     public void processMouseReleasedEvent(MouseEvent event)
     {
+        if ( cameraControlTechnique.isGestureInCourse() ) {
+            processCameraControlMouseReleasedEvent(event);
+            return;
+        }
         boolean titleGesture = viewportTitleGesture;
         viewportTitleGesture = false;
         Viewport mouseView = getInteractionViewportAtPointer(event);
@@ -557,8 +666,39 @@ public class DrawingAreaInteractionTechniques
         editRecorder.endGesture();
     }
 
+    /**
+    Ends the gesture of the camera control gizmo. A click starts the turn of
+    the camera to a view: its recording ends with the animation.
+    */
+    private void processCameraControlMouseReleasedEvent(MouseEvent event)
+    {
+        Viewport viewport = cameraControlViewport;
+
+        cameraControlViewport = null;
+        viewportTitleGesture = false;
+        cameraControlClickConsumed = true;
+        placeCameraControlGizmo(viewport);
+        cameraControlTechnique.processMouseReleasedEvent(
+            toViewportEvent(event, viewport));
+        if ( cameraControlTechnique.isAnimating() ) {
+            cameraAnimationRecording = true;
+            listener.animationRequested(this::advanceCameraAnimation);
+        }
+        else {
+            editRecorder.endGesture();
+        }
+        if ( !model.getCameraControlGizmo().isActive() ) {
+            updateModeCursor(event);
+        }
+        listener.repaintRequested();
+    }
+
     public void processMouseClickedEvent(MouseEvent event)
     {
+        if ( cameraControlClickConsumed ) {
+            cameraControlClickConsumed = false;
+            return;
+        }
         if ( viewportTitleClickConsumed ) {
             viewportTitleClickConsumed = false;
             return;
@@ -608,6 +748,16 @@ public class DrawingAreaInteractionTechniques
         Viewport mouseView = getInteractionViewportAtPointer(event);
         boolean confinedGesture = isTranslationGestureConfined();
         InteractionMode mode = drawingArea.getInteractionMode();
+        boolean wasOverCameraControl = model.getCameraControlGizmo().isActive();
+
+        if ( !confinedGesture &&
+             processCameraControlMouseMovedEvent(event, mouseView) ) {
+            listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
+            return;
+        }
+        if ( wasOverCameraControl ) {
+            updateModeCursor(event);
+        }
 
         // Moved events can come while dragging the gizmo (i.e. when the cursor
         // is wrapped): the viewport of the gesture keeps on being the one used
@@ -638,6 +788,15 @@ public class DrawingAreaInteractionTechniques
 
     public void processMouseDraggedEvent(MouseEvent event)
     {
+        if ( cameraControlTechnique.isGestureInCourse() ) {
+            // The gesture belongs to the viewport where it started
+            placeCameraControlGizmo(cameraControlViewport);
+            if ( cameraControlTechnique.processMouseDraggedEvent(
+                     toViewportEvent(event, cameraControlViewport)) ) {
+                listener.repaintRequested();
+            }
+            return;
+        }
         Viewport mouseView = getInteractionViewportAtPointer(event);
         boolean confinedGesture = isTranslationGestureConfined();
         InteractionMode mode = drawingArea.getInteractionMode();
@@ -696,6 +855,7 @@ public class DrawingAreaInteractionTechniques
     {
         InteractionMode mode = drawingArea.getInteractionMode();
 
+        stopCameraAnimation();
         editRecorder.beginAction();
         try {
             if ( mode == InteractionMode.CAMERA &&
@@ -724,6 +884,7 @@ public class DrawingAreaInteractionTechniques
             processUndoRedoCommand(command);
             return;
         }
+        stopCameraAnimation();
         if ( isControlLetterChord(event) ) {
             // Other Ctrl+letter chords are not commands of the drawing area:
             // the letters alone are, so they must not be taken as them
@@ -1133,6 +1294,7 @@ public class DrawingAreaInteractionTechniques
         Viewport selectedViewport = viewportSet.getSelectedViewport();
         UndoRedoInteractionTechnique.Result result;
 
+        stopCameraAnimation();
         editRecorder.endGesture();
         // Numbers typed in the gizmo boxes belong to the state before
         cancelInputGizmoEditing();

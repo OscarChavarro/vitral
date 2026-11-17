@@ -11,7 +11,9 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import javax.swing.JLabel;
+import javax.swing.Timer;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -46,6 +48,8 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     private final SceneSelectionEditor selectionEditor;
 
     private final Map<PointerCursor, Cursor> cursors;
+    /// Drives the animation in course, if any
+    private Timer animationTimer;
 
     /**
     @param application the application whose GUI is used
@@ -164,6 +168,31 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     public void repaintRequested()
     {
         canvas.repaint();
+    }
+
+    /// Period of the frames of animations, in milliseconds
+    private static final int ANIMATION_FRAME_PERIOD = 15;
+
+    /**
+    The frames are advanced by a Swing timer, in the event dispatch thread
+    (the same one of the mouse events that change the cameras).
+    */
+    @Override
+    public void animationRequested(BooleanSupplier frame)
+    {
+        if ( animationTimer != null ) {
+            animationTimer.stop();
+        }
+        animationTimer = new Timer(ANIMATION_FRAME_PERIOD, null);
+        Timer timer = animationTimer;
+        timer.addActionListener(e -> {
+            boolean running = frame.getAsBoolean();
+            canvas.repaint();
+            if ( !running ) {
+                timer.stop();
+            }
+        });
+        timer.start();
     }
 
     @Override

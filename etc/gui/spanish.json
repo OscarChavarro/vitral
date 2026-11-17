@@ -756,6 +756,14 @@
       "name": "Esfera"
     },
     {
+      "id": "IDC_CREATE_TUBE",
+      "name": "Tubo"
+    },
+    {
+      "id": "IDC_CREATE_WASHER",
+      "name": "Arandela"
+    },
+    {
       "id": "IDC_CREATE_TORUS",
       "name": "Toroide"
     },
@@ -987,6 +995,8 @@
         "IDC_CREATE_CYLINDER",
         "IDC_CREATE_CUBE",
         "IDC_CREATE_BOX",
+        "IDC_CREATE_TUBE",
+        "IDC_CREATE_WASHER",
         "IDC_CREATE_TORUS",
         "IDC_CREATE_BLOB",
         "IDC_CREATE_QUADRIC",

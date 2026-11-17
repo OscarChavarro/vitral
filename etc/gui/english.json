@@ -365,6 +365,20 @@
               },
               {
                 "type": "item",
+                "name": "Tube",
+                "modifiers": [
+                  "IDC_CREATE_TUBE"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Washer",
+                "modifiers": [
+                  "IDC_CREATE_WASHER"
+                ]
+              },
+              {
+                "type": "item",
                 "name": "Torus",
                 "modifiers": [
                   "IDC_CREATE_TORUS"
@@ -1192,6 +1206,14 @@
       "name": "Sphere"
     },
     {
+      "id": "IDC_CREATE_TUBE",
+      "name": "Tube"
+    },
+    {
+      "id": "IDC_CREATE_WASHER",
+      "name": "Washer"
+    },
+    {
       "id": "IDC_CREATE_TORUS",
       "name": "Torus"
     },
@@ -1423,6 +1445,8 @@
         "IDC_CREATE_CYLINDER",
         "IDC_CREATE_CUBE",
         "IDC_CREATE_BOX",
+        "IDC_CREATE_TUBE",
+        "IDC_CREATE_WASHER",
         "IDC_CREATE_TORUS",
         "IDC_CREATE_BLOB",
         "IDC_CREATE_QUADRIC",
