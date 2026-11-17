@@ -148,6 +148,11 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
         applicationTools.repaint();
         return sceneTools.describeScene();
     }
+    if ( tool.equals("scene.add_tube") ) {
+        sceneTools.addTube(request);
+        applicationTools.repaint();
+        return sceneTools.describeScene();
+    }
     if ( tool.equals("scene.move_body") ) {
         sceneTools.moveBody(request);
         applicationTools.repaint();
@@ -260,6 +265,7 @@ java::String XtOpenGL1VitralEditorMCPProtocol::toolsJson()
         + "," + MCPJson::tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
         + "," + MCPJson::tool("scene.add_cone", "Create a cone (or truncated cone). Arguments: baseRadius,topRadius,height,x,y,z.")
         + "," + MCPJson::tool("scene.add_cylinder", "Create a cylinder. Arguments: radius,height,x,y,z.")
+        + "," + MCPJson::tool("scene.add_tube", "Create a tube (a washer if height is 0). Arguments: internalRadius,externalRadius,height,x,y,z.")
         + "," + MCPJson::tool("scene.move_body", "Set the position of a body (default: the last one; undoable). Arguments: index,x,y,z (missing coordinates are kept).")
         + "," + MCPJson::tool("scene.select_body", "Select one body (a negative index clears the selection). Arguments: index.")
         + "," + MCPJson::tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")

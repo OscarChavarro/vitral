@@ -1,3 +1,5 @@
+#include <sys/select.h>
+#include <sys/time.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include "vsdk/toolkit/gui/framebuffer/xlib/XlibFramebuffer.h"
@@ -266,6 +268,33 @@ XlibInput::waitEvent(FramebufferEvent &event) {
     while (display && !closed) {
         if (!XPending(display)) {
             surface.flush();
+        }
+        XEvent native;
+        XNextEvent(display, &native);
+        if (translate(native, event)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
+XlibInput::waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) {
+    Display *display = surface.getDisplay();
+    while (display && !closed) {
+        if (!XPending(display)) {
+            surface.flush();
+            int connection = ConnectionNumber(display);
+            fd_set in;
+            FD_ZERO(&in);
+            FD_SET(connection, &in);
+            timeval timeout;
+            timeout.tv_sec = timeoutMilliseconds / 1000;
+            timeout.tv_usec = (timeoutMilliseconds % 1000) * 1000;
+            if (select(connection + 1, &in, nullptr, nullptr, &timeout) <= 0 || !XPending(display)) {
+                event = FramebufferEvent();
+                return true;
+            }
         }
         XEvent native;
         XNextEvent(display, &native);

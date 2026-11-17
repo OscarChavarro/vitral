@@ -25,6 +25,7 @@ public:
     void detach();
 
     bool waitEvent(FramebufferEvent &event) override;
+    bool waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) override;
     bool hasPointer() const override { return connected; }
 
 private:

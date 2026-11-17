@@ -116,6 +116,22 @@ SceneEditor::waitEvent(FramebufferEvent &event) {
     if (!input.waitEvent(event)) {
         return false;
     }
+    return processModeKey(event);
+}
+
+// The editor waits at most a time while it animates (i.e. the camera turning to a view chosen in the ViewCube).
+bool
+SceneEditor::waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) {
+    if (!input.waitEventWithTimeout(event, timeoutMilliseconds)) {
+        return false;
+    }
+    return processModeKey(event);
+}
+
+// Ctrl-R and Ctrl-r change the graphics mode, reported as a Resized event; other events pass. Returns false when no
+// mode can be shown.
+bool
+SceneEditor::processModeKey(FramebufferEvent &event) {
     event.message = nullptr;
     if (event.type != FramebufferEvent::Type::KeyPressed || !isModeKey(event.key)) {
         return true;

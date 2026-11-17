@@ -1,6 +1,7 @@
 #ifndef __XT_OPENGL1_SCENE_BRIDGE__
 #define __XT_OPENGL1_SCENE_BRIDGE__
 
+#include "java/util/function/BooleanSupplier.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include <X11/Xlib.h>
@@ -92,6 +93,17 @@ public:
         @param image the image (not owned: it stays in the model)
         */
         virtual void imageRequested(RGBImageUncompressed* image) = 0;
+
+        /**
+        An animation started (i.e. the camera turning to a view chosen with
+        the camera control gizmo): `frame` must be called periodically (some
+        tens of times per second), drawing the drawing area again after each
+        call, while it returns true. A new request replaces the one in
+        course (see `DrawingAreaInteractionListener::animationRequested`).
+        @param frame advances the animation to the current time; returns
+        false when it ended
+        */
+        virtual void animationRequested(const java::BooleanSupplier& frame) = 0;
     };
 
     /**

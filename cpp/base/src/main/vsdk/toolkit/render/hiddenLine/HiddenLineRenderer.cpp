@@ -1,4 +1,4 @@
-#include <algorithm>
+#include "java/lang/Math.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -530,12 +530,12 @@ bool segmentOverlapsMinMax(const Vector3Dd& a, const Vector3Dd& b,
     if ( minmax == 0 ) {
         return true;
     }
-    return std::max(a.x(), b.x()) >= minmax[0] - tolerance &&
-           std::min(a.x(), b.x()) <= minmax[3] + tolerance &&
-           std::max(a.y(), b.y()) >= minmax[1] - tolerance &&
-           std::min(a.y(), b.y()) <= minmax[4] + tolerance &&
-           std::max(a.z(), b.z()) >= minmax[2] - tolerance &&
-           std::min(a.z(), b.z()) <= minmax[5] + tolerance;
+    return java::Math::max(a.x(), b.x()) >= minmax[0] - tolerance &&
+           java::Math::min(a.x(), b.x()) <= minmax[3] + tolerance &&
+           java::Math::max(a.y(), b.y()) >= minmax[1] - tolerance &&
+           java::Math::min(a.y(), b.y()) <= minmax[4] + tolerance &&
+           java::Math::max(a.z(), b.z()) >= minmax[2] - tolerance &&
+           java::Math::min(a.z(), b.z()) <= minmax[5] + tolerance;
 }
 
 /**

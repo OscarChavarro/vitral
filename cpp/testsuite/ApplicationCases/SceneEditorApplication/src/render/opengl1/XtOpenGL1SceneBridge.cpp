@@ -272,6 +272,10 @@ public:
     {
         listener->fullScreenGuiToggleRequested();
     }
+    void animationRequested(const java::BooleanSupplier& frame) override
+    {
+        listener->animationRequested(frame);
+    }
     /**
     The model changes now; the application replaces the drawing surface
     when drawing the next frame (see `usesXlibRendering`).

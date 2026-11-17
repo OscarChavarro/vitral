@@ -1,3 +1,4 @@
+#include "application/NoDisplayReport.h"
 #include "java/lang/Exception.h"
 #include "java/lang/IllegalArgumentException.h"
 #include "java/lang/IllegalStateException.h"
@@ -612,6 +613,11 @@ private:
     GtkWidget* sidePanel;
     Gtk4ModifyPanel* modifyPanel;
     guint modifyUpdateSource;
+    /// Drives the animation in course, if any
+    java::BooleanSupplier animationFrame;
+    guint animationSource;
+    /// Period of the frames of animations, in milliseconds
+    static const guint ANIMATION_FRAME_PERIOD = 15;
     GMenu* applicationMenu;
     java::String guiLanguage;
     Gtk4LabelImageProvider labels;
@@ -645,6 +651,7 @@ public:
           sidePanel(nullptr),
           modifyPanel(nullptr),
           modifyUpdateSource(0),
+          animationSource(0),
           applicationMenu(nullptr),
           guiLanguage(selectedGuiLanguage()),
           sceneBridge(&labels, this),
@@ -669,6 +676,10 @@ public:
 
     ~Gtk4SceneEditor()
     {
+        if ( animationSource != 0 ) {
+            g_source_remove(animationSource);
+            animationSource = 0;
+        }
         delete selectorDialog;
         selectorDialog = nullptr;
         if ( modifyUpdateSource != 0 ) {
@@ -1939,6 +1950,34 @@ private:
     {
         setStatus("Image preview is not implemented in the GTK4 example yet");
     }
+
+    static gboolean advanceAnimation(gpointer data)
+    {
+        Gtk4SceneEditor* self = static_cast<Gtk4SceneEditor*>(data);
+        bool running = self->animationFrame.getAsBoolean();
+
+        self->repaintRequested();
+        if ( !running ) {
+            self->animationSource = 0;
+            return G_SOURCE_REMOVE;
+        }
+        return G_SOURCE_CONTINUE;
+    }
+
+    /**
+    The frames are advanced by a GLib timeout, in the main loop (the same
+    one of the mouse events that change the cameras).
+    */
+    void animationRequested(const java::BooleanSupplier& frame) override
+    {
+        if ( animationSource != 0 ) {
+            g_source_remove(animationSource);
+            animationSource = 0;
+        }
+        animationFrame = frame;
+        animationSource = g_timeout_add(ANIMATION_FRAME_PERIOD,
+            &Gtk4SceneEditor::advanceAnimation, this);
+    }
 };
 
 static void activate(GtkApplication* app, gpointer)
@@ -1978,6 +2017,10 @@ int main(int argc, char** argv)
     gtkArguments.add(nullptr);
     argv = gtkArguments.data();
 
+    // Without a display GTK would only warn when activating
+    if ( !gtk_init_check() ) {
+        NoDisplayReport::exitBecauseNoDisplayIsAvailable();
+    }
     GtkApplication* app = gtk_application_new(
         "org.vitral.SceneEditorApplication.Gtk4", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), nullptr);

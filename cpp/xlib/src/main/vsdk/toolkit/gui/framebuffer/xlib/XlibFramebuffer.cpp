@@ -648,6 +648,24 @@ XlibFramebuffer::putImage(int x, int y, int w, int h, const uint32_t *rgb) {
     if (!rgb || w <= 0 || h <= 0) {
         return;
     }
+    // While the mirror matches the back buffer (i.e. blending reads it back span by span), the pixels go to the
+    // mirror, so it stays valid and the next read needs no round trip for the whole window.
+    if (mirrorValid) {
+        for (int row = 0; row < h; row++) {
+            int py = y + row;
+            if (py < clipTop || py >= clipBottom) {
+                continue;
+            }
+            for (int column = 0; column < w; column++) {
+                int px = x + column;
+                if (px < clipLeft || px >= clipRight) {
+                    continue;
+                }
+                putNativePixel(px, py, (uint32_t)native(rgb[(long)row * w + column] & 0xFFFFFF));
+            }
+        }
+        return;
+    }
     XImage *image = XCreateImage(display, visual, (unsigned)depth, ZPixmap, 0, nullptr, (unsigned)w, (unsigned)h, 32, 0);
     if (!image) {
         return;

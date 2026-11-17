@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "application/NoDisplayReport.h"
 #include "application/framebuffer/FramebufferSceneEditor.h"
 #include "java/util/ArrayList.txx"
 #include "model/GuiState.h"
@@ -80,6 +81,13 @@ int main(int argc, char** argv)
         std::fprintf(stderr, "Unknown GUI language %s: see %s\n", language,
                      GuiState::GUI_LANGUAGE_FOLDER);
         return 1;
+    }
+
+    // Without a display only a short message is shown (see NoDisplayReport)
+    const char* environmentDisplay = std::getenv("DISPLAY");
+    if ( display == nullptr && (environmentDisplay == nullptr ||
+                                environmentDisplay[0] == '\0') ) {
+        NoDisplayReport::exitBecauseNoDisplayIsAvailable();
     }
 
     XlibFramebuffer surface;

@@ -182,7 +182,8 @@ FramebufferSceneEditor::FramebufferSceneEditor(Framebuffer& target,
       executor(nullptr), modifyTab(-1), modifyTarget(nullptr),
       modifyPageBuilt(false), viewportMenu(nullptr), menuViewport(nullptr),
       viewportMenuPosted(false), popupPending(false), popupX(0), popupY(0),
-      running(false), repaintPending(false), buttonDown(false),
+      running(false), repaintPending(false), animating(false),
+      buttonDown(false),
       pressMoved(false), areaX(0), areaY(0), areaWidth(0), areaHeight(0),
       panelX(0), panelWidth(0),
       statusY(0), statusHeight(0)
@@ -629,12 +630,15 @@ int FramebufferSceneEditor::run()
     layout();
     redrawAll();
     FramebufferEvent event;
-    while ( running && input.waitEvent(event) ) {
-        handle(event);
+    while ( running && waitEvent(event) ) {
+        if ( event.type != FramebufferEvent::Type::NoEvent ) {
+            handle(event);
+        }
         // Quitting does not draw the pending repaint.
         if ( !running ) {
             break;
         }
+        advanceAnimation();
         if ( !menuBar.isActive() ) {
             viewportMenuPosted = false;
             updateModifyPage(false);
@@ -642,6 +646,32 @@ int FramebufferSceneEditor::run()
         drawViewports();
     }
     return 0;
+}
+
+/**
+While an animation goes on the wait for events lasts at most a frame
+period: a NoEvent event comes when none arrived.
+*/
+bool FramebufferSceneEditor::waitEvent(FramebufferEvent& event)
+{
+    if ( animating ) {
+        return input.waitEventWithTimeout(event, ANIMATION_FRAME_PERIOD);
+    }
+    return input.waitEvent(event);
+}
+
+/**
+The frames are advanced in the event loop (the same one of the mouse events
+that change the cameras), after each event or wait timeout, drawing the
+viewports again.
+*/
+void FramebufferSceneEditor::advanceAnimation()
+{
+    if ( !animating ) {
+        return;
+    }
+    animating = animationFrame.getAsBoolean();
+    repaintPending = true;
 }
 
 void FramebufferSceneEditor::handle(const FramebufferEvent& event)
@@ -1097,6 +1127,13 @@ void FramebufferSceneEditor::selectorDialogRequested()
 void FramebufferSceneEditor::closeRequested()
 {
     running = false;
+}
+
+void FramebufferSceneEditor::animationRequested(
+    const java::BooleanSupplier& frame)
+{
+    animationFrame = frame;
+    animating = true;
 }
 
 void FramebufferSceneEditor::fullScreenGuiToggleRequested()

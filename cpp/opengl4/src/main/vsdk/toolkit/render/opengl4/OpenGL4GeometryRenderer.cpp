@@ -26,6 +26,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
+#include "vsdk/toolkit/environment/geometry/volume/Tube.h"
 #include "vsdk/toolkit/environment/geometry/volume/Volume.h"
 #include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
@@ -57,6 +58,7 @@
 #include "vsdk/toolkit/render/opengl4/volume/OpenGL4QuadricSurfaceRenderer.h"
 #include "vsdk/toolkit/render/opengl4/volume/OpenGL4SphereRenderer.h"
 #include "vsdk/toolkit/render/opengl4/volume/OpenGL4TorusRenderer.h"
+#include "vsdk/toolkit/render/opengl4/volume/OpenGL4TubeRenderer.h"
 #include "vsdk/toolkit/render/opengl4/volume/OpenGL4VolumeRenderer.h"
 #include "vsdk/toolkit/render/opengl4/volume/OpenGL4VoxelVolumeRenderer.h"
 #include "vsdk/toolkit/render/opengl4/volume/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidRenderer.h"
@@ -95,6 +97,9 @@ java::String keyOf(Geometry* geometry)
     }
     if ( Torus* t = dynamic_cast<Torus*>(geometry) ) {
         return OpenGL4TorusRenderer::meshKey(*t);
+    }
+    if ( Tube* t = dynamic_cast<Tube*>(geometry) ) {
+        return OpenGL4TubeRenderer::meshKey(*t);
     }
     if ( TriangleMesh* m = dynamic_cast<TriangleMesh*>(geometry) ) {
         return OpenGL4TriangleMeshRenderer::meshKey(*m);
@@ -149,6 +154,9 @@ OpenGL4MeshRenderer::Mesh* buildMesh(Geometry* geometry)
     }
     if ( Torus* t = dynamic_cast<Torus*>(geometry) ) {
         return OpenGL4TorusRenderer::buildMesh(*t);
+    }
+    if ( Tube* t = dynamic_cast<Tube*>(geometry) ) {
+        return OpenGL4TubeRenderer::buildMesh(*t);
     }
     if ( TriangleMesh* m = dynamic_cast<TriangleMesh*>(geometry) ) {
         return OpenGL4TriangleMeshRenderer::buildMesh(*m);

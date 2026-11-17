@@ -60,6 +60,7 @@
 #include "vsdk/toolkit/gui/XtSystem.h"
 #include "io/GuiJsonReader.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "application/NoDisplayReport.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 
 #ifndef VITRAL_SCENE_EDITOR_OPENGL1
@@ -208,6 +209,8 @@ public:
         , ready(false)
         , closing(false)
         , repaintQueued(false)
+        , animationTimer(0)
+        , animationTimerActive(false)
         , currentCursor(PointerCursor::SELECT)
         , pressButton(0)
         , pressX(0)
@@ -223,6 +226,10 @@ public:
 
     ~SceneEditorApplication()
     {
+        if (animationTimerActive) {
+            XtRemoveTimeOut(animationTimer);
+            animationTimerActive = false;
+        }
         // The automation service lives as long as the process (as in Java)
         delete imageControlWindow;
         imageControlWindow = nullptr;
@@ -372,6 +379,12 @@ private:
     bool ready;
     bool closing;
     bool repaintQueued;
+    /// Drives the animation in course, if any
+    java::BooleanSupplier animationFrame;
+    XtIntervalId animationTimer;
+    bool animationTimerActive;
+    /// Period of the frames of animations, in milliseconds
+    static const unsigned long ANIMATION_FRAME_PERIOD = 15;
     java::TreeMap<int, Cursor> cursors;
     PointerCursor::Value currentCursor;
     PopupDismissClickFilter popupDismissFilter;
@@ -771,7 +784,7 @@ private:
         display = XtOpenDisplay(appContext, nullptr, "scene-editor",
             "SceneEditorApplication", nullptr, 0, &argc, argv);
         if (display == nullptr)
-            throw VSDKFatalException("Could not open X display. Is DISPLAY set?");
+            NoDisplayReport::exitBecauseNoDisplayIsAvailable();
         loadResourceFile();
         const int screen = DefaultScreen(display);
         width = DisplayWidth(display, screen);
@@ -1668,6 +1681,40 @@ private:
     void imageRequested(RGBImageUncompressed* image) override
     {
         showImage(image);
+    }
+
+    static void advanceAnimation(XtPointer clientData, XtIntervalId*)
+    {
+        SceneEditorApplication* self =
+            reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self == nullptr) return;
+        self->animationTimerActive = false;
+        bool running = self->animationFrame.getAsBoolean();
+        self->requestRedraw();
+        if (running) self->scheduleAnimationFrame();
+    }
+
+    void scheduleAnimationFrame()
+    {
+        animationTimer = XtAppAddTimeOut(appContext, ANIMATION_FRAME_PERIOD,
+            &SceneEditorApplication::advanceAnimation,
+            reinterpret_cast<XtPointer>(this));
+        animationTimerActive = true;
+    }
+
+    /**
+    The frames are advanced by an Xt timeout, in the event loop (the same
+    one of the mouse events that change the cameras).
+    */
+    void animationRequested(const java::BooleanSupplier& frame) override
+    {
+        if (appContext == nullptr) return;
+        if (animationTimerActive) {
+            XtRemoveTimeOut(animationTimer);
+            animationTimerActive = false;
+        }
+        animationFrame = frame;
+        scheduleAnimationFrame();
     }
 
     //= Tangible interface ================================================

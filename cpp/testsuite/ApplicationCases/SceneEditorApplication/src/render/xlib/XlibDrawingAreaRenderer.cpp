@@ -38,6 +38,8 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "java/lang/Exception.h"
+#include "vsdk/toolkit/gui/gizmo/CameraControlGizmo.h"
+#include "vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.h"
 #include "vsdk/toolkit/render/gizmo/Gizmo2DDrawList.h"
 #include "vsdk/toolkit/render/gizmo/InputGizmo2DPainter.h"
 #include "vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.h"
@@ -200,6 +202,8 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
       titleFontSize(0),
       selectionEditor(new SceneSelectionEditor(m->getScene())),
       gizmoPresenter(nullptr), gizmoDrawList(new Gizmo2DDrawList()),
+      cameraControlDrawList(new Gizmo2DDrawList()),
+      cameraControlPainter(new CameraControlGizmo2DPainter()),
       gizmoRenderer(new XlibGizmo2DDrawListRenderer()),
       linesBuilder(new ProjectedLinesViewBuilder())
 {
@@ -212,6 +216,8 @@ XlibDrawingAreaRenderer::~XlibDrawingAreaRenderer()
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
     delete linesBuilder;
     delete gizmoRenderer;
+    delete cameraControlPainter;
+    delete cameraControlDrawList;
     delete gizmoDrawList;
     delete gizmoPresenter;
     delete selectionEditor;
@@ -256,6 +262,18 @@ void XlibDrawingAreaRenderer::drawGizmos(Display* display, Drawable frame,
             set->getElementScaler(), *gizmoRenderer);
     gizmoRenderer->draw(frame, gc, visual, *gizmoDrawList, x, y, width,
                         height);
+
+    // The HUD of the selected viewport is over everything
+    if ( set->isSelected(viewport) ) {
+        CameraControlGizmo* cameraControl = model->getCameraControlGizmo();
+
+        cameraControlDrawList->clear();
+        cameraControl->placeInViewport(viewport, set->getElementScaler());
+        cameraControlPainter->paint(cameraControlDrawList, cameraControl,
+            set->getElementScaler());
+        gizmoRenderer->draw(frame, gc, visual, *cameraControlDrawList, x, y,
+                            width, height);
+    }
 }
 
 void XlibDrawingAreaRenderer::ensureTitleFont(Display* display, int size)

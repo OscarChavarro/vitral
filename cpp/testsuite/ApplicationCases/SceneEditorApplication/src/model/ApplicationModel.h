@@ -9,6 +9,7 @@
 #include "model/history/EditHistory.h"
 
 class Camera;
+class CameraControlGizmo;
 class Light;
 class PointLight;
 class RayGizmo;
@@ -40,6 +41,9 @@ private:
     int raytracedImageHeight;
     RGBColorPalette* palette;
     RayGizmo* rayGizmo;
+    /// ViewCube shown over the selected viewport, controlling its camera
+    /// (owned)
+    CameraControlGizmo* cameraControlGizmo;
     mutable Ray visualDebugRay;
     java::ArrayList<ViewportSet*> viewportSets;
     int activeViewportSetIndex;
@@ -162,6 +166,13 @@ public:
     void setVisualDebugRay(const Ray* visualDebugRay);
     int getVisualDebugRayLevels() const;
     void setVisualDebugRayLevels(int visualDebugRayLevels);
+
+    /**
+    @return the camera control gizmo (ViewCube) presented over the selected
+    viewport
+    */
+    CameraControlGizmo* getCameraControlGizmo() const;
+
     RayGizmo* getRayGizmo() const;
 };
 

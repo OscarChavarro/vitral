@@ -8,6 +8,7 @@ class ApplicationModel;
 class DrawingAreaGizmoPresenter;
 class DrawingAreaHost;
 class FrameCaptureService;
+class CameraControlGizmo2DPainter;
 class Gizmo2DDrawList;
 class RotateGizmo;
 class ScaleGizmo;
@@ -24,6 +25,9 @@ gizmo (numeric boxes) of the selected viewport are drawn as 2D primitives
 computed by the gizmo painters of `vsdk/toolkit/render/gizmo` (hidden
 surfaces solved with the painter's algorithm) and drawn by
 `XlibGizmo2DDrawListRenderer`, as the Java `AwtDrawingAreaRenderer` does.
+Over the selected viewport the camera control gizmo (ViewCube) is drawn as a
+HUD at its upper right corner, with the hidden lines of its parts removed by
+Appel's algorithm (see `CameraControlGizmo2DPainter`).
 */
 class XlibDrawingAreaRenderer {
     ApplicationModel* model;
@@ -36,6 +40,8 @@ class XlibDrawingAreaRenderer {
     SceneSelectionEditor* selectionEditor;
     DrawingAreaGizmoPresenter* gizmoPresenter;
     Gizmo2DDrawList* gizmoDrawList;
+    Gizmo2DDrawList* cameraControlDrawList;
+    CameraControlGizmo2DPainter* cameraControlPainter;
     XlibGizmo2DDrawListRenderer* gizmoRenderer;
     /// The bodies of the views as projected lines (see `ProjectedLinesViewBuilder`)
     ProjectedLinesViewBuilder* linesBuilder;

@@ -54,6 +54,20 @@ void Gizmo2DDrawList::addLine(double x0, double y0, double x1, double y1,
         false, java::String(), 0, Alignment::LOWER_LEFT));
 }
 
+void Gizmo2DDrawList::addOverlayLine(double x0, double y0, double x1,
+    double y1, const ColorRgb& color, double width)
+{
+    java::ArrayList<double> x;
+    java::ArrayList<double> y;
+
+    x.add(x0);
+    x.add(x1);
+    y.add(y0);
+    y.add(y1);
+    primitives.add(Primitive(Kind::LINE, x, y, color, 1.0, width, 0, true,
+        java::String(), 0, Alignment::LOWER_LEFT));
+}
+
 void Gizmo2DDrawList::addOverlayRectangle(double x, double y, double width,
     double height, const ColorRgb& color)
 {

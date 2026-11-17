@@ -35,6 +35,8 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
 #include "vsdk/toolkit/render/framebuffer/FramebufferGizmo2DDrawListRenderer.h"
+#include "vsdk/toolkit/gui/gizmo/CameraControlGizmo.h"
+#include "vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.h"
 #include "vsdk/toolkit/render/gizmo/Gizmo2DDrawList.h"
 #include "vsdk/toolkit/render/gizmo/InputGizmo2DPainter.h"
 #include "vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.h"
@@ -130,7 +132,9 @@ FramebufferDrawingAreaRenderer::FramebufferDrawingAreaRenderer(
     : model(m), host(h), frameCapture(new FrameCaptureService(m, h)),
       ditheringMode(4), selectedListener(selected),
       selectionEditor(new SceneSelectionEditor(m->getScene())),
-      gizmoPresenter(nullptr), gizmoDrawList(new Gizmo2DDrawList())
+      gizmoPresenter(nullptr), gizmoDrawList(new Gizmo2DDrawList()),
+      cameraControlDrawList(new Gizmo2DDrawList()),
+      cameraControlPainter(new CameraControlGizmo2DPainter())
 {
     gizmoPresenter = new DrawingAreaGizmoPresenter(m->getDrawingArea(),
         selectionEditor, translationGizmo, rotateGizmo, scaleGizmo);
@@ -138,6 +142,8 @@ FramebufferDrawingAreaRenderer::FramebufferDrawingAreaRenderer(
 
 FramebufferDrawingAreaRenderer::~FramebufferDrawingAreaRenderer()
 {
+    delete cameraControlPainter;
+    delete cameraControlDrawList;
     delete gizmoDrawList;
     delete gizmoPresenter;
     delete selectionEditor;
@@ -455,6 +461,18 @@ void FramebufferDrawingAreaRenderer::drawGizmos(Framebuffer& surface,
             FramebufferGizmo2DDrawListRenderer::TextMeasurer(surface));
     }
     FramebufferGizmo2DDrawListRenderer::draw(surface, *gizmoDrawList, x, y);
+
+    // The HUD of the selected viewport is over everything
+    if ( set->isSelected(viewport) ) {
+        CameraControlGizmo* cameraControl = model->getCameraControlGizmo();
+
+        cameraControlDrawList->clear();
+        cameraControl->placeInViewport(viewport, set->getElementScaler());
+        cameraControlPainter->paint(cameraControlDrawList, cameraControl,
+            set->getElementScaler());
+        FramebufferGizmo2DDrawListRenderer::draw(surface,
+            *cameraControlDrawList, x, y);
+    }
 }
 
 void FramebufferDrawingAreaRenderer::display(Framebuffer& surface, int left,

@@ -12,6 +12,7 @@ class DrawingAreaHost;
 class DrawingAreaGizmoPresenter;
 class FrameCaptureService;
 class Framebuffer;
+class CameraControlGizmo2DPainter;
 class Gizmo2DDrawList;
 class RotateGizmo;
 class ScaleGizmo;
@@ -34,7 +35,9 @@ both, the manipulation gizmo of the interaction mode and the input gizmo
 by the gizmo painters of `vsdk/toolkit/render/gizmo` (hidden surfaces solved
 with the painter's algorithm) and drawn by
 `FramebufferGizmo2DDrawListRenderer`, as the Java `AwtDrawingAreaRenderer`
-does. Frame captures read the surface back with `Framebuffer::readImage`.
+does. Over the selected viewport the camera control gizmo (ViewCube) is drawn
+as a HUD at its upper right corner, with the hidden lines of its parts
+removed by Appel's algorithm (see `CameraControlGizmo2DPainter`). Frame captures read the surface back with `Framebuffer::readImage`.
 */
 class FramebufferDrawingAreaRenderer {
 private:
@@ -46,6 +49,8 @@ private:
     SceneSelectionEditor* selectionEditor;
     DrawingAreaGizmoPresenter* gizmoPresenter;
     Gizmo2DDrawList* gizmoDrawList;
+    Gizmo2DDrawList* cameraControlDrawList;
+    CameraControlGizmo2DPainter* cameraControlPainter;
 
     void drawLines(Framebuffer& surface, const Calligraphic2DBuffer& lines,
                    int x, int y, int width, int height, uint32_t color,

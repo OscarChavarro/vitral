@@ -266,6 +266,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/BlobSolid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Torus.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Tube.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/VoxelVolume.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.cpp
@@ -423,6 +424,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/gizmo/Gizmo2DProjector.cpp
     src/main/vsdk/toolkit/render/gizmo/InputGizmo2DPainter.cpp
     src/main/vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.cpp
+    src/main/vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.cpp
     src/main/vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.cpp
     src/main/vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.cpp
     src/main/vsdk/toolkit/gui/framebuffer/FramebufferMenuBar.cpp
@@ -459,6 +461,9 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/gizmo/TranslateGizmoInteractionTechnique.cpp
     src/main/vsdk/toolkit/gui/gizmo/RotateGizmo.cpp
     src/main/vsdk/toolkit/gui/gizmo/RotateGizmoInteractionTechnique.cpp
+    src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoAnimation.cpp
+    src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoInteractionTechnique.cpp
     src/main/vsdk/toolkit/gui/gizmo/ScaleGizmo.cpp
     src/main/vsdk/toolkit/gui/gizmo/ScaleGizmoInteractionTechnique.cpp
 )
@@ -661,6 +666,9 @@ if(VITRAL_BUILD_TESTS)
     src/test/euler_operator_sequence_fuzz_tests.cpp
     src/test/set_op_finish_and_connect_invariants_tests.cpp
     src/test/boolean_volume_oracle_tests.cpp
+    src/test/tube_tests.cpp
+    src/test/camera_control_gizmo_tests.cpp
+    src/test/camera_control_gizmo_2d_painter_tests.cpp
     ${VITRAL_BASE_TEST_SUPPORT_SOURCES}
     src/test/freetype2_font_reader_tests.cpp
   )

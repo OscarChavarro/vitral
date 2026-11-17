@@ -31,6 +31,7 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4PlanarHalfSpaceRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4QuadricSurfaceRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4TorusRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4TubeRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4VolumeRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/_OpenGL4SolidBoundaryMeshBuilder.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4VoxelVolumeRenderer.cpp
@@ -64,6 +65,7 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4TranslateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RotateGizmoRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4CameraControlGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4ScaleGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/surface/polygon/OpenGL4Polygon2DRenderer.cpp
     src/main/vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.cpp

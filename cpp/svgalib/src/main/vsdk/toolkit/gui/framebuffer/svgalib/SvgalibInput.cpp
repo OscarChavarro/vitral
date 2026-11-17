@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <vga.h>
@@ -338,6 +339,42 @@ SvgalibInput::readKey(KeyEvent &event) {
             event.keycode = pair[1];
         }
     }
+    return true;
+}
+
+// One wait for the keyboard or the mouse, at most the time given: a mouse report that changes nothing ends it
+// early, with a NoEvent event, as a timeout does.
+bool
+SvgalibInput::waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) {
+    for (int attempt = 0; attempt < 2; attempt++) {
+        if (queued > 0) {
+            event = queue[0];
+            for (int i = 1; i < queued; i++) {
+                queue[i - 1] = queue[i];
+            }
+            queued--;
+            return true;
+        }
+        if (readKey(event.key)) {
+            event.type = FramebufferEvent::Type::KeyPressed;
+            return true;
+        }
+        if (attempt > 0) {
+            break;
+        }
+        if (attached) {
+            surface->flush();
+        }
+        timeval timeout;
+        timeout.tv_sec = timeoutMilliseconds / 1000;
+        timeout.tv_usec = (timeoutMilliseconds % 1000) * 1000;
+        int events = vga_waitevent(VGA_KEYEVENT | (connected ? VGA_MOUSEEVENT : 0), nullptr, nullptr, nullptr,
+                                   &timeout);
+        if (events > 0 && (events & VGA_MOUSEEVENT) && attached) {
+            readMouse();
+        }
+    }
+    event = FramebufferEvent();
     return true;
 }
 

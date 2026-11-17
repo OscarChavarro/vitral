@@ -17,6 +17,7 @@ public:
     static int start(int argc, char *argv[]);
 
     bool waitEvent(FramebufferEvent &event) override;
+    bool waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) override;
     void extendMenu(Widget &widget) override;
     bool executeMenuCommand(const char *command, const char *&status) override;
     bool hasPointer() const override { return input.hasPointer(); }
@@ -33,6 +34,7 @@ private:
     SceneEditor();
     int run(int argc, char *argv[]);
     int initialMode() const;
+    bool processModeKey(FramebufferEvent &event);
     void usage() const;
     bool changeMode(int step);
     bool selectMode(int mode);

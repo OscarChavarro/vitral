@@ -20,6 +20,7 @@ public:
     XlibInput &operator=(const XlibInput &) = delete;
 
     bool waitEvent(FramebufferEvent &event) override;
+    bool waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) override;
     bool hasPointer() const override { return true; }
     bool warpPointer(int x, int y) override;
     // True once the window manager asked to close the window.

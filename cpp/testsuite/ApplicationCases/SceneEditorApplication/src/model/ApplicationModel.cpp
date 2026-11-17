@@ -13,6 +13,7 @@
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
+#include "vsdk/toolkit/gui/gizmo/CameraControlGizmo.h"
 #include "model/ApplicationModel.h"
 #include "model/Scene.h"
 
@@ -20,6 +21,7 @@ ApplicationModel::ApplicationModel()
     : scene(nullptr), raytracedImage(nullptr), raytracedDepth(nullptr),
       zbufferImage(nullptr), raytracedImageWidth(0), raytracedImageHeight(0),
       palette(nullptr), rayGizmo(nullptr),
+      cameraControlGizmo(new CameraControlGizmo()),
       activeViewportSetIndex(0),
       i18nContext(nullptr), drawingArea(nullptr),
       editHistory([this]() { return getScene(); })
@@ -44,6 +46,7 @@ ApplicationModel::~ApplicationModel()
     delete i18nContext;
     delete palette;
     delete rayGizmo;
+    delete cameraControlGizmo;
     delete raytracedImage;
     delete raytracedDepth;
     delete zbufferImage;
@@ -294,6 +297,11 @@ void ApplicationModel::setVisualDebugRayLevels(int visualDebugRayLevels)
     if ( rayGizmo != nullptr ) {
         rayGizmo->setMaxNumOfReflections(visualDebugRayLevels);
     }
+}
+
+CameraControlGizmo* ApplicationModel::getCameraControlGizmo() const
+{
+    return cameraControlGizmo;
 }
 
 RayGizmo* ApplicationModel::getRayGizmo() const

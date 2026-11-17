@@ -4,7 +4,14 @@
 #include <fenv.h>
 #include <cmath>
 #include <cfloat>
+// The kernel runtime (vitralStdC++) has no <limits>: there the compiler's
+// predefined __GCC_IEC_559 tells the same
+#if defined(__has_include)
+#if __has_include(<limits>)
 #include <limits>
+#define VITRAL_FLOATING_INTERVAL_NUMERIC_LIMITS 1
+#endif
+#endif
 
 FloatingInterval::FloatingInterval() : lower(0), upper(0), valid(false) {}
 FloatingInterval::FloatingInterval(double lo, double hi, bool ok) : lower(lo), upper(hi), valid(ok) {}
@@ -16,7 +23,11 @@ bool FloatingInterval::isSupportedEnvironment()
 #endif
     // __STDC_IEC_559__ comes from the C library (glibc defines it, macOS does not),
     // so ask the C++ implementation instead.
+#ifdef VITRAL_FLOATING_INTERVAL_NUMERIC_LIMITS
     if (!std::numeric_limits<double>::is_iec559) return false;
+#elif !defined(__GCC_IEC_559) || __GCC_IEC_559 <= 0
+    return false;
+#endif
     if (FLT_RADIX!=2 || DBL_MANT_DIG!=53 || DBL_MAX_EXP!=1024 || FLT_EVAL_METHOD!=0 ||
         fegetround()!=FE_TONEAREST) return false;
     volatile double tiny=java::Double::MIN_VALUE;

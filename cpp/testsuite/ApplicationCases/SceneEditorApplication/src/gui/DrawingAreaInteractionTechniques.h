@@ -12,6 +12,7 @@
 #include "gui/history/UndoRedoCommand.h"
 
 class ApplicationModel;
+class CameraControlGizmoInteractionTechnique;
 class DrawingArea;
 class DrawingAreaInteractionListener;
 class InteractionEditRecorder;
@@ -56,6 +57,13 @@ map on the selected body; `h` shows the object selector; `ESC` closes the
 application. Commands of the visual debug ray and of the viewport set are
 processed by their own techniques.
 
+The camera control gizmo (ViewCube) of the selected viewport has priority
+over every interaction mode (see `CameraControlGizmoInteractionTechnique`):
+hovering highlights its regions, a click turns the camera smoothly to the
+view of a region (the animation is driven by the listener, see
+`DrawingAreaInteractionListener::animationRequested`, and recorded in the
+view history when it ends), and a drag over it orbits the camera.
+
 Undo and redo (see `UndoRedoInteractionTechnique`): `Ctrl+Z` / `Ctrl+Y` over
 the scene (creation, deletion and transformation of things),
 `Ctrl+Shift+Z` / `Ctrl+Shift+Y` over the view of the selected viewport
@@ -89,6 +97,40 @@ private:
     bool viewportTitleGesture;
     /// Suppresses the synthetic click following a title press/release.
     bool viewportTitleClickConsumed;
+    CameraControlGizmoInteractionTechnique* cameraControlTechnique;
+    /// Viewport of the camera control gizmo gesture in course, or null.
+    Viewport* cameraControlViewport;
+    /// Suppresses the synthetic click after a camera control gizmo gesture.
+    bool cameraControlClickConsumed;
+    /// The gesture that started the camera animation is still recorded.
+    bool cameraAnimationRecording;
+
+    //= Camera control gizmo ==============================================
+    /**
+    Places the camera control gizmo over a viewport (as the renderers do),
+    controlling its camera.
+    */
+    void placeCameraControlGizmo(Viewport* viewport);
+
+    /**
+    Stops the camera animation where it is (other interaction takes the
+    camera), recording what it did.
+    */
+    void stopCameraAnimation();
+
+    /**
+    Lets the camera control gizmo of the selected viewport show what is under
+    the pointer.
+    @return true if the pointer is over the gizmo
+    */
+    bool processCameraControlMouseMovedEvent(const MouseEvent& event,
+                                             Viewport* mouseView);
+
+    /**
+    Ends the gesture of the camera control gizmo. A click starts the turn of
+    the camera to a view: its recording ends with the animation.
+    */
+    void processCameraControlMouseReleasedEvent(const MouseEvent& event);
 
     //= Pointer shape =====================================================
     PointerCursor::Value getModeCursor();
@@ -149,6 +191,14 @@ public:
     DrawingAreaInteractionTechniques(ApplicationModel* model,
                                      DrawingAreaInteractionListener* listener);
     virtual ~DrawingAreaInteractionTechniques();
+
+    /**
+    Advances the camera animation started by the camera control gizmo. When
+    it ends, the gesture that started it is recorded (so the whole turn is
+    one view operation).
+    @return true while the animation goes on
+    */
+    bool advanceCameraAnimation();
 
     ViewportSetInteractionTechniques* getViewportSetTechniques() const;
     TranslateGizmo* getTranslationGizmo() const;

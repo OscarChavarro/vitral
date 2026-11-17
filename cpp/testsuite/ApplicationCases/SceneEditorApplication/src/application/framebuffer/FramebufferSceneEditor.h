@@ -104,6 +104,11 @@ private:
     java::String status;
     bool running;
     bool repaintPending;
+    /// Drives the animation in course, if any (see `animationRequested`)
+    java::BooleanSupplier animationFrame;
+    bool animating;
+    /// Period of the frames of animations, in milliseconds
+    static const int ANIMATION_FRAME_PERIOD = 15;
     bool buttonDown;
     bool pressMoved;
     int areaX;
@@ -140,6 +145,8 @@ private:
 
     //= Events ============================================================
     void handle(const FramebufferEvent& event);
+    bool waitEvent(FramebufferEvent& event);
+    void advanceAnimation();
     void handleMouse(const FramebufferEvent& event);
     void chosen(WidgetMenuItem* item);
     void executeCommand(const java::String& command);
@@ -175,6 +182,7 @@ private:
     void selectorDialogRequested() override;
     void closeRequested() override;
     void fullScreenGuiToggleRequested() override;
+    void animationRequested(const java::BooleanSupplier& frame) override;
 
     //= ViewportSetInteractionListener ====================================
     void projectionLocationMenuRequested(Viewport* viewport, int x,

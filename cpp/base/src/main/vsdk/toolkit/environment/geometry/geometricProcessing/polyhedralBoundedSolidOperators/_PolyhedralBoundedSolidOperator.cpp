@@ -1,4 +1,4 @@
-#include <algorithm>
+#include "java/lang/Math.h"
 #include "java/lang/String.h"
 #include <cfloat>
 #include <cmath>
@@ -437,11 +437,11 @@ double _PolyhedralBoundedSolidOperator::_OuterLoopShadow::clearance(
         double t = len2 > 0.0 ?
             ((px - a.x()) * abx + (py - a.y()) * aby +
              (pz - a.z()) * abz) / len2 : 0.0;
-        t = std::max(0.0, std::min(1.0, t));
+        t = java::Math::max(0.0, java::Math::min(1.0, t));
         double dx = px - (a.x() + abx * t);
         double dy = py - (a.y() + aby * t);
         double dz = pz - (a.z() + abz * t);
-        best = std::min(best, std::sqrt(dx * dx + dy * dy + dz * dz));
+        best = java::Math::min(best, std::sqrt(dx * dx + dy * dy + dz * dz));
     }
     return best;
 }
@@ -546,8 +546,8 @@ double _PolyhedralBoundedSolidOperator::outerLoopClearance(
         double len2 = ab.dotProduct(ab);
         double t = len2 > 0.0 ?
             point.subtract(a).dotProduct(ab) / len2 : 0.0;
-        t = std::max(0.0, std::min(1.0, t));
-        best = std::min(best,
+        t = java::Math::max(0.0, java::Math::min(1.0, t));
+        best = java::Math::min(best,
             point.subtract(a.add(ab.multiply(t))).length());
         he = next;
         guard++;

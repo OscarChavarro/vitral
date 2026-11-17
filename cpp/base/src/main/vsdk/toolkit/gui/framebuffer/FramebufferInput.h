@@ -10,6 +10,12 @@ public:
     virtual ~FramebufferInput() {}
     // Waits for the next event. Returns false only when no more input can arrive.
     virtual bool waitEvent(FramebufferEvent &event) = 0;
+    // Waits for the next event at most a time, for animations: when none arrives in time, the event is a NoEvent
+    // one. Returns false only when no more input can arrive. Backends without timed waits block as waitEvent().
+    virtual bool waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) {
+        (void)timeoutMilliseconds;
+        return waitEvent(event);
+    }
     virtual bool hasPointer() const = 0;
     virtual void extendMenu(Widget &) {}
     virtual bool executeMenuCommand(const char *, const char *&) { return false; }

@@ -18,6 +18,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/BlobSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
+#include "vsdk/toolkit/environment/geometry/volume/Tube.h"
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
 #include "vsdk/toolkit/environment/geometry/volume/PolynomialSurface.h"
@@ -168,6 +169,12 @@ void MCPSceneSerializer::appendParameters(java::StringBuilder& sb,
         sb.append("{\"bottomRadius\":").append(cone->getBottomRadius())
             .append(",\"topRadius\":").append(cone->getTopRadius())
             .append(",\"height\":").append(cone->getHeight())
+            .append('}');
+    }
+    else if ( Tube* tube = dynamic_cast<Tube*>(geometry) ) {
+        sb.append("{\"internalRadius\":").append(tube->getInternalRadius())
+            .append(",\"externalRadius\":").append(tube->getExternalRadius())
+            .append(",\"height\":").append(tube->getHeight())
             .append('}');
     }
     else if ( Box* box = dynamic_cast<Box*>(geometry) ) {

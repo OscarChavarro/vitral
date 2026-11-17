@@ -84,6 +84,13 @@ public:
     void addCylinder(const java::String& request);
 
     /**
+    Adds a tube, or a washer when its height is 0 (tool `scene.add_tube`).
+    @param request request with the arguments
+    internalRadius,externalRadius,height,x,y,z
+    */
+    void addTube(const java::String& request);
+
+    /**
     Sets the position of a body (tool `scene.move_body`).
     @param request request with the arguments index,x,y,z
     */

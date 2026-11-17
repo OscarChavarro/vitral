@@ -151,8 +151,10 @@ set_source_files_properties(src/main/os/drivers/block/loop_image.S PROPERTIES
 
 # ---- vitralLibC and vitralStdC++, and the Vitral base library compiled from where it lives ----
 set(VITRAL_BASE_DIR "${CMAKE_SOURCE_DIR}/../base" CACHE PATH "Vitral C++ base library")
+# The kernel has no thread local storage (no TLS segment, no __cxa_thread_atexit): the thread_local variables of the
+# base library (diagnostics of the boolean set operators) are plain static variables in it.
 set(LIB_FLAGS ${ARCH_FLAGS} ${ARCH_LIB_FLAGS} -mno-mmx -std=c++11 -fexceptions -frtti
-              -fthreadsafe-statics -nostdinc++ -ffunction-sections -fdata-sections -fno-math-errno)
+              -fthreadsafe-statics -nostdinc++ -ffunction-sections -fdata-sections -fno-math-errno -Dthread_local=)
 set(LIB_INCLUDES ${CMAKE_SOURCE_DIR}/src/main/lib/vitralStdC++/include ${CMAKE_SOURCE_DIR}/src/main/lib/vitralLibC/include)
 file(GLOB SOURCES_LIBC CONFIGURE_DEPENDS src/main/lib/vitralLibC/src/*.cpp)
 file(GLOB SOURCES_STDCXX CONFIGURE_DEPENDS src/main/lib/vitralStdC++/src/*.cpp)
@@ -271,6 +273,7 @@ set(SCENE_EDITOR_APPLICATION_SOURCES
     model/DrawingArea.cpp
     model/GuiState.cpp
     model/ProjectedViewsDebugPlan.cpp
+    model/RenderTechnology.cpp
     model/Scene.cpp
     model/SceneLightFactory.cpp
     model/dialog/SceneHierarchyPresenter.cpp
