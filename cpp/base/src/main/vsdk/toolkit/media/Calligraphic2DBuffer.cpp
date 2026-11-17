@@ -25,6 +25,18 @@ void Calligraphic2DBuffer::add2DLine(double x0, double y0, double x1, double y1)
     lineData.add(1.0);     // Width
 }
 
+bool Calligraphic2DBuffer::get2DLine(int i, double& outX0, double& outY0,
+                                     double& outX1, double& outY1) const {
+    if (i < 0 || i >= getNumLines()) {
+        return false;
+    }
+    outX0 = lineData.get(8*i);
+    outY0 = lineData.get(8*i+1);
+    outX1 = lineData.get(8*i+2);
+    outY1 = lineData.get(8*i+3);
+    return true;
+}
+
 Vector3Dd* Calligraphic2DBuffer::get2DLinePoint0(int i) const {
     if (i < 0 || i >= getNumLines()) {
         return nullptr;

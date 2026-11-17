@@ -3,6 +3,7 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
+#include "java/util/ArrayList.txx"
 #include "model/DrawingArea.h"
 
 namespace {
@@ -23,11 +24,24 @@ DrawingArea::DrawingArea(ViewportSet* viewportSet)
       hasPendingViewportExport(false), pendingViewportExportJpg(false),
       hasPendingWorkspaceExport(false), canvasWidth(0), canvasHeight(0)
 {
+    setRenderTechnology(RenderTechnology::OPENGL);
 }
 
 ViewportSet* DrawingArea::getViewportSet() const
 {
     return viewportSet;
+}
+
+RenderTechnology::Value DrawingArea::getRenderTechnology() const
+{
+    return renderTechnology;
+}
+
+void DrawingArea::setRenderTechnology(RenderTechnology::Value technology)
+{
+    renderTechnology = technology;
+    viewportSet->setAvailableRenderModes(
+        RenderTechnology::getRenderModes(technology));
 }
 
 InteractionMode DrawingArea::getInteractionMode() const

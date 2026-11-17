@@ -17,10 +17,10 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.h"
+#include "vsdk/toolkit/render/opengl4/volume/OpenGL4ArrowRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
+#include "vsdk/toolkit/render/opengl4/volume/OpenGL4SphereRenderer.h"
 
 namespace {
 const float IND_OUTER_R = 0.65f;

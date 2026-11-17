@@ -52,6 +52,7 @@ if(SCENE_EDITOR_VARIANT STREQUAL "x11_framebuffer")
         src/io/GuiJsonReader.cpp
         src/model/ApplicationModel.cpp
         src/model/DrawingArea.cpp
+        src/model/RenderTechnology.cpp
         src/model/GuiState.cpp
         src/model/ProjectedViewsDebugPlan.cpp
         src/model/Scene.cpp
@@ -224,6 +225,7 @@ if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
     set(SCENE_EDITOR_OPENGL_SOURCES
         src/application/XtOpenGL4GuiEventExecutor.cpp
         src/application/mcp/MCPJson.cpp
+        src/application/mcp/MCPSceneSerializer.cpp
         src/application/mcp/MCPSceneTools.cpp
         src/application/mcp/MCPViewportTools.cpp
         src/application/mcp/XtOpenGL4MCPApplicationTools.cpp
@@ -235,6 +237,7 @@ if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
         src/render/opengl4/OpenGL4RenderPrimitiveRenderer.cpp
         src/render/opengl4/OpenGL4SceneRenderer.cpp
         src/render/opengl4/XtOpenGL4SceneBridge.cpp
+        src/render/xlib/XlibDrawingAreaRenderer.cpp
     )
     set(SCENE_EDITOR_OPENGL_GTK4_SOURCES
         src/render/opengl4/OpenGL4DrawingAreaRenderer.cpp
@@ -248,6 +251,7 @@ else()
     set(SCENE_EDITOR_OPENGL_SOURCES
         src/application/XtOpenGL1GuiEventExecutor.cpp
         src/application/mcp/MCPJson.cpp
+        src/application/mcp/MCPSceneSerializer.cpp
         src/application/mcp/MCPSceneTools.cpp
         src/application/mcp/MCPViewportTools.cpp
         src/application/mcp/XtOpenGL1MCPApplicationTools.cpp
@@ -293,6 +297,7 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/io/XmlManager.cpp
     src/model/ApplicationModel.cpp
     src/model/DrawingArea.cpp
+    src/model/RenderTechnology.cpp
     src/model/GuiState.cpp
     src/model/ProjectedViewsDebugPlan.cpp
     src/model/Scene.cpp
@@ -320,6 +325,9 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/render/DrawingAreaGizmoPresenter.cpp
     src/render/FrameCaptureService.cpp
     src/render/ProjectedViewsDebugger.cpp
+    src/render/BrepExportCache.cpp
+    src/render/ClipSpaceLineProjector.cpp
+    src/render/ProjectedLinesViewBuilder.cpp
     ${SCENE_EDITOR_OPENGL_SOURCES}
     ${SCENE_EDITOR_WIDGET_SET_SOURCES}
 )
@@ -340,6 +348,7 @@ if(SCENE_EDITOR_IS_GTK4)
         src/io/GuiJsonReader.cpp
         src/model/ApplicationModel.cpp
         src/model/DrawingArea.cpp
+        src/model/RenderTechnology.cpp
         src/model/GuiState.cpp
         src/model/ProjectedViewsDebugPlan.cpp
         src/model/Scene.cpp
@@ -373,6 +382,12 @@ else()
     add_executable(SceneEditorApplication ${SCENE_EDITOR_SHARED_SOURCES})
 endif()
 
+if(NOT SCENE_EDITOR_IS_GTK4)
+    # The Xt variants can also present the viewport set without GL, on the
+    # drawing area of the widget set drawn with Xlib (see RenderTechnology)
+    target_compile_definitions(SceneEditorApplication PRIVATE
+        VITRAL_SCENE_EDITOR_XLIB_CANVAS)
+endif()
 if(SCENE_EDITOR_OPENGL STREQUAL "opengl1")
     target_compile_definitions(SceneEditorApplication PRIVATE
         VITRAL_SCENE_EDITOR_OPENGL1)

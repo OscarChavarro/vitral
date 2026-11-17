@@ -22,6 +22,10 @@ private:
 
     Scene* scene() const;
     java::String message(const char* id) const;
+    void createBlob();
+    void createQuadric();
+    void createPolynomial();
+    void createHeightField();
     void createPlane();
     void createSphericalHarmonicDebugSpheres();
     bool createVolume();

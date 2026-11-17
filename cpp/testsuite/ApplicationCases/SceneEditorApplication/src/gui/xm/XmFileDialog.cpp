@@ -37,6 +37,21 @@ XmFileDialog::~XmFileDialog()
     }
 }
 
+XmFileDialog* XmFileDialog::openDialog = nullptr;
+
+bool XmFileDialog::chooseInOpenDialog(const java::String& chosen)
+{
+    if ( openDialog == nullptr ) {
+        return false;
+    }
+    openDialog->approved = !chosen.isEmpty();
+    if ( openDialog->approved ) {
+        openDialog->path = chosen;
+    }
+    openDialog->done = true;
+    return true;
+}
+
 bool XmFileDialog::showDialog(XtApplicationHost* host,
                               const java::String& title,
                               const java::String& folder,
@@ -52,9 +67,12 @@ bool XmFileDialog::showDialog(XtApplicationHost* host,
                        XmTRAVERSE_CURRENT);
 
     XtAppContext appContext = XtWidgetToApplicationContext(dialog.shell);
+    XmFileDialog* previous = openDialog;
+    openDialog = &dialog;
     while ( !dialog.done ) {
         XtAppProcessEvent(appContext, XtIMAll);
     }
+    openDialog = previous;
     XtPopdown(dialog.shell);
 
     if ( dialog.approved ) {

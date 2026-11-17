@@ -7,6 +7,7 @@
 #include "vsdk/toolkit/render/RenderingElement.h"
 class Camera;
 class Calligraphic2DBuffer;
+class Calligraphic3DBuffer;
 class SimpleBody;
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
@@ -104,6 +105,25 @@ public:
         Calligraphic2DBuffer* outHiddenLineSet);
 
     /**
+    As `executeAppelAlgorithm`, also presenting sets of free lines: lines
+    that are not edges of the solids (i.e. curves, or a reference grid), given
+    in world coordinates, which are hidden by the solids but do not hide
+    anything. The visible and hidden parts of the lines of
+    `inFreeLineSets[i]` are reported in `outVisibleFreeLineSets[i]` and
+    `outHiddenFreeLineSets[i]`, so each set can be drawn with its own
+    style.
+    */
+    static void executeAppelAlgorithm(
+        java::ArrayList<SimpleBody*>& inSimpleBodyArray,
+        const Camera* inCamera,
+        Calligraphic2DBuffer* outVisibleContourLineSet,
+        Calligraphic2DBuffer* outVisibleNonContourLineSet,
+        Calligraphic2DBuffer* outHiddenLineSet,
+        const java::ArrayList<Calligraphic3DBuffer*>& inFreeLineSets,
+        java::ArrayList<Calligraphic2DBuffer*>& outVisibleFreeLineSets,
+        java::ArrayList<Calligraphic2DBuffer*>& outHiddenFreeLineSets);
+
+    /**
     As `executeAppelAlgorithm`, also collecting for each edge its
     sub-segments and their classification.
     @param outDump diagnostics (C++ port: an output parameter instead of the
@@ -127,7 +147,10 @@ private:
         Calligraphic2DBuffer* outVisibleNonContourLineSet,
         Calligraphic2DBuffer* outHiddenLineSet,
         bool collectDiagnostics,
-        AppelAlgorithmDump& outDump);
+        AppelAlgorithmDump& outDump,
+        const java::ArrayList<Calligraphic3DBuffer*>* inFreeLineSets,
+        java::ArrayList<Calligraphic2DBuffer*>* outVisibleFreeLineSets,
+        java::ArrayList<Calligraphic2DBuffer*>* outHiddenFreeLineSets);
 };
 
 #endif

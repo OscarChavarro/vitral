@@ -11,8 +11,29 @@
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
 #include "model/InteractionMode.h"
+#include "model/RenderTechnology.h"
 
 namespace {
+
+int renderModeFromName(const java::String& name)
+{
+    if ( name.equalsIgnoreCase("gpu") ) return Viewport::RENDER_MODE_Z_BUFFER;
+    if ( name.equalsIgnoreCase("cpu") ) return Viewport::RENDER_MODE_RAYTRACING;
+    if ( name.equalsIgnoreCase("hidden_lines") ) {
+        return Viewport::RENDER_MODE_HIDDEN_LINES;
+    }
+    throw java::IllegalArgumentException(
+        "renderMode must be gpu, cpu or hidden_lines");
+}
+
+const char* renderModeName(int mode)
+{
+    switch ( mode ) {
+      case Viewport::RENDER_MODE_RAYTRACING: return "cpu";
+      case Viewport::RENDER_MODE_HIDDEN_LINES: return "hidden_lines";
+      default: return "gpu";
+    }
+}
 
 const char* shadingTypeName(ShadingType type)
 {
@@ -47,8 +68,8 @@ ShadingType shadingTypeValueOf(const java::String& name)
 
 }
 
-MCPViewportTools::MCPViewportTools(ApplicationModel* model, bool supportsXlib)
-    : model(model), supportsXlib(supportsXlib)
+MCPViewportTools::MCPViewportTools(ApplicationModel* model)
+    : model(model)
 {
 }
 
@@ -95,25 +116,6 @@ java::ArrayList<Viewport*> MCPViewportTools::selectedViewports(
 void MCPViewportTools::setRendererConfiguration(const java::String& request)
 {
     java::ArrayList<Viewport*> viewports = selectedViewports(request);
-    ViewportSet* set = model->getActiveViewportSet();
-    java::String renderMode = MCPJson::stringProperty(request, "renderMode", "");
-    int mode = 0;
-    if ( !renderMode.isEmpty() ) {
-        mode = renderMode.equalsIgnoreCase("gpu") ? Viewport::RENDER_MODE_Z_BUFFER :
-            renderMode.equalsIgnoreCase("cpu") ? Viewport::RENDER_MODE_RAYTRACING :
-            renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES : 0;
-        if ( mode == 0 )
-            throw java::IllegalArgumentException("renderMode must be gpu, cpu or hidden_lines");
-        if ( supportsXlib && (mode == Viewport::RENDER_MODE_HIDDEN_LINES ||
-                              mode == Viewport::RENDER_MODE_Z_BUFFER) ) {
-            java::ArrayList<int> modes;
-            modes.add(mode);
-            modes.add(Viewport::RENDER_MODE_RAYTRACING);
-            set->setAvailableRenderModes(modes);
-        }
-        if ( !set->isRenderModeAvailable(mode) )
-            throw java::IllegalArgumentException("renderMode is not available with this rendering technology");
-    }
 
     for ( long i = 0; i < viewports.size(); i++ ) {
         Viewport* viewport = viewports.get(i);
@@ -136,10 +138,65 @@ void MCPViewportTools::setRendererConfiguration(const java::String& request)
         }
 
         if ( MCPJson::booleanProperty(request, "grid", value) ) viewport->setShowGrid(value);
-        if ( mode != 0 ) {
+        java::String renderMode = MCPJson::stringProperty(request, "renderMode", "");
+        if ( !renderMode.isEmpty() ) {
+            int mode = renderModeFromName(renderMode);
+            if ( !model->getActiveViewportSet()->isRenderModeAvailable(mode) ) {
+                throw java::IllegalArgumentException((java::String("renderMode ") +
+                    renderMode + " is not available with the render technology " +
+                    RenderTechnology::getName(
+                        model->getDrawingArea()->getRenderTechnology())).c_str());
+            }
             viewport->setRenderMode(mode);
         }
     }
+}
+
+java::String MCPViewportTools::setSelectedRendering(const java::String& request)
+{
+    ViewportSet* set = model->getActiveViewportSet();
+    int selected = -1;
+    for ( int i = 0; i < set->getViewportCount(); i++ ) {
+        if ( set->getViewport(i) == set->getSelectedViewport() ) {
+            selected = i;
+            break;
+        }
+    }
+    int index = (int)MCPJson::numberProperty(request, "viewport", selected);
+    if ( index < 0 || index >= set->getViewportCount() ) {
+        throw java::IllegalArgumentException((java::String(
+            "Viewport index out of range: ") + java::String::valueOf(index)).c_str());
+    }
+    java::String algorithm = MCPJson::stringProperty(request, "algorithm", "");
+    if ( algorithm.isEmpty() ) {
+        throw java::IllegalArgumentException(
+            "algorithm must be gpu, hidden_lines or raytracing");
+    }
+    int mode;
+    if ( algorithm.equalsIgnoreCase("gpu") ) {
+        mode = Viewport::RENDER_MODE_Z_BUFFER;
+    }
+    else if ( algorithm.equalsIgnoreCase("hidden_lines") ||
+              algorithm.equalsIgnoreCase("hidden-line") ) {
+        mode = Viewport::RENDER_MODE_HIDDEN_LINES;
+    }
+    else if ( algorithm.equalsIgnoreCase("raytracing") ||
+              algorithm.equalsIgnoreCase("raytrace") ||
+              algorithm.equalsIgnoreCase("cpu") ) {
+        mode = Viewport::RENDER_MODE_RAYTRACING;
+    }
+    else {
+        throw java::IllegalArgumentException(
+            "algorithm must be gpu, hidden_lines or raytracing");
+    }
+    if ( !set->isRenderModeAvailable(mode) ) {
+        throw java::IllegalArgumentException((java::String("algorithm ") +
+            algorithm + " is not available with " + RenderTechnology::getName(
+                model->getDrawingArea()->getRenderTechnology())).c_str());
+    }
+    set->getViewport(index)->setRenderMode(mode);
+    return describeRendererConfigurations(java::String("{\"viewport\":") +
+        java::String::valueOf(index) + "}");
 }
 
 java::String MCPViewportTools::describeRendererConfigurations(
@@ -180,10 +237,12 @@ java::String MCPViewportTools::describeRendererConfigurations(
             .append(",\"shading\":\"").append(shadingTypeName(q->getShadingTypeEnum())).append('"')
             .append(",\"grid\":").append(viewport->isShowGrid())
             .append(",\"renderMode\":\"")
-            .append(viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING ? "cpu" :
-                    viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_LINES ? "hidden_lines" : "gpu")
+            .append(renderModeName(viewport->getRenderMode()))
             .append("\"}");
     }
-    sb.append("]}");
+    sb.append("],\"technology\":\"")
+        .append(RenderTechnology::getName(
+            model->getDrawingArea()->getRenderTechnology()))
+        .append("\"}");
     return sb.toString();
 }

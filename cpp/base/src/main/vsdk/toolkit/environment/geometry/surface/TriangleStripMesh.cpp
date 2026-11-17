@@ -6,6 +6,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 TriangleStripMesh::TriangleStripMesh() : name("default") {}
 
 double* TriangleStripMesh::calculateMinMaxPositions()
@@ -104,4 +105,55 @@ void TriangleStripMesh::doExtraInformation(const Ray& inRay, double inT, RayHit*
 {
     if (outData == nullptr) return;
     outData->point = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
+}
+
+TriangleMesh* TriangleStripMesh::exportToTriangleMesh()
+{
+    // Java null arrays are the empty lists of the C++ port
+    if ( vertexes.isEmpty() || strips.isEmpty() ) {
+        return nullptr;
+    }
+    TriangleMesh* mesh = new TriangleMesh();
+    int count = 0;
+    int i;
+    int j;
+
+    for ( i = 0; i < strips.size(); i++ ) {
+        if ( strips[i].size() > 2 ) {
+            count += (int)strips[i].size() - 2;
+        }
+    }
+    mesh->initVertexPositionsArray((int)vertexes.size());
+    java::ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( i = 0; i < vertexes.size(); i++ ) {
+        positions[3*i] = vertexes[i].position.x();
+        positions[3*i+1] = vertexes[i].position.y();
+        positions[3*i+2] = vertexes[i].position.z();
+    }
+    java::ArrayList<int> all;
+    for ( i = 0; i < 3*count; i++ ) {
+        all.add(0);
+    }
+    count = 0;
+    for ( i = 0; i < strips.size(); i++ ) {
+        const java::ArrayList<int>& strip = strips[i];
+        for ( j = 2; j < strip.size(); j++ ) {
+            int p0 = (j % 2 == 0) ? strip[j-2] : strip[j-1];
+            int p1 = (j % 2 == 0) ? strip[j-1] : strip[j-2];
+            int p2 = strip[j];
+            if ( p0 == p1 || p1 == p2 || p0 == p2 ) {
+                continue;
+            }
+            all[3*count] = p0;
+            all[3*count+1] = p1;
+            all[3*count+2] = p2;
+            count++;
+        }
+    }
+    mesh->initTriangleArrays(count);
+    java::ArrayList<int>& indexes = mesh->getTriangleIndexes();
+    for ( i = 0; i < 3*count; i++ ) {
+        indexes[i] = all[i];
+    }
+    return mesh;
 }

@@ -26,3 +26,8 @@ bool XmUiFactory::showFileDialog(XtApplicationHost* host,
 {
     return XmFileDialog::showDialog(host, title, folder, filters, outPath);
 }
+
+bool XmUiFactory::chooseFileInOpenDialog(const java::String& path)
+{
+    return XmFileDialog::chooseInOpenDialog(path);
+}

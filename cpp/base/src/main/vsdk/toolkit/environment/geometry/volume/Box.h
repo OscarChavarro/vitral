@@ -24,6 +24,13 @@ public:
     Box(double dx, double dy, double dz);
     explicit Box(const Vector3Dd& s);
     Box(const Vector3Dd& minimum, const Vector3Dd& maximum);
+private:
+    /**
+    The state edited is the size along each axis; the center is kept (moving
+    the box is a transformation of its body, not a change of the box).
+    */
+    void addControlSpecifications();
+public:
     Vector3Dd* getRawBounds() { return bounds; }
     const Vector3Dd* getRawBounds() const { return bounds; }
     Vector3Dd getCenter() const { return bounds[0].multiply(0.5).add(bounds[1].multiply(0.5)); }
@@ -68,6 +75,13 @@ public:
     Vector3Dd getSize() const { return bounds[1].subtract(bounds[0]); }
     void setSize(double dx, double dy, double dz);
     void setSize(const Vector3Dd& s);
+
+    double getSizeX() const { return bounds[1].x() - bounds[0].x(); }
+    double getSizeY() const { return bounds[1].y() - bounds[0].y(); }
+    double getSizeZ() const { return bounds[1].z() - bounds[0].z(); }
+    void setSizeX(double dx) { setSize(getSize().withX(dx)); }
+    void setSizeY(double dy) { setSize(getSize().withY(dy)); }
+    void setSizeZ(double dz) { setSize(getSize().withZ(dz)); }
 
 private:
     PolyhedralBoundedSolid* buildPolyhedralBoundedSolid();

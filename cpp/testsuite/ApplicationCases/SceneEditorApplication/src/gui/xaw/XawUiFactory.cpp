@@ -29,3 +29,8 @@ bool XawUiFactory::showFileDialog(XtApplicationHost* host,
 {
     return XawFileDialog::showDialog(host, title, folder, filters, outPath);
 }
+
+bool XawUiFactory::chooseFileInOpenDialog(const java::String& path)
+{
+    return XawFileDialog::chooseInOpenDialog(path);
+}

@@ -8,6 +8,8 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
+#include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
+#include "java/util/ArrayList.txx"
 InfinitePlane::InfinitePlane(const InfinitePlane& other) { clone(other); }
 
 InfinitePlane::InfinitePlane(double a_, double b_, double c_, double d_)
@@ -271,3 +273,54 @@ double InfinitePlane::getB() const { return b; }
 void InfinitePlane::setB(double b_) { b = b_; }
 double InfinitePlane::getC() const { return c; }
 void InfinitePlane::setC(double c_) { c = c_; }
+
+QuadMesh* InfinitePlane::exportToQuadMesh(const Vector3Dd& near, double size,
+    int tiles) const
+{
+    double length = java::Math::sqrt(a*a + b*b + c*c);
+    if ( !(length > 0) || tiles < 1 ) {
+        return nullptr;
+    }
+    Vector3Dd n = getNormal();
+    Vector3Dd origin = n.multiply(-d / length);
+    Vector3Dd reference = java::Math::abs(n.z()) < 0.9 ?
+        Vector3Dd(0, 0, 1) : Vector3Dd(1, 0, 0);
+    Vector3Dd u = reference.crossProduct(n).normalized();
+    Vector3Dd v = n.crossProduct(u).normalized();
+    double cell = size / tiles;
+    Vector3Dd offset = projectPoint(near).subtract(origin);
+    // std::rint, in the default rounding mode, is Java Math.rint
+    double cu = std::rint(offset.dotProduct(u) / cell) * cell;
+    double cv = std::rint(offset.dotProduct(v) / cell) * cell;
+    Vector3Dd corner = origin.add(u.multiply(cu - size/2))
+        .add(v.multiply(cv - size/2));
+    int vertices = tiles + 1;
+    QuadMesh* mesh = new QuadMesh();
+    int i;
+    int j;
+    int index;
+
+    mesh->initVertexPositionsArray(vertices*vertices);
+    java::ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( i = 0; i < vertices; i++ ) {
+        for ( j = 0; j < vertices; j++ ) {
+            Vector3Dd p = corner.add(u.multiply(i * cell))
+                .add(v.multiply(j * cell));
+            index = i*vertices + j;
+            positions[3*index] = p.x();
+            positions[3*index+1] = p.y();
+            positions[3*index+2] = p.z();
+        }
+    }
+    mesh->initQuadArrays(tiles*tiles);
+    index = 0;
+    for ( i = 0; i < tiles; i++ ) {
+        for ( j = 0; j < tiles; j++ ) {
+            // Counterclockwise seen from the normal
+            mesh->setQuadAt(index, i*vertices + j, (i+1)*vertices + j,
+                (i+1)*vertices + j+1, i*vertices + j+1);
+            index++;
+        }
+    }
+    return mesh;
+}

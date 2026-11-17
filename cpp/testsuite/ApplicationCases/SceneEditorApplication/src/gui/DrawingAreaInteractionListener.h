@@ -3,6 +3,7 @@
 
 #include "java/lang/String.h"
 #include "gui/PointerCursor.h"
+#include "model/RenderTechnology.h"
 
 /**
 Receives the requests that `DrawingAreaInteractionTechniques` derives from
@@ -60,6 +61,20 @@ public:
     The user requested to toggle the full screen GUI mode.
     */
     virtual void fullScreenGuiToggleRequested() = 0;
+
+    /**
+    The user requested to present the viewport set with another technology
+    (i.e. from the menu of a viewport): only the application can replace
+    the drawing surface. By default the request is ignored, for the hosts
+    that have one technology only.
+    @return true if the technology of the drawing area was changed
+    */
+    virtual bool renderTechnologyChangeRequested(
+        RenderTechnology::Value technology)
+    {
+        (void)technology;
+        return false;
+    }
 };
 
 #endif

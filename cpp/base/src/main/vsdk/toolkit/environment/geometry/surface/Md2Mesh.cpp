@@ -4,6 +4,8 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/surface/Md2Mesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/lang/Math.h"
 _AnimationInfo::_AnimationInfo() : start(0), end(0) {}
 _AnimationInfo::_AnimationInfo(const _AnimationInfo& ai) : name(ai.name), start(ai.start), end(ai.end) {}
 
@@ -291,3 +293,32 @@ const float Md2Mesh::anorms[162][3] =
         {-0.587785f, -0.425325f, -0.688191f}, 
         {-0.688191f, -0.587785f, -0.425325f}
     };
+
+TriangleMesh* Md2Mesh::exportToTriangleMesh(int frame)
+{
+    // Java null arrays are the empty lists of the C++ port
+    if ( frame < 0 || frame >= frameVertices.size() || triangles.isEmpty() ) {
+        return nullptr;
+    }
+    const java::ArrayList<float>& vertices = frameVertices[frame];
+    TriangleMesh* mesh = new TriangleMesh();
+    int count = java::Math::min(numTriangles, (int)(triangles.size() / 2));
+    int i;
+    int j;
+
+    mesh->initVertexPositionsArray((int)(vertices.size() / 3));
+    java::ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( i = 0; i < positions.size(); i++ ) {
+        positions[i] = vertices[i];
+    }
+    mesh->initTriangleArrays(count);
+    java::ArrayList<int>& indexes = mesh->getTriangleIndexes();
+    for ( i = 0; i < count; i++ ) {
+        // triangles[2*i] are the vertex indexes, triangles[2*i+1] the
+        // texture coordinate indexes
+        for ( j = 0; j < 3; j++ ) {
+            indexes[3*i+j] = triangles[2*i][j];
+        }
+    }
+    return mesh;
+}

@@ -16,6 +16,26 @@ add_library(vitral_opengl1 SHARED
     src/main/vsdk/toolkit/render/opengl1/OpenGL1Renderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1ColoredPrimitiveRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1GeometryRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/curve/OpenGL1ParametricCurveRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1FunctionalExplicitSurfaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1InfinitePlaneRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1ParametricBiCubicPatchRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1QuadMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1SubdividedBezierPatchRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1TriangleMeshGroupRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1TriangleMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1TriangleStripMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1BoxRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1ConeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1HeightFieldSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1ImplicitSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1PlanarHalfSpaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1QuadricSurfaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1TorusRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1VolumeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/_OpenGL1SolidBoundaryMeshBuilder.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1VoxelVolumeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/polyhedralBoundedSolid/OpenGL1PolyhedralBoundedSolidRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1MeshBuilder.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1MeshRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1RendererConfigurationStateSelector.cpp
@@ -34,15 +54,15 @@ add_library(vitral_opengl1 SHARED
     src/main/vsdk/toolkit/render/opengl1/OpenGL1RGBAImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1RGBAImageCompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1LightRenderer.cpp
-    src/main/vsdk/toolkit/render/opengl1/OpenGL1ArrowRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1ArrowRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1InputGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1RayGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1TranslateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1RotateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1ScaleGizmoRenderer.cpp
-    src/main/vsdk/toolkit/render/opengl1/OpenGL1Polygon2DRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/polygon/OpenGL1Polygon2DRenderer.cpp
     src/main/vsdk/toolkit/fixtures/OpenGL1SimpleCorridorSample.cpp
-    src/main/vsdk/toolkit/render/opengl1/OpenGL1SphereRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1SphereRenderer.cpp
 )
 
 target_include_directories(vitral_opengl1 PUBLIC src/main)

@@ -3,6 +3,7 @@
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
+#include "vsdk/toolkit/media/Calligraphic3DBuffer.h"
 static Matrix4x4d buildLinearMatrix()
 {
     const double m[4][4] = {
@@ -373,4 +374,22 @@ int ParametricCurve::doContainmentTest(const Vector3Dd& p, double distanceTolera
     }
 
     return OUTSIDE;
+}
+
+Calligraphic3DBuffer* ParametricCurve::exportToCalligraphic3DBuffer()
+{
+    Calligraphic3DBuffer* lines = new Calligraphic3DBuffer();
+    long i, j;
+
+    for ( i = 1; i < types.size(); i++ ) {
+        if ( types.get(i) == BREAK ) {
+            i++;
+            continue;
+        }
+        java::ArrayList<Vector3Dd> polyline = calculatePoints((int)i, false);
+        for ( j = 0; j + 1 < polyline.size(); j++ ) {
+            lines->add3DLine(polyline.get(j), polyline.get(j + 1));
+        }
+    }
+    return lines;
 }

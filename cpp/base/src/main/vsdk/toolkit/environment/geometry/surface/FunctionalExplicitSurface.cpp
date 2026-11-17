@@ -7,6 +7,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy)
     : xyFunction(0), internalTriangleMesh(0)
 {
@@ -191,4 +192,43 @@ over the line.
 int FunctionalExplicitSurface::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
 {
     return internalTriangleMesh ? internalTriangleMesh->doContainmentTest(p, distanceTolerance) : OUTSIDE;
+}
+
+QuadMesh* FunctionalExplicitSurface::exportToQuadMesh()
+{
+    // Java null arrays are the empty lists of the C++ port
+    if ( internalTriangleMesh == nullptr ||
+         internalTriangleMesh->getVertexPositions().isEmpty() ||
+         internalTriangleMesh->getTriangleIndexes().isEmpty() ) {
+        return nullptr;
+    }
+    java::ArrayList<double>& source = internalTriangleMesh->getVertexPositions();
+    int n = (tesselationHintX+1)*(tesselationHintY+1);
+    QuadMesh* mesh;
+    int ix;
+    int iy;
+    int index;
+
+    if ( source.size() < 3*n ) {
+        return nullptr;
+    }
+    mesh = new QuadMesh();
+    mesh->initVertexPositionsArray(n);
+    java::ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( index = 0; index < 3*n; index++ ) {
+        positions[index] = source[index];
+    }
+    mesh->initQuadArrays(tesselationHintX*tesselationHintY);
+    index = 0;
+    for ( iy = 0; iy < tesselationHintY; iy++ ) {
+        for ( ix = 0; ix < tesselationHintX; ix++ ) {
+            mesh->setQuadAt(index,
+                coord(tesselationHintX, tesselationHintY, ix, iy),
+                coord(tesselationHintX, tesselationHintY, ix+1, iy),
+                coord(tesselationHintX, tesselationHintY, ix+1, iy+1),
+                coord(tesselationHintX, tesselationHintY, ix, iy+1));
+            index++;
+        }
+    }
+    return mesh;
 }

@@ -27,7 +27,7 @@
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4Polygon2DRenderer.h"
+#include "vsdk/toolkit/render/opengl4/surface/polygon/OpenGL4Polygon2DRenderer.h"
 #include "model/PolygonClippingFixtures.h"
 #include "model/PolygonSurfaceTessellationMode.h"
 #include "options/CommandLineOptions.h"

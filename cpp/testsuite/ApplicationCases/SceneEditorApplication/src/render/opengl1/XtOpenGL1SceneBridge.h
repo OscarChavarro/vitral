@@ -8,6 +8,7 @@
 #include "application/commands/GuiEventExecutor.h"
 #include "gui/PointerCursor.h"
 #include "java/io/File.h"
+#include "model/RenderTechnology.h"
 
 class ApplicationModel;
 class BodyEditFeedbackProvider;
@@ -151,7 +152,23 @@ public:
     void display(int width, int height);
     void displayXlib(Display* display, Window window, Visual* visual,
                      int depth, int width, int height);
+    /**
+    @return true if the viewport set is presented with Xlib 2D drawing (see
+    `RenderTechnology`): the drawing area must have no GL context
+    */
     bool usesXlibRendering() const;
+
+    /**
+    @return the technology presenting the viewport set
+    */
+    RenderTechnology::Value getRenderTechnology() const;
+
+    /**
+    Changes the technology presenting the viewport set; the application
+    replaces the drawing surface when drawing the next frame.
+    @return false if this GUI can not present the technology
+    */
+    bool setRenderTechnology(RenderTechnology::Value technology);
     void reshape(int width, int height);
 
     /**

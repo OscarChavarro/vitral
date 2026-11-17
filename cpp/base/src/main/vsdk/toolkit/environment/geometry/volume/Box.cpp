@@ -27,8 +27,21 @@ static const Vector3Dd ZERO_VECTOR(0, 0, 0);
 Box::Box(double dx, double dy, double dz) :
     Box(Vector3Dd(dx,dy,dz)) {}
 Box::Box(const Vector3Dd& s) :
-    bounds{Vector3Dd(-s.x()/2,-s.y()/2,-s.z()/2), Vector3Dd(s.x()/2,s.y()/2,s.z()/2)} {}
-Box::Box(const Vector3Dd& minimum, const Vector3Dd& maximum) : bounds{minimum, maximum} {}
+    bounds{Vector3Dd(-s.x()/2,-s.y()/2,-s.z()/2), Vector3Dd(s.x()/2,s.y()/2,s.z()/2)} {
+    addControlSpecifications();
+}
+Box::Box(const Vector3Dd& minimum, const Vector3Dd& maximum) : bounds{minimum, maximum} {
+    addControlSpecifications();
+}
+
+void Box::addControlSpecifications() {
+    addControlSpecification("double;sizeX;(0, INFINITE)",
+        &Box::getSizeX, &Box::setSizeX);
+    addControlSpecification("double;sizeY;(0, INFINITE)",
+        &Box::getSizeY, &Box::setSizeY);
+    addControlSpecification("double;sizeZ;(0, INFINITE)",
+        &Box::getSizeZ, &Box::setSizeZ);
+}
 
 void Box::getBounds(GeometryBounds& result) const {
     const Vector3Dd size = getSize();

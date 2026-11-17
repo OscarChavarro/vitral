@@ -48,7 +48,7 @@ XtOpenGL1VitralEditorMCPProtocol::XtOpenGL1VitralEditorMCPProtocol(
     XtOpenGL1SceneEditorApplication* parent, java::net::Socket* socket)
     : socket(socket),
       sceneTools(parent->getApplicationModel()),
-      viewportTools(parent->getApplicationModel(), true),
+      viewportTools(parent->getApplicationModel()),
       applicationTools(parent)
 {
 }
@@ -120,6 +120,9 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
     if ( tool.equals("scene.describe") ) {
         return sceneTools.describeScene();
     }
+    if ( tool.equals("scene.serialize") ) {
+        return sceneTools.serializeScene(request);
+    }
     if ( tool.equals("scene.clear") ) {
         sceneTools.clearScene();
         applicationTools.repaint();
@@ -174,6 +177,16 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
         applicationTools.repaint();
         return viewportTools.describeRendererConfigurations(request);
     }
+    if ( tool.equals("viewport.set_rendering") ) {
+        java::String technology =
+            MCPJson::stringProperty(request, "technology", "");
+        if ( !technology.isEmpty() ) {
+            applicationTools.setRenderTechnology(request);
+        }
+        java::String answer = viewportTools.setSelectedRendering(request);
+        applicationTools.repaint();
+        return answer;
+    }
     //- Application ---------------------------------------------------
     if ( tool.equals("gui.mouse") ) {
         applicationTools.injectMouse(request);
@@ -185,6 +198,9 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
     }
     if ( tool.equals("gui.import_scene_dialog") ) {
         return applicationTools.showImportDialog();
+    }
+    if ( tool.equals("gui.dialog.choose_file") ) {
+        return applicationTools.chooseImportFile(request);
     }
     if ( tool.equals("gui.dialog.state") ) {
         return applicationTools.dialogState();
@@ -218,6 +234,9 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
     if ( tool.equals("workspace.export_jpg") ) {
         return applicationTools.exportWorkspaceJpg(request);
     }
+    if ( tool.equals("render.set_technology") ) {
+        return applicationTools.setRenderTechnology(request);
+    }
     if ( tool.equals("gui.list_languages") ) {
         return applicationTools.listLanguages();
     }
@@ -234,7 +253,8 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
 java::String XtOpenGL1VitralEditorMCPProtocol::toolsJson()
 {
     return java::String("{\"tools\":[")
-        + MCPJson::tool("scene.describe", "Return the bodies (index, name, geometry, position, scale, radius of spheres) and lights (index, type, position, emission) as JSON.")
+        + MCPJson::tool("scene.describe", "Return the bodies (index, name, geometry, hidden, position, scale, rotation as 3x3 matrix by rows and yaw/pitch/roll degrees, and the parameters of the geometry: i.e. radius of spheres, bottomRadius/topRadius/height of cones and cylinders, size of boxes, majorRadius/minorRadius of tori; summaries for boundary representations, meshes, curves and patches) and lights (index, type, position, emission) as JSON.")
+        + "," + MCPJson::tool("scene.serialize", "Like scene.describe, but with all the data needed to create the bodies again: also their materials, and the full data of the geometries defined by data (vertices and face loops of boundary representations, vertex positions and triangles of meshes, points of curves, contour or control points of patches); spot lights also report pointsAt, coefficient, radius and falloff. Arguments: index (optional: only that body, without lights).")
         + "," + MCPJson::tool("scene.clear", "Remove all bodies, lights and debug groups (undoable).")
         + "," + MCPJson::tool("scene.add_point_light", "Create a point light inside the view of a viewport (first light white, the rest random light colors and positions). Optional arguments: x,y,z,r,g,b override the automatic values.")
         + "," + MCPJson::tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
@@ -246,6 +266,7 @@ java::String XtOpenGL1VitralEditorMCPProtocol::toolsJson()
         + "," + MCPJson::tool("gui.mouse", "Send a mouse event to the drawing area. Arguments: type (move|press|drag|release), x, y (logical pixels of the drawing area, as given by viewport.project), button (1 left, 2 middle, 3 right; default 1). Returns the scene state.")
         + "," + MCPJson::tool("gui.key", "Send a key press to the drawing area. Arguments: key (a single character, or tab|enter|backspace|delete|escape|left|right|up|down|pageup|pagedown|num0..num9|num/|num*|num-|num+|num.|numenter), shift (default false), ctrl (default false; i.e. key z with ctrl is undo, y with ctrl is redo, and with shift too they work over the view of the selected viewport). Returns the scene state.")
         + "," + MCPJson::tool("gui.import_scene_dialog", "Open the native File > Import scene chooser. The call returns after the user selects a file or cancels it.")
+        + "," + MCPJson::tool("gui.dialog.choose_file", "Choose a path in the open import dialog, or cancel with an empty path. Arguments: path.")
         + "," + MCPJson::tool("gui.dialog.state", "Describe open widget dialogs and tangible connection form state.")
         + "," + MCPJson::tool("gui.selector.open", "Open or refresh the scene hierarchy dialog.")
         + "," + MCPJson::tool("gui.selector.select_body", "Select a geometry body through the open hierarchy dialog. Arguments: index, or -1 to clear.")
@@ -256,7 +277,9 @@ java::String XtOpenGL1VitralEditorMCPProtocol::toolsJson()
         + "," + MCPJson::tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
         + "," + MCPJson::tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
         + "," + MCPJson::tool("render.get_configuration", "Return the rendering configuration of the viewports. Arguments: viewport (index; default all).")
-        + "," + MCPJson::tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu|hidden_lines).")
+        + "," + MCPJson::tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu|hidden_lines; only the ones available in the render technology: gpu|cpu with opengl1, hidden_lines|cpu with xlib).")
+        + "," + MCPJson::tool("viewport.set_rendering", "Set the canvas technology and rendering algorithm of the selected viewport (or viewport index). Arguments: technology (opengl1|xlib, optional; awt is accepted as xlib, as in the Java port) and algorithm (gpu|hidden_lines|raytracing). Technology changes rebuild the canvas; gpu requires opengl1, hidden_lines requires xlib, raytracing works with either.")
+        + "," + MCPJson::tool("render.set_technology", "Present the viewport set with other technology, rebuilding the GUI. Arguments: technology (opengl1|xlib; awt is accepted as xlib, as in the Java port). Xlib draws only with 2D operations on the drawing area of the widget set, without any OpenGL context: its viewports are hidden lines (wireframe, or Appel hidden line removal when surfaces are on) or raytraced.")
         + "," + MCPJson::tool("render.raytrace_png", "Raytrace the scene from the camera of the last drawn viewport and export a PNG (it also writes ./output.jpg). Arguments: path, width (default 640), height (default 480).")
         + "," + MCPJson::tool("viewport.export_jpg", "Export the selected viewport, as drawn, to a JPG. Arguments: path.")
         + "," + MCPJson::tool("workspace.export_jpg", "Export the whole drawing area, with all its viewports, to a JPG. Arguments: path.")

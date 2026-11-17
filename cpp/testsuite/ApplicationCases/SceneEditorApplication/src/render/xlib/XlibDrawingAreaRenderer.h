@@ -15,6 +15,7 @@ class SceneSelectionEditor;
 class TranslateGizmo;
 class Viewport;
 class XlibGizmo2DDrawListRenderer;
+class ProjectedLinesViewBuilder;
 
 /**
 CPU presentation of the complete viewport set, without a GL context. Over
@@ -36,6 +37,8 @@ class XlibDrawingAreaRenderer {
     DrawingAreaGizmoPresenter* gizmoPresenter;
     Gizmo2DDrawList* gizmoDrawList;
     XlibGizmo2DDrawListRenderer* gizmoRenderer;
+    /// The bodies of the views as projected lines (see `ProjectedLinesViewBuilder`)
+    ProjectedLinesViewBuilder* linesBuilder;
 
     void ensureTitleFont(Display* display, int size);
     void drawView(Display* display, Drawable frame, GC gc, Visual* visual,

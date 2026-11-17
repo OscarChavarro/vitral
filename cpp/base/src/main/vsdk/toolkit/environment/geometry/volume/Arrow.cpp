@@ -17,6 +17,14 @@ Arrow::Arrow(double bl, double hl, double br, double hr)
     baseCylinder = new Cone(baseRadius, baseRadius, baseLength);
     headCone = new Cone(headRadius, 0, headLength);
     lastElement = baseCylinder;
+    addControlSpecification("double;baseLength;(0, INFINITE)",
+        &Arrow::getBaseLength, &Arrow::setBaseLength);
+    addControlSpecification("double;headLength;(0, INFINITE)",
+        &Arrow::getHeadLength, &Arrow::setHeadLength);
+    addControlSpecification("double;baseRadius;(0, INFINITE)",
+        &Arrow::getBaseRadius, &Arrow::setBaseRadius);
+    addControlSpecification("double;headRadius;(0, INFINITE)",
+        &Arrow::getHeadRadius, &Arrow::setHeadRadius);
 }
 
 Arrow::~Arrow() {

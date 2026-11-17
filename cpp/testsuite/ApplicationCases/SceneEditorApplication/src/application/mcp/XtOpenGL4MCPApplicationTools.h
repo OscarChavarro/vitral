@@ -142,6 +142,26 @@ public:
     @return the answer of the tool as JSON
     */
     java::String exitApplication();
+
+    /**
+    Chooses a path in the open file dialog (i.e. the one of
+    `gui.import_scene_dialog`), or cancels it with an empty path (tool
+    `gui.dialog.choose_file`).
+    @param request request with the argument path
+    @return the answer of the tool as JSON
+    @throws java::IllegalStateException if no file dialog is open
+    */
+    java::String chooseImportFile(const java::String& request);
+
+    /**
+    Presents the viewport set with another technology, rebuilding the
+    drawing surface (tool `render.set_technology`; also used by
+    `viewport.set_rendering`).
+    @param request request with the argument technology (opengl4, opengl1,
+    xlib, or awt as in the Java port)
+    @return the technology set as JSON
+    */
+    java::String setRenderTechnology(const java::String& request);
 };
 
 #endif

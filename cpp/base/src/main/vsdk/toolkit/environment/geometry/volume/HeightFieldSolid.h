@@ -6,6 +6,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldTraceResult.h"
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldTraversal.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
+class PolyhedralBoundedSolid;
 
 // Height field: heights h(x, z) on the integer grid 0 <= x < columns,
 // 0 <= z < rows, stored in single precision and interpolated linearly over the
@@ -58,6 +59,19 @@ private:
     Vector3Dd surfaceNormal(const Vector3Dd& point, long surfaceIndex) const;
     GeometryContainment classifyRegion(const Vector3Dd& center, const Vector3Dd& halfWidths,
         double tolerance) const;
+
+    /**
+    @return the box limits and the grid lines strictly between them
+    */
+    static java::ArrayList<double> boxGridCoordinates(double low, double high);
+
+    /**
+    Adds a polygon, reversing it if needed so it is counterclockwise as seen
+    from outside (its normal along `outward`).
+    */
+    static void addPolygon(const java::ArrayList<Vector3Dd>& positions,
+        java::ArrayList<java::ArrayList<int> >& polygons,
+        java::ArrayList<int> polygon, const Vector3Dd& outward);
 public:
     // Heights start at zero. A grid needs at least 2 x 2 points.
     HeightFieldSolid(long columns, long rows, const Vector3Dd& minimum, const Vector3Dd& maximum);
@@ -108,5 +122,22 @@ public:
     void doExtraInformation(const Ray& ray, double t, RayHit* hit) override;
     int doContainmentTest(const Vector3Dd& point, double tolerance) override;
     double* getMinMax() override;
+
+    //= Boundary representation =============================================
+
+    /**
+    Boundary representation of the height field, built with Euler operators
+    by `PolyhedralBoundedSolidMeshConstructions` from its polygons:
+      - The surface: the two triangles of each grid cell inside the box,
+        split along the same diagonal as `evaluateHeight` (from (x+1, z) to
+        (x, z+1)). Cells cut by the box are sampled at the box sides.
+      - Four sides, each one a planar polygon under the profile of the
+        surface, and the bottom of the box.
+    It is exact for heights inside the box. Heights above the box are taken
+    at its top, and heights at or below its bottom just above it, so a part
+    of the box where the solid is empty is approximated by a thin layer.
+    @return a new polyhedral solid, or null if the height field is not valid
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
 };
 #endif

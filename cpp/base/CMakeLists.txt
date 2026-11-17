@@ -237,6 +237,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCalligraphicExporter.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.cpp
@@ -269,6 +270,8 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidMeshConstructions.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidPredicates.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.cpp
@@ -292,6 +295,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/CameraControllerGoogleEarth.cpp
     src/main/vsdk/toolkit/render/TraceWorkspace.cpp
     src/main/vsdk/toolkit/render/SpherePolyhedralCache.cpp
+    src/main/vsdk/toolkit/render/SelectionCorners.cpp
     src/main/vsdk/toolkit/render/raytracing/DepthBufferEncoder.cpp
     src/main/vsdk/toolkit/render/raytracing/ParallelRaytracer.cpp
     src/main/vsdk/toolkit/render/raytracing/RasterTileArea.cpp
@@ -358,6 +362,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/media/ZBuffer.cpp
     src/main/vsdk/toolkit/media/NormalMap.cpp
     src/main/vsdk/toolkit/media/Calligraphic2DBuffer.cpp
+    src/main/vsdk/toolkit/media/Calligraphic3DBuffer.cpp
     src/main/vsdk/toolkit/media/PrimitiveCountShapeDescriptor.cpp
     src/main/vsdk/toolkit/media/FourierShapeDescriptor.cpp
     src/main/vsdk/toolkit/media/GeometryMetadata.cpp

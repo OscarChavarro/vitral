@@ -4,6 +4,7 @@
 #include "java/lang/IllegalArgumentException.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "model/RenderTechnology.h"
 
 class ApplicationModel;
 class XtOpenGL1ApplicationController;
@@ -114,6 +115,27 @@ public:
     @throws java::IllegalArgumentException for unknown actions
     */
     virtual void selectorAction(const java::String& action) = 0;
+
+    /**
+    Closes the open file dialog (i.e. the one of `showImportSceneDialog`),
+    approving a path or cancelling it (tool `gui.dialog.choose_file`).
+    @param path the file to approve, or empty to cancel
+    @return false if no file dialog is open
+    */
+    virtual bool chooseFileInOpenDialog(const java::String& path) = 0;
+
+    /**
+    Presents the viewport set with another technology, rebuilding the
+    drawing surface of the GUI once the current event is processed (as
+    `AwtJogl4SceneEditorApplication.setRenderTechnology`).
+    @return false if the GUI can not present the technology
+    */
+    virtual bool setRenderTechnology(RenderTechnology::Value technology) = 0;
+
+    /**
+    @return the technology presenting the viewport set
+    */
+    virtual RenderTechnology::Value getRenderTechnology() = 0;
 
     /**
     Ends the application.

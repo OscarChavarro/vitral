@@ -161,9 +161,7 @@ public:
         , workspace(nullptr)
         , menuBar(nullptr)
         , drawingCanvas(nullptr)
-#ifdef VITRAL_SCENE_EDITOR_OPENGL1
         , cpuShellMode(false)
-#endif
         , visual(nullptr)
         , visualDepth(0)
         , colormap(0)
@@ -351,9 +349,8 @@ private:
     java::ArrayList<java::String> viewportMenuCommands;
     XlibLabelImageProvider* labelProvider;
     Window window;
-#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+    /// The shell has no GL visual nor context: Xlib 2D drawing only
     bool cpuShellMode;
-#endif
     GLXFBConfig fbConfig;
     GLXContext context;
 #ifndef VITRAL_SCENE_EDITOR_OPENGL1
@@ -786,16 +783,14 @@ private:
     void buildShell(bool cpu)
     {
         const int screen = DefaultScreen(display);
-#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+        // The 2D canvas of the toolkit: the default visual, never a GLX one
         if (cpu) {
             visual = DefaultVisual(display, screen);
             visualDepth = DefaultDepth(display, screen);
             colormap = DefaultColormap(display, screen);
             fbConfig = nullptr;
         }
-        else
-#endif
-        {
+        else {
             XVisualInfo* visualInfo = chooseVisual();
             visual = visualInfo->visual;
             visualDepth = visualInfo->depth;
@@ -813,13 +808,12 @@ private:
         XtSetArg(args[n], XtNwidth, width); ++n;
         XtSetArg(args[n], XtNheight, height); ++n;
 #ifdef VITRAL_SCENE_EDITOR_OPENGL1
-        const java::String title = java::String("VITRAL Scene Editor - ") +
-            widgetSet->getName() + (cpu ? " Xlib CPU hidden lines" :
-                                        " GLX OpenGL 1.2");
+        const char* glName = " GLX OpenGL 1.2";
 #else
-        const java::String title = java::String("VITRAL Scene Editor - ") +
-            widgetSet->getName() + " GLX OpenGL 4";
+        const char* glName = " GLX OpenGL 4";
 #endif
+        const java::String title = java::String("VITRAL Scene Editor - ") +
+            widgetSet->getName() + (cpu ? " Xlib CPU (no OpenGL)" : glName);
         XtSetArg(args[n], XtNtitle, title.c_str()); ++n;
         XtSetArg(args[n], XtNx, 0); ++n;
         XtSetArg(args[n], XtNy, 0); ++n;
@@ -856,18 +850,24 @@ private:
         XtRealizeWidget(shell);
         window = XtWindow(drawingCanvas);
         widgetSet->setKeyboardFocus(shell, drawingCanvas);
-#ifdef VITRAL_SCENE_EDITOR_OPENGL1
         cpuShellMode = cpu;
-#endif
     }
 
-#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+    /**
+    Replaces the shell when the technology presenting the viewport set
+    changes (see `RenderTechnology`), as the Java application replaces its
+    canvas: for the Xlib technology every GL resource and the GLX context
+    are destroyed, and the new drawing area uses the default visual, so
+    nothing is drawn with OpenGL; for the OpenGL one a GLX visual and a new
+    context are created again.
+    */
     void rebuildShell(bool cpu)
     {
         if (cpu == cpuShellMode) return;
         ready = false;
         if (context != nullptr) {
-            glXMakeCurrent(display, window, context);
+            // Makes the context current, frees the GL objects of this class
+            cleanupOpenGL();
             sceneBridge->dispose();
             glXMakeCurrent(display, None, nullptr);
             glXDestroyContext(display, context);
@@ -904,7 +904,6 @@ private:
             ready = true;
         }
     }
-#endif
 
     XVisualInfo* chooseVisual()
     {
@@ -1211,7 +1210,6 @@ private:
     void redraw()
     {
         if (!ready || display == nullptr) return;
-#ifdef VITRAL_SCENE_EDITOR_OPENGL1
         if (sceneBridge != nullptr &&
             sceneBridge->usesXlibRendering() != cpuShellMode)
             rebuildShell(sceneBridge->usesXlibRendering());
@@ -1223,7 +1221,6 @@ private:
                                      canvasWidth, canvasHeight);
             return;
         }
-#endif
         if (context == nullptr) return;
         glXMakeCurrent(display, window, context);
         glViewport(0, 0, canvasWidth, canvasHeight);
@@ -1855,6 +1852,26 @@ private:
         java::String url = serviceUrl != nullptr ? serviceUrl->c_str() : "";
         return tangibleDialog->performAction(action.c_str(),
                                              serviceUrl != nullptr ? &url : nullptr);
+    }
+
+    bool chooseFileInOpenDialog(const java::String& path) override
+    {
+        return uiFactory->chooseFileInOpenDialog(path);
+    }
+
+    bool setRenderTechnology(RenderTechnology::Value technology) override
+    {
+        if (sceneBridge == nullptr ||
+            !sceneBridge->setRenderTechnology(technology)) return false;
+        // The shell is replaced when drawing the next frame
+        requestRedraw();
+        return true;
+    }
+
+    RenderTechnology::Value getRenderTechnology() override
+    {
+        return sceneBridge != nullptr ? sceneBridge->getRenderTechnology() :
+            RenderTechnology::OPENGL;
     }
 
     void closeApplication() override

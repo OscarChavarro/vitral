@@ -4,6 +4,7 @@
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/numerics/FloatingInterval.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
+class PolyhedralBoundedSolid;
 
 // Solid F(p) < 0 of a continuous scalar field F whose ray restriction a
 // subclass can solve. This class turns the roots of F along a ray into the
@@ -19,6 +20,12 @@ public:
     static constexpr double ROOT_POLISH_REACH = 1.0e-3;
     // Roots closer than this relative distance are one root.
     static constexpr double ROOT_MERGE_TOLERANCE = 1.0e-12;
+    /// Default number of grid cells along the largest side of the box
+    /// polygonized by `exportToPolyhedralBoundedSolid`
+    static const int DEFAULT_POLYGONIZATION_DIVISIONS = 16;
+    /// Half the side of the cube, centered at the origin, that clips an
+    /// unbounded solid when exported to a boundary representation
+    static constexpr double DEFAULT_CLIPPING_HALF_SIZE = 3.0;
 private:
     double polishRoot(const Vector3Dd& start, const Vector3Dd& unit, double distance) const;
     RayFirstHitStatus collectRoots(const Ray& ray, const RayCrossingQuery& query,
@@ -68,5 +75,35 @@ public:
     void doExtraInformation(const Ray& ray, double t, RayHit* hit) override;
     int doContainmentTest(const Vector3Dd& point, double tolerance) override;
     double* getMinMax() override;
+
+    //= Boundary representation =============================================
+
+    /**
+    Polyhedral approximation with the default number of divisions (see
+    `exportToPolyhedralBoundedSolid(int)`).
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
+
+    /**
+    Polyhedral approximation of the solid F < 0, built with Euler
+    operators by `PolyhedralBoundedSolidFieldConstructions`. A bounded solid
+    is polygonized inside its bounds; an unbounded one is clipped by the
+    cube of half side `DEFAULT_CLIPPING_HALF_SIZE` centered at the origin.
+    @param divisions number of grid cells along the largest side of the
+    polygonized box (at least 1)
+    @return a new polyhedral approximation, or null if the solid is empty or
+    its bounds can not be determined
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int divisions);
+
+    /**
+    Polyhedral approximation of the part of the solid F < 0 inside a box.
+    @param divisions number of grid cells along the largest side of the box
+    @param minimum minimum corner of the box
+    @param maximum maximum corner of the box
+    @return a new polyhedral approximation, or null if it is empty
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int divisions,
+        const Vector3Dd& minimum, const Vector3Dd& maximum);
 };
 #endif

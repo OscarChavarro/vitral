@@ -8,9 +8,27 @@
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
 #include "vsdk/toolkit/common/numerics/FloatingInterval.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
-PlanarHalfSpace::PlanarHalfSpace(double a, double b, double c, double d) : plane(a,b,c,d) {}
-PlanarHalfSpace::PlanarHalfSpace(const InfinitePlane& boundary) : plane(boundary) {}
+PlanarHalfSpace::PlanarHalfSpace(double a, double b, double c, double d) : plane(a,b,c,d) {
+    addControlSpecifications();
+}
+PlanarHalfSpace::PlanarHalfSpace(const InfinitePlane& boundary) : plane(boundary) {
+    addControlSpecifications();
+}
+void PlanarHalfSpace::addControlSpecifications() {
+    addControlSpecification("double;a;(-INFINITE, INFINITE)",
+        &PlanarHalfSpace::getA, &PlanarHalfSpace::setA);
+    addControlSpecification("double;b;(-INFINITE, INFINITE)",
+        &PlanarHalfSpace::getB, &PlanarHalfSpace::setB);
+    addControlSpecification("double;c;(-INFINITE, INFINITE)",
+        &PlanarHalfSpace::getC, &PlanarHalfSpace::setC);
+    addControlSpecification("double;d;(-INFINITE, INFINITE)",
+        &PlanarHalfSpace::getD, &PlanarHalfSpace::setD);
+}
 Geometry* PlanarHalfSpace::copyGeometry() const { return new PlanarHalfSpace(plane); }
 void PlanarHalfSpace::getBounds(GeometryBounds& result) const { plane.getBounds(result); }
 double* PlanarHalfSpace::getMinMax() { return plane.getMinMax(); }
@@ -178,4 +196,48 @@ bool PlanarHalfSpace::doIntersectionFirstHit(const Ray& ray, RayHit* hit)
 void PlanarHalfSpace::doExtraInformation(const Ray& ray, double t, RayHit* hit)
 {
     plane.doExtraInformation(ray, t, hit);
+}
+
+//= Boundary representation =============================================
+
+PolyhedralBoundedSolid* PlanarHalfSpace::exportToPolyhedralBoundedSolid()
+{
+    return exportToPolyhedralBoundedSolid(DEFAULT_EXPORT_HALF_SIZE,
+        DEFAULT_EXPORT_DEPTH);
+}
+
+PolyhedralBoundedSolid* PlanarHalfSpace::exportToPolyhedralBoundedSolid(
+    double halfSize, double depth)
+{
+    Vector3Dd n(plane.getA(), plane.getB(), plane.getC());
+    double length = n.length();
+    if ( !(length > 0) || !java::Double::isFinite(length) ||
+         !java::Double::isFinite(plane.getD()) || !(halfSize > 0) ||
+         !(depth > 0) ) {
+        return nullptr;
+    }
+    Vector3Dd u = n.multiply(1.0 / length);
+    Vector3Dd center = u.multiply(-plane.getD() / length);
+    // Tangents of the plane: (t1, t2, u) is a right handed frame
+    Vector3Dd axis = java::Math::abs(u.x()) < 0.9 ? Vector3Dd(1, 0, 0) :
+        Vector3Dd(0, 1, 0);
+    Vector3Dd t1 = axis.subtract(u.multiply(axis.dotProduct(u))).normalized();
+    Vector3Dd t2 = u.crossProduct(t1);
+    const double frameValues[4][4] = {
+        {t1.x(), t2.x(), u.x(), center.x()},
+        {t1.y(), t2.y(), u.y(), center.y()},
+        {t1.z(), t2.z(), u.z(), center.z()},
+        {0, 0, 0, 1}
+    };
+    Matrix4x4d frame(frameValues);
+
+    PolyhedralBoundedSolid* solid = Box(
+        Vector3Dd(-halfSize, -halfSize, -depth),
+        Vector3Dd(halfSize, halfSize, 0)).exportToPolyhedralBoundedSolid();
+    int i;
+    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
+        solid->getVerticesList().get(i)->position =
+            frame.multiply(solid->getVerticesList().get(i)->position);
+    }
+    return solid;
 }

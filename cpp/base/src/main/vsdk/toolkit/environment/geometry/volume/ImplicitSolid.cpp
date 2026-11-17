@@ -9,6 +9,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.h"
 
 RayFirstHitStatus ImplicitSolid::collectRoots(const Ray& ray, const RayCrossingQuery& query,
     java::ArrayList<double>& distances, Vector3Dd& start, Vector3Dd& unit,
@@ -326,4 +327,38 @@ double* ImplicitSolid::getMinMax()
         return new double[6]{bounds.getMinimum().x(), bounds.getMinimum().y(), bounds.getMinimum().z(),
             bounds.getMaximum().x(), bounds.getMaximum().y(), bounds.getMaximum().z()};
     return new double[6]{-1e308,-1e308,-1e308,1e308,1e308,1e308};
+}
+
+//= Boundary representation =============================================
+
+PolyhedralBoundedSolid* ImplicitSolid::exportToPolyhedralBoundedSolid()
+{
+    return exportToPolyhedralBoundedSolid(DEFAULT_POLYGONIZATION_DIVISIONS);
+}
+
+PolyhedralBoundedSolid* ImplicitSolid::exportToPolyhedralBoundedSolid(
+    int divisions)
+{
+    GeometryBounds bounds;
+    getBounds(bounds);
+    if ( bounds.getKind() == GeometryBounds::Kind::Finite ) {
+        return PolyhedralBoundedSolidFieldConstructions::createFromBoundedScalarField(
+            [this](const Vector3Dd& p) { return evaluateField(p); },
+            bounds.getMinimum(), bounds.getMaximum(),
+            java::Math::max(1, divisions));
+    }
+    if ( bounds.getKind() == GeometryBounds::Kind::Unbounded ) {
+        double c = DEFAULT_CLIPPING_HALF_SIZE;
+        return exportToPolyhedralBoundedSolid(divisions,
+            Vector3Dd(-c, -c, -c), Vector3Dd(c, c, c));
+    }
+    return nullptr;
+}
+
+PolyhedralBoundedSolid* ImplicitSolid::exportToPolyhedralBoundedSolid(
+    int divisions, const Vector3Dd& minimum, const Vector3Dd& maximum)
+{
+    return PolyhedralBoundedSolidFieldConstructions::createFromScalarField(
+        [this](const Vector3Dd& p) { return evaluateField(p); }, minimum,
+        maximum, java::Math::max(1, divisions));
 }

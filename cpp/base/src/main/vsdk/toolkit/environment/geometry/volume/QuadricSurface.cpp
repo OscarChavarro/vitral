@@ -7,9 +7,37 @@
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
+#include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.h"
 
 QuadricSurface::QuadricSurface(const Vector3Dd& s, const Vector3Dd& m,
-    const Vector3Dd& l, double c) : square(s), mixed(m), linear(l), constant(c) {}
+    const Vector3Dd& l, double c) : square(s), mixed(m), linear(l), constant(c) {
+    addControlSpecifications();
+}
+
+void QuadricSurface::addControlSpecifications() {
+    typedef double (QuadricSurface::*Getter)() const;
+    typedef void (QuadricSurface::*Setter)(double);
+    const char* names[] = {"squareX", "squareY", "squareZ",
+        "mixedXY", "mixedXZ", "mixedYZ", "linearX", "linearY", "linearZ",
+        "constant"};
+    const Getter getters[] = {&QuadricSurface::getSquareX,
+        &QuadricSurface::getSquareY, &QuadricSurface::getSquareZ,
+        &QuadricSurface::getMixedXY, &QuadricSurface::getMixedXZ,
+        &QuadricSurface::getMixedYZ, &QuadricSurface::getLinearX,
+        &QuadricSurface::getLinearY, &QuadricSurface::getLinearZ,
+        &QuadricSurface::getConstant};
+    const Setter setters[] = {&QuadricSurface::setSquareX,
+        &QuadricSurface::setSquareY, &QuadricSurface::setSquareZ,
+        &QuadricSurface::setMixedXY, &QuadricSurface::setMixedXZ,
+        &QuadricSurface::setMixedYZ, &QuadricSurface::setLinearX,
+        &QuadricSurface::setLinearY, &QuadricSurface::setLinearZ,
+        &QuadricSurface::setConstant};
+    for ( int i = 0; i < 10; i++ ) {
+        addControlSpecification(java::String("double;") + names[i] +
+            ";(-INFINITE, INFINITE)", getters[i], setters[i]);
+    }
+}
 Geometry* QuadricSurface::copyGeometry() const { return new QuadricSurface(*this); }
 
 RayFirstHitStatus QuadricSurface::roots(const Ray& ray, const RayCrossingQuery& query,
@@ -325,4 +353,39 @@ double* QuadricSurface::getMinMax() {
         return new double[6]{bounds.getMinimum().x(), bounds.getMinimum().y(), bounds.getMinimum().z(),
             bounds.getMaximum().x(), bounds.getMaximum().y(), bounds.getMaximum().z()};
     return new double[6]{-1e308,-1e308,-1e308,1e308,1e308,1e308};
+}
+
+//= Boundary representation =============================================
+
+PolyhedralBoundedSolid* QuadricSurface::exportToPolyhedralBoundedSolid()
+{
+    return exportToPolyhedralBoundedSolid(
+        ImplicitSolid::DEFAULT_POLYGONIZATION_DIVISIONS);
+}
+
+PolyhedralBoundedSolid* QuadricSurface::exportToPolyhedralBoundedSolid(
+    int divisions)
+{
+    GeometryBounds bounds;
+    getBounds(bounds);
+    if ( bounds.getKind() == GeometryBounds::Kind::Finite ) {
+        return PolyhedralBoundedSolidFieldConstructions::createFromBoundedScalarField(
+            [this](const Vector3Dd& p) { return evaluate(p); },
+            bounds.getMinimum(), bounds.getMaximum(),
+            java::Math::max(1, divisions));
+    }
+    if ( bounds.getKind() == GeometryBounds::Kind::Unbounded ) {
+        double c = ImplicitSolid::DEFAULT_CLIPPING_HALF_SIZE;
+        return exportToPolyhedralBoundedSolid(divisions,
+            Vector3Dd(-c, -c, -c), Vector3Dd(c, c, c));
+    }
+    return nullptr;
+}
+
+PolyhedralBoundedSolid* QuadricSurface::exportToPolyhedralBoundedSolid(
+    int divisions, const Vector3Dd& minimum, const Vector3Dd& maximum)
+{
+    return PolyhedralBoundedSolidFieldConstructions::createFromScalarField(
+        [this](const Vector3Dd& p) { return evaluate(p); }, minimum, maximum,
+        java::Math::max(1, divisions));
 }

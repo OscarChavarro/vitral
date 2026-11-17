@@ -1,11 +1,23 @@
+#include <algorithm>
 #include <cmath>
 
 #include "java/util/Collections.txx"
 #include "vsdk/toolkit/render/opengl1/OpenGL1MeshBuilder.h"
 
-OpenGL1MeshBuilder::OpenGL1MeshBuilder(double characteristicSize)
-    : characteristicSize(characteristicSize), doubleSided(false)
+OpenGL1MeshBuilder::OpenGL1MeshBuilder(double inCharacteristicSize)
+    : meshCharacteristicSize(inCharacteristicSize), doubleSided(false)
 {
+}
+
+double OpenGL1MeshBuilder::characteristicSize(const double* minmax)
+{
+    double size = 1.0;
+    if ( minmax != nullptr ) {
+        size = std::max(std::fabs(minmax[3] - minmax[0]),
+            std::max(std::fabs(minmax[4] - minmax[1]),
+                     std::fabs(minmax[5] - minmax[2])));
+    }
+    return size;
 }
 
 void OpenGL1MeshBuilder::addTriangle(
@@ -124,7 +136,7 @@ OpenGL1MeshRenderer::Mesh* OpenGL1MeshBuilder::build()
 
     int count = (int)(vertices.size() / VERTEX_SIZE);
     OpenGL1MeshRenderer::Mesh* mesh =
-        new OpenGL1MeshRenderer::Mesh(characteristicSize);
+        new OpenGL1MeshRenderer::Mesh(meshCharacteristicSize);
 
     mesh->positions = java::Collections::nCopies<float>((long)count * 3, 0.0f);
     mesh->normals = java::Collections::nCopies<float>((long)count * 3, 0.0f);

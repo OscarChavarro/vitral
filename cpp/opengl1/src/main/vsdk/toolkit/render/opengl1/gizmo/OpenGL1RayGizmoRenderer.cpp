@@ -15,11 +15,11 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
-#include "vsdk/toolkit/render/opengl1/OpenGL1ArrowRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1ArrowRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1RendererConfigurationStateSelector.h"
 #include "vsdk/toolkit/render/opengl1/gizmo/OpenGL1RayGizmoRenderer.h"
-#include "vsdk/toolkit/render/opengl1/OpenGL1SphereRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1SphereRenderer.h"
 
 namespace {
 const float IND_OUTER_R = 0.65f;

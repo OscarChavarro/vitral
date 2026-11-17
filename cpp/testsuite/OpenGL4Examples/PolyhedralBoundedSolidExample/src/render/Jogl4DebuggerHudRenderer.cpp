@@ -11,7 +11,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LabelCanvas.h"
-#include "vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugHUDRenderer.h"
+#include "vsdk/toolkit/render/opengl4/volume/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugHUDRenderer.h"
 #include "models/DebuggerModel.h"
 
 static const int LINE_HEIGHT = 34;

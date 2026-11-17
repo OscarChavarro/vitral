@@ -32,6 +32,20 @@ XawFileDialog::~XawFileDialog()
     }
 }
 
+XawFileDialog* XawFileDialog::openDialog = nullptr;
+
+bool XawFileDialog::chooseInOpenDialog(const java::String& chosen)
+{
+    if ( openDialog == nullptr ) {
+        return false;
+    }
+    if ( !chosen.isEmpty() ) {
+        openDialog->widgets->setText(openDialog->pathField, chosen);
+    }
+    openDialog->close(!chosen.isEmpty());
+    return true;
+}
+
 bool XawFileDialog::showDialog(XtApplicationHost* host,
                                const java::String& title,
                                const java::String& folder,
@@ -47,9 +61,12 @@ bool XawFileDialog::showDialog(XtApplicationHost* host,
     XtSetKeyboardFocus(dialog.shell, dialog.pathField);
 
     XtAppContext appContext = XtWidgetToApplicationContext(dialog.shell);
+    XawFileDialog* previous = openDialog;
+    openDialog = &dialog;
     while ( !dialog.done ) {
         XtAppProcessEvent(appContext, XtIMAll);
     }
+    openDialog = previous;
     XtPopdown(dialog.shell);
 
     if ( dialog.approved ) {

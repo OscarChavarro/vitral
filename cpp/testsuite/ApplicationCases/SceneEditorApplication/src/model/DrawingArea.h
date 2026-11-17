@@ -5,6 +5,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
 #include "model/InteractionMode.h"
+#include "model/RenderTechnology.h"
 
 class Viewport;
 class ViewportSet;
@@ -23,6 +24,7 @@ The viewport set is referenced, not owned.
 class DrawingArea {
 private:
     ViewportSet* viewportSet;
+    RenderTechnology::Value renderTechnology;
 
     InteractionMode interactionMode;
     InteractionMode lastInteractionMode;
@@ -48,6 +50,20 @@ public:
     explicit DrawingArea(ViewportSet* viewportSet);
 
     ViewportSet* getViewportSet() const;
+
+    //= Render technology =================================================
+
+    /**
+    @return the technology presenting the viewport set
+    */
+    RenderTechnology::Value getRenderTechnology() const;
+
+    /**
+    Changes the technology presenting the viewport set, which changes the
+    render modes its viewports can use. The application must replace the
+    drawing surface accordingly.
+    */
+    void setRenderTechnology(RenderTechnology::Value renderTechnology);
 
     //= Interaction mode ==================================================
     InteractionMode getInteractionMode() const;

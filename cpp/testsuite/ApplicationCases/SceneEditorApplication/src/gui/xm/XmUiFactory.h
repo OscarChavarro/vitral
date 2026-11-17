@@ -28,6 +28,7 @@ public:
                                 const java::String& folder,
                                 const java::ArrayList<FileSuffixFilter>& filters,
                                 java::String& outPath) override;
+    virtual bool chooseFileInOpenDialog(const java::String& path) override;
 };
 
 #endif

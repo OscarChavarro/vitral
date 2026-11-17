@@ -14,6 +14,9 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
+#include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
+#include "java/lang/Math.h"
+#include "java/util/ArrayList.txx"
 
 namespace {
 java::ReentrantLock& rayIntersectorAccess();
@@ -447,4 +450,38 @@ double* ParametricBiCubicPatch::getMinMax()
     minMax[0] = minX; minMax[1] = minY; minMax[2] = minZ;
     minMax[3] = maxX; minMax[4] = maxY; minMax[5] = maxZ;
     return minMax;
+}
+
+QuadMesh* ParametricBiCubicPatch::exportToQuadMesh()
+{
+    int steps = java::Math::max(1, getApproximationSteps());
+    int n = steps + 1;
+    QuadMesh* mesh = new QuadMesh();
+    int i;
+    int j;
+    int index;
+
+    mesh->initVertexPositionsArray(n*n);
+    java::ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( i = 0; i < n; i++ ) {
+        double s = (double)i / steps;
+        for ( j = 0; j < n; j++ ) {
+            Vector3Dd p;
+            evaluate(p, s, (double)j / steps);
+            index = i*n + j;
+            positions[3*index] = p.x();
+            positions[3*index+1] = p.y();
+            positions[3*index+2] = p.z();
+        }
+    }
+    mesh->initQuadArrays(steps*steps);
+    index = 0;
+    for ( i = 0; i < steps; i++ ) {
+        for ( j = 0; j < steps; j++ ) {
+            mesh->setQuadAt(index, i*n + j, (i+1)*n + j, (i+1)*n + j+1,
+                i*n + j+1);
+            index++;
+        }
+    }
+    return mesh;
 }

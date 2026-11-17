@@ -22,6 +22,7 @@
 #include "application/mcp/MCPJson.h"
 #include "application/mcp/XtOpenGL4MCPApplicationTools.h"
 #include "model/ApplicationModel.h"
+#include "model/RenderTechnology.h"
 #include "model/Scene.h"
 #include "model/selection/SelectionSet.h"
 
@@ -331,4 +332,35 @@ java::String XtOpenGL4MCPApplicationTools::exitApplication()
 {
     XtEventQueue::invokeLater(new CloseApplication(parent), 300);
     return "{\"ok\":true,\"message\":\"The application is closing\"}";
+}
+
+java::String XtOpenGL4MCPApplicationTools::chooseImportFile(
+    const java::String& request)
+{
+    java::String path = MCPJson::stringProperty(request, "path", "");
+    if ( !parent->chooseFileInOpenDialog(path.trim()) ) {
+        throw java::IllegalStateException("Import chooser is not open");
+    }
+    return "{\"ok\":true}";
+}
+
+java::String XtOpenGL4MCPApplicationTools::setRenderTechnology(
+    const java::String& request)
+{
+    java::String name = MCPJson::stringProperty(request, "technology", "");
+    RenderTechnology::Value technology;
+
+    if ( !RenderTechnology::fromName(name, technology) ) {
+        throw java::IllegalArgumentException((java::String(
+            "Unknown technology \"") + name +
+            "\". Use " + RenderTechnology::getName(RenderTechnology::OPENGL) +
+            " or xlib (awt)").c_str());
+    }
+    if ( !parent->setRenderTechnology(technology) ) {
+        throw java::IllegalStateException((java::String("The technology ") +
+            RenderTechnology::getName(technology) +
+            " is not available in this GUI").c_str());
+    }
+    return java::String("{\"ok\":true,\"technology\":\"") +
+        RenderTechnology::getName(technology) + "\"}";
 }

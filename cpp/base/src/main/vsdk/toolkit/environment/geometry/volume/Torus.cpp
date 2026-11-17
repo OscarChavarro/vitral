@@ -7,8 +7,28 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+
+//= References:                                                             =
+//= [WAGN2004] Wagner, Max. "Ray/Torus Intersection". CS400 course homework =
+//= report for CS400 class                                                  =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 Torus::Torus(double inMajorRadius, double inMinorRadius)
-    : majorRadius(inMajorRadius), minorRadius(inMinorRadius) {}
+    : majorRadius(inMajorRadius), minorRadius(inMinorRadius) {
+    addControlSpecification("double;majorRadius;(0, INFINITE)",
+        &Torus::getMajorRadius, &Torus::setMajorRadius);
+    addControlSpecification("double;minorRadius;(0, INFINITE)",
+        &Torus::getMinorRadius, &Torus::setMinorRadius);
+}
 
 double Torus::getMajorRadius() const { return majorRadius; }
 void Torus::setMajorRadius(double rMajor) { majorRadius = rMajor; }
@@ -214,6 +234,71 @@ void Torus::doExtraInformation(const Ray& inRay, double inT, RayHit* outHit) {
             outHit->tangent = Vector3Dd(-std::sin(theta), std::cos(theta), 0);
         }
     }
+}
+
+PolyhedralBoundedSolid* Torus::exportToPolyhedralBoundedSolid()
+{
+    return buildPolyhedralBoundedSolid(DEFAULT_MAJOR_DIVISIONS,
+        DEFAULT_MINOR_DIVISIONS);
+}
+
+PolyhedralBoundedSolid* Torus::exportToPolyhedralBoundedSolid(
+    int majorDivisions, int minorDivisions)
+{
+    int normalizedMajorDivisions = java::Math::max(MIN_MAJOR_DIVISIONS,
+        majorDivisions);
+    int normalizedMinorDivisions = java::Math::max(MIN_MINOR_DIVISIONS,
+        minorDivisions);
+
+    if ( normalizedMajorDivisions == DEFAULT_MAJOR_DIVISIONS &&
+         normalizedMinorDivisions == DEFAULT_MINOR_DIVISIONS ) {
+        return exportToPolyhedralBoundedSolid();
+    }
+
+    return buildPolyhedralBoundedSolid(normalizedMajorDivisions,
+        normalizedMinorDivisions);
+}
+
+PolyhedralBoundedSolid* Torus::buildPolyhedralBoundedSolid(
+    int majorDivisions, int minorDivisions)
+{
+    PolyhedralBoundedSolid* solid;
+    Matrix4x4d T;
+    Matrix4x4d R;
+    Matrix4x4d M;
+    Matrix4x4d step;
+    int i;
+
+    //- Section lamina, from the XY plane to the XZ plane -------------
+    solid = PolyhedralBoundedSolidEulerConstructions::createCircularLamina(
+        0.0, 0.0, minorRadius, 0.0, minorDivisions);
+    T = Matrix4x4d();
+    T = T.translation(majorRadius, 0.0, 0.0);
+    R = Matrix4x4d();
+    R = R.axisRotation(-M_PI/2.0, 1, 0, 0);
+    M = T.multiply(R);
+    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
+        solid->getVerticesList().get(i)->position =
+            M.multiply(solid->getVerticesList().get(i)->position);
+    }
+
+    //- Rotational sweep of face 1 about the Z axis -------------------
+    step = Matrix4x4d();
+    step = step.axisRotation(2.0*M_PI / ((double)majorDivisions),
+        0, 0, 1);
+    for ( i = 0; i < majorDivisions; i++ ) {
+        PolyhedralBoundedSolidEulerConstructions::translationalSweepExtrudeFace(
+            solid, solid->findFace(1), step);
+    }
+
+    //- Close the ring: glue the swept face to the starting one -------
+    _PolyhedralBoundedSolidFace* headFace = solid->findFace(2);
+    _PolyhedralBoundedSolidFace* tailFace = solid->findFace(1);
+    PolyhedralBoundedSolidEulerOperators::lkfmrh(solid, headFace, tailFace);
+    PolyhedralBoundedSolidTopologyEditing::loopGlue(solid, headFace->id);
+    PolyhedralBoundedSolidValidationEngine::validateIntermediate(solid);
+
+    return solid;
 }
 
 double* Torus::getMinMax() {

@@ -211,7 +211,11 @@ public:
     /**
     Processes one of the standard commands of the viewport set (projection
     location or render mode, i.e. chosen in the menu of a viewport) over a
-    viewport, recording the change of its view.
+    viewport, recording the change of its view. A render technology command
+    is passed to the listener, as only the application can replace the
+    drawing surface; so is a render mode the technology in use does not
+    offer (i.e. the hidden lines over OpenGL), with the technology that
+    offers it, before selecting the mode.
     @param command the id of the command, starting with `IDV_`
     @param viewport viewport to change
     @return true if the command was a viewport set one and was processed

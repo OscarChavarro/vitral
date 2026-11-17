@@ -51,6 +51,14 @@ public:
     Vector3Dd* get2DLinePoint0(int i) const;
     Vector3Dd* get2DLinePoint1(int i) const;
 
+    /**
+    Reads a line without allocating (C++ port of `get2DLine`).
+    @param i index of the line, from 0 to `getNumLines() - 1`
+    @return false if there is no such line
+    */
+    bool get2DLine(int i, double& outX0, double& outY0,
+                   double& outX1, double& outY1) const;
+
     int getNumLines() const;
 
     void exportRgbImage(RGBImageUncompressed* inOutRasterViewport);

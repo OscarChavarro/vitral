@@ -15,12 +15,30 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4Renderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.cpp
-    src/main/vsdk/toolkit/render/opengl4/OpenGL4VoxelVolumeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/curve/OpenGL4ParametricCurveRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4FunctionalExplicitSurfaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4InfinitePlaneRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4ParametricBiCubicPatchRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4QuadMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4SubdividedBezierPatchRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4TriangleMeshGroupRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4TriangleMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/OpenGL4TriangleStripMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4BoxRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4ConeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4HeightFieldSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4ImplicitSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4PlanarHalfSpaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4QuadricSurfaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4TorusRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4VolumeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/_OpenGL4SolidBoundaryMeshBuilder.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4VoxelVolumeRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4SimpleMaterialRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ShaderProgramUtil.cpp
-    src/main/vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidRenderer.cpp
-    src/main/vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugRenderer.cpp
-    src/main/vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugHUDRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugHUDRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4LabelCanvas.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MeshBuilder.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MeshRenderer.cpp
@@ -41,15 +59,15 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.cpp
-    src/main/vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4ArrowRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4InputGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4TranslateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RotateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4ScaleGizmoRenderer.cpp
-    src/main/vsdk/toolkit/render/opengl4/OpenGL4Polygon2DRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/surface/polygon/OpenGL4Polygon2DRenderer.cpp
     src/main/vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.cpp
-    src/main/vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4SphereRenderer.cpp
 )
 
 target_include_directories(vitral_opengl4 PUBLIC src/main)

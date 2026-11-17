@@ -12,6 +12,9 @@
 #include "render/DrawingAreaHost.h"
 #include "render/opengl4/OpenGL4DrawingAreaRenderer.h"
 #include "render/opengl4/XtOpenGL4SceneBridge.h"
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+#include "render/xlib/XlibDrawingAreaRenderer.h"
+#endif
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSetCommands.h"
@@ -48,6 +51,10 @@ public:
     ApplicationModel* model;
     DrawingAreaInteractionTechniques* techniques;
     OpenGL4DrawingAreaRenderer* renderer;
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+    /// Presents the viewport set without GL, with Xlib 2D drawing only
+    XlibDrawingAreaRenderer* xlibRenderer;
+#endif
     GuiEventExecutor* executor;
     /// Viewport whose title was clicked, target of the viewport menu
     Viewport* menuViewport;
@@ -59,7 +66,11 @@ public:
     Impl(OpenGL4LabelImageProvider* labels,
          XtOpenGL4SceneBridge::Listener* listener)
         : listener(listener), model(new ApplicationModel()),
-          techniques(nullptr), renderer(nullptr), executor(nullptr),
+          techniques(nullptr), renderer(nullptr),
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+          xlibRenderer(nullptr),
+#endif
+          executor(nullptr),
           menuViewport(nullptr), selectionEditor(nullptr),
           editFeedbackProvider(nullptr)
     {
@@ -78,6 +89,13 @@ public:
             techniques->getTranslationGizmo(),
             techniques->getRotateGizmo(),
             techniques->getScaleGizmo());
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+        xlibRenderer = new XlibDrawingAreaRenderer(model, this,
+            [t](Viewport* viewport) { t->activateViewport(viewport); },
+            techniques->getTranslationGizmo(),
+            techniques->getRotateGizmo(),
+            techniques->getScaleGizmo());
+#endif
         executor = new GuiEventExecutor(model, this);
     }
 
@@ -86,6 +104,9 @@ public:
         delete selectionEditor;
         delete executor;
         delete renderer;
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+        delete xlibRenderer;
+#endif
         delete techniques;
         delete model;
     }
@@ -263,6 +284,23 @@ public:
     {
         listener->fullScreenGuiToggleRequested();
     }
+    /**
+    The model changes now; the application replaces the drawing surface
+    when drawing the next frame (see `usesXlibRendering`). Only the Xt
+    variants have a GL-less 2D canvas.
+    */
+    bool renderTechnologyChangeRequested(
+        RenderTechnology::Value technology) override
+    {
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+        model->getDrawingArea()->setRenderTechnology(technology);
+        listener->repaintRequested();
+        return true;
+#else
+        (void)technology;
+        return false;
+#endif
+    }
 
     //= ViewportSetInteractionListener ====================================
     void projectionLocationMenuRequested(Viewport* viewport,
@@ -314,6 +352,35 @@ void XtOpenGL4SceneBridge::display(int w, int h)
 {
     setCanvasSize(w, h);
     impl->renderer->display(w, h);
+}
+
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+void XtOpenGL4SceneBridge::displayXlib(Display* display, Window window,
+    Visual* visual, int depth, int width, int height)
+{
+    setCanvasSize(width, height);
+    impl->xlibRenderer->display(display, window, visual, depth, width, height);
+}
+#endif
+
+bool XtOpenGL4SceneBridge::usesXlibRendering() const
+{
+    return impl->model->getDrawingArea()->getRenderTechnology() ==
+        RenderTechnology::XLIB;
+}
+
+RenderTechnology::Value XtOpenGL4SceneBridge::getRenderTechnology() const
+{
+    return impl->model->getDrawingArea()->getRenderTechnology();
+}
+
+bool XtOpenGL4SceneBridge::setRenderTechnology(
+    RenderTechnology::Value technology)
+{
+    if ( technology == getRenderTechnology() ) {
+        return true;
+    }
+    return impl->renderTechnologyChangeRequested(technology);
 }
 
 void XtOpenGL4SceneBridge::display(int surfaceWidth, int surfaceHeight,
@@ -464,6 +531,18 @@ XtOpenGL4SceneBridge::getViewportMenuItems() const
         items.add(separator);
     }
     items.addAll(renderModes);
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+    java::ArrayList<ViewportMenuItem> technologies;
+    impl->addMenuItems(technologies, ViewportSetCommands::POPUP_RENDER_TECHNOLOGY,
+        RenderTechnology::getCommand(getRenderTechnology()));
+    if ( !items.isEmpty() && !technologies.isEmpty() ) {
+        ViewportMenuItem separator;
+        separator.separator = true;
+        separator.current = false;
+        items.add(separator);
+    }
+    items.addAll(technologies);
+#endif
     return items;
 }
 

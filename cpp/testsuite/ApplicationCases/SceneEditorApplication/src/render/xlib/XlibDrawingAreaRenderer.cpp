@@ -6,6 +6,8 @@
 #include <X11/Xutil.h>
 #include <cmath>
 #include <cstdio>
+#include <exception>
+#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "model/ApplicationModel.h"
@@ -16,6 +18,8 @@
 #include "render/DrawingAreaHost.h"
 #include "render/FrameBufferSource.h"
 #include "render/FrameCaptureService.h"
+#include "render/ProjectedLineLayer.h"
+#include "render/ProjectedLinesViewBuilder.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
@@ -33,8 +37,7 @@
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
-#include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
+#include "java/lang/Exception.h"
 #include "vsdk/toolkit/render/gizmo/Gizmo2DDrawList.h"
 #include "vsdk/toolkit/render/gizmo/InputGizmo2DPainter.h"
 #include "vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.h"
@@ -93,82 +96,96 @@ public:
     ZBuffer* readDepth() override { return nullptr; }
 };
 
-void drawLines(Display* display, Drawable frame, GC gc,
-               const Calligraphic2DBuffer& lines, int x, int y,
-               int width, int height, unsigned long color,
-               int lineWidth = 1, bool dashed = false)
+XPoint toPoint(double x, double y)
 {
-    XSetForeground(display, gc, color);
-    XSetLineAttributes(display, gc, lineWidth,
-        dashed ? LineOnOffDash : LineSolid, CapRound, JoinRound);
-    for (int i = 0; i < lines.getNumLines(); ++i) {
-        Vector3Dd* a = lines.get2DLinePoint0(i);
-        Vector3Dd* b = lines.get2DLinePoint1(i);
-        int x0 = x + static_cast<int>((a->x() + 1) * width / 2);
-        int y0 = y + static_cast<int>((1 - a->y()) * height / 2);
-        int x1 = x + static_cast<int>((b->x() + 1) * width / 2);
-        int y1 = y + static_cast<int>((1 - b->y()) * height / 2);
-        XDrawLine(display, frame, gc, x0, y0, x1, y1);
-        delete a;
-        delete b;
+    XPoint p;
+    p.x = static_cast<short>(java::Math::max(-32768.0,
+        java::Math::min(32767.0, static_cast<double>(std::lround(x)))));
+    p.y = static_cast<short>(java::Math::max(-32768.0,
+        java::Math::min(32767.0, static_cast<double>(std::lround(y)))));
+    return p;
+}
+
+/**
+Draws `ProjectedLineLayer`s with Xlib: the last stage of the calligraphic
+pipeline, the mapping from normalized device coordinates to the pixels of a
+viewport [FOLE1992].6, honoring the color, width and style of each layer
+(as the Java `AwtProjectedLineLayerRenderer`). Consecutive segments where
+one starts at the end of the previous one (i.e. the polyline approximating a
+curve, or a line broken by the hidden line algorithm) are drawn as one
+polyline, so the pattern of a dashed line continues along it instead of
+starting again at each (maybe very short) segment.
+*/
+void drawLayers(Display* display, Drawable frame, GC gc, Visual* visual,
+                const java::ArrayList<ProjectedLineLayer*>& layers,
+                int x0, int y0, int width, int height, double widthScale)
+{
+    // Distance, in pixels, under which a segment continues the previous one
+    const double CHAIN_TOLERANCE = 0.01;
+    std::vector<XPoint> polyline;
+
+    for (long l = 0; l < layers.size(); ++l) {
+        const ProjectedLineLayer* layer = layers.get(l);
+        const Calligraphic2DBuffer* lines = layer->getLines();
+        int lineWidth = static_cast<int>(std::lround(
+            java::Math::max(1.0, layer->getWidth() * widthScale)));
+        XSetForeground(display, gc, pixel(visual, layer->getColor()));
+
+        if (layer->getStyle() == ProjectedLineLayer::POINTS) {
+            for (int i = 0; i < lines->getNumLines(); ++i) {
+                double ax, ay, bx, by;
+                lines->get2DLine(i, ax, ay, bx, by);
+                double px = x0 + (ax + 1.0) / 2.0 * width;
+                double py = y0 + (1.0 - ay) / 2.0 * height;
+                XFillRectangle(display, frame, gc,
+                    static_cast<int>(std::lround(px - lineWidth / 2.0)),
+                    static_cast<int>(std::lround(py - lineWidth / 2.0)),
+                    lineWidth, lineWidth);
+            }
+            continue;
+        }
+        if (layer->getStyle() == ProjectedLineLayer::DASHED) {
+            char dashes[2] = {
+                static_cast<char>(java::Math::min(127, 4 * lineWidth)),
+                static_cast<char>(java::Math::min(127, 3 * lineWidth))
+            };
+            XSetDashes(display, gc, 0, dashes, 2);
+            XSetLineAttributes(display, gc, lineWidth, LineOnOffDash,
+                               CapButt, JoinMiter);
+        }
+        else {
+            XSetLineAttributes(display, gc, lineWidth, LineSolid,
+                               CapRound, JoinRound);
+        }
+
+        double lastX = NAN;
+        double lastY = NAN;
+        polyline.clear();
+        for (int i = 0; i < lines->getNumLines(); ++i) {
+            double ax, ay, bx, by;
+            lines->get2DLine(i, ax, ay, bx, by);
+            ax = x0 + (ax + 1.0) / 2.0 * width;
+            ay = y0 + (1.0 - ay) / 2.0 * height;
+            bx = x0 + (bx + 1.0) / 2.0 * width;
+            by = y0 + (1.0 - by) / 2.0 * height;
+            if (std::isnan(lastX) || std::fabs(ax - lastX) > CHAIN_TOLERANCE ||
+                std::fabs(ay - lastY) > CHAIN_TOLERANCE) {
+                if (polyline.size() >= 2)
+                    XDrawLines(display, frame, gc, polyline.data(),
+                               static_cast<int>(polyline.size()),
+                               CoordModeOrigin);
+                polyline.clear();
+                polyline.push_back(toPoint(ax, ay));
+            }
+            polyline.push_back(toPoint(bx, by));
+            lastX = bx;
+            lastY = by;
+        }
+        if (polyline.size() >= 2)
+            XDrawLines(display, frame, gc, polyline.data(),
+                       static_cast<int>(polyline.size()), CoordModeOrigin);
     }
     XSetLineAttributes(display, gc, 1, LineSolid, CapButt, JoinMiter);
-}
-
-bool projectLine(const Matrix4x4d& projection, const Vector3Dd& a,
-                 const Vector3Dd& b, Calligraphic2DBuffer& lines)
-{
-    Vector4Dd p = projection.multiply(Vector4Dd(a));
-    Vector4Dd q = projection.multiply(Vector4Dd(b));
-    const double planes[6][4] = {
-        {1,0,0,1}, {-1,0,0,1}, {0,1,0,1}, {0,-1,0,1},
-        {0,0,1,1}, {0,0,-1,1}
-    };
-    for (int i = 0; i < 6; ++i) {
-        const double* n = planes[i];
-        double dp = n[0]*p.x()+n[1]*p.y()+n[2]*p.z()+n[3]*p.w();
-        double dq = n[0]*q.x()+n[1]*q.y()+n[2]*q.z()+n[3]*q.w();
-        if (dp < 0 && dq < 0) return false;
-        if (dp < 0 || dq < 0) {
-            double t = dp / (dp - dq);
-            Vector4Dd cut = p.multiply(1-t).add(q.multiply(t));
-            if (dp < 0) p = cut; else q = cut;
-        }
-    }
-    p = p.dividedByW();
-    q = q.dividedByW();
-    lines.add2DLine(p.x(), p.y(), q.x(), q.y());
-    return true;
-}
-
-void drawGrid(Display* display, Drawable frame, GC gc, Visual* visual,
-              Camera* camera, int x, int y, int width, int height)
-{
-    Matrix4x4d transform;
-    if (camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL) {
-        Matrix4x4d rotation = camera->getRotation();
-        double yaw = rotation.obtainEulerYawAngle() * 180.0 / M_PI;
-        double pitch = rotation.obtainEulerPitchAngle() * 180.0 / M_PI;
-        if (pitch > -45 && pitch < 45) {
-            if ((yaw > 45 && yaw < 135) || (yaw < -45 && yaw > -135))
-                transform = transform.axisRotation(M_PI / 2, 1, 0, 0);
-            else
-                transform = transform.axisRotation(M_PI / 2, 0, 1, 0);
-        }
-    }
-    Matrix4x4d projection = camera->calculateProjectionMatrix();
-    Calligraphic2DBuffer regular, axes;
-    for (int i = -7; i <= 7; ++i) {
-        Calligraphic2DBuffer& out = i == 0 ? axes : regular;
-        projectLine(projection, transform.multiply(Vector3Dd(i,-7,0)),
-                    transform.multiply(Vector3Dd(i,7,0)), out);
-        projectLine(projection, transform.multiply(Vector3Dd(-7,i,0)),
-                    transform.multiply(Vector3Dd(7,i,0)), out);
-    }
-    drawLines(display, frame, gc, regular, x, y, width, height,
-              pixel(visual, ColorRgb(.37,.37,.37)));
-    drawLines(display, frame, gc, axes, x, y, width, height,
-              pixel(visual, ColorRgb(0,0,0)));
 }
 
 } // namespace
@@ -183,7 +200,8 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
       titleFontSize(0),
       selectionEditor(new SceneSelectionEditor(m->getScene())),
       gizmoPresenter(nullptr), gizmoDrawList(new Gizmo2DDrawList()),
-      gizmoRenderer(new XlibGizmo2DDrawListRenderer())
+      gizmoRenderer(new XlibGizmo2DDrawListRenderer()),
+      linesBuilder(new ProjectedLinesViewBuilder())
 {
     gizmoPresenter = new DrawingAreaGizmoPresenter(m->getDrawingArea(),
         selectionEditor, translationGizmo, rotateGizmo, scaleGizmo);
@@ -192,6 +210,7 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
 XlibDrawingAreaRenderer::~XlibDrawingAreaRenderer()
 {
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
+    delete linesBuilder;
     delete gizmoRenderer;
     delete gizmoDrawList;
     delete gizmoPresenter;
@@ -315,44 +334,36 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
         XSetForeground(display, gc, pixel(visual,
             scene->simpleBackground->colorInDireccion(camera->getFront())));
         XFillRectangle(display, frame, gc, x, y, width, height);
-        if (viewport->isShowGrid())
-            drawGrid(display, frame, gc, visual, camera, x, y, width, height);
     }
 
-    java::ArrayList<SimpleBody*>& bodies = scene->scene->getSimpleBodies();
-    if (!raytraced) {
-        java::ArrayList<SimpleBody*> solids, wires;
-        for (long i = 0; i < bodies.size(); ++i) {
-            SimpleBody* body = bodies[i];
-            if (!body || !body->getGeometry() || scene->isHidden(body)) continue;
-            if (dynamic_cast<Volume*>(body->getGeometry()))
-                solids.add(body);
-            else
-                wires.add(body);
-        }
-        if (wires.size()) {
-            Calligraphic2DBuffer lines;
-            WireframeRenderer::execute(&lines, wires, camera);
-            drawLines(display, frame, gc, lines, x, y, width, height,
-                      pixel(visual, ColorRgb(0,0,0)));
-        }
-        if (solids.size()) {
-            Calligraphic2DBuffer contours, visible, hidden;
-            Camera eye(*camera);
-            if (camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL) {
-                Vector3Dd front = camera->getFront().normalized();
-                eye.setPosition(camera->getPosition().subtract(front.multiply(1000)));
-                eye.setNearPlaneDistance(camera->getNearPlaneDistance() + 1000);
-                eye.setFarPlaneDistance(camera->getFarPlaneDistance() + 1000);
-            }
-            HiddenLineRenderer::executeAppelAlgorithm(solids, &eye,
-                &contours, &visible, &hidden);
-            drawLines(display, frame, gc, visible, x, y, width, height,
-                      pixel(visual, ColorRgb(0,0,0)));
-            drawLines(display, frame, gc, contours, x, y, width, height,
-                      pixel(visual, ColorRgb(0,0,0)), 2);
-        }
+    // The bodies as hidden lines (wireframe, or Appel hidden line removal
+    // when surfaces are on) and the annotations, as the AWT presentation of
+    // the Java port does
+    java::ArrayList<ProjectedLineLayer*> layers;
+    try {
+        linesBuilder->buildView(scene, viewport,
+            host->getBodyEditFeedbackProvider(), !raytraced, layers);
     }
+    catch (const java::Exception& e) {
+        // A failure of the line algorithms over some body must not break
+        // the presentation of the whole set
+        fprintf(stderr, "XlibDrawingAreaRenderer: can not compute the lines "
+                "of viewport \"%s\": %s\n",
+                model->getDrawingArea()->getViewportSet()->getTitleFor(
+                    viewport).c_str(), e.getMessage().c_str());
+        ProjectedLineLayer::deleteAll(layers);
+    }
+    catch (const std::exception& e) {
+        fprintf(stderr, "XlibDrawingAreaRenderer: can not compute the lines "
+                "of viewport \"%s\": %s\n",
+                model->getDrawingArea()->getViewportSet()->getTitleFor(
+                    viewport).c_str(), e.what());
+        ProjectedLineLayer::deleteAll(layers);
+    }
+    drawLayers(display, frame, gc, visual, layers, x, y, width, height,
+        model->getDrawingArea()->getViewportSet()->getElementScaler()
+            ->getScale());
+    ProjectedLineLayer::deleteAll(layers);
 
     // Must be the last to draw, over the scene
     drawGizmos(display, frame, gc, visual, viewport, x, y, width, height);

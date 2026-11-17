@@ -7,6 +7,7 @@
 class Vertex;
 class Ray;
 class RayHit;
+class TriangleMesh;
 
 class TriangleStripMesh : public Surface {
 private:
@@ -28,6 +29,17 @@ public:
 
     void setStrips(const java::ArrayList< java::ArrayList<int> >& indexes);
     java::ArrayList< java::ArrayList<int> >& getStrips();
+
+    /**
+    The triangles of the strips, as a triangle mesh sharing the vertex
+    positions: in each strip, every vertex after the first two closes a
+    triangle with the two before it, alternating their order so all the
+    triangles keep the orientation of the first one. Triangles with a
+    repeated vertex (used to join strips) are skipped.
+    @return a new mesh (owned by the caller) with positions and triangles
+    only, or null if there are no vertexes or strips
+    */
+    TriangleMesh* exportToTriangleMesh();
 
     Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
     virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);

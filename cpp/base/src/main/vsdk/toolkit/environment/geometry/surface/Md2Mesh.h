@@ -4,6 +4,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 class Image;
+class TriangleMesh;
 
 class _AnimationInfo {
 public:
@@ -68,6 +69,15 @@ public:
     void setFrameTimeSeg(float frameTimeSeg);
     float getElapsedTimeSeg() const;
     void setElapsedTimeSeg(float elapsedTimeSeg);
+
+    /**
+    The triangles of a key frame of the model (without interpolation between
+    frames), as a triangle mesh with the positions of the frame.
+    @param frame index of the frame, from 0 to `frameVertices.size() - 1`
+    @return a new mesh (owned by the caller) with positions and triangles
+    only, or null if the model has no such frame or no triangles
+    */
+    TriangleMesh* exportToTriangleMesh(int frame);
 
     void returnStartEndAnim(short inIndex, short outStartEnd[2]);
     void returnStartEndAnim(const java::String& inNameAnim, short outStartEnd[2]);

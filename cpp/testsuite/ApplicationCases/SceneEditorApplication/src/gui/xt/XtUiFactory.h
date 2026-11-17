@@ -48,6 +48,13 @@ public:
                                 const java::String& folder,
                                 const java::ArrayList<FileSuffixFilter>& filters,
                                 java::String& outPath) = 0;
+
+    /**
+    Closes the file dialog being shown, as the automation service asks.
+    @param path the file to approve, or empty to cancel
+    @return false if no file dialog is open
+    */
+    virtual bool chooseFileInOpenDialog(const java::String& path) = 0;
 };
 
 /**

@@ -20,9 +20,18 @@ Each of its items must have as modifier the corresponding command:
 
 The `VIEWPORT_SET_RENDER_MODE` popup lists the ways a viewport can be
 rendered: `IDV_VIEWPORT_SET_RENDER_MODE_GPU` (the graphics API in use, i.e.
-OpenGL; the default) and `IDV_VIEWPORT_SET_RENDER_MODE_CPU` (raytracing in the
-processor). Applications present it after the projection location items,
-separated from them.
+OpenGL; the default), `IDV_VIEWPORT_SET_RENDER_MODE_CPU` (raytracing in the
+processor) and `IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES` (lines computed
+in the processor: wireframe or hidden line removal). Applications present it
+after the projection location items, separated from them.
+
+The `VIEWPORT_SET_RENDER_TECHNOLOGY` popup lists the technologies an
+application can use to present the whole viewport set:
+`IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4` and
+`IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT` (2D drawing only, without any 3D
+API: AWT in the Java port, the 2D canvas of the GUI toolkit in this one).
+The viewport set model does not process these commands: only the
+application knows how to replace the drawing surface.
 */
 class ViewportSetCommands {
 public:
@@ -49,6 +58,14 @@ public:
         "IDV_VIEWPORT_SET_RENDER_MODE_CPU";
     static constexpr const char* IDV_RENDER_MODE_CPU_HIDDEN_LINES =
         "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES";
+
+    static constexpr const char* POPUP_RENDER_TECHNOLOGY =
+        "VIEWPORT_SET_RENDER_TECHNOLOGY";
+
+    static constexpr const char* IDV_RENDER_TECHNOLOGY_OPENGL4 =
+        "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4";
+    static constexpr const char* IDV_RENDER_TECHNOLOGY_AWT =
+        "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT";
 
 private:
     ViewportSetCommands() {}

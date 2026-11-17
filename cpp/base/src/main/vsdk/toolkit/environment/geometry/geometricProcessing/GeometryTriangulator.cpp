@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.h"
 bool GeometryTriangulator::exportToTriangleMeshGroup(Geometry* geometry, TriangleMeshGroup& outGroup)
 {
@@ -27,6 +28,17 @@ bool GeometryTriangulator::exportToTriangleMeshGroup(Geometry* geometry, Triangl
         if ( tmp == 0 ) return false;
         outGroup = *tmp;
         delete tmp;
+        return true;
+    }
+
+    if ( TriangleStripMesh* strips = dynamic_cast<TriangleStripMesh*>(geometry) ) {
+        TriangleMesh* mesh = strips->exportToTriangleMesh();
+        if ( mesh == 0 ) {
+            return false;
+        }
+        outGroup.getMeshes().clear();
+        outGroup.addMesh(*mesh);
+        delete mesh;
         return true;
     }
 

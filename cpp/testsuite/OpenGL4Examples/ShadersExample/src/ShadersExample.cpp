@@ -49,7 +49,7 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
+#include "vsdk/toolkit/render/opengl4/volume/OpenGL4SphereRenderer.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "model/ShadersGeometryFixture.h"
 #include "options/CommandLineOptions.h"

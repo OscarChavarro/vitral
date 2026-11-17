@@ -35,7 +35,18 @@ public:
                            const java::ArrayList<FileSuffixFilter>& filters,
                            java::String& outPath);
 
+    /**
+    Closes the open dialog as the automation service asks (tool
+    `gui.dialog.choose_file`): approving a path, or cancelling it.
+    @param path the file to approve, or empty to cancel
+    @return false if no dialog is open
+    */
+    static bool chooseInOpenDialog(const java::String& path);
+
 private:
+    /// The dialog being shown, or null
+    static XmFileDialog* openDialog;
+
     java::ArrayList<FileSuffixFilter> filters;
     Widget shell;
     Widget box;

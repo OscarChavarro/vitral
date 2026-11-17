@@ -18,6 +18,7 @@
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "application/commands/GuiEventExecutor.h"
 #include "application/mcp/MCPJson.h"
+#include "application/mcp/MCPSceneSerializer.h"
 #include "application/mcp/MCPSceneTools.h"
 #include "model/ApplicationModel.h"
 #include "model/Scene.h"
@@ -63,44 +64,13 @@ void MCPSceneTools::recordSceneChange(const java::String& tool,
 
 java::String MCPSceneTools::describeScene()
 {
-    Scene* scene = this->scene();
-    java::StringBuilder sb;
-    sb.append("{\"bodies\":[");
-    java::ArrayList<SimpleBody*>& bodies = scene->scene->getSimpleBodies();
-    for ( int i = 0; i < bodies.size(); i++ ) {
-        if ( i > 0 ) {
-            sb.append(',');
-        }
-        SimpleBody* body = bodies.get(i);
-        Geometry* geometry = body->getGeometry();
-        Vector3Dd position = body->getPosition();
-        Vector3Dd scale = body->getScale();
-        sb.append("{\"index\":").append(i)
-            .append(",\"name\":\"").append(MCPJson::escape(body->getName())).append('"')
-            .append(",\"geometry\":\"").append(geometry->getClassSimpleName()).append('"')
-            .append(",\"position\":").append(MCPJson::vector(position))
-            .append(",\"scale\":").append(MCPJson::vector(scale));
-        Sphere* sphere = dynamic_cast<Sphere*>(geometry);
-        if ( sphere != nullptr ) {
-            sb.append(",\"radius\":").append(sphere->getRadius());
-        }
-        sb.append('}');
-    }
-    sb.append("],\"lights\":[");
-    java::ArrayList<Light*>& lights = scene->scene->getLights();
-    for ( int i = 0; i < lights.size(); i++ ) {
-        if ( i > 0 ) {
-            sb.append(',');
-        }
-        Light* light = lights.get(i);
-        sb.append("{\"index\":").append(i)
-            .append(",\"type\":\"").append(light->getClassSimpleName()).append('"')
-            .append(",\"position\":").append(MCPJson::vector(light->getPosition()))
-            .append(",\"emission\":").append(MCPJson::color(light->getEmission()))
-            .append('}');
-    }
-    sb.append("]}");
-    return sb.toString();
+    return MCPSceneSerializer(scene(), false).toJson(-1);
+}
+
+java::String MCPSceneTools::serializeScene(const java::String& request)
+{
+    int index = (int)MCPJson::numberProperty(request, "index", -1);
+    return MCPSceneSerializer(scene(), true).toJson(index);
 }
 
 void MCPSceneTools::clearScene()

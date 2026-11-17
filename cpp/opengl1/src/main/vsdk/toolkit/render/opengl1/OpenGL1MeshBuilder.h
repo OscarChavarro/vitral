@@ -16,6 +16,14 @@ public:
     explicit OpenGL1MeshBuilder(double characteristicSize);
 
     /**
+    @param minmax bounding box as given by `Geometry::getMinMax()`, or null
+    (it is not deleted)
+    @return the longest side of the box (1 if there is no box), to be used as
+    the characteristic size of a mesh
+    */
+    static double characteristicSize(const double* minmax);
+
+    /**
     Adds one triangle; vertices are given counterclockwise seen from the side
     the normals point to.
     */
@@ -63,7 +71,9 @@ private:
     /// x y z, nx ny nz, u v of each vertex
     static const int VERTEX_SIZE = 8;
     java::ArrayList<float> vertices;
-    double characteristicSize;
+    /// C++ port note: Java's `characteristicSize` field, renamed as it
+    /// would clash with the static method of the same name
+    double meshCharacteristicSize;
     bool doubleSided;
 
     void addVertex(const Vector3Dd& p, const Vector3Dd& n, double u, double v);

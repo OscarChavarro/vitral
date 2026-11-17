@@ -21,7 +21,6 @@ Java ones.
 class MCPViewportTools {
 private:
     ApplicationModel* model;
-    bool supportsXlib;
 
     java::ArrayList<Viewport*> selectedViewports(const java::String& request);
 
@@ -29,8 +28,7 @@ public:
     /**
     @param model application model the tools work over (referenced)
     */
-    explicit MCPViewportTools(ApplicationModel* model,
-                              bool supportsXlib = false);
+    explicit MCPViewportTools(ApplicationModel* model);
 
     /**
     Sets the interaction mode of the drawing area (tool `gui.set_mode`).
@@ -47,9 +45,20 @@ public:
     void setRendererConfiguration(const java::String& request);
 
     /**
+    Sets the rendering algorithm of the selected viewport (or `viewport`
+    when supplied; tool `viewport.set_rendering`). The drawing technology
+    must already make that algorithm available; the protocol changes the
+    canvas before calling this method.
+    @param request request with the arguments algorithm (gpu, hidden_lines
+    or raytracing) and viewport (optional)
+    @return the rendering configuration of the viewport as JSON
+    */
+    java::String setSelectedRendering(const java::String& request);
+
+    /**
     @param request request with the argument viewport (index; default all)
-    @return the rendering configuration of the viewports as JSON (tool
-    `render.get_configuration`)
+    @return the rendering configuration of the viewports, and the technology
+    presenting them, as JSON (tool `render.get_configuration`)
     */
     java::String describeRendererConfigurations(const java::String& request);
 };

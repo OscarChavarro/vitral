@@ -1052,6 +1052,26 @@ bool DrawingAreaInteractionTechniques::processViewportCommand(
     const java::String& command, Viewport* viewport)
 {
     bool processed;
+    RenderTechnology::Value technology;
+
+    // The technology presents the whole set: it is not part of the view
+    // history of a viewport
+    if ( RenderTechnology::fromCommand(command, technology) ) {
+        if ( technology != drawingArea->getRenderTechnology() ) {
+            listener->renderTechnologyChangeRequested(technology);
+        }
+        return true;
+    }
+
+    // A render mode that the technology in use does not offer (i.e. the
+    // hidden lines over OpenGL) first changes to the technology offering it
+    int mode = Viewport::renderModeForCommand(command);
+    if ( mode != 0 && !viewportSet->isRenderModeAvailable(mode) &&
+         RenderTechnology::forRenderMode(mode,
+             drawingArea->getRenderTechnology(), technology) &&
+         technology != drawingArea->getRenderTechnology() ) {
+        listener->renderTechnologyChangeRequested(technology);
+    }
 
     editRecorder->beginAction();
     try {

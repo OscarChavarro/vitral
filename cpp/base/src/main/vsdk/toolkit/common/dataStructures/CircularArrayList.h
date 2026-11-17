@@ -116,20 +116,32 @@ private:
     void insertAt(int index, const E& e)
     {
         int i;
+        // Copy first: `e` may refer to a slot of `elements`, freed on growth.
+        E value = e;
 
-        if ( currentSize == capacity ) {
-            E* grown = new E[2 * capacity];
-            for ( i = 0; i < currentSize; i++ ) {
+        if ( currentSize >= capacity ) {
+            // Growth copies around the gap at `index` in a single pass, so
+            // no shift is done on the new array (that shift made GCC report
+            // a false -Wstringop-overflow on `new E[2 * capacity]`).
+            int newCapacity = (capacity > 0) ? 2 * capacity : 8;
+            E* grown = new E[newCapacity];
+            for ( i = 0; i < index; i++ ) {
                 grown[i] = elements[i];
             }
+            for ( i = index; i < currentSize; i++ ) {
+                grown[i + 1] = elements[i];
+            }
+            grown[index] = value;
             delete[] elements;
             elements = grown;
-            capacity = 2 * capacity;
+            capacity = newCapacity;
         }
-        for ( i = currentSize; i > index; i-- ) {
-            elements[i] = elements[i - 1];
+        else {
+            for ( i = currentSize; i > index; i-- ) {
+                elements[i] = elements[i - 1];
+            }
+            elements[index] = value;
         }
-        elements[index] = e;
         currentSize++;
         attachFrom(index);
     }

@@ -10,6 +10,13 @@
 BlobSolid::BlobSolid(double thresholdValue, bool useSturmSequences) :
     components(), threshold(thresholdValue), sturm(useSturmSequences)
 {
+    addControlSpecifications();
+}
+
+void BlobSolid::addControlSpecifications()
+{
+    addControlSpecification("double;threshold;(0, INFINITE)",
+        &BlobSolid::getThreshold, &BlobSolid::setThreshold);
 }
 
 Geometry* BlobSolid::copyGeometry() const { return new BlobSolid(*this); }

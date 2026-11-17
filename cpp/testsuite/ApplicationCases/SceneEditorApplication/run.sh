@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Runs the platform default variant; set SCENE_EDITOR_VARIANT to choose another
 # one (xm_opengl4, xaw_opengl4, xm_opengl1, xaw_opengl1, gtk4_opengl4).
+# The MCP automation service (-s, TCP port 1234) is always started, as in the
+# Java port, except for the GTK4 variant, which has none.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -24,4 +26,12 @@ case "$SCENE_EDITOR_VARIANT" in
         exit 1
         ;;
 esac
-exec "$SCRIPT_DIR/$LAUNCHER" "$@"
+MCP_ARGS=()
+if [ "$SCENE_EDITOR_VARIANT" != "gtk4_opengl4" ]; then
+    MCP_ARGS=(-s)
+    for arg in "$@"; do
+        if [ "$arg" = "-s" ]; then MCP_ARGS=(); fi
+    done
+fi
+# (the expansion is safe with set -u on the bash 3.2 of macOS too)
+exec "$SCRIPT_DIR/$LAUNCHER" ${MCP_ARGS[@]+"${MCP_ARGS[@]}"} "$@"

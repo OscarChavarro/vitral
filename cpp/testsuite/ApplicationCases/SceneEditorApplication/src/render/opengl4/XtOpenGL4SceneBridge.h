@@ -7,6 +7,10 @@
 #include "application/commands/GuiEventExecutor.h"
 #include "gui/PointerCursor.h"
 #include "java/io/File.h"
+#include "model/RenderTechnology.h"
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+#include <X11/Xlib.h>
+#endif
 
 class ApplicationModel;
 class BodyEditFeedbackProvider;
@@ -150,6 +154,32 @@ public:
     void display(int width, int height);
     void display(int surfaceWidth, int surfaceHeight,
                  int canvasWidth, int canvasHeight);
+#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
+    /**
+    Draws a frame with Xlib 2D operations only (no GL context): the hidden
+    lines or raytraced views of `XlibDrawingAreaRenderer`.
+    */
+    void displayXlib(Display* display, Window window, Visual* visual,
+                     int depth, int width, int height);
+#endif
+
+    /**
+    @return true if the viewport set is presented with Xlib 2D drawing (see
+    `RenderTechnology`): the drawing area must have no GL context
+    */
+    bool usesXlibRendering() const;
+
+    /**
+    @return the technology presenting the viewport set
+    */
+    RenderTechnology::Value getRenderTechnology() const;
+
+    /**
+    Changes the technology presenting the viewport set; the application
+    replaces the drawing surface when drawing the next frame.
+    @return false if this GUI can not present the technology
+    */
+    bool setRenderTechnology(RenderTechnology::Value technology);
     void reshape(int width, int height);
 
     /**

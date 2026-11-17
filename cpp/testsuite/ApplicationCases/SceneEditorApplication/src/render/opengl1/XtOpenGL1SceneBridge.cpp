@@ -99,18 +99,6 @@ public:
         delete model;
     }
 
-    void useXlibRendering(bool useXlib)
-    {
-        ViewportSet* set = model->getDrawingArea()->getViewportSet();
-        if (set->isRenderModeAvailable(Viewport::RENDER_MODE_HIDDEN_LINES)
-            == useXlib) return;
-        java::ArrayList<int> modes;
-        modes.add(useXlib ? Viewport::RENDER_MODE_HIDDEN_LINES :
-                            Viewport::RENDER_MODE_Z_BUFFER);
-        modes.add(Viewport::RENDER_MODE_RAYTRACING);
-        set->setAvailableRenderModes(modes);
-    }
-
     /**
     Initializes the model as `AwtJogl4SceneEditorApplication.createModel`
     does: the scene, the raytraced image, the palette of depth maps and the
@@ -284,6 +272,17 @@ public:
     {
         listener->fullScreenGuiToggleRequested();
     }
+    /**
+    The model changes now; the application replaces the drawing surface
+    when drawing the next frame (see `usesXlibRendering`).
+    */
+    bool renderTechnologyChangeRequested(
+        RenderTechnology::Value technology) override
+    {
+        model->getDrawingArea()->setRenderTechnology(technology);
+        listener->repaintRequested();
+        return true;
+    }
 
     //= ViewportSetInteractionListener ====================================
     void projectionLocationMenuRequested(Viewport* viewport,
@@ -346,8 +345,22 @@ void XtOpenGL1SceneBridge::displayXlib(Display* display, Window window,
 
 bool XtOpenGL1SceneBridge::usesXlibRendering() const
 {
-    return impl->model->getDrawingArea()->getViewportSet()->isRenderModeAvailable(
-        Viewport::RENDER_MODE_HIDDEN_LINES);
+    return impl->model->getDrawingArea()->getRenderTechnology() ==
+        RenderTechnology::XLIB;
+}
+
+RenderTechnology::Value XtOpenGL1SceneBridge::getRenderTechnology() const
+{
+    return impl->model->getDrawingArea()->getRenderTechnology();
+}
+
+bool XtOpenGL1SceneBridge::setRenderTechnology(
+    RenderTechnology::Value technology)
+{
+    if ( technology != getRenderTechnology() ) {
+        impl->renderTechnologyChangeRequested(technology);
+    }
+    return true;
 }
 
 void XtOpenGL1SceneBridge::reshape(int w, int h)
@@ -491,6 +504,16 @@ XtOpenGL1SceneBridge::getViewportMenuItems() const
         items.add(separator);
     }
     items.addAll(renderModes);
+    java::ArrayList<ViewportMenuItem> technologies;
+    impl->addMenuItems(technologies, ViewportSetCommands::POPUP_RENDER_TECHNOLOGY,
+        RenderTechnology::getCommand(getRenderTechnology()));
+    if ( !items.isEmpty() && !technologies.isEmpty() ) {
+        ViewportMenuItem separator;
+        separator.separator = true;
+        separator.current = false;
+        items.add(separator);
+    }
+    items.addAll(technologies);
     return items;
 }
 
@@ -500,10 +523,6 @@ void XtOpenGL1SceneBridge::executeViewportCommand(const java::String& command)
     if ( viewport == nullptr || !impl->isKnownViewport(viewport) ) {
         return;
     }
-    if (command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES)
-        impl->useXlibRendering(true);
-    else if (command == ViewportSetCommands::IDV_RENDER_MODE_GPU)
-        impl->useXlibRendering(false);
     impl->techniques->processViewportCommand(command.c_str(), viewport);
 }
 

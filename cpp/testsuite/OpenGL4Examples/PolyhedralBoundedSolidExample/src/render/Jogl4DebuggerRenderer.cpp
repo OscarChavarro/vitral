@@ -24,7 +24,7 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RendererConfigurationShaderSelector.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SimpleMaterialRenderer.h"
-#include "vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidRenderer.h"
+#include "vsdk/toolkit/render/opengl4/volume/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidRenderer.h"
 #include "models/DebuggerModel.h"
 
 static const double HUD_INSET_DEPTH = 2.8;

@@ -5,6 +5,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+class QuadMesh;
 #include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
 #include "vsdk/toolkit/environment/geometry/surface/_ParametricBiCubicPatchIntersector.h"
 class ParametricCurve;
@@ -90,6 +91,15 @@ public:
     virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double intT, RayHit* outData);
     virtual double* getMinMax();
+
+    /**
+    Exports an approximation of the patch as a mesh of quadrilaterals: the
+    patch is evaluated on a grid of `getApproximationSteps()` x
+    `getApproximationSteps()` cells of its parameters (s, t) in [0, 1] x
+    [0, 1], so the lines of the mesh are isoparametric lines of the patch.
+    @return a new mesh (owned by the caller)
+    */
+    QuadMesh* exportToQuadMesh();
 
 private:
     static const int INITIAL_APPROXIMATION_STEPS = 12;

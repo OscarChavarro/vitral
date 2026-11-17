@@ -41,9 +41,18 @@ public:
     explicit MCPSceneTools(ApplicationModel* model);
 
     /**
-    @return the bodies and lights of the scene as JSON
+    @return the bodies (placement and parameters of their geometries) and
+    lights of the scene as JSON (tool `scene.describe`)
     */
     java::String describeScene();
+
+    /**
+    @param request request with the optional argument index
+    @return the bodies with their materials and the full data of their
+    geometries, and the lights, as JSON (tool `scene.serialize`); only the
+    body `index` if given
+    */
+    java::String serializeScene(const java::String& request);
 
     /**
     Removes all bodies, lights and debug groups (tool `scene.clear`).
