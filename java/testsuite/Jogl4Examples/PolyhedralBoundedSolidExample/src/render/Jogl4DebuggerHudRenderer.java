@@ -17,7 +17,7 @@ import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
-import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidDebugHUDRenderer;
+import vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidDebugHUDRenderer;
 
 public class Jogl4DebuggerHudRenderer
 {

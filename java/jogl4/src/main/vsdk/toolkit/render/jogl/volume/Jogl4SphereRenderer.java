@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.volume;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +15,8 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.SpherePolyhedralCache;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4MeshRenderer;
 
 /**
 Renders a `Sphere` as a tessellated mesh (see `Jogl4MeshRenderer`). The sphere
@@ -24,7 +26,8 @@ attributes of the parametric surface) are uploaded once. The meshes are cached
 by radius and resolution, so many spheres can be drawn per frame.
 */
 public class Jogl4SphereRenderer extends Jogl4Renderer {
-    private static final int DEFAULT_SLICES = 32;
+    /// Divisions around the axis of a sphere drawn with the default tessellation
+    public static final int SLICES = 32;
     private static final int DEFAULT_STACKS = 16;
 
     private static final Map<String, Jogl4MeshRenderer.Mesh> MESHES = new HashMap<>();
@@ -48,7 +51,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             quality,
             textureMap,
             normalMap,
-            DEFAULT_SLICES,
+            SLICES,
             DEFAULT_STACKS);
     }
 

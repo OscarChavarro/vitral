@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 import java.util.List;
 
@@ -13,6 +13,10 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MeshBuilder;
+import vsdk.toolkit.render.jogl.Jogl4MeshRenderer;
 
 /**
 Renders a `FunctionalExplicitSurface` (a height field z = f(x, y)) with the GL4
@@ -59,7 +63,7 @@ public class Jogl4FunctionalExplicitSurfaceRenderer extends Jogl4Renderer {
     @return a string that identifies its current tessellation: the internal
     mesh is replaced by the surface whenever it changes
     */
-    static String meshKey(FunctionalExplicitSurface surface)
+    public static String meshKey(FunctionalExplicitSurface surface)
     {
         return "functionalexplicitsurface/" + System.identityHashCode(surface) + "/" +
             System.identityHashCode(surface.getInternalTriangleMesh());
@@ -70,7 +74,7 @@ public class Jogl4FunctionalExplicitSurfaceRenderer extends Jogl4Renderer {
     @return the mesh of the surface, or null if it has no valid tessellation
     (i.e. its function could not be evaluated)
     */
-    static Jogl4MeshRenderer.Mesh buildMesh(FunctionalExplicitSurface surface)
+    public static Jogl4MeshRenderer.Mesh buildMesh(FunctionalExplicitSurface surface)
     {
         TriangleMesh mesh = surface.getInternalTriangleMesh();
 

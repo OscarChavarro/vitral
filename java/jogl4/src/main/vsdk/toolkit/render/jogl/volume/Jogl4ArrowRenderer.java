@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.volume;
 
 import java.nio.FloatBuffer;
 import java.util.List;
@@ -16,9 +16,23 @@ import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4MeshBuilder;
+import vsdk.toolkit.render.jogl.Jogl4MeshRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 
+/**
+Renders an `Arrow` with the GL4 pipeline, in two ways: `draw` with its own
+mesh of `SLICES` divisions (as needed by the gizmos), and, through
+`Jogl4GeometryRenderer`, from the mesh built by `buildMesh` (cached by its
+parameters), that honors every bit of the `RendererConfiguration` as the
+other geometries.
+*/
 public class Jogl4ArrowRenderer extends Jogl4Renderer {
     private static final int SLICES = 16;
+    /// Divisions around the axis of the mesh built by `buildMesh`
+    public static final int MESH_SLICES = 32;
     private static final float SURFACE_POLYGON_OFFSET_FACTOR = 1.0f;
     private static final float SURFACE_POLYGON_OFFSET_UNITS = 1.0f;
 
@@ -123,7 +137,7 @@ public class Jogl4ArrowRenderer extends Jogl4Renderer {
         initialized = false;
     }
 
-    static void ensureMesh(GL4 gl, Arrow arrow) {
+    public static void ensureMesh(GL4 gl, Arrow arrow) {
         if ( initialized && matchesMesh(arrow) ) {
             return;
         }
@@ -476,5 +490,34 @@ public class Jogl4ArrowRenderer extends Jogl4Renderer {
         float[] normals;
         float[] uvs;
         int vertexCount;
+    }
+
+    /**
+    @param arrow an arrow
+    @return a string that identifies the mesh of the arrow
+    */
+    public static String meshKey(Arrow arrow)
+    {
+        return "arrow/" + arrow.getBaseLength() + "/" + arrow.getHeadLength() + "/" +
+            arrow.getBaseRadius() + "/" + arrow.getHeadRadius();
+    }
+
+    /**
+    @param arrow arrow to tessellate
+    @return the mesh of the base cylinder and the head cone of the arrow
+    */
+    public static Jogl4MeshRenderer.Mesh buildMesh(Arrow arrow)
+    {
+        double h1 = arrow.getBaseLength();
+        double h2 = arrow.getHeadLength();
+        double r1 = arrow.getBaseRadius();
+        double r2 = arrow.getHeadRadius();
+        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(h1 + h2);
+
+        builder.addFrustum(0, r1, h1, r1, MESH_SLICES);
+        builder.addDisk(0, 0, r1, false, MESH_SLICES);
+        builder.addFrustum(h1, r2, h1 + h2, 0, MESH_SLICES);
+        builder.addDisk(h1, r1, r2, false, MESH_SLICES);
+        return builder.build();
     }
 }

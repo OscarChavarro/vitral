@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 import java.util.List;
 
@@ -12,6 +12,12 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MeshBuilder;
+import vsdk.toolkit.render.jogl.Jogl4MinMaxRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MeshRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SelectionCornersRenderer;
 
 /**
 Renders an `InfinitePlane` with the GL4 pipeline. As in
@@ -61,10 +67,54 @@ public class Jogl4InfinitePlaneRenderer extends Jogl4Renderer {
     }
 
     /**
+    Draws the mesh of the square shown for a plane. Its bounding volume is
+    infinite, so the bounding volume and the selection corners are drawn
+    around the square instead.
+    @param gl OpenGL context
+    @param mesh mesh of the plane, built by `buildMesh`
+    @param plane plane to draw
+    @param camera camera that views the plane
+    @param lights lights of the scene, or null or empty to use a light at the camera
+    @param material material of the plane
+    @param quality bits of rendering configuration
+    @param textureMap texture, or null
+    @param normalMap normal (bump) map, or null
+    @param localTransform transformation from plane space to world space
+    */
+    public static void drawMesh(
+        GL4 gl,
+        Jogl4MeshRenderer.Mesh mesh,
+        InfinitePlane plane,
+        Camera camera,
+        List<Light> lights,
+        SimpleMaterial material,
+        RendererConfiguration quality,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
+        Matrix4x4d localTransform)
+    {
+        RendererConfiguration meshQuality = new RendererConfiguration();
+
+        meshQuality.clone(quality);
+        meshQuality.setBoundingVolume(false);
+        meshQuality.setSelectionCorners(false);
+        Jogl4MeshRenderer.draw(gl, mesh, plane, camera, lights, material, meshQuality,
+            textureMap, normalMap, localTransform);
+
+        double[] shown = calculateShownMinMax(plane);
+        if ( quality.isBoundingVolumeSet() ) {
+            Jogl4MinMaxRenderer.draw(gl, shown, camera, localTransform);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            Jogl4SelectionCornersRenderer.draw(gl, shown, camera, localTransform);
+        }
+    }
+
+    /**
     @param plane a plane
     @return a string that identifies the square shown for the plane
     */
-    static String meshKey(InfinitePlane plane)
+    public static String meshKey(InfinitePlane plane)
     {
         return "infiniteplane/" + plane.getA() + "/" + plane.getB() + "/" +
             plane.getC() + "/" + plane.getD();
@@ -102,7 +152,7 @@ public class Jogl4InfinitePlaneRenderer extends Jogl4Renderer {
     @param plane plane to tessellate
     @return the mesh of the square shown for the plane
     */
-    static Jogl4MeshRenderer.Mesh buildMesh(InfinitePlane plane)
+    public static Jogl4MeshRenderer.Mesh buildMesh(InfinitePlane plane)
     {
         Vector3Dd[] frame = calculateFrame(plane);
         Vector3Dd center = frame[0];

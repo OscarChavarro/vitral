@@ -30,7 +30,7 @@ import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
 import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
-import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 import vsdk.toolkit.media.RGBImageUncompressed;

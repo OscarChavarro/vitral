@@ -3,7 +3,8 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.render.RenderingElement;
-import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4ArrowRenderer;
 
 public abstract class Jogl4Renderer extends RenderingElement {
     public static boolean verifyOpenGLAvailability()

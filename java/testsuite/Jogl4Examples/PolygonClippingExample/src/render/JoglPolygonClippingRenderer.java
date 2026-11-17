@@ -28,7 +28,7 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
-import vsdk.toolkit.render.jogl.Jogl4Polygon2DRenderer;
+import vsdk.toolkit.render.jogl.surface.polygon.Jogl4Polygon2DRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ShaderProgramUtil;
 
 public class JoglPolygonClippingRenderer implements GLEventListener

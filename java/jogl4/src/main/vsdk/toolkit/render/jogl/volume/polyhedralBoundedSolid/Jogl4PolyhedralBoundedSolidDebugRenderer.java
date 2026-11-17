@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl.polyhedralBoundedSolid;
+package vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl.polyhedralBoundedSolid;
+package vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
+import vsdk.toolkit.render.jogl.Jogl4SelectionCornersRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ShaderProgramUtil;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 
@@ -69,6 +70,51 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
             : Matrix4x4d.identityMatrix();
         Matrix4x4d mvp = camera.calculateProjectionMatrix().multiply(local);
         draw(gl, solid, camera, quality, local, mvp);
+    }
+
+    /**
+    Draws a brep with the given material and lights. This renderer takes
+    them from the active ones, so they are activated only while the solid is
+    drawn. Textures and normal maps are not supported. The bounding volume
+    is drawn with the debug overlays, the selection corners here.
+
+    @param gl OpenGL context
+    @param solid solid to draw
+    @param camera camera that views the solid
+    @param lights lights of the scene, or null for none
+    @param material material of the solid
+    @param quality bits of rendering configuration
+    @param modelMatrix transformation from solid space to world space
+    */
+    public static void draw(
+        GL4 gl,
+        PolyhedralBoundedSolid solid,
+        Camera camera,
+        List<Light> lights,
+        SimpleMaterial material,
+        RendererConfiguration quality,
+        Matrix4x4d modelMatrix)
+    {
+        if ( gl == null || solid == null || quality == null ) {
+            return;
+        }
+        Jogl4SimpleMaterialRenderer.activate(gl, material);
+        Jogl4LightRenderer.deactivateAll(gl);
+        if ( lights != null ) {
+            for ( Light light : lights ) {
+                Jogl4LightRenderer.activate(gl, light);
+            }
+        }
+
+        draw(gl, solid, camera, quality, modelMatrix);
+
+        Jogl4LightRenderer.deactivateAll(gl);
+        Jogl4SimpleMaterialRenderer.activate(gl, null);
+
+        if ( quality.isSelectionCornersSet() ) {
+            Jogl4SelectionCornersRenderer.draw(gl, solid.getMinMax(), camera,
+                modelMatrix);
+        }
     }
 
     public static void drawDebugFaceBoundary(

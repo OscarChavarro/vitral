@@ -17,7 +17,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
-import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4SphereRenderer;
 
 public class OpenGlOfflineSphereRenderer
 {

@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -15,6 +15,10 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.media.Image;
+import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 
 public class Jogl4Md2MeshRenderer extends Jogl4Renderer
 {

@@ -6,7 +6,7 @@ import model.DebuggerModel;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
-import vsdk.toolkit.render.jogl.Jogl4Md2MeshRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4Md2MeshRenderer;
 
 public class Jogl4DebuggerRenderer {
     private final DebuggerModel model;

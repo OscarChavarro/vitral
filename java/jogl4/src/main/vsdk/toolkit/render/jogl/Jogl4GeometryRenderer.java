@@ -1,7 +1,6 @@
 package vsdk.toolkit.render.jogl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,65 +12,75 @@ import com.jogamp.opengl.GL4;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
-import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
+import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.SubdividedBezierPatch;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
+import vsdk.toolkit.environment.geometry.surface.TriangleStripMesh;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.HeightFieldSolid;
-import vsdk.toolkit.environment.geometry.volume.BlobComponent;
-import vsdk.toolkit.environment.geometry.volume.BlobSolid;
 import vsdk.toolkit.environment.geometry.volume.ImplicitSolid;
-import vsdk.toolkit.environment.geometry.volume.PolynomialSurface;
+import vsdk.toolkit.environment.geometry.volume.PlanarHalfSpace;
 import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
+import vsdk.toolkit.environment.geometry.volume.Volume;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
-import vsdk.toolkit.environment.geometry.element.GeometryBounds;
-import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.processing.BezierPatchTessellator;
-import vsdk.toolkit.processing.SolidBoundaryTessellationReport;
-import vsdk.toolkit.processing.SolidBoundaryTessellator;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.curve.Jogl4ParametricCurveRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4FunctionalExplicitSurfaceRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4InfinitePlaneRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4ParametricBiCubicPatchRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4QuadMeshRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4SubdividedBezierPatchRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4TriangleMeshGroupRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4TriangleMeshRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl4TriangleStripMeshRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4ArrowRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4BoxRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4ConeRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4HeightFieldSolidRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4ImplicitSolidRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4PlanarHalfSpaceRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4QuadricSurfaceRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4SphereRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4TorusRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4VolumeRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4VoxelVolumeRenderer;
+import vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
 
 /**
-Renders the geometries of the toolkit with the GL4 pipeline: each one is
-tessellated once into a mesh (cached by its parameters) that is drawn by
+Renders the geometries of the toolkit with the GL4 pipeline. Each geometry
+has its own `Jogl4*Renderer`, in the package that mirrors the package of the
+geometry (`curve`, `surface`, `volume`), that tessellates it into a mesh
+(`meshKey` and `buildMesh`). This class dispatches the drawing to them, and
+keeps the meshes (cached by their keys), that are drawn by
 `Jogl4MeshRenderer`, so every geometry honors every bit of the
 `RendererConfiguration` in the same way (surfaces, wires, points, normals,
 bounding volume, texture, bump map and shading).
 
-Supported geometries: `Sphere`, `Cone` (also cylinders and truncated cones),
-`Arrow`, `Box`, `Torus`, `TriangleMesh`, `TriangleMeshGroup`, `VoxelVolume` (as the cubes of its
-voxels, tessellated by `Jogl4VoxelVolumeRenderer`), and the open surfaces
-`FunctionalExplicitSurface`, `ParametricBiCubicPatch` and `InfinitePlane`
-(tessellated by their `Jogl4*Renderer`, visible from both sides). Quadrics,
-implicit solids and height fields with finite bounds are drawn from their
-`SolidBoundaryTessellator` mesh, and a `SubdividedBezierPatch` from its
-`BezierPatchTessellator` mesh, visible from both sides. A
-`ParametricCurve` has no surface: it is drawn as lines by
-`Jogl4ParametricCurveRenderer`.
+Some geometries are drawn by their renderers in their own way: a `Sphere` by
+`Jogl4SphereRenderer`, a `ParametricCurve` (it has no surface) as lines by
+`Jogl4ParametricCurveRenderer`, a `TriangleMeshGroup` mesh by mesh, a
+`PlanarHalfSpace` by its boundary plane, and a `PolyhedralBoundedSolid` by
+`Jogl4PolyhedralBoundedSolidRenderer` (without texture nor normal map). Any
+other volume is drawn, as the last resort, from its boundary representation
+(see `Jogl4VolumeRenderer`).
 */
 public class Jogl4GeometryRenderer extends Jogl4Renderer {
-    private static final int SLICES = 32;
-    private static final int TORUS_MAJOR_SEGMENTS = 48;
-    private static final int TORUS_MINOR_SEGMENTS = 24;
     private static final int MAX_CACHED_MESHES = 256;
-    /** Cells along the longest side of the bounds of a tessellated solid */
-    private static final int SOLID_TESSELLATION_RESOLUTION = 64;
-    /** Parameter steps of a tessellated Bezier patch along u and v */
-    private static final int PATCH_TESSELLATION_STEPS = 24;
 
     private static final Map<String, Jogl4MeshRenderer.Mesh> MESHES = new HashMap<>();
     private static final Set<String> REPORTED_UNSUPPORTED = new HashSet<>();
@@ -85,19 +94,14 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     */
     public static boolean isSupported(Geometry geometry)
     {
-        return geometry instanceof Sphere || geometry instanceof Cone ||
-            geometry instanceof Arrow || geometry instanceof Box ||
-            geometry instanceof Torus || geometry instanceof TriangleMesh ||
+        return geometry instanceof Sphere ||
+            geometry instanceof ParametricCurve ||
             geometry instanceof TriangleMeshGroup ||
-            geometry instanceof FunctionalExplicitSurface ||
-            geometry instanceof ParametricBiCubicPatch ||
-            geometry instanceof InfinitePlane ||
-            geometry instanceof VoxelVolume ||
-            geometry instanceof ImplicitSolid ||
-            geometry instanceof QuadricSurface ||
-            geometry instanceof HeightFieldSolid ||
-            geometry instanceof SubdividedBezierPatch ||
-            geometry instanceof ParametricCurve;
+            geometry instanceof PlanarHalfSpace ||
+            geometry instanceof PolyhedralBoundedSolid ||
+            keyOf(geometry) != null ||
+            (geometry instanceof Volume volume &&
+             Jogl4VolumeRenderer.exportedSolid(volume) != null);
     }
 
     /**
@@ -164,7 +168,8 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         }
         if ( geometry instanceof Sphere sphere ) {
             Jogl4SphereRenderer.draw(gl, sphere, camera, lights, material, quality,
-                textureMap, normalMap, localTransform, SLICES, SLICES / 2);
+                textureMap, normalMap, localTransform,
+                Jogl4SphereRenderer.SLICES, Jogl4SphereRenderer.SLICES / 2);
             return;
         }
         if ( geometry instanceof ParametricCurve curve ) {
@@ -172,8 +177,23 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             return;
         }
         if ( geometry instanceof TriangleMeshGroup group ) {
-            drawTriangleMeshGroup(gl, group, camera, lights, material, quality,
-                textureMap, normalMap, localTransform);
+            Jogl4TriangleMeshGroupRenderer.draw(gl, group, camera, lights, material,
+                quality, textureMap, normalMap, localTransform);
+            return;
+        }
+        if ( geometry instanceof PlanarHalfSpace halfSpace ) {
+            Jogl4PlanarHalfSpaceRenderer.draw(gl, halfSpace, camera, lights,
+                material, quality, textureMap, normalMap, localTransform);
+            return;
+        }
+        if ( geometry instanceof PolyhedralBoundedSolid solid ) {
+            Jogl4PolyhedralBoundedSolidRenderer.draw(gl, solid, camera, lights,
+                material, quality, localTransform);
+            return;
+        }
+        if ( keyOf(geometry) == null && geometry instanceof Volume volume &&
+             Jogl4VolumeRenderer.draw(gl, volume, camera, lights, material,
+                 quality, localTransform) ) {
             return;
         }
         Jogl4MeshRenderer.Mesh mesh = obtainMesh(geometry);
@@ -181,88 +201,12 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             return;
         }
         if ( geometry instanceof InfinitePlane plane && quality != null ) {
-            drawInfinitePlaneMesh(gl, mesh, plane, camera, lights, material, quality,
-                textureMap, normalMap, localTransform);
+            Jogl4InfinitePlaneRenderer.drawMesh(gl, mesh, plane, camera, lights,
+                material, quality, textureMap, normalMap, localTransform);
             return;
         }
         Jogl4MeshRenderer.draw(gl, mesh, geometry, camera, lights, material, quality,
             textureMap, normalMap, localTransform);
-    }
-
-    /**
-     * OBJ imports are represented as a group of meshes (normally one per
-     * material).  Raytracing already traverses this geometry, so rasterizing
-     * every member here keeps the two rendering paths equivalent.
-     */
-    private static void drawTriangleMeshGroup(
-        GL4 gl,
-        TriangleMeshGroup group,
-        Camera camera,
-        List<Light> lights,
-        SimpleMaterial material,
-        RendererConfiguration quality,
-        RGBImageUncompressed textureMap,
-        RGBImageUncompressed normalMap,
-        Matrix4x4d localTransform)
-    {
-        if ( quality == null ) {
-            return;
-        }
-        RendererConfiguration meshQuality;
-        try {
-            meshQuality = quality.clone();
-        }
-        catch ( CloneNotSupportedException e ) {
-            return;
-        }
-        meshQuality.setBoundingVolume(false);
-        meshQuality.setSelectionCorners(false);
-
-        for ( TriangleMesh mesh : group.getMeshes() ) {
-            draw(gl, mesh, camera, lights, material, meshQuality,
-                textureMap, normalMap, localTransform);
-        }
-
-        if ( quality.isBoundingVolumeSet() ) {
-            Jogl4MinMaxRenderer.draw(gl, group, camera, localTransform);
-        }
-        if ( quality.isSelectionCornersSet() ) {
-            Jogl4SelectionCornersRenderer.draw(gl, group, camera, localTransform);
-        }
-    }
-
-    /**
-    Draws the mesh of the square shown for an infinite plane. Its bounding
-    volume is infinite, so the bounding volume and the selection corners are
-    drawn around the square instead.
-    */
-    private static void drawInfinitePlaneMesh(
-        GL4 gl,
-        Jogl4MeshRenderer.Mesh mesh,
-        InfinitePlane plane,
-        Camera camera,
-        List<Light> lights,
-        SimpleMaterial material,
-        RendererConfiguration quality,
-        RGBImageUncompressed textureMap,
-        RGBImageUncompressed normalMap,
-        Matrix4x4d localTransform)
-    {
-        RendererConfiguration meshQuality = new RendererConfiguration();
-
-        meshQuality.clone(quality);
-        meshQuality.setBoundingVolume(false);
-        meshQuality.setSelectionCorners(false);
-        Jogl4MeshRenderer.draw(gl, mesh, plane, camera, lights, material, meshQuality,
-            textureMap, normalMap, localTransform);
-
-        double[] shown = Jogl4InfinitePlaneRenderer.calculateShownMinMax(plane);
-        if ( quality.isBoundingVolumeSet() ) {
-            Jogl4MinMaxRenderer.draw(gl, shown, camera, localTransform);
-        }
-        if ( quality.isSelectionCornersSet() ) {
-            Jogl4SelectionCornersRenderer.draw(gl, shown, camera, localTransform);
-        }
     }
 
     /**
@@ -273,6 +217,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     public static void dispose(GL4 gl)
     {
         releaseMeshes(gl);
+        Jogl4VolumeRenderer.dispose();
         Jogl4SphereRenderer.dispose(gl);
     }
 
@@ -315,35 +260,41 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     }
 
     /**
-    @return a string that identifies the mesh of the geometry, or null if the
-    geometry is not supported. Parametric geometries are identified by their
-    parameters (so editing them produces a new mesh); triangle meshes by
-    identity, as they are not edited while shown.
+    @return a string that identifies the mesh of the geometry (given by the
+    `meshKey` of its renderer), or null if the geometry is not tessellated to
+    a mesh
     */
     private static String keyOf(Geometry geometry)
     {
         if ( geometry instanceof Cone c ) {
-            return "cone/" + c.getBottomRadius() + "/" + c.getTopRadius() + "/" + c.getHeight();
+            return Jogl4ConeRenderer.meshKey(c);
         }
         if ( geometry instanceof Arrow a ) {
-            return "arrow/" + a.getBaseLength() + "/" + a.getHeadLength() + "/" +
-                a.getBaseRadius() + "/" + a.getHeadRadius();
+            return Jogl4ArrowRenderer.meshKey(a);
         }
         if ( geometry instanceof Box b ) {
-            Vector3Dd s = b.getSize();
-            return "box/" + s.x() + "/" + s.y() + "/" + s.z();
+            return Jogl4BoxRenderer.meshKey(b);
         }
         if ( geometry instanceof Torus t ) {
-            return "torus/" + t.getMajorRadius() + "/" + t.getMinorRadius();
+            return Jogl4TorusRenderer.meshKey(t);
         }
-        if ( geometry instanceof TriangleMesh ) {
-            return "trianglemesh/" + System.identityHashCode(geometry);
+        if ( geometry instanceof TriangleMesh m ) {
+            return Jogl4TriangleMeshRenderer.meshKey(m);
+        }
+        if ( geometry instanceof QuadMesh m ) {
+            return Jogl4QuadMeshRenderer.meshKey(m);
+        }
+        if ( geometry instanceof TriangleStripMesh m ) {
+            return Jogl4TriangleStripMeshRenderer.meshKey(m);
         }
         if ( geometry instanceof FunctionalExplicitSurface f ) {
             return Jogl4FunctionalExplicitSurfaceRenderer.meshKey(f);
         }
         if ( geometry instanceof ParametricBiCubicPatch p ) {
             return Jogl4ParametricBiCubicPatchRenderer.meshKey(p);
+        }
+        if ( geometry instanceof SubdividedBezierPatch p ) {
+            return Jogl4SubdividedBezierPatchRenderer.meshKey(p);
         }
         if ( geometry instanceof InfinitePlane p ) {
             return Jogl4InfinitePlaneRenderer.meshKey(p);
@@ -352,61 +303,43 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             return Jogl4VoxelVolumeRenderer.meshKey(v);
         }
         if ( geometry instanceof QuadricSurface q ) {
-            return "quadric/" + keyOf(q.squareCoefficients()) + "/" +
-                keyOf(q.mixedCoefficients()) + "/" +
-                keyOf(q.linearCoefficients()) + "/" +
-                q.constantCoefficient() + "/" + SOLID_TESSELLATION_RESOLUTION;
+            return Jogl4QuadricSurfaceRenderer.meshKey(q);
         }
-        if ( geometry instanceof BlobSolid b ) {
-            StringBuilder key = new StringBuilder("blob/");
-            key.append(b.getThreshold());
-            for ( long i = 0; i < b.getComponentCount(); i++ ) {
-                BlobComponent c = b.getComponent(i);
-                key.append('/').append(keyOf(c.getCenter())).append('/')
-                    .append(c.getRadius()).append('/').append(c.getStrength());
-            }
-            return key.append('/').append(SOLID_TESSELLATION_RESOLUTION)
-                .toString();
+        if ( geometry instanceof ImplicitSolid s ) {
+            return Jogl4ImplicitSolidRenderer.meshKey(s);
         }
-        if ( geometry instanceof PolynomialSurface p ) {
-            return "polynomial/" + p.getOrder() + "/" +
-                Arrays.toString(p.getCoefficients()) + "/" +
-                SOLID_TESSELLATION_RESOLUTION;
-        }
-        if ( geometry instanceof ImplicitSolid ||
-             geometry instanceof HeightFieldSolid ) {
-            return "tessellatedsolid/" + System.identityHashCode(geometry) + "/" +
-                SOLID_TESSELLATION_RESOLUTION;
-        }
-        if ( geometry instanceof SubdividedBezierPatch ) {
-            return "subdividedbezierpatch/" + System.identityHashCode(geometry) + "/" +
-                PATCH_TESSELLATION_STEPS;
+        if ( geometry instanceof HeightFieldSolid h ) {
+            return Jogl4HeightFieldSolidRenderer.meshKey(h);
         }
         return null;
     }
 
-    /** Exact text of the coordinates, as `Vector3Dd.toString` rounds them */
-    private static String keyOf(Vector3Dd v)
-    {
-        return v.x() + "," + v.y() + "," + v.z();
-    }
-
+    /**
+    @return the mesh of the geometry, built by its renderer, or null if it
+    can not be tessellated
+    */
     private static Jogl4MeshRenderer.Mesh buildMesh(Geometry geometry)
     {
         if ( geometry instanceof Cone c ) {
-            return buildCone(c);
+            return Jogl4ConeRenderer.buildMesh(c);
         }
         if ( geometry instanceof Arrow a ) {
-            return buildArrow(a);
+            return Jogl4ArrowRenderer.buildMesh(a);
         }
         if ( geometry instanceof Box b ) {
-            return buildBox(b);
+            return Jogl4BoxRenderer.buildMesh(b);
         }
         if ( geometry instanceof Torus t ) {
-            return buildTorus(t);
+            return Jogl4TorusRenderer.buildMesh(t);
         }
         if ( geometry instanceof TriangleMesh m ) {
-            return buildTriangleMesh(m);
+            return Jogl4TriangleMeshRenderer.buildMesh(m);
+        }
+        if ( geometry instanceof QuadMesh m ) {
+            return Jogl4QuadMeshRenderer.buildMesh(m);
+        }
+        if ( geometry instanceof TriangleStripMesh m ) {
+            return Jogl4TriangleStripMeshRenderer.buildMesh(m);
         }
         if ( geometry instanceof FunctionalExplicitSurface f ) {
             return Jogl4FunctionalExplicitSurfaceRenderer.buildMesh(f);
@@ -414,249 +347,24 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         if ( geometry instanceof ParametricBiCubicPatch p ) {
             return Jogl4ParametricBiCubicPatchRenderer.buildMesh(p);
         }
+        if ( geometry instanceof SubdividedBezierPatch p ) {
+            return Jogl4SubdividedBezierPatchRenderer.buildMesh(p);
+        }
         if ( geometry instanceof InfinitePlane p ) {
             return Jogl4InfinitePlaneRenderer.buildMesh(p);
         }
         if ( geometry instanceof VoxelVolume v ) {
             return Jogl4VoxelVolumeRenderer.buildMesh(v);
         }
-        if ( geometry instanceof ImplicitSolid ||
-             geometry instanceof QuadricSurface ||
-             geometry instanceof HeightFieldSolid ) {
-            return buildTessellatedSolid(geometry);
+        if ( geometry instanceof QuadricSurface q ) {
+            return Jogl4QuadricSurfaceRenderer.buildMesh(q);
         }
-        if ( geometry instanceof SubdividedBezierPatch p ) {
-            return buildBezierPatch(p);
+        if ( geometry instanceof ImplicitSolid s ) {
+            return Jogl4ImplicitSolidRenderer.buildMesh(s);
+        }
+        if ( geometry instanceof HeightFieldSolid h ) {
+            return Jogl4HeightFieldSolidRenderer.buildMesh(h);
         }
         return null;
-    }
-
-    private static Jogl4MeshRenderer.Mesh buildCone(Cone cone)
-    {
-        double r1 = cone.getBottomRadius();
-        double r2 = cone.getTopRadius();
-        double h = cone.getHeight();
-        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(Math.max(Math.max(r1, r2), h));
-
-        builder.addFrustum(0, r1, h, r2, SLICES);
-        builder.addDisk(0, 0, r1, false, SLICES);
-        if ( r2 > 0.0 ) {
-            builder.addDisk(h, 0, r2, true, SLICES);
-        }
-        return builder.build();
-    }
-
-    private static Jogl4MeshRenderer.Mesh buildArrow(Arrow arrow)
-    {
-        double h1 = arrow.getBaseLength();
-        double h2 = arrow.getHeadLength();
-        double r1 = arrow.getBaseRadius();
-        double r2 = arrow.getHeadRadius();
-        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(h1 + h2);
-
-        builder.addFrustum(0, r1, h1, r1, SLICES);
-        builder.addDisk(0, 0, r1, false, SLICES);
-        builder.addFrustum(h1, r2, h1 + h2, 0, SLICES);
-        builder.addDisk(h1, r1, r2, false, SLICES);
-        return builder.build();
-    }
-
-    private static Jogl4MeshRenderer.Mesh buildBox(Box box)
-    {
-        Vector3Dd size = box.getSize();
-        double hx = size.x() / 2;
-        double hy = size.y() / 2;
-        double hz = size.z() / 2;
-        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(Math.max(hx, Math.max(hy, hz)) * 2);
-
-        // Each face is given counterclockwise seen from outside
-        addBoxFace(builder, new Vector3Dd(0, 0, -1),
-            new Vector3Dd(-hx, -hy, -hz), new Vector3Dd(-hx, hy, -hz),
-            new Vector3Dd(hx, hy, -hz), new Vector3Dd(hx, -hy, -hz));
-        addBoxFace(builder, new Vector3Dd(0, 0, 1),
-            new Vector3Dd(-hx, -hy, hz), new Vector3Dd(hx, -hy, hz),
-            new Vector3Dd(hx, hy, hz), new Vector3Dd(-hx, hy, hz));
-        addBoxFace(builder, new Vector3Dd(0, -1, 0),
-            new Vector3Dd(-hx, -hy, hz), new Vector3Dd(-hx, -hy, -hz),
-            new Vector3Dd(hx, -hy, -hz), new Vector3Dd(hx, -hy, hz));
-        addBoxFace(builder, new Vector3Dd(-1, 0, 0),
-            new Vector3Dd(-hx, hy, hz), new Vector3Dd(-hx, hy, -hz),
-            new Vector3Dd(-hx, -hy, -hz), new Vector3Dd(-hx, -hy, hz));
-        addBoxFace(builder, new Vector3Dd(0, 1, 0),
-            new Vector3Dd(hx, hy, hz), new Vector3Dd(hx, hy, -hz),
-            new Vector3Dd(-hx, hy, -hz), new Vector3Dd(-hx, hy, hz));
-        addBoxFace(builder, new Vector3Dd(1, 0, 0),
-            new Vector3Dd(hx, -hy, hz), new Vector3Dd(hx, -hy, -hz),
-            new Vector3Dd(hx, hy, -hz), new Vector3Dd(hx, hy, hz));
-        return builder.build();
-    }
-
-    /**
-    Adds a face whose vertices are given in the order upper left, lower left,
-    lower right, upper right as seen from outside (the Jogl2 texture layout),
-    and which is wound so its front side looks outside.
-    */
-    private static void addBoxFace(
-        Jogl4MeshBuilder builder,
-        Vector3Dd n,
-        Vector3Dd a,
-        Vector3Dd b,
-        Vector3Dd c,
-        Vector3Dd d)
-    {
-        Vector3Dd winding = b.subtract(a).crossProduct(c.subtract(b));
-
-        if ( winding.dotProduct(n) >= 0 ) {
-            builder.addQuad(a, n, 0, 1, b, n, 0, 0, c, n, 1, 0, d, n, 1, 1);
-        }
-        else {
-            builder.addQuad(d, n, 1, 1, c, n, 1, 0, b, n, 0, 0, a, n, 0, 1);
-        }
-    }
-
-    private static Jogl4MeshRenderer.Mesh buildTorus(Torus torus)
-    {
-        double bigR = torus.getMajorRadius();
-        double smallR = torus.getMinorRadius();
-        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(bigR + smallR);
-        int nw = TORUS_MAJOR_SEGMENTS;
-        int nv = TORUS_MINOR_SEGMENTS;
-
-        for ( int i = 0; i < nw; i++ ) {
-            double w0 = 2 * Math.PI * i / nw;
-            double w1 = 2 * Math.PI * (i + 1) / nw;
-
-            for ( int j = 0; j < nv; j++ ) {
-                double v0 = 2 * Math.PI * j / nv;
-                double v1 = 2 * Math.PI * (j + 1) / nv;
-                Vector3Dd p00 = torusPoint(bigR, smallR, w0, v0);
-                Vector3Dd p01 = torusPoint(bigR, smallR, w0, v1);
-                Vector3Dd p11 = torusPoint(bigR, smallR, w1, v1);
-                Vector3Dd p10 = torusPoint(bigR, smallR, w1, v0);
-                Vector3Dd n00 = torusNormal(w0, v0);
-                Vector3Dd n01 = torusNormal(w0, v1);
-                Vector3Dd n11 = torusNormal(w1, v1);
-                Vector3Dd n10 = torusNormal(w1, v0);
-
-                builder.addQuad(
-                    p00, n00, (double)i / nw, (double)j / nv,
-                    p10, n10, (double)(i + 1) / nw, (double)j / nv,
-                    p11, n11, (double)(i + 1) / nw, (double)(j + 1) / nv,
-                    p01, n01, (double)i / nw, (double)(j + 1) / nv);
-            }
-        }
-        return builder.build();
-    }
-
-    private static Vector3Dd torusPoint(double bigR, double smallR, double w, double v)
-    {
-        return new Vector3Dd(
-            (bigR + smallR * Math.cos(v)) * Math.cos(w),
-            (bigR + smallR * Math.cos(v)) * Math.sin(w),
-            smallR * Math.sin(v));
-    }
-
-    private static Vector3Dd torusNormal(double w, double v)
-    {
-        return new Vector3Dd(Math.cos(v) * Math.cos(w), Math.cos(v) * Math.sin(w), Math.sin(v));
-    }
-
-    private static Jogl4MeshRenderer.Mesh buildTriangleMesh(TriangleMesh mesh)
-    {
-        double[] p = mesh.getVertexPositions();
-        int[] idx = mesh.getTriangleIndexes();
-
-        if ( p == null || idx == null ) {
-            return null;
-        }
-        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(maxAbsExtent(mesh.getMinMax()));
-        builder.setDoubleSided(mesh.isDoubleSided());
-        addTriangleMesh(builder, mesh);
-        return builder.build();
-    }
-
-    private static double maxAbsExtent(double[] minmax)
-    {
-        double size = 1.0;
-        if ( minmax != null && minmax.length >= 6 ) {
-            size = Math.max(Math.abs(minmax[3] - minmax[0]),
-                Math.max(Math.abs(minmax[4] - minmax[1]), Math.abs(minmax[5] - minmax[2])));
-        }
-        return size;
-    }
-
-    private static void addTriangleMesh(Jogl4MeshBuilder builder, TriangleMesh mesh)
-    {
-        double[] p = mesh.getVertexPositions();
-        double[] n = mesh.getVertexNormals();
-        double[] uv = mesh.getVertexUvs();
-        int[] idx = mesh.getTriangleIndexes();
-
-        if ( p == null || idx == null ) {
-            return;
-        }
-        for ( int t = 0; t + 2 < idx.length; t += 3 ) {
-            Vector3Dd[] pos = new Vector3Dd[3];
-            Vector3Dd[] nor = new Vector3Dd[3];
-            double[] u = new double[3];
-            double[] v = new double[3];
-
-            for ( int k = 0; k < 3; k++ ) {
-                int i = idx[t + k];
-                pos[k] = new Vector3Dd(p[3 * i], p[3 * i + 1], p[3 * i + 2]);
-                nor[k] = (n != null && n.length >= 3 * i + 3)
-                    ? new Vector3Dd(n[3 * i], n[3 * i + 1], n[3 * i + 2])
-                    : new Vector3Dd(0, 0, 1);
-                if ( uv != null && uv.length >= 2 * i + 2 ) {
-                    u[k] = uv[2 * i];
-                    v[k] = uv[2 * i + 1];
-                }
-            }
-            builder.addTriangle(pos[0], nor[0], u[0], v[0], pos[1], nor[1], u[1], v[1],
-                pos[2], nor[2], u[2], v[2]);
-        }
-    }
-
-    /**
-    Quadrics, implicit solids and height fields are drawn from the
-    `SolidBoundaryTessellator` mesh of their finite bounds; unbounded ones are
-    not supported.
-    */
-    private static Jogl4MeshRenderer.Mesh buildTessellatedSolid(Geometry geometry)
-    {
-        GeometryBounds bounds = new GeometryBounds();
-        geometry.getBounds(bounds);
-        if ( bounds.getKind() != GeometryBounds.Kind.Finite ) {
-            return null;
-        }
-        SimpleBody body = new SimpleBody();
-        // cpp setGeometryReference (borrowed); the same under garbage collection.
-        body.setGeometry(geometry);
-        SolidBoundaryTessellationReport report = new SolidBoundaryTessellationReport();
-        // The margin keeps the extreme points of the solid inside the region
-        TriangleMesh mesh = SolidBoundaryTessellator.tessellate(body,
-            bounds.inflated(1e-3 * maxAbsExtent(geometry.getMinMax())),
-            SOLID_TESSELLATION_RESOLUTION, report);
-        if ( mesh == null ) {
-            return null;
-        }
-        return buildTriangleMesh(mesh);
-    }
-
-    /**
-    A Bezier patch is drawn from the `BezierPatchTessellator` mesh of its
-    surface, visible from both sides.
-    */
-    private static Jogl4MeshRenderer.Mesh buildBezierPatch(SubdividedBezierPatch patch)
-    {
-        TriangleMesh mesh = BezierPatchTessellator.tessellate(patch,
-            PATCH_TESSELLATION_STEPS, PATCH_TESSELLATION_STEPS);
-        if ( mesh == null ) {
-            return null;
-        }
-        Jogl4MeshBuilder builder = new Jogl4MeshBuilder(maxAbsExtent(mesh.getMinMax()));
-        builder.setDoubleSided(true);
-        addTriangleMesh(builder, mesh);
-        return builder.build();
     }
 }

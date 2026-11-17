@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 import java.util.List;
 
@@ -12,6 +12,10 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MeshBuilder;
+import vsdk.toolkit.render.jogl.Jogl4MeshRenderer;
 
 /**
 Renders a `ParametricBiCubicPatch` (Bezier, Hermite or Ferguson) with the GL4
@@ -59,7 +63,7 @@ public class Jogl4ParametricBiCubicPatchRenderer extends Jogl4Renderer {
     @return a string that identifies its tessellation: its geometry matrices
     and its number of approximation steps
     */
-    static String meshKey(ParametricBiCubicPatch patch)
+    public static String meshKey(ParametricBiCubicPatch patch)
     {
         return "parametricbicubicpatch/" + System.identityHashCode(patch) + "/" +
             patch.getType() + "/" + patch.getApproximationSteps() + "/" +
@@ -71,7 +75,7 @@ public class Jogl4ParametricBiCubicPatchRenderer extends Jogl4Renderer {
     @param patch patch to tessellate
     @return the mesh of the patch, or null if it can not be tessellated
     */
-    static Jogl4MeshRenderer.Mesh buildMesh(ParametricBiCubicPatch patch)
+    public static Jogl4MeshRenderer.Mesh buildMesh(ParametricBiCubicPatch patch)
     {
         int steps = Math.max(1, patch.getApproximationSteps());
         int n = steps + 1;

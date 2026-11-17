@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.curve;
 
 import java.util.ArrayList;
 
@@ -11,6 +11,10 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.material.RendererConfiguration;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4MinMaxRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SelectionCornersRenderer;
 
 /**
 Renders a `ParametricCurve` with the GL4 pipeline. As in

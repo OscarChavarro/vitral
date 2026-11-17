@@ -10,12 +10,12 @@ Accumulates the triangles of a tessellated surface and builds a
 `Jogl4MeshRenderer.Mesh` from them. Tangents and binormals are derived from
 the normal of each vertex.
 */
-final class Jogl4MeshBuilder {
+public final class Jogl4MeshBuilder {
     private final List<float[]> vertices = new ArrayList<>();
     private double characteristicSize;
     private boolean doubleSided;
 
-    Jogl4MeshBuilder(double characteristicSize)
+    public Jogl4MeshBuilder(double characteristicSize)
     {
         this.characteristicSize = characteristicSize;
     }
@@ -24,7 +24,7 @@ final class Jogl4MeshBuilder {
     Adds one triangle; vertices are given counterclockwise seen from the side
     the normals point to.
     */
-    void addTriangle(
+    public void addTriangle(
         Vector3Dd p0, Vector3Dd n0, double u0, double v0,
         Vector3Dd p1, Vector3Dd n1, double u1, double v1,
         Vector3Dd p2, Vector3Dd n2, double u2, double v2)
@@ -38,7 +38,7 @@ final class Jogl4MeshBuilder {
     Adds a quad as two triangles; vertices are given counterclockwise seen from
     the side the normals point to.
     */
-    void addQuad(
+    public void addQuad(
         Vector3Dd p0, Vector3Dd n0, double u0, double v0,
         Vector3Dd p1, Vector3Dd n1, double u1, double v1,
         Vector3Dd p2, Vector3Dd n2, double u2, double v2,
@@ -57,7 +57,7 @@ final class Jogl4MeshBuilder {
     @param r1 radius of the second ring
     @param slices number of divisions around the axis
     */
-    void addFrustum(double z0, double r0, double z1, double r1, int slices)
+    public void addFrustum(double z0, double r0, double z1, double r1, int slices)
     {
         double dz = z1 - z0;
         double dr = r0 - r1;
@@ -109,7 +109,7 @@ final class Jogl4MeshBuilder {
     @param facingUp true if the normal is +Z, false for -Z
     @param slices number of divisions around the axis
     */
-    void addDisk(double z, double innerRadius, double outerRadius, boolean facingUp, int slices)
+    public void addDisk(double z, double innerRadius, double outerRadius, boolean facingUp, int slices)
     {
         Vector3Dd n = new Vector3Dd(0, 0, facingUp ? 1 : -1);
 
@@ -149,6 +149,21 @@ final class Jogl4MeshBuilder {
         }
     }
 
+    /**
+    @param minmax bounding box as given by `Geometry.getMinMax()`, or null
+    @return the longest side of the box (1 if there is no box), to be used as
+    the characteristic size of a mesh
+    */
+    public static double characteristicSize(double[] minmax)
+    {
+        double size = 1.0;
+        if ( minmax != null && minmax.length >= 6 ) {
+            size = Math.max(Math.abs(minmax[3] - minmax[0]),
+                Math.max(Math.abs(minmax[4] - minmax[1]), Math.abs(minmax[5] - minmax[2])));
+        }
+        return size;
+    }
+
     private void addVertex(Vector3Dd p, Vector3Dd n, double u, double v)
     {
         Vector3Dd normal = n.normalized();
@@ -172,12 +187,12 @@ final class Jogl4MeshBuilder {
     is, with no special shader support.
     @param doubleSided true to add the back sides when building
     */
-    void setDoubleSided(boolean doubleSided)
+    public void setDoubleSided(boolean doubleSided)
     {
         this.doubleSided = doubleSided;
     }
 
-    Jogl4MeshRenderer.Mesh build()
+    public Jogl4MeshRenderer.Mesh build()
     {
         int frontCount = vertices.size();
 

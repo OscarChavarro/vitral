@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.volume;
 
 import java.util.List;
 
@@ -12,6 +12,10 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MeshBuilder;
+import vsdk.toolkit.render.jogl.Jogl4MeshRenderer;
 
 /**
 Renders a `VoxelVolume` with the GL4 pipeline, as the binary cubes of
@@ -62,7 +66,7 @@ public class Jogl4VoxelVolumeRenderer extends Jogl4Renderer {
     @return a string that identifies the mesh of the volume with its current
     threshold
     */
-    static String meshKey(VoxelVolume volume)
+    public static String meshKey(VoxelVolume volume)
     {
         return "voxelvolume/" + System.identityHashCode(volume) + "/" +
             volume.getThreshold();
@@ -73,7 +77,7 @@ public class Jogl4VoxelVolumeRenderer extends Jogl4Renderer {
     @return the mesh of the boundary faces of the filled voxels, or null if the
     volume has no filled voxels
     */
-    static Jogl4MeshRenderer.Mesh buildMesh(VoxelVolume volume)
+    public static Jogl4MeshRenderer.Mesh buildMesh(VoxelVolume volume)
     {
         int[] size = { volume.getXSize(), volume.getYSize(), volume.getZSize() };
         double[] step = { 2.0 / size[0], 2.0 / size[1], 2.0 / size[2] };

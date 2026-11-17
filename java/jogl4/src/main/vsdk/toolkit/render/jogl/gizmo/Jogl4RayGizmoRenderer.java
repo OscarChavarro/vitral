@@ -21,12 +21,12 @@ import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.gizmo.RayGizmo;
-import vsdk.toolkit.render.jogl.Jogl4ArrowRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4ArrowRenderer;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
-import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4SphereRenderer;
 
 /**
 Renders a {@link RayGizmo} as a lit arrow (cylinder shaft + cone head) using

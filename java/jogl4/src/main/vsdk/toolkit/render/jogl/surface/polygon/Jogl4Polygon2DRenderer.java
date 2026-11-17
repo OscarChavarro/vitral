@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface.polygon;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -15,6 +15,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.environment.material.RendererConfiguration;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 
 public class Jogl4Polygon2DRenderer extends Jogl4Renderer
 {

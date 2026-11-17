@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl.polyhedralBoundedSolid;
+package vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

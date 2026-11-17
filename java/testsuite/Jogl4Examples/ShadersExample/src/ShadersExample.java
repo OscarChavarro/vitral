@@ -40,7 +40,7 @@ import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
-import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4SphereRenderer;
 
 public class ShadersExample extends JFrame implements
     GLEventListener,
