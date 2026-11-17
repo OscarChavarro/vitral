@@ -53,47 +53,24 @@ class MCPSceneTools
     }
 
     /**
-    @return the bodies and lights of the scene as JSON
+    @return the bodies (placement and parameters of their geometries) and
+    lights of the scene as JSON (tool `scene.describe`)
     */
     String describeScene()
     {
-        Scene scene = scene();
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\"bodies\":[");
-        ArrayList<SimpleBody> bodies = scene.scene.getSimpleBodies();
-        for ( int i = 0; i < bodies.size(); i++ ) {
-            if ( i > 0 ) {
-                sb.append(',');
-            }
-            SimpleBody body = bodies.get(i);
-            Geometry geometry = body.getGeometry();
-            Vector3Dd position = body.getPosition();
-            Vector3Dd scale = body.getScale();
-            sb.append("{\"index\":").append(i)
-                .append(",\"name\":\"").append(MCPJson.escape(body.getName())).append('"')
-                .append(",\"geometry\":\"").append(geometry.getClass().getSimpleName()).append('"')
-                .append(",\"position\":").append(MCPJson.vector(position))
-                .append(",\"scale\":").append(MCPJson.vector(scale));
-            if ( geometry instanceof Sphere ) {
-                sb.append(",\"radius\":").append(((Sphere)geometry).getRadius());
-            }
-            sb.append('}');
-        }
-        sb.append("],\"lights\":[");
-        ArrayList<Light> lights = scene.scene.getLights();
-        for ( int i = 0; i < lights.size(); i++ ) {
-            if ( i > 0 ) {
-                sb.append(',');
-            }
-            Light light = lights.get(i);
-            sb.append("{\"index\":").append(i)
-                .append(",\"type\":\"").append(light.getClass().getSimpleName()).append('"')
-                .append(",\"position\":").append(MCPJson.vector(light.getPosition()))
-                .append(",\"emission\":").append(MCPJson.color(light.getEmission()))
-                .append('}');
-        }
-        sb.append("]}");
-        return sb.toString();
+        return new MCPSceneSerializer(scene(), false).toJson(-1);
+    }
+
+    /**
+    @param request request with the optional argument index
+    @return the bodies with their materials and the full data of their
+    geometries, and the lights, as JSON (tool `scene.serialize`); only the
+    body `index` if given
+    */
+    String serializeScene(String request)
+    {
+        int index = (int)MCPJson.numberProperty(request, "index", -1);
+        return new MCPSceneSerializer(scene(), true).toJson(index);
     }
 
     /**

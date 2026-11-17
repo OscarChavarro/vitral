@@ -114,12 +114,10 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
         processArguments(args);
         createGUI();
 
-        for ( int i = 0; i < args.length; i++ ) {
-            if ( args[i].equals("-s") ) {
-                // Starts its own listener thread, which keeps it alive
-                new AwtJogl4VitralEditorMCP(this);
-            }
-        }
+        // The automation service is always started (the former "-s" argument
+        // is still accepted, but no longer needed). It starts its own
+        // listener thread, which keeps it alive
+        new AwtJogl4VitralEditorMCP(this);
     }
 
     private void processArguments(String[] args) {

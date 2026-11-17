@@ -1,6 +1,8 @@
 //= References:                                                             =
 //= [WAGN2004] Wagner, Max. "Ray/Torus Intersection". CS400 course homework =
 //= report for CS400 class                                                  =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
@@ -8,7 +10,14 @@ import java.util.Arrays;
 
 // VSDK classes
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 
 /**
@@ -24,6 +33,14 @@ public class Torus extends Solid
     /// (relative to the major radius): verified roots have errors around 1e-11,
     /// and spurious ones (the solver gives some) errors of the order of 0.1
     private static final double ROOT_VALIDATION_TOLERANCE = 1.0e-6;
+
+    /// Default number of sections of the boundary representation along the
+    /// major circle (around the Z axis)
+    private static final int DEFAULT_MAJOR_DIVISIONS = 24;
+    /// Default number of sides of each section (around the tube)
+    private static final int DEFAULT_MINOR_DIVISIONS = 12;
+    private static final int MIN_MAJOR_DIVISIONS = 3;
+    private static final int MIN_MINOR_DIVISIONS = 3;
 
     private double majorRadius;
     private double minorRadius;
@@ -1417,6 +1434,99 @@ public class Torus extends Solid
             4 * hitPoint.y() * (hitNormSquared - r2 - R2),
             4 * hitPoint.z() * (hitNormSquared - r2 - R2) + 8 * R2 * hitPoint.z()
         ).normalized();
+    }
+
+    @Override
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
+    {
+        return buildPolyhedralBoundedSolid(DEFAULT_MAJOR_DIVISIONS,
+            DEFAULT_MINOR_DIVISIONS);
+    }
+
+    /**
+    @param majorDivisions number of sections along the major circle, around
+    the Z axis (at least 3)
+    @param minorDivisions number of sides of each section, around the tube
+    (at least 3)
+    @return a new polyhedral approximation of current torus
+    */
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(
+        int majorDivisions, int minorDivisions)
+    {
+        int normalizedMajorDivisions = Math.max(MIN_MAJOR_DIVISIONS,
+            majorDivisions);
+        int normalizedMinorDivisions = Math.max(MIN_MINOR_DIVISIONS,
+            minorDivisions);
+
+        if ( normalizedMajorDivisions == DEFAULT_MAJOR_DIVISIONS &&
+             normalizedMinorDivisions == DEFAULT_MINOR_DIVISIONS ) {
+            return exportToPolyhedralBoundedSolid();
+        }
+
+        return buildPolyhedralBoundedSolid(normalizedMajorDivisions,
+            normalizedMinorDivisions);
+    }
+
+    /**
+    Builds a "polyhedral torus" approximation by a closed rotational sweep of
+    a circular lamina, following the idea of section [MANT1988].12.5 and
+    program [MANT1988].12.11, but expressed with the generalized sweep of
+    `PolyhedralBoundedSolidEulerConstructions` (each step is a rotation about
+    the Z axis instead of a translation):
+      - A circular lamina of `minorDivisions` vertices and radius
+        `minorRadius` is placed on the XZ plane, centered at
+        (`majorRadius`, 0, 0), with its face 1 looking along the sweep (+Y).
+      - Face 1 is swept `majorDivisions` times, each one rotated
+        2*PI/`majorDivisions` about Z. After the last step its vertices
+        coincide with the ones of the other face of the lamina.
+      - The two coincident faces are merged as two loops of one face
+        (`lkfmrh`) and glued (`loopGlue`, [MANT1988].12.4.2), closing the
+        handle of the genus 1 solid.
+
+    The side faces are planar: the four vertices of each one are two points
+    of a section and their rotated copies, an isosceles trapezoid symmetric
+    about the bisector plane of both sections.
+    */
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid(
+        int majorDivisions, int minorDivisions)
+    {
+        PolyhedralBoundedSolid solid;
+        Matrix4x4d T;
+        Matrix4x4d R;
+        Matrix4x4d M;
+        Matrix4x4d step;
+        int i;
+
+        //- Section lamina, from the XY plane to the XZ plane -------------
+        solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
+            0.0, 0.0, minorRadius, 0.0, minorDivisions);
+        T = new Matrix4x4d();
+        T = T.translation(majorRadius, 0.0, 0.0);
+        R = new Matrix4x4d();
+        R = R.axisRotation(-Math.PI/2.0, 1, 0, 0);
+        M = T.multiply(R);
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            solid.getVerticesList().get(i).position =
+                M.multiply(solid.getVerticesList().get(i).position);
+        }
+
+        //- Rotational sweep of face 1 about the Z axis -------------------
+        step = new Matrix4x4d();
+        step = step.axisRotation(2.0*Math.PI / ((double)majorDivisions),
+            0, 0, 1);
+        for ( i = 0; i < majorDivisions; i++ ) {
+            PolyhedralBoundedSolidEulerConstructions.translationalSweepExtrudeFace(
+                solid, solid.findFace(1), step);
+        }
+
+        //- Close the ring: glue the swept face to the starting one -------
+        _PolyhedralBoundedSolidFace headFace = solid.findFace(2);
+        _PolyhedralBoundedSolidFace tailFace = solid.findFace(1);
+        PolyhedralBoundedSolidEulerOperators.lkfmrh(solid, headFace, tailFace);
+        PolyhedralBoundedSolidTopologyEditing.loopGlue(solid, headFace.id);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+
+        return solid;
     }
 
     /**

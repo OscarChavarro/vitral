@@ -113,6 +113,9 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             case "scene.describe" -> {
                 return sceneTools.describeScene();
             }
+            case "scene.serialize" -> {
+                return sceneTools.serializeScene(request);
+            }
             case "scene.clear" -> {
                 sceneTools.clearScene();
                 applicationTools.repaint();
@@ -223,7 +226,8 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
     private static String toolsJson()
     {
         return "{\"tools\":["
-            + MCPJson.tool("scene.describe", "Return the bodies (index, name, geometry, position, scale, radius of spheres) and lights (index, type, position, emission) as JSON.")
+            + MCPJson.tool("scene.describe", "Return the bodies (index, name, geometry, hidden, position, scale, rotation as 3x3 matrix by rows and yaw/pitch/roll degrees, and the parameters of the geometry: i.e. radius of spheres, bottomRadius/topRadius/height of cones and cylinders, size of boxes, majorRadius/minorRadius of tori; summaries for boundary representations, meshes, curves and patches) and lights (index, type, position, emission) as JSON.")
+            + "," + MCPJson.tool("scene.serialize", "Like scene.describe, but with all the data needed to create the bodies again: also their materials, and the full data of the geometries defined by data (vertices and face loops of boundary representations, vertex positions and triangles of meshes, points of curves, contour or control points of patches); spot lights also report pointsAt, coefficient, radius and falloff. Arguments: index (optional: only that body, without lights).")
             + "," + MCPJson.tool("scene.clear", "Remove all bodies, lights and debug groups (undoable).")
             + "," + MCPJson.tool("scene.add_point_light", "Create a point light inside the view of a viewport (first light white, the rest random light colors and positions). Optional arguments: x,y,z,r,g,b override the automatic values.")
             + "," + MCPJson.tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")

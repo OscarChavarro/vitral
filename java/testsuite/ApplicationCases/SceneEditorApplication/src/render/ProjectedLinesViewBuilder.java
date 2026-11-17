@@ -48,8 +48,9 @@ The bodies follow the `RendererConfiguration` of the viewport:
     contour lines are thicker than the other visible lines, and hidden lines
     are dashed if wires are also asked for. The occlusion is computed among
     all those solids.
-  - Without surfaces, with wires, every body is a plain wireframe: the edges
-    of its boundary representation, or of its triangle mesh.
+  - Without surfaces, every body is a plain wireframe with no hidden line
+    removal (whether wires are asked for or not): the edges of its boundary
+    representation, or of its triangle mesh.
   - Bodies with no boundary representation nor mesh are always drawn as
     wireframes (with surfaces they neither hide nor are hidden), and bodies
     with none of them are represented by their bounding box.
@@ -177,7 +178,9 @@ public class ProjectedLinesViewBuilder
                 // Drawn below, all at once: they occlude each other
                 solids.add(brepBody(body, brep));
             }
-            else if ( quality.isSurfacesSet() || quality.isWiresSet() ) {
+            else {
+                // Without surfaces (or without a boundary representation to
+                // hide with), a plain wireframe, whatever the wires flag is
                 ProjectedLineLayer wires = new ProjectedLineLayer(
                     wireColor(body.getMaterial()), 1.0,
                     ProjectedLineLayer.Style.SOLID);

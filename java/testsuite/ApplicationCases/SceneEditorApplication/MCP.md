@@ -7,19 +7,22 @@ offer the same service, with the same tools and the same results.
 
 ## Starting The Service
 
-Start the application with the `-s` argument. The service listens on TCP port
-`1234` on localhost and prints `Waiting for MCP connections on TCP port 1234`
-when it is ready (a few seconds after the start).
+The service listens on TCP port `1234` on localhost and prints `Waiting for
+MCP connections on TCP port 1234` when it is ready (a few seconds after the
+start). If the port is already taken (i.e. by another instance of the
+editor), the error is reported in the console and the editor keeps running
+without the service.
 
-In the Java port:
+In the Java port the service is always started, with no arguments needed (the
+former `-s` argument is still accepted, and ignored):
 
 ```bash
-./run.sh -s
+./run.sh
 ```
 
-`run.sh` passes `-s` to the `runMain` Gradle task of this module, which already
-adds the JVM options the Java port needs (see the root `build.gradle`). When
-launching it some other way (i.e. from an IDE), copy those options too.
+`run.sh` runs the `runMain` Gradle task of this module, which already adds the
+JVM options the Java port needs (see the root `build.gradle`). When launching
+it some other way (i.e. from an IDE), copy those options too.
 
 In the C++ port (Xt GUI and OpenGL 4 drawing area, in
 `cpp/testsuite/ApplicationCases/SceneEditorApplication`):
@@ -68,9 +71,40 @@ values documented below.
 
 ### Scene
 
-- `scene.describe`: returns the bodies (`index`, `name`, `geometry` type,
-  `position`, `scale`, and `radius` for spheres) and the lights (`index`,
-  `type`, `position`, `emission` color). It does not report the selection.
+- `scene.describe`: returns the bodies and the lights (`index`, `type`,
+  `position`, `emission` color). It does not report the selection. Each
+  body reports:
+  - `index`, `name`, `geometry` (class of the geometry, i.e. `Cone` for
+    cones and cylinders) and `hidden`.
+  - Its placement: `position`, `scale` and `rotation`, given as its 3x3
+    `matrix` (rows) and as the `yaw`, `pitch` and `roll` angles in degrees
+    (`null` if they can not be obtained).
+  - The `parameters` of its geometry, named as in its constructor:
+    `radius` (`Sphere`); `bottomRadius`, `topRadius`, `height` (`Cone`);
+    `size`, `minimum`, `maximum` (`Box`); `majorRadius`, `minorRadius`
+    (`Torus`); `baseLength`, `headLength`, `baseRadius`, `headRadius`
+    (`Arrow`); `a`, `b`, `c`, `d` of a*x + b*y + c*z + d = 0
+    (`InfinitePlane`); `functionExpression`, `minimum`, `maximum`,
+    `tesselationHintX`, `tesselationHintY` (`FunctionalExplicitSurface`);
+    `xSize`, `ySize`, `zSize`, `threshold` (`VoxelVolume`, without its
+    voxels). Geometries defined by data report only a summary: the number
+    of vertices, edges and faces of a `PolyhedralBoundedSolid`, of vertices
+    and triangles of each mesh, of points of a `ParametricCurve`, and the
+    `type` of a `ParametricBiCubicPatch`. Other geometries report `null`.
+  - `radius` for spheres, also at the level of the body, as in the first
+    version of this tool.
+- `scene.serialize`: like `scene.describe`, with all the data needed to
+  create the bodies again: each body also reports its `material` (colors,
+  coefficients, `opacity`, `doubleSided`) and the full data of the
+  geometries defined by data: `vertices` (`id`, `position`) and `faces`
+  (`id` and `loops`, each one the ids of its vertices in order, the outer
+  loop first) of a `PolyhedralBoundedSolid`; `vertexPositions` (x, y, z of
+  each vertex) and `triangleIndexes` (three per triangle) of meshes;
+  `points` (`type` and `vectors`: position and tangent control points) of a
+  `ParametricCurve`; `contourCurve` (Ferguson) or 4x4 `controlMeshPoints`
+  (Bezier) of a `ParametricBiCubicPatch`. Spot lights also report
+  `pointsAt`, `coefficient`, `radius` and `falloff`. Arguments: `index`
+  (optional: only that body, and no lights).
 - `scene.clear`: removes all bodies, lights and debug groups. Returns
   `{"ok":true}`.
 - `scene.add_point_light`: creates a point light. Without arguments, the light
@@ -190,9 +224,10 @@ has not been created`).
 - `render.set_technology`: presents the viewport set with other technology,
   rebuilding the GUI (wait about a second before the next call). Arguments:
   `technology` (`opengl4` or `awt`). With `awt` no OpenGL is used: viewports
-  are drawn with AWT 2D operations, as lines (wireframe, or Appel hidden line
-  removal for the solids when `surfaces` is on; hidden lines dashed when
-  `wires` is also on) or as raytraced images. The translation, rotation and
+  are drawn with AWT 2D operations, as lines (Appel hidden line removal for
+  the solids when `surfaces` is on, with hidden lines dashed when `wires` is
+  also on; a plain wireframe of every body when `surfaces` is off) or as
+  raytraced images. The translation, rotation and
   scale gizmos and the input boxes are drawn there as 2D primitives (painter's
   algorithm, see `vsdk.toolkit.render.gizmo`); the visual debug ray is not.
 - `render.raytrace_png`: raytraces the scene and exports it as a PNG. It uses
