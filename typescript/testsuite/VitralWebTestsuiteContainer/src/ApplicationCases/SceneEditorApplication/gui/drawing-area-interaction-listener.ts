@@ -55,4 +55,14 @@ export interface DrawingAreaInteractionListener {
    * The user requested to toggle the full screen GUI mode.
    */
   fullScreenGuiToggleRequested(): void;
+
+  /**
+   * An animation started (i.e. the camera turning to a view chosen with the
+   * camera control gizmo): `frame` must be called periodically (some tens of
+   * times per second), drawing the drawing area again after each call, while
+   * it returns true. A new request replaces the one in course.
+   * @param frame advances the animation to the current time; returns false
+   * when it ended (Java's `BooleanSupplier`)
+   */
+  animationRequested(frame: () => boolean): void;
 }

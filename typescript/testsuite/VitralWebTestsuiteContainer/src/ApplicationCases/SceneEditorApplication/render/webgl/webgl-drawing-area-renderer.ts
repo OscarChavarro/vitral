@@ -223,6 +223,14 @@ export class WebGLDrawingAreaRenderer {
     if (inputGizmo !== null && view.isSelected()) {
       await view.drawInputGizmo(gl, inputGizmo);
     }
+
+    // The camera control gizmo (ViewCube), as a HUD of the selected view
+    if (view.isSelected()) {
+      this.model
+        .getCameraControlGizmo()
+        .placeInViewport(view.getViewport(), this.viewportSet.getElementScaler());
+      await view.drawCameraControlGizmo(gl, this.model.getCameraControlGizmo());
+    }
   }
 
   /**

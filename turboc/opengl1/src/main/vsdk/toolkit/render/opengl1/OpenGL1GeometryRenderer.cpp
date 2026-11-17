@@ -624,10 +624,15 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
         }
         gluTessEndPolygon(tess);
 
+        // Port note: no `?:` with NULL as an argument (gcc 2.7.2)
+        const TreeMap<String, ArrayList<Vector3Dd> >* incidentNormals = NULL;
+        if ( smoothNormals ) {
+            incidentNormals = &incident;
+        }
         for ( long i = 0; i + 2 < t.triangles.size(); i += 3 ) {
             Vector3Dd n[3];
             for ( int k = 0; k < 3; k++ ) {
-                n[k] = resolveVertexNormal(smoothNormals ? &incident : NULL,
+                n[k] = resolveVertexNormal(incidentNormals,
                     t.triangles[i + k], normal,
                     quality->getVertexNormalSmoothingThresholdDegrees());
             }

@@ -1,4 +1,5 @@
 import {
+  CameraControlGizmoInteractionTechnique,
   KeyEvent,
   Matrix4x4d,
   MouseEvent,
@@ -58,6 +59,13 @@ import { SelectedBodyMapToggles } from './selected-body-map-toggles';
  * selector; `ESC` closes the application. Commands of the visual debug ray and
  * of the viewport set are processed by their own techniques.
  *
+ * The camera control gizmo (ViewCube) of the selected viewport has priority
+ * over every interaction mode (see `CameraControlGizmoInteractionTechnique`):
+ * hovering highlights its regions, a click turns the camera smoothly to the
+ * view of a region (the animation is driven by the listener, see
+ * `DrawingAreaInteractionListener.animationRequested`, and recorded in the
+ * view history when it ends), and a drag over it orbits the camera.
+ *
  * Undo and redo (see `UndoRedoInteractionTechnique`): `Ctrl+Z` / `Ctrl+Y` over
  * the scene (creation, deletion and transformation of things), `Ctrl+Shift+Z`
  * / `Ctrl+Shift+Y` over the view of the selected viewport (camera placement,
@@ -86,6 +94,13 @@ export class DrawingAreaInteractionTechniques {
   private readonly listener: DrawingAreaInteractionListener;
   private readonly editRecorder: InteractionEditRecorder;
   private readonly undoRedoTechnique: UndoRedoInteractionTechnique;
+  private readonly cameraControlTechnique: CameraControlGizmoInteractionTechnique;
+  /** Viewport of the camera control gizmo gesture in course, or null. */
+  private cameraControlViewport: Viewport | null;
+  /** Suppresses the synthetic click after a camera control gizmo gesture. */
+  private cameraControlClickConsumed: boolean;
+  /** The gesture that started the camera animation is still recorded. */
+  private cameraAnimationRecording: boolean;
 
   private qualitySelection: RendererConfiguration;
 
@@ -115,6 +130,78 @@ export class DrawingAreaInteractionTechniques {
     this.scaleGizmo = this.interactionTechniques.getScaleGizmo();
     this.editRecorder = new InteractionEditRecorder(model.getEditHistory(), this.viewportSet);
     this.undoRedoTechnique = new UndoRedoInteractionTechnique(model.getEditHistory());
+    this.cameraControlTechnique = new CameraControlGizmoInteractionTechnique(
+      model.getCameraControlGizmo(),
+    );
+    this.cameraControlViewport = null;
+    this.cameraControlClickConsumed = false;
+    this.cameraAnimationRecording = false;
+  }
+
+  //= Camera control gizmo ==============================================
+
+  /**
+   * Places the camera control gizmo over a viewport (as the renderers do),
+   * controlling its camera.
+   */
+  private placeCameraControlGizmo(viewport: Viewport): void {
+    this.model.getCameraControlGizmo().placeInViewport(viewport, this.viewportSet.getElementScaler());
+  }
+
+  /**
+   * Advances the camera animation started by the camera control gizmo. When
+   * it ends, the gesture that started it is recorded (so the whole turn is
+   * one view operation).
+   * @return true while the animation goes on
+   */
+  advanceCameraAnimation(): boolean {
+    // Java's System.nanoTime()
+    this.cameraControlTechnique.advanceAnimation(Math.round(performance.now() * 1.0e6));
+    if (this.cameraControlTechnique.isAnimating()) {
+      return true;
+    }
+    if (this.cameraAnimationRecording) {
+      this.cameraAnimationRecording = false;
+      this.editRecorder.endGesture();
+    }
+    return false;
+  }
+
+  /**
+   * Stops the camera animation where it is (other interaction takes the
+   * camera), recording what it did.
+   */
+  private stopCameraAnimation(): void {
+    this.cameraControlTechnique.cancelAnimation();
+    if (this.cameraAnimationRecording) {
+      this.cameraAnimationRecording = false;
+      this.editRecorder.endGesture();
+    }
+  }
+
+  /**
+   * Lets the camera control gizmo of the selected viewport show what is under
+   * the pointer.
+   * @return true if the pointer is over the gizmo
+   */
+  private processCameraControlMouseMovedEvent(
+    event: MouseEvent,
+    mouseView: Viewport | null,
+  ): boolean {
+    let changed: boolean;
+
+    if (mouseView !== null && this.viewportSet.isSelected(mouseView)) {
+      this.placeCameraControlGizmo(mouseView);
+      changed = this.cameraControlTechnique.processMouseMovedEvent(
+        this.toViewportEvent(event, mouseView),
+      );
+    } else {
+      changed = this.cameraControlTechnique.processMouseExitedEvent();
+    }
+    if (changed) {
+      this.listener.repaintRequested();
+    }
+    return this.model.getCameraControlGizmo().isActive();
   }
 
   getViewportSetTechniques(): ViewportSetInteractionTechniques {
@@ -386,16 +473,34 @@ export class DrawingAreaInteractionTechniques {
   }
 
   processMousePressedEvent(event: MouseEvent): void {
+    this.cameraControlClickConsumed = false;
     const mouseView: Viewport | null = this.getViewportAtPointer(event);
     const mode: InteractionMode = this.drawingArea.getInteractionMode();
 
+    // Any press takes the camera: a turn in course stops where it is
+    this.stopCameraAnimation();
     if (mouseView === null) {
       return;
     }
+    // The gizmo is shown only over the selected viewport
+    const selectedBefore: boolean = this.viewportSet.isSelected(mouseView);
     // Everything the gesture changes, up to its release, is one operation
     this.editRecorder.beginGesture(DrawingAreaInteractionTechniques.sceneOperationName(mode));
     this.viewportSetTechniques.processMousePressedEvent(this.drawingArea.toSurfaceEvent(event));
     this.activateViewport(mouseView);
+
+    // The camera control gizmo has priority over the interaction modes
+    if (selectedBefore) {
+      this.placeCameraControlGizmo(mouseView);
+      if (
+        this.cameraControlTechnique.processMousePressedEvent(this.toViewportEvent(event, mouseView))
+      ) {
+        this.cameraControlViewport = mouseView;
+        this.listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
+        this.listener.repaintRequested();
+        return;
+      }
+    }
 
     //-----------------------------------------------------------------
     // WARNING / TODO
@@ -490,6 +595,10 @@ export class DrawingAreaInteractionTechniques {
   }
 
   processMouseReleasedEvent(event: MouseEvent): void {
+    if (this.cameraControlTechnique.isGestureInCourse()) {
+      this.processCameraControlMouseReleasedEvent(event);
+      return;
+    }
     const mouseView: Viewport | null = this.getInteractionViewportAtPointer(event);
     const confinedGesture: boolean = this.isTranslationGestureConfined();
     const mode: InteractionMode = this.drawingArea.getInteractionMode();
@@ -529,7 +638,34 @@ export class DrawingAreaInteractionTechniques {
     this.editRecorder.endGesture();
   }
 
+  /**
+   * Ends the gesture of the camera control gizmo. A click starts the turn of
+   * the camera to a view: its recording ends with the animation.
+   */
+  private processCameraControlMouseReleasedEvent(event: MouseEvent): void {
+    const viewport: Viewport = this.cameraControlViewport!;
+
+    this.cameraControlViewport = null;
+    this.cameraControlClickConsumed = true;
+    this.placeCameraControlGizmo(viewport);
+    this.cameraControlTechnique.processMouseReleasedEvent(this.toViewportEvent(event, viewport));
+    if (this.cameraControlTechnique.isAnimating()) {
+      this.cameraAnimationRecording = true;
+      this.listener.animationRequested((): boolean => this.advanceCameraAnimation());
+    } else {
+      this.editRecorder.endGesture();
+    }
+    if (!this.model.getCameraControlGizmo().isActive()) {
+      this.updateModeCursor(event);
+    }
+    this.listener.repaintRequested();
+  }
+
   processMouseClickedEvent(event: MouseEvent): void {
+    if (this.cameraControlClickConsumed) {
+      this.cameraControlClickConsumed = false;
+      return;
+    }
     const mode: InteractionMode = this.drawingArea.getInteractionMode();
 
     this.editRecorder.record(DrawingAreaInteractionTechniques.sceneOperationName(mode), (): void =>
@@ -575,6 +711,15 @@ export class DrawingAreaInteractionTechniques {
     const mouseView: Viewport | null = this.getInteractionViewportAtPointer(event);
     const confinedGesture: boolean = this.isTranslationGestureConfined();
     const mode: InteractionMode = this.drawingArea.getInteractionMode();
+    const wasOverCameraControl: boolean = this.model.getCameraControlGizmo().isActive();
+
+    if (!confinedGesture && this.processCameraControlMouseMovedEvent(event, mouseView)) {
+      this.listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
+      return;
+    }
+    if (wasOverCameraControl) {
+      this.updateModeCursor(event);
+    }
 
     // Moved events can come while dragging the gizmo (i.e. when the cursor
     // is wrapped): the viewport of the gesture keeps on being the one used
@@ -606,6 +751,18 @@ export class DrawingAreaInteractionTechniques {
   }
 
   processMouseDraggedEvent(event: MouseEvent): void {
+    if (this.cameraControlTechnique.isGestureInCourse()) {
+      // The gesture belongs to the viewport where it started
+      this.placeCameraControlGizmo(this.cameraControlViewport!);
+      if (
+        this.cameraControlTechnique.processMouseDraggedEvent(
+          this.toViewportEvent(event, this.cameraControlViewport!),
+        )
+      ) {
+        this.listener.repaintRequested();
+      }
+      return;
+    }
     const mouseView: Viewport | null = this.getInteractionViewportAtPointer(event);
     const confinedGesture: boolean = this.isTranslationGestureConfined();
     const mode: InteractionMode = this.drawingArea.getInteractionMode();
@@ -664,6 +821,7 @@ export class DrawingAreaInteractionTechniques {
   processMouseWheelEvent(event: MouseEvent): void {
     const mode: InteractionMode = this.drawingArea.getInteractionMode();
 
+    this.stopCameraAnimation();
     this.editRecorder.beginAction();
     try {
       if (
@@ -692,6 +850,7 @@ export class DrawingAreaInteractionTechniques {
       this.processUndoRedoCommand(command);
       return;
     }
+    this.stopCameraAnimation();
     if (DrawingAreaInteractionTechniques.isControlLetterChord(event)) {
       // Other Ctrl+letter chords are not commands of the drawing area:
       // the letters alone are, so they must not be taken as them
@@ -1091,6 +1250,7 @@ export class DrawingAreaInteractionTechniques {
   processUndoRedoCommand(command: UndoRedoCommand): void {
     const selectedViewport: Viewport | null = this.viewportSet.getSelectedViewport();
 
+    this.stopCameraAnimation();
     this.editRecorder.endGesture();
     // Numbers typed in the gizmo boxes belong to the state before
     this.cancelInputGizmoEditing();

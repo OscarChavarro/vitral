@@ -54,6 +54,7 @@ export { WebGLImplicitSolidRenderer } from "./vsdk/toolkit/render/webgl/volume/W
 export { WebGLPlanarHalfSpaceRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLPlanarHalfSpaceRenderer.js";
 export { WebGLQuadricSurfaceRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLQuadricSurfaceRenderer.js";
 export { WebGLTorusRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLTorusRenderer.js";
+export { WebGLTubeRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLTubeRenderer.js";
 export { WebGLVolumeRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLVolumeRenderer.js";
 export { _WebGLSolidBoundaryMeshBuilder } from "./vsdk/toolkit/render/webgl/volume/_WebGLSolidBoundaryMeshBuilder.js";
 export { WebGLBackgroundRenderer } from "./vsdk/toolkit/render/webgl/WebGLBackgroundRenderer.js";
@@ -71,6 +72,10 @@ export {
 export { WebGLTranslateGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLTranslateGizmoRenderer.js";
 export { WebGLRotateGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLRotateGizmoRenderer.js";
 export { WebGLScaleGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLScaleGizmoRenderer.js";
+export {
+    WebGLCameraControlGizmoRenderer,
+    type WebGLCameraControlGizmoLabelPainter,
+} from "./vsdk/toolkit/render/webgl/WebGLCameraControlGizmoRenderer.js";
 export {
     WEBGL_LABEL_DEFAULT_FONT_SIZE,
     type WebGLLabelImageProvider,

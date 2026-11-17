@@ -196,6 +196,11 @@ export class Math {
         return conversionFloat[0]!;
     }
 
+    /** `Math.nextDown(double)`: the adjacent value towards negative infinity. */
+    public static nextDown(d: number): number {
+        return Math.nextAfter(d, globalThis.Number.NEGATIVE_INFINITY);
+    }
+
     /** `Math.fma(double, double, double)`: `a * b + c` with a single rounding. */
     public static fma(a: number, b: number, c: number): number {
         if (!globalThis.Number.isFinite(a) || !globalThis.Number.isFinite(b)) {

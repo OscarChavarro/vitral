@@ -33,6 +33,8 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
   private readonly selectionEditor: SceneSelectionEditor;
 
   private readonly cursors: Map<PointerCursor, string>;
+  /// Drives the animation in course, if any (Java's Swing `Timer`)
+  private animationTimer: ReturnType<typeof setInterval> | null = null;
 
   /**
    * @param application the application whose GUI is used
@@ -142,6 +144,31 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
 
   repaintRequested(): void {
     this.application.repaintDrawingArea();
+  }
+
+  /// Period of the frames of animations, in milliseconds
+  private static readonly ANIMATION_FRAME_PERIOD: number = 15;
+
+  /**
+   * The frames are advanced by a timer of the event loop (the same one of the
+   * mouse events that change the cameras), as Java's Swing `Timer` in the
+   * event dispatch thread.
+   */
+  animationRequested(frame: () => boolean): void {
+    if (this.animationTimer !== null) {
+      clearInterval(this.animationTimer);
+    }
+    const timer: ReturnType<typeof setInterval> = setInterval((): void => {
+      const running: boolean = frame();
+      this.application.repaintDrawingArea();
+      if (!running) {
+        clearInterval(timer);
+        if (this.animationTimer === timer) {
+          this.animationTimer = null;
+        }
+      }
+    }, HtmlDrawingAreaFeedback.ANIMATION_FRAME_PERIOD);
+    this.animationTimer = timer;
   }
 
   statusMessageRequested(message: string): void {

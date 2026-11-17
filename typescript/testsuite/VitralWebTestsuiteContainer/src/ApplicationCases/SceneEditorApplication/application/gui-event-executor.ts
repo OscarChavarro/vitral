@@ -30,6 +30,7 @@ import {
   Sphere,
   StringReader,
   Torus,
+  Tube,
   VSDK,
   Vector3Dd,
   VoxelVolume,
@@ -154,6 +155,12 @@ export class GuiEventExecutor extends CommandListener {
       this.scene().addThing(new Cone(1, 0, 2));
     } else if (label === 'IDC_CREATE_CYLINDER') {
       this.scene().addThing(new Cone(1, 1, 2));
+    } else if (label === 'IDC_CREATE_TUBE') {
+      this.scene().addThing(new Tube(0.6, 1, 2));
+    } else if (label === 'IDC_CREATE_WASHER') {
+      // A tube of height 0: a circular lamina with a hole
+      const body: SimpleBody = this.scene().addThing(new Tube(0.6, 1, 0));
+      body.setMaterial(body.getMaterial()!.withDoubleSided(true));
     } else if (label === 'IDC_CREATE_CUBE') {
       this.scene().addThing(new Box(1, 1, 1));
     } else if (label === 'IDC_CREATE_BOX') {

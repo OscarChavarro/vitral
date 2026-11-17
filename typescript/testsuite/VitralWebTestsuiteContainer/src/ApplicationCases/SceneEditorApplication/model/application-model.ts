@@ -1,4 +1,5 @@
 import {
+  CameraControlGizmo,
   Intersection,
   Ray,
   RayGizmo,
@@ -37,6 +38,8 @@ export class ApplicationModel {
   private raytracedImageHeight = 0;
   private palette: RGBColorPalette | null = null;
   private rayGizmo: RayGizmo | null = null;
+  /// ViewCube shown over the selected viewport, controlling its camera
+  private readonly cameraControlGizmo: CameraControlGizmo = new CameraControlGizmo();
   private readonly viewportSets: ViewportSet[];
   private activeViewportSetIndex: number;
   private i18nContext: Widget | null = null;
@@ -267,6 +270,14 @@ export class ApplicationModel {
     if (this.rayGizmo !== null) {
       this.rayGizmo.setMaxNumOfReflections(visualDebugRayLevels);
     }
+  }
+
+  /**
+   * @return the camera control gizmo (ViewCube) presented over the selected
+   * viewport
+   */
+  getCameraControlGizmo(): CameraControlGizmo {
+    return this.cameraControlGizmo;
   }
 
   getRayGizmo(): RayGizmo | null {

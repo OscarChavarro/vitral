@@ -16,6 +16,7 @@ import {
     Sphere,
     SubdividedBezierPatch,
     Torus,
+    Tube,
     TriangleMesh,
     TriangleMeshGroup,
     TriangleStripMesh,
@@ -49,6 +50,7 @@ import { WebGLPolyhedralBoundedSolidRenderer } from "./volume/polyhedralBoundedS
 import { WebGLQuadricSurfaceRenderer } from "./volume/WebGLQuadricSurfaceRenderer.js";
 import { WebGLSphereRenderer } from "./volume/WebGLSphereRenderer.js";
 import { WebGLTorusRenderer } from "./volume/WebGLTorusRenderer.js";
+import { WebGLTubeRenderer } from "./volume/WebGLTubeRenderer.js";
 import { WebGLVolumeRenderer } from "./volume/WebGLVolumeRenderer.js";
 
 /**
@@ -299,6 +301,9 @@ export class WebGLGeometryRenderer {
         if (geometry instanceof Torus) {
             return WebGLTorusRenderer.meshKey(geometry);
         }
+        if (geometry instanceof Tube) {
+            return WebGLTubeRenderer.meshKey(geometry);
+        }
         if (geometry instanceof TriangleMesh) {
             return WebGLTriangleMeshRenderer.meshKey(geometry);
         }
@@ -348,6 +353,9 @@ export class WebGLGeometryRenderer {
         }
         if (geometry instanceof Torus) {
             return WebGLTorusRenderer.buildMesh(geometry);
+        }
+        if (geometry instanceof Tube) {
+            return WebGLTubeRenderer.buildMesh(geometry);
         }
         if (geometry instanceof TriangleMesh) {
             return WebGLTriangleMeshRenderer.buildMesh(geometry);

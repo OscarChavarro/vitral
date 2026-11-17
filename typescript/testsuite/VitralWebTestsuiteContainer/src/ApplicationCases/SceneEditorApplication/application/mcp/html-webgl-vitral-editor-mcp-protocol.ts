@@ -8,6 +8,7 @@ import {
   RendererConfiguration,
   ShadingType,
   Sphere,
+  Tube,
   Vector3Dd,
   Viewport,
   type Geometry,
@@ -120,6 +121,10 @@ export class HtmlWebGLVitralEditorMCPProtocol {
     }
     if (tool === 'scene.add_cylinder') {
       this.recordSceneChange(tool, (): void => this.addCylinder(request));
+      return this.describeScene();
+    }
+    if (tool === 'scene.add_tube') {
+      this.recordSceneChange(tool, (): void => this.addTube(request));
       return this.describeScene();
     }
     if (tool === 'scene.move_body') {
@@ -381,6 +386,19 @@ export class HtmlWebGLVitralEditorMCPProtocol {
     const radius: number = P.numberProperty(request, 'radius', 1.0);
     const height: number = P.numberProperty(request, 'height', 2.0);
     this.placeNewBody(new Cone(radius, radius, height), request);
+  }
+
+  /**
+   * Adds a tube, or a washer when its height is 0 (tool `scene.add_tube`).
+   * @param request request with the arguments
+   * internalRadius,externalRadius,height,x,y,z
+   */
+  private addTube(request: string): void {
+    const P = HtmlWebGLVitralEditorMCPProtocol;
+    const internalRadius: number = P.numberProperty(request, 'internalRadius', 0.5);
+    const externalRadius: number = P.numberProperty(request, 'externalRadius', 1.0);
+    const height: number = P.numberProperty(request, 'height', 2.0);
+    this.placeNewBody(new Tube(internalRadius, externalRadius, height), request);
   }
 
   private placeNewBody(geometry: Geometry, request: string): void {
@@ -757,6 +775,11 @@ export class HtmlWebGLVitralEditorMCPProtocol {
       ) +
       ',' +
       tool('scene.add_cylinder', 'Create a cylinder. Arguments: radius,height,x,y,z.') +
+      ',' +
+      tool(
+        'scene.add_tube',
+        'Create a tube (a washer if height is 0). Arguments: internalRadius,externalRadius,height,x,y,z.',
+      ) +
       ',' +
       tool(
         'scene.move_body',

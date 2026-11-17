@@ -3,6 +3,7 @@
 import {
     Arrow,
     Camera,
+    type CameraControlGizmo,
     ColorRgb,
     InputGizmo,
     JavaMath,
@@ -20,6 +21,7 @@ import {
     type ViewportElementScaler,
     type ViewportSet,
 } from "@vitral/base";
+import { WebGLCameraControlGizmoRenderer } from "../WebGLCameraControlGizmoRenderer.js";
 import { WebGLImageRenderer } from "../WebGLImageRenderer.js";
 import { WebGLInputGizmoRenderer } from "../WebGLInputGizmoRenderer.js";
 import { WebGLLineRenderer } from "../WebGLLineRenderer.js";
@@ -45,6 +47,7 @@ export class WebGLViewportWindow {
     private static readonly BASE_TITLE_BORDER_Y: number = 1;
     // A bit smaller than the titles
     private static readonly BASE_REFERENCE_FRAME_LABEL_FONT_SIZE: number = 12;
+    private static readonly BASE_CAMERA_CONTROL_GIZMO_LABEL_FONT_SIZE: number = 9;
     private static readonly BASE_TRANSLATE_GIZMO_LABEL_FONT_SIZE: number = WEBGL_LABEL_DEFAULT_FONT_SIZE;
     // Position of the labels of the translate gizmo, with respect to the tip
     // of its arrows
@@ -81,6 +84,12 @@ export class WebGLViewportWindow {
     private rotateGizmoArcLabelColor: ColorRgb | null = null;
     private rotateGizmoArcLabelFontSize: number = 0;
     private readonly inputGizmoRenderer: WebGLInputGizmoRenderer;
+    // Labels of the faces of the camera control gizmo, by text
+    private readonly cameraControlGizmoLabelImages: Map<string, RGBAImageUncompressed> = new Map<
+        string,
+        RGBAImageUncompressed
+    >();
+    private cameraControlGizmoLabelFontSize: number = 0;
 
     public constructor(viewportSet: ViewportSet, viewport: Viewport, labelImageProvider: WebGLLabelImageProvider) {
         this.viewportSet = viewportSet;
@@ -554,6 +563,56 @@ export class WebGLViewportWindow {
             }
             this.titleImage = this.labelImageProvider.createLabelImage(this.title, this.titleColor, this.titleFontSize);
         }
+    }
+
+    /**
+    Draws a camera control gizmo (ViewCube) as a HUD over this viewport, with
+    the labels of its faces. The gizmo must be already placed in this
+    viewport (see `CameraControlGizmo.placeInViewport`).
+    @param gl WebGL context
+    @param gizmo the gizmo
+    */
+    public async drawCameraControlGizmo(gl: WebGL2RenderingContext, gizmo: CameraControlGizmo): Promise<void> {
+        const elementScaler: ViewportElementScaler = this.viewportSet.getElementScaler();
+        const fontSize: number = elementScaler.scaleSize(WebGLViewportWindow.BASE_CAMERA_CONTROL_GIZMO_LABEL_FONT_SIZE);
+
+        if (fontSize !== this.cameraControlGizmoLabelFontSize) {
+            for (const image of this.cameraControlGizmoLabelImages.values()) {
+                this.discardedLabelImages.push(image);
+            }
+            this.cameraControlGizmoLabelImages.clear();
+            this.cameraControlGizmoLabelFontSize = fontSize;
+        }
+        await WebGLCameraControlGizmoRenderer.draw(
+            gl,
+            gizmo,
+            this.viewport.getPixelStartX(),
+            this.viewport.getPixelStartY(),
+            this.viewport.getPixelSizeY(),
+            elementScaler.scaleLength(1.0),
+            {
+                drawLabel: async (
+                    glContext: WebGL2RenderingContext,
+                    label: string,
+                    x: number,
+                    y: number,
+                ): Promise<void> => {
+                    // Java's Map.computeIfAbsent
+                    let image: RGBAImageUncompressed | undefined = this.cameraControlGizmoLabelImages.get(label);
+                    if (image === undefined) {
+                        image = this.labelImageProvider.createLabelImage(label, gizmo.getLabelColor(), fontSize);
+                        this.cameraControlGizmoLabelImages.set(label, image);
+                    }
+                    // Centered; the y given is the lower edge of the image
+                    await this.drawTextureString2D(
+                        glContext,
+                        JavaMath.round(x - image.getXSize() / 2.0),
+                        JavaMath.round(y + image.getYSize() / 2.0),
+                        image,
+                    );
+                },
+            },
+        );
     }
 
     public async drawLabelsForTranslateGizmo(gl: WebGL2RenderingContext, gizmo: TranslateGizmo): Promise<void> {

@@ -337,6 +337,7 @@ export { Box } from "./vsdk/toolkit/environment/geometry/volume/Box.js";
 export { VoxelVolume } from "./vsdk/toolkit/environment/geometry/volume/VoxelVolume.js";
 export { Cone } from "./vsdk/toolkit/environment/geometry/volume/Cone.js";
 export { Torus } from "./vsdk/toolkit/environment/geometry/volume/Torus.js";
+export { Tube } from "./vsdk/toolkit/environment/geometry/volume/Tube.js";
 export { Arrow } from "./vsdk/toolkit/environment/geometry/volume/Arrow.js";
 export {
     PolyhedralBoundedSolidNumericPolicy,
@@ -455,6 +456,7 @@ export { InputGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/InputGizmo2DPai
 export { RotateGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.js";
 export { ScaleGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.js";
 export { TranslateGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.js";
+export { CameraControlGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.js";
 export { WireframeRenderer } from "./vsdk/toolkit/render/hiddenLine/WireframeRenderer.js";
 export { HiddenLineRenderer } from "./vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.js";
 export { TraceWorkspace } from "./vsdk/toolkit/render/TraceWorkspace.js";
@@ -555,6 +557,9 @@ export { RotateGizmoInteractionTechnique } from "./vsdk/toolkit/gui/gizmo/Rotate
 export { ScaleGizmo, ContourSegment } from "./vsdk/toolkit/gui/gizmo/ScaleGizmo.js";
 export { ScaleGizmoInteractionTechnique } from "./vsdk/toolkit/gui/gizmo/ScaleGizmoInteractionTechnique.js";
 export { RayGizmoInteractionTechniques } from "./vsdk/toolkit/gui/gizmo/RayGizmoInteractionTechniques.js";
+export { CameraControlGizmo } from "./vsdk/toolkit/gui/gizmo/CameraControlGizmo.js";
+export { CameraControlGizmoAnimation } from "./vsdk/toolkit/gui/gizmo/CameraControlGizmoAnimation.js";
+export { CameraControlGizmoInteractionTechnique } from "./vsdk/toolkit/gui/gizmo/CameraControlGizmoInteractionTechnique.js";
 export { Viewport } from "./vsdk/toolkit/gui/viewport/Viewport.js";
 export { ViewportSet } from "./vsdk/toolkit/gui/viewport/ViewportSet.js";
 export { ViewportSetCommands } from "./vsdk/toolkit/gui/viewport/ViewportSetCommands.js";

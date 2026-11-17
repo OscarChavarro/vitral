@@ -16,6 +16,7 @@ import {
   Sphere,
   Surface,
   Torus,
+  Tube,
   TriangleMesh,
   TriangleMeshGroup,
   TriangleStripMesh,
@@ -48,6 +49,7 @@ const JAVA_CLASS_NAMES: readonly [abstract new (...args: never[]) => object, str
   ],
   [Sphere, 'vsdk.toolkit.environment.geometry.volume.Sphere'],
   [Torus, 'vsdk.toolkit.environment.geometry.volume.Torus'],
+  [Tube, 'vsdk.toolkit.environment.geometry.volume.Tube'],
   [VoxelVolume, 'vsdk.toolkit.environment.geometry.volume.VoxelVolume'],
   [
     FunctionalExplicitSurface,

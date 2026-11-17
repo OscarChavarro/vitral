@@ -157,11 +157,15 @@ void OpenGL1ViewportWindow::drawCameraControlGizmo(CameraControlGizmo* gizmo)
         cameraControlGizmoLabelFontSize = fontSize;
     }
     OpenGL1CameraControlGizmoLabels labelPainter(this, gizmo, fontSize);
+    // Port note: no `?:` with NULL (it is `(void*)0` for gcc 2.7.2)
+    OpenGL1CameraControlGizmoRenderer::LabelPainter* painter = NULL;
+    if ( labels != NULL ) {
+        painter = &labelPainter;
+    }
     OpenGL1CameraControlGizmoRenderer::draw(gizmo,
         viewport->getPixelStartX(), viewport->getPixelStartY(),
         viewport->getPixelSizeY(),
-        (float)elementScaler->scaleLength(1.0),
-        labels != NULL ? &labelPainter : NULL);
+        (float)elementScaler->scaleLength(1.0), painter);
 }
 void OpenGL1ViewportWindow::disposeGlResources(){if(titleImage)OpenGL1ImageRenderer::unload(titleImage);if(inputGizmoRenderer)inputGizmoRenderer->disposeGlResources();}void OpenGL1ViewportWindow::invalidateGlResources(){}
 

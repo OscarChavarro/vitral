@@ -1,3 +1,4 @@
+import { Math as JavaMath } from "../../../../../../java/lang/Math.js";
 import type { Matrix4x4d } from "../../../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
 import { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
@@ -53,9 +54,10 @@ export class PolyhedralBoundedSolidEulerConstructions {
             // two separately constructed circles always produce bit-identical
             // coordinates, preventing near-coincident vertices downstream.
             // Java `Math.round(double)` rounds half toward positive infinity,
-            // exactly as ECMAScript `Math.round`.
-            x = Math.round((cx + radius * Math.cos(angle)) * 1.0e10) / 1.0e10;
-            y = Math.round((cy + radius * Math.sin(angle)) * 1.0e10) / 1.0e10;
+            // as ECMAScript `Math.round`, but returns a `long`: a value that
+            // rounds to zero gives +0.0, never -0.0 (see `JavaMath.round`).
+            x = JavaMath.round((cx + radius * Math.cos(angle)) * 1.0e10) / 1.0e10;
+            y = JavaMath.round((cy + radius * Math.sin(angle)) * 1.0e10) / 1.0e10;
             nextVertexId = solid.getMaxVertexId() + 1;
             PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3Dd(x, y, height));
             prev = nextVertexId;
