@@ -5,6 +5,8 @@
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "vsdk/toolkit/gui/gizmo/CameraControlGizmo.h"
+#include "vsdk/toolkit/gui/gizmo/CameraControlGizmoInteractionTechnique.h"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmoInteractionTechniques.h"
 #include "vsdk/toolkit/gui/gizmo/RotateGizmo.h"
@@ -30,6 +32,7 @@
 
 DrawingAreaInteractionTechniques::DrawingAreaInteractionTechniques(
     ApplicationModel* model, DrawingAreaInteractionListener* listener)
+    : cameraAnimationFrame(this)
 {
     this->model = model;
     this->drawingArea = model->getDrawingArea();
@@ -55,10 +58,84 @@ DrawingAreaInteractionTechniques::DrawingAreaInteractionTechniques(
         model->getEditHistory());
     viewportTitleGesture = FALSE;
     viewportTitleClickConsumed = FALSE;
+    cameraControlTechnique = new CameraControlGizmoInteractionTechnique(
+        model->getCameraControlGizmo());
+    cameraControlViewport = NULL;
+    cameraControlClickConsumed = FALSE;
+    cameraAnimationRecording = FALSE;
+}
+
+//= Camera control gizmo ==================================================
+
+/**
+Places the camera control gizmo over a viewport (as the renderers do),
+controlling its camera.
+*/
+void DrawingAreaInteractionTechniques::placeCameraControlGizmo(
+    Viewport* viewport)
+{
+    model->getCameraControlGizmo()->placeInViewport(viewport,
+        viewportSet->getElementScaler());
+}
+
+BOOLEAN DrawingAreaInteractionTechniques::advanceCameraAnimation()
+{
+    cameraControlTechnique->advanceAnimation(System::nanoTime());
+    if ( cameraControlTechnique->isAnimating() ) {
+        return TRUE;
+    }
+    if ( cameraAnimationRecording ) {
+        cameraAnimationRecording = FALSE;
+        editRecorder->endGesture();
+    }
+    return FALSE;
+}
+
+BOOLEAN DrawingAreaInteractionTechniques::CameraAnimationFrame::getAsBoolean()
+{
+    return owner->advanceCameraAnimation();
+}
+
+/**
+Stops the camera animation where it is (other interaction takes the
+camera), recording what it did.
+*/
+void DrawingAreaInteractionTechniques::stopCameraAnimation()
+{
+    cameraControlTechnique->cancelAnimation();
+    if ( cameraAnimationRecording ) {
+        cameraAnimationRecording = FALSE;
+        editRecorder->endGesture();
+    }
+}
+
+/**
+Lets the camera control gizmo of the selected viewport show what is under
+the pointer.
+@return true if the pointer is over the gizmo
+*/
+BOOLEAN DrawingAreaInteractionTechniques::processCameraControlMouseMovedEvent(
+    const MouseEvent& event, Viewport* mouseView)
+{
+    BOOLEAN changed;
+
+    if ( mouseView != NULL && viewportSet->isSelected(mouseView) ) {
+        placeCameraControlGizmo(mouseView);
+        changed = cameraControlTechnique->processMouseMovedEvent(
+            toViewportEvent(event, mouseView));
+    }
+    else {
+        changed = cameraControlTechnique->processMouseExitedEvent();
+    }
+    if ( changed ) {
+        listener->repaintRequested();
+    }
+    return model->getCameraControlGizmo()->isActive();
 }
 
 DrawingAreaInteractionTechniques::~DrawingAreaInteractionTechniques()
 {
+    delete cameraControlTechnique;
     delete undoRedoTechnique;
     delete editRecorder;
     delete mapToggles;
@@ -365,12 +442,17 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
     const MouseEvent& event)
 {
     viewportTitleClickConsumed = FALSE;
+    cameraControlClickConsumed = FALSE;
     Viewport* mouseView = getViewportAtPointer(event);
     InteractionMode mode = drawingArea->getInteractionMode();
 
+    // Any press takes the camera: a turn in course stops where it is
+    stopCameraAnimation();
     if ( mouseView == NULL ) {
         return;
     }
+    // The gizmo is shown only over the selected viewport
+    BOOLEAN selectedBefore = viewportSet->isSelected(mouseView);
     // Everything the gesture changes, up to its release, is one operation
     editRecorder->beginGesture(sceneOperationName(mode));
     viewportSetTechniques->processMousePressedEvent(
@@ -382,6 +464,18 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
         requestCursorForPointer(event, PointerCursor::VIEWPORT_TITLE);
         listener->repaintRequested();
         return;
+    }
+
+    // The camera control gizmo has priority over the interaction modes
+    if ( selectedBefore ) {
+        placeCameraControlGizmo(mouseView);
+        if ( cameraControlTechnique->processMousePressedEvent(
+                 toViewportEvent(event, mouseView)) ) {
+            cameraControlViewport = mouseView;
+            listener->cursorRequested(PointerCursor::VIEWPORT_TITLE);
+            listener->repaintRequested();
+            return;
+        }
     }
 
     //-----------------------------------------------------------------
@@ -477,6 +571,10 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
 void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     const MouseEvent& event)
 {
+    if ( cameraControlTechnique->isGestureInCourse() ) {
+        processCameraControlMouseReleasedEvent(event);
+        return;
+    }
     BOOLEAN titleGesture = viewportTitleGesture;
     viewportTitleGesture = FALSE;
     Viewport* mouseView = getInteractionViewportAtPointer(event);
@@ -526,9 +624,41 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     editRecorder->endGesture();
 }
 
+/**
+Ends the gesture of the camera control gizmo. A click starts the turn of the
+camera to a view: its recording ends with the animation.
+*/
+void DrawingAreaInteractionTechniques::processCameraControlMouseReleasedEvent(
+    const MouseEvent& event)
+{
+    Viewport* viewport = cameraControlViewport;
+
+    cameraControlViewport = NULL;
+    viewportTitleGesture = FALSE;
+    cameraControlClickConsumed = TRUE;
+    placeCameraControlGizmo(viewport);
+    cameraControlTechnique->processMouseReleasedEvent(
+        toViewportEvent(event, viewport));
+    if ( cameraControlTechnique->isAnimating() ) {
+        cameraAnimationRecording = TRUE;
+        listener->animationRequested(&cameraAnimationFrame);
+    }
+    else {
+        editRecorder->endGesture();
+    }
+    if ( !model->getCameraControlGizmo()->isActive() ) {
+        updateModeCursor(event);
+    }
+    listener->repaintRequested();
+}
+
 void DrawingAreaInteractionTechniques::processMouseClickedEvent(
     const MouseEvent& event)
 {
+    if ( cameraControlClickConsumed ) {
+        cameraControlClickConsumed = FALSE;
+        return;
+    }
     if ( viewportTitleClickConsumed ) {
         viewportTitleClickConsumed = FALSE;
         return;
@@ -578,6 +708,16 @@ void DrawingAreaInteractionTechniques::processMouseMovedEvent(
     Viewport* mouseView = getInteractionViewportAtPointer(event);
     BOOLEAN confinedGesture = isTranslationGestureConfined();
     InteractionMode mode = drawingArea->getInteractionMode();
+    BOOLEAN wasOverCameraControl = model->getCameraControlGizmo()->isActive();
+
+    if ( !confinedGesture &&
+         processCameraControlMouseMovedEvent(event, mouseView) ) {
+        listener->cursorRequested(PointerCursor::VIEWPORT_TITLE);
+        return;
+    }
+    if ( wasOverCameraControl ) {
+        updateModeCursor(event);
+    }
 
     // Moved events can come while dragging the gizmo (i.e. when the cursor
     // is wrapped): the viewport of the gesture keeps on being the one used
@@ -610,6 +750,15 @@ void DrawingAreaInteractionTechniques::processMouseMovedEvent(
 void DrawingAreaInteractionTechniques::processMouseDraggedEvent(
     const MouseEvent& event)
 {
+    if ( cameraControlTechnique->isGestureInCourse() ) {
+        // The gesture belongs to the viewport where it started
+        placeCameraControlGizmo(cameraControlViewport);
+        if ( cameraControlTechnique->processMouseDraggedEvent(
+                 toViewportEvent(event, cameraControlViewport)) ) {
+            listener->repaintRequested();
+        }
+        return;
+    }
     Viewport* mouseView = getInteractionViewportAtPointer(event);
     BOOLEAN confinedGesture = isTranslationGestureConfined();
     InteractionMode mode = drawingArea->getInteractionMode();
@@ -655,6 +804,7 @@ void DrawingAreaInteractionTechniques::processMouseWheelEvent(
 {
     InteractionMode mode = drawingArea->getInteractionMode();
 
+    stopCameraAnimation();
     editRecorder->beginAction();
     try {
         if ( mode == InteractionMode::CAMERA &&
@@ -681,6 +831,7 @@ void DrawingAreaInteractionTechniques::processKeyPressedEvent(
         processUndoRedoCommand(command);
         return;
     }
+    stopCameraAnimation();
     if ( isControlLetterChord(event) ) {
         // Other Ctrl+letter chords are not commands of the drawing area:
         // the letters alone are, so they must not be taken as them
@@ -1046,6 +1197,7 @@ void DrawingAreaInteractionTechniques::processUndoRedoCommand(
 {
     Viewport* selectedViewport = viewportSet->getSelectedViewport();
 
+    stopCameraAnimation();
     editRecorder->endGesture();
     // Numbers typed in the gizmo boxes belong to the state before
     cancelInputGizmoEditing();

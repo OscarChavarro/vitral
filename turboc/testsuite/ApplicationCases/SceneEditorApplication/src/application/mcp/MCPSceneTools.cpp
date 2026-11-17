@@ -8,6 +8,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
+#include "vsdk/toolkit/environment/geometry/volume/Tube.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/light/PointLight.h"
@@ -181,6 +182,15 @@ void MCPSceneTools::addCylinder(const String& request)
     double height = MCPJson::numberProperty(request, "height", 2.0);
     recordSceneChange("scene.add_cylinder", &MCPSceneTools::placeNewBody,
         new Cone(radius, radius, height), request);
+}
+
+void MCPSceneTools::addTube(const String& request)
+{
+    double internalRadius = MCPJson::numberProperty(request, "internalRadius", 0.5);
+    double externalRadius = MCPJson::numberProperty(request, "externalRadius", 1.0);
+    double height = MCPJson::numberProperty(request, "height", 2.0);
+    recordSceneChange("scene.add_tube", &MCPSceneTools::placeNewBody,
+        new Tube(internalRadius, externalRadius, height), request);
 }
 
 void MCPSceneTools::placeNewBody(Geometry* geometry,

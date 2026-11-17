@@ -21,6 +21,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
+#include "vsdk/toolkit/environment/geometry/volume/Tube.h"
 #include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
@@ -66,6 +67,15 @@ CommandResult GeometryCreationCommandsExecutor::execute(
     }
     else if ( label.equals("IDC_CREATE_CYLINDER") ) {
         scene()->addThing(new Cone(1, 1, 2));
+    }
+    else if ( label.equals("IDC_CREATE_TUBE") ) {
+        scene()->addThing(new Tube(0.6, 1, 2));
+    }
+    else if ( label.equals("IDC_CREATE_WASHER") ) {
+        // A tube of height 0: a circular lamina with a hole
+        SimpleBody* body = scene()->addThing(new Tube(0.6, 1, 0));
+        body->setMaterial(new SimpleMaterial(
+            body->getMaterial()->withDoubleSided(TRUE)));
     }
     else if ( label.equals("IDC_CREATE_CUBE") ) {
         scene()->addThing(new Box(1, 1, 1));

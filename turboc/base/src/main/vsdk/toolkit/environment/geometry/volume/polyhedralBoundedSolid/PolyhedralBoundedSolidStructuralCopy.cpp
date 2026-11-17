@@ -78,18 +78,19 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidStructuralCopy::copy(
                 halfEdges.put(he, ch);
             }
             cl->boundaryStartHalfEdge = halfEdges.getOrDefault(
-                l->boundaryStartHalfEdge, NULL);
+                l->boundaryStartHalfEdge, (_PolyhedralBoundedSolidHalfEdge*)NULL);
         }
     }
     for ( i = 0; i < edges.size(); i++ ) {
         edges.getValue(i)->rightHalf = halfEdges.getOrDefault(
-            edges.getKey(i)->rightHalf, NULL);
+            edges.getKey(i)->rightHalf, (_PolyhedralBoundedSolidHalfEdge*)NULL);
         edges.getValue(i)->leftHalf = halfEdges.getOrDefault(
-            edges.getKey(i)->leftHalf, NULL);
+            edges.getKey(i)->leftHalf, (_PolyhedralBoundedSolidHalfEdge*)NULL);
     }
     for ( i = 0; i < vertices.size(); i++ ) {
         vertices.getValue(i)->emanatingHalfEdge = halfEdges.getOrDefault(
-            vertices.getKey(i)->emanatingHalfEdge, NULL);
+            vertices.getKey(i)->emanatingHalfEdge,
+            (_PolyhedralBoundedSolidHalfEdge*)NULL);
     }
     target->setMaxVertexId(source->getMaxVertexId());
     target->setMaxFaceId(source->getMaxFaceId());
@@ -104,7 +105,8 @@ _PolyhedralBoundedSolidVertex* PolyhedralBoundedSolidStructuralCopy::mapVertex(
     PolyhedralBoundedSolid* target,
     _PolyhedralBoundedSolidVertex* v)
 {
-    _PolyhedralBoundedSolidVertex* c = vertices.getOrDefault(v, NULL);
+    _PolyhedralBoundedSolidVertex* c = vertices.getOrDefault(v,
+        (_PolyhedralBoundedSolidVertex*)NULL);
     if ( c == NULL && v != NULL ) {
         c = new _PolyhedralBoundedSolidVertex(v->position, v->id);
         target->getVerticesList().add(c);
@@ -120,7 +122,8 @@ _PolyhedralBoundedSolidEdge* PolyhedralBoundedSolidStructuralCopy::mapEdge(
     PolyhedralBoundedSolid* target,
     _PolyhedralBoundedSolidEdge* e)
 {
-    _PolyhedralBoundedSolidEdge* c = edges.getOrDefault(e, NULL);
+    _PolyhedralBoundedSolidEdge* c = edges.getOrDefault(e,
+        (_PolyhedralBoundedSolidEdge*)NULL);
     if ( c == NULL ) {
         c = new _PolyhedralBoundedSolidEdge();
         target->getEdgesList().add(c);

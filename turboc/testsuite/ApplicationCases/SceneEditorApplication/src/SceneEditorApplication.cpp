@@ -228,6 +228,9 @@ public:
         , ready(FALSE)
         , closing(FALSE)
         , repaintQueued(FALSE)
+        , animationFrame(NULL)
+        , animationTimer(0)
+        , animationTimerActive(FALSE)
         , currentCursor(PointerCursor::SELECT)
         , viewportMenuX(0)
         , viewportMenuY(0)
@@ -243,6 +246,7 @@ public:
 
     ~SceneEditorApplication()
     {
+        stopAnimationTimer();
         // The automation service lives as long as the process (as in Java)
         delete imageControlWindow;
         imageControlWindow = NULL;
@@ -386,6 +390,11 @@ private:
     BOOLEAN ready;
     BOOLEAN closing;
     BOOLEAN repaintQueued;
+    /// Advances the animation in course, if any (not owned)
+    BooleanSupplier* animationFrame;
+    /// Drives the animation in course, if any
+    XtIntervalId animationTimer;
+    BOOLEAN animationTimerActive;
     TreeMap<int, Cursor> cursors;
     PointerCursor::Value currentCursor;
     PopupDismissClickFilter popupDismissFilter;
@@ -798,8 +807,17 @@ private:
         XtEventQueue::install(appContext);
         display = XtOpenDisplay(appContext, NULL, "scene-editor",
             "SceneEditorApplication", NULL, 0, &argc, argv);
-        if (display == NULL)
-            throw VSDKFatalException("Could not open X display. Is DISPLAY set?");
+        if (display == NULL) {
+            // C++ port note: Java checks for a headless AWT; here the
+            // display is defined (see exitIfNoDisplayIsAvailable) but it
+            // can not be opened
+            fprintf(stderr, "ERROR: No graphical display is available: the "
+                "X display \"%s\" can not be opened.\n", getenv("DISPLAY"));
+            fprintf(stderr, "The scene editor needs a display: check that "
+                "the X server is running and accepts connections, or use a "
+                "virtual display (i.e. xvfb-run ./run.sh).\n");
+            exit(1);
+        }
         loadResourceFile();
         const int screen = DefaultScreen(display);
         width = DisplayWidth(display, screen);
@@ -1425,6 +1443,53 @@ private:
         requestRedraw();
     }
 
+    /// Period of the frames of animations, in milliseconds
+    enum { ANIMATION_FRAME_PERIOD = 15 };
+
+    void stopAnimationTimer()
+    {
+        if (animationTimerActive) {
+            XtRemoveTimeOut(animationTimer);
+            animationTimerActive = FALSE;
+        }
+        animationFrame = NULL;
+    }
+
+    static void animationFrameCallback(XtPointer clientData, XtIntervalId*)
+    {
+        SceneEditorApplication* self = ((SceneEditorApplication*)(clientData));
+        if (self == NULL) return;
+        self->animationTimerActive = FALSE;
+        if (self->animationFrame == NULL) return;
+        BOOLEAN running = self->animationFrame->getAsBoolean();
+        self->requestRedraw();
+        if (!running) {
+            self->animationFrame = NULL;
+            return;
+        }
+        self->animationTimer = XtAppAddTimeOut(self->appContext,
+            ANIMATION_FRAME_PERIOD,
+            &SceneEditorApplication::animationFrameCallback,
+            ((XtPointer)(self)));
+        self->animationTimerActive = TRUE;
+    }
+
+    /**
+    The frames are advanced by an Xt timer (as the Swing timer of
+    `AwtDrawingAreaFeedback.animationRequested`), in the thread of the
+    events that change the cameras.
+    */
+    void animationRequested(BooleanSupplier* frame)
+    {
+        stopAnimationTimer();
+        if (frame == NULL || appContext == NULL) return;
+        animationFrame = frame;
+        animationTimer = XtAppAddTimeOut(appContext, ANIMATION_FRAME_PERIOD,
+            &SceneEditorApplication::animationFrameCallback,
+            ((XtPointer)(this)));
+        animationTimerActive = TRUE;
+    }
+
     Cursor getCursor(PointerCursor::Value cursor)
     {
         unsigned int shape = XC_left_ptr;
@@ -1946,8 +2011,28 @@ void ApplyTangibleEventTask::run()
     application->applyTangibleInterfaceEvent();
 }
 
+/**
+The editor needs a graphical display: without one (i.e. with no DISPLAY
+variable defined), the reason is reported in a short message, and the
+application ends.
+*/
+static void exitIfNoDisplayIsAvailable()
+{
+    const char* display = getenv("DISPLAY");
+
+    if ( display == NULL || display[0] == '\0' ) {
+        fprintf(stderr, "ERROR: No graphical display is available: the "
+            "DISPLAY environment variable is not defined.\n");
+        fprintf(stderr, "The scene editor needs a display. Define DISPLAY "
+            "(i.e. export DISPLAY=:0), connect with X11 forwarding "
+            "(ssh -X), or use a virtual display (i.e. xvfb-run ./run.sh).\n");
+        exit(1);
+    }
+}
+
 int main(int argc, char** argv)
 {
+    exitIfNoDisplayIsAvailable();
     // The widget set the application is built with
     XtUiFactory* uiFactory = createUiFactory();
     int result = 0;

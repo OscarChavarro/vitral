@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/Math.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
@@ -18,6 +19,8 @@
 #include "vsdk/toolkit/render/opengl1/OpenGL1ColoredPrimitiveRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1ViewportWindow.h"
 #include "vsdk/toolkit/render/opengl1/gizmo/OpenGL1InputGizmoRenderer.h"
+#include "vsdk/toolkit/render/opengl1/gizmo/OpenGL1CameraControlGizmoRenderer.h"
+#include "vsdk/toolkit/gui/gizmo/CameraControlGizmo.h"
 
 /**
 Services of a viewport window for the renderer of its input gizmo: label
@@ -51,7 +54,7 @@ public:
         delete image;
     }
 };
-OpenGL1ViewportWindow::OpenGL1ViewportWindow(ViewportSet*s,Viewport*v,OpenGL1LabelImageProvider*l):set(s),viewport(v),labels(l),titleImage(0),titleFontSize(0),inputGizmoHost(0),inputGizmoRenderer(0){if(l){inputGizmoHost=new OpenGL1InputGizmoHost(this,l);inputGizmoRenderer=new OpenGL1InputGizmoRenderer(inputGizmoHost,s,v);}}OpenGL1ViewportWindow::~OpenGL1ViewportWindow(){delete inputGizmoRenderer;delete inputGizmoHost;delete titleImage;}Viewport*OpenGL1ViewportWindow::getViewport()const{return viewport;}int OpenGL1ViewportWindow::getRenderMode()const{return viewport->getRenderMode();}int OpenGL1ViewportWindow::getViewportStartX()const{return viewport->getPixelStartX();}int OpenGL1ViewportWindow::getViewportStartY()const{return viewport->getPixelStartY();}int OpenGL1ViewportWindow::getViewportSizeX()const{return viewport->getPixelSizeX();}int OpenGL1ViewportWindow::getViewportSizeY()const{return viewport->getPixelSizeY();}BOOLEAN OpenGL1ViewportWindow::isSelected()const{return set->isSelected(viewport);}BOOLEAN OpenGL1ViewportWindow::isActive()const{return viewport->isActive();}Camera*OpenGL1ViewportWindow::getCamera()const{return viewport->getActiveCamera();}RendererConfiguration*OpenGL1ViewportWindow::getRendererConfiguration()const{return viewport->getRendererConfiguration();}void OpenGL1ViewportWindow::toggleGrid(){viewport->toggleGrid();}
+OpenGL1ViewportWindow::OpenGL1ViewportWindow(ViewportSet*s,Viewport*v,OpenGL1LabelImageProvider*l):set(s),viewport(v),labels(l),titleImage(0),titleFontSize(0),inputGizmoHost(0),inputGizmoRenderer(0),cameraControlGizmoLabelFontSize(0){if(l){inputGizmoHost=new OpenGL1InputGizmoHost(this,l);inputGizmoRenderer=new OpenGL1InputGizmoRenderer(inputGizmoHost,s,v);}}OpenGL1ViewportWindow::~OpenGL1ViewportWindow(){discardCameraControlGizmoLabels();delete inputGizmoRenderer;delete inputGizmoHost;delete titleImage;}Viewport*OpenGL1ViewportWindow::getViewport()const{return viewport;}int OpenGL1ViewportWindow::getRenderMode()const{return viewport->getRenderMode();}int OpenGL1ViewportWindow::getViewportStartX()const{return viewport->getPixelStartX();}int OpenGL1ViewportWindow::getViewportStartY()const{return viewport->getPixelStartY();}int OpenGL1ViewportWindow::getViewportSizeX()const{return viewport->getPixelSizeX();}int OpenGL1ViewportWindow::getViewportSizeY()const{return viewport->getPixelSizeY();}BOOLEAN OpenGL1ViewportWindow::isSelected()const{return set->isSelected(viewport);}BOOLEAN OpenGL1ViewportWindow::isActive()const{return viewport->isActive();}Camera*OpenGL1ViewportWindow::getCamera()const{return viewport->getActiveCamera();}RendererConfiguration*OpenGL1ViewportWindow::getRendererConfiguration()const{return viewport->getRendererConfiguration();}void OpenGL1ViewportWindow::toggleGrid(){viewport->toggleGrid();}
 void OpenGL1ViewportWindow::drawGrid(){if(!viewport->isShowGrid()||!getCamera())return;ArrayList<float>p,c;for(int i=-7;i<=7;i++){p.add(i);p.add(-7);p.add(0);p.add(i);p.add(7);p.add(0);p.add(-7);p.add(i);p.add(0);p.add(7);p.add(i);p.add(0);for(int k=0;k<4;k++){float x=i?0.37f:0;c.add(x);c.add(x);c.add(x);} }OpenGL1LineRenderer::drawLines(getCamera()->calculateProjectionMatrix(),p,c,1);}
 void OpenGL1ViewportWindow::drawLabel(RGBAImageUncompressed*i,int x,int y){if(!i)return;GLint old[4];glGetIntegerv(GL_VIEWPORT,old);int sw=set->getSizeXInPixels(),sh=set->getSizeYInPixels();float x0=x,y0=y,x1=x+i->getXSize(),y1=y+i->getYSize();float p[]={x0,y0,0,x1,y0,0,x1,y1,0,x0,y0,0,x1,y1,0,x0,y1,0};float uv[]={0,0,1,0,1,1,0,0,1,1,0,1};Matrix4x4d m=Matrix4x4d::identityMatrix().withVal(0,0,2.0/sw).withVal(0,3,-1).withVal(1,1,2.0/sh).withVal(1,3,-1);float*mf=m.exportToFloatArrayColumnOrder();glViewport(0,0,sw,sh);glEnable(GL_SCISSOR_TEST);glScissor(viewport->getPixelStartX(),viewport->getPixelStartY(),viewport->getPixelSizeX(),viewport->getPixelSizeY());glDisable(GL_DEPTH_TEST);glEnable(GL_BLEND);glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);OpenGL1ImageRenderer::drawTexturedQuad(OpenGL1ImageRenderer::activate(i),mf,p,6,uv,6,1,1,1);delete[]mf;glDisable(GL_BLEND);glDisable(GL_SCISSOR_TEST);glEnable(GL_DEPTH_TEST);glViewport(old[0],old[1],old[2],old[3]);}
 void OpenGL1ViewportWindow::drawReferenceBase(){ReferenceFrameGizmo g;g.applyScale(set->getElementScaler());if(!g.isVisible())return;GLint old[4];glGetIntegerv(GL_VIEWPORT,old);int size=g.getSizeInPixels();glViewport(viewport->getPixelStartX(),viewport->getPixelStartY(),size,size);glDisable(GL_DEPTH_TEST);for(int a=0;a<ReferenceFrameGizmo::NUMBER_OF_AXES;a++){Vector3Dd strip[4];g.buildAxisStrip(a,getCamera()->getRotation(),strip);ArrayList<float>p,c;ColorRgb color=g.getAxisColor(a);for(int i=0;i<4;i++){p.add(strip[i].x());p.add(strip[i].y());p.add(strip[i].z());c.add(color.r());c.add(color.g());c.add(color.b());c.add(1);}OpenGL1ColoredPrimitiveRenderer::draw(Matrix4x4d::identityMatrix(),GL_TRIANGLE_STRIP,p,c);}glViewport(old[0],old[1],old[2],old[3]);glEnable(GL_DEPTH_TEST);if(labels){Matrix4x4d orientation=g.estimateOrientation(getCamera()->getRotation());int font=set->getElementScaler()->scaleSize(12);for(int a=0;a<ReferenceFrameGizmo::NUMBER_OF_AXES;a++){Vector3Dd p=orientation.multiply(g.getLabelPosition(a));RGBAImageUncompressed*i=labels->createLabelImage(g.getAxisLabel(a),g.getAxisColor(a),font);drawLabel(i,viewport->getPixelStartX()+(int)((p.x()+1)*size/2),viewport->getPixelStartY()+(int)((p.y()+1)*size/2));OpenGL1ImageRenderer::unload(i);delete i;}}}
@@ -86,6 +89,80 @@ void OpenGL1ViewportWindow::drawTitle()
 void OpenGL1ViewportWindow::drawLabelsForTranslateGizmo(TranslateGizmo*g){if(!labels||!g)return;ArrayList<SimpleBody*>&b=g->getElements();for(int a=0;a<3&&a<b.size();a++){SimpleBody*body=b[a];if(!body||!body->getGeometry())continue;double z=1;Arrow*arrow=(body->getGeometry() != NULL && body->getGeometry()->instanceOf(Arrow::CLASS) ? (Arrow*)body->getGeometry() : NULL);if(arrow)z=(arrow->getHeadLength()+arrow->getBaseLength())*1.1;Vector3Dd world=body->getTransformationMatrix().multiply(Vector3Dd(0,0,z)),projected;if(!getCamera()->projectPointUsingRayMethod(world,&projected))continue;ColorRgb color=g->isAxisHighlighted(a)?ColorRgb(1,1,0):ColorRgb(a==0, a==1, a==2);const char*axis=a==0?"X":(a==1?"Y":"Z");RGBAImageUncompressed*i=labels->createLabelImage(axis,color,set->getElementScaler()->scaleSize(12));int wx=viewport->getPixelStartX()+(int)projected.x()-3;int wy=viewport->getPixelStartY()+viewport->getPixelSizeY()-(int)projected.y()-i->getYSize()+12;drawLabel(i,wx,wy);OpenGL1ImageRenderer::unload(i);delete i;}}
 void OpenGL1ViewportWindow::drawLabelForRotateGizmoArc(RotateGizmo*g){if(!labels||!g)return;Vector3Dd anchor,projected;if(!g->getArcLabelPosition(&anchor)||!getCamera()->projectPointUsingRayMethod(anchor,&projected))return;char text[64];snprintf(text,sizeof(text),"%.*f deg",RotateGizmo::ANGLE_DECIMALS,g->getArcSweepInDegrees());RGBAImageUncompressed*i=labels->createLabelImage(text,g->getArcColor(),set->getElementScaler()->scaleSize(16));int wx=viewport->getPixelStartX()+(int)projected.x()-i->getXSize()/2;int wy=viewport->getPixelStartY()+viewport->getPixelSizeY()-(int)projected.y()-i->getYSize()/2;drawLabel(i,wx,wy);OpenGL1ImageRenderer::unload(i);delete i;}
 void OpenGL1ViewportWindow::drawInputGizmo(InputGizmo*g){if(inputGizmoRenderer)inputGizmoRenderer->draw(g);}
+
+/**
+Draws the labels of the faces of a camera control gizmo, cached by text in
+the viewport window (C++98 has no lambdas).
+*/
+class OpenGL1CameraControlGizmoLabels :
+    public OpenGL1CameraControlGizmoRenderer::LabelPainter {
+public:
+    OpenGL1CameraControlGizmoLabels(OpenGL1ViewportWindow* w,
+        CameraControlGizmo* g, int f) : window(w), gizmo(g), fontSize(f) {}
+
+    virtual void drawLabel(const String& label, double x, double y)
+    {
+        RGBAImageUncompressed* image = NULL;
+        long i;
+
+        for ( i = 0; i < window->cameraControlGizmoLabelTexts.size(); i++ ) {
+            if ( window->cameraControlGizmoLabelTexts[i] == label ) {
+                image = window->cameraControlGizmoLabelImages[i];
+                break;
+            }
+        }
+        if ( image == NULL ) {
+            image = window->labels->createLabelImage(label,
+                gizmo->getLabelColor(), fontSize);
+            if ( image == NULL ) {
+                return;
+            }
+            window->cameraControlGizmoLabelTexts.add(label);
+            window->cameraControlGizmoLabelImages.add(image);
+        }
+        // Centered; the y given grows downwards, and the y of `drawLabel`
+        // is the lower edge of the image, from the bottom of the surface
+        Viewport* viewport = window->viewport;
+        window->drawLabel(image,
+            viewport->getPixelStartX() +
+                (int)Math::round(x - image->getXSize() / 2.0),
+            viewport->getPixelStartY() + viewport->getPixelSizeY() -
+                (int)Math::round(y + image->getYSize() / 2.0));
+    }
+
+private:
+    OpenGL1ViewportWindow* window;
+    CameraControlGizmo* gizmo;
+    int fontSize;
+};
+
+void OpenGL1ViewportWindow::discardCameraControlGizmoLabels()
+{
+    for ( long i = 0; i < cameraControlGizmoLabelImages.size(); i++ ) {
+        OpenGL1ImageRenderer::unload(cameraControlGizmoLabelImages[i]);
+        delete cameraControlGizmoLabelImages[i];
+    }
+    cameraControlGizmoLabelImages.clear();
+    cameraControlGizmoLabelTexts.clear();
+}
+
+void OpenGL1ViewportWindow::drawCameraControlGizmo(CameraControlGizmo* gizmo)
+{
+    ViewportElementScaler* elementScaler = set->getElementScaler();
+    // BASE_CAMERA_CONTROL_GIZMO_LABEL_FONT_SIZE = 9
+    int fontSize = elementScaler->scaleSize(9);
+
+    if ( fontSize != cameraControlGizmoLabelFontSize ) {
+        discardCameraControlGizmoLabels();
+        cameraControlGizmoLabelFontSize = fontSize;
+    }
+    OpenGL1CameraControlGizmoLabels labelPainter(this, gizmo, fontSize);
+    OpenGL1CameraControlGizmoRenderer::draw(gizmo,
+        viewport->getPixelStartX(), viewport->getPixelStartY(),
+        viewport->getPixelSizeY(),
+        (float)elementScaler->scaleLength(1.0),
+        labels != NULL ? &labelPainter : NULL);
+}
 void OpenGL1ViewportWindow::disposeGlResources(){if(titleImage)OpenGL1ImageRenderer::unload(titleImage);if(inputGizmoRenderer)inputGizmoRenderer->disposeGlResources();}void OpenGL1ViewportWindow::invalidateGlResources(){}
 
 // Integral constants bound to references (i.e. by `?:`) need a

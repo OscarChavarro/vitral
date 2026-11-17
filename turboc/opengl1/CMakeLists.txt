@@ -31,6 +31,7 @@ set(VITRAL_OPENGL1_SOURCES
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1ImplicitSolidRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1PlanarHalfSpaceRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1QuadricSurfaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1TubeRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1VolumeRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/volume/_OpenGL1SolidBoundaryMeshBuilder.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1MeshRenderer.cpp
@@ -54,6 +55,7 @@ set(VITRAL_OPENGL1_SOURCES
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1InputGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1RayGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1TranslateGizmoRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1CameraControlGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1RotateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1ScaleGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1Polygon2DRenderer.cpp

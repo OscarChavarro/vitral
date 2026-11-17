@@ -44,7 +44,10 @@ PolyhedralBoundedSolidVolumeOracle::OrientedBox::OrientedBox(double sx,
 PolyhedralBoundedSolid*
 PolyhedralBoundedSolidVolumeOracle::OrientedBox::toSolid() const
 {
-    Box box(Vector3Dd(size[0], size[1], size[2]));
+    // Port note: a named size, as gcc 2.7.2 parses Box box(Vector3Dd(...))
+    // as a function declaration
+    Vector3Dd boxSize(size[0], size[1], size[2]);
+    Box box(boxSize);
     PolyhedralBoundedSolid* solid = box.exportToPolyhedralBoundedSolid();
 
     PolyhedralBoundedSolidModeler::applyTransformation(solid, transform);

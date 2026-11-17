@@ -298,6 +298,10 @@ public:
     {
         listener->fullScreenGuiToggleRequested();
     }
+    void animationRequested(BooleanSupplier* frame)
+    {
+        listener->animationRequested(frame);
+    }
 
     //= ViewportSetInteractionListener ====================================
     void projectionLocationMenuRequested(Viewport* viewport,

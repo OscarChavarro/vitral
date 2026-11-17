@@ -46,6 +46,8 @@ TESTS = \
     boolean_oracle_fuzz_gate_tests \
     boolean_volume_identity_fuzz_gate_tests \
     bounding_volume_hierarchy_tests \
+    camera_control_gizmo_2d_painter_tests \
+    camera_control_gizmo_tests \
     certified_containment_tests \
     circular_array_list_tests \
     csg_evaluator_tests \
@@ -84,6 +86,7 @@ TESTS = \
     subdivided_bezier_patch_tests \
     triangle_acceleration_tests \
     triangle_mesh_contract_tests \
+    tube_tests \
     validation_does_not_modify_tests
 
 OTHER_PROGRAMS = \

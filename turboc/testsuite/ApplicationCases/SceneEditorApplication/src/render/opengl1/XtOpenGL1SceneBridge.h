@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/util/function/BooleanSupplier.h"
 #include <X11/Xlib.h>
 
 #include "application/commands/GuiEventExecutor.h"
@@ -92,6 +93,15 @@ public:
         @param image the image (not owned: it stays in the model)
         */
         virtual void imageRequested(RGBImageUncompressed* image) = 0;
+
+        /**
+        An animation started (see
+        `DrawingAreaInteractionListener::animationRequested`): `frame` must
+        be called periodically, drawing again after each call, while it
+        returns true. A new request replaces the one in course.
+        @param frame advances the animation (not owned)
+        */
+        virtual void animationRequested(BooleanSupplier* frame) = 0;
     };
 
     /**

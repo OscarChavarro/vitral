@@ -136,12 +136,22 @@ NearDegenerateBooleanFuzz::Summary NearDegenerateBooleanFuzz::run(
             char stepText[40];
             // Java `"" + step` of these steps: one decimal
             sprintf(stepText, "%.1f", step);
-            String label = String(contactName(contact)) +
-                (rotated ? " rotated" : "") + " k=" + stepText + " " +
+            // Port note: no conditional operators over String temporaries
+            // (internal compiler error of gcc 2.7.2)
+            String label = String(contactName(contact));
+            if ( rotated ) {
+                label = label + " rotated";
+            }
+            label = label + " k=" + stepText + " " +
                 BooleanOracleFuzz::opName(op);
             int blank = outcome.indexOf(' ');
             summary.total++;
-            summary.merge(blank < 0 ? outcome : outcome.substring(0, blank));
+            if ( blank < 0 ) {
+                summary.merge(outcome);
+            }
+            else {
+                summary.merge(outcome.substring(0, blank));
+            }
             if ( outcome.startsWith("OK") ) {
                 summary.answered++;
             }

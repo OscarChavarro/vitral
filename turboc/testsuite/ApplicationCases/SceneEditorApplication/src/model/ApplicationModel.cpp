@@ -308,6 +308,11 @@ void ApplicationModel::setVisualDebugRayLevels(int visualDebugRayLevels)
     }
 }
 
+CameraControlGizmo* ApplicationModel::getCameraControlGizmo()
+{
+    return &cameraControlGizmo;
+}
+
 RayGizmo* ApplicationModel::getRayGizmo() const
 {
     return rayGizmo;

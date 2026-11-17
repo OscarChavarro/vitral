@@ -5,6 +5,7 @@
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
+#include "java/util/function/BooleanSupplier.h"
 #include "java/util/function/Supplier.h"
 
 #include "java/lang/String.h"
@@ -16,6 +17,7 @@
 #include "gui/history/UndoRedoCommand.h"
 
 class ApplicationModel;
+class CameraControlGizmoInteractionTechnique;
 class DrawingArea;
 class DrawingAreaInteractionListener;
 class InteractionEditRecorder;
@@ -59,6 +61,13 @@ chooses (click) the rings of the gizmo (see
 map on the selected body; `h` shows the object selector; `ESC` closes the
 application. Commands of the visual debug ray and of the viewport set are
 processed by their own techniques.
+
+The camera control gizmo (ViewCube) of the selected viewport has priority
+over every interaction mode (see `CameraControlGizmoInteractionTechnique`):
+hovering highlights its regions, a click turns the camera smoothly to the
+view of a region (the animation is driven by the listener, see
+`DrawingAreaInteractionListener::animationRequested`, and recorded in the
+view history when it ends), and a drag over it orbits the camera.
 
 Undo and redo (see `UndoRedoInteractionTechnique`): `Ctrl+Z` / `Ctrl+Y` over
 the scene (creation, deletion and transformation of things),
@@ -118,6 +127,18 @@ private:
     };
     friend class ClickRecording;
 
+    /// Advances the camera animation (`this::advanceCameraAnimation` in
+    /// Java)
+    class CameraAnimationFrame : public BooleanSupplier {
+    public:
+        explicit CameraAnimationFrame(DrawingAreaInteractionTechniques* owner)
+            : owner(owner) {}
+        virtual BOOLEAN getAsBoolean();
+    private:
+        DrawingAreaInteractionTechniques* owner;
+    };
+    friend class CameraAnimationFrame;
+
     DrawingArea* drawingArea;
     ApplicationModel* model;
     Scene* scene;
@@ -140,6 +161,21 @@ private:
     BOOLEAN viewportTitleGesture;
     /// Suppresses the synthetic click following a title press/release.
     BOOLEAN viewportTitleClickConsumed;
+    CameraControlGizmoInteractionTechnique* cameraControlTechnique;
+    /// Viewport of the camera control gizmo gesture in course, or null.
+    Viewport* cameraControlViewport;
+    /// Suppresses the synthetic click after a camera control gizmo gesture.
+    BOOLEAN cameraControlClickConsumed;
+    /// The gesture that started the camera animation is still recorded.
+    BOOLEAN cameraAnimationRecording;
+    CameraAnimationFrame cameraAnimationFrame;
+
+    //= Camera control gizmo ==============================================
+    void placeCameraControlGizmo(Viewport* viewport);
+    void stopCameraAnimation();
+    BOOLEAN processCameraControlMouseMovedEvent(const MouseEvent& event,
+                                                Viewport* mouseView);
+    void processCameraControlMouseReleasedEvent(const MouseEvent& event);
 
     //= Pointer shape =====================================================
     PointerCursor::Value getModeCursor();
@@ -199,6 +235,14 @@ public:
     DrawingAreaInteractionTechniques(ApplicationModel* model,
                                      DrawingAreaInteractionListener* listener);
     virtual ~DrawingAreaInteractionTechniques();
+
+    /**
+    Advances the camera animation started by the camera control gizmo. When
+    it ends, the gesture that started it is recorded (so the whole turn is
+    one view operation).
+    @return true while the animation goes on
+    */
+    BOOLEAN advanceCameraAnimation();
 
     ViewportSetInteractionTechniques* getViewportSetTechniques() const;
     TranslateGizmo* getTranslationGizmo() const;

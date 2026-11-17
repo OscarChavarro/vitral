@@ -1759,3 +1759,17 @@ base/src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCall
 base/src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCalligraphicExporter.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/GEP/GEOCALEX.H,GeometryCalligraphicExporter.h,GEOCALEX.H
 base/src/main/vsdk/toolkit/media/Calligraphic3DBuffer.cpp,BASE/SRC/MAIN/V/T/MEDIA/CAL3DBUF.CPP,Calligraphic3DBuffer.cpp,CAL3DBUF.CPP
 base/src/main/vsdk/toolkit/media/Calligraphic3DBuffer.h,BASE/SRC/MAIN/V/T/MEDIA/CAL3DBUF.H,Calligraphic3DBuffer.h,CAL3DBUF.H
+base/src/main/java/util/function/BooleanSupplier.h,BASE/SRC/MAIN/JAVA/UTIL/FUNCTION/BOOLSUPP.H,BooleanSupplier.h,BOOLSUPP.H
+base/src/main/vsdk/toolkit/environment/geometry/volume/Tube.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/TUBE.CPP,Tube.cpp,TUBE.CPP
+base/src/main/vsdk/toolkit/environment/geometry/volume/Tube.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/TUBE.H,Tube.h,TUBE.H
+base/src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmo.cpp,BASE/SRC/MAIN/V/T/GUI/GIZMO/CACOGIZM.CPP,CameraControlGizmo.cpp,CACOGIZM.CPP
+base/src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmo.h,BASE/SRC/MAIN/V/T/GUI/GIZMO/CACOGIZM.H,CameraControlGizmo.h,CACOGIZM.H
+base/src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoAnimation.cpp,BASE/SRC/MAIN/V/T/GUI/GIZMO/CACOGIAN.CPP,CameraControlGizmoAnimation.cpp,CACOGIAN.CPP
+base/src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoAnimation.h,BASE/SRC/MAIN/V/T/GUI/GIZMO/CACOGIAN.H,CameraControlGizmoAnimation.h,CACOGIAN.H
+base/src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoInteractionTechnique.cpp,BASE/SRC/MAIN/V/T/GUI/GIZMO/CCGIINTE.CPP,CameraControlGizmoInteractionTechnique.cpp,CCGIINTE.CPP
+base/src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoInteractionTechnique.h,BASE/SRC/MAIN/V/T/GUI/GIZMO/CCGIINTE.H,CameraControlGizmoInteractionTechnique.h,CCGIINTE.H
+base/src/main/vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.cpp,BASE/SRC/MAIN/V/T/RENDER/GIZMO/CCGI2DPA.CPP,CameraControlGizmo2DPainter.cpp,CCGI2DPA.CPP
+base/src/main/vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.h,BASE/SRC/MAIN/V/T/RENDER/GIZMO/CCGI2DPA.H,CameraControlGizmo2DPainter.h,CCGI2DPA.H
+base/src/test/camera_control_gizmo_2d_painter_tests.cpp,BASE/SRC/TEST/CCG2DPTE.CPP,camera_control_gizmo_2d_painter_tests.cpp,CCG2DPTE.CPP
+base/src/test/camera_control_gizmo_tests.cpp,BASE/SRC/TEST/CACOGITE.CPP,camera_control_gizmo_tests.cpp,CACOGITE.CPP
+base/src/test/tube_tests.cpp,BASE/SRC/TEST/TUBETEST.CPP,tube_tests.cpp,TUBETEST.CPP

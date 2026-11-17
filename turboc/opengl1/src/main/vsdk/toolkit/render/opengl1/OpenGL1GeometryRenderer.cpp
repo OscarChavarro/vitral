@@ -31,6 +31,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
+#include "vsdk/toolkit/environment/geometry/volume/Tube.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
@@ -55,6 +56,7 @@
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1ImplicitSolidRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1PlanarHalfSpaceRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1QuadricSurfaceRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1TubeRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1VolumeRenderer.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 #include "java/util/Collections.h"
@@ -667,6 +669,9 @@ static String keyOf(Geometry* geometry)
         Torus* t = (Torus*)geometry;
         return format("torus/%.17g/%.17g", t->getMajorRadius(), t->getMinorRadius());
     }
+    if ( geometry != NULL && geometry->instanceOf(Tube::CLASS) ) {
+        return OpenGL1TubeRenderer::meshKey(*(Tube*)geometry);
+    }
     if ( geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ) {
         return OpenGL1TriangleMeshRenderer::meshKey(*(TriangleMesh*)geometry);
     }
@@ -731,6 +736,7 @@ static OpenGL1MeshRenderer::Mesh* buildMesh(Geometry* geometry)
     if ( geometry != NULL && geometry->instanceOf(Cone::CLASS) ) return buildCone(*(Cone*)geometry);
     if ( geometry != NULL && geometry->instanceOf(Box::CLASS) ) return buildBox(*(Box*)geometry);
     if ( geometry != NULL && geometry->instanceOf(Torus::CLASS) ) return buildTorus(*(Torus*)geometry);
+    if ( geometry != NULL && geometry->instanceOf(Tube::CLASS) ) return OpenGL1TubeRenderer::buildMesh(*(Tube*)geometry);
     if ( geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ) {
         TriangleMesh* m = (TriangleMesh*)geometry;
         return OpenGL1TriangleMeshRenderer::buildMesh(*m);

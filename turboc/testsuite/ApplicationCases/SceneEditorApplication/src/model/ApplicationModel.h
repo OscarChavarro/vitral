@@ -6,6 +6,7 @@
 #include "java/util/function/Function.h"
 #include "java/util/function/Supplier.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/gui/gizmo/CameraControlGizmo.h"
 #include "model/DrawingArea.h"
 #include "model/GuiState.h"
 #include "model/SceneLightFactory.h"
@@ -65,6 +66,8 @@ private:
     int raytracedImageHeight;
     RGBColorPalette* palette;
     RayGizmo* rayGizmo;
+    /// ViewCube shown over the selected viewport, controlling its camera
+    CameraControlGizmo cameraControlGizmo;
     Ray visualDebugRay;
     ArrayList<ViewportSet*> viewportSets;
     int activeViewportSetIndex;
@@ -190,6 +193,13 @@ public:
     void setVisualDebugRay(const Ray* visualDebugRay);
     int getVisualDebugRayLevels() const;
     void setVisualDebugRayLevels(int visualDebugRayLevels);
+
+    /**
+    @return the camera control gizmo (ViewCube) presented over the selected
+    viewport
+    */
+    CameraControlGizmo* getCameraControlGizmo();
+
     RayGizmo* getRayGizmo() const;
 };
 

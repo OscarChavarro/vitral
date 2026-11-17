@@ -153,6 +153,13 @@ public:
                  const ColorRgb& color, double width);
 
     /**
+    Adds a screen space line (overlay), i.e. a line whose visibility was
+    already solved (as the hidden line removal of a HUD).
+    */
+    void addOverlayLine(double x0, double y0, double x1, double y1,
+                        const ColorRgb& color, double width);
+
+    /**
     Adds an opaque screen space rectangle (overlay).
     @param x left pixel
     @param y top pixel

@@ -156,6 +156,7 @@ SOURCES = \
     src/main/vsdk/toolkit/environment/geometry/volume/Cone.cpp \
     src/main/vsdk/toolkit/environment/geometry/volume/Arrow.cpp \
     src/main/vsdk/toolkit/environment/geometry/volume/Torus.cpp \
+    src/main/vsdk/toolkit/environment/geometry/volume/Tube.cpp \
     src/main/vsdk/toolkit/environment/geometry/volume/VoxelVolume.cpp \
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.cpp \
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.cpp \
@@ -186,6 +187,7 @@ SOURCES = \
     src/main/vsdk/toolkit/render/gizmo/Gizmo2DProjector.cpp \
     src/main/vsdk/toolkit/render/gizmo/InputGizmo2DPainter.cpp \
     src/main/vsdk/toolkit/render/gizmo/RotateGizmo2DPainter.cpp \
+    src/main/vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.cpp \
     src/main/vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.cpp \
     src/main/vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.cpp \
     src/main/vsdk/toolkit/render/raytracing/DepthBufferEncoder.cpp \
@@ -309,6 +311,9 @@ SOURCES = \
     src/main/vsdk/toolkit/gui/gizmo/TranslateGizmoInteractionTechnique.cpp \
     src/main/vsdk/toolkit/gui/gizmo/RotateGizmo.cpp \
     src/main/vsdk/toolkit/gui/gizmo/RotateGizmoInteractionTechnique.cpp \
+    src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmo.cpp \
+    src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoAnimation.cpp \
+    src/main/vsdk/toolkit/gui/gizmo/CameraControlGizmoInteractionTechnique.cpp \
     src/main/vsdk/toolkit/gui/gizmo/ScaleGizmo.cpp \
     src/main/vsdk/toolkit/gui/gizmo/ScaleGizmoInteractionTechnique.cpp \
     src/main/vsdk/toolkit/gui/PresentationElement.cpp \
