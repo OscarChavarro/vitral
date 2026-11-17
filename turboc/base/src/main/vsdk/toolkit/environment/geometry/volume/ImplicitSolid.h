@@ -72,5 +72,43 @@ public:
     virtual void doExtraInformation(const Ray& ray, double t, RayHit* hit);
     virtual int doContainmentTest(const Vector3Dd& point, double tolerance);
     virtual double* getMinMax();
+
+    //= Boundary representation =========================================
+
+    /// Default number of grid cells along the largest side of the box
+    /// polygonized by `exportToPolyhedralBoundedSolid`
+    enum { DEFAULT_POLYGONIZATION_DIVISIONS = 16 };
+    /// Half the side of the cube, centered at the origin, that clips an
+    /// unbounded solid when exported to a boundary representation
+    static const double DEFAULT_CLIPPING_HALF_SIZE;
+
+    /**
+    Polyhedral approximation with the default number of divisions (see
+    `exportToPolyhedralBoundedSolid(int)`).
+    */
+    virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
+
+    /**
+    Polyhedral approximation of the solid F &lt; 0, built with Euler
+    operators by `PolyhedralBoundedSolidFieldConstructions`. A bounded solid
+    is polygonized inside its bounds; an unbounded one is clipped by the
+    cube of half side `DEFAULT_CLIPPING_HALF_SIZE` centered at the origin.
+    @param divisions number of grid cells along the largest side of the
+    polygonized box (at least 1)
+    @return a new polyhedral approximation, owned by the caller, or null if
+    the solid is empty or its bounds can not be determined
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int divisions);
+
+    /**
+    Polyhedral approximation of the part of the solid F &lt; 0 inside a box.
+    @param divisions number of grid cells along the largest side of the box
+    @param minimum minimum corner of the box
+    @param maximum maximum corner of the box
+    @return a new polyhedral approximation, owned by the caller, or null if
+    it is empty
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int divisions,
+        const Vector3Dd& minimum, const Vector3Dd& maximum);
 };
 #endif

@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
+#include "vsdk/toolkit/media/Calligraphic3DBuffer.h"
 #include <float.h>
 static Matrix4x4d buildLinearMatrix()
 {
@@ -364,6 +365,25 @@ int ParametricCurve::doContainmentTest(const Vector3Dd& p, double distanceTolera
     }
 
     return OUTSIDE;
+}
+
+Calligraphic3DBuffer* ParametricCurve::exportToCalligraphic3DBuffer()
+{
+    Calligraphic3DBuffer* lines = new Calligraphic3DBuffer();
+    int i;
+    long j;
+
+    for ( i = 1; i < types.size(); i++ ) {
+        if ( types[i] == BREAK ) {
+            i++;
+            continue;
+        }
+        ArrayList<Vector3Dd> polyline = calculatePoints(i, FALSE);
+        for ( j = 0; j + 1 < polyline.size(); j++ ) {
+            lines->add3DLine(polyline[j], polyline[j + 1]);
+        }
+    }
+    return lines;
 }
 
 const Class ParametricCurve::CLASS = { "ParametricCurve", &Curve::CLASS };

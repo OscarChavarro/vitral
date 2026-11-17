@@ -18,6 +18,11 @@ private:
     int classifyHitPlane(double x, double y, double z) const;
     RayFirstHitStatus::Value clipRay(const Ray& ray, const RayCrossingQuery& query,
         double& entry, double& exit) const;
+    /**
+    The state edited is the size along each axis; the center is kept (moving
+    the box is a transformation of its body, not a change of the box).
+    */
+    void addControlSpecifications();
     static RayFirstHitStatus::Value clipAxis(double origin, double direction, double minimum,
         double maximum, double parallelTolerance, BOOLEAN checkArithmetic,
         double& entry, double& exit, BOOLEAN& faceOverlap);
@@ -73,6 +78,13 @@ public:
     Vector3Dd getSize() const { return bounds[1].subtract(bounds[0]); }
     void setSize(double dx, double dy, double dz);
     void setSize(const Vector3Dd& s);
+
+    double getSizeX() const { return bounds[1].x() - bounds[0].x(); }
+    double getSizeY() const { return bounds[1].y() - bounds[0].y(); }
+    double getSizeZ() const { return bounds[1].z() - bounds[0].z(); }
+    void setSizeX(double dx) { setSize(getSize().withX(dx)); }
+    void setSizeY(double dy) { setSize(getSize().withY(dy)); }
+    void setSizeZ(double dz) { setSize(getSize().withZ(dz)); }
 
 private:
     PolyhedralBoundedSolid* buildPolyhedralBoundedSolid();

@@ -2,6 +2,7 @@
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/surface/SubdividedBezierPatch.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 #include "vsdk/toolkit/processing/BezierPatchTessellator.h"
 
 double BezierPatchTessellator::bernstein(int k, double t)
@@ -108,6 +109,37 @@ TriangleMesh* BezierPatchTessellator::tessellate(const SubdividedBezierPatch& pa
         normals[index*3] = n.x();
         normals[index*3 + 1] = n.y();
         normals[index*3 + 2] = n.z();
+    }
+    return mesh;
+}
+
+QuadMesh* BezierPatchTessellator::tessellateQuads(const SubdividedBezierPatch& patch,
+    int uSteps, int vSteps)
+{
+    int i;
+    int j;
+    if (uSteps < 1 || vSteps < 1 || uSteps > MAXIMUM_STEPS || vSteps > MAXIMUM_STEPS) return NULL;
+    const int columns = vSteps + 1;
+    QuadMesh* mesh = new QuadMesh();
+    mesh->initVertexPositionsArray((uSteps + 1)*columns);
+    ArrayList<double>& positions = mesh->getVertexPositions();
+    for (i = 0; i <= uSteps; i++) {
+        const double u = (double)i/uSteps;
+        for (j = 0; j <= vSteps; j++) {
+            const long index = ((long)i)*columns + j;
+            const Vector3Dd p = patch.evaluate(u, (double)j/vSteps);
+            positions[index*3] = p.x();
+            positions[index*3 + 1] = p.y();
+            positions[index*3 + 2] = p.z();
+        }
+    }
+    mesh->initQuadArrays(uSteps*vSteps);
+    int q = 0;
+    for (i = 0; i < uSteps; i++) {
+        for (j = 0; j < vSteps; j++, q++) {
+            mesh->setQuadAt(q, i*columns + j, (i + 1)*columns + j,
+                (i + 1)*columns + j + 1, i*columns + j + 1);
+        }
     }
     return mesh;
 }

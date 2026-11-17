@@ -1750,3 +1750,12 @@ testsuite/OfflineExamples/RaytracingOfflineExample/run4.bat,TESTSUIT/OFFLEXAM/RA
 testsuite/OfflineExamples/RaytracingOfflineExample/run5.bat,TESTSUIT/OFFLEXAM/RAYOFFEX/RUN5.BAT,run5.bat,RUN5.BAT
 testsuite/OfflineExamples/RaytracingOfflineExample/run6.bat,TESTSUIT/OFFLEXAM/RAYOFFEX/RUN6.BAT,run6.bat,RUN6.BAT
 testsuite/OfflineExamples/RaytracingOfflineExample/run7.bat,TESTSUIT/OFFLEXAM/RAYOFFEX/RUN7.BAT,run7.bat,RUN7.BAT
+base/src/main/java/util/function/ToDoubleFunction.h,BASE/SRC/MAIN/JAVA/UTIL/FUNCTION/TODOUFUN.H,ToDoubleFunction.h,TODOUFUN.H
+base/src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/POBS/POBOSOFC.CPP,PolyhedralBoundedSolidFieldConstructions.cpp,POBOSOFC.CPP
+base/src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/POBS/POBOSOFC.H,PolyhedralBoundedSolidFieldConstructions.h,POBOSOFC.H
+base/src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidMeshConstructions.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/POBS/POBOSOMC.CPP,PolyhedralBoundedSolidMeshConstructions.cpp,POBOSOMC.CPP
+base/src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidMeshConstructions.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/POBS/POBOSOMC.H,PolyhedralBoundedSolidMeshConstructions.h,POBOSOMC.H
+base/src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCalligraphicExporter.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/GEP/GEOCALEX.CPP,GeometryCalligraphicExporter.cpp,GEOCALEX.CPP
+base/src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCalligraphicExporter.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/GEP/GEOCALEX.H,GeometryCalligraphicExporter.h,GEOCALEX.H
+base/src/main/vsdk/toolkit/media/Calligraphic3DBuffer.cpp,BASE/SRC/MAIN/V/T/MEDIA/CAL3DBUF.CPP,Calligraphic3DBuffer.cpp,CAL3DBUF.CPP
+base/src/main/vsdk/toolkit/media/Calligraphic3DBuffer.h,BASE/SRC/MAIN/V/T/MEDIA/CAL3DBUF.H,Calligraphic3DBuffer.h,CAL3DBUF.H

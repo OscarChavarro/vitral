@@ -9,6 +9,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 #include "vsdk/toolkit/environment/geometry/surface/_ParametricBiCubicPatchIntersector.h"
 class ParametricCurve;
+class QuadMesh;
 class Ray;
 class RayHit;
 
@@ -94,6 +95,15 @@ public:
     virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double intT, RayHit* outData);
     virtual double* getMinMax();
+
+    /**
+    Exports an approximation of the patch as a mesh of quadrilaterals: the
+    patch is evaluated on a grid of `getApproximationSteps()` x
+    `getApproximationSteps()` cells of its parameters (s, t) in [0, 1] x
+    [0, 1], so the lines of the mesh are isoparametric lines of the patch.
+    @return a new mesh, owned by the caller
+    */
+    QuadMesh* exportToQuadMesh();
 
 private:
     enum { INITIAL_APPROXIMATION_STEPS = 12 };

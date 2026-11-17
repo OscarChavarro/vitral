@@ -1079,7 +1079,7 @@
         },
         {
           "type": "item",
-          "name": "Render using &AWT",
+          "name": "Render using &2D",
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT"
           ]
@@ -1386,8 +1386,8 @@
     },
     {
       "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT",
-      "name": "Render using AWT",
-      "brief": "Present the viewport set with AWT 2D drawing only (no OpenGL)"
+      "name": "Render using 2D",
+      "brief": "Present the viewport set with 2D drawing only, on the canvas of the GUI toolkit (no OpenGL)"
     }
   ],
   "buttonGroups": [

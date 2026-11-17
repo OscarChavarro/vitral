@@ -92,6 +92,33 @@ public:
 
     static Matrix4x4d getTransformFromVoxelFrameToMinMax(const double minmax[6]);
     virtual Vector3Dd doCenterOfMass();
+
+    //= Boundary representation =========================================
+
+    /// The default export samples at most this number of voxels along each
+    /// axis
+    enum { DEFAULT_EXPORT_MAXIMUM_SAMPLES = 32 };
+
+    /**
+    Polyhedral approximation sampling at most
+    `DEFAULT_EXPORT_MAXIMUM_SAMPLES` voxels along each axis (see
+    `exportToPolyhedralBoundedSolid(int)`).
+    */
+    virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
+
+    /**
+    Polyhedral approximation of the voxels that reach the threshold, built
+    with Euler operators by `PolyhedralBoundedSolidFieldConstructions`: the
+    voxel values are taken as samples at the voxel centers (the field is
+    `threshold - 0.5 - value`, negative for the filled voxels), surrounded by
+    a layer of empty samples, so the surface is closed and passes half way
+    between filled and empty voxel centers.
+    @param step sampling step (at least 1): 1 uses every voxel, 2 every other
+    one along each axis, and so on, for coarser approximations
+    @return a new polyhedral approximation, owned by the caller, or null if
+    there are no filled voxels
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int step);
 };
 
 #endif

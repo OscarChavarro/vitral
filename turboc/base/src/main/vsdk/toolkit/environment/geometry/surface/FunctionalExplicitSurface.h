@@ -5,6 +5,7 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 class AlgebraicExpression;
+class QuadMesh;
 class TriangleMesh;
 class Ray;
 class RayHit;
@@ -58,6 +59,17 @@ public:
     virtual BOOLEAN doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
+
+    /**
+    Exports the tessellation of the surface as a mesh of quadrilaterals: the
+    same grid of `getTesselationHintX()` x `getTesselationHintY()` cells of
+    the internal triangle mesh, without the diagonals that split each cell
+    in two triangles, so the lines of the mesh are the lines of constant x
+    and y of the surface.
+    @return a new mesh, owned by the caller, or null if the surface has no
+    valid tessellation (i.e. its function could not be evaluated)
+    */
+    QuadMesh* exportToQuadMesh();
 };
 
 #endif

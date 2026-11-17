@@ -1,4 +1,5 @@
 #include "vsdk/toolkit/common/VSDK.h"
+#include <stdlib.h>
 #include <math.h>
 #include "java/lang/Double.h"
 #include "java/lang/Math.h"
@@ -13,6 +14,8 @@
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidMeshConstructions.h"
 
 // C++ port note: `new double[6]{...}` of the cpp version
 static double*
@@ -1124,6 +1127,143 @@ double* HeightFieldSolid::getMinMax()
         return newMinMax6(bounds.getMinimum().x(), bounds.getMinimum().y(), bounds.getMinimum().z(),
             bounds.getMaximum().x(), bounds.getMaximum().y(), bounds.getMaximum().z());
     return newMinMax6(-1e308,-1e308,-1e308,1e308,1e308,1e308);
+}
+
+//= Boundary representation =============================================
+
+PolyhedralBoundedSolid* HeightFieldSolid::exportToPolyhedralBoundedSolid()
+{
+    if ( !isValid() ) {
+        return NULL;
+    }
+    ArrayList<double> xs = boxGridCoordinates(minimum.x(), maximum.x());
+    ArrayList<double> zs = boxGridCoordinates(minimum.z(), maximum.z());
+    int nx = (int)xs.size();
+    int nz = (int)zs.size();
+    double bottom = minimum.y();
+    double lowest = bottom + 1.0e-3 * (maximum.y() - minimum.y());
+    ArrayList<Vector3Dd> positions;
+    ArrayList<ArrayList<int> > polygons;
+    ArrayList<int> polygon;
+    int i;
+    int k;
+
+    // Surface vertices (i, k) at index i + nx*k
+    for ( k = 0; k < nz; k++ ) {
+        for ( i = 0; i < nx; i++ ) {
+            double h = evaluateHeight(xs[i], zs[k]);
+            h = Math::max(lowest, Math::min(maximum.y(), h));
+            positions.add(Vector3Dd(xs[i], h, zs[k]));
+        }
+    }
+    // Bottom corners
+    int b00 = (int)positions.size();
+    positions.add(Vector3Dd(xs[0], bottom, zs[0]));
+    int b10 = (int)positions.size();
+    positions.add(Vector3Dd(xs[nx - 1], bottom, zs[0]));
+    int b01 = (int)positions.size();
+    positions.add(Vector3Dd(xs[0], bottom, zs[nz - 1]));
+    int b11 = (int)positions.size();
+    positions.add(Vector3Dd(xs[nx - 1], bottom, zs[nz - 1]));
+
+    Vector3Dd up(0, 1, 0);
+    for ( k = 0; k < nz - 1; k++ ) {
+        for ( i = 0; i < nx - 1; i++ ) {
+            int v00 = i + nx * k;
+            int v10 = (i + 1) + nx * k;
+            int v01 = i + nx * (k + 1);
+            int v11 = (i + 1) + nx * (k + 1);
+            polygon = ArrayList<int>();
+            polygon.add(v00);
+            polygon.add(v01);
+            polygon.add(v10);
+            addPolygon(positions, polygons, polygon, up);
+            polygon = ArrayList<int>();
+            polygon.add(v10);
+            polygon.add(v01);
+            polygon.add(v11);
+            addPolygon(positions, polygons, polygon, up);
+        }
+    }
+
+    // Sides: the profile of the surface and two bottom corners
+    polygon = ArrayList<int>();
+    for ( k = 0; k < nz; k++ ) {
+        polygon.add(nx * k);
+    }
+    polygon.add(b01);
+    polygon.add(b00);
+    addPolygon(positions, polygons, polygon, Vector3Dd(-1, 0, 0));
+    polygon = ArrayList<int>();
+    for ( k = 0; k < nz; k++ ) {
+        polygon.add((nx - 1) + nx * k);
+    }
+    polygon.add(b11);
+    polygon.add(b10);
+    addPolygon(positions, polygons, polygon, Vector3Dd(1, 0, 0));
+    polygon = ArrayList<int>();
+    for ( i = 0; i < nx; i++ ) {
+        polygon.add(i);
+    }
+    polygon.add(b10);
+    polygon.add(b00);
+    addPolygon(positions, polygons, polygon, Vector3Dd(0, 0, -1));
+    polygon = ArrayList<int>();
+    for ( i = 0; i < nx; i++ ) {
+        polygon.add(i + nx * (nz - 1));
+    }
+    polygon.add(b11);
+    polygon.add(b01);
+    addPolygon(positions, polygons, polygon, Vector3Dd(0, 0, 1));
+    polygon = ArrayList<int>();
+    polygon.add(b00);
+    polygon.add(b10);
+    polygon.add(b11);
+    polygon.add(b01);
+    addPolygon(positions, polygons, polygon, Vector3Dd(0, -1, 0));
+
+    return PolyhedralBoundedSolidMeshConstructions::createFromPolygonMesh(
+        positions, polygons);
+}
+
+ArrayList<double> HeightFieldSolid::boxGridCoordinates(double low, double high)
+{
+    ArrayList<double> list;
+    double c;
+    list.add(low);
+    for ( c = Math::floor(low) + 1; c < high; c += 1.0 ) {
+        if ( c - low > 1.0e-9 && high - c > 1.0e-9 ) {
+            list.add(c);
+        }
+    }
+    list.add(high);
+    return list;
+}
+
+void HeightFieldSolid::addPolygon(const ArrayList<Vector3Dd>& positions,
+    ArrayList<ArrayList<int> >& polygons, ArrayList<int>& polygon,
+    const Vector3Dd& outward)
+{
+    double x = 0;
+    double y = 0;
+    double z = 0;
+    long i;
+    long j;
+    for ( i = 0; i < polygon.size(); i++ ) {
+        const Vector3Dd& p = positions[polygon[i]];
+        const Vector3Dd& q = positions[polygon[(i + 1) % polygon.size()]];
+        x += (p.y() - q.y()) * (p.z() + q.z());
+        y += (p.z() - q.z()) * (p.x() + q.x());
+        z += (p.x() - q.x()) * (p.y() + q.y());
+    }
+    if ( Vector3Dd(x, y, z).dotProduct(outward) < 0 ) {
+        for ( i = 0, j = polygon.size() - 1; i < j; i++, j-- ) {
+            int tmp = polygon[i];
+            polygon[i] = polygon[j];
+            polygon[j] = tmp;
+        }
+    }
+    polygons.add(polygon);
 }
 
 const double HeightFieldSolid::INTERSECTION_EPSILON = 1.0e-5;

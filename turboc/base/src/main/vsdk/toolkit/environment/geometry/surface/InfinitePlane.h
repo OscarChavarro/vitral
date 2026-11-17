@@ -6,6 +6,7 @@
 #include "java/lang/Double.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/HalfSpace.h"
+class QuadMesh;
 class Ray;
 class RayHit;
 
@@ -84,6 +85,25 @@ public:
     void setB(double b);
     double getC() const;
     void setC(double c);
+
+    /**
+    A finite part of the plane, to present it: a square of side `size`
+    divided into `tiles` x `tiles` cells, centered near a given point (i.e.
+    the point of the plane viewed by a camera). The center is the projection
+    of the point onto the plane, moved to the nearest corner of the cells of
+    a grid fixed on the plane (with a corner at the point of the plane
+    closest to the origin), so the lines of the square stay in the same
+    places of the plane as the point moves. The sides follow two orthonormal
+    directions (u, v) on the plane, with (u, v, normal) right handed: u is
+    perpendicular to z (to x if the normal is almost along z).
+    @param near point near which the square is centered
+    @param size side of the square
+    @param tiles cells along each side of the square, at least 1
+    @return a mesh of `tiles` x `tiles` quadrilaterals, owned by the caller,
+    or null if the plane is degenerated (zero normal)
+    */
+    QuadMesh* exportToQuadMesh(const Vector3Dd& near, double size,
+        int tiles) const;
 };
 
 inline RayFirstHitStatus::Value InfinitePlane::intersectionDepth(double numerator, double denominator,

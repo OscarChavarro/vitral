@@ -24,6 +24,15 @@ set(VITRAL_OPENGL1_SOURCES
     src/main/vsdk/toolkit/render/opengl1/OpenGL1ColoredPrimitiveRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1GeometryRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1MeshBuilder.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1SubdividedBezierPatchRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1TriangleMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/surface/OpenGL1TriangleStripMeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1HeightFieldSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1ImplicitSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1PlanarHalfSpaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1QuadricSurfaceRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1VolumeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/volume/_OpenGL1SolidBoundaryMeshBuilder.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1MeshRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1RendererConfigurationStateSelector.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1BackgroundRenderer.cpp

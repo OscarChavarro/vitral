@@ -19,6 +19,12 @@ private:
         const FloatingInterval& z) const;
     RayFirstHitStatus::Value roots(const Ray& ray, const RayCrossingQuery& query,
         double& first, double& second) const;
+    /**
+    The state is the ten coefficients of
+    Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0, any real
+    value being valid for each one.
+    */
+    void addControlSpecifications();
 public:
     static const Class CLASS;
     virtual const Class *getClass() const;
@@ -38,6 +44,28 @@ public:
             base.y()+mixed.x()*point.x()+mixed.z()*point.z(),
             base.z()+mixed.y()*point.x()+mixed.z()*point.y());
     }
+    double getSquareX() const { return square.x(); }
+    double getSquareY() const { return square.y(); }
+    double getSquareZ() const { return square.z(); }
+    double getMixedXY() const { return mixed.x(); }
+    double getMixedXZ() const { return mixed.y(); }
+    double getMixedYZ() const { return mixed.z(); }
+    double getLinearX() const { return linear.x(); }
+    double getLinearY() const { return linear.y(); }
+    double getLinearZ() const { return linear.z(); }
+    double getConstant() const { return constant; }
+
+    void setSquareX(double value) { square = square.withX(value); }
+    void setSquareY(double value) { square = square.withY(value); }
+    void setSquareZ(double value) { square = square.withZ(value); }
+    void setMixedXY(double value) { mixed = mixed.withX(value); }
+    void setMixedXZ(double value) { mixed = mixed.withY(value); }
+    void setMixedYZ(double value) { mixed = mixed.withZ(value); }
+    void setLinearX(double value) { linear = linear.withX(value); }
+    void setLinearY(double value) { linear = linear.withY(value); }
+    void setLinearZ(double value) { linear = linear.withZ(value); }
+    void setConstant(double value) { constant = value; }
+
     virtual Geometry* copyGeometry() const;
     Vector3Dd& squareCoefficients() { return square; }
     const Vector3Dd& squareCoefficients() const { return square; }
@@ -78,5 +106,37 @@ public:
     virtual void doExtraInformation(const Ray& ray, double t, RayHit* hit);
     virtual int doContainmentTest(const Vector3Dd& point, double tolerance);
     virtual double* getMinMax();
+
+    //= Boundary representation =========================================
+
+    /**
+    Polyhedral approximation with the default number of divisions of
+    `ImplicitSolid` (see `exportToPolyhedralBoundedSolid(int)`).
+    */
+    virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
+
+    /**
+    Polyhedral approximation of the solid F &lt;= 0, built with Euler
+    operators by `PolyhedralBoundedSolidFieldConstructions`. A bounded
+    quadric (an ellipsoid) is polygonized inside its bounds; an unbounded one
+    (i.e. a cylinder or a paraboloid) is clipped by the cube of half side
+    `ImplicitSolid::DEFAULT_CLIPPING_HALF_SIZE` centered at the origin.
+    @param divisions number of grid cells along the largest side of the
+    polygonized box (at least 1)
+    @return a new polyhedral approximation, owned by the caller, or null if
+    the solid is empty or its bounds can not be determined
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int divisions);
+
+    /**
+    Polyhedral approximation of the part of the solid F &lt;= 0 inside a box.
+    @param divisions number of grid cells along the largest side of the box
+    @param minimum minimum corner of the box
+    @param maximum maximum corner of the box
+    @return a new polyhedral approximation, owned by the caller, or null if
+    it is empty
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int divisions,
+        const Vector3Dd& minimum, const Vector3Dd& maximum);
 };
 #endif

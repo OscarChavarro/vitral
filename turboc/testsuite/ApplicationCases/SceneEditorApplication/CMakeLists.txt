@@ -98,6 +98,7 @@ set(SCENE_EDITOR_OPENGL_SOURCES
         src/render/opengl1/OpenGL1SceneRenderer.cpp
         src/render/opengl1/XtOpenGL1SceneBridge.cpp
         src/render/xlib/XlibDrawingAreaRenderer.cpp
+        src/render/BrepExportCache.cpp
     )
 
 # The technology-independent application classes, the OpenGL rendering

@@ -4,6 +4,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 class Image;
+class TriangleMesh;
 
 class _AnimationInfo {
 public:
@@ -59,6 +60,15 @@ private:
 
 public:
     Md2Mesh();
+
+    /**
+    The triangles of a key frame of the model (without interpolation between
+    frames), as a triangle mesh with the positions of the frame.
+    @param frame index of the frame, from 0 to `frameVertices.size() - 1`
+    @return a new mesh with positions and triangles only, owned by the
+    caller, or null if the model has no such frame or no triangles
+    */
+    TriangleMesh* exportToTriangleMesh(int frame) const;
 
     short getMaxAnimationInd() const;
     void setMaxAnimationInd(short maxAnimationInd);

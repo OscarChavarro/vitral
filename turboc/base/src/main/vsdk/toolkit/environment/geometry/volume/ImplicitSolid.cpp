@@ -10,6 +10,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.h"
 
 // C++ port note: `new double[6]{...}` of the cpp version
 static double*
@@ -337,6 +338,57 @@ double* ImplicitSolid::getMinMax()
         return newMinMax6(bounds.getMinimum().x(), bounds.getMinimum().y(), bounds.getMinimum().z(),
             bounds.getMaximum().x(), bounds.getMaximum().y(), bounds.getMaximum().z());
     return newMinMax6(-1e308,-1e308,-1e308,1e308,1e308,1e308);
+}
+
+//= Boundary representation =============================================
+
+const double ImplicitSolid::DEFAULT_CLIPPING_HALF_SIZE = 3.0;
+
+/**
+C++ port note: the field given to `PolyhedralBoundedSolidFieldConstructions`
+(`this::evaluateField` in Java).
+*/
+class _ImplicitSolidField : public ToDoubleFunction<Vector3Dd> {
+private:
+    const ImplicitSolid* solid;
+public:
+    _ImplicitSolidField(const ImplicitSolid* solid) : solid(solid) {}
+    virtual double applyAsDouble(Vector3Dd point)
+    {
+        return solid->evaluateField(point);
+    }
+};
+
+PolyhedralBoundedSolid* ImplicitSolid::exportToPolyhedralBoundedSolid()
+{
+    return exportToPolyhedralBoundedSolid(DEFAULT_POLYGONIZATION_DIVISIONS);
+}
+
+PolyhedralBoundedSolid* ImplicitSolid::exportToPolyhedralBoundedSolid(
+    int divisions)
+{
+    GeometryBounds bounds;
+    getBounds(bounds);
+    if ( bounds.getKind() == GeometryBounds::Kind::Finite ) {
+        _ImplicitSolidField field(this);
+        return PolyhedralBoundedSolidFieldConstructions::createFromBoundedScalarField(
+            field, bounds.getMinimum(), bounds.getMaximum(),
+            Math::max(1, divisions));
+    }
+    if ( bounds.getKind() == GeometryBounds::Kind::Unbounded ) {
+        double c = DEFAULT_CLIPPING_HALF_SIZE;
+        return exportToPolyhedralBoundedSolid(divisions,
+            Vector3Dd(-c, -c, -c), Vector3Dd(c, c, c));
+    }
+    return NULL;
+}
+
+PolyhedralBoundedSolid* ImplicitSolid::exportToPolyhedralBoundedSolid(
+    int divisions, const Vector3Dd& minimum, const Vector3Dd& maximum)
+{
+    _ImplicitSolidField field(this);
+    return PolyhedralBoundedSolidFieldConstructions::createFromScalarField(
+        field, minimum, maximum, Math::max(1, divisions));
 }
 
 const double ImplicitSolid::ROOT_POLISH_REACH = 1.0e-3;

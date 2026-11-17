@@ -11,6 +11,12 @@
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
+#include "vsdk/toolkit/environment/geometry/volume/BlobComponent.h"
+#include "vsdk/toolkit/environment/geometry/volume/BlobSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
+#include "vsdk/toolkit/environment/geometry/volume/PolynomialSurface.h"
+#include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
@@ -95,6 +101,21 @@ CommandResult GeometryCreationCommandsExecutor::execute(
     }
     else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
         createParametricBiCubicPatch();
+    }
+    else if ( label.equals("IDC_CREATE_BLOB") ) {
+        createBlob();
+    }
+    else if ( label.equals("IDC_CREATE_QUADRIC") ) {
+        createQuadric();
+    }
+    else if ( label.equals("IDC_CREATE_POLYNOMIAL") ) {
+        createPolynomial();
+    }
+    else if ( label.equals("IDC_CREATE_HEIGHTFIELD") ) {
+        createHeightField();
+    }
+    else if ( label.equals("IDC_CREATE_HALFSPACE") ) {
+        scene()->addThing(new PlanarHalfSpace(0, 0, 1, 0));
     }
     else {
         return CommandResult::NOT_HANDLED;
@@ -401,4 +422,85 @@ SimpleBody* GeometryCreationCommandsExecutor::addDebugSphere(
     //-----------------------------------------------------------------
     body->setTexture(texture);
     return body;
+}
+
+/**
+A blob shaped as a triangular molecule with a hole: three components at
+the vertices of an equilateral triangle (at distance 1 from its center,
+on the plane z = 0). Each component reaches 1.25 units, so neighbors
+overlap; the threshold 0.46 is above the density at the center of the
+triangle (0.39) and below the one half way between two components
+(0.54), so the three of them merge in a ring around an empty center
+(of radius 0.25, wide enough to be kept by the default polygonization).
+*/
+void GeometryCreationCommandsExecutor::createBlob()
+{
+    BlobSolid* blob = new BlobSolid(0.46, FALSE);
+    int i;
+    for ( i = 0; i < 3; i++ ) {
+        double angle = M_PI / 2 + 2 * M_PI * i / 3;
+        blob->addComponent(BlobComponent(
+            Vector3Dd(cos(angle), sin(angle), 0), 1.25, 1.0));
+    }
+    scene()->addThing(blob);
+}
+
+/**
+An ellipsoid of semiaxes 1.5, 1 and 0.7: x^2/1.5^2 + y^2 + z^2/0.7^2 - 1
+<= 0.
+*/
+void GeometryCreationCommandsExecutor::createQuadric()
+{
+    scene()->addThing(new QuadricSurface(
+        Vector3Dd(1.0 / (1.5 * 1.5), 1.0, 1.0 / (0.7 * 0.7)),
+        Vector3Dd(0, 0, 0), Vector3Dd(0, 0, 0), -1.0));
+}
+
+/**
+The quartic "tangle cube" x^4 - 5x^2 + y^4 - 5y^2 + z^4 - 5z^2 + 11.8 < 0,
+a solid of genus 5 that fits in a cube of side 4.6, scaled to 0.4.
+*/
+void GeometryCreationCommandsExecutor::createPolynomial()
+{
+    int order = 4;
+    PolynomialSurface* polynomial = new PolynomialSurface(order, FALSE);
+    double* c = polynomial->getCoefficients();
+    c[PolynomialSurface::getTermIndex(order, 4, 0, 0)] = 1;
+    c[PolynomialSurface::getTermIndex(order, 0, 4, 0)] = 1;
+    c[PolynomialSurface::getTermIndex(order, 0, 0, 4)] = 1;
+    c[PolynomialSurface::getTermIndex(order, 2, 0, 0)] = -5;
+    c[PolynomialSurface::getTermIndex(order, 0, 2, 0)] = -5;
+    c[PolynomialSurface::getTermIndex(order, 0, 0, 2)] = -5;
+    c[PolynomialSurface::getTermIndex(order, 0, 0, 0)] = 11.8;
+    SimpleBody* body = scene()->addThing(polynomial);
+    body->setScale(Vector3Dd(0.4, 0.4, 0.4));
+}
+
+/**
+A terrain of 17 x 17 heights (waves between 0.7 and 2.3) over a box of
+height 3. Height fields grow along their Y axis: the body is rotated so
+they grow along Z, scaled to 0.25 and centered at the origin.
+*/
+void GeometryCreationCommandsExecutor::createHeightField()
+{
+    int n = 17;
+    HeightFieldSolid* field = new HeightFieldSolid(n, n,
+        Vector3Dd(0, 0, 0), Vector3Dd(n - 1, 3, n - 1));
+    int x;
+    int z;
+    for ( z = 0; z < n; z++ ) {
+        for ( x = 0; x < n; x++ ) {
+            field->setHeight(x, z,
+                1.5 + 0.8 * sin(x / 2.5) * cos(z / 3.0));
+        }
+    }
+    SimpleBody* body = scene()->addThing(field);
+    Matrix4x4d rotation;
+    rotation = rotation.axisRotation(M_PI / 2, 1, 0, 0);
+    double scale = 0.25;
+    body->setRotation(rotation);
+    body->setScale(Vector3Dd(scale, scale, scale));
+    // Rotated, the center of the grid (8, y, 8) goes to (8, -8, y)
+    body->setPosition(Vector3Dd(-scale * (n - 1) / 2.0,
+        scale * (n - 1) / 2.0, 0));
 }

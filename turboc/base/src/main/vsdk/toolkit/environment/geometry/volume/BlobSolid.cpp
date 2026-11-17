@@ -11,6 +11,21 @@
 BlobSolid::BlobSolid(double thresholdValue, BOOLEAN useSturmSequences) :
     components(), threshold(thresholdValue), sturm(useSturmSequences)
 {
+    addControlSpecifications();
+}
+
+/**
+C++ port note: the copy constructor synthesized for the class copies the
+control specifications with the entity (see `Entity`), so only this
+constructor adds them.
+*/
+void BlobSolid::addControlSpecifications()
+{
+    // Turbo C++ 3.0 crashes with the new of a template class as an argument
+    MemberEntityControlAccessor<BlobSolid, double> *accessor;
+    accessor = new MemberEntityControlAccessor<BlobSolid, double>(
+        &BlobSolid::getThreshold, &BlobSolid::setThreshold);
+    addControlSpecification("double;threshold;(0, INFINITE)", accessor);
 }
 
 Geometry* BlobSolid::copyGeometry() const { return new BlobSolid(*this); }

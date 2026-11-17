@@ -8,6 +8,8 @@
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
+#include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.h"
 
 // C++ port note: `new double[6]{...}` of the cpp version
 static double*
@@ -20,7 +22,48 @@ newMinMax6(double x0, double y0, double z0, double x1, double y1, double z1)
 }
 
 QuadricSurface::QuadricSurface(const Vector3Dd& s, const Vector3Dd& m,
-    const Vector3Dd& l, double c) : square(s), mixed(m), linear(l), constant(c) {}
+    const Vector3Dd& l, double c) : square(s), mixed(m), linear(l), constant(c)
+{
+    addControlSpecifications();
+}
+
+void QuadricSurface::addControlSpecifications()
+{
+    // C++ port note: one accessor pair per coefficient, as there is no
+    // reflection to find them from the names
+    // Turbo C++ 3.0 crashes with the new of a template class as an argument
+    MemberEntityControlAccessor<QuadricSurface, double> *accessor;
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getSquareX, &QuadricSurface::setSquareX);
+    addControlSpecification("double;squareX;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getSquareY, &QuadricSurface::setSquareY);
+    addControlSpecification("double;squareY;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getSquareZ, &QuadricSurface::setSquareZ);
+    addControlSpecification("double;squareZ;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getMixedXY, &QuadricSurface::setMixedXY);
+    addControlSpecification("double;mixedXY;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getMixedXZ, &QuadricSurface::setMixedXZ);
+    addControlSpecification("double;mixedXZ;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getMixedYZ, &QuadricSurface::setMixedYZ);
+    addControlSpecification("double;mixedYZ;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getLinearX, &QuadricSurface::setLinearX);
+    addControlSpecification("double;linearX;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getLinearY, &QuadricSurface::setLinearY);
+    addControlSpecification("double;linearY;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getLinearZ, &QuadricSurface::setLinearZ);
+    addControlSpecification("double;linearZ;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<QuadricSurface, double>(
+        &QuadricSurface::getConstant, &QuadricSurface::setConstant);
+    addControlSpecification("double;constant;(-INFINITE, INFINITE)", accessor);
+}
 Geometry* QuadricSurface::copyGeometry() const { return new QuadricSurface(*this); }
 
 RayFirstHitStatus::Value QuadricSurface::roots(const Ray& ray, const RayCrossingQuery& query,
@@ -336,6 +379,56 @@ double* QuadricSurface::getMinMax() {
         return newMinMax6(bounds.getMinimum().x(), bounds.getMinimum().y(), bounds.getMinimum().z(),
             bounds.getMaximum().x(), bounds.getMaximum().y(), bounds.getMaximum().z());
     return newMinMax6(-1e308,-1e308,-1e308,1e308,1e308,1e308);
+}
+
+//= Boundary representation =============================================
+
+/**
+C++ port note: the field given to `PolyhedralBoundedSolidFieldConstructions`
+(`this::evaluate` in Java).
+*/
+class _QuadricSurfaceField : public ToDoubleFunction<Vector3Dd> {
+private:
+    const QuadricSurface* quadric;
+public:
+    _QuadricSurfaceField(const QuadricSurface* quadric) : quadric(quadric) {}
+    virtual double applyAsDouble(Vector3Dd point)
+    {
+        return quadric->evaluate(point);
+    }
+};
+
+PolyhedralBoundedSolid* QuadricSurface::exportToPolyhedralBoundedSolid()
+{
+    return exportToPolyhedralBoundedSolid(
+        ImplicitSolid::DEFAULT_POLYGONIZATION_DIVISIONS);
+}
+
+PolyhedralBoundedSolid* QuadricSurface::exportToPolyhedralBoundedSolid(
+    int divisions)
+{
+    GeometryBounds bounds;
+    getBounds(bounds);
+    if ( bounds.getKind() == GeometryBounds::Kind::Finite ) {
+        _QuadricSurfaceField field(this);
+        return PolyhedralBoundedSolidFieldConstructions::createFromBoundedScalarField(
+            field, bounds.getMinimum(), bounds.getMaximum(),
+            Math::max(1, divisions));
+    }
+    if ( bounds.getKind() == GeometryBounds::Kind::Unbounded ) {
+        double c = ImplicitSolid::DEFAULT_CLIPPING_HALF_SIZE;
+        return exportToPolyhedralBoundedSolid(divisions,
+            Vector3Dd(-c, -c, -c), Vector3Dd(c, c, c));
+    }
+    return NULL;
+}
+
+PolyhedralBoundedSolid* QuadricSurface::exportToPolyhedralBoundedSolid(
+    int divisions, const Vector3Dd& minimum, const Vector3Dd& maximum)
+{
+    _QuadricSurfaceField field(this);
+    return PolyhedralBoundedSolidFieldConstructions::createFromScalarField(
+        field, minimum, maximum, Math::max(1, divisions));
 }
 
 const Class QuadricSurface::CLASS = { "QuadricSurface", &Solid::CLASS };

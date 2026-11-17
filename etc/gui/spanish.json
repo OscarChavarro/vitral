@@ -647,7 +647,7 @@
         },
         {
           "type": "item",
-          "name": "Dibujar usando &AWT",
+          "name": "Dibujar usando &2D",
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT"
           ]
@@ -950,8 +950,8 @@
     },
     {
       "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT",
-      "name": "Dibujar usando AWT",
-      "brief": "Presentar el conjunto de vistas solo con dibujo 2D de AWT (sin OpenGL)"
+      "name": "Dibujar usando 2D",
+      "brief": "Presentar el conjunto de vistas solo con dibujo 2D, sobre el lienzo del toolkit de la GUI (sin OpenGL)"
     }
   ],
   "buttonGroups": [

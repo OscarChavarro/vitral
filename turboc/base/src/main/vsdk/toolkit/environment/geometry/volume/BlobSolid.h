@@ -31,12 +31,20 @@ private:
         double influenceStart, ArrayList<BlobInfluenceInterval>& intervals) const;
     FloatingInterval clampedFalloff(long int index, const FloatingInterval& x,
         const FloatingInterval& y, const FloatingInterval& z) const;
+    /**
+    The state edited here is the threshold. The components are a list of
+    their own, and using Sturm sequences is a choice of the intersection
+    algorithm, not part of the shape. A density above a nonpositive
+    threshold would fill the whole space, so it must be positive.
+    */
+    void addControlSpecifications();
 public:
     BlobSolid(double threshold, BOOLEAN useSturmSequences);
     void addComponent(const BlobComponent& component);
     long int getComponentCount() const { return components.size(); }
     const BlobComponent& getComponent(long int index) const { return components[index]; }
     double getThreshold() const { return threshold; }
+    void setThreshold(double value) { threshold = value; }
     BOOLEAN usesSturmSequences() const { return sturm; }
     // Summed component density at the point.
     double evaluateDensity(const Vector3Dd& point) const;

@@ -47,6 +47,37 @@ public enum RenderTechnology
     }
 
     /**
+    @param renderMode a `Viewport.RENDER_MODE_*`
+    @param current the technology in use
+    @return the technology offering the render mode: the current one if it
+    offers it (raytracing is offered by every technology), or null if none
+    does
+    */
+    public static RenderTechnology forRenderMode(int renderMode,
+                                                 RenderTechnology current)
+    {
+        if ( current != null && current.offers(renderMode) ) {
+            return current;
+        }
+        for ( RenderTechnology technology : values() ) {
+            if ( technology.offers(renderMode) ) {
+                return technology;
+            }
+        }
+        return null;
+    }
+
+    private boolean offers(int renderMode)
+    {
+        for ( int mode : renderModes ) {
+            if ( mode == renderMode ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
     @param command a command of the `VIEWPORT_SET_RENDER_TECHNOLOGY` popup
     @return the technology selected by the command, or null if it is not a
     render technology command

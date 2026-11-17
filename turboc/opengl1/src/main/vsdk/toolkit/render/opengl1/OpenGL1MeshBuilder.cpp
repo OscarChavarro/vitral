@@ -1,11 +1,12 @@
 #include <math.h>
 
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/Math.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1MeshBuilder.h"
 #include "java/util/Collections.h"
 
 OpenGL1MeshBuilder::OpenGL1MeshBuilder(double characteristicSize)
-    : characteristicSize(characteristicSize), doubleSided(FALSE)
+    : meshCharacteristicSize(characteristicSize), doubleSided(FALSE)
 {
 }
 
@@ -125,7 +126,7 @@ OpenGL1MeshRenderer::Mesh* OpenGL1MeshBuilder::build()
 
     int count = (int)(vertices.size() / VERTEX_SIZE);
     OpenGL1MeshRenderer::Mesh* mesh =
-        new OpenGL1MeshRenderer::Mesh(characteristicSize);
+        new OpenGL1MeshRenderer::Mesh(meshCharacteristicSize);
 
     mesh->positions = Collections<float>::nCopies(count * 3, 0.0f);
     mesh->normals = Collections<float>::nCopies(count * 3, 0.0f);
@@ -185,3 +186,14 @@ void OpenGL1MeshBuilder::addBackSides(int frontCount)
 
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
+
+double OpenGL1MeshBuilder::characteristicSize(double* minmax)
+{
+    double size = 1.0;
+    if ( minmax != NULL ) {
+        size = Math::max(Math::abs(minmax[3] - minmax[0]),
+            Math::max(Math::abs(minmax[4] - minmax[1]), Math::abs(minmax[5] - minmax[2])));
+        delete[] minmax;
+    }
+    return size;
+}

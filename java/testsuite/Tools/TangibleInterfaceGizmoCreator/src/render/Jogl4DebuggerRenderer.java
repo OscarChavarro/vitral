@@ -11,8 +11,6 @@ import com.jogamp.opengl.GLEventListener;
 
 import models.TangibleInterfaceGizmosModel;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
-import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;

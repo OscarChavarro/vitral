@@ -8,6 +8,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 FunctionalExplicitSurface::FunctionalExplicitSurface(const String& fxy)
     : xyFunction(0), internalTriangleMesh(0)
 {
@@ -204,4 +205,47 @@ const Class *
 FunctionalExplicitSurface::getClass() const
 {
     return &CLASS;
+}
+
+/**
+C++ port note: the arrays of the internal mesh are never null, so an
+uninitialized one is an empty one.
+*/
+QuadMesh* FunctionalExplicitSurface::exportToQuadMesh()
+{
+    if ( internalTriangleMesh == NULL ||
+         internalTriangleMesh->getVertexPositions().size() == 0 ||
+         internalTriangleMesh->getTriangleIndexes().size() == 0 ) {
+        return NULL;
+    }
+    ArrayList<double>& source = internalTriangleMesh->getVertexPositions();
+    int n = (tesselationHintX+1)*(tesselationHintY+1);
+    QuadMesh* mesh;
+    int ix;
+    int iy;
+    int index;
+    long i;
+
+    if ( source.size() < 3L*n ) {
+        return NULL;
+    }
+    mesh = new QuadMesh();
+    mesh->initVertexPositionsArray(n);
+    ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( i = 0; i < 3L*n; i++ ) {
+        positions[i] = source[i];
+    }
+    mesh->initQuadArrays(tesselationHintX*tesselationHintY);
+    index = 0;
+    for ( iy = 0; iy < tesselationHintY; iy++ ) {
+        for ( ix = 0; ix < tesselationHintX; ix++ ) {
+            mesh->setQuadAt(index,
+                coord(tesselationHintX, tesselationHintY, ix, iy),
+                coord(tesselationHintX, tesselationHintY, ix+1, iy),
+                coord(tesselationHintX, tesselationHintY, ix+1, iy+1),
+                coord(tesselationHintX, tesselationHintY, ix, iy+1));
+            index++;
+        }
+    }
+    return mesh;
 }

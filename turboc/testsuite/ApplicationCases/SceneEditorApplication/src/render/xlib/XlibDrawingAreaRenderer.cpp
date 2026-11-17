@@ -17,6 +17,12 @@
 #include "render/DrawingAreaHost.h"
 #include "render/FrameBufferSource.h"
 #include "render/FrameCaptureService.h"
+#include "render/BrepExportCache.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCalligraphicExporter.h"
+#include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/media/Calligraphic3DBuffer.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
@@ -99,19 +105,51 @@ static void drawLines(Display* display, Drawable frame, GC gc,
                int width, int height, unsigned long color,
                int lineWidth = 1, BOOLEAN dashed = FALSE)
 {
+    // Consecutive segments where one starts at the end of the previous one
+    // (i.e. the polyline approximating a curve, or a line broken by the
+    // hidden line algorithm) are drawn as one polyline, so the pattern of a
+    // dashed line continues along it instead of starting again at each
+    // (maybe very short) segment (as the Java `AwtProjectedLineLayerRenderer`)
+    const double CHAIN_TOLERANCE = 0.01;
+    ArrayList<XPoint> chain;
+    double lastX = 0;
+    double lastY = 0;
+    BOOLEAN hasLast = FALSE;
+    XPoint point;
+
     XSetForeground(display, gc, color);
     XSetLineAttributes(display, gc, lineWidth,
         dashed ? LineOnOffDash : LineSolid, CapRound, JoinRound);
     for (int i = 0; i < lines.getNumLines(); ++i) {
         Vector3Dd* a = lines.get2DLinePoint0(i);
         Vector3Dd* b = lines.get2DLinePoint1(i);
-        int x0 = x + ((int)((a->x() + 1) * width / 2));
-        int y0 = y + ((int)((1 - a->y()) * height / 2));
-        int x1 = x + ((int)((b->x() + 1) * width / 2));
-        int y1 = y + ((int)((1 - b->y()) * height / 2));
-        XDrawLine(display, frame, gc, x0, y0, x1, y1);
+        double ax = x + (a->x() + 1) * width / 2;
+        double ay = y + (1 - a->y()) * height / 2;
+        double bx = x + (b->x() + 1) * width / 2;
+        double by = y + (1 - b->y()) * height / 2;
+        if (!hasLast || Math::abs(ax - lastX) > CHAIN_TOLERANCE ||
+            Math::abs(ay - lastY) > CHAIN_TOLERANCE) {
+            if (chain.size() > 1) {
+                XDrawLines(display, frame, gc, &chain[0], (int)chain.size(),
+                    CoordModeOrigin);
+            }
+            chain.clear();
+            point.x = (short)((int)ax);
+            point.y = (short)((int)ay);
+            chain.add(point);
+        }
+        point.x = (short)((int)bx);
+        point.y = (short)((int)by);
+        chain.add(point);
+        lastX = bx;
+        lastY = by;
+        hasLast = TRUE;
         delete a;
         delete b;
+    }
+    if (chain.size() > 1) {
+        XDrawLines(display, frame, gc, &chain[0], (int)chain.size(),
+            CoordModeOrigin);
     }
     XSetLineAttributes(display, gc, 1, LineSolid, CapButt, JoinMiter);
 }
@@ -142,8 +180,35 @@ static BOOLEAN projectLine(const Matrix4x4d& projection, const Vector3Dd& a,
     return TRUE;
 }
 
-static void drawGrid(Display* display, Drawable frame, GC gc, Visual* visual,
-              Camera* camera, int x, int y, int width, int height)
+/**
+A set of free lines of the drawing views (lines that are not edges of
+solids: the reference grid, curves and surfaces), in world coordinates,
+drawn with its own color (as the `FreeLineSet` of the Java
+`ProjectedLinesViewBuilder`).
+*/
+class _XlibFreeLineSet {
+public:
+    Calligraphic3DBuffer lines;
+    ColorRgb color;
+
+    _XlibFreeLineSet(const ColorRgb& color) : lines(), color(color) {}
+};
+
+static const double ORTHOGONAL_EYE_DISTANCE = 1000.0;
+
+static ColorRgb wireColor(const SimpleMaterial* material)
+{
+    if (material == NULL) {
+        return ColorRgb(0, 0, 0);
+    }
+    return material->getDiffuse();
+}
+
+/**
+The reference grid, as two free line sets (lines and axes), so it is hidden
+by the solids in the hidden line views.
+*/
+static void addGrid(ArrayList<_XlibFreeLineSet*>& freeLines, Camera* camera)
 {
     Matrix4x4d transform;
     if (camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL) {
@@ -157,21 +222,88 @@ static void drawGrid(Display* display, Drawable frame, GC gc, Visual* visual,
                 transform = transform.axisRotation(M_PI / 2, 0, 1, 0);
         }
     }
-    Matrix4x4d projection = camera->calculateProjectionMatrix();
-    Calligraphic2DBuffer regular, axes;
+    _XlibFreeLineSet* grid = new _XlibFreeLineSet(ColorRgb(.37,.37,.37));
+    _XlibFreeLineSet* axes = new _XlibFreeLineSet(ColorRgb(0,0,0));
     for (int i = -7; i <= 7; ++i) {
-        Calligraphic2DBuffer& out = i == 0 ? axes : regular;
-        projectLine(projection, transform.multiply(Vector3Dd(i,-7,0)),
-                    transform.multiply(Vector3Dd(i,7,0)), out);
-        projectLine(projection, transform.multiply(Vector3Dd(-7,i,0)),
-                    transform.multiply(Vector3Dd(7,i,0)), out);
+        _XlibFreeLineSet* target = i == 0 ? axes : grid;
+        target->lines.add3DLine(transform.multiply(Vector3Dd(i,-7,0)),
+                                transform.multiply(Vector3Dd(i,7,0)));
+        target->lines.add3DLine(transform.multiply(Vector3Dd(-7,i,0)),
+                                transform.multiply(Vector3Dd(7,i,0)));
     }
-    drawLines(display, frame, gc, regular, x, y, width, height,
-              pixel(visual, ColorRgb(.37,.37,.37)));
-    drawLines(display, frame, gc, axes, x, y, width, height,
-              pixel(visual, ColorRgb(0,0,0)));
+    freeLines.add(grid);
+    freeLines.add(axes);
 }
 
+/**
+The point of an infinite plane viewed by the camera, in the coordinates of
+the plane: where the line of sight crosses it (if it does, in front of the
+camera and nearer than the far plane), or else the projection of the eye
+onto it.
+*/
+static Vector3Dd viewedPoint(const InfinitePlane& plane,
+                             const Matrix4x4d& transform, Camera* camera)
+{
+    Matrix4x4d inverse = transform.inverse();
+    Vector3Dd eye = inverse.multiply(camera->getPosition());
+    Vector3Dd direction = inverse.multiply(
+        camera->getPosition().add(camera->getFront())).subtract(eye);
+    double towards = plane.getCoefficients().dotProduct(direction);
+    double length = direction.length();
+    if (towards != 0 && length > 0) {
+        double t = -plane.pointDistance(eye) / towards;
+        if (t > 0 && t * length <= camera->getFarPlaneDistance()) {
+            return eye.add(direction.multiply(t));
+        }
+    }
+    return plane.projectPoint(eye);
+}
+
+static Calligraphic3DBuffer* exportToLines(Geometry* geometry,
+                                           const Matrix4x4d& transform,
+                                           Camera* camera)
+{
+    if (geometry->instanceOf(InfinitePlane::CLASS)) {
+        InfinitePlane* plane = (InfinitePlane*)geometry;
+        return GeometryCalligraphicExporter::exportToCalligraphic3DBuffer(
+            *plane, viewedPoint(*plane, transform, camera));
+    }
+    return GeometryCalligraphicExporter::exportToCalligraphic3DBuffer(geometry);
+}
+
+static void addFreeLines(ArrayList<_XlibFreeLineSet*>& freeLines,
+                         const Calligraphic3DBuffer& local, SimpleBody* body)
+{
+    Matrix4x4d transform = body->getTransformationMatrix();
+    _XlibFreeLineSet* set = new _XlibFreeLineSet(wireColor(body->getMaterial()));
+    Vector3Dd ends[2];
+    for (int i = 0; i < local.getNumLines(); ++i) {
+        local.get3DLine(i, ends);
+        set->lines.add3DLine(transform.multiply(ends[0]),
+                             transform.multiply(ends[1]));
+    }
+    freeLines.add(set);
+}
+
+/**
+A body with the boundary representation of the volume of a body, at the
+same place (the body itself when its geometry is the solid).
+C++ port note: the surrogate body, owned by the caller, does not own the
+solid.
+*/
+static SimpleBody* brepBody(SimpleBody* body, PolyhedralBoundedSolid* brep)
+{
+    if (body->getGeometry() == (Geometry*)brep) {
+        return body;
+    }
+    SimpleBody* surrogate = new SimpleBody();
+    surrogate->setName(body->getName());
+    surrogate->setGeometryReference(brep);
+    surrogate->setPosition(body->getPosition());
+    surrogate->setRotation(body->getRotation());
+    surrogate->setScale(body->getScale());
+    return surrogate;
+}
 
 XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
     ApplicationModel* m, DrawingAreaHost* h,
@@ -183,7 +315,8 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
       titleFontSize(0),
       selectionEditor(new SceneSelectionEditor(m->getScene())),
       gizmoPresenter(NULL), gizmoDrawList(new Gizmo2DDrawList()),
-      gizmoRenderer(new XlibGizmo2DDrawListRenderer())
+      gizmoRenderer(new XlibGizmo2DDrawListRenderer()),
+      brepCache(new BrepExportCache())
 {
     gizmoPresenter = new DrawingAreaGizmoPresenter(m->getDrawingArea(),
         selectionEditor, translationGizmo, rotateGizmo, scaleGizmo);
@@ -192,6 +325,7 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
 XlibDrawingAreaRenderer::~XlibDrawingAreaRenderer()
 {
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
+    delete brepCache;
     delete gizmoRenderer;
     delete gizmoDrawList;
     delete gizmoPresenter;
@@ -310,21 +444,46 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
         XSetForeground(display, gc, pixel(visual,
             scene->simpleBackground->colorInDireccion(camera->getFront())));
         XFillRectangle(display, frame, gc, x, y, width, height);
-        if (viewport->isShowGrid())
-            drawGrid(display, frame, gc, visual, camera, x, y, width, height);
     }
 
     ArrayList<SimpleBody*>& bodies = scene->scene->getSimpleBodies();
     if (!raytraced) {
+        // As the Java `ProjectedLinesViewBuilder`: the volumes are drawn by
+        // the hidden line algorithm over their boundary representation; the
+        // curves and surfaces (and the grid) are free lines, hidden by the
+        // solids but not hiding anything; other bodies, or all of them when
+        // the surfaces are not shown, are drawn as wireframes
+        ArrayList<_XlibFreeLineSet*> freeLines;
         ArrayList<SimpleBody*> solids, wires;
-        for (long i = 0; i < bodies.size(); ++i) {
+        ArrayList<SimpleBody*> surrogates;
+        ArrayList<PolyhedralBoundedSolid*> exported;
+        long i;
+        if (viewport->isShowGrid())
+            addGrid(freeLines, camera);
+        for (i = 0; i < bodies.size(); ++i) {
             SimpleBody* body = bodies[i];
             if (!body || !body->getGeometry() || scene->isHidden(body)) continue;
-            if (body->getGeometry() != NULL &&
-                body->getGeometry()->instanceOf(Volume::CLASS))
-                solids.add(body);
-            else
+            Geometry* geometry = body->getGeometry();
+            BOOLEAN callerOwns = FALSE;
+            PolyhedralBoundedSolid* brep = brepCache->get(geometry, callerOwns);
+            if (brep != NULL && callerOwns) exported.add(brep);
+            Calligraphic3DBuffer* lines = NULL;
+            if (quality->isSurfacesSet() && brep == NULL) {
+                lines = exportToLines(geometry,
+                    body->getTransformationMatrix(), camera);
+            }
+            if (quality->isSurfacesSet() && brep != NULL) {
+                SimpleBody* solid = brepBody(body, brep);
+                if (solid != body) surrogates.add(solid);
+                solids.add(solid);
+            }
+            else if (lines != NULL) {
+                addFreeLines(freeLines, *lines, body);
+            }
+            else {
                 wires.add(body);
+            }
+            delete lines;
         }
         if (wires.size()) {
             Calligraphic2DBuffer lines;
@@ -334,20 +493,62 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
         }
         if (solids.size()) {
             Calligraphic2DBuffer contours, visible, hidden;
+            ArrayList<Calligraphic3DBuffer*> freeInput;
+            ArrayList<Calligraphic2DBuffer*> freeVisible, freeHidden;
+            for (i = 0; i < freeLines.size(); ++i) {
+                freeInput.add(&freeLines[i]->lines);
+                freeVisible.add(new Calligraphic2DBuffer());
+                freeHidden.add(new Calligraphic2DBuffer());
+            }
             Camera eye(*camera);
             if (camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL) {
                 Vector3Dd front = camera->getFront().normalized();
-                eye.setPosition(camera->getPosition().subtract(front.multiply(1000)));
-                eye.setNearPlaneDistance(camera->getNearPlaneDistance() + 1000);
-                eye.setFarPlaneDistance(camera->getFarPlaneDistance() + 1000);
+                eye.setPosition(camera->getPosition().subtract(
+                    front.multiply(ORTHOGONAL_EYE_DISTANCE)));
+                eye.setNearPlaneDistance(camera->getNearPlaneDistance() +
+                    ORTHOGONAL_EYE_DISTANCE);
+                eye.setFarPlaneDistance(camera->getFarPlaneDistance() +
+                    ORTHOGONAL_EYE_DISTANCE);
             }
             HiddenLineRenderer::executeAppelAlgorithm(solids, &eye,
-                &contours, &visible, &hidden);
+                &contours, &visible, &hidden, freeInput, freeVisible,
+                freeHidden);
+            if (quality->isWiresSet()) {
+                for (i = 0; i < freeLines.size(); ++i) {
+                    drawLines(display, frame, gc, *freeHidden[i], x, y, width,
+                              height, pixel(visual, freeLines[i]->color), 1,
+                              TRUE);
+                }
+                drawLines(display, frame, gc, hidden, x, y, width, height,
+                          pixel(visual, ColorRgb(.32,.32,.32)), 1, TRUE);
+            }
+            for (i = 0; i < freeLines.size(); ++i) {
+                drawLines(display, frame, gc, *freeVisible[i], x, y, width,
+                          height, pixel(visual, freeLines[i]->color));
+                delete freeVisible[i];
+                delete freeHidden[i];
+            }
             drawLines(display, frame, gc, visible, x, y, width, height,
                       pixel(visual, ColorRgb(0,0,0)));
             drawLines(display, frame, gc, contours, x, y, width, height,
                       pixel(visual, ColorRgb(0,0,0)), 2);
         }
+        else {
+            Matrix4x4d projection = camera->calculateProjectionMatrix();
+            Vector3Dd ends[2];
+            for (i = 0; i < freeLines.size(); ++i) {
+                Calligraphic2DBuffer projected;
+                for (int j = 0; j < freeLines[i]->lines.getNumLines(); ++j) {
+                    freeLines[i]->lines.get3DLine(j, ends);
+                    projectLine(projection, ends[0], ends[1], projected);
+                }
+                drawLines(display, frame, gc, projected, x, y, width, height,
+                          pixel(visual, freeLines[i]->color));
+            }
+        }
+        for (i = 0; i < freeLines.size(); ++i) delete freeLines[i];
+        for (i = 0; i < surrogates.size(); ++i) delete surrogates[i];
+        for (i = 0; i < exported.size(); ++i) delete exported[i];
     }
 
     // Must be the last to draw, over the scene

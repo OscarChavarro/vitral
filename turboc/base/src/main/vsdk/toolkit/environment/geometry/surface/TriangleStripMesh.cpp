@@ -7,6 +7,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 TriangleStripMesh::TriangleStripMesh() : name("default") {}
 
@@ -106,6 +107,57 @@ void TriangleStripMesh::doExtraInformation(const Ray& inRay, double inT, RayHit*
 {
     if (outData == NULL) return;
     outData->point = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
+}
+
+/**
+C++ port note: the lists of the mesh are never null, so the ones that are
+not set yet are empty.
+*/
+TriangleMesh* TriangleStripMesh::exportToTriangleMesh() const
+{
+    if ( vertexes.size() == 0 || strips.size() == 0 ) {
+        return NULL;
+    }
+    TriangleMesh* mesh = new TriangleMesh();
+    long count = 0;
+    long i;
+    long j;
+
+    for ( i = 0; i < strips.size(); i++ ) {
+        if ( strips[i].size() > 2 ) {
+            count += strips[i].size() - 2;
+        }
+    }
+    mesh->initVertexPositionsArray((int)vertexes.size());
+    ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( i = 0; i < vertexes.size(); i++ ) {
+        positions[3*i] = vertexes[i].getPosition().x();
+        positions[3*i+1] = vertexes[i].getPosition().y();
+        positions[3*i+2] = vertexes[i].getPosition().z();
+    }
+    ArrayList<int> all;
+    count = 0;
+    for ( i = 0; i < strips.size(); i++ ) {
+        const ArrayList<int>& strip = strips[i];
+        for ( j = 2; j < strip.size(); j++ ) {
+            int p0 = (j % 2 == 0) ? strip[j-2] : strip[j-1];
+            int p1 = (j % 2 == 0) ? strip[j-1] : strip[j-2];
+            int p2 = strip[j];
+            if ( p0 == p1 || p1 == p2 || p0 == p2 ) {
+                continue;
+            }
+            all.add(p0);
+            all.add(p1);
+            all.add(p2);
+            count++;
+        }
+    }
+    mesh->initTriangleArrays((int)count);
+    ArrayList<int>& indexes = mesh->getTriangleIndexes();
+    for ( i = 0; i < 3*count; i++ ) {
+        indexes[i] = all[i];
+    }
+    return mesh;
 }
 
 const Class TriangleStripMesh::CLASS = { "TriangleStripMesh", &Surface::CLASS };

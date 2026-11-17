@@ -8,6 +8,10 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/element/RaySolidClassification.h"
 #include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/numerics/FloatingInterval.h"
 
 /**
@@ -22,8 +26,78 @@ productUnderflows(double a, double b)
     return a != 0 && b != 0 && product == 0;
 }
 
-PlanarHalfSpace::PlanarHalfSpace(double a, double b, double c, double d) : plane(a,b,c,d) {}
-PlanarHalfSpace::PlanarHalfSpace(const InfinitePlane& boundary) : plane(boundary) {}
+const double PlanarHalfSpace::DEFAULT_EXPORT_HALF_SIZE = 2.0;
+const double PlanarHalfSpace::DEFAULT_EXPORT_DEPTH = 0.5;
+
+PlanarHalfSpace::PlanarHalfSpace(double a, double b, double c, double d) : plane(a,b,c,d)
+{
+    addControlSpecifications();
+}
+
+PlanarHalfSpace::PlanarHalfSpace(const InfinitePlane& boundary) : plane(boundary)
+{
+    addControlSpecifications();
+}
+
+void PlanarHalfSpace::addControlSpecifications()
+{
+    // Turbo C++ 3.0 crashes with the new of a template class as an argument
+    MemberEntityControlAccessor<PlanarHalfSpace, double> *accessor;
+    accessor = new MemberEntityControlAccessor<PlanarHalfSpace, double>(
+        &PlanarHalfSpace::getA, &PlanarHalfSpace::setA);
+    addControlSpecification("double;a;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<PlanarHalfSpace, double>(
+        &PlanarHalfSpace::getB, &PlanarHalfSpace::setB);
+    addControlSpecification("double;b;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<PlanarHalfSpace, double>(
+        &PlanarHalfSpace::getC, &PlanarHalfSpace::setC);
+    addControlSpecification("double;c;(-INFINITE, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<PlanarHalfSpace, double>(
+        &PlanarHalfSpace::getD, &PlanarHalfSpace::setD);
+    addControlSpecification("double;d;(-INFINITE, INFINITE)", accessor);
+}
+
+PolyhedralBoundedSolid* PlanarHalfSpace::exportToPolyhedralBoundedSolid()
+{
+    return exportToPolyhedralBoundedSolid(DEFAULT_EXPORT_HALF_SIZE,
+        DEFAULT_EXPORT_DEPTH);
+}
+
+PolyhedralBoundedSolid* PlanarHalfSpace::exportToPolyhedralBoundedSolid(
+    double halfSize, double depth)
+{
+    Vector3Dd n(plane.getA(), plane.getB(), plane.getC());
+    double length = n.length();
+    if ( !(length > 0) || !Double::isFinite(length) ||
+         !Double::isFinite(plane.getD()) || !(halfSize > 0) || !(depth > 0) ) {
+        return NULL;
+    }
+    Vector3Dd u = n.multiply(1.0 / length);
+    Vector3Dd center = u.multiply(-plane.getD() / length);
+    // Tangents of the plane: (t1, t2, u) is a right handed frame
+    Vector3Dd axis = Math::abs(u.x()) < 0.9 ? Vector3Dd(1, 0, 0) :
+        Vector3Dd(0, 1, 0);
+    Vector3Dd t1 = axis.subtract(u.multiply(axis.dotProduct(u))).normalized();
+    Vector3Dd t2 = u.crossProduct(t1);
+    const double values[4][4] = {
+        {t1.x(), t2.x(), u.x(), center.x()},
+        {t1.y(), t2.y(), u.y(), center.y()},
+        {t1.z(), t2.z(), u.z(), center.z()},
+        {0, 0, 0, 1}
+    };
+    Matrix4x4d frame(values);
+
+    Vector3Dd minimum(-halfSize, -halfSize, -depth);
+    Vector3Dd maximum(halfSize, halfSize, 0);
+    Box box(minimum, maximum);
+    PolyhedralBoundedSolid* solid = box.exportToPolyhedralBoundedSolid();
+    long int i;
+    for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
+        solid->getVerticesList().get(i)->position =
+            frame.multiply(solid->getVerticesList().get(i)->position);
+    }
+    return solid;
+}
 Geometry* PlanarHalfSpace::copyGeometry() const { return new PlanarHalfSpace(plane); }
 void PlanarHalfSpace::getBounds(GeometryBounds& result) const { plane.getBounds(result); }
 double* PlanarHalfSpace::getMinMax() { return plane.getMinMax(); }

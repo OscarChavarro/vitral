@@ -31,6 +31,10 @@ private:
     void createParametricCubicCurve();
     void createFunctionalExplicitSurface();
     void createParametricBiCubicPatch();
+    void createBlob();
+    void createQuadric();
+    void createPolynomial();
+    void createHeightField();
     SimpleBody* addDebugSphere(SimpleBody* voxelBody, int groupIndex,
                                const Vector3Dd& cm, double averageDistance);
 

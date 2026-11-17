@@ -133,6 +133,7 @@ SOURCES = \
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.cpp \
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.cpp \
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.cpp \
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCalligraphicExporter.cpp \
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.cpp \
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.cpp \
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.cpp \
@@ -240,6 +241,7 @@ SOURCES = \
     src/main/vsdk/toolkit/media/ZBuffer.cpp \
     src/main/vsdk/toolkit/media/NormalMap.cpp \
     src/main/vsdk/toolkit/media/Calligraphic2DBuffer.cpp \
+    src/main/vsdk/toolkit/media/Calligraphic3DBuffer.cpp \
     src/main/vsdk/toolkit/media/PrimitiveCountShapeDescriptor.cpp \
     src/main/vsdk/toolkit/media/FourierShapeDescriptor.cpp \
     src/main/vsdk/toolkit/media/GeometryMetadata.cpp \
@@ -338,6 +340,8 @@ SOURCES = \
     src/main/vsdk/toolkit/environment/geometry/volume/OrthogonalEllipsoidDistance.cpp \
     src/main/vsdk/toolkit/environment/geometry/volume/QuadraticInteriorBound.cpp \
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.cpp \
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.cpp \
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidMeshConstructions.cpp \
     src/main/vsdk/toolkit/environment/scene/AffinePlacement.cpp \
     src/main/vsdk/toolkit/environment/scene/AffineToleranceMap.cpp \
     src/main/vsdk/toolkit/environment/scene/InstanceRayCrossingBuffer.cpp \

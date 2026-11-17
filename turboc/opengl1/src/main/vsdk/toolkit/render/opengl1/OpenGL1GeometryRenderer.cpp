@@ -19,6 +19,13 @@
 #include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "vsdk/toolkit/environment/geometry/surface/SubdividedBezierPatch.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
+#include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
+#include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
+#include "vsdk/toolkit/environment/geometry/volume/Volume.h"
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
@@ -41,6 +48,14 @@
 #include "vsdk/toolkit/render/opengl1/OpenGL1MinMaxRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1SelectionCornersRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1SphereRenderer.h"
+#include "vsdk/toolkit/render/opengl1/surface/OpenGL1SubdividedBezierPatchRenderer.h"
+#include "vsdk/toolkit/render/opengl1/surface/OpenGL1TriangleMeshRenderer.h"
+#include "vsdk/toolkit/render/opengl1/surface/OpenGL1TriangleStripMeshRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1HeightFieldSolidRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1ImplicitSolidRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1PlanarHalfSpaceRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1QuadricSurfaceRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1VolumeRenderer.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 #include "java/util/Collections.h"
 
@@ -88,14 +103,7 @@ static String format(const char* pattern, ...)
 
 static double maxAbsExtent(double* minmax)
 {
-    double size = 1.0;
-    if ( minmax != NULL ) {
-        size = fabs(minmax[3] - minmax[0]);
-        if ( fabs(minmax[4] - minmax[1]) > size ) size = fabs(minmax[4] - minmax[1]);
-        if ( fabs(minmax[5] - minmax[2]) > size ) size = fabs(minmax[5] - minmax[2]);
-        delete[] minmax;
-    }
-    return size;
+    return OpenGL1MeshBuilder::characteristicSize(minmax);
 }
 
 //= Primitives ============================================================
@@ -221,45 +229,6 @@ static OpenGL1MeshRenderer::Mesh* buildTorus(const Torus& torus)
 
 //= Meshes and surfaces ===================================================
 
-static void addTriangleMesh(OpenGL1MeshBuilder& builder, TriangleMesh& mesh)
-{
-    ArrayList<double>& p = mesh.getVertexPositions();
-    ArrayList<double>& n = mesh.getVertexNormals();
-    ArrayList<double>& uv = mesh.getVertexUvs();
-    ArrayList<int>& idx = mesh.getTriangleIndexes();
-
-    for ( long t = 0; t + 2 < idx.size(); t += 3 ) {
-        Vector3Dd pos[3];
-        Vector3Dd nor[3];
-        double u[3] = { 0, 0, 0 };
-        double v[3] = { 0, 0, 0 };
-        for ( int k = 0; k < 3; k++ ) {
-            long i = idx[t + k];
-            pos[k] = Vector3Dd(p[3 * i], p[3 * i + 1], p[3 * i + 2]);
-            nor[k] = n.size() >= 3 * i + 3 ?
-                Vector3Dd(n[3 * i], n[3 * i + 1], n[3 * i + 2]) :
-                Vector3Dd(0, 0, 1);
-            if ( uv.size() >= 2 * i + 2 ) {
-                u[k] = uv[2 * i];
-                v[k] = uv[2 * i + 1];
-            }
-        }
-        builder.addTriangle(pos[0], nor[0], u[0], v[0], pos[1], nor[1], u[1], v[1],
-                            pos[2], nor[2], u[2], v[2]);
-    }
-}
-
-static OpenGL1MeshRenderer::Mesh* buildTriangleMesh(TriangleMesh& mesh)
-{
-    if ( mesh.getVertexPositions().size() == 0 ||
-         mesh.getTriangleIndexes().size() < 3 ) {
-        return NULL;
-    }
-    OpenGL1MeshBuilder builder(maxAbsExtent(mesh.getMinMax()));
-    addTriangleMesh(builder, mesh);
-    return builder.build();
-}
-
 /**
 Groups of meshes and quad meshes (i.e. imported objects), through the
 triangle meshes `GeometryTriangulator` exports for them.
@@ -273,7 +242,7 @@ static OpenGL1MeshRenderer::Mesh* buildTriangulatedGeometry(Geometry* geometry)
     }
     OpenGL1MeshBuilder builder(maxAbsExtent(geometry->getMinMax()));
     for ( long i = 0; i < group.getMeshes().size(); i++ ) {
-        addTriangleMesh(builder, group.getMeshes()[i]);
+        OpenGL1TriangleMeshRenderer::addTriangles(builder, group.getMeshes()[i]);
     }
     return builder.build();
 }
@@ -699,9 +668,7 @@ static String keyOf(Geometry* geometry)
         return format("torus/%.17g/%.17g", t->getMajorRadius(), t->getMinorRadius());
     }
     if ( geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ) {
-        TriangleMesh* m = (TriangleMesh*)geometry;
-        return format("trianglemesh/%p/%d/%d", (void*)m, m->getNumVertices(),
-            m->getNumTriangles());
+        return OpenGL1TriangleMeshRenderer::meshKey(*(TriangleMesh*)geometry);
     }
     if ( geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS) ) {
         FunctionalExplicitSurface* f = (FunctionalExplicitSurface*)geometry;
@@ -740,6 +707,21 @@ static String keyOf(Geometry* geometry)
         QuadMesh* q = (QuadMesh*)geometry;
         return format("quadmesh/%p", (void*)q);
     }
+    if ( geometry != NULL && geometry->instanceOf(TriangleStripMesh::CLASS) ) {
+        return OpenGL1TriangleStripMeshRenderer::meshKey(*(TriangleStripMesh*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(SubdividedBezierPatch::CLASS) ) {
+        return OpenGL1SubdividedBezierPatchRenderer::meshKey(*(SubdividedBezierPatch*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(QuadricSurface::CLASS) ) {
+        return OpenGL1QuadricSurfaceRenderer::meshKey(*(QuadricSurface*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(ImplicitSolid::CLASS) ) {
+        return OpenGL1ImplicitSolidRenderer::meshKey(*(ImplicitSolid*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(HeightFieldSolid::CLASS) ) {
+        return OpenGL1HeightFieldSolidRenderer::meshKey(*(HeightFieldSolid*)geometry);
+    }
     return String();
 }
 
@@ -751,7 +733,7 @@ static OpenGL1MeshRenderer::Mesh* buildMesh(Geometry* geometry)
     if ( geometry != NULL && geometry->instanceOf(Torus::CLASS) ) return buildTorus(*(Torus*)geometry);
     if ( geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ) {
         TriangleMesh* m = (TriangleMesh*)geometry;
-        return buildTriangleMesh(*m);
+        return OpenGL1TriangleMeshRenderer::buildMesh(*m);
     }
     if ( geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS) ) {
         FunctionalExplicitSurface* f = (FunctionalExplicitSurface*)geometry;
@@ -764,6 +746,21 @@ static OpenGL1MeshRenderer::Mesh* buildMesh(Geometry* geometry)
     if ( geometry != NULL && geometry->instanceOf(InfinitePlane::CLASS) ) {
         InfinitePlane* p = (InfinitePlane*)geometry;
         return buildInfinitePlane(*p);
+    }
+    if ( geometry != NULL && geometry->instanceOf(TriangleStripMesh::CLASS) ) {
+        return OpenGL1TriangleStripMeshRenderer::buildMesh(*(TriangleStripMesh*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(SubdividedBezierPatch::CLASS) ) {
+        return OpenGL1SubdividedBezierPatchRenderer::buildMesh(*(SubdividedBezierPatch*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(QuadricSurface::CLASS) ) {
+        return OpenGL1QuadricSurfaceRenderer::buildMesh(*(QuadricSurface*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(ImplicitSolid::CLASS) ) {
+        return OpenGL1ImplicitSolidRenderer::buildMesh(*(ImplicitSolid*)geometry);
+    }
+    if ( geometry != NULL && geometry->instanceOf(HeightFieldSolid::CLASS) ) {
+        return OpenGL1HeightFieldSolidRenderer::buildMesh(*(HeightFieldSolid*)geometry);
     }
     return buildTriangulatedGeometry(geometry);
 }
@@ -846,6 +843,13 @@ void OpenGL1GeometryRenderer::draw(Geometry* geometry, Camera* camera,
         return;
     }
 
+    PlanarHalfSpace* halfSpace = (geometry->instanceOf(PlanarHalfSpace::CLASS) ? (PlanarHalfSpace*)geometry : NULL);
+    if ( halfSpace != 0 ) {
+        OpenGL1PlanarHalfSpaceRenderer::draw(halfSpace, camera, lights,
+            material, quality, textureMap, normalMap, local);
+        return;
+    }
+
     // Boundary representations are tessellated at each frame, as in Java
     PolyhedralBoundedSolid* solid = (geometry != NULL && geometry->instanceOf(PolyhedralBoundedSolid::CLASS) ? (PolyhedralBoundedSolid*)geometry : NULL);
     if ( solid != 0 ) {
@@ -857,6 +861,13 @@ void OpenGL1GeometryRenderer::draw(Geometry* geometry, Camera* camera,
             OpenGL1MeshRenderer::release(mesh);
             delete mesh;
         }
+        return;
+    }
+
+    // Other volumes are drawn through their exported boundary representation
+    if ( keyOf(geometry).isEmpty() && geometry->instanceOf(Volume::CLASS) &&
+         OpenGL1VolumeRenderer::draw((Volume*)geometry, camera, lights,
+             material, quality, local) ) {
         return;
     }
 
@@ -888,6 +899,7 @@ void OpenGL1GeometryRenderer::draw(Geometry* geometry, Camera* camera,
 void OpenGL1GeometryRenderer::dispose()
 {
     releaseMeshes();
+    OpenGL1VolumeRenderer::dispose();
     OpenGL1MeshRenderer::dispose();
     OpenGL1ColoredPrimitiveRenderer::release();
     OpenGL1LineRenderer::release();

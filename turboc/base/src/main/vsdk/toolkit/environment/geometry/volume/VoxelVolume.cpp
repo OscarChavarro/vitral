@@ -16,6 +16,9 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 #include "java/lang/Math.h"
 const double VoxelVolume::PARALLEL_EPSILON = 1.0e-12;
@@ -386,6 +389,66 @@ Vector3Dd VoxelVolume::doCenterOfMass() {
     }
     if (Cpp98Support::abs(M) < VSDK::EPSILON) return Vector3Dd(0,0,0);
     return Vector3Dd(cmx/M, cmy/M, cmz/M);
+}
+
+//= Boundary representation =============================================
+
+PolyhedralBoundedSolid* VoxelVolume::exportToPolyhedralBoundedSolid()
+{
+    int largest = Math::max(getXSize(), Math::max(getYSize(), getZSize()));
+    return exportToPolyhedralBoundedSolid(Math::max(1,
+        (largest + DEFAULT_EXPORT_MAXIMUM_SAMPLES - 1) /
+        DEFAULT_EXPORT_MAXIMUM_SAMPLES));
+}
+
+PolyhedralBoundedSolid* VoxelVolume::exportToPolyhedralBoundedSolid(int step)
+{
+    int xs = getXSize();
+    int ys = getYSize();
+    int zs = getZSize();
+    if ( xs <= 0 || ys <= 0 || zs <= 0 ) {
+        return NULL;
+    }
+    if ( step < 1 ) {
+        step = 1;
+    }
+    int sx = (xs + step - 1) / step;
+    int sy = (ys + step - 1) / step;
+    int sz = (zs + step - 1) / step;
+    int nx = sx + 2;
+    int ny = sy + 2;
+    int nz = sz + 2;
+    ArrayList<double> values;
+    double level = threshold - 0.5;
+    int i;
+    int j;
+    int k;
+
+    for ( k = 0; k < nz; k++ ) {
+        for ( j = 0; j < ny; j++ ) {
+            for ( i = 0; i < nx; i++ ) {
+                double value = 1.0;
+                if ( i > 0 && j > 0 && k > 0 &&
+                     i < nx - 1 && j < ny - 1 && k < nz - 1 ) {
+                    value = level - getVoxel((i - 1) * step, (j - 1) * step,
+                        (k - 1) * step);
+                }
+                // Index i + nx * (j + ny * k), in this order
+                values.add(value);
+            }
+        }
+    }
+
+    // Samples at the voxel centers (see getVoxelPosition), one step
+    // before the first one for the empty layer
+    Vector3Dd spacing(2.0 * step / xs, 2.0 * step / ys,
+        2.0 * step / zs);
+    Vector3Dd origin(
+        (0.5 / xs) * 2 - 1 - spacing.x(),
+        (0.5 / ys) * 2 - 1 - spacing.y(),
+        (0.5 / zs) * 2 - 1 - spacing.z());
+    return PolyhedralBoundedSolidFieldConstructions::createFromSampledField(
+        nx, ny, nz, origin, spacing, values);
 }
 
 const Class VoxelVolume::CLASS = { "VoxelVolume", &Solid::CLASS };

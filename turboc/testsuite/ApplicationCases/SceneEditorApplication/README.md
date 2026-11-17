@@ -34,12 +34,13 @@ builds its fixed variant, and runs it from this folder (the resources are
 read from `etc/` of the Vitral repository, `../../../../etc`):
 
 ```sh
-./runXawOpenGL1.sh -s
-./runXmOpenGL1.sh -s
-./run.sh -s          # SCENE_EDITOR_VARIANT=xm_opengl1 (default) or xaw_opengl1
+./runXawOpenGL1.sh
+./runXmOpenGL1.sh
+./run.sh             # SCENE_EDITOR_VARIANT=xm_opengl1 (default) or xaw_opengl1
 ```
 
-The `-s` option starts the MCP automation service on TCP port 1234.
+The MCP automation service is always started, on TCP port 1234 (the former
+`-s` option is still accepted, but no longer needed).
 
 The last button of the command bar (**Tools → Tangible interface client**)
 opens the dialog to connect with a tangible interface websocket service (see

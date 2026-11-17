@@ -31,16 +31,34 @@ Box::Box(double dx, double dy, double dz)
 {
     bounds[0]=Vector3Dd(-dx/2,-dy/2,-dz/2);
     bounds[1]=Vector3Dd(dx/2,dy/2,dz/2);
+    addControlSpecifications();
 }
 Box::Box(const Vector3Dd& s)
 {
     bounds[0]=Vector3Dd(-s.x()/2,-s.y()/2,-s.z()/2);
     bounds[1]=Vector3Dd(s.x()/2,s.y()/2,s.z()/2);
+    addControlSpecifications();
 }
 Box::Box(const Vector3Dd& minimum, const Vector3Dd& maximum)
 {
     bounds[0]=minimum;
     bounds[1]=maximum;
+    addControlSpecifications();
+}
+
+void Box::addControlSpecifications()
+{
+    // Turbo C++ 3.0 crashes with the new of a template class as an argument
+    MemberEntityControlAccessor<Box, double> *accessor;
+    accessor = new MemberEntityControlAccessor<Box, double>(
+        &Box::getSizeX, &Box::setSizeX);
+    addControlSpecification("double;sizeX;(0, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<Box, double>(
+        &Box::getSizeY, &Box::setSizeY);
+    addControlSpecification("double;sizeY;(0, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<Box, double>(
+        &Box::getSizeZ, &Box::setSizeZ);
+    addControlSpecification("double;sizeZ;(0, INFINITE)", accessor);
 }
 
 void Box::getBounds(GeometryBounds& result) const {

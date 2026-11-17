@@ -5,6 +5,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.h"
 BOOLEAN GeometryTriangulator::exportToTriangleMeshGroup(Geometry* geometry, TriangleMeshGroup& outGroup)
 {
@@ -31,6 +32,16 @@ BOOLEAN GeometryTriangulator::exportToTriangleMeshGroup(Geometry* geometry, Tria
         if ( tmp == 0 ) return FALSE;
         outGroup = *tmp;
         delete tmp;
+        return TRUE;
+    }
+
+    if ( geometry->instanceOf(TriangleStripMesh::CLASS) ) {
+        TriangleStripMesh* strips = (TriangleStripMesh*)geometry;
+        TriangleMesh* mesh = strips->exportToTriangleMesh();
+        if ( mesh == 0 ) return FALSE;
+        outGroup.getMeshes().clear();
+        outGroup.addMesh(*mesh);
+        delete mesh;
         return TRUE;
     }
 

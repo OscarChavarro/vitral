@@ -112,5 +112,37 @@ public:
     virtual void doExtraInformation(const Ray& ray, double t, RayHit* hit);
     virtual int doContainmentTest(const Vector3Dd& point, double tolerance);
     virtual double* getMinMax();
+
+    //= Boundary representation =========================================
+
+    /**
+    Boundary representation of the height field, built with Euler operators
+    by `PolyhedralBoundedSolidMeshConstructions` from its polygons:
+      - The surface: the two triangles of each grid cell inside the box,
+        split along the same diagonal as `evaluateHeight` (from (x+1, z) to
+        (x, z+1)). Cells cut by the box are sampled at the box sides.
+      - Four sides, each one a planar polygon under the profile of the
+        surface, and the bottom of the box.
+    It is exact for heights inside the box. Heights above the box are taken
+    at its top, and heights at or below its bottom just above it, so a part
+    of the box where the solid is empty is approximated by a thin layer.
+    @return a new polyhedral solid, owned by the caller, or null if the
+    height field is not valid
+    */
+    virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
+
+private:
+    /**
+    @return the box limits and the grid lines strictly between them
+    */
+    static ArrayList<double> boxGridCoordinates(double low, double high);
+
+    /**
+    Adds a polygon, reversing it if needed so it is counterclockwise as seen
+    from outside (its normal along `outward`).
+    */
+    static void addPolygon(const ArrayList<Vector3Dd>& positions,
+        ArrayList<ArrayList<int> >& polygons, ArrayList<int>& polygon,
+        const Vector3Dd& outward);
 };
 #endif

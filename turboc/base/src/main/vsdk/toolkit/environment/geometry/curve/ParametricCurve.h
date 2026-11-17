@@ -57,6 +57,17 @@ public:
     virtual double* getMinMax();
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
 
+    /**
+    Check the general interface contract in superclass method
+    Curve.exportToCalligraphic3DBuffer. Each curve segment is approximated by
+    the polyline of `calculatePoints` (with `getApproximationSteps()` steps),
+    as when it is drawn with a 3D graphics API; break points start a new
+    piece of the curve.
+    @return a new buffer with the segments approximating the curve, owned by
+    the caller
+    */
+    virtual Calligraphic3DBuffer* exportToCalligraphic3DBuffer();
+
 private:
     enum { INITIAL_APPROXIMATION_STEPS = 50 };
 

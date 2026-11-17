@@ -4,7 +4,6 @@ import java.io.Serial;
 // VitralSDK classes
 import vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpression;
 import vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;

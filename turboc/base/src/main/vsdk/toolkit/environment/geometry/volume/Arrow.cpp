@@ -18,6 +18,20 @@ Arrow::Arrow(double bl, double hl, double br, double hr)
     baseCylinder = new Cone(baseRadius, baseRadius, baseLength);
     headCone = new Cone(headRadius, 0, headLength);
     lastElement = baseCylinder;
+    // Turbo C++ 3.0 crashes with the new of a template class as an argument
+    MemberEntityControlAccessor<Arrow, double> *accessor;
+    accessor = new MemberEntityControlAccessor<Arrow, double>(
+        &Arrow::getBaseLength, &Arrow::setBaseLength);
+    addControlSpecification("double;baseLength;(0, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<Arrow, double>(
+        &Arrow::getHeadLength, &Arrow::setHeadLength);
+    addControlSpecification("double;headLength;(0, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<Arrow, double>(
+        &Arrow::getBaseRadius, &Arrow::setBaseRadius);
+    addControlSpecification("double;baseRadius;(0, INFINITE)", accessor);
+    accessor = new MemberEntityControlAccessor<Arrow, double>(
+        &Arrow::getHeadRadius, &Arrow::setHeadRadius);
+    addControlSpecification("double;headRadius;(0, INFINITE)", accessor);
 }
 
 Arrow::~Arrow() {

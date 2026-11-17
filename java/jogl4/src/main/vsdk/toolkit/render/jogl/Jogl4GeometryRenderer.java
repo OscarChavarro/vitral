@@ -196,7 +196,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
                  quality, localTransform) ) {
             return;
         }
-        Jogl4MeshRenderer.Mesh mesh = obtainMesh(geometry);
+        Jogl4MeshRenderer.Mesh mesh = obtainMesh(gl, geometry);
         if ( mesh == null ) {
             return;
         }
@@ -229,7 +229,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         MESHES.clear();
     }
 
-    private static Jogl4MeshRenderer.Mesh obtainMesh(Geometry geometry)
+    private static Jogl4MeshRenderer.Mesh obtainMesh(GL4 gl, Geometry geometry)
     {
         String key = keyOf(geometry);
 
@@ -250,9 +250,8 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             }
             if ( MESHES.size() >= MAX_CACHED_MESHES ) {
                 // Stale meshes (i.e. from geometries edited many times) are
-                // recreated on demand; their GPU objects are freed with the
-                // context
-                MESHES.clear();
+                // released, and recreated on demand
+                releaseMeshes(gl);
             }
             MESHES.put(key, mesh);
         }

@@ -56,6 +56,16 @@ public:
     void setDoubleSided(BOOLEAN doubleSided);
 
     /**
+    @param minmax bounding box as given by `Geometry::getMinMax()`, or null
+    @return the longest side of the box (1 if there is no box), to be used as
+    the characteristic size of a mesh
+
+    C++ port note: the box is deleted here, as `getMinMax` returns a new
+    array.
+    */
+    static double characteristicSize(double* minmax);
+
+    /**
     @return a new mesh with the triangles added, owned by the caller
     */
     OpenGL1MeshRenderer::Mesh* build();
@@ -64,7 +74,9 @@ private:
     /// x y z, nx ny nz, u v of each vertex
     enum { VERTEX_SIZE = 8 };
     ArrayList<float> vertices;
-    double characteristicSize;
+    // C++ port note: renamed from `characteristicSize`, the name of the
+    // static method that computes it
+    double meshCharacteristicSize;
     BOOLEAN doubleSided;
 
     void addVertex(const Vector3Dd& p, const Vector3Dd& n, double u, double v);

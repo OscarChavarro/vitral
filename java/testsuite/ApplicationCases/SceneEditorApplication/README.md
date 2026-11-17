@@ -26,7 +26,10 @@ here independently of any implementation.
   viewports are CPU raytraced or CPU hidden lines: wireframe, or hidden line
   removal with Appel's quantitative invisibility for the solids that are (or
   export to) a `PolyhedralBoundedSolid` when surfaces are shown. `.` cycles
-  only the render modes of the technology in use.
+  only the render modes of the technology in use. Choosing in that menu a
+  render mode the technology in use does not offer (GPU mode over AWT, CPU
+  hidden lines over OpenGL 4) first changes to the technology that offers it,
+  as in the C++ port.
 - Camera control with the mouse (rotate, pan, advance) and the keyboard.
 
 ### Selection and transformation

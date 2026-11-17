@@ -16,6 +16,7 @@ class Math {
     static float floor(float a);
     static double ceil(double a);
     static long round(double a);
+    static double rint(double a);
     static double log(double a);
     static float log(float a);
     static double log10(double a);
@@ -89,6 +90,23 @@ Math::floor(double a) {
 inline long
 Math::round(double a) {
     return Cpp98Support::lround(a);
+}
+
+/**
+As Java `Math.rint`: the closest mathematical integer, the even one for
+halfway cases.
+*/
+inline double
+Math::rint(double a) {
+    double low = ::floor(a);
+    double fraction = a - low;
+    if ( fraction < 0.5 ) {
+        return low;
+    }
+    if ( fraction > 0.5 ) {
+        return low + 1.0;
+    }
+    return ::fmod(low, 2.0) == 0.0 ? low : low + 1.0;
 }
 
 inline float

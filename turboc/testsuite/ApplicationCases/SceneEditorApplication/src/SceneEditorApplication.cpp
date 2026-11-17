@@ -304,20 +304,16 @@ public:
 
     int run(int argc, char** argv)
     {
-        // Before Xt takes its own options from the command line
-        BOOLEAN withAutomationService = FALSE;
-        for (int i = 1; i < argc; ++i)
-            if (String(argv[i]) == "-s") withAutomationService = TRUE;
         tangibleConnection.processArguments(argc, argv);
         try {
             createWindow(argc, argv);
             createContext();
             initOpenGL();
             redraw();
-            if (withAutomationService) {
-                // Starts its own listener thread, which keeps it alive
-                automationService = new XtOpenGLVitralEditorMCP(this);
-            }
+            // The automation service is always started (the former "-s"
+            // argument is still accepted, but no longer needed). It starts
+            // its own listener thread, which keeps it alive
+            automationService = new XtOpenGLVitralEditorMCP(this);
             XtAppMainLoop(appContext);
         }
         catch (const VSDKFatalException& ex) {

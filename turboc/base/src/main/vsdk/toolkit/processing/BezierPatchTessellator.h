@@ -2,6 +2,7 @@
 #define __BEZIER_PATCH_TESSELLATOR__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+class QuadMesh;
 class SubdividedBezierPatch;
 class TriangleMesh;
 
@@ -27,6 +28,13 @@ public:
     // Returns a new mesh owned by the caller, or null when a step count is
     // outside 1..MAXIMUM_STEPS.
     static TriangleMesh* tessellate(const SubdividedBezierPatch& patch, int uSteps, int vSteps);
+    // Same grid of (uSteps + 1) x (vSteps + 1) points of the Bezier surface as
+    // `tessellate`, joined by one quadrilateral per parameter cell (without the
+    // diagonals of the triangles), with positions only: the lines of its edges
+    // are the curves of constant u and v of the surface. Returns a new mesh
+    // owned by the caller, or null when a step count is outside
+    // 1..MAXIMUM_STEPS.
+    static QuadMesh* tessellateQuads(const SubdividedBezierPatch& patch, int uSteps, int vSteps);
 };
 
 #endif

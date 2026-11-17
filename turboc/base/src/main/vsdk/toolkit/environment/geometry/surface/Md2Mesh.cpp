@@ -4,6 +4,40 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/surface/Md2Mesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+/**
+C++ port note: the triangle list is never null, so a model without
+triangles has it empty.
+*/
+TriangleMesh* Md2Mesh::exportToTriangleMesh(int frame) const
+{
+    if ( frame < 0 || frame >= frameVertices.size() || triangles.size() == 0 ) {
+        return NULL;
+    }
+    const ArrayList<float>& vertices = frameVertices[frame];
+    TriangleMesh* mesh = new TriangleMesh();
+    long count = numTriangles < triangles.size() / 2 ?
+        numTriangles : triangles.size() / 2;
+    long i;
+    int j;
+
+    mesh->initVertexPositionsArray((int)(vertices.size() / 3));
+    ArrayList<double>& positions = mesh->getVertexPositions();
+    for ( i = 0; i < positions.size(); i++ ) {
+        positions[i] = vertices[i];
+    }
+    mesh->initTriangleArrays((int)count);
+    ArrayList<int>& indexes = mesh->getTriangleIndexes();
+    for ( i = 0; i < count; i++ ) {
+        // triangles[2*i] are the vertex indexes, triangles[2*i+1] the
+        // texture coordinate indexes
+        for ( j = 0; j < 3; j++ ) {
+            indexes[3*i+j] = triangles[2*i][j];
+        }
+    }
+    return mesh;
+}
+
 _AnimationInfo::_AnimationInfo() : start(0), end(0) {}
 _AnimationInfo::_AnimationInfo(const _AnimationInfo& ai) : name(ai.name), start(ai.start), end(ai.end) {}
 

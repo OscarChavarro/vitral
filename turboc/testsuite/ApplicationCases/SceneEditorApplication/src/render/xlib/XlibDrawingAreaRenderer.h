@@ -8,6 +8,7 @@
 #include "java/util/function/Supplier.h"
 
 class ApplicationModel;
+class BrepExportCache;
 class DrawingAreaGizmoPresenter;
 class DrawingAreaHost;
 class FrameCaptureService;
@@ -39,6 +40,8 @@ class XlibDrawingAreaRenderer {
     DrawingAreaGizmoPresenter* gizmoPresenter;
     Gizmo2DDrawList* gizmoDrawList;
     XlibGizmo2DDrawListRenderer* gizmoRenderer;
+    /// Boundary representations of the volumes drawn in the views
+    BrepExportCache* brepCache;
 
     void ensureTitleFont(Display* display, int size);
     void drawView(Display* display, Drawable frame, GC gc, Visual* visual,
