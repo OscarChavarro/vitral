@@ -33,6 +33,15 @@ public:
     static BOOLEAN isDispatchThread();
 
     /**
+    C++ port note: no Java counterpart. Without threads
+    (`VITRAL_WITHOUT_PTHREADS`) the services that would have their own thread
+    (i.e. the automation service of the scene editor) watch their sockets in
+    the event loop with `XtAppAddInput`, which needs this context.
+    @return the application context given to `install`, or null before it
+    */
+    static XtAppContext getApplicationContext();
+
+    /**
     Runs the task in the thread of the event loop and waits for its end (as
     `SwingUtilities.invokeAndWait`); from that thread it runs it at once.
     The task should catch its exceptions: the ones escaping it are reported

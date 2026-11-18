@@ -169,6 +169,11 @@ BOOLEAN XtEventQueue::isDispatchThread()
         pthread_equal(pthread_self(), queue->dispatchThread);
 }
 
+XtAppContext XtEventQueue::getApplicationContext()
+{
+    return state()->appContext;
+}
+
 void XtEventQueue::invokeAndWait(Runnable* task)
 {
     if ( isDispatchThread() ) {

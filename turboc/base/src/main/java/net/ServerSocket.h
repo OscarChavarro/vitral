@@ -17,6 +17,8 @@ public:
     void close();
     BOOLEAN isOpen() const { return listenFd_ >= 0; }
     int port() const { return port_; }
+    // The listening descriptor (as Socket::fd), i.e. to watch it in an event loop
+    int fd() const { return listenFd_; }
 };
 
 

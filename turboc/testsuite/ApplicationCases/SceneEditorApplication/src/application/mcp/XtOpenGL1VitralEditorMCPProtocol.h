@@ -33,12 +33,20 @@ private:
     MCPViewportTools viewportTools;
     XtOpenGL1MCPApplicationTools applicationTools;
 
-    String handle(const String& request);
     String callTool(const String& tool,
                           const String& request);
     static String toolsJson();
 
 public:
+    /**
+    Answers one JSON-RPC request (one line of the connection).
+    C++ port note: public for the event loop service of
+    XtOpenGL1VitralEditorMCP.cpp, used without threads
+    (`VITRAL_WITHOUT_PTHREADS`), which reads the lines itself.
+    @return the JSON-RPC answer, without its end of line
+    */
+    String handle(const String& request);
+
     /**
     Executes a tool; called in the thread of the GUI (by `ToolCall`).
     @throws Exception i.e. IllegalArgumentException for wrong arguments

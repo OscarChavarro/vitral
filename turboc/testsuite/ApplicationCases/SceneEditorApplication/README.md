@@ -41,6 +41,10 @@ read from `etc/` of the Vitral repository, `../../../../etc`):
 
 The MCP automation service is always started, on TCP port 1234 (the former
 `-s` option is still accepted, but no longer needed).
+Without POSIX threads (`VITRAL_WITHOUT_PTHREADS`, i.e. Debian 1.1) the
+service does not use a thread: its listening and client sockets are
+registered in the Xt event loop (`XtAppAddInput`), and each request line
+is answered there.
 
 The last button of the command bar (**Tools → Tangible interface client**)
 opens the dialog to connect with a tangible interface websocket service (see
