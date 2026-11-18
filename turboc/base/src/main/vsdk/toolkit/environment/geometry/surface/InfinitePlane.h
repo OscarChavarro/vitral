@@ -96,13 +96,13 @@ public:
     places of the plane as the point moves. The sides follow two orthonormal
     directions (u, v) on the plane, with (u, v, normal) right handed: u is
     perpendicular to z (to x if the normal is almost along z).
-    @param near point near which the square is centered
+    @param nearPoint point near which the square is centered
     @param size side of the square
     @param tiles cells along each side of the square, at least 1
     @return a mesh of `tiles` x `tiles` quadrilaterals, owned by the caller,
     or null if the plane is degenerated (zero normal)
     */
-    QuadMesh* exportToQuadMesh(const Vector3Dd& near, double size,
+    QuadMesh* exportToQuadMesh(const Vector3Dd& nearPoint, double size,
         int tiles) const;
 };
 

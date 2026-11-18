@@ -83,6 +83,18 @@ public:
     void setDeleteListener(Listener* listener);
     void setContextMenuListener(ContextMenuListener* listener);
 
+    /**
+    Event handling of the widget, called by its Xt callbacks (plain functions
+    of the .cpp: the Xt types are not declared in this header).
+    */
+    void redraw();
+    void click(int x, int y, unsigned int button, unsigned int state);
+    void key(XKeyEvent* event);
+    /// Button 3 released at a screen position: notifies the menu listener
+    void contextMenuRequested(int xRoot, int yRoot);
+    /// The widget is being destroyed: releases its graphics context
+    void widgetDestroyed();
+
 private:
     struct Row {
         const DialogTreeNode* node;
@@ -111,14 +123,10 @@ private:
     int visibleRows() const;
     void clampScroll();
     void ensureVisible(int row);
-    void redraw();
     void allocateColors();
     void notifySelection();
-    void click(int x, int y, unsigned int button, unsigned int state);
-    void key(XKeyEvent* event);
 
     /// The Xt callbacks, which use the Xt types
-    friend struct XtTreeViewCallbacks;
 
     XtTreeView(const XtTreeView& other);
     XtTreeView& operator=(const XtTreeView& other);

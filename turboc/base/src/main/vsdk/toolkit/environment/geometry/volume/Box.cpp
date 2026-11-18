@@ -96,7 +96,8 @@ GeometryContainment::Value Box::classifyBoxCertified(const Vector3Dd& center, co
     const double maximum[3] = {bounds[1].x(), bounds[1].y(), bounds[1].z()};
     const double c[3] = {center.x(), center.y(), center.z()};
     const double h[3] = {halfWidths.x(), halfWidths.y(), halfWidths.z()};
-    for (int i = 0; i < 3; ++i) {
+    int i;
+    for (i = 0; i < 3; ++i) {
         if (!Double::isFinite(c[i]) || !Double::isFinite(h[i]) || h[i] < 0)
             return GeometryContainment::InvalidInput;
         if (!Double::isFinite(minimum[i]) || !Double::isFinite(maximum[i]))
@@ -105,7 +106,7 @@ GeometryContainment::Value Box::classifyBoxCertified(const Vector3Dd& center, co
     }
     if (!FloatingInterval::isSupportedEnvironment()) return GeometryContainment::Unsupported;
     BOOLEAN inside = TRUE;
-    for (int i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; ++i) {
         const FloatingInterval range = FloatingInterval::around(c[i], h[i]);
         if (!range.isValid()) return GeometryContainment::Indeterminate;
         if (range.getUpper() < minimum[i] || range.getLower() > maximum[i]) return GeometryContainment::Outside;
@@ -119,7 +120,8 @@ GeometryContainment::Value Box::classifyPointCertified(const Vector3Dd& point, d
     const double maximum[3] = {bounds[1].x(), bounds[1].y(), bounds[1].z()};
     const double coordinates[3] = {point.x(), point.y(), point.z()};
     if (!Double::isFinite(tolerance) || tolerance < 0) return GeometryContainment::InvalidInput;
-    for (int i = 0; i < 3; ++i) {
+    int i;
+    for (i = 0; i < 3; ++i) {
         if (!Double::isFinite(coordinates[i])) return GeometryContainment::InvalidInput;
         if (!Double::isFinite(minimum[i]) || !Double::isFinite(maximum[i]))
             return GeometryContainment::Indeterminate;
@@ -127,24 +129,24 @@ GeometryContainment::Value Box::classifyPointCertified(const Vector3Dd& point, d
     }
     if (!FloatingInterval::isSupportedEnvironment()) return GeometryContainment::Unsupported;
     BOOLEAN inside = TRUE;
-    for (int i = 0; i < 3; ++i)
+    for (i = 0; i < 3; ++i)
         if (coordinates[i] < minimum[i] || coordinates[i] > maximum[i]) inside = FALSE;
     if (inside) {
         // The distance to the boundary is the smallest face distance.
-        BOOLEAN deep = TRUE, near = FALSE;
-        for (int i = 0; i < 3; ++i) {
-            if (coordinates[i] == minimum[i] || coordinates[i] == maximum[i]) { near = TRUE; deep = FALSE; continue; }
+        BOOLEAN deep = TRUE, nearBoundary = FALSE;
+        for (i = 0; i < 3; ++i) {
+            if (coordinates[i] == minimum[i] || coordinates[i] == maximum[i]) { nearBoundary = TRUE; deep = FALSE; continue; }
             const FloatingInterval low = FloatingInterval::exact(coordinates[i]).subtract(FloatingInterval::exact(minimum[i]));
             const FloatingInterval high = FloatingInterval::exact(maximum[i]).subtract(FloatingInterval::exact(coordinates[i]));
             if (!low.isValid() || !high.isValid()) return GeometryContainment::Indeterminate;
             if (!(low.getLower() > tolerance) || !(high.getLower() > tolerance)) deep = FALSE;
-            if (low.getUpper() <= tolerance || high.getUpper() <= tolerance) near = TRUE;
+            if (low.getUpper() <= tolerance || high.getUpper() <= tolerance) nearBoundary = TRUE;
         }
         if (deep) return GeometryContainment::Inside;
-        return near ? GeometryContainment::Boundary : GeometryContainment::Indeterminate;
+        return nearBoundary ? GeometryContainment::Boundary : GeometryContainment::Indeterminate;
     }
     FloatingInterval squared = FloatingInterval::exact(0);
-    for (int i = 0; i < 3; ++i) {
+    for (i = 0; i < 3; ++i) {
         if (coordinates[i] < minimum[i])
             squared = squared.add(FloatingInterval::exact(minimum[i]).subtract(FloatingInterval::exact(coordinates[i])).square());
         else if (coordinates[i] > maximum[i])

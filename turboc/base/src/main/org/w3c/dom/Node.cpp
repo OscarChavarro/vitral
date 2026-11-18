@@ -180,7 +180,11 @@ void Element::setAttribute(const String& name,
         attribute->setNodeValue(value);
         return;
     }
-    attribute = new Node(ATTRIBUTE_NODE, name, value);
+    addAttribute(new Node(ATTRIBUTE_NODE, name, value));
+}
+
+void Node::addAttribute(Node* attribute)
+{
     attribute->parentNode = this;
     attributes.add(attribute);
 }

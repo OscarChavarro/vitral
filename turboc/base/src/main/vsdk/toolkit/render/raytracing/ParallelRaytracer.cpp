@@ -81,7 +81,10 @@ class ParallelRaytracerTileWorker : public Callable<Void> {
                               tile.getEndX(),
                               tile.getEndY());
         }
-        return Void();
+        // C++ port note: a named value, as Turbo C++ 3.0 with -vi- rejects
+        // the temporary `Void()` of an empty struct ("Expression syntax")
+        Void result;
+        return result;
     }
 };
 

@@ -48,7 +48,6 @@ private:
         Geometry* geometry;
         const String& request;
     };
-    friend class SceneChange;
 
     void recordSceneChange(const String& tool, MCPSceneTools::SceneChange::Method method,
                            Geometry* geometry, const String& request);

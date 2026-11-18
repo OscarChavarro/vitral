@@ -71,14 +71,14 @@ public:
 
     /**
     @param plane
-    @param near point of interest, in the coordinates of the plane (i.e. the
+    @param nearPoint point of interest, in the coordinates of the plane (i.e. the
     point viewed by the camera), near which the square shown is centered
     @return the lines of a square of side `INFINITE_PLANE_SIZE` of the plane,
     divided into `INFINITE_PLANE_TILES` x `INFINITE_PLANE_TILES` cells (see
     `InfinitePlane::exportToQuadMesh`), or null for a degenerated plane
     */
     static Calligraphic3DBuffer* exportToCalligraphic3DBuffer(
-        const InfinitePlane& plane, const Vector3Dd& near);
+        const InfinitePlane& plane, const Vector3Dd& nearPoint);
 
     /**
     @param model

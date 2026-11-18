@@ -37,6 +37,10 @@ private:
         MIN_CIRCUMFERENCE_DIVISIONS = 3
     };
 
+#ifdef __TURBOC__
+// Turbo C++ 3.0 does not let the nested Interval read private members
+public:
+#endif
     /// Surfaces of the tube, used to tag the ends of the interior intervals
     enum {
         SURFACE_NONE = 0,
@@ -45,6 +49,9 @@ private:
         SURFACE_EXTERNAL = 3,
         SURFACE_INTERNAL = 4
     };
+#ifdef __TURBOC__
+private:
+#endif
 
     double internalRadius;
     double externalRadius;

@@ -44,7 +44,6 @@ private:
     private:
         ApplicationModel* model;
     };
-    friend class SceneSource;
 
     /// Intersects the rays of the ray gizmo with the scene (a lambda in the
     /// C++11 port)
@@ -55,7 +54,6 @@ private:
     private:
         ApplicationModel* model;
     };
-    friend class RayGizmoIntersector;
 
     Scene* scene;
     RGBImageUncompressed* raytracedImage;
@@ -82,9 +80,13 @@ private:
 
     ApplicationModel(const ApplicationModel& other);
     ApplicationModel& operator=(const ApplicationModel& other);
-    class Intersection* makeRayGizmoIntersection(const Ray& ray);
 
 public:
+    // C++ port note: public for the nested classes of this class, which
+    // legacy compilers (gcc 2.7.2, Turbo C++ 3.0) do not let read its
+    // private members.
+    class Intersection* makeRayGizmoIntersection(const Ray& ray);
+
     /**
     Creates the model with one standard `ViewportSet`. More sets can be
     added to support users working with several displays.

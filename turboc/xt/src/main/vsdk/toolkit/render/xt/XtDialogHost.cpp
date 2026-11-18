@@ -101,11 +101,11 @@ XtDialogHost::Form::~Form()
     }
 }
 
-XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
-                                       XFontSet fontSet,
-                                       MessageSource* messages,
-                                       const WidgetDialog* definition,
-                                       ActionListener* onAction)
+XtDialogHost::Form* XtDialogHost::Form::build(XtWidget shell, XtWidgetSet* widgetSet,
+                                              XFontSet fontSet,
+                                              MessageSource* messages,
+                                              const WidgetDialog* definition,
+                                              ActionListener* onAction)
 {
     Form* form = new Form(widgetSet, fontSet, shell, definition, onAction);
     try {
@@ -119,7 +119,16 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
     return form;
 }
 
-void XtDialogHost::buildForm(Form* form, MessageSource* messages)
+XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
+                                       XFontSet fontSet,
+                                       MessageSource* messages,
+                                       const WidgetDialog* definition,
+                                       ActionListener* onAction)
+{
+    return Form::build(shell, widgetSet, fontSet, messages, definition, onAction);
+}
+
+void XtDialogHost::Form::buildForm(Form* form, MessageSource* messages)
 {
     XtWidgetSet* widgetSet = form->widgetSet;
     XtPanelWidgets* widgets = widgetSet->getPanelWidgets();
@@ -172,7 +181,7 @@ only group them (as the Swing host does), and the buttons go to the bottom
 row.
 @return TRUE when there is a tree among the inputs
 */
-BOOLEAN XtDialogHost::collectElements(const WidgetDialog* definition,
+BOOLEAN XtDialogHost::Form::collectElements(const WidgetDialog* definition,
     ArrayList<const WidgetDialogElement*>& inputs,
     ArrayList<const WidgetDialogElement*>& buttons)
 {
@@ -211,7 +220,7 @@ BOOLEAN XtDialogHost::collectElements(const WidgetDialog* definition,
     return withTree;
 }
 
-void XtDialogHost::layoutInputs(Form* form, XtWidget frame,
+void XtDialogHost::Form::layoutInputs(Form* form, XtWidget frame,
     const ArrayList<const WidgetDialogElement*>& inputs,
     const ArrayList<ArrayList<String> >& prompts)
 {
@@ -248,7 +257,7 @@ void XtDialogHost::layoutInputs(Form* form, XtWidget frame,
     }
 }
 
-void XtDialogHost::createButtons(Form* form, XtWidget frame,
+void XtDialogHost::Form::createButtons(Form* form, XtWidget frame,
     MessageSource* messages,
     const ArrayList<const WidgetDialogElement*>& buttons)
 {

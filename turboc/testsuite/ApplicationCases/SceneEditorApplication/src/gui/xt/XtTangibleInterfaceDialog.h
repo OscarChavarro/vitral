@@ -39,6 +39,11 @@ class XtTangibleInterfaceDialog :
     private XtDialogHost::ActionListener
 {
 public:
+    // C++ port note: public for the nested classes of this class, which
+    // legacy compilers (gcc 2.7.2, Turbo C++ 3.0) do not let read its
+    // private members.
+    void connectionFinished(long serial, long request, BOOLEAN connected);
+
     static const char* const DIALOG_ID;
 
     explicit XtTangibleInterfaceDialog(XtApplicationHost* host);
@@ -98,7 +103,6 @@ private:
         long serial;
         long request;
     };
-    friend class ConnectionListener;
 
     XtApplicationHost* host;
     /// Listeners of the requests made (they may be answered at any time)
@@ -112,7 +116,6 @@ private:
     // in the C++11 port)
     virtual String message(const String& key);
     virtual void actionPerformed(const String& action);
-    void connectionFinished(long serial, long request, BOOLEAN connected);
 
     XtTangibleInterfaceDialog(const XtTangibleInterfaceDialog& other);
     XtTangibleInterfaceDialog& operator=(const XtTangibleInterfaceDialog& other);

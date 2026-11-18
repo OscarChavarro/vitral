@@ -12,6 +12,7 @@ echo -ml >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
 echo -DTURBO_C_8086_REAL_MODE_ENABLED >> TC.RSP
@@ -28,6 +29,7 @@ echo -ml >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
 echo -DTURBO_C_8086_REAL_MODE_ENABLED >> TC.RSP
@@ -51,6 +53,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -68,6 +71,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -85,6 +89,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -102,6 +107,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -119,6 +125,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -136,6 +143,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -153,6 +161,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -170,6 +179,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -187,6 +197,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -204,6 +215,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP
@@ -221,6 +233,7 @@ echo -f87 >> TC.RSP
 echo -O1 >> TC.RSP
 echo -d >> TC.RSP
 echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
 echo -w-inl >> TC.RSP
 echo -DTURBO_C_286_ENABLED >> TC.RSP
 echo -IC:\TURBOC\INCLUDE >> TC.RSP

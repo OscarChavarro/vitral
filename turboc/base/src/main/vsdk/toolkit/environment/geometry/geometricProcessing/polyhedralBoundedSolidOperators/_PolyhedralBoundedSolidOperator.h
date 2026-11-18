@@ -115,8 +115,6 @@ protected:
     static BOOLEAN checkWideness(_PolyhedralBoundedSolidHalfEdge* he);
 
 private:
-    friend class _OuterLoopShadow;
-    friend class _RingSideTest;
 
     static BOOLEAN canMoveFace(_PolyhedralBoundedSolidFace* f);
     static void laringmv(_PolyhedralBoundedSolidFace* f1,
@@ -148,6 +146,11 @@ private:
                                             _PolyhedralBoundedSolidFace* f2,
                                             _PolyhedralBoundedSolidLoop* l,
                                             const String& site);
+
+public:
+    // C++ port note: public for the top level helpers _OuterLoopShadow and
+    // _RingSideTest of the .cpp (nested classes in the cpp port, which Turbo
+    // C++ 3.0 does not let read private members of the enclosing class).
     static double shadowProjectedU(const Vector3Dd& p, int dropAxis);
     static double shadowProjectedV(const Vector3Dd& p, int dropAxis);
 };

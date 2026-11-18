@@ -495,9 +495,9 @@ RayCrossingSupport::Value TriangleMesh::emitRayCrossings(const Ray& ray, const R
             else { depths.add(at, t); faces.add(at, i); }
         }
     }
-    for (long int i = 0; i < depths.size(); ++i) {
-        RayCrossing event(depths[i], this, RayCrossingKind::Unclassified);
-        event.surfaceIndex = faces[i];
+    for (long int k = 0; k < depths.size(); ++k) {
+        RayCrossing event(depths[k], this, RayCrossingKind::Unclassified);
+        event.surfaceIndex = faces[k];
         sink.crossing(event);
     }
     return RayCrossingSupport::Supported;

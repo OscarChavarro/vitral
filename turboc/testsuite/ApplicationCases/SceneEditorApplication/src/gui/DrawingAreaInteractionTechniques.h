@@ -112,7 +112,6 @@ private:
         Viewport* viewport;
         SimpleBody* body;
     };
-    friend class MouseTechnique;
 
     /// A click, recorded in the edit history (a lambda in the C++11 port)
     class ClickRecording : public Runnable {
@@ -125,7 +124,6 @@ private:
         DrawingAreaInteractionTechniques* owner;
         const MouseEvent& event;
     };
-    friend class ClickRecording;
 
     /// Advances the camera animation (`this::advanceCameraAnimation` in
     /// Java)
@@ -137,7 +135,6 @@ private:
     private:
         DrawingAreaInteractionTechniques* owner;
     };
-    friend class CameraAnimationFrame;
 
     DrawingArea* drawingArea;
     ApplicationModel* model;
@@ -208,9 +205,6 @@ private:
     BOOLEAN processScaleEvent(const MouseEvent& event, Viewport* viewport,
                            const MouseTechnique& technique);
     void cancelInputGizmoEditing();
-    void applyRotationGizmoToBody(SimpleBody* body);
-    void applyScaleGizmoToBody(SimpleBody* body);
-    void processMouseClickedEventWithoutRecording(const MouseEvent& event);
 
     //= Keyboard ==========================================================
     void processEditionKeyPressedEvent(const KeyEvent& event);
@@ -239,6 +233,14 @@ private:
         const DrawingAreaInteractionTechniques& other);
 
 public:
+    // C++ port note: public for the nested classes of this class, which
+    // legacy compilers (gcc 2.7.2, Turbo C++ 3.0) do not let read its
+    // private members.
+    void applyRotationGizmoToBody(SimpleBody* body);
+    void applyScaleGizmoToBody(SimpleBody* body);
+    void processMouseClickedEventWithoutRecording(const MouseEvent& event);
+    ViewportInteractionTechniques* getInteractionTechniques() const;
+
     /**
     @param model application model, providing the scene to interact with
     @param listener who presents the requests derived from interaction

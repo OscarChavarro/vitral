@@ -7,9 +7,6 @@
 #include "java/util/function/Predicate.h"
 
 template <class T>
-class PriorityQueueAccess;
-
-template <class T>
 class PriorityQueue : public Object {
   private:
     enum { DEFAULT_CAPACITY = 11 };
@@ -27,8 +24,6 @@ class PriorityQueue : public Object {
     void siftDown(int index);
     BOOLEAN lessThan(const T& a, const T& b) const;
 
-    friend class PriorityQueueAccess<T>;
-
   public:
     // Iterator: JDK-style unordered traversal of the internal heap array [1..currentSize]
     class Iterator {
@@ -36,18 +31,18 @@ class PriorityQueue : public Object {
         const PriorityQueue<T>* owner;
         int cursor;
 
-        friend class PriorityQueue<T>;
+      public:
+        /** Starts at heap position `start` (1 is the first element) */
         Iterator(const PriorityQueue<T>* q, int start) : owner(q), cursor(start) {}
 
-      public:
         BOOLEAN hasNext() const
         {
-            return cursor <= owner->currentSize;
+            return cursor <= owner->size();
         }
 
         T next()
         {
-            return owner->data[cursor++];
+            return owner->begin()[(cursor++) - 1];
         }
     };
 
@@ -80,15 +75,6 @@ class PriorityQueue : public Object {
     const T* end() const;
     T* begin();
     T* end();
-};
-
-template <class T>
-class PriorityQueueAccess {
-  public:
-    static inline void setActiveLimit(PriorityQueue<T> &queue, int limit)
-    {
-        queue.activeLimit = limit;
-    }
 };
 
 

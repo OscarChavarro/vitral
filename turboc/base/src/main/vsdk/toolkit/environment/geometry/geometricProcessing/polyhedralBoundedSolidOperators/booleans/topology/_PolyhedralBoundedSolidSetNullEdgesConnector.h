@@ -39,13 +39,17 @@ public:
     /**
     C++ port note: Java keeps a reference to the connector to answer the
     pair indexes; here the result keeps a copy of the connector's pair index
-    maps, so it does not depend on the connector lifetime.
+    maps, so it does not depend on the connector lifetime. The connector
+    gives them to the constructor (Turbo C++ 3.0 does not let a nested
+    class read the private members of its enclosing class).
     */
     class ConnectResult {
     public:
         ConnectResult();
         ConnectResult(const FaceList& sonfa, const FaceList& sonfb,
-            const _PolyhedralBoundedSolidSetNullEdgesConnector& connector);
+            const TreeMap<int, int>& inSonfaPairIndexByFaceId,
+            const TreeMap<int, int>& inSonfbPairIndexByFaceId,
+            BOOLEAN inHasPairIndexMaps);
         int pairIndexA(_PolyhedralBoundedSolidFace* face) const;
         int pairIndexB(_PolyhedralBoundedSolidFace* face) const;
         const FaceList& sonfa() const;

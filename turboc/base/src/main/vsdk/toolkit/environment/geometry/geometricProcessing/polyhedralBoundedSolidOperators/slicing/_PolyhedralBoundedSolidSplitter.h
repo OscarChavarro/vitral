@@ -25,6 +25,8 @@ class _PolyhedralBoundedSolidVertex;
 This class is used to store vertex / halfedge neigborhood information, as presented
 in section [MANT1988].14.5, and program [MANT1988].14.3.
 */
+class _PBSSplitContext;
+
 class _PolyhedralBoundedSolidSplitterSectorClassification
     : public _PolyhedralBoundedSolidSectorClassification {
 public:
@@ -118,7 +120,7 @@ private:
     [MANT1988].14.1 live here instead of in static fields, so that split is
     reentrant and leaves nothing behind (Fable5.2Analysis.md Stage E).
     */
-    class _SplitContext;
+    typedef _PBSSplitContext _SplitContext;
 
     static int compareToZero(double value);
     static void addsoov(_SplitContext& ctx, _PolyhedralBoundedSolidVertex* v);

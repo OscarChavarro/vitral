@@ -1690,13 +1690,15 @@ private:
 
     //= Tangible interface ================================================
 
-    friend class ApplyTangibleEventTask;
-
+public:
+    /** Called by ApplyTangibleEventTask, in the thread of the Xt event loop */
     void applyTangibleInterfaceEvent()
     {
         if (tangibleConnection.applyPendingEvent(getApplicationModel()))
             requestRedraw();
     }
+
+private:
 
     //= XtApplicationHost =================================================
 

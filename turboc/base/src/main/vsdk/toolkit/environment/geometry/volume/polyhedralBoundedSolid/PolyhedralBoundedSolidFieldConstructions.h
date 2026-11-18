@@ -30,9 +30,11 @@ The polygons are given to `PolyhedralBoundedSolidMeshConstructions`, so the
 boundary representation is built only with Euler operators [MANT1988], for
 any genus of the surface.
 */
+class _PBSPolygonizer;
+
 class PolyhedralBoundedSolidFieldConstructions {
 private:
-    class _Polygonizer;
+    typedef _PBSPolygonizer _Polygonizer;
 
 public:
     /**

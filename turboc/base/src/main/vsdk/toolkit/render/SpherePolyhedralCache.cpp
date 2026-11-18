@@ -156,8 +156,12 @@ static void put(ArrayList<float>& array, long index, const Vector3Dd& v)
 }
 
 SpherePolyhedralCache::Entry::Entry(double radius, int meridians, int parallels,
-                                    PolyhedralBoundedSolid* solid)
-    : radius(radius), meridians(meridians), parallels(parallels), solid(solid)
+    PolyhedralBoundedSolid* solid, const ArrayList<float>& positions,
+    const ArrayList<float>& normals, const ArrayList<float>& uvs,
+    const ArrayList<float>& tangents, const ArrayList<float>& biNormals)
+    : radius(radius), meridians(meridians), parallels(parallels), solid(solid),
+      positions(positions), normals(normals), uvs(uvs), tangents(tangents),
+      biNormals(biNormals)
 {
 }
 
@@ -213,13 +217,19 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
     ArrayList<Vector3Dd> triangles = collectTriangles(solid);
     long vertexCount = triangles.size();
     double radius = sphere->getRadius();
-    Entry* entry = new Entry(radius, meridians, parallels, solid);
+    // The attributes are filled before the entry is made, so the entry
+    // has no setters
+    ArrayList<float> positions;
+    ArrayList<float> normals;
+    ArrayList<float> uvs;
+    ArrayList<float> tangents;
+    ArrayList<float> biNormals;
 
-    fill(entry->positions, vertexCount * 3);
-    fill(entry->normals, vertexCount * 3);
-    fill(entry->uvs, vertexCount * 2);
-    fill(entry->tangents, vertexCount * 3);
-    fill(entry->biNormals, vertexCount * 3);
+    fill(positions, vertexCount * 3);
+    fill(normals, vertexCount * 3);
+    fill(uvs, vertexCount * 2);
+    fill(tangents, vertexCount * 3);
+    fill(biNormals, vertexCount * 3);
 
     for (long t = 0; t + 2 < vertexCount; t += 3) {
         double theta[3];
@@ -243,15 +253,16 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
         for (k = 0; k < 3; k++) {
             long i = t + k;
 
-            put(entry->positions, i, triangles[i]);
-            put(entry->normals, i, parametric.sphereNormal(theta[k], phi[k]));
-            put(entry->tangents, i, parametric.sphereTangent(theta[k], phi[k]));
-            put(entry->biNormals, i, parametric.sphereBinormal(theta[k], phi[k]));
-            entry->uvs[2 * i] = (float)(1.0 - theta[k] / (2 * M_PI));
-            entry->uvs[2 * i + 1] = (float)((phi[k] + M_PI / 2) / M_PI);
+            put(positions, i, triangles[i]);
+            put(normals, i, parametric.sphereNormal(theta[k], phi[k]));
+            put(tangents, i, parametric.sphereTangent(theta[k], phi[k]));
+            put(biNormals, i, parametric.sphereBinormal(theta[k], phi[k]));
+            uvs[2 * i] = (float)(1.0 - theta[k] / (2 * M_PI));
+            uvs[2 * i + 1] = (float)((phi[k] + M_PI / 2) / M_PI);
         }
     }
-    return entry;
+    return new Entry(radius, meridians, parallels, solid, positions, normals,
+        uvs, tangents, biNormals);
 }
 
 #endif

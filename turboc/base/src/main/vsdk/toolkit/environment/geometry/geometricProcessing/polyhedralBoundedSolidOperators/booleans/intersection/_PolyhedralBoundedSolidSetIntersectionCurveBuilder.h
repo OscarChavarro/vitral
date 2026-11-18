@@ -156,8 +156,6 @@ private:
     // Sorting criteria (C++98 has no lambdas)
     class NodeDirectionOrder;
     class CycleMinimumOrder;
-    friend class NodeDirectionOrder;
-    friend class CycleMinimumOrder;
 };
 
 #endif

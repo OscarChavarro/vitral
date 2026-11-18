@@ -26,8 +26,10 @@ void CsgSolidBounds::queryExpression(const CsgExpression& expression,
     for (long int i=0;i<used;++i) {
         const CsgOperandView* operand=expression.getOperand(i);
         GeometryBounds bounds;
+        // Turbo C++ 3.0 has no declarations in conditions
+        const CsgExpression* child=operand ? operand->getChildExpression() : 0;
         if (!operand) bounds.setIndeterminate();
-        else if (const CsgExpression* child=operand->getChildExpression()) {
+        else if (child) {
             Matrix4x4d forward,inverse;
             if (!operand->isStructuralTraversalSafe() || !child->isStructuralTraversalSafe()) bounds.setUnsupported();
             else if (operand->queryAffinePlacement(forward,inverse)!=AffinePlacementStatus::Valid) bounds.setIndeterminate();
@@ -39,7 +41,9 @@ void CsgSolidBounds::queryExpression(const CsgExpression& expression,
         }
         else operand->getSolidBounds(bounds);
         if (i==0) combined=bounds;
-        else combined=operation==CsgOperation::UNION ? combined.enclosing(bounds) : combined.intersecting(bounds);
+        // Turbo C++ 3.0 cannot destroy class temporaries of a conditional expression
+        else if (operation==CsgOperation::UNION) combined=combined.enclosing(bounds);
+        else combined=combined.intersecting(bounds);
     }
     path.remove(path.size()-1);
     result=combined;

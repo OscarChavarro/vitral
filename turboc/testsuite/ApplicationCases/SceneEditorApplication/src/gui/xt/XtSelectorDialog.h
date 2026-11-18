@@ -32,6 +32,12 @@ only hides it.
 */
 class XtSelectorDialog : private XtDialogHost::MessageSource {
 public:
+    // C++ port note: public for the nested classes of this class, which
+    // legacy compilers (gcc 2.7.2, Turbo C++ 3.0) do not let read its
+    // private members.
+    void applyTreeSelection();
+    void showPopup(int rootX, int rootY);
+
     static const char* const DIALOG_ID;
 
     explicit XtSelectorDialog(XtApplicationHost* host);
@@ -95,9 +101,6 @@ private:
     private:
         XtSelectorDialog* dialog;
     };
-    friend class TreeSelectionListener;
-    friend class TreeDeleteListener;
-    friend class TreeContextMenuListener;
 
     XtApplicationHost* host;
     // Must be built before the presenter and the form that use them
@@ -113,8 +116,6 @@ private:
 
     // XtDialogHost::MessageSource
     virtual String message(const String& key);
-    void applyTreeSelection();
-    void showPopup(int rootX, int rootY);
     void collectSelected(const DialogTreeNode* node,
                          ArrayList<const DialogTreeNode*>& selected);
 

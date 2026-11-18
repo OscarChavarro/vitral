@@ -98,9 +98,9 @@ Calligraphic3DBuffer* GeometryCalligraphicExporter::exportToCalligraphic3DBuffer
 }
 
 Calligraphic3DBuffer* GeometryCalligraphicExporter::exportToCalligraphic3DBuffer(
-    const InfinitePlane& plane, const Vector3Dd& near)
+    const InfinitePlane& plane, const Vector3Dd& nearPoint)
 {
-    QuadMesh* mesh = plane.exportToQuadMesh(near, INFINITE_PLANE_SIZE,
+    QuadMesh* mesh = plane.exportToQuadMesh(nearPoint, INFINITE_PLANE_SIZE,
         INFINITE_PLANE_TILES);
     if ( mesh == NULL ) {
         return NULL;

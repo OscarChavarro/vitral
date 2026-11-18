@@ -51,7 +51,9 @@ C++ port note: node indexes are `long`, as `int` is 16 bits on Turbo C++
 3.0; the vertex indexes of the polygons are `int`, as the vertex ids of a
 `PolyhedralBoundedSolid`.
 */
-class PolyhedralBoundedSolidFieldConstructions::_Polygonizer {
+// C++ port note: a top level class, named in PolyhedralBoundedSolidFieldConstructions by a typedef. Turbo C++ 3.0
+// rejects a nested class defined outside its enclosing class.
+class _PBSPolygonizer {
 private:
     int nodesX;
     int nodesY;
@@ -76,7 +78,7 @@ private:
     static void reverse(ArrayList<int>& polygon);
 
 public:
-    _Polygonizer(int nodesX, int nodesY, int nodesZ, const Vector3Dd& origin,
+    _PBSPolygonizer(int nodesX, int nodesY, int nodesZ, const Vector3Dd& origin,
         const Vector3Dd& spacing, const ArrayList<double>& values);
     PolyhedralBoundedSolid* build();
 };
@@ -143,7 +145,7 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidFieldConstructions::createFromSamp
 
 //= _Polygonizer ============================================================
 
-PolyhedralBoundedSolidFieldConstructions::_Polygonizer::_Polygonizer(
+_PBSPolygonizer::_PBSPolygonizer(
     int nodesX, int nodesY, int nodesZ, const Vector3Dd& origin,
     const Vector3Dd& spacing, const ArrayList<double>& values)
     : nodesX(nodesX), nodesY(nodesY), nodesZ(nodesZ), origin(origin),
@@ -156,7 +158,7 @@ PolyhedralBoundedSolidFieldConstructions::_Polygonizer::_Polygonizer(
 @return the values, with the ones of the nodes too close to zero
 moved away from it (see NODE_SEPARATION)
 */
-ArrayList<double> PolyhedralBoundedSolidFieldConstructions::_Polygonizer::separateFromZero(
+ArrayList<double> _PBSPolygonizer::separateFromZero(
     const ArrayList<double>& original) const
 {
     ArrayList<double> separated(original);
@@ -193,13 +195,13 @@ ArrayList<double> PolyhedralBoundedSolidFieldConstructions::_Polygonizer::separa
     return separated;
 }
 
-long PolyhedralBoundedSolidFieldConstructions::_Polygonizer::nodeIndex(
+long _PBSPolygonizer::nodeIndex(
     long i, long j, long k) const
 {
     return i + nodesX * (j + nodesY * k);
 }
 
-Vector3Dd PolyhedralBoundedSolidFieldConstructions::_Polygonizer::nodePosition(
+Vector3Dd _PBSPolygonizer::nodePosition(
     long node) const
 {
     long i = node % nodesX;
@@ -209,7 +211,7 @@ Vector3Dd PolyhedralBoundedSolidFieldConstructions::_Polygonizer::nodePosition(
         origin.y() + j * spacing.y(), origin.z() + k * spacing.z());
 }
 
-BOOLEAN PolyhedralBoundedSolidFieldConstructions::_Polygonizer::isBorder(
+BOOLEAN _PBSPolygonizer::isBorder(
     long node) const
 {
     long i = node % nodesX;
@@ -219,7 +221,7 @@ BOOLEAN PolyhedralBoundedSolidFieldConstructions::_Polygonizer::isBorder(
         i == nodesX - 1 || j == nodesY - 1 || k == nodesZ - 1;
 }
 
-BOOLEAN PolyhedralBoundedSolidFieldConstructions::_Polygonizer::isInside(
+BOOLEAN _PBSPolygonizer::isInside(
     long node) const
 {
     return !isBorder(node) && values[node] < 0;
@@ -230,7 +232,7 @@ BOOLEAN PolyhedralBoundedSolidFieldConstructions::_Polygonizer::isInside(
 @return index of the vertex where the zero level crosses the edge
 from an inside node to an outside node
 */
-int PolyhedralBoundedSolidFieldConstructions::_Polygonizer::edgeVertex(
+int _PBSPolygonizer::edgeVertex(
     long inside, long outside)
 {
     long key = Math::min(inside, outside) * values.size() +
@@ -263,7 +265,7 @@ int PolyhedralBoundedSolidFieldConstructions::_Polygonizer::edgeVertex(
     return index;
 }
 
-PolyhedralBoundedSolid* PolyhedralBoundedSolidFieldConstructions::_Polygonizer::build()
+PolyhedralBoundedSolid* _PBSPolygonizer::build()
 {
     long corners[8];
     long i;
@@ -292,7 +294,7 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidFieldConstructions::_Polygonizer::
         positions, polygons);
 }
 
-void PolyhedralBoundedSolidFieldConstructions::_Polygonizer::polygonizeTetrahedron(
+void _PBSPolygonizer::polygonizeTetrahedron(
     long n0, long n1, long n2, long n3)
 {
     long nodes[4];
@@ -363,7 +365,7 @@ void PolyhedralBoundedSolidFieldConstructions::_Polygonizer::polygonizeTetrahedr
     }
 }
 
-Vector3Dd PolyhedralBoundedSolidFieldConstructions::_Polygonizer::centroid(
+Vector3Dd _PBSPolygonizer::centroid(
     const long* nodes, int count) const
 {
     Vector3Dd sum(0, 0, 0);
@@ -374,7 +376,7 @@ Vector3Dd PolyhedralBoundedSolidFieldConstructions::_Polygonizer::centroid(
     return sum.multiply(1.0 / count);
 }
 
-Vector3Dd PolyhedralBoundedSolidFieldConstructions::_Polygonizer::newellNormal(
+Vector3Dd _PBSPolygonizer::newellNormal(
     const ArrayList<int>& polygon) const
 {
     double x = 0;
@@ -391,7 +393,7 @@ Vector3Dd PolyhedralBoundedSolidFieldConstructions::_Polygonizer::newellNormal(
     return Vector3Dd(x, y, z);
 }
 
-BOOLEAN PolyhedralBoundedSolidFieldConstructions::_Polygonizer::isPlanar(
+BOOLEAN _PBSPolygonizer::isPlanar(
     const ArrayList<int>& quad) const
 {
     const Vector3Dd& p0 = positions[quad[0]];
@@ -408,7 +410,7 @@ BOOLEAN PolyhedralBoundedSolidFieldConstructions::_Polygonizer::isPlanar(
         PLANARITY_TOLERANCE * size;
 }
 
-void PolyhedralBoundedSolidFieldConstructions::_Polygonizer::reverse(
+void _PBSPolygonizer::reverse(
     ArrayList<int>& polygon)
 {
     long i;

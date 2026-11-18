@@ -34,10 +34,10 @@ void SimpleScene::clearOwnedElements()
         delete cameras[i];
     }
     // Bodies and backgrounds referencing these resources are gone by now.
-    for (long int i = 0; i < images.size(); ++i) {
+    for (i = 0; i < images.size(); ++i) {
         delete images[i];
     }
-    for (long int i = 0; i < normalMaps.size(); ++i) {
+    for (i = 0; i < normalMaps.size(); ++i) {
         delete normalMaps[i];
     }
 

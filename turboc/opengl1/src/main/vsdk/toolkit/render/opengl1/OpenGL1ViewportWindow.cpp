@@ -102,32 +102,7 @@ public:
 
     virtual void drawLabel(const String& label, double x, double y)
     {
-        RGBAImageUncompressed* image = NULL;
-        long i;
-
-        for ( i = 0; i < window->cameraControlGizmoLabelTexts.size(); i++ ) {
-            if ( window->cameraControlGizmoLabelTexts[i] == label ) {
-                image = window->cameraControlGizmoLabelImages[i];
-                break;
-            }
-        }
-        if ( image == NULL ) {
-            image = window->labels->createLabelImage(label,
-                gizmo->getLabelColor(), fontSize);
-            if ( image == NULL ) {
-                return;
-            }
-            window->cameraControlGizmoLabelTexts.add(label);
-            window->cameraControlGizmoLabelImages.add(image);
-        }
-        // Centered; the y given grows downwards, and the y of `drawLabel`
-        // is the lower edge of the image, from the bottom of the surface
-        Viewport* viewport = window->viewport;
-        window->drawLabel(image,
-            viewport->getPixelStartX() +
-                (int)Math::round(x - image->getXSize() / 2.0),
-            viewport->getPixelStartY() + viewport->getPixelSizeY() -
-                (int)Math::round(y + image->getYSize() / 2.0));
+        window->drawCameraControlGizmoLabel(gizmo, label, x, y, fontSize);
     }
 
 private:
@@ -135,6 +110,37 @@ private:
     CameraControlGizmo* gizmo;
     int fontSize;
 };
+
+void OpenGL1ViewportWindow::drawCameraControlGizmoLabel(
+    CameraControlGizmo* gizmo, const String& label, double x, double y,
+    int fontSize)
+{
+    RGBAImageUncompressed* image = NULL;
+    long i;
+
+    for ( i = 0; i < cameraControlGizmoLabelTexts.size(); i++ ) {
+        if ( cameraControlGizmoLabelTexts[i] == label ) {
+            image = cameraControlGizmoLabelImages[i];
+            break;
+        }
+    }
+    if ( image == NULL ) {
+        image = labels->createLabelImage(label,
+            gizmo->getLabelColor(), fontSize);
+        if ( image == NULL ) {
+            return;
+        }
+        cameraControlGizmoLabelTexts.add(label);
+        cameraControlGizmoLabelImages.add(image);
+    }
+    // Centered; the y given grows downwards, and the y of `drawLabel`
+    // is the lower edge of the image, from the bottom of the surface
+    drawLabel(image,
+        viewport->getPixelStartX() +
+            (int)Math::round(x - image->getXSize() / 2.0),
+        viewport->getPixelStartY() + viewport->getPixelSizeY() -
+            (int)Math::round(y + image->getYSize() / 2.0));
+}
 
 void OpenGL1ViewportWindow::discardCameraControlGizmoLabels()
 {

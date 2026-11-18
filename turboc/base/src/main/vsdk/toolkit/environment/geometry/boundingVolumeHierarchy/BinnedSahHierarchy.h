@@ -142,23 +142,6 @@ class BinnedSahHierarchy {
     };
 };
 
-inline BinnedSahHierarchy::RaySlab::RaySlab(const Ray &ray)
-{
-    const Vector3Dd &o = ray.getOrigin();
-    const Vector3Dd &d = ray.getDirection();
-    origin[0] = o.x(); origin[1] = o.y(); origin[2] = o.z();
-    // C++ port note: filled one by one, without an aggregate initializer of
-    // non constant values
-    double direction[3];
-    direction[0] = d.x(); direction[1] = d.y(); direction[2] = d.z();
-    // Only a component exactly zero is parallel: any other one, however
-    // small, uses its reciprocal, so no hit is lost to the slab test.
-    for (int a = 0; a < 3; a++) {
-        parallel[a] = direction[a] == 0.0;
-        inverse[a] = parallel[a] ? 0.0 : 1.0 / direction[a];
-    }
-}
-
 inline double
 BinnedSahHierarchy::RaySlab::entry(const BinnedSahHierarchyNode &node, double tMax) const
 {

@@ -57,8 +57,11 @@ ReaderMitScene::ReaderMitScene()
 void ReaderMitScene::resetState(const char* fileName)
 {
     const char* slash = strrchr(fileName, '/');
-    sceneDirectory = slash == NULL ? String("") :
-        String(fileName).substr(0, (size_t)(slash - fileName) + 1);
+    // Turbo C++ 3.0 cannot destroy String temporaries of a conditional expression
+    sceneDirectory = String("");
+    if ( slash != NULL ) {
+        sceneDirectory = String(fileName).substr(0, (size_t)(slash - fileName) + 1);
+    }
     yaw = 0;
     pitch = 0;
     roll = 0;
@@ -938,7 +941,8 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
             String directory("../../cubemaps/dorise1");
             if (sscanf(javaLine.toCString(), "%*s %511s", directoryStr) == 1) directory = unquote(directoryStr);
             RGBAImageUncompressed* faces[6];
-            for (int i = 0; i < 6; ++i) {
+            int i;
+            for (i = 0; i < 6; ++i) {
                 char name[32];
                 snprintf(name, sizeof(name), "/entorno%d.jpg", i);
                 faces[i] = ImagePersistence::importRGBA(File(resolveResource(directory + name)));
@@ -951,7 +955,7 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
                     context.fail("ReaderMitScene: could not read the cubemap faces");
                 }
             }
-            for (int i = 0; i < 6; ++i) outScene->addImage(faces[i]);
+            for (i = 0; i < 6; ++i) outScene->addImage(faces[i]);
             outScene->addBackground(new CubemapBackground(camera,
                 faces[0], faces[1], faces[2], faces[3], faces[4], faces[5]));
             outScene->setActiveBackgroundIndex((int)outScene->getBackgrounds().size() - 1);

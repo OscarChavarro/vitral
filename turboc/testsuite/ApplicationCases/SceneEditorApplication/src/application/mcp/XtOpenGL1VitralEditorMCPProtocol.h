@@ -26,7 +26,6 @@ C++ port note: failures inside the tools are C++ exceptions (i.e.
 the same messages as the Java ones.
 */
 class XtOpenGL1VitralEditorMCPProtocol : public Runnable {
-    friend class ToolCall;
 
 private:
     Socket* socket;
@@ -37,11 +36,20 @@ private:
     String handle(const String& request);
     String callTool(const String& tool,
                           const String& request);
-    String executeTool(const String& tool,
-                             const String& request);
     static String toolsJson();
 
 public:
+    /**
+    Executes a tool; called in the thread of the GUI (by `ToolCall`).
+    @throws Exception i.e. IllegalArgumentException for wrong arguments
+    */
+    String executeTool(const String& tool, const String& request);
+    /**
+    A tool may change the scene or its rendering configuration without
+    asking for a frame: frames computed before it can not be shown again.
+    */
+    void markContentChanged();
+
     /**
     @param parent application to automate (referenced)
     @param socket connection to serve (referenced)

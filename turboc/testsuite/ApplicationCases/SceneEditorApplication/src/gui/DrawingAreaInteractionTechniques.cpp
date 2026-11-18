@@ -154,6 +154,12 @@ DrawingAreaInteractionTechniques::getViewportSetTechniques() const
     return viewportSetTechniques;
 }
 
+ViewportInteractionTechniques*
+DrawingAreaInteractionTechniques::getInteractionTechniques() const
+{
+    return interactionTechniques;
+}
+
 TranslateGizmo* DrawingAreaInteractionTechniques::getTranslationGizmo() const
 {
     return translationGizmo;
@@ -298,7 +304,7 @@ void DrawingAreaInteractionTechniques::wrapCursorIfRequested(
 BOOLEAN DrawingAreaInteractionTechniques::MouseTechnique::apply(
     const MouseEvent& e) const
 {
-    ViewportInteractionTechniques* t = owner->interactionTechniques;
+    ViewportInteractionTechniques* t = owner->getInteractionTechniques();
     BOOLEAN changed = FALSE;
     switch ( kind ) {
       case ROTATION_PRESSED:

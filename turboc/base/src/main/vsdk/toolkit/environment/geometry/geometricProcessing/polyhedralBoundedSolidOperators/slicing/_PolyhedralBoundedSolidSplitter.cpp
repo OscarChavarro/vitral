@@ -159,7 +159,9 @@ int _PolyhedralBoundedSolidSplitterNullEdge::compareTo(
 
 //= _PolyhedralBoundedSolidSplitter =======================================
 
-class _PolyhedralBoundedSolidSplitter::_SplitContext {
+// C++ port note: a top level class, named in _PolyhedralBoundedSolidSplitter by a typedef. Turbo C++ 3.0
+// rejects a nested class defined outside its enclosing class.
+class _PBSSplitContext {
 public:
     /**
     Variable `soov` ("set of ON-vertices") from program [MANT1988].14.1.

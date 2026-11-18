@@ -197,34 +197,44 @@ void PolyhedralBoundedSolid::retireVertex(_PolyhedralBoundedSolidVertex* vertex)
     retiredVertices.add(vertex);
 }
 
-template <class T>
-static void collectOwnedNodes(TreeSet<T*>& set, CircularArrayList<T*>& live,
-    ArrayList<T*>& retired)
-{
-    long int i;
-    for ( i = 0; i < live.size(); i++ ) set.add(live.get(i));
-    for ( i = 0; i < retired.size(); i++ ) set.add(retired.get(i));
+/*
+C++ port note: overloads per node type instead of function templates. Turbo
+C++ 3.0 rejects `static` function templates and cannot deduce `T` from an
+argument such as `CircularArrayList<T*>&`.
+*/
+#define VSDK_RETIRED_NODE_HELPERS(T) \
+static void removeOwnedFromRetired(ArrayList<T*>& list, TreeSet<T*>& set) \
+{ \
+    long int i = 0; \
+    while ( i < list.size() ) { \
+        if ( set.contains(list.get(i)) ) list.remove(i); \
+        else i++; \
+    } \
 }
 
-template <class T>
-static void removeOwnedFromLive(CircularArrayList<T*>& list, TreeSet<T*>& set)
-{
-    long int i = 0;
-    while ( i < list.size() ) {
-        if ( set.contains(list.get(i)) ) list.remove(i);
-        else i++;
-    }
+#define VSDK_LISTED_NODE_HELPERS(T) \
+VSDK_RETIRED_NODE_HELPERS(T) \
+static void collectOwnedNodes(TreeSet<T*>& set, CircularArrayList<T*>& live, \
+    ArrayList<T*>& retired) \
+{ \
+    long int i; \
+    for ( i = 0; i < live.size(); i++ ) set.add(live.get(i)); \
+    for ( i = 0; i < retired.size(); i++ ) set.add(retired.get(i)); \
+} \
+static void removeOwnedFromLive(CircularArrayList<T*>& list, TreeSet<T*>& set) \
+{ \
+    long int i = 0; \
+    while ( i < list.size() ) { \
+        if ( set.contains(list.get(i)) ) list.remove(i); \
+        else i++; \
+    } \
 }
 
-template <class T>
-static void removeOwnedFromRetired(ArrayList<T*>& list, TreeSet<T*>& set)
-{
-    long int i = 0;
-    while ( i < list.size() ) {
-        if ( set.contains(list.get(i)) ) list.remove(i);
-        else i++;
-    }
-}
+VSDK_LISTED_NODE_HELPERS(_PolyhedralBoundedSolidFace)
+VSDK_LISTED_NODE_HELPERS(_PolyhedralBoundedSolidEdge)
+VSDK_LISTED_NODE_HELPERS(_PolyhedralBoundedSolidVertex)
+VSDK_RETIRED_NODE_HELPERS(_PolyhedralBoundedSolidLoop)
+VSDK_RETIRED_NODE_HELPERS(_PolyhedralBoundedSolidHalfEdge)
 
 void PolyhedralBoundedSolid::unlistNodesOwnedBy(PolyhedralBoundedSolid* reference)
 {

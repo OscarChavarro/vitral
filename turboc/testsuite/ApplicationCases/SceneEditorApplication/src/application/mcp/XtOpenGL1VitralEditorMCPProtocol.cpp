@@ -43,7 +43,7 @@ public:
         // Tools may change the scene or its rendering configuration without
         // asking for a frame: frames computed before them (i.e. raytraced
         // images) can not be presented again
-        protocol->applicationTools.markContentChanged();
+        protocol->markContentChanged();
     }
 };
 
@@ -55,6 +55,11 @@ XtOpenGL1VitralEditorMCPProtocol::XtOpenGL1VitralEditorMCPProtocol(
       viewportTools(parent->getApplicationModel(), TRUE),
       applicationTools(parent)
 {
+}
+
+void XtOpenGL1VitralEditorMCPProtocol::markContentChanged()
+{
+    applicationTools.markContentChanged();
 }
 
 void XtOpenGL1VitralEditorMCPProtocol::run()

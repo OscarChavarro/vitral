@@ -290,7 +290,7 @@ void InfinitePlane::setB(double b_) { b = b_; }
 double InfinitePlane::getC() const { return c; }
 void InfinitePlane::setC(double c_) { c = c_; }
 
-QuadMesh* InfinitePlane::exportToQuadMesh(const Vector3Dd& near,
+QuadMesh* InfinitePlane::exportToQuadMesh(const Vector3Dd& nearPoint,
     double size, int tiles) const
 {
     double length = Math::sqrt(a*a + b*b + c*c);
@@ -304,7 +304,7 @@ QuadMesh* InfinitePlane::exportToQuadMesh(const Vector3Dd& near,
     Vector3Dd u = reference.crossProduct(n).normalized();
     Vector3Dd v = n.crossProduct(u).normalized();
     double cell = size / tiles;
-    Vector3Dd offset = projectPoint(near).subtract(origin);
+    Vector3Dd offset = projectPoint(nearPoint).subtract(origin);
     double cu = Math::rint(offset.dotProduct(u) / cell) * cell;
     double cv = Math::rint(offset.dotProduct(v) / cell) * cell;
     Vector3Dd corner = origin.add(u.multiply(cu - size/2))

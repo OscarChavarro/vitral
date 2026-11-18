@@ -15,12 +15,12 @@
 Handle of an element of `CircularArrayList`: the Java
 `elements[i] instanceof ArrayLinkable` test, resolved by overloading. A
 pointer to a class derived from `ArrayLinkable` takes the first overload (a
-conversion to a base class is preferred to one to `void *`); any other
+conversion to a base class is preferred to an ellipsis); any other
 pointer, and the `String` elements of the tests, have no handle and are
 always found by a scan.
 
 C++ port note: the element class must be complete where the list members
-are compiled, or its pointers take the `void *` overload. The headers that
+are compiled, or its pointers take the ellipsis overload. The headers that
 declare lists of nodes include the node headers for that reason; the
 handle is only a shortcut, so correctness never depends on it.
 */
@@ -30,8 +30,15 @@ circularArrayListHandle(ArrayLinkable* e)
     return e;
 }
 
+/*
+The fallback takes an ellipsis, not a `const void *`: Turbo C++ 3.0 ranks the
+conversions of a derived pointer to its base and to `void *` equally (an
+ambiguous call), while an ellipsis match is the worst one for every
+compiler. The elements are pointers or `String`, so nothing that is not
+trivially copyable goes through it.
+*/
 inline ArrayLinkable*
-circularArrayListHandle(const void* /*e*/)
+circularArrayListHandle(...)
 {
     return NULL;
 }

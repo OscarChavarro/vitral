@@ -45,9 +45,11 @@ out of them:
   - A finished face that shares its face record with other loops gets a face
     of its own (`lmfkrh`).
 */
+class _PBSMeshBuilder;
+
 class PolyhedralBoundedSolidMeshConstructions {
 private:
-    class _MeshBuilder;
+    typedef _PBSMeshBuilder _MeshBuilder;
 
 public:
     /**

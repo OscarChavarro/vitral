@@ -38,6 +38,19 @@ hashMapKey(const T &value) {
 }
 
 /**
+Hash of a pointer `HashMap` key, from the bytes of the pointer (as the
+template above does).
+
+C++ port note: Turbo C++ 3.0 does not deduce `T` of `const T &` from a
+pointer argument ("Could not find a match for hashMapKey(X *)"); modern
+compilers keep choosing the template, an exact match, with the same hash.
+*/
+inline size_t
+hashMapKey(const void *value) {
+    return hashMapFnv1a(((const unsigned char *)(&value)), sizeof(value));
+}
+
+/**
 Hash of a text `HashMap` key, from its characters.
 */
 inline size_t

@@ -113,7 +113,6 @@ public:
     void evaluate(double u, double v, double out[9]) const;
 
 private:
-    friend struct _ParametricBiCubicPatchNode;
     typedef _ParametricBiCubicPatchNode PatchNode;
 
     /// Bezier control net, stored as 16 points of 3 coordinates, with point
@@ -139,9 +138,13 @@ private:
                             double low[], double high[],
                             int start, int stride);
     static double subPatchFlatness(const double net[48]);
+public:
+    // C++ port note: public for the top level _ParametricBiCubicPatchNode (a
+    // nested class reads no private member of its enclosing one in Turbo C++).
     static void boundingSphere(const double net[48], double outSphere[4]);
     static void copyPoint(const double net[48], int i, int j,
                           double target[], int targetIndex);
+private:
     void walkTree(const PatchNode* node, const double o[3], const double d[3],
                   double directionLengthSquared, PatchHit& best) const;
     static BOOLEAN sphericalBoundsCheck(const PatchNode* node, const double o[3],

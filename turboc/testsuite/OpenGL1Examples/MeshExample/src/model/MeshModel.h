@@ -27,7 +27,6 @@ private:
     private:
         MeshModel* model;
     };
-    friend class IntersectionCallback;
 
     Camera camera;
     ArrayList<Light*> lights;
@@ -42,10 +41,14 @@ private:
     static const double INITIAL_RAY_YAW_IN_DEGREES;
     static const double INITIAL_RAY_PITCH_IN_DEGREES;
 
-    Intersection* makeIntersectionCallback(const Ray& ray);
     static Vector3Dd initialRayDirection();
 
 public:
+    // C++ port note: public for the nested classes of this class, which
+    // legacy compilers (gcc 2.7.2, Turbo C++ 3.0) do not let read its
+    // private members.
+    Intersection* makeIntersectionCallback(const Ray& ray);
+
     MeshModel();
     ~MeshModel();
 

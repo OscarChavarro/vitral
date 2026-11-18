@@ -285,9 +285,9 @@ GeometryContainment::Value SceneSolid::classifyPlacedSolidCertified(const Geomet
     if (result==GeometryContainment::Boundary && outer==0) return result;
     // A boundary inside the inner local ball maps inside the world ball.
     if (inner>0) {
-        const GeometryContainment::Value near=geometry.classifyPointCertified(local,inner);
-        if (near==GeometryContainment::Boundary || near==GeometryContainment::InvalidInput ||
-            near==GeometryContainment::Unsupported) return near;
+        const GeometryContainment::Value nearResult=geometry.classifyPointCertified(local,inner);
+        if (nearResult==GeometryContainment::Boundary || nearResult==GeometryContainment::InvalidInput ||
+            nearResult==GeometryContainment::Unsupported) return nearResult;
     }
     if (!(tolerance>0)) return GeometryContainment::Indeterminate;
     // Under anisotropic placement the inner ball is small. Two world points of

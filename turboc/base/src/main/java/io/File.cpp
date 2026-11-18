@@ -35,8 +35,8 @@ static int
 find83Child(int node, const char *name, int length) {
     for ( int i = 0; i < FILE_NAMES_83_COUNT; i++ ) {
         if ( fileNames83Parent[i] == node &&
-             strncmp(fileNames83Long[i], name, length) == 0 &&
-             fileNames83Long[i][length] == '\0' ) {
+             strncmp(fileNames83Long(i), name, length) == 0 &&
+             fileNames83Long(i)[length] == '\0' ) {
             return i;
         }
     }
@@ -98,7 +98,7 @@ convertTo83(const char *path, char *out) {
                 index = find83Child(node, name, size);
             }
             if ( index >= 0 ) {
-                strcpy(out, fileNames83Short[index]);
+                strcpy(out, fileNames83Short(index));
                 out += strlen(out);
                 node = index;
             } else {
@@ -383,13 +383,13 @@ File::list() const {
         if ( folderNode >= 0 ) {
             for ( int i = 0; i < FILE_NAMES_83_COUNT && index < 0; i++ ) {
                 if ( fileNames83Parent[i] == folderNode &&
-                     equalsIgnoringCase(fileNames83Short[i], entry->d_name) ) {
+                     equalsIgnoringCase(fileNames83Short(i), entry->d_name) ) {
                     index = i;
                 }
             }
         }
         if ( index >= 0 ) {
-            names.add(String(fileNames83Long[index]));
+            names.add(String(fileNames83Long(index)));
             continue;
         }
 #endif

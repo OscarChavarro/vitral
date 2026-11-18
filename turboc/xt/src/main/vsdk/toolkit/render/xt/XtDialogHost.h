@@ -117,9 +117,30 @@ public:
         void close();
         BOOLEAN isVisible() const;
 
+        /**
+        Builds the form of a dialog definition, as `XtDialogHost::form`
+        (which calls it): a member, so it fills the private state.
+        */
+        static Form* build(XtWidget shell, XtWidgetSet* widgetSet,
+                           XFontSet fontSet, MessageSource* messages,
+                           const WidgetDialog* definition,
+                           ActionListener* onAction);
+
     private:
-        friend class XtDialogHost;
         struct Button;
+
+        // The steps of build(), in separate functions: gcc 2.7.2 crashes
+        // (internal compiler error) compiling them as one function in a try
+        static void buildForm(Form* form, MessageSource* messages);
+        static BOOLEAN collectElements(const WidgetDialog* definition,
+            ArrayList<const WidgetDialogElement*>& inputs,
+            ArrayList<const WidgetDialogElement*>& buttons);
+        static void layoutInputs(Form* form, XtWidget frame,
+            const ArrayList<const WidgetDialogElement*>& inputs,
+            const ArrayList<ArrayList<String> >& prompts);
+        static void createButtons(Form* form, XtWidget frame,
+            MessageSource* messages,
+            const ArrayList<const WidgetDialogElement*>& buttons);
 
         XtWidgetSet* widgetSet;
         const WidgetDialog* definition;
@@ -172,19 +193,6 @@ public:
 
 private:
     XtDialogHost();
-
-    // The steps of form(), in separate functions: gcc 2.7.2 crashes
-    // (internal compiler error) compiling them as one function in a try
-    static void buildForm(Form* form, MessageSource* messages);
-    static BOOLEAN collectElements(const WidgetDialog* definition,
-        ArrayList<const WidgetDialogElement*>& inputs,
-        ArrayList<const WidgetDialogElement*>& buttons);
-    static void layoutInputs(Form* form, XtWidget frame,
-        const ArrayList<const WidgetDialogElement*>& inputs,
-        const ArrayList<ArrayList<String> >& prompts);
-    static void createButtons(Form* form, XtWidget frame,
-        MessageSource* messages,
-        const ArrayList<const WidgetDialogElement*>& buttons);
 };
 
 #endif

@@ -284,8 +284,15 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
 
 void SimpleRaytracer::prepareAccelerationStructures(ArrayList<SimpleBody*>& bodies, const RendererConfiguration* q)
 {
-    const TriangleMeshAccelerationMethod::Value method = q != 0 ?
-        q->getMeshAccelerationMethod() : RendererConfiguration().getMeshAccelerationMethod();
+    // Turbo C++ 3.0 cannot destroy class temporaries of a conditional expression
+    TriangleMeshAccelerationMethod::Value method;
+    if ( q != 0 ) {
+        method = q->getMeshAccelerationMethod();
+    }
+    else {
+        RendererConfiguration defaults;
+        method = defaults.getMeshAccelerationMethod();
+    }
     for ( long int i=0; i<bodies.size(); i++ ) {
         Geometry* geometry = bodies.get(i)->getGeometry();
         if ( geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ) {

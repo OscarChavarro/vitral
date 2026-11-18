@@ -147,6 +147,26 @@ procedure.  Agents maintaining this port should install `djtar` and its
 DJGPP runtime requirements (`GO32.EXE` and `CWSDPMI.EXE`) in `C:\NETDOS`,
 and use a mounted ISO image as the normal transfer medium.
 
+Two rules apply to every DOS machine:
+
+- Everything an agent creates stays inside `C:\VITRAL`: the mapped tree,
+  logs, probes and scratch tests.  Never leave files or folders elsewhere
+  (`C:\`, `C:\NETDOS`, `C:\TURBOC`, `C:\DOSVIEW`), and do not change
+  `AUTOEXEC.BAT` or `CONFIG.SYS` without asking the user.  The tools that
+  are already installed in those folders are used read only.
+- Never copy the whole repository: DOS machines have little disk space.
+  Only `etc/` and `turboc/` go, mapped to 8.3 names, and never
+  `etc/portMachines` (the credentials of the test nodes).
+
+`scripts/stageDosFull.sh` builds that complete payload in one step: every
+git-tracked file of `etc/` and `turboc/` whose mapped path is 8.3 (1826
+files, about 7.5 MB compressed), plus the top-level `ETC` scene copies
+read by the raytracer's `RUN*.BAT`, and prints a staging folder with
+`FILES.LST`, `VITRAL.TGZ` and `VITRAL.ISO`.  The X11, OpenGL and svgalib
+parts, the host scripts and build folders are left out.
+`scripts/stageDos286.sh` and `scripts/stageDosBgi.sh` package a single
+program instead.
+
 1. Produce a temporary DOS staging tree with exactly two top-level
    directories, `ETC` and `TURBOC`.  It must contain only the 8.3-mapped
    source/data files selected by `scripts/mappings_83.csv`, plus the files
@@ -217,6 +237,89 @@ floppy is acceptable only as a small bootstrap medium for tools such as
 `djtar`; it is not the source-transfer mechanism.  An ISO avoids both
 limitations, preserves one auditable archive, and can be inserted or
 replaced as CD media without rebooting the VM.
+
+To send only a few changed sources after a complete transfer, run
+`scripts/stageDosFull.sh` again, compare its tree with the previous staging
+folder (`cmp` on each path of `FILES.LST`), and put a TGZ with only the
+changed paths on a new ISO.  In DOS, delete the old copies first (`djtar`
+does not overwrite them), then extract it from `C:\VITRAL` as above.
+Never edit the sources inside the DOS machine.
+
+### Driving the DOS VM from the host (agents)
+
+The guest has no usable network for this work, so an agent drives its
+console with `scripts/dosVm.sh` (VirtualBox `keyboardputstring` and
+`screenshotpng`, OCR with tesseract):
+
+```bash
+python3 scripts/checkTurboCpp.py          # Turbo C++ pitfalls, on the host
+stage=$(sh scripts/stageDosFull.sh)        # complete 8.3 payload
+scripts/dosVm.sh full "$stage"             # empty C:\VITRAL, extract, count files
+scripts/dosVm.sh type "cd C:\VITRAL\TURBOC\BASE"
+scripts/dosVm.sh type "BASE"
+scripts/dosVm.sh wait 60 3600              # prints the last lines of the screen
+# after fixing sources on the host:
+new=$(sh scripts/stageDosFull.sh)
+scripts/dosVm.sh patch "$new" "$stage"     # only the changed files
+```
+
+`full` and `patch` replace the files with the procedure above (`patch`
+also puts a `DELOLD.BAT` on the ISO that deletes the old copies, because
+`djtar` stops at an invisible overwrite prompt when its output is
+redirected; `dosVm.sh ctrlc` aborts it). Two DOS limits matter when typing
+or generating batch files: COMMAND.COM truncates command lines at 127
+characters, and keys are lost when long strings are typed at once
+(`dosVm.sh type` sends 12 characters at a time).
+
+A compile batch stops at its first error, and `BASE.BAT` needs about 20
+minutes, so after larger changes probe the whole library first:
+
+```bash
+python3 scripts/makeProbeBat.py "$new/TURBOC/BASE/BASE.BAT" "$new/TURBOC/BASE/PROBE.BAT"
+```
+
+Send `PROBE.BAT` with the next patch and run it from `C:\VITRAL\TURBOC\BASE`.
+It compiles every object without stopping and writes only the error lines
+to `PROBE.LOG`; `find /c "Error" PROBE.LOG` counts them, and
+`find "Error" PROBE.LOG | more` shows them (one header that repeats in
+many files appears once per file: filter it with `find /v`). Run the real
+`BASE.BAT` and `BASELINK.BAT` once the probe is clean.
+
+After a change to a few base sources, the libraries can be updated without
+rerunning `BASE.BAT` and `BASELINK.BAT` (8.3 object names, without `.OBJ`):
+
+```bash
+python3 scripts/makeUpdateBat.py "$new/TURBOC/BASE" UPDATE.BAT FILE ENVIPERS
+echo TURBOC/BASE/UPDATE.BAT >> "$new/FILES.LST"   # then patch, run UPDATE
+```
+
+`UPDATE.BAT` repeats the compile steps of `BASE.BAT` for these objects and
+replaces them (`tlib -+`) in the libraries where `BASELINK.BAT` puts them.
+
+Files of the guest (link maps, logs) are read on the host with
+`scripts/dosVm.sh get <host dir> C:\VITRAL\TURBOC\TESTSUIT\OFFLEXAM\RAYOFFEX RAY286.MAP TLINK.LOG`
+(a scratch floppy image replaces the one in A: for the copy). Two link
+limits of the large model matter for the bigger programs; both are found in
+the `/s` map of TLINK:
+
+- "Group DGROUP exceeds 64K": the near data (`_DATA` and `_BSS` of every
+  module) is a single 64 KB segment. The detailed map lists one line per
+  module, with the length at column 12:
+  `find "G=DGROUP" RAY286.MAP | sort /R /+12 | more`. Large initialized
+  tables must be `far`, and few: the generated `java/io/NAMES83.H` keeps
+  all the names in one far array of characters with far offset tables,
+  as one far array per name (some 900) makes TCC die with "GP FAULT".
+  A GP fault ends TCC with errorlevel 0, so a batch must also check that
+  the object file exists (`BASE.BAT` and `UPDATE.BAT` do).
+- "Relocation item exceeds 1Meg DOS limit": the whole image (code, data and
+  the 32 KB stack of the 286 payload) must fit in 1 MB, even though the 286
+  loader places it in extended memory. The segment addresses of the map
+  wrap around at 1 MB, so add up the lengths instead of reading the last
+  address. All the DOS batches compile with `-vi-` (no inline expansion),
+  which takes some 15% off the code of a program (TLINK already merges the
+  out of line copies of inline functions); `TC_INLINE_SOURCES` of
+  `map_to_83.py` lists the sources that make TCC fail with it. The 286
+  raytracer still needs about 1.27 MB (see doc/portability.md).
 
 After the mapped tree has been copied, open a DOS prompt and build in this
 order:

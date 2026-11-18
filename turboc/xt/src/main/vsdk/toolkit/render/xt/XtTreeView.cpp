@@ -38,10 +38,8 @@ struct XtTreeViewCallbacks {
         }
         // The menu is shown on release: shown on press, the release of the
         // same click would choose or close it
-        else if ( event->type == ButtonRelease && button->button == Button3 &&
-                  self->contextMenuListener ) {
-            self->contextMenuListener->contextMenuRequested(
-                button->x_root, button->y_root);
+        else if ( event->type == ButtonRelease && button->button == Button3 ) {
+            self->contextMenuRequested(button->x_root, button->y_root);
         }
     }
 
@@ -56,13 +54,25 @@ struct XtTreeViewCallbacks {
     static void destroyed(XtWidget, XtPointer clientData, XtPointer)
     {
         XtTreeView* self = ((XtTreeView*)(clientData));
-        if ( self->graphicsContext != NULL ) {
-            XFreeGC(XtDisplay(self->widget), self->graphicsContext);
-            self->graphicsContext = NULL;
-        }
-        self->widget = NULL;
+        self->widgetDestroyed();
     }
 };
+
+void XtTreeView::contextMenuRequested(int xRoot, int yRoot)
+{
+    if ( contextMenuListener ) {
+        contextMenuListener->contextMenuRequested(xRoot, yRoot);
+    }
+}
+
+void XtTreeView::widgetDestroyed()
+{
+    if ( graphicsContext != NULL ) {
+        XFreeGC(XtDisplay(widget), graphicsContext);
+        graphicsContext = NULL;
+    }
+    widget = NULL;
+}
 
 XtTreeView::XtTreeView(XtWidget parent, XFontSet fontSet, int x, int y,
                        int width, int height)

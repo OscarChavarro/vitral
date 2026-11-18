@@ -45,7 +45,9 @@ public:
     class Entry {
     public:
         Entry(double radius, int meridians, int parallels,
-              PolyhedralBoundedSolid* solid);
+              PolyhedralBoundedSolid* solid, const ArrayList<float>& positions,
+              const ArrayList<float>& normals, const ArrayList<float>& uvs,
+              const ArrayList<float>& tangents, const ArrayList<float>& biNormals);
         ~Entry();
 
         double getRadius() const;
@@ -67,7 +69,6 @@ public:
         const ArrayList<float>& getBiNormals() const;
 
     private:
-        friend class SpherePolyhedralCache;
 
         double radius;
         int meridians;

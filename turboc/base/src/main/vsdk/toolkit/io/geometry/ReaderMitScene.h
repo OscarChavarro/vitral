@@ -18,7 +18,6 @@ class SimpleScene;
 // Textures and normal maps are scene resources shared by the bodies using them.
 class ReaderMitScene {
     // C++ port note: the lambdas of importEnvironment (see the .cpp)
-    friend class MitSceneImportContext;
 private:
     String sceneDirectory;
     // Euler angles of the last `rotation` line, applied to each later primitive.
@@ -39,10 +38,14 @@ private:
     Image* loadTexture(const String& path, SimpleScene* scene);
     NormalMap* loadNormalMap(const String& path, const Vector3Dd& scale,
         SimpleScene* scene);
+public:
+    // C++ port note: public for MitSceneImportContext, the class that holds
+    // the lambdas of importEnvironment (see the .cpp).
     // Applies the current rotation about the body's origin.
     void applyRotation(SimpleBody* body) const;
     // Applies the current rotation, texture and normal map.
     void dressBody(SimpleBody* body) const;
+private:
     // Moves the bodies of an OBJ file into the scene, placed by the current
     // rotation, the translation and a uniform scale; false when unreadable.
     BOOLEAN importObj(const String& path, const Vector3Dd& translation,

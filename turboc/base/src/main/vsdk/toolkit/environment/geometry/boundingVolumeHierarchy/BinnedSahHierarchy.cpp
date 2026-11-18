@@ -8,6 +8,26 @@
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.h"
 
+// C++ port note: not inline (it is in the cpp port), as Turbo C++ 3.0
+// rejects a loop in an inline constructor ("Expression syntax").
+BinnedSahHierarchy::RaySlab::RaySlab(const Ray &ray)
+{
+    const Vector3Dd &o = ray.getOrigin();
+    const Vector3Dd &d = ray.getDirection();
+    origin[0] = o.x(); origin[1] = o.y(); origin[2] = o.z();
+    // C++ port note: filled one by one, without an aggregate initializer of
+    // non constant values
+    double direction[3];
+    direction[0] = d.x(); direction[1] = d.y(); direction[2] = d.z();
+    // Only a component exactly zero is parallel: any other one, however
+    // small, uses its reciprocal, so no hit is lost to the slab test.
+    int a;
+    for (a = 0; a < 3; a++) {
+        parallel[a] = direction[a] == 0.0;
+        inverse[a] = parallel[a] ? 0.0 : 1.0 / direction[a];
+    }
+}
+
 /**
 Axis aligned box of the build. The default box is the "negative box"
 [+inf, -inf] of [WALD2007].3.4: enclosing it in another box leaves that box

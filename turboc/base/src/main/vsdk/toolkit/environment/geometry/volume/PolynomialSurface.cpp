@@ -17,7 +17,7 @@ typedef char PolynomialSurfaceOrderMatchesSolver[
 
 static const double COEFFICIENT_LIMIT = 1.0e-20;
 
-const int PolynomialSurface::TERM_COUNTS[MAXIMUM_ORDER + 1] = {1, 4, 10, 20, 35, 56, 84, 120};
+const int PolynomialSurface::TERM_COUNTS[PolynomialSurface::MAXIMUM_ORDER + 1] = {1, 4, 10, 20, 35, 56, 84, 120};
 const int PolynomialSurface::BINOMIAL[11][12] = {{0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 1, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0}, {0, 1, 4, 6, 4, 1, 0, 0, 0, 0, 0, 0},
@@ -27,7 +27,7 @@ const int PolynomialSurface::BINOMIAL[11][12] = {{0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 
     {0, 1, 8, 28, 56, 70, 56, 28, 8, 1, 0, 0},
     {0, 1, 9, 36, 84, 126, 126, 84, 36, 9, 1, 0},
     {0, 1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1}};
-const int PolynomialSurface::FACTORIALS[MAXIMUM_ORDER + 1] = {1, 1, 2, 6, 24, 120, 720, 5040};
+const int PolynomialSurface::FACTORIALS[PolynomialSurface::MAXIMUM_ORDER + 1] = {1, 1, 2, 6, 24, 120, 720, 5040};
 
 PolynomialSurface::PolynomialSurface(int initialOrder, BOOLEAN useSturmSequences) :
     order(initialOrder), sturm(useSturmSequences)

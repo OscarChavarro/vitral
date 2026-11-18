@@ -29,7 +29,9 @@ directed edges are `long` (32 bits on Turbo C++ 3.0, enough for meshes of
 some tens of thousands of vertices), and the sets of the Java code are maps
 to a dummy value.
 */
-class PolyhedralBoundedSolidMeshConstructions::_MeshBuilder {
+// C++ port note: a top level class, named in PolyhedralBoundedSolidMeshConstructions by a typedef. Turbo C++ 3.0
+// rejects a nested class defined outside its enclosing class.
+class _PBSMeshBuilder {
 private:
     const ArrayList<Vector3Dd>& positions;
     const ArrayList<ArrayList<int> >& faces;
@@ -68,9 +70,9 @@ private:
     void finishFace(const ArrayList<int>& polygon);
 
 public:
-    _MeshBuilder(const ArrayList<Vector3Dd>& positions,
+    _PBSMeshBuilder(const ArrayList<Vector3Dd>& positions,
         const ArrayList<ArrayList<int> >& faces);
-    ~_MeshBuilder();
+    ~_PBSMeshBuilder();
     PolyhedralBoundedSolid* build();
 };
 
@@ -90,7 +92,7 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidMeshConstructions::createFromPolyg
     return solid;
 }
 
-PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::_MeshBuilder(
+_PBSMeshBuilder::_PBSMeshBuilder(
     const ArrayList<Vector3Dd>& positions,
     const ArrayList<ArrayList<int> >& faces)
     : positions(positions), faces(faces),
@@ -107,20 +109,20 @@ PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::_MeshBuilder(
     }
 }
 
-PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::~_MeshBuilder()
+_PBSMeshBuilder::~_PBSMeshBuilder()
 {
     if ( solid != NULL ) {
         delete solid;
     }
 }
 
-long PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::key(
+long _PBSMeshBuilder::key(
     int from, int to) const
 {
     return ((long)from) * numberOfVertices + to;
 }
 
-int PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::meshIndex(
+int _PBSMeshBuilder::meshIndex(
     _PolyhedralBoundedSolidVertex* vertex)
 {
     return vertex->id - 1;
@@ -133,7 +135,7 @@ C++ port note: the check of the reverse of each directed edge goes over the
 faces again, as the `HashMap` of the port has no key set; only the edge that
 is reported when there are several on the border may change.
 */
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::indexMesh()
+void _PBSMeshBuilder::indexMesh()
 {
     long f;
     long i;
@@ -181,7 +183,7 @@ void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::indexMesh()
 /**
 Indexes the half-edges of the edges created since the last call.
 */
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::registerNewEdges()
+void _PBSMeshBuilder::registerNewEdges()
 {
     CircularArrayList<_PolyhedralBoundedSolidEdge*>& edges = solid->getEdgesList();
     for ( ; registeredEdges < edges.size(); registeredEdges++ ) {
@@ -191,7 +193,7 @@ void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::registerNewEdges()
     }
 }
 
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::registerHalfEdge(
+void _PBSMeshBuilder::registerHalfEdge(
     _PolyhedralBoundedSolidHalfEdge* he)
 {
     int from = meshIndex(he->startingVertex);
@@ -200,14 +202,14 @@ void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::registerHalfEdge(
     outgoing[from].add(he);
 }
 
-BOOLEAN PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::isOpen(
+BOOLEAN _PBSMeshBuilder::isOpen(
     _PolyhedralBoundedSolidFace* face) const
 {
     return !builtFaces.containsKey(face);
 }
 
 _PolyhedralBoundedSolidFace*
-PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::faceOf(
+_PBSMeshBuilder::faceOf(
     _PolyhedralBoundedSolidHalfEdge* he)
 {
     return he->parentLoop->parentFace;
@@ -215,7 +217,7 @@ PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::faceOf(
 
 //= Construction ============================================================
 
-PolyhedralBoundedSolid* PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::build()
+PolyhedralBoundedSolid* _PBSMeshBuilder::build()
 {
     indexMesh();
 
@@ -254,7 +256,7 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::b
     return result;
 }
 
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::enqueueNeighbors(
+void _PBSMeshBuilder::enqueueNeighbors(
     int f, ArrayList<BOOLEAN>& queued, ArrayDeque<int>& queue)
 {
     const ArrayList<int>& polygon = faces[f];
@@ -275,7 +277,7 @@ void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::enqueueNeighbors(
 that follows the order of the polygon is the mesh face, the other one
 is the first open face.
 */
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::buildFirstFace(
+void _PBSMeshBuilder::buildFirstFace(
     const ArrayList<int>& polygon)
 {
     long n = polygon.size();
@@ -296,13 +298,13 @@ void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::buildFirstFace(
     finishFace(polygon);
 }
 
-BOOLEAN PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::edgeExists(
+BOOLEAN _PBSMeshBuilder::edgeExists(
     int from, int to) const
 {
     return halfEdges.containsKey(key(from, to));
 }
 
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::buildFace(int f)
+void _PBSMeshBuilder::buildFace(int f)
 {
     const ArrayList<int>& polygon = faces[f];
     long n = polygon.size();
@@ -354,7 +356,7 @@ Adds a run of new edges of mesh face `f`, from vertex `a` (whose
 previous edge in the face, from `beforeA`, already exists) through the
 new vertices to vertex `b` (followed in the face by `afterB`).
 */
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::buildRun(
+void _PBSMeshBuilder::buildRun(
     int f, int beforeA, int a, const ArrayList<int>& newVertices,
     int b, int afterB)
 {
@@ -390,7 +392,7 @@ void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::buildRun(
 Adds the edge from the vertex of `corner` to the vertex of `target`,
 before both half-edges.
 */
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::connect(
+void _PBSMeshBuilder::connect(
     _PolyhedralBoundedSolidHalfEdge* corner,
     _PolyhedralBoundedSolidHalfEdge* target)
 {
@@ -434,7 +436,7 @@ between its previous edge and its own edge contains `f` in the star of
 `x`.
 */
 _PolyhedralBoundedSolidHalfEdge*
-PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::findCorner(int x, int f)
+_PBSMeshBuilder::findCorner(int x, int f)
 {
     ArrayList<_PolyhedralBoundedSolidHalfEdge*> candidates;
     ArrayList<_PolyhedralBoundedSolidHalfEdge*>& fromX = outgoing[x];
@@ -471,7 +473,7 @@ PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::findCorner(int x, int f)
         String::valueOf(x) + " for face " + String::valueOf(f));
 }
 
-int PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::nextInFace(
+int _PBSMeshBuilder::nextInFace(
     int f, int x) const
 {
     const ArrayList<int>& polygon = faces[f];
@@ -489,7 +491,7 @@ int PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::nextInFace(
 Once all the edges of the polygon exist, its half-edges form a loop:
 its face becomes a mesh face.
 */
-void PolyhedralBoundedSolidMeshConstructions::_MeshBuilder::finishFace(
+void _PBSMeshBuilder::finishFace(
     const ArrayList<int>& polygon)
 {
     _PolyhedralBoundedSolidHalfEdge* he =

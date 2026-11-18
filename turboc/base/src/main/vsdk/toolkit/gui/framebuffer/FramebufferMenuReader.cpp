@@ -68,11 +68,18 @@ FramebufferMenuReader::read(const String &json, Widget &widget)
         return FALSE;
     }
     const JsonNode *messages = root.get(String("messages"));
-    const JsonNode *resolution = messages ? messages->get(String("IDM_RESOLUTION")) : NULL;
+    // Turbo C++ 3.0 cannot destroy String temporaries of a conditional expression
+    const JsonNode *resolution = NULL;
+    if ( messages ) {
+        resolution = messages->get(String("IDM_RESOLUTION"));
+    }
     if ( resolution && resolution->isString() ) {
         widget.addMessage(String("IDM_RESOLUTION"), resolution->asText());
     }
-    const JsonNode *view = messages ? messages->get(String("IDM_VIEW_MENU")) : NULL;
+    const JsonNode *view = NULL;
+    if ( messages ) {
+        view = messages->get(String("IDM_VIEW_MENU"));
+    }
     if ( view && view->isString() ) {
         widget.addMessage(String("IDM_VIEW_MENU"), view->asText());
     }

@@ -69,11 +69,12 @@ Connector::ConnectResult::ConnectResult()
 }
 
 Connector::ConnectResult::ConnectResult(const FaceList& sonfa,
-    const FaceList& sonfb, const Connector& connector)
+    const FaceList& sonfb, const TreeMap<int, int>& inSonfaPairIndexByFaceId,
+    const TreeMap<int, int>& inSonfbPairIndexByFaceId, BOOLEAN inHasPairIndexMaps)
     : sonfaValue(sonfa), sonfbValue(sonfb),
-      sonfaPairIndexByFaceId(connector.sonfaPairIndexByFaceId),
-      sonfbPairIndexByFaceId(connector.sonfbPairIndexByFaceId),
-      hasPairIndexMaps(connector.hasPairIndexMaps)
+      sonfaPairIndexByFaceId(inSonfaPairIndexByFaceId),
+      sonfbPairIndexByFaceId(inSonfbPairIndexByFaceId),
+      hasPairIndexMaps(inHasPairIndexMaps)
 {
 }
 
@@ -651,7 +652,8 @@ Connector::ConnectResult Connector::connect(int op, int flags,
     // 6.1 of plan-csg-boolean-fix-stage2 because it duplicated setOpConnect
     // with extra heuristics that the book does not require.
     setOpConnect();
-    return ConnectResult(sonfa, sonfb, *this);
+    return ConnectResult(sonfa, sonfb, sonfaPairIndexByFaceId,
+        sonfbPairIndexByFaceId, hasPairIndexMaps);
 }
 
 //= Null edges ordering =============================================
