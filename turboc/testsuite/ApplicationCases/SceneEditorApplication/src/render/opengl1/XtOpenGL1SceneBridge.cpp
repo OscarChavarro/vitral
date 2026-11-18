@@ -10,6 +10,7 @@
 #include "model/selection/SceneSelectionEditor.h"
 #include "model/Scene.h"
 #include "render/DrawingAreaHost.h"
+#include "render/RaytracedViewportFrames.h"
 #include "render/opengl1/OpenGL1DrawingAreaRenderer.h"
 #include "render/opengl1/XtOpenGL1SceneBridge.h"
 #include "render/xlib/XlibDrawingAreaRenderer.h"
@@ -59,6 +60,21 @@ public:
         DrawingAreaInteractionTechniques* techniques;
     };
 
+    /**
+    Advances the animation in course, telling the drawing area when it ends:
+    animations only move cameras, so their frames may be approximated while
+    they go on.
+    */
+    class AnimationFrame : public BooleanSupplier {
+    public:
+        AnimationFrame() : owner(NULL), frame(NULL), inCourse(FALSE) {}
+        virtual BOOLEAN getAsBoolean();
+        Impl* owner;
+        /// Animation requested by the techniques (not owned)
+        BooleanSupplier* frame;
+        BOOLEAN inCourse;
+    };
+
     XtOpenGL1SceneBridge::Listener* listener;
     ApplicationModel* model;
     DrawingAreaInteractionTechniques* techniques;
@@ -72,6 +88,11 @@ public:
     /// Editor of the modify panel, or null
     BodyEditFeedbackProvider* bodyEditFeedbackProvider;
     ViewportActivator viewportActivator;
+    /// Raytraced images of the viewports in CPU render mode
+    RaytracedViewportFrames raytracedViewportFrames;
+    /// A gesture of the pointer is in course over the drawing area
+    BOOLEAN pointerGestureInCourse;
+    AnimationFrame animationFrame;
 
     Impl(OpenGL1LabelImageProvider* labels,
          XtOpenGL1SceneBridge::Listener* listener)
@@ -79,7 +100,8 @@ public:
           techniques(NULL), renderer(NULL), xlibRenderer(NULL),
           executor(NULL),
           menuViewport(NULL), selectionEditor(NULL),
-          bodyEditFeedbackProvider(NULL)
+          bodyEditFeedbackProvider(NULL),
+          pointerGestureInCourse(FALSE)
     {
         createModel();
         selectionEditor = new SceneSelectionEditor(model->getScene());
@@ -242,22 +264,50 @@ public:
     */
     void raytraceImage()
     {
-        if ( !prepareRaytracedImage() ) {
-            return;
-        }
         int width = model->getRaytracedImageWidth();
         int height = model->getRaytracedImageHeight();
+        if ( width <= 0 || height <= 0 ) {
+            return;
+        }
         RGBImageUncompressed* image = model->getRaytracedImage();
-        Scene* scene = model->getScene();
-
+        if ( image == NULL ) {
+            image = new RGBImageUncompressed();
+            model->setRaytracedImage(image);
+        }
+        if ( image->getXSize() != width || image->getYSize() != height ) {
+            image->init(width, height);
+            raytracedViewportFrames.invalidate();
+        }
         ZBuffer* depth = model->getRaytracedDepth();
         if ( depth == NULL || depth->getXSize() != width ||
              depth->getYSize() != height ) {
             depth = new ZBuffer(width, height);
             model->setRaytracedDepth(depth);
+            raytracedViewportFrames.invalidate();
         }
-        scene->raytraceViewport(image, depth);
+        // See `RaytracedViewportFrames` for the work it avoids
+        raytracedViewportFrames.raytrace(model->getScene(),
+            model->getDrawingArea(), image, depth);
     }
+
+    /**
+    Raytraces a full image (menu or automation service) in the buffers the
+    viewports in CPU mode share.
+    */
+    void doRaytracingImage()
+    {
+        raytracedViewportFrames.invalidate();
+        if ( prepareRaytracedImage() ) {
+            model->getScene()->raytrace(model->getRaytracedImage());
+        }
+    }
+
+    void updateInteractiveGesture()
+    {
+        model->getDrawingArea()->setInteractiveGestureInCourse(
+            pointerGestureInCourse || animationFrame.inCourse);
+    }
+
     void showImage(RGBImageUncompressed* image)
     {
         listener->imageRequested(image);
@@ -282,6 +332,14 @@ public:
 
     void repaintRequested() { listener->repaintRequested(); }
 
+    void viewRepaintRequested() { listener->viewRepaintRequested(); }
+
+    void interactiveGestureChanged(BOOLEAN inCourse)
+    {
+        pointerGestureInCourse = inCourse;
+        updateInteractiveGesture();
+    }
+
     void statusMessageRequested(const String& message)
     {
         listener->statusMessageRequested(message.c_str());
@@ -300,7 +358,11 @@ public:
     }
     void animationRequested(BooleanSupplier* frame)
     {
-        listener->animationRequested(frame);
+        animationFrame.owner = this;
+        animationFrame.frame = frame;
+        animationFrame.inCourse = TRUE;
+        updateInteractiveGesture();
+        listener->animationRequested(&animationFrame);
     }
 
     //= ViewportSetInteractionListener ====================================
@@ -313,6 +375,20 @@ public:
                                         drawingArea->scaleYToCanvas(y));
     }
 };
+
+BOOLEAN XtOpenGL1SceneBridge::Impl::AnimationFrame::getAsBoolean()
+{
+    BOOLEAN running = FALSE;
+
+    if ( frame != NULL ) {
+        running = frame->getAsBoolean();
+    }
+    if ( !running && inCourse ) {
+        inCourse = FALSE;
+        owner->updateInteractiveGesture();
+    }
+    return running;
+}
 
 XtOpenGL1SceneBridge::XtOpenGL1SceneBridge(
     OpenGL1LabelImageProvider* labels, Listener* listener)
@@ -397,9 +473,12 @@ CommandResult XtOpenGL1SceneBridge::executeCommand(
 
 void XtOpenGL1SceneBridge::doRaytracingImage()
 {
-    if ( impl->prepareRaytracedImage() ) {
-        impl->model->getScene()->raytrace(impl->model->getRaytracedImage());
-    }
+    impl->doRaytracingImage();
+}
+
+void XtOpenGL1SceneBridge::markContentChanged()
+{
+    impl->model->getDrawingArea()->markContentChanged();
 }
 
 RGBImageUncompressed* XtOpenGL1SceneBridge::getRaytracedImage()

@@ -17,6 +17,7 @@ import vsdk.toolkit.render.jogl.viewport.Jogl4LabelImageProvider;
 
 import gui.awt.AwtDrawingAreaController;
 import gui.awt.AwtDrawingAreaFeedback;
+import gui.awt.AwtFrameScheduler;
 import gui.DrawingAreaInteractionTechniques;
 import model.ApplicationModel;
 import model.DrawingArea;
@@ -40,6 +41,8 @@ public class AwtJogl4ApplicationController
     private RenderTechnology canvasTechnology;
     private AwtDrawingAreaController awtController;
     private AwtDrawingAreaFeedback awtFeedback;
+    /// Draws the frames requested by the application and the interaction
+    private AwtFrameScheduler frameScheduler;
 
     public AwtJogl4ApplicationController(ApplicationModel model)
     {
@@ -72,7 +75,9 @@ public class AwtJogl4ApplicationController
     private DrawingAreaInteractionTechniques createTechniques(
         AwtJogl4SceneEditorApplication application)
     {
-        awtFeedback = new AwtDrawingAreaFeedback(application, canvas);
+        frameScheduler = new AwtFrameScheduler(this::displayNow);
+        awtFeedback = new AwtDrawingAreaFeedback(application, canvas,
+            frameScheduler);
         DrawingAreaInteractionTechniques techniques =
             new DrawingAreaInteractionTechniques(model, awtFeedback);
         // While dragging the gizmo, the cursor wraps around its viewport
@@ -131,6 +136,7 @@ public class AwtJogl4ApplicationController
             canvas = null;
             awtController = null;
             awtFeedback = null;
+            frameScheduler = null;
         }
         if ( canvas == null ) {
             createDrawingArea(application);
@@ -177,10 +183,17 @@ public class AwtJogl4ApplicationController
         }
     }
 
+    /**
+    Requests a frame of the drawing area after a change done by the
+    application (commands, dialogs, automation service), which may have
+    changed anything in the scene. Frames are drawn when the GUI is not busy
+    (see `AwtFrameScheduler`).
+    */
     public void repaint()
     {
-        if ( canvas != null ) {
-            canvas.repaint();
+        model.getDrawingArea().markContentChanged();
+        if ( frameScheduler != null ) {
+            frameScheduler.requestFrame();
         }
     }
 

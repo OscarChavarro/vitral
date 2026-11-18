@@ -22,6 +22,7 @@ import model.GuiState;
 import model.Scene;
 import model.ApplicationModel;
 import model.RenderTechnology;
+import render.RaytracedViewportFrames;
 import gui.awt.AwtApplicationHost;
 import gui.awt.AwtApplicationModel;
 import application.mcp.AwtJogl4VitralEditorMCP;
@@ -29,6 +30,9 @@ import application.mcp.AwtJogl4VitralEditorMCP;
 public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     // Application model
     private ApplicationModel applicationModel;
+    /// Raytraced images of the viewports in CPU render mode
+    private final RaytracedViewportFrames raytracedViewportFrames =
+        new RaytracedViewportFrames();
 
     // Application GUI
     private AwtApplicationModel awtModel;
@@ -179,22 +183,39 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     @Override
     public void doRaytracingImage()
     {
+        // The buffers shared with the viewports in CPU mode are overwritten
+        raytracedViewportFrames.invalidate();
         prepareRaytracedImage();
         applicationModel.getScene().raytrace(applicationModel.getRaytracedImage());
     }
 
+    /**
+    Raytraces the viewport being drawn (the active camera of the scene) into
+    the raytraced image and depth of the model, which are allocated again
+    only when the size of the viewport changes (they are megabytes, raytraced
+    tens of times per second). See `RaytracedViewportFrames` for the work
+    it avoids.
+    */
     @Override
     public void doViewportRaytracingImage()
     {
-        prepareRaytracedImage();
-        ZBuffer depth = applicationModel.getRaytracedDepth();
+        int width = applicationModel.getRaytracedImageWidth();
+        int height = applicationModel.getRaytracedImageHeight();
         RGBImageUncompressed image = applicationModel.getRaytracedImage();
-        if ( depth == null || depth.getXSize() != image.getXSize() ||
-             depth.getYSize() != image.getYSize() ) {
-            depth = new ZBuffer(image.getXSize(), image.getYSize());
-            applicationModel.setRaytracedDepth(depth);
+        ZBuffer depth = applicationModel.getRaytracedDepth();
+
+        if ( image.getXSize() != width || image.getYSize() != height ) {
+            image.init(width, height);
+            raytracedViewportFrames.invalidate();
         }
-        applicationModel.getScene().raytraceViewport(image, depth);
+        if ( depth == null || depth.getXSize() != width ||
+             depth.getYSize() != height ) {
+            depth = new ZBuffer(width, height);
+            applicationModel.setRaytracedDepth(depth);
+            raytracedViewportFrames.invalidate();
+        }
+        raytracedViewportFrames.raytrace(applicationModel.getScene(),
+            applicationModel.getDrawingArea(), image, depth);
     }
 
     @Override

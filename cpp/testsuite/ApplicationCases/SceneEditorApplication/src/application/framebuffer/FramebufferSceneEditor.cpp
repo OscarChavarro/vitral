@@ -183,6 +183,7 @@ FramebufferSceneEditor::FramebufferSceneEditor(Framebuffer& target,
       modifyPageBuilt(false), viewportMenu(nullptr), menuViewport(nullptr),
       viewportMenuPosted(false), popupPending(false), popupX(0), popupY(0),
       running(false), repaintPending(false), animating(false),
+      pointerGestureInCourse(false), framePostponements(0),
       buttonDown(false),
       pressMoved(false), areaX(0), areaY(0), areaWidth(0), areaHeight(0),
       panelX(0), panelWidth(0),
@@ -643,6 +644,15 @@ int FramebufferSceneEditor::run()
             viewportMenuPosted = false;
             updateModifyPage(false);
         }
+        // The frame waits for the events already waiting (as
+        // `AwtFrameScheduler`): if 20 events arrive while a frame is being
+        // drawn, the 20 are processed and then one frame is drawn
+        if ( repaintPending && framePostponements < MAXIMUM_FRAME_POSTPONEMENTS &&
+             input.hasPendingEvent() ) {
+            framePostponements++;
+            continue;
+        }
+        framePostponements = 0;
         drawViewports();
     }
     return 0;
@@ -671,7 +681,20 @@ void FramebufferSceneEditor::advanceAnimation()
         return;
     }
     animating = animationFrame.getAsBoolean();
+    if ( !animating ) {
+        updateInteractiveGesture();
+    }
     repaintPending = true;
+}
+
+/**
+Animations and dragging gestures only move cameras or bodies continuously:
+their frames may be approximated (see `RaytracedViewportFrames`).
+*/
+void FramebufferSceneEditor::updateInteractiveGesture()
+{
+    model->getDrawingArea()->setInteractiveGestureInCourse(
+        pointerGestureInCourse || animating);
 }
 
 void FramebufferSceneEditor::handle(const FramebufferEvent& event)
@@ -828,7 +851,7 @@ void FramebufferSceneEditor::executeCommand(const java::String& command)
     if ( result == CommandResult::NOT_HANDLED && !executeGuiCommand(command) ) {
         showStatus(java::String("Not available in the framebuffer GUI: ") + command);
     }
-    repaintPending = true;
+    repaintRequested();
 }
 
 /**
@@ -960,7 +983,7 @@ bool FramebufferSceneEditor::chooseFile(const java::String& title, bool save,
                      "Filter:");
     bool accepted = dialog.run(surface, input, theme, this, path);
     // The menus and viewports behind the dialog may have changed.
-    repaintPending = true;
+    repaintRequested();
     return accepted;
 }
 
@@ -1007,7 +1030,7 @@ void FramebufferSceneEditor::showSelectorDialog()
     SceneHierarchyPresenter presenter(model, [self]() { self->repaintRequested(); });
     SelectorListener listener(*this, form, presenter);
     form.run(surface, input, theme, &listener);
-    repaintPending = true;
+    repaintRequested();
 }
 
 /**
@@ -1040,6 +1063,8 @@ bool FramebufferSceneEditor::prepareRaytracedImage()
 
 void FramebufferSceneEditor::computeRaytracedImage()
 {
+    // The buffers shared with the viewports in CPU mode are overwritten
+    raytracedViewportFrames.invalidate();
     if ( prepareRaytracedImage() ) {
         model->getScene()->raytrace(model->getRaytracedImage());
     }
@@ -1063,18 +1088,30 @@ renderer requested (see `Scene::raytraceViewport`).
 */
 void FramebufferSceneEditor::raytraceImage()
 {
-    if ( !prepareRaytracedImage() ) {
-        return;
-    }
     int width = model->getRaytracedImageWidth();
     int height = model->getRaytracedImageHeight();
+    if ( width <= 0 || height <= 0 ) {
+        return;
+    }
+    RGBImageUncompressed* image = model->getRaytracedImage();
+    if ( image == nullptr ) {
+        image = new RGBImageUncompressed();
+        model->setRaytracedImage(image);
+    }
+    if ( image->getXSize() != width || image->getYSize() != height ) {
+        image->init(width, height);
+        raytracedViewportFrames.invalidate();
+    }
     ZBuffer* depth = model->getRaytracedDepth();
     if ( depth == nullptr || depth->getXSize() != width ||
          depth->getYSize() != height ) {
         depth = new ZBuffer(width, height);
         model->setRaytracedDepth(depth);
+        raytracedViewportFrames.invalidate();
     }
-    model->getScene()->raytraceViewport(model->getRaytracedImage(), depth);
+    // See `RaytracedViewportFrames` for the work it avoids
+    raytracedViewportFrames.raytrace(model->getScene(),
+        model->getDrawingArea(), image, depth);
 }
 
 void FramebufferSceneEditor::showImage(RGBImageUncompressed* image)
@@ -1096,9 +1133,25 @@ void FramebufferSceneEditor::cursorWarpRequested(int surfaceX, int surfaceY)
                       areaY + drawingArea->scaleYToCanvas(surfaceY));
 }
 
+/**
+The scene may have changed: frames computed before (i.e. raytraced images)
+can not be presented again.
+*/
 void FramebufferSceneEditor::repaintRequested()
 {
+    model->getDrawingArea()->markContentChanged();
     repaintPending = true;
+}
+
+void FramebufferSceneEditor::viewRepaintRequested()
+{
+    repaintPending = true;
+}
+
+void FramebufferSceneEditor::interactiveGestureChanged(bool inCourse)
+{
+    pointerGestureInCourse = inCourse;
+    updateInteractiveGesture();
 }
 
 void FramebufferSceneEditor::statusMessageRequested(const java::String& text)
@@ -1134,6 +1187,7 @@ void FramebufferSceneEditor::animationRequested(
 {
     animationFrame = frame;
     animating = true;
+    updateInteractiveGesture();
 }
 
 void FramebufferSceneEditor::fullScreenGuiToggleRequested()

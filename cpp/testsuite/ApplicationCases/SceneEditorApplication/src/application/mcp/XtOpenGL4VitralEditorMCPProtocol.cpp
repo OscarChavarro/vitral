@@ -102,7 +102,19 @@ java::String XtOpenGL4VitralEditorMCPProtocol::callTool(
     const java::String& tool, const java::String& request)
 {
     ToolCall command([this, tool, request]() {
-        return executeTool(tool, request);
+        java::String answer;
+        try {
+            answer = executeTool(tool, request);
+        }
+        catch ( ... ) {
+            applicationTools.markContentChanged();
+            throw;
+        }
+        // Tools may change the scene or its rendering configuration without
+        // asking for a frame: frames computed before them (i.e. raytraced
+        // images) can not be presented again
+        applicationTools.markContentChanged();
+        return answer;
     });
 
     XtEventQueue::invokeAndWait(&command);

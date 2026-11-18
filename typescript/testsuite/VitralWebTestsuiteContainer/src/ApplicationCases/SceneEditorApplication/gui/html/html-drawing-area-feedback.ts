@@ -35,6 +35,10 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
   private readonly cursors: Map<PointerCursor, string>;
   /// Drives the animation in course, if any (Java's Swing `Timer`)
   private animationTimer: ReturnType<typeof setInterval> | null = null;
+  /// A gesture of the pointer is in course over the drawing area
+  private pointerGestureInCourse: boolean = false;
+  /// An animation of the cameras is in course
+  private animationInCourse: boolean = false;
 
   /**
    * @param application the application whose GUI is used
@@ -56,6 +60,8 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
       this.drawingArea.getViewportSet().getElementScaler(),
     );
     this.elementScaler.updateFromDefaultScreen();
+    // A gesture of a replaced drawing surface can not end anymore
+    this.drawingArea.setInteractiveGestureInCourse(false);
   }
 
   /**
@@ -142,8 +148,32 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
     );
   }
 
+  /**
+   * The scene may have changed: frames computed before (i.e. raytraced
+   * images) can not be presented again.
+   */
   repaintRequested(): void {
     this.application.repaintDrawingArea();
+  }
+
+  viewRepaintRequested(): void {
+    this.application.requestDrawingAreaFrame();
+  }
+
+  interactiveGestureChanged(inCourse: boolean): void {
+    this.pointerGestureInCourse = inCourse;
+    this.updateInteractiveGesture();
+  }
+
+  /**
+   * Animations and dragging gestures only move cameras or bodies
+   * continuously: their frames may be approximated (see
+   * `RaytracedViewportFrames`).
+   */
+  private updateInteractiveGesture(): void {
+    this.drawingArea.setInteractiveGestureInCourse(
+      this.pointerGestureInCourse || this.animationInCourse,
+    );
   }
 
   /// Period of the frames of animations, in milliseconds
@@ -158,13 +188,18 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
     if (this.animationTimer !== null) {
       clearInterval(this.animationTimer);
     }
+    this.animationInCourse = true;
+    this.updateInteractiveGesture();
     const timer: ReturnType<typeof setInterval> = setInterval((): void => {
       const running: boolean = frame();
-      this.application.repaintDrawingArea();
+      // Animations only move cameras
+      this.application.requestDrawingAreaFrame();
       if (!running) {
         clearInterval(timer);
         if (this.animationTimer === timer) {
           this.animationTimer = null;
+          this.animationInCourse = false;
+          this.updateInteractiveGesture();
         }
       }
     }, HtmlDrawingAreaFeedback.ANIMATION_FRAME_PERIOD);

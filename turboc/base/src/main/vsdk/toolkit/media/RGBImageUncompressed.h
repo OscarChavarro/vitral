@@ -73,6 +73,11 @@ public:
 
     char* getRawImage() const;
 
+    // The pixels themselves (no copy), in the order of `getRawImage`: to read
+    // or modify the image without copying it. Null if not initialized, or if
+    // the pixels are kept out of the program memory (DOS images).
+    char* getRawImageDirectBuffer();
+
     void setRawImage(int xSize, int ySize, char* data);
 
     RGBImageUncompressed* clone() const;

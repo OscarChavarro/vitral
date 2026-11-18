@@ -16,6 +16,9 @@ public:
         (void)timeoutMilliseconds;
         return waitEvent(event);
     }
+    // True if events are waiting to be read, so the application can process them all before drawing a frame
+    // that would present only the state after the first one. Backends that cannot tell return false.
+    virtual bool hasPendingEvent() { return false; }
     virtual bool hasPointer() const = 0;
     virtual void extendMenu(Widget &) {}
     virtual bool executeMenuCommand(const char *, const char *&) { return false; }

@@ -40,6 +40,10 @@ public:
             failed = TRUE;
             failure = e.getMessage().c_str();
         }
+        // Tools may change the scene or its rendering configuration without
+        // asking for a frame: frames computed before them (i.e. raytraced
+        // images) can not be presented again
+        protocol->applicationTools.markContentChanged();
     }
 };
 

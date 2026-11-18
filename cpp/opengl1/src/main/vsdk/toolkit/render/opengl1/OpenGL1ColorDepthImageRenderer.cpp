@@ -38,7 +38,7 @@ void OpenGL1ColorDepthImageRenderer::draw(RGBImageUncompressed* image, ZBuffer* 
     // The raw image stores its bottom row first, as glDrawPixels expects
     glDisable(GL_DEPTH_TEST);
     glDrawPixels(image->getXSize(), image->getYSize(), GL_RGB,
-        GL_UNSIGNED_BYTE, image->getRawImage());
+        GL_UNSIGNED_BYTE, image->getRawImageDirectBuffer());
 
     // Depth writes need the depth test enabled; ALWAYS replaces what was
     // there. The color buffer is left untouched.
@@ -83,7 +83,8 @@ void OpenGL1ColorDepthImageRenderer::flipDepthRows(ZBuffer* depth)
         depthUploadBuffer = new float[count];
         depthUploadCapacity = count;
     }
-    const float* values = depth->getZBuffer();
+    // Not copied (each frame of a raytraced viewport is uploaded)
+    const float* values = depth->getZBufferDirectBuffer();
     int write = 0;
     for ( int row = ySize - 1; row >= 0; row-- ) {
         for ( int x = 0; x < xSize; x++ ) {

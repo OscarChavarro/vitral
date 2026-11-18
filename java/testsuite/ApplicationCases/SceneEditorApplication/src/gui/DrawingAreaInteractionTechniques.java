@@ -16,6 +16,7 @@ import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
 import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSetCommands;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 
 import model.Scene;
@@ -101,6 +102,10 @@ public class DrawingAreaInteractionTechniques
     private boolean cameraControlClickConsumed;
     /** The gesture that started the camera animation is still recorded. */
     private boolean cameraAnimationRecording;
+    /** A button was pressed over the drawing area and not released yet. */
+    private boolean pointerGestureInCourse;
+    /** The pointer moved in the gesture in course: it is not a click. */
+    private boolean pointerGestureDragged;
 
     /**
     @param model application model, providing the scene to interact with
@@ -132,6 +137,8 @@ public class DrawingAreaInteractionTechniques
         cameraControlViewport = null;
         cameraControlClickConsumed = false;
         cameraAnimationRecording = false;
+        pointerGestureInCourse = false;
+        pointerGestureDragged = false;
     }
 
     //= Camera control gizmo ==============================================
@@ -197,7 +204,7 @@ public class DrawingAreaInteractionTechniques
             changed = cameraControlTechnique.processMouseExitedEvent();
         }
         if ( changed ) {
-            listener.repaintRequested();
+            listener.viewRepaintRequested();
         }
         return model.getCameraControlGizmo().isActive();
     }
@@ -490,6 +497,9 @@ public class DrawingAreaInteractionTechniques
 
         // Any press takes the camera: a turn in course stops where it is
         stopCameraAnimation();
+        // A gesture whose release was lost ends here
+        endPointerGesture();
+        pointerGestureInCourse = true;
         if ( mouseView == null ) {
             return;
         }
@@ -507,7 +517,7 @@ public class DrawingAreaInteractionTechniques
         // the pointer before the release that opens the projection menu.
         if ( viewportTitleGesture ) {
             requestCursorForPointer(event, PointerCursor.VIEWPORT_TITLE);
-            listener.repaintRequested();
+            listener.viewRepaintRequested();
             return;
         }
 
@@ -518,7 +528,7 @@ public class DrawingAreaInteractionTechniques
                      toViewportEvent(event, mouseView)) ) {
                 cameraControlViewport = mouseView;
                 listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
-                listener.repaintRequested();
+                listener.viewRepaintRequested();
                 return;
             }
         }
@@ -610,11 +620,18 @@ public class DrawingAreaInteractionTechniques
             // The selection may have changed what the pointer can do
             updateModeCursor(event);
         }
-        listener.repaintRequested();
+        // In camera mode only the camera reacts to a press
+        if ( mode == InteractionMode.CAMERA ) {
+            listener.viewRepaintRequested();
+        }
+        else {
+            listener.repaintRequested();
+        }
     }
 
     public void processMouseReleasedEvent(MouseEvent event)
     {
+        endPointerGesture();
         if ( cameraControlTechnique.isGestureInCourse() ) {
             processCameraControlMouseReleasedEvent(event);
             return;
@@ -634,7 +651,7 @@ public class DrawingAreaInteractionTechniques
             viewportTitleClickConsumed = true;
             updateModeCursor(event);
             editRecorder.endGesture();
-            listener.repaintRequested();
+            listener.viewRepaintRequested();
             return;
         }
 
@@ -649,7 +666,7 @@ public class DrawingAreaInteractionTechniques
 
         if ( mode == InteractionMode.CAMERA &&
              interactionTechniques.processCameraMouseReleasedEvent(event) ) {
-            listener.repaintRequested();
+            listener.viewRepaintRequested();
         }
         else if ( mode == InteractionMode.TRANSLATE && centroid != null ) {
             processTranslationEvent(event, mouseView, centroid,
@@ -690,7 +707,26 @@ public class DrawingAreaInteractionTechniques
         if ( !model.getCameraControlGizmo().isActive() ) {
             updateModeCursor(event);
         }
-        listener.repaintRequested();
+        // The view turns: only the camera changes
+        listener.viewRepaintRequested();
+    }
+
+    /**
+    Ends the gesture of the pointer, if one is in course. If it was dragged,
+    a frame is requested: the ones drawn during the gesture may be
+    approximated.
+    */
+    private void endPointerGesture()
+    {
+        if ( !pointerGestureInCourse ) {
+            return;
+        }
+        pointerGestureInCourse = false;
+        if ( pointerGestureDragged ) {
+            pointerGestureDragged = false;
+            listener.interactiveGestureChanged(false);
+            listener.viewRepaintRequested();
+        }
     }
 
     public void processMouseClickedEvent(MouseEvent event)
@@ -750,6 +786,12 @@ public class DrawingAreaInteractionTechniques
         InteractionMode mode = drawingArea.getInteractionMode();
         boolean wasOverCameraControl = model.getCameraControlGizmo().isActive();
 
+        // No button is pressed: a gesture whose release was lost (i.e.
+        // taken by a popup menu) is over
+        if ( !confinedGesture ) {
+            endPointerGesture();
+        }
+
         if ( !confinedGesture &&
              processCameraControlMouseMovedEvent(event, mouseView) ) {
             listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
@@ -770,7 +812,7 @@ public class DrawingAreaInteractionTechniques
 
         if ( mode == InteractionMode.CAMERA &&
              interactionTechniques.processCameraMouseMovedEvent(event) ) {
-            listener.repaintRequested();
+            listener.viewRepaintRequested();
         }
         else if ( mode == InteractionMode.TRANSLATE && centroid != null ) {
             processTranslationEvent(event, mouseView, centroid,
@@ -788,12 +830,17 @@ public class DrawingAreaInteractionTechniques
 
     public void processMouseDraggedEvent(MouseEvent event)
     {
+        // A click is not a continuous gesture: it starts when dragging
+        if ( pointerGestureInCourse && !pointerGestureDragged ) {
+            pointerGestureDragged = true;
+            listener.interactiveGestureChanged(true);
+        }
         if ( cameraControlTechnique.isGestureInCourse() ) {
             // The gesture belongs to the viewport where it started
             placeCameraControlGizmo(cameraControlViewport);
             if ( cameraControlTechnique.processMouseDraggedEvent(
                      toViewportEvent(event, cameraControlViewport)) ) {
-                listener.repaintRequested();
+                listener.viewRepaintRequested();
             }
             return;
         }
@@ -812,7 +859,7 @@ public class DrawingAreaInteractionTechniques
 
         if ( mode == InteractionMode.CAMERA &&
              interactionTechniques.processCameraMouseDraggedEvent(event) ) {
-            listener.repaintRequested();
+            listener.viewRepaintRequested();
         }
         else if ( mode == InteractionMode.TRANSLATE && centroid != null ) {
             if ( processTranslationEvent(event, mouseView, centroid,
@@ -860,7 +907,7 @@ public class DrawingAreaInteractionTechniques
         try {
             if ( mode == InteractionMode.CAMERA &&
                  interactionTechniques.processCameraMouseWheelEvent(event) ) {
-                listener.repaintRequested();
+                listener.viewRepaintRequested();
             }
         }
         finally {
@@ -1251,6 +1298,21 @@ public class DrawingAreaInteractionTechniques
         if ( technology != null ) {
             if ( technology != drawingArea.getRenderTechnology() ) {
                 listener.renderTechnologyChangeRequested(technology);
+                // Choosing OpenGL in the menu of a raytraced viewport means
+                // rasterizing it: raytracing is available with both
+                // technologies, so it would be kept otherwise
+                if ( technology == RenderTechnology.OPENGL4 &&
+                     viewport.getRenderMode() == Viewport.RENDER_MODE_RAYTRACING ) {
+                    editRecorder.beginAction();
+                    try {
+                        viewportSetTechniques.processCommand(
+                            ViewportSetCommands.IDV_RENDER_MODE_GPU, viewport);
+                    }
+                    finally {
+                        editRecorder.endAction(sceneOperationName(
+                            drawingArea.getInteractionMode()), false);
+                    }
+                }
             }
             return true;
         }

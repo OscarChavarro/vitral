@@ -104,6 +104,10 @@ private:
     bool cameraControlClickConsumed;
     /// The gesture that started the camera animation is still recorded.
     bool cameraAnimationRecording;
+    /// A button was pressed over the drawing area and not released yet.
+    bool pointerGestureInCourse;
+    /// The pointer moved in the gesture in course: it is not a click.
+    bool pointerGestureDragged;
 
     //= Camera control gizmo ==============================================
     /**
@@ -125,6 +129,13 @@ private:
     */
     bool processCameraControlMouseMovedEvent(const MouseEvent& event,
                                              Viewport* mouseView);
+
+    /**
+    Ends the gesture of the pointer, if one is in course. If it was dragged,
+    a frame is requested: the ones drawn during the gesture may be
+    approximated.
+    */
+    void endPointerGesture();
 
     /**
     Ends the gesture of the camera control gizmo. A click starts the turn of

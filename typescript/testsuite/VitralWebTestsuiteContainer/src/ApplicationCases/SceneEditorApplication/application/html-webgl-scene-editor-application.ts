@@ -18,6 +18,7 @@ import { ApplicationModel } from '../model/application-model';
 import { GuiState } from '../model/gui-state';
 import { javaSimpleClassName } from '../model/java-class-name';
 import { Scene } from '../model/scene';
+import { RaytracedViewportFrames } from '../render/raytraced-viewport-frames';
 import { WebSceneRaytracingBackend } from '../render/web-scene-raytracing-backend';
 import { HtmlWebGLApplicationController } from './html-webgl-application-controller';
 import { HtmlWebGLGuiController } from './html-webgl-gui-controller';
@@ -50,6 +51,8 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
   private htmlGuiController!: HtmlWebGLGuiController;
   private webglController!: HtmlWebGLApplicationController;
   private raytracingBackend: WebSceneRaytracingBackend | null = null;
+  /// Raytraced images of the viewports in CPU render mode
+  private readonly raytracedViewportFrames: RaytracedViewportFrames = new RaytracedViewportFrames();
   private mcp: HtmlWebGLVitralEditorMCP | null = null;
   private tangibleInterfaceClient: TangibleInterfaceNetworkClient | null = null;
   private closed = false;
@@ -242,23 +245,38 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
   }
 
   async doRaytracingImage(): Promise<void> {
+    // The buffers shared with the viewports in CPU mode are overwritten
+    this.raytracedViewportFrames.invalidate();
     this.prepareRaytracedImage();
     await this.applicationModel.getScene().raytrace(this.applicationModel.getRaytracedImage());
   }
 
+  /**
+   * Raytraces the viewport being drawn into the image and depth buffers of
+   * the model, of the size the renderer requested. The buffers are created
+   * again only when that size changes, and the image is computed only when
+   * needed (see `RaytracedViewportFrames`).
+   */
   async doViewportRaytracingImage(): Promise<void> {
-    this.prepareRaytracedImage();
-    let depth: ZBuffer | null = this.applicationModel.getRaytracedDepth();
+    const width: number = this.applicationModel.getRaytracedImageWidth();
+    const height: number = this.applicationModel.getRaytracedImageHeight();
     const image: RGBImageUncompressed = this.applicationModel.getRaytracedImage();
-    if (
-      depth === null ||
-      depth.getXSize() !== image.getXSize() ||
-      depth.getYSize() !== image.getYSize()
-    ) {
-      depth = new ZBuffer(image.getXSize(), image.getYSize());
-      this.applicationModel.setRaytracedDepth(depth);
+    if (image.getXSize() !== width || image.getYSize() !== height) {
+      image.init(width, height);
+      this.raytracedViewportFrames.invalidate();
     }
-    await this.applicationModel.getScene().raytraceViewport(image, depth);
+    let depth: ZBuffer | null = this.applicationModel.getRaytracedDepth();
+    if (depth === null || depth.getXSize() !== width || depth.getYSize() !== height) {
+      depth = new ZBuffer(width, height);
+      this.applicationModel.setRaytracedDepth(depth);
+      this.raytracedViewportFrames.invalidate();
+    }
+    await this.raytracedViewportFrames.raytrace(
+      this.applicationModel.getScene(),
+      this.applicationModel.getDrawingArea(),
+      image,
+      depth,
+    );
   }
 
   closeApplication(): void {
@@ -292,6 +310,12 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
   repaintDrawingArea(): void {
     if (this.webglController !== undefined) {
       this.webglController.repaint();
+    }
+  }
+
+  requestDrawingAreaFrame(): void {
+    if (this.webglController !== undefined) {
+      this.webglController.requestFrame();
     }
   }
 

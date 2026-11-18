@@ -33,6 +33,22 @@ public:
     virtual void repaintRequested() = 0;
 
     /**
+    The drawing area must be drawn again, but only cameras or overlays
+    (gizmos, highlights, selected viewport) changed: the content of the scene
+    did not, so images computed from it for the same cameras (i.e. raytraced
+    ones) can be presented again.
+    */
+    virtual void viewRepaintRequested() = 0;
+
+    /**
+    A continuous gesture of the pointer over the drawing area started (a
+    button was pressed and dragged) or ended (it was released). While it is
+    in course, expensive render modes may present approximated frames.
+    @param inCourse true when it starts, false when it ends
+    */
+    virtual void interactiveGestureChanged(bool inCourse) = 0;
+
+    /**
     @param message text for the status message of the application
     */
     virtual void statusMessageRequested(const java::String& message) = 0;

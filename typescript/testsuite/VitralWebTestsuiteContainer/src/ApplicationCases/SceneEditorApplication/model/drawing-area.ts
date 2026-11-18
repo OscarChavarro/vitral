@@ -41,6 +41,9 @@ export class DrawingArea {
   private canvasWidth: number;
   private canvasHeight: number;
 
+  private contentGeneration: number;
+  private interactiveGestureInCourse: boolean;
+
   /**
    * @param viewportSet the viewport set presented by this drawing area
    */
@@ -59,6 +62,8 @@ export class DrawingArea {
     this.pendingWorkspaceExportFile = null;
     this.canvasWidth = 0;
     this.canvasHeight = 0;
+    this.contentGeneration = 0;
+    this.interactiveGestureInCourse = false;
   }
 
   getViewportSet(): ViewportSet {
@@ -325,5 +330,41 @@ export class DrawingArea {
       (surfaceX * this.canvasWidth) / this.viewportSet.getSizeXInPixels(),
       (surfaceY * this.canvasHeight) / this.viewportSet.getSizeYInPixels(),
     ];
+  }
+
+  //= Frame invalidation ================================================
+
+  /**
+   * @return a number that changes each time the content of the scene
+   * (bodies, lights, materials, backgrounds, rendering configuration...) may
+   * have changed. A frame computed for an equal generation, with the same
+   * camera and size, can be presented again (i.e. a raytraced image).
+   * Changes of the cameras alone do not change it.
+   */
+  getContentGeneration(): number {
+    return this.contentGeneration;
+  }
+
+  /**
+   * The content of the scene may have changed: frames computed before can not
+   * be presented again. Any request to draw again that is not known to change
+   * only the cameras or overlays must call this.
+   */
+  markContentChanged(): void {
+    this.contentGeneration++;
+  }
+
+  /**
+   * @return true while the user is doing a continuous gesture over the
+   * drawing area (dragging with a button pressed, or an animation of the
+   * cameras is in course): expensive render modes (raytracing) may draw
+   * approximated frames, and the exact one when it ends
+   */
+  isInteractiveGestureInCourse(): boolean {
+    return this.interactiveGestureInCourse;
+  }
+
+  setInteractiveGestureInCourse(inCourse: boolean): void {
+    this.interactiveGestureInCourse = inCourse;
   }
 }

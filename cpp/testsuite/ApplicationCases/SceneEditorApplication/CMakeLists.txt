@@ -79,6 +79,7 @@ if(SCENE_EDITOR_VARIANT STREQUAL "x11_framebuffer")
         src/model/selection/SelectionSet.cpp
         src/render/DrawingAreaGizmoPresenter.cpp
         src/render/FrameCaptureService.cpp
+        src/render/RaytracedViewportFrames.cpp
         src/render/ProjectedViewsDebugger.cpp
     )
     target_include_directories(SceneEditorApplication PRIVATE
@@ -324,6 +325,7 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/model/selection/SelectionSet.cpp
     src/render/DrawingAreaGizmoPresenter.cpp
     src/render/FrameCaptureService.cpp
+    src/render/RaytracedViewportFrames.cpp
     src/render/ProjectedViewsDebugger.cpp
     src/render/BrepExportCache.cpp
     src/render/ClipSpaceLineProjector.cpp
@@ -375,6 +377,7 @@ if(SCENE_EDITOR_IS_GTK4)
         src/model/selection/SelectionSet.cpp
         src/render/DrawingAreaGizmoPresenter.cpp
         src/render/FrameCaptureService.cpp
+        src/render/RaytracedViewportFrames.cpp
         src/render/ProjectedViewsDebugger.cpp
         ${SCENE_EDITOR_OPENGL_GTK4_SOURCES}
     )

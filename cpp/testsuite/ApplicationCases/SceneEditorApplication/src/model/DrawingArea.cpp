@@ -22,7 +22,8 @@ DrawingArea::DrawingArea(ViewportSet* viewportSet)
       colorCaptureRequested(false), depthCaptureRequested(false),
       contoursRequested(false), projectedViewsDebugRequested(false),
       hasPendingViewportExport(false), pendingViewportExportJpg(false),
-      hasPendingWorkspaceExport(false), canvasWidth(0), canvasHeight(0)
+      hasPendingWorkspaceExport(false), canvasWidth(0), canvasHeight(0),
+      contentGeneration(0), interactiveGestureInCourse(false)
 {
     setRenderTechnology(RenderTechnology::OPENGL);
 }
@@ -36,6 +37,30 @@ RenderTechnology::Value DrawingArea::getRenderTechnology() const
 {
     return renderTechnology;
 }
+
+//= Frame invalidation ====================================================
+
+long long DrawingArea::getContentGeneration() const
+{
+    return contentGeneration;
+}
+
+void DrawingArea::markContentChanged()
+{
+    contentGeneration++;
+}
+
+bool DrawingArea::isInteractiveGestureInCourse() const
+{
+    return interactiveGestureInCourse;
+}
+
+void DrawingArea::setInteractiveGestureInCourse(bool inCourse)
+{
+    interactiveGestureInCourse = inCourse;
+}
+
+//=========================================================================
 
 void DrawingArea::setRenderTechnology(RenderTechnology::Value technology)
 {

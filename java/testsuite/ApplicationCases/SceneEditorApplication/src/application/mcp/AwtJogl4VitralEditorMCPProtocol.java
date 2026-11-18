@@ -94,6 +94,12 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             catch ( Exception e ) {
                 result[0] = "{\"error\":\"" + MCPJson.escape(e.getMessage()) + "\"}";
             }
+            finally {
+                // Tools may change the scene or its rendering configuration
+                // without asking for a frame: frames computed before them
+                // (i.e. raytraced images) can not be presented again
+                applicationTools.markContentChanged();
+            }
         };
 
         if ( SwingUtilities.isEventDispatchThread() ) {

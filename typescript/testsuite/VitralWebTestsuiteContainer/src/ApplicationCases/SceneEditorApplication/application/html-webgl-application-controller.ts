@@ -99,7 +99,7 @@ export class HtmlWebGLApplicationController {
     canvas.addEventListener('webglcontextlost', (event: Event): void => event.preventDefault());
     canvas.addEventListener('webglcontextrestored', (): void => {
       this.renderer?.init();
-      this.repaint();
+      this.requestFrame();
     });
   }
 
@@ -133,9 +133,24 @@ export class HtmlWebGLApplicationController {
   }
 
   /**
-   * Requests a new frame of the drawing area.
+   * Requests a new frame of the drawing area after a change done by the
+   * application (commands, dialogs, automation service), which may have
+   * changed anything in the scene (see `DrawingArea.markContentChanged`).
    */
   repaint(): void {
+    this.model.getDrawingArea().markContentChanged();
+    this.requestFrame();
+  }
+
+  /**
+   * Requests a new frame of the drawing area, without changes in the content
+   * of the scene. Requests are coalesced: one frame is drawn in the next
+   * animation frame of the browser (after the pending events are processed),
+   * and the requests done while a frame is drawn give one frame after it, so
+   * if 20 events arrive while a frame is being drawn, only the state left by
+   * the last one is drawn.
+   */
+  requestFrame(): void {
     if (this.canvas === null) {
       return;
     }
@@ -161,7 +176,7 @@ export class HtmlWebGLApplicationController {
   display(): Promise<void> {
     return new Promise<void>((resolve): void => {
       this.displayWaiters.push(resolve);
-      this.repaint();
+      this.requestFrame();
     });
   }
 
@@ -190,7 +205,7 @@ export class HtmlWebGLApplicationController {
       }
       if (this.repaintAfterFrame) {
         this.repaintAfterFrame = false;
-        this.repaint();
+        this.requestFrame();
       }
     }
   }
@@ -212,7 +227,7 @@ export class HtmlWebGLApplicationController {
     }
     this.renderer.reshape(width, height);
     this.reshaped = true;
-    this.repaint();
+    this.requestFrame();
   }
 
   /**

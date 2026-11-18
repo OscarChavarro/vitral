@@ -45,6 +45,14 @@ class AwtJogl4MCPApplicationTools
     /**
     Repaints the drawing area, i.e. after a change of the model.
     */
+    /**
+    The scene may have changed (see `DrawingArea.markContentChanged`).
+    */
+    void markContentChanged()
+    {
+        parent.getApplicationModel().getDrawingArea().markContentChanged();
+    }
+
     void repaint()
     {
         parent.getJogl4Controller().repaint();

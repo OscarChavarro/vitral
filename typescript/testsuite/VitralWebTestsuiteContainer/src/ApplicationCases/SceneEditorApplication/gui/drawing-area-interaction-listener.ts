@@ -26,6 +26,22 @@ export interface DrawingAreaInteractionListener {
   repaintRequested(): void;
 
   /**
+   * The drawing area must be drawn again, but only cameras or overlays
+   * (gizmos, highlights, selected viewport) changed: the content of the scene
+   * did not, so images computed from it for the same cameras (i.e. raytraced
+   * ones) can be presented again.
+   */
+  viewRepaintRequested(): void;
+
+  /**
+   * A continuous gesture of the pointer over the drawing area started (it was
+   * dragged) or ended (it was released). While it is in course, expensive
+   * render modes may present approximated frames.
+   * @param inCourse true when it starts, false when it ends
+   */
+  interactiveGestureChanged(inCourse: boolean): void;
+
+  /**
    * @param message text for the status message of the application
    */
   statusMessageRequested(message: string): void;

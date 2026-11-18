@@ -43,6 +43,9 @@ private:
     int canvasWidth;
     int canvasHeight;
 
+    long long contentGeneration;
+    bool interactiveGestureInCourse;
+
 public:
     /**
     @param viewportSet the viewport set presented by this drawing area
@@ -64,6 +67,34 @@ public:
     drawing surface accordingly.
     */
     void setRenderTechnology(RenderTechnology::Value renderTechnology);
+
+    //= Frame invalidation ================================================
+
+    /**
+    @return a number that changes each time the content of the scene
+    (bodies, lights, materials, backgrounds, rendering configuration...) may
+    have changed. A frame computed for an equal generation, with the same
+    camera and size, can be presented again (i.e. a raytraced image).
+    Changes of the cameras alone do not change it.
+    */
+    long long getContentGeneration() const;
+
+    /**
+    The content of the scene may have changed: frames computed before can not
+    be presented again. Any request to draw again that is not known to change
+    only the cameras or overlays must call this.
+    */
+    void markContentChanged();
+
+    /**
+    @return true while the user is doing a continuous gesture over the
+    drawing area (dragging with a button pressed, or an animation of the
+    cameras is in course): expensive render modes (raytracing) may draw
+    approximated frames, and the exact one when it ends
+    */
+    bool isInteractiveGestureInCourse() const;
+
+    void setInteractiveGestureInCourse(bool inCourse);
 
     //= Interaction mode ==================================================
     InteractionMode getInteractionMode() const;

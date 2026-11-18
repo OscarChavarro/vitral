@@ -89,6 +89,7 @@ SOURCES = \
     src/render/DrawingAreaGizmoPresenter.cpp \
     src/render/FrameCaptureService.cpp \
     src/render/ProjectedViewsDebugger.cpp \
+    src/render/RaytracedViewportFrames.cpp \
     src/application/XtOpenGL1GuiEventExecutor.cpp \
     src/application/mcp/MCPJson.cpp \
     src/application/mcp/MCPSceneTools.cpp \

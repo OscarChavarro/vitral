@@ -93,6 +93,7 @@ set(SCENE_EDITOR_APPLICATION_SOURCES
     model/selection/SelectionSet.cpp
     render/DrawingAreaGizmoPresenter.cpp
     render/FrameCaptureService.cpp
+    render/RaytracedViewportFrames.cpp
     render/ProjectedViewsDebugger.cpp
 )
 list(TRANSFORM SCENE_EDITOR_APPLICATION_SOURCES PREPEND "${SCENE_EDITOR_APPLICATION_SOURCE_DIR}/src/")

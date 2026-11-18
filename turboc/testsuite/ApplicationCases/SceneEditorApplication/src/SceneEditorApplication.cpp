@@ -228,6 +228,8 @@ public:
         , ready(FALSE)
         , closing(FALSE)
         , repaintQueued(FALSE)
+        , frameWorkProcedure(0)
+        , frameDeadline(0)
         , animationFrame(NULL)
         , animationTimer(0)
         , animationTimerActive(FALSE)
@@ -247,6 +249,7 @@ public:
     ~SceneEditorApplication()
     {
         stopAnimationTimer();
+        cancelQueuedFrame();
         // The automation service lives as long as the process (as in Java)
         delete imageControlWindow;
         imageControlWindow = NULL;
@@ -390,6 +393,10 @@ private:
     BOOLEAN ready;
     BOOLEAN closing;
     BOOLEAN repaintQueued;
+    /// Draws the queued frame when there are no events to process
+    XtWorkProcId frameWorkProcedure;
+    /// Draws the queued frame if events never stop arriving
+    XtIntervalId frameDeadline;
     /// Advances the animation in course, if any (not owned)
     BooleanSupplier* animationFrame;
     /// Drives the animation in course, if any
@@ -1241,7 +1248,7 @@ private:
         case KeyRelease:
             if (sceneBridge != NULL && !isAutoRepeatRelease(event->xkey)) {
                 sceneBridge->keyReleased(XtSystem::xt2vsdkKeyEvent(event->xkey));
-                requestRedraw();
+                requestFrame();
             }
             break;
         default:
@@ -1266,7 +1273,7 @@ private:
             baseKeysym == XK_f) {
             fullScreenGuiToggleRequested();
         }
-        requestRedraw();
+        requestFrame();
     }
 
     /**
@@ -1294,7 +1301,7 @@ private:
             MouseEvent wheel = XtSystem::xt2vsdkWheelEvent(event);
             if (wheel.getClicks() != 0) {
                 sceneBridge->mouseWheel(wheel);
-                requestRedraw();
+                requestFrame();
             }
             return;
         }
@@ -1306,7 +1313,7 @@ private:
         pressY = event.xbutton.y;
         pressMoved = FALSE;
         sceneBridge->mousePressed(XtSystem::xt2vsdkMouseEvent(event));
-        requestRedraw();
+        requestFrame();
     }
 
     void processButtonRelease(const XEvent& event)
@@ -1334,7 +1341,7 @@ private:
             click.setClicks(clickCount);
             sceneBridge->mouseClicked(click);
         }
-        requestRedraw();
+        requestFrame();
     }
 
     void processMotion(XEvent* event)
@@ -1356,27 +1363,80 @@ private:
         // As in AWT, a press followed by any motion is not a click
         if (event->xmotion.x != pressX || event->xmotion.y != pressY) pressMoved = TRUE;
         sceneBridge->mouseDragged(XtSystem::xt2vsdkMouseEvent(*event));
-        requestRedraw();
+        requestFrame();
     }
 
-    static void redrawAfterEvents(XtPointer clientData, XtIntervalId*)
+    /// Longest time a frame waits for the events to stop, in milliseconds
+    enum { MAXIMUM_FRAME_DELAY = 250 };
+
+    static Boolean drawFrameWhenIdle(XtPointer clientData)
+    {
+        SceneEditorApplication* self = ((SceneEditorApplication*)(clientData));
+        if (self == NULL) return True;
+        self->frameWorkProcedure = 0;
+        self->drawQueuedFrame();
+        // The work procedure is removed
+        return True;
+    }
+
+    static void drawFrameAfterDeadline(XtPointer clientData, XtIntervalId*)
     {
         SceneEditorApplication* self = ((SceneEditorApplication*)(clientData));
         if (self == NULL) return;
-        self->repaintQueued = FALSE;
-        self->redraw();
+        self->frameDeadline = 0;
+        self->drawQueuedFrame();
+    }
+
+    void cancelQueuedFrame()
+    {
+        if (frameWorkProcedure != 0) {
+            XtRemoveWorkProc(frameWorkProcedure);
+            frameWorkProcedure = 0;
+        }
+        if (frameDeadline != 0) {
+            XtRemoveTimeOut(frameDeadline);
+            frameDeadline = 0;
+        }
+        repaintQueued = FALSE;
+    }
+
+    void drawQueuedFrame()
+    {
+        cancelQueuedFrame();
+        redraw();
     }
 
     /**
-    Coalesces the repaints requested while processing a burst of events in
-    one redraw, done once the pending events are processed.
+    Coalesces the requests to draw the drawing area, so a frame is drawn
+    only when the application has no events to process (as
+    `AwtFrameScheduler`): if 20 events arrive while a frame is being drawn,
+    the 20 are processed and then one frame is drawn, presenting the state
+    left by the last one. Xt calls work procedures only when no event is
+    waiting; a deadline still draws it if events never stop arriving (i.e.
+    the pointer always moving). Frames asked by the X server (expose) are
+    drawn directly.
     */
-    void requestRedraw()
+    void requestFrame()
     {
         if (repaintQueued || appContext == NULL) return;
         repaintQueued = TRUE;
-        XtAppAddTimeOut(appContext, 0, &SceneEditorApplication::redrawAfterEvents,
-                        ((XtPointer)(this)));
+        frameWorkProcedure = XtAppAddWorkProc(appContext,
+            &SceneEditorApplication::drawFrameWhenIdle,
+            ((XtPointer)(this)));
+        frameDeadline = XtAppAddTimeOut(appContext, MAXIMUM_FRAME_DELAY,
+            &SceneEditorApplication::drawFrameAfterDeadline,
+            ((XtPointer)(this)));
+    }
+
+    /**
+    Requests a frame after a change done by the application (commands,
+    dialogs, automation service), which may have changed anything in the
+    scene (see `DrawingArea::markContentChanged`).
+    */
+    void requestRedraw()
+    {
+        if (sceneBridge != NULL) sceneBridge->markContentChanged();
+        requestFrame();
     }
 
     //= Viewport menu =====================================================
@@ -1394,7 +1454,7 @@ private:
     {
         SceneEditorApplication* self = ((SceneEditorApplication*)(clientData));
         self->popupDismissFilter.popupClosed(currentTimeMillis());
-        self->requestRedraw();
+        self->requestFrame();
     }
 
     /**
@@ -1443,6 +1503,11 @@ private:
         requestRedraw();
     }
 
+    void viewRepaintRequested()
+    {
+        requestFrame();
+    }
+
     /// Period of the frames of animations, in milliseconds
     enum { ANIMATION_FRAME_PERIOD = 15 };
 
@@ -1462,7 +1527,8 @@ private:
         self->animationTimerActive = FALSE;
         if (self->animationFrame == NULL) return;
         BOOLEAN running = self->animationFrame->getAsBoolean();
-        self->requestRedraw();
+        // Animations only move cameras
+        self->requestFrame();
         if (!running) {
             self->animationFrame = NULL;
             return;

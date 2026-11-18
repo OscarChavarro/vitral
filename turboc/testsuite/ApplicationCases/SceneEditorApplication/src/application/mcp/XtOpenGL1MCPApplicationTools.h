@@ -31,6 +31,11 @@ public:
     /**
     Repaints the drawing area, i.e. after a change of the model.
     */
+    /**
+    The scene may have changed (see `DrawingArea::markContentChanged`).
+    */
+    void markContentChanged();
+
     void repaint();
 
     //= Drawing area ======================================================

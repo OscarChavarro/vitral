@@ -96,6 +96,10 @@ export class HtmlWebGLVitralEditorMCPProtocol {
         HtmlWebGLVitralEditorMCPProtocol.escape(e instanceof Error ? e.message : String(e)) +
         '"}';
     }
+    // Tools may change the scene or its rendering configuration without
+    // asking for a frame: frames computed before them (i.e. raytraced images)
+    // can not be presented again
+    this.parent.getApplicationModel().getDrawingArea().markContentChanged();
     return HtmlWebGLVitralEditorMCPProtocol.content(result);
   }
 

@@ -101,6 +101,10 @@ export class DrawingAreaInteractionTechniques {
   private cameraControlClickConsumed: boolean;
   /** The gesture that started the camera animation is still recorded. */
   private cameraAnimationRecording: boolean;
+  /** A button was pressed over the drawing area and not released yet. */
+  private pointerGestureInCourse: boolean;
+  /** The pointer moved in the gesture in course: it is not a click. */
+  private pointerGestureDragged: boolean;
 
   private qualitySelection: RendererConfiguration;
 
@@ -136,6 +140,8 @@ export class DrawingAreaInteractionTechniques {
     this.cameraControlViewport = null;
     this.cameraControlClickConsumed = false;
     this.cameraAnimationRecording = false;
+    this.pointerGestureInCourse = false;
+    this.pointerGestureDragged = false;
   }
 
   //= Camera control gizmo ==============================================
@@ -145,7 +151,9 @@ export class DrawingAreaInteractionTechniques {
    * controlling its camera.
    */
   private placeCameraControlGizmo(viewport: Viewport): void {
-    this.model.getCameraControlGizmo().placeInViewport(viewport, this.viewportSet.getElementScaler());
+    this.model
+      .getCameraControlGizmo()
+      .placeInViewport(viewport, this.viewportSet.getElementScaler());
   }
 
   /**
@@ -199,7 +207,7 @@ export class DrawingAreaInteractionTechniques {
       changed = this.cameraControlTechnique.processMouseExitedEvent();
     }
     if (changed) {
-      this.listener.repaintRequested();
+      this.listener.viewRepaintRequested();
     }
     return this.model.getCameraControlGizmo().isActive();
   }
@@ -479,6 +487,9 @@ export class DrawingAreaInteractionTechniques {
 
     // Any press takes the camera: a turn in course stops where it is
     this.stopCameraAnimation();
+    // A gesture whose release was lost ends here
+    this.endPointerGesture();
+    this.pointerGestureInCourse = true;
     if (mouseView === null) {
       return;
     }
@@ -497,7 +508,7 @@ export class DrawingAreaInteractionTechniques {
       ) {
         this.cameraControlViewport = mouseView;
         this.listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
-        this.listener.repaintRequested();
+        this.listener.viewRepaintRequested();
         return;
       }
     }
@@ -591,10 +602,16 @@ export class DrawingAreaInteractionTechniques {
       // The selection may have changed what the pointer can do
       this.updateModeCursor(event);
     }
-    this.listener.repaintRequested();
+    // In camera mode only the camera reacts to a press
+    if (mode === InteractionMode.CAMERA) {
+      this.listener.viewRepaintRequested();
+    } else {
+      this.listener.repaintRequested();
+    }
   }
 
   processMouseReleasedEvent(event: MouseEvent): void {
+    this.endPointerGesture();
     if (this.cameraControlTechnique.isGestureInCourse()) {
       this.processCameraControlMouseReleasedEvent(event);
       return;
@@ -621,7 +638,7 @@ export class DrawingAreaInteractionTechniques {
       mode === InteractionMode.CAMERA &&
       this.interactionTechniques.processCameraMouseReleasedEvent(event)
     ) {
-      this.listener.repaintRequested();
+      this.listener.viewRepaintRequested();
     } else if (mode === InteractionMode.TRANSLATE && centroid !== null) {
       this.processTranslationEvent(event, mouseView, centroid, (e: MouseEvent): boolean =>
         this.interactionTechniques.processTranslationMouseReleasedEvent(e),
@@ -658,7 +675,24 @@ export class DrawingAreaInteractionTechniques {
     if (!this.model.getCameraControlGizmo().isActive()) {
       this.updateModeCursor(event);
     }
-    this.listener.repaintRequested();
+    // The view turns: only the camera changes
+    this.listener.viewRepaintRequested();
+  }
+
+  /**
+   * Ends the gesture of the pointer, if one is in course. If it was dragged, a
+   * frame is requested: the ones drawn during the gesture may be approximated.
+   */
+  private endPointerGesture(): void {
+    if (!this.pointerGestureInCourse) {
+      return;
+    }
+    this.pointerGestureInCourse = false;
+    if (this.pointerGestureDragged) {
+      this.pointerGestureDragged = false;
+      this.listener.interactiveGestureChanged(false);
+      this.listener.viewRepaintRequested();
+    }
   }
 
   processMouseClickedEvent(event: MouseEvent): void {
@@ -713,6 +747,12 @@ export class DrawingAreaInteractionTechniques {
     const mode: InteractionMode = this.drawingArea.getInteractionMode();
     const wasOverCameraControl: boolean = this.model.getCameraControlGizmo().isActive();
 
+    // No button is pressed: a gesture whose release was lost (i.e. taken by a
+    // popup menu) is over
+    if (!confinedGesture) {
+      this.endPointerGesture();
+    }
+
     if (!confinedGesture && this.processCameraControlMouseMovedEvent(event, mouseView)) {
       this.listener.cursorRequested(PointerCursor.VIEWPORT_TITLE);
       return;
@@ -734,7 +774,7 @@ export class DrawingAreaInteractionTechniques {
       mode === InteractionMode.CAMERA &&
       this.interactionTechniques.processCameraMouseMovedEvent(event)
     ) {
-      this.listener.repaintRequested();
+      this.listener.viewRepaintRequested();
     } else if (mode === InteractionMode.TRANSLATE && centroid !== null) {
       this.processTranslationEvent(event, mouseView, centroid, (e: MouseEvent): boolean =>
         this.interactionTechniques.processTranslationMouseMovedEvent(e),
@@ -751,6 +791,11 @@ export class DrawingAreaInteractionTechniques {
   }
 
   processMouseDraggedEvent(event: MouseEvent): void {
+    // A click is not a continuous gesture: it starts when dragging
+    if (this.pointerGestureInCourse && !this.pointerGestureDragged) {
+      this.pointerGestureDragged = true;
+      this.listener.interactiveGestureChanged(true);
+    }
     if (this.cameraControlTechnique.isGestureInCourse()) {
       // The gesture belongs to the viewport where it started
       this.placeCameraControlGizmo(this.cameraControlViewport!);
@@ -759,7 +804,7 @@ export class DrawingAreaInteractionTechniques {
           this.toViewportEvent(event, this.cameraControlViewport!),
         )
       ) {
-        this.listener.repaintRequested();
+        this.listener.viewRepaintRequested();
       }
       return;
     }
@@ -780,7 +825,7 @@ export class DrawingAreaInteractionTechniques {
       mode === InteractionMode.CAMERA &&
       this.interactionTechniques.processCameraMouseDraggedEvent(event)
     ) {
-      this.listener.repaintRequested();
+      this.listener.viewRepaintRequested();
     } else if (mode === InteractionMode.TRANSLATE && centroid !== null) {
       if (
         this.processTranslationEvent(event, mouseView, centroid, (e: MouseEvent): boolean =>
@@ -828,7 +873,7 @@ export class DrawingAreaInteractionTechniques {
         mode === InteractionMode.CAMERA &&
         this.interactionTechniques.processCameraMouseWheelEvent(event)
       ) {
-        this.listener.repaintRequested();
+        this.listener.viewRepaintRequested();
       }
     } finally {
       this.editRecorder.endAction(DrawingAreaInteractionTechniques.sceneOperationName(mode), true);

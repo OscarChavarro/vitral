@@ -202,6 +202,10 @@ char* RGBImageUncompressed::getRawImage() const {
     return copy;
 }
 
+char* RGBImageUncompressed::getRawImageDirectBuffer() {
+    return data;
+}
+
 void RGBImageUncompressed::setRawImage(int width, int height, char* imageData) {
     xSize = width;
     ySize = height;

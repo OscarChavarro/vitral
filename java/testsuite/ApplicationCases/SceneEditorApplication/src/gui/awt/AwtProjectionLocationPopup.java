@@ -196,10 +196,9 @@ public class AwtProjectionLocationPopup
                 item.setSelected(true);
                 currentItem = item;
             }
-            item.addActionListener(e -> {
-                techniques.processViewportCommand(command, viewport);
-                canvas.repaint();
-            });
+            // The techniques ask for the frame (one, when the GUI is idle)
+            item.addActionListener(e ->
+                techniques.processViewportCommand(command, viewport));
             group.add(item);
             popup.add(item);
         }

@@ -944,6 +944,8 @@ testsuite/ApplicationCases/SceneEditorApplication/src/render/FrameCaptureService
 testsuite/ApplicationCases/SceneEditorApplication/src/render/ProjectedViewRenderer.h,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/PROVIERE.H,ProjectedViewRenderer.h,PROVIERE.H
 testsuite/ApplicationCases/SceneEditorApplication/src/render/ProjectedViewsDebugger.cpp,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/PROVIEDE.CPP,ProjectedViewsDebugger.cpp,PROVIEDE.CPP
 testsuite/ApplicationCases/SceneEditorApplication/src/render/ProjectedViewsDebugger.h,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/PROVIEDE.H,ProjectedViewsDebugger.h,PROVIEDE.H
+testsuite/ApplicationCases/SceneEditorApplication/src/render/RaytracedViewportFrames.cpp,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/RAYVIEFR.CPP,RaytracedViewportFrames.cpp,RAYVIEFR.CPP
+testsuite/ApplicationCases/SceneEditorApplication/src/render/RaytracedViewportFrames.h,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/RAYVIEFR.H,RaytracedViewportFrames.h,RAYVIEFR.H
 testsuite/ApplicationCases/SceneEditorApplication/src/render/RenderPrimitive.h,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/RENDPRIM.H,RenderPrimitive.h,RENDPRIM.H
 testsuite/ApplicationCases/SceneEditorApplication/src/render/opengl1/OpenGL1FrameBufferSource.h,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/OPENGL1/OPGL1FBS.H,OpenGL1FrameBufferSource.h,OPGL1FBS.H
 testsuite/ApplicationCases/SceneEditorApplication/src/render/opengl1/OpenGL1ProjectedViewRenderer.h,TESTSUIT/APPLCASE/SCEEDIAP/SRC/RENDER/OPENGL1/OPGL1PVR.H,OpenGL1ProjectedViewRenderer.h,OPGL1PVR.H

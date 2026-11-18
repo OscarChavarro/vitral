@@ -29,6 +29,22 @@ public interface DrawingAreaInteractionListener
     void repaintRequested();
 
     /**
+    The drawing area must be drawn again, but only cameras or overlays
+    (gizmos, highlights, selected viewport) changed: the content of the scene
+    did not, so images computed from it for the same cameras (i.e. raytraced
+    ones) can be presented again.
+    */
+    void viewRepaintRequested();
+
+    /**
+    A continuous gesture of the pointer over the drawing area started (a
+    button was pressed) or ended (it was released). While it is in course,
+    expensive render modes may present approximated frames.
+    @param inCourse true when it starts, false when it ends
+    */
+    void interactiveGestureChanged(boolean inCourse);
+
+    /**
     @param message text for the status message of the application
     */
     void statusMessageRequested(String message);

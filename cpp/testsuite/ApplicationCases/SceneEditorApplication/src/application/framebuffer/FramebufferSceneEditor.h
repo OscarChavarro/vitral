@@ -6,6 +6,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "render/DrawingAreaHost.h"
+#include "render/RaytracedViewportFrames.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferDialog.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferMenuBar.h"
 #include "vsdk/toolkit/gui/framebuffer/FramebufferSidePanel.h"
@@ -107,8 +108,16 @@ private:
     /// Drives the animation in course, if any (see `animationRequested`)
     java::BooleanSupplier animationFrame;
     bool animating;
+    /// A gesture of the pointer is in course over the drawing area
+    bool pointerGestureInCourse;
+    /// Times the pending frame gave way to waiting events
+    int framePostponements;
+    /// Raytraced images of the viewports in CPU render mode
+    RaytracedViewportFrames raytracedViewportFrames;
     /// Period of the frames of animations, in milliseconds
     static const int ANIMATION_FRAME_PERIOD = 15;
+    /// Events a pending frame gives way to before being drawn anyway
+    static const int MAXIMUM_FRAME_POSTPONEMENTS = 64;
     bool buttonDown;
     bool pressMoved;
     int areaX;
@@ -147,6 +156,7 @@ private:
     void handle(const FramebufferEvent& event);
     bool waitEvent(FramebufferEvent& event);
     void advanceAnimation();
+    void updateInteractiveGesture();
     void handleMouse(const FramebufferEvent& event);
     void chosen(WidgetMenuItem* item);
     void executeCommand(const java::String& command);
@@ -176,6 +186,8 @@ private:
     void cursorRequested(PointerCursor::Value) override {}
     void cursorWarpRequested(int surfaceX, int surfaceY) override;
     void repaintRequested() override;
+    void viewRepaintRequested() override;
+    void interactiveGestureChanged(bool inCourse) override;
     void statusMessageRequested(const java::String& message) override;
     void selectionChanged() override;
     void raytracingRequested() override;

@@ -17,6 +17,7 @@
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportInteractionTechniques.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
+#include "vsdk/toolkit/gui/viewport/ViewportSetCommands.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSetInteractionTechniques.h"
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
@@ -61,6 +62,8 @@ DrawingAreaInteractionTechniques::DrawingAreaInteractionTechniques(
     cameraControlViewport = nullptr;
     cameraControlClickConsumed = false;
     cameraAnimationRecording = false;
+    pointerGestureInCourse = false;
+    pointerGestureDragged = false;
 }
 
 DrawingAreaInteractionTechniques::~DrawingAreaInteractionTechniques()
@@ -121,7 +124,7 @@ bool DrawingAreaInteractionTechniques::processCameraControlMouseMovedEvent(
         changed = cameraControlTechnique->processMouseExitedEvent();
     }
     if ( changed ) {
-        listener->repaintRequested();
+        listener->viewRepaintRequested();
     }
     return model->getCameraControlGizmo()->isActive();
 }
@@ -376,6 +379,9 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
 
     // Any press takes the camera: a turn in course stops where it is
     stopCameraAnimation();
+    // A gesture whose release was lost ends here
+    endPointerGesture();
+    pointerGestureInCourse = true;
     if ( mouseView == nullptr ) {
         return;
     }
@@ -394,7 +400,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
     if ( viewportTitleGesture ) {
         requestCursorForPointer(event, PointerCursor::VIEWPORT_TITLE);
         if ( !alreadySelected ) {
-            listener->repaintRequested();
+            listener->viewRepaintRequested();
         }
         return;
     }
@@ -406,7 +412,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
                  toViewportEvent(event, mouseView)) ) {
             cameraControlViewport = mouseView;
             listener->cursorRequested(PointerCursor::VIEWPORT_TITLE);
-            listener->repaintRequested();
+            listener->viewRepaintRequested();
             return;
         }
     }
@@ -506,7 +512,11 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
         // The selection may have changed what the pointer can do
         updateModeCursor(event);
     }
-    if ( changed ) {
+    // In camera mode only the camera reacts to a press
+    if ( changed && mode == InteractionMode::CAMERA ) {
+        listener->viewRepaintRequested();
+    }
+    else if ( changed ) {
         listener->repaintRequested();
     }
 }
@@ -514,6 +524,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
 void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     const MouseEvent& event)
 {
+    endPointerGesture();
     if ( cameraControlTechnique->isGestureInCourse() ) {
         processCameraControlMouseReleasedEvent(event);
         return;
@@ -537,7 +548,7 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
         updateModeCursor(event);
         editRecorder->endGesture();
         if ( !alreadySelected ) {
-            listener->repaintRequested();
+            listener->viewRepaintRequested();
         }
         return;
     }
@@ -554,7 +565,7 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
 
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraMouseReleasedEvent(event) ) {
-        listener->repaintRequested();
+        listener->viewRepaintRequested();
     }
     else if ( mode == InteractionMode::TRANSLATE && withSelection ) {
         processTranslationEvent(event, mouseView, centroid,
@@ -602,7 +613,21 @@ void DrawingAreaInteractionTechniques::processCameraControlMouseReleasedEvent(
     if ( !model->getCameraControlGizmo()->isActive() ) {
         updateModeCursor(event);
     }
-    listener->repaintRequested();
+    // The view turns: only the camera changes
+    listener->viewRepaintRequested();
+}
+
+void DrawingAreaInteractionTechniques::endPointerGesture()
+{
+    if ( !pointerGestureInCourse ) {
+        return;
+    }
+    pointerGestureInCourse = false;
+    if ( pointerGestureDragged ) {
+        pointerGestureDragged = false;
+        listener->interactiveGestureChanged(false);
+        listener->viewRepaintRequested();
+    }
 }
 
 void DrawingAreaInteractionTechniques::processMouseClickedEvent(
@@ -672,6 +697,12 @@ void DrawingAreaInteractionTechniques::processMouseMovedEvent(
     InteractionMode mode = drawingArea->getInteractionMode();
     bool wasOverCameraControl = model->getCameraControlGizmo()->isActive();
 
+    // No button is pressed: a gesture whose release was lost (i.e. taken
+    // by a popup menu) is over
+    if ( !confinedGesture ) {
+        endPointerGesture();
+    }
+
     if ( !confinedGesture &&
          processCameraControlMouseMovedEvent(event, mouseView) ) {
         listener->cursorRequested(PointerCursor::VIEWPORT_TITLE);
@@ -693,7 +724,7 @@ void DrawingAreaInteractionTechniques::processMouseMovedEvent(
 
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraMouseMovedEvent(event) ) {
-        listener->repaintRequested();
+        listener->viewRepaintRequested();
     }
     else if ( mode == InteractionMode::TRANSLATE && withSelection ) {
         processTranslationEvent(event, mouseView, centroid,
@@ -721,12 +752,17 @@ void DrawingAreaInteractionTechniques::processMouseMovedEvent(
 void DrawingAreaInteractionTechniques::processMouseDraggedEvent(
     const MouseEvent& event)
 {
+    // A click is not a continuous gesture: it starts when dragging
+    if ( pointerGestureInCourse && !pointerGestureDragged ) {
+        pointerGestureDragged = true;
+        listener->interactiveGestureChanged(true);
+    }
     if ( cameraControlTechnique->isGestureInCourse() ) {
         // The gesture belongs to the viewport where it started
         placeCameraControlGizmo(cameraControlViewport);
         if ( cameraControlTechnique->processMouseDraggedEvent(
                  toViewportEvent(event, cameraControlViewport)) ) {
-            listener->repaintRequested();
+            listener->viewRepaintRequested();
         }
         return;
     }
@@ -747,7 +783,7 @@ void DrawingAreaInteractionTechniques::processMouseDraggedEvent(
 
     if ( mode == InteractionMode::CAMERA &&
          interactionTechniques->processCameraMouseDraggedEvent(event) ) {
-        listener->repaintRequested();
+        listener->viewRepaintRequested();
     }
     else if ( mode == InteractionMode::TRANSLATE && withSelection ) {
         if ( processTranslationEvent(event, mouseView, centroid,
@@ -799,7 +835,7 @@ void DrawingAreaInteractionTechniques::processMouseWheelEvent(
     try {
         if ( mode == InteractionMode::CAMERA &&
              interactionTechniques->processCameraMouseWheelEvent(event) ) {
-            listener->repaintRequested();
+            listener->viewRepaintRequested();
         }
     }
     catch ( ... ) {
@@ -1187,7 +1223,25 @@ bool DrawingAreaInteractionTechniques::processViewportCommand(
     // history of a viewport
     if ( RenderTechnology::fromCommand(command, technology) ) {
         if ( technology != drawingArea->getRenderTechnology() ) {
-            listener->renderTechnologyChangeRequested(technology);
+            bool changed = listener->renderTechnologyChangeRequested(technology);
+            // Choosing OpenGL in the menu of a raytraced viewport means
+            // rasterizing it: raytracing is available with both
+            // technologies, so it would be kept otherwise
+            if ( changed && technology == RenderTechnology::OPENGL &&
+                 viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING ) {
+                editRecorder->beginAction();
+                try {
+                    viewportSetTechniques->processCommand(
+                        ViewportSetCommands::IDV_RENDER_MODE_GPU, viewport);
+                }
+                catch ( ... ) {
+                    editRecorder->endAction(sceneOperationName(
+                        drawingArea->getInteractionMode()), false);
+                    throw;
+                }
+                editRecorder->endAction(sceneOperationName(
+                    drawingArea->getInteractionMode()), false);
+            }
         }
         return true;
     }

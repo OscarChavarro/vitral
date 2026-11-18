@@ -279,6 +279,12 @@ XlibInput::waitEvent(FramebufferEvent &event) {
 }
 
 bool
+XlibInput::hasPendingEvent() {
+    Display *display = surface.getDisplay();
+    return display && !closed && XPending(display) > 0;
+}
+
+bool
 XlibInput::waitEventWithTimeout(FramebufferEvent &event, int timeoutMilliseconds) {
     Display *display = surface.getDisplay();
     while (display && !closed) {

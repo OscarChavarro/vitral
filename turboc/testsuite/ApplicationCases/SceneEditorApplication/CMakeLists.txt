@@ -160,6 +160,7 @@ set(SCENE_EDITOR_SOURCES
     src/render/DrawingAreaGizmoPresenter.cpp
     src/render/FrameCaptureService.cpp
     src/render/ProjectedViewsDebugger.cpp
+    src/render/RaytracedViewportFrames.cpp
     ${SCENE_EDITOR_OPENGL_SOURCES}
     ${SCENE_EDITOR_WIDGET_SET_SOURCES}
 )

@@ -22,6 +22,7 @@
 #include "application/mcp/MCPJson.h"
 #include "application/mcp/XtOpenGL4MCPApplicationTools.h"
 #include "model/ApplicationModel.h"
+#include "model/DrawingArea.h"
 #include "model/RenderTechnology.h"
 #include "model/Scene.h"
 #include "model/selection/SelectionSet.h"
@@ -60,6 +61,14 @@ XtOpenGL4MCPApplicationTools::XtOpenGL4MCPApplicationTools(
     XtOpenGL4SceneEditorApplication* parent)
     : parent(parent)
 {
+}
+
+/**
+The scene may have changed (see `DrawingArea::markContentChanged`).
+*/
+void XtOpenGL4MCPApplicationTools::markContentChanged()
+{
+    parent->getApplicationModel()->getDrawingArea()->markContentChanged();
 }
 
 void XtOpenGL4MCPApplicationTools::repaint()

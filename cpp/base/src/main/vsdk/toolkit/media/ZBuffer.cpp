@@ -49,6 +49,10 @@ float* ZBuffer::getZBuffer() const {
     return copy;
 }
 
+float* ZBuffer::getZBufferDirectBuffer() {
+    return depth;
+}
+
 float ZBuffer::getDepth(int x, int y) const {
     if (x < 0 || x >= xSize || y < 0 || y >= ySize) {
         return 0.0f;

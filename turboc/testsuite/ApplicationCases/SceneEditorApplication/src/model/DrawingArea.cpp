@@ -20,7 +20,8 @@ DrawingArea::DrawingArea(ViewportSet* viewportSet)
       colorCaptureRequested(FALSE), depthCaptureRequested(FALSE),
       contoursRequested(FALSE), projectedViewsDebugRequested(FALSE),
       hasPendingViewportExport(FALSE), pendingViewportExportJpg(FALSE),
-      hasPendingWorkspaceExport(FALSE), canvasWidth(0), canvasHeight(0)
+      hasPendingWorkspaceExport(FALSE), canvasWidth(0), canvasHeight(0),
+      contentGeneration(0), interactiveGestureInCourse(FALSE)
 {
 }
 
@@ -269,4 +270,26 @@ BOOLEAN DrawingArea::projectToCanvas(Viewport* viewport, const Vector3Dd& point,
     outCanvas[0] = surfaceX * canvasWidth / viewportSet->getSizeXInPixels();
     outCanvas[1] = surfaceY * canvasHeight / viewportSet->getSizeYInPixels();
     return TRUE;
+}
+
+//= Frame invalidation ====================================================
+
+long DrawingArea::getContentGeneration() const
+{
+    return contentGeneration;
+}
+
+void DrawingArea::markContentChanged()
+{
+    contentGeneration++;
+}
+
+BOOLEAN DrawingArea::isInteractiveGestureInCourse() const
+{
+    return interactiveGestureInCourse;
+}
+
+void DrawingArea::setInteractiveGestureInCourse(BOOLEAN inCourse)
+{
+    interactiveGestureInCourse = inCourse;
 }

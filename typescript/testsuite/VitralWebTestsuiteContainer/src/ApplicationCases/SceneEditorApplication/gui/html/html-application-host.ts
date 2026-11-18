@@ -26,6 +26,13 @@ export interface HtmlApplicationHost {
   repaintDrawingArea(): void;
 
   /**
+   * Requests a new frame in the drawing area when only cameras or overlays
+   * changed: images computed from the scene for the same cameras (i.e.
+   * raytraced ones) can be presented again.
+   */
+  requestDrawingAreaFrame(): void;
+
+  /**
    * Tells the modify panel which is the body currently selected.
    */
   reportTargetToModifyPanel(): void;

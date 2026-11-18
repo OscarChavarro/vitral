@@ -38,6 +38,9 @@ public class DrawingArea
     private int canvasWidth;
     private int canvasHeight;
 
+    private long contentGeneration;
+    private boolean interactiveGestureInCourse;
+
     /**
     @param viewportSet the viewport set presented by this drawing area
     */
@@ -58,6 +61,8 @@ public class DrawingArea
         pendingWorkspaceExportFile = null;
         canvasWidth = 0;
         canvasHeight = 0;
+        contentGeneration = 0;
+        interactiveGestureInCourse = false;
     }
 
     public ViewportSet getViewportSet()
@@ -88,6 +93,46 @@ public class DrawingArea
         }
         this.renderTechnology = renderTechnology;
         viewportSet.setAvailableRenderModes(renderTechnology.getRenderModes());
+    }
+
+    //= Frame invalidation ================================================
+
+    /**
+    @return a number that changes each time the content of the scene (bodies,
+    lights, materials, backgrounds, rendering configuration...) may have
+    changed. A frame computed for an equal generation, with the same camera
+    and size, can be presented again (i.e. a raytraced image). Changes of the
+    cameras alone do not change it.
+    */
+    public long getContentGeneration()
+    {
+        return contentGeneration;
+    }
+
+    /**
+    The content of the scene may have changed: frames computed before can not
+    be presented again. Any request to draw again that is not known to change
+    only the cameras or overlays must call this.
+    */
+    public void markContentChanged()
+    {
+        contentGeneration++;
+    }
+
+    /**
+    @return true while the user is doing a continuous gesture over the drawing
+    area (a button is pressed, or an animation of the cameras is in course):
+    expensive render modes (raytracing) may draw approximated frames, and
+    the exact one when it ends
+    */
+    public boolean isInteractiveGestureInCourse()
+    {
+        return interactiveGestureInCourse;
+    }
+
+    public void setInteractiveGestureInCourse(boolean inCourse)
+    {
+        interactiveGestureInCourse = inCourse;
     }
 
     //= Interaction mode ==================================================

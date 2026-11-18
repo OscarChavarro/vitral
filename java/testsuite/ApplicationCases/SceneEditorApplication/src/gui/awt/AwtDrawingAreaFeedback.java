@@ -43,6 +43,7 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     private final AwtApplicationHost application;
     private final DrawingArea drawingArea;
     private final Component canvas;
+    private final AwtFrameScheduler frameScheduler;
     private final AwtCursorWarper cursorWarper = new AwtCursorWarper();
     private final AwtViewportElementScaler elementScaler;
     private final SceneSelectionEditor selectionEditor;
@@ -50,17 +51,29 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     private final Map<PointerCursor, Cursor> cursors;
     /// Drives the animation in course, if any
     private Timer animationTimer;
+    /// A gesture of the pointer is in course over the drawing area
+    private boolean pointerGestureInCourse;
+    /// An animation of the cameras is in course
+    private boolean animationInCourse;
 
     /**
     @param application the application whose GUI is used
     @param canvas the component presenting the drawing surface
+    @param frameScheduler draws the frames of the canvas when the GUI is
+    not busy
     */
     public AwtDrawingAreaFeedback(AwtApplicationHost application,
-                                  Component canvas)
+                                  Component canvas,
+                                  AwtFrameScheduler frameScheduler)
     {
         this.application = application;
         this.drawingArea = application.getApplicationModel().getDrawingArea();
         this.canvas = canvas;
+        this.frameScheduler = frameScheduler;
+        this.pointerGestureInCourse = false;
+        this.animationInCourse = false;
+        // A new drawing area (i.e. after changing the technology) starts idle
+        drawingArea.setInteractiveGestureInCourse(false);
         this.selectionEditor = new SceneSelectionEditor(
             application.getApplicationModel().getScene());
 
@@ -167,7 +180,27 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     @Override
     public void repaintRequested()
     {
-        canvas.repaint();
+        drawingArea.markContentChanged();
+        frameScheduler.requestFrame();
+    }
+
+    @Override
+    public void viewRepaintRequested()
+    {
+        frameScheduler.requestFrame();
+    }
+
+    @Override
+    public void interactiveGestureChanged(boolean inCourse)
+    {
+        pointerGestureInCourse = inCourse;
+        updateInteractiveGesture();
+    }
+
+    private void updateInteractiveGesture()
+    {
+        drawingArea.setInteractiveGestureInCourse(
+            pointerGestureInCourse || animationInCourse);
     }
 
     /// Period of the frames of animations, in milliseconds
@@ -185,12 +218,17 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         }
         animationTimer = new Timer(ANIMATION_FRAME_PERIOD, null);
         Timer timer = animationTimer;
+        // Animations only move cameras; their frames may be approximated
+        animationInCourse = true;
+        updateInteractiveGesture();
         timer.addActionListener(e -> {
             boolean running = frame.getAsBoolean();
-            canvas.repaint();
             if ( !running ) {
                 timer.stop();
+                animationInCourse = false;
+                updateInteractiveGesture();
             }
+            frameScheduler.requestFrame();
         });
         timer.start();
     }
@@ -225,7 +263,7 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         if ( awtModel.getSelectorDialog() == null ) {
             awtModel.setSelectorDialog(new AwtSelectorDialog(
                 awtModel.getMainWindowWidget(), application.getApplicationModel(),
-                application.getApplicationModel().getI18nContext(), canvas::repaint));
+                application.getApplicationModel().getI18nContext(), this::repaintRequested));
         }
         awtModel.getSelectorDialog().rebuild();
         awtModel.getSelectorDialog().setVisible(true);

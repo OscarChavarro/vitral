@@ -63,6 +63,14 @@ public:
     float* getZBuffer() const;
 
     /**
+    The depth values themselves (no copy), in the order of `getZBuffer`: to
+    read or modify the depth map without copying it (as `getZBuffer` does in
+    the Java version).
+    @return the depth values of this map, owned by it
+    */
+    float* getZBufferDirectBuffer();
+
+    /**
     This method returns the depth value at the specified position
     @param x x coordinate
     @param y y coordinate

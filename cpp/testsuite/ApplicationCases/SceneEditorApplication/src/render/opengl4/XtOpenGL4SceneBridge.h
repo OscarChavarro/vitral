@@ -47,7 +47,18 @@ public:
     class Listener {
     public:
         virtual ~Listener() {}
+        /**
+        The drawing area must be drawn again: the scene may have changed.
+        */
         virtual void repaintRequested() = 0;
+
+        /**
+        The drawing area must be drawn again, but only cameras or overlays
+        changed (see `DrawingAreaInteractionListener::viewRepaintRequested`).
+        By default, as any other repaint.
+        */
+        virtual void viewRepaintRequested() { repaintRequested(); }
+
         virtual void cursorRequested(PointerCursor::Value cursor) = 0;
 
         /**
@@ -227,6 +238,14 @@ public:
     console and exporting it to `output.jpg`.
     */
     void doRaytracingImage();
+
+    /**
+    The scene may have changed by means of the application (commands,
+    dialogs, automation service): frames computed before (i.e. raytraced
+    images) can not be presented again (see
+    `DrawingArea::markContentChanged`).
+    */
+    void markContentChanged();
 
     /**
     @return the raytraced image of the model (kept there)

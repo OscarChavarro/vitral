@@ -122,7 +122,8 @@ void OpenGL4ColorDepthImageRenderer::uploadTextures(RGBImageUncompressed* image,
         depthUploadBuffer = new float[count];
         depthUploadCapacity = count;
     }
-    const float* values = depth->getZBuffer();
+    // Not copied (each frame of a raytraced viewport is uploaded)
+    const float* values = depth->getZBufferDirectBuffer();
     int write = 0;
     for ( int row = ySize - 1; row >= 0; row-- ) {
         for ( int x = 0; x < xSize; x++ ) {
@@ -135,11 +136,11 @@ void OpenGL4ColorDepthImageRenderer::uploadTextures(RGBImageUncompressed* image,
     glBindTexture(GL_TEXTURE_2D, colorTextureId);
     if ( resized ) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, xSize, ySize, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, image->getRawImage());
+            GL_RGB, GL_UNSIGNED_BYTE, image->getRawImageDirectBuffer());
     }
     else {
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, xSize, ySize,
-            GL_RGB, GL_UNSIGNED_BYTE, image->getRawImage());
+            GL_RGB, GL_UNSIGNED_BYTE, image->getRawImageDirectBuffer());
     }
 
     glBindTexture(GL_TEXTURE_2D, depthTextureId);

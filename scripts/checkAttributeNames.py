@@ -157,6 +157,7 @@ ACCESSOR_EXEMPTIONS = {
     "ColorRgb", "ColorRgba", "MatrixNxM",
     "ArrayListOfBytes:getRawArray", "IndexedColorImageUncompressed:getRawImage",
     "RGBAImageCompressed:getRawImage", "RGBAImageCompressed:getRawImageDirectBuffer",
+    "RGBImageUncompressed:getRawImageDirectBuffer", "ZBuffer:getZBufferDirectBuffer",
     "SimpleMaterial:getAmbientReference", "SimpleMaterial:getDiffuseReference",
     "SimpleMaterial:getSpecularReference", "SimpleMaterial:getEmissionReference",
     "SimpleMaterial:getTransmittanceReference",

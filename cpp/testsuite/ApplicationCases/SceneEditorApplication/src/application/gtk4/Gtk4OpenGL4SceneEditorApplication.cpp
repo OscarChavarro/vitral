@@ -1878,7 +1878,18 @@ private:
         static_cast<Gtk4SceneEditor*>(data)->importDialogResponse(dialog, response);
     }
 
+    /**
+    The scene may have changed: frames computed before (i.e. raytraced
+    images) can not be presented again. GTK draws the queued frame once,
+    after processing the pending events.
+    */
     void repaintRequested() override
+    {
+        sceneBridge.markContentChanged();
+        if ( isLiveWidget(glArea) ) gtk_widget_queue_draw(glArea);
+    }
+
+    void viewRepaintRequested() override
     {
         if ( isLiveWidget(glArea) ) gtk_widget_queue_draw(glArea);
     }
@@ -1956,7 +1967,8 @@ private:
         Gtk4SceneEditor* self = static_cast<Gtk4SceneEditor*>(data);
         bool running = self->animationFrame.getAsBoolean();
 
-        self->repaintRequested();
+        // Animations only move cameras
+        self->viewRepaintRequested();
         if ( !running ) {
             self->animationSource = 0;
             return G_SOURCE_REMOVE;

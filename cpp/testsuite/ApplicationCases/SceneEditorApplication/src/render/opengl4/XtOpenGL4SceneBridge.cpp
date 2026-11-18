@@ -10,6 +10,7 @@
 #include "model/selection/SceneSelectionEditor.h"
 #include "model/Scene.h"
 #include "render/DrawingAreaHost.h"
+#include "render/RaytracedViewportFrames.h"
 #include "render/opengl4/OpenGL4DrawingAreaRenderer.h"
 #include "render/opengl4/XtOpenGL4SceneBridge.h"
 #ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
@@ -62,6 +63,12 @@ public:
     SceneSelectionEditor* selectionEditor;
     /// Editor of the modify panel, or null
     BodyEditFeedbackProvider* editFeedbackProvider;
+    /// Raytraced images of the viewports in CPU render mode
+    RaytracedViewportFrames raytracedViewportFrames;
+    /// A gesture of the pointer is in course over the drawing area
+    bool pointerGestureInCourse;
+    /// An animation of the cameras is in course
+    bool animationInCourse;
 
     Impl(OpenGL4LabelImageProvider* labels,
          XtOpenGL4SceneBridge::Listener* listener)
@@ -72,7 +79,8 @@ public:
 #endif
           executor(nullptr),
           menuViewport(nullptr), selectionEditor(nullptr),
-          editFeedbackProvider(nullptr)
+          editFeedbackProvider(nullptr),
+          pointerGestureInCourse(false), animationInCourse(false)
     {
         createModel();
         selectionEditor = new SceneSelectionEditor(model->getScene());
@@ -228,21 +236,48 @@ public:
     */
     void raytraceImage() override
     {
-        if ( !prepareRaytracedImage() ) {
-            return;
-        }
         int width = model->getRaytracedImageWidth();
         int height = model->getRaytracedImageHeight();
+        if ( width <= 0 || height <= 0 ) {
+            return;
+        }
         RGBImageUncompressed* image = model->getRaytracedImage();
-        Scene* scene = model->getScene();
-
+        if ( image == nullptr ) {
+            image = new RGBImageUncompressed();
+            model->setRaytracedImage(image);
+        }
+        if ( image->getXSize() != width || image->getYSize() != height ) {
+            image->init(width, height);
+            raytracedViewportFrames.invalidate();
+        }
         ZBuffer* depth = model->getRaytracedDepth();
         if ( depth == nullptr || depth->getXSize() != width ||
              depth->getYSize() != height ) {
             depth = new ZBuffer(width, height);
             model->setRaytracedDepth(depth);
+            raytracedViewportFrames.invalidate();
         }
-        scene->raytraceViewport(image, depth);
+        // See `RaytracedViewportFrames` for the work it avoids
+        raytracedViewportFrames.raytrace(model->getScene(),
+            model->getDrawingArea(), image, depth);
+    }
+
+    /**
+    Raytraces a full image (menu or automation service) in the buffers the
+    viewports in CPU mode share.
+    */
+    void doRaytracingImage()
+    {
+        raytracedViewportFrames.invalidate();
+        if ( prepareRaytracedImage() ) {
+            model->getScene()->raytrace(model->getRaytracedImage());
+        }
+    }
+
+    void updateInteractiveGesture()
+    {
+        model->getDrawingArea()->setInteractiveGestureInCourse(
+            pointerGestureInCourse || animationInCourse);
     }
     void showImage(RGBImageUncompressed* image) override
     {
@@ -268,6 +303,17 @@ public:
 
     void repaintRequested() override { listener->repaintRequested(); }
 
+    void viewRepaintRequested() override
+    {
+        listener->viewRepaintRequested();
+    }
+
+    void interactiveGestureChanged(bool inCourse) override
+    {
+        pointerGestureInCourse = inCourse;
+        updateInteractiveGesture();
+    }
+
     void statusMessageRequested(const java::String& message) override
     {
         listener->statusMessageRequested(message.c_str());
@@ -284,9 +330,24 @@ public:
     {
         listener->fullScreenGuiToggleRequested();
     }
+    /**
+    Animations only move cameras: their frames may be approximated while
+    they go on.
+    */
     void animationRequested(const java::BooleanSupplier& frame) override
     {
-        listener->animationRequested(frame);
+        Impl* self = this;
+        java::BooleanSupplier animation = frame;
+        animationInCourse = true;
+        updateInteractiveGesture();
+        listener->animationRequested(java::BooleanSupplier([self, animation]() {
+            bool running = animation.getAsBoolean();
+            if ( !running ) {
+                self->animationInCourse = false;
+                self->updateInteractiveGesture();
+            }
+            return running;
+        }));
     }
     /**
     The model changes now; the application replaces the drawing surface
@@ -423,9 +484,12 @@ CommandResult XtOpenGL4SceneBridge::executeCommand(
 
 void XtOpenGL4SceneBridge::doRaytracingImage()
 {
-    if ( impl->prepareRaytracedImage() ) {
-        impl->model->getScene()->raytrace(impl->model->getRaytracedImage());
-    }
+    impl->doRaytracingImage();
+}
+
+void XtOpenGL4SceneBridge::markContentChanged()
+{
+    impl->model->getDrawingArea()->markContentChanged();
 }
 
 RGBImageUncompressed* XtOpenGL4SceneBridge::getRaytracedImage()
