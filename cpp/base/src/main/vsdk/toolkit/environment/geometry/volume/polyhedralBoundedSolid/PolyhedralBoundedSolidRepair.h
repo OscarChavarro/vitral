@@ -25,11 +25,9 @@ public:
         int relinkedVertices;
         int removedVertices;
 
+    public:
         Report(int relinkedVertices, int removedVertices);
 
-        friend class PolyhedralBoundedSolidRepair;
-
-    public:
         /**
         Vertices whose emanating half-edge was missing or wrong (not
         starting at the vertex, or not a member of its loop) and was set.

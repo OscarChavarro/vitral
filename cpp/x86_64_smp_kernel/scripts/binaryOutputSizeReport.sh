@@ -27,7 +27,6 @@ describe() {  # file, purpose
 }
 describe boot.img "disk image for QEMU or a BIOS machine (our own boot sector + stage 2 + kernel)"
 describe kernel64.bin "the kernel alone, for GRUB: multiboot2 /boot/kernel64.bin"
-describe vitral.iso "bootable GRUB CD with the kernel inside (only after scripts/rungrub.sh)"
 echo
 
 python3 - "$BUILD/kernel64.map" "$TOP" "$ROOT" <<'PY'

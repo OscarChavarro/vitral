@@ -76,8 +76,15 @@ public:
         */
         void close();
 
+        /**
+        Builds the form of a dialog definition, as `Gtk4DialogHost::form`
+        (which calls it): a member, so it fills the private state.
+        */
+        static Form* build(GtkWindow* owner, Widget* messages,
+                           const WidgetDialog* definition,
+                           const ActionListener& onAction);
+
     private:
-        friend class Gtk4DialogHost;
 
         GtkWidget* window;
         GtkWidget* firstField;

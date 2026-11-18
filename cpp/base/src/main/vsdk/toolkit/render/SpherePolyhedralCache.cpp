@@ -141,8 +141,12 @@ namespace {
 }
 
 SpherePolyhedralCache::Entry::Entry(double radius, int meridians, int parallels,
-                                    PolyhedralBoundedSolid* solid)
-    : radius(radius), meridians(meridians), parallels(parallels), solid(solid)
+    PolyhedralBoundedSolid* solid, const java::ArrayList<float>& positions,
+    const java::ArrayList<float>& normals, const java::ArrayList<float>& uvs,
+    const java::ArrayList<float>& tangents, const java::ArrayList<float>& biNormals)
+    : radius(radius), meridians(meridians), parallels(parallels), solid(solid),
+      positions(positions), normals(normals), uvs(uvs), tangents(tangents),
+      biNormals(biNormals)
 {
 }
 
@@ -198,13 +202,19 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
     java::ArrayList<Vector3Dd> triangles = collectTriangles(solid);
     std::size_t vertexCount = triangles.size();
     double radius = sphere->getRadius();
-    Entry* entry = new Entry(radius, meridians, parallels, solid);
+    // The attributes are filled before the entry is made, so the entry
+    // has no setters
+    java::ArrayList<float> positions;
+    java::ArrayList<float> normals;
+    java::ArrayList<float> uvs;
+    java::ArrayList<float> tangents;
+    java::ArrayList<float> biNormals;
 
-    entry->positions = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
-    entry->normals = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
-    entry->uvs = java::Collections::nCopies<float>(vertexCount * 2, 0.0f);
-    entry->tangents = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
-    entry->biNormals = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
+    positions = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
+    normals = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
+    uvs = java::Collections::nCopies<float>(vertexCount * 2, 0.0f);
+    tangents = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
+    biNormals = java::Collections::nCopies<float>(vertexCount * 3, 0.0f);
 
     for (std::size_t t = 0; t + 2 < vertexCount; t += 3) {
         double theta[3];
@@ -227,13 +237,14 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
         for (int k = 0; k < 3; k++) {
             std::size_t i = t + k;
 
-            put(entry->positions, i, triangles[i]);
-            put(entry->normals, i, parametric.sphereNormal(theta[k], phi[k]));
-            put(entry->tangents, i, parametric.sphereTangent(theta[k], phi[k]));
-            put(entry->biNormals, i, parametric.sphereBinormal(theta[k], phi[k]));
-            entry->uvs[2 * i] = (float)(1.0 - theta[k] / (2 * M_PI));
-            entry->uvs[2 * i + 1] = (float)((phi[k] + M_PI / 2) / M_PI);
+            put(positions, i, triangles[i]);
+            put(normals, i, parametric.sphereNormal(theta[k], phi[k]));
+            put(tangents, i, parametric.sphereTangent(theta[k], phi[k]));
+            put(biNormals, i, parametric.sphereBinormal(theta[k], phi[k]));
+            uvs[2 * i] = (float)(1.0 - theta[k] / (2 * M_PI));
+            uvs[2 * i + 1] = (float)((phi[k] + M_PI / 2) / M_PI);
         }
     }
-    return entry;
+    return new Entry(radius, meridians, parallels, solid, positions, normals,
+        uvs, tangents, biNormals);
 }

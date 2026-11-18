@@ -64,3 +64,6 @@ java/coverage/
 
 # TurboC local build dirs
 **/buildtc/
+
+# Security / secrets
+**/secrets.json

@@ -178,7 +178,7 @@ bool OpenGL4ColorDepthImageRenderer::ensureInitialized()
         return true;
     }
 
-    java::String basePath = OpenGL4ImageRenderer::shaderBasePath;
+    java::String basePath = OpenGL4ImageRenderer::getShaderBasePath();
     java::String vertexSource = OpenGL4ImageRenderer::readShaderFile(
         basePath + "/colorDepthImageVertexShader.glsl");
     java::String fragmentSource = OpenGL4ImageRenderer::readShaderFile(

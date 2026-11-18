@@ -100,11 +100,11 @@ XtDialogHost::Form::~Form()
     }
 }
 
-XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
-                                       XFontSet fontSet,
-                                       const MessageSource& messages,
-                                       const WidgetDialog* definition,
-                                       const ActionListener& onAction)
+XtDialogHost::Form* XtDialogHost::Form::build(XtWidget shell, XtWidgetSet* widgetSet,
+                                              XFontSet fontSet,
+                                              const MessageSource& messages,
+                                              const WidgetDialog* definition,
+                                              const ActionListener& onAction)
 {
     Form* form = new Form(widgetSet, fontSet, shell, definition, onAction);
     try {
@@ -217,6 +217,15 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
         throw;
     }
     return form;
+}
+
+XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
+                                       XFontSet fontSet,
+                                       const MessageSource& messages,
+                                       const WidgetDialog* definition,
+                                       const ActionListener& onAction)
+{
+    return Form::build(shell, widgetSet, fontSet, messages, definition, onAction);
 }
 
 /**

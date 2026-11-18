@@ -65,14 +65,36 @@ public:
     OpenFile *takeFile(int fd);
     char *cwd() { return resources->cwd; }
 
-private:
-    friend class Scheduler;
-
-    Process();
-    void setProgram(const Program &program, const ArgList &args);
+    // Run queue and futex bucket links, sleeps and waits: the state that the Scheduler keeps of each process (only
+    // the Scheduler changes it). Value initialized: no links, no wait.
+    struct Scheduling {
+        Process *nextInQueue;
+        Process *waitNext;
+        int *waitAddress;
+        uint64_t wakeNs;
+        bool waitable;
+        bool exited;
+        uint32_t waitingFor;
+        int *waitStatus;
+    };
+    // Changed by the Scheduler
+    // Frees the stack (back to the pool) of a process that has exited
     void releaseStack();
+    // exec: replaces the program and arguments of the process
+    void setProgram(const Program &program, const ArgList &args);
     // On exit: gives the screen back if showConsole() took it and nothing has changed it since.
     void returnScreen();
+    void setState(State s) { stateValue = s; }
+    void setCpu(int index) { cpuValue = index; }
+    void addTick() { cpuTicks++; }
+    void setExitCode(int code) { exitCodeValue = code; }
+    TrapFrame *trapFrame() const { return frame; }
+    void setTrapFrame(TrapFrame *f) { frame = f; }
+    Fpu::Image &fpuImage() { return fpu; }
+
+private:
+
+    Process();
     // Builds the first TrapFrame of the process, which resumes in start() (kernel/<arch>/ProcessFrame.cpp).
     void prepareFrame();
     [[noreturn]] static void start();
@@ -106,21 +128,16 @@ private:
     void (*threadEntry)(void *);
     void *threadArgument;
     void *threadData;
-    int *waitAddress;
     Fpu::Image fpu;
     TrapFrame *frame;
-    uint64_t wakeNs;
     uint64_t cpuTicks;
-    Process *waitNext;
     int errorValue;
     int exitCodeValue;
-    bool waitable;
-    bool exited;
-    uint32_t waitingFor;
-    int *waitStatus;
     void *keyValues[KEY_COUNT];
     Resources *resources;
-    Process *nextInQueue;
+
+public:
+    Scheduling scheduling;
 };
 
 #endif

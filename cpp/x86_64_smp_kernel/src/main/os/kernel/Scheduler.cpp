@@ -35,7 +35,7 @@ Scheduler::init(unsigned count) {
     for (unsigned i = 0; i < cpuTotal; i++) {
         cpus[i] = {nullptr, Process::makeIdle(i), nullptr, nullptr, 0, i == 0, nullptr, 0, 0, 0};
         cpus[i].current = cpus[i].idle;
-        cpus[i].idle->stateValue = Process::State::Running;
+        cpus[i].idle->setState(Process::State::Running);
     }
     for (auto &slot : table) {
         slot = nullptr;
@@ -57,8 +57,8 @@ int
 Scheduler::consoleOf(uint32_t pid) {
     LockGuard guard(lock);
     for (Process *p : table) {
-        if (p && p->pidValue == pid && p->stateValue != Process::State::Zombie) {
-            return (int)p->consoleValue;
+        if (p && p->pid() == pid && p->state() != Process::State::Zombie) {
+            return (int)p->console();
         }
     }
     return -1;
@@ -87,10 +87,10 @@ void
 Scheduler::enqueue(Process *p) {
     unsigned target = chooseCpu(*p);
     CpuState &cpu = cpus[target];
-    p->stateValue = Process::State::Ready;
-    p->nextInQueue = nullptr;
+    p->setState(Process::State::Ready);
+    p->scheduling.nextInQueue = nullptr;
     if (cpu.tail) {
-        cpu.tail->nextInQueue = p;
+        cpu.tail->scheduling.nextInQueue = p;
     } else {
         cpu.head = p;
     }
@@ -124,19 +124,19 @@ Scheduler::steal(unsigned thief) {
         }
         CpuState &v = cpus[victim];
         Process *before = nullptr;
-        for (Process *p = v.head; p; before = p, p = p->nextInQueue) {
+        for (Process *p = v.head; p; before = p, p = p->scheduling.nextInQueue) {
             if (!p->affinity().test(thief)) {
                 continue;
             }
             if (before) {
-                before->nextInQueue = p->nextInQueue;
+                before->scheduling.nextInQueue = p->scheduling.nextInQueue;
             } else {
-                v.head = p->nextInQueue;
+                v.head = p->scheduling.nextInQueue;
             }
             if (v.tail == p) {
                 v.tail = before;
             }
-            p->nextInQueue = nullptr;
+            p->scheduling.nextInQueue = nullptr;
             v.queued--;
             return p;
         }
@@ -156,8 +156,8 @@ Scheduler::setAffinity(uint32_t pid, const unsigned long *bits) {
     }
     LockGuard guard(lock);
     for (Process *p : table) {
-        if (p && p->pidValue == pid && p->stateValue != Process::State::Zombie) {
-            p->affinityMask = mask;
+        if (p && p->pid() == pid && p->state() != Process::State::Zombie) {
+            p->setAffinity(mask);
             return true;
         }
     }
@@ -180,36 +180,36 @@ Scheduler::bucketOf(const int *address) {
 
 void
 Scheduler::futexLink(Process *p) {
-    Process **at = &futexBuckets[bucketOf(p->waitAddress)];
+    Process **at = &futexBuckets[bucketOf(p->scheduling.waitAddress)];
     while (*at) {
-        at = &(*at)->waitNext;
+        at = &(*at)->scheduling.waitNext;
     }
-    p->waitNext = nullptr;
+    p->scheduling.waitNext = nullptr;
     *at = p;
 }
 
 void
 Scheduler::futexUnlink(Process *p) {
-    Process **at = &futexBuckets[bucketOf(p->waitAddress)];
+    Process **at = &futexBuckets[bucketOf(p->scheduling.waitAddress)];
     while (*at && *at != p) {
-        at = &(*at)->waitNext;
+        at = &(*at)->scheduling.waitNext;
     }
     if (*at) {
-        *at = p->waitNext;
+        *at = p->scheduling.waitNext;
     }
-    p->waitNext = nullptr;
-    p->waitAddress = nullptr;
+    p->scheduling.waitNext = nullptr;
+    p->scheduling.waitAddress = nullptr;
 }
 
 void
 Scheduler::setDeadline(Process *p, uint64_t nanoseconds) {
     if (!nanoseconds) {
-        p->wakeNs = 0;
+        p->scheduling.wakeNs = 0;
         return;
     }
-    p->wakeNs = Clock::nanoseconds() + nanoseconds;
-    if (!earliestWake || p->wakeNs < earliestWake) {
-        earliestWake = p->wakeNs;
+    p->scheduling.wakeNs = Clock::nanoseconds() + nanoseconds;
+    if (!earliestWake || p->scheduling.wakeNs < earliestWake) {
+        earliestWake = p->scheduling.wakeNs;
     }
 }
 
@@ -219,11 +219,11 @@ Scheduler::dequeue(CpuState &cpu) {
     if (!p) {
         return nullptr;
     }
-    cpu.head = p->nextInQueue;
+    cpu.head = p->scheduling.nextInQueue;
     if (!cpu.head) {
         cpu.tail = nullptr;
     }
-    p->nextInQueue = nullptr;
+    p->scheduling.nextInQueue = nullptr;
     cpu.queued--;
     return p;
 }
@@ -255,7 +255,7 @@ Scheduler::spawn(const Program &program, const ArgList &args, uint32_t ppid,
     }
     Process *p = new Process(nextPid++, ppid, program, args, affinity, (unsigned)console, inheritConsole < 0, terminal,
                              stack);
-    p->waitable = waitable;
+    p->scheduling.waitable = waitable;
     table[slot] = p;
     enqueue(p);
     return p;
@@ -292,15 +292,15 @@ Scheduler::switchFrom(unsigned index, TrapFrame *frame) {
         (prev == cpu.idle ? cpu.idleCycles : cpu.busyCycles) += now - cpu.since;
     }
     cpu.since = now;
-    prev->frame = frame;
-    Fpu::save(prev->fpu);
-    if (prev->stateValue == Process::State::Running && prev != cpu.idle) {
+    prev->setTrapFrame(frame);
+    Fpu::save(prev->fpuImage());
+    if (prev->state() == Process::State::Running && prev != cpu.idle) {
         enqueue(prev);
     } else if (prev == cpu.idle) {
-        prev->stateValue = Process::State::Ready;
+        prev->setState(Process::State::Ready);
     }
 
-    if (prev->stateValue == Process::State::Zombie) {
+    if (prev->state() == Process::State::Zombie) {
         cpu.zombie = prev;
     }
     Process *next = dequeue(cpu);
@@ -310,14 +310,14 @@ Scheduler::switchFrom(unsigned index, TrapFrame *frame) {
     if (!next) {
         next = cpu.idle;
     }
-    next->stateValue = Process::State::Running;
-    next->cpuValue = (int)index;
+    next->setState(Process::State::Running);
+    next->setCpu((int)index);
     cpu.current = next;
-    Fpu::restore(next->fpu);
+    Fpu::restore(next->fpuImage());
     if (lapicTimers) {
         armTimer(index, next);
     }
-    return next->frame;
+    return next->trapFrame();
 }
 
 void
@@ -343,20 +343,20 @@ Scheduler::wakeSleepers(uint64_t now) {
         if (!p) {
             continue;
         }
-        bool sleeping = p->stateValue == Process::State::Sleeping;
-        bool timed = p->stateValue == Process::State::Blocked && p->wakeNs;
+        bool sleeping = p->state() == Process::State::Sleeping;
+        bool timed = p->state() == Process::State::Blocked && p->scheduling.wakeNs;
         if (!sleeping && !timed) {
             continue;
         }
-        if (p->wakeNs <= now) {
+        if (p->scheduling.wakeNs <= now) {
             if (timed) {
-                p->frame->setResult((uint64_t)-Syscalls::ERR_TIMEDOUT);
+                p->trapFrame()->setResult((uint64_t)-Syscalls::ERR_TIMEDOUT);
                 futexUnlink(p);
             }
-            p->wakeNs = 0;
+            p->scheduling.wakeNs = 0;
             enqueue(p);
-        } else if (!next || p->wakeNs < next) {
-            next = p->wakeNs;
+        } else if (!next || p->scheduling.wakeNs < next) {
+            next = p->scheduling.wakeNs;
         }
     }
     earliestWake = next;
@@ -369,9 +369,9 @@ Scheduler::reapZombie(CpuState &cpu) {
         return;
     }
     cpu.zombie = nullptr;
-    if (z->waitable) {
+    if (z->scheduling.waitable) {
         z->releaseStack();
-        z->exited = true;
+        z->scheduling.exited = true;
         childEnded(z);
         return;
     }
@@ -389,7 +389,7 @@ Scheduler::tick(TrapFrame *frame) {
     LockGuard guard(lock);
     unsigned index = cpuIndex();
     uint64_t now = Clock::nanoseconds();
-    cpus[index].current->cpuTicks++;
+    cpus[index].current->addTick();
     wakeSleepers(now);
     return switchFrom(index, frame);
 }
@@ -406,7 +406,7 @@ Scheduler::sleep(TrapFrame *frame, uint64_t nanoseconds) {
     unsigned index = cpuIndex();
     Process *p = cpus[index].current;
     setDeadline(p, nanoseconds ? nanoseconds : 1);
-    p->stateValue = Process::State::Sleeping;
+    p->setState(Process::State::Sleeping);
     return switchFrom(index, frame);
 }
 
@@ -420,10 +420,10 @@ Scheduler::futexWait(TrapFrame *frame, int *address, int expected, uint64_t time
     unsigned index = cpuIndex();
     Process *p = cpus[index].current;
     frame->setResult(0);
-    p->waitAddress = address;
+    p->scheduling.waitAddress = address;
     futexLink(p);
     setDeadline(p, timeoutNs);
-    p->stateValue = Process::State::Blocked;
+    p->setState(Process::State::Blocked);
     return switchFrom(index, frame);
 }
 
@@ -433,10 +433,10 @@ Scheduler::futexWake(int *address, int count) {
     int woken = 0;
     Process *p = futexBuckets[bucketOf(address)];
     while (p && woken < count) {
-        Process *next = p->waitNext;
-        if (p->waitAddress == address) {
+        Process *next = p->scheduling.waitNext;
+        if (p->scheduling.waitAddress == address) {
             futexUnlink(p);
-            p->wakeNs = 0;
+            p->scheduling.wakeNs = 0;
             enqueue(p);
             woken++;
         }
@@ -449,7 +449,7 @@ bool
 Scheduler::collect(Process *child, Process *parent, int *status) {
     (void)parent;
     if (status) {
-        *status = (child->exitCodeValue & 0xFF) << 8;
+        *status = (child->exitCode() & 0xFF) << 8;
     }
     for (Process *&slot : table) {
         if (slot == child) {
@@ -464,16 +464,16 @@ Scheduler::collect(Process *child, Process *parent, int *status) {
 void
 Scheduler::childEnded(Process *child) {
     for (Process *parent : table) {
-        if (!parent || parent->pidValue != child->ppidValue) {
+        if (!parent || parent->pid() != child->ppid()) {
             continue;
         }
-        if (parent->stateValue == Process::State::Blocked && parent->waitingFor &&
-            (parent->waitingFor == Process::WAIT_ANY || parent->waitingFor == child->pidValue)) {
-            uint32_t pid = child->pidValue;
-            collect(child, parent, parent->waitStatus);
-            parent->waitingFor = 0;
-            parent->waitStatus = nullptr;
-            parent->frame->setResult(pid);
+        if (parent->state() == Process::State::Blocked && parent->scheduling.waitingFor &&
+            (parent->scheduling.waitingFor == Process::WAIT_ANY || parent->scheduling.waitingFor == child->pid())) {
+            uint32_t pid = child->pid();
+            collect(child, parent, parent->scheduling.waitStatus);
+            parent->scheduling.waitingFor = 0;
+            parent->scheduling.waitStatus = nullptr;
+            parent->trapFrame()->setResult(pid);
             enqueue(parent);
         }
         return;
@@ -487,15 +487,15 @@ Scheduler::wait(TrapFrame *frame, int64_t pid, int *status, bool noHang) {
     Process *self = cpus[index].current;
     bool candidates = false;
     for (Process *child : table) {
-        if (!child || child->ppidValue != self->pidValue || !child->waitable) {
+        if (!child || child->ppid() != self->pid() || !child->scheduling.waitable) {
             continue;
         }
-        if (pid >= 0 && child->pidValue != (uint32_t)pid) {
+        if (pid >= 0 && child->pid() != (uint32_t)pid) {
             continue;
         }
         candidates = true;
-        if (child->exited) {
-            uint32_t done = child->pidValue;
+        if (child->scheduling.exited) {
+            uint32_t done = child->pid();
             collect(child, self, status);
             frame->setResult(done);
             return frame;
@@ -509,11 +509,11 @@ Scheduler::wait(TrapFrame *frame, int64_t pid, int *status, bool noHang) {
         frame->setResult(0);
         return frame;
     }
-    self->waitingFor = pid >= 0 ? (uint32_t)pid : Process::WAIT_ANY;
-    self->waitStatus = status;
-    self->waitAddress = nullptr;
-    self->wakeNs = 0;
-    self->stateValue = Process::State::Blocked;
+    self->scheduling.waitingFor = pid >= 0 ? (uint32_t)pid : Process::WAIT_ANY;
+    self->scheduling.waitStatus = status;
+    self->scheduling.waitAddress = nullptr;
+    self->scheduling.wakeNs = 0;
+    self->setState(Process::State::Blocked);
     return switchFrom(index, frame);
 }
 
@@ -522,22 +522,22 @@ Scheduler::exit(TrapFrame *frame, int code) {
     LockGuard guard(lock);
     unsigned index = cpuIndex();
     Process *p = cpus[index].current;
-    if (p->pidValue == 1) {
+    if (p->pid() == 1) {
         Panic::halt("init (PID 1) exited");
     }
-    p->stateValue = Process::State::Zombie;
-    p->exitCodeValue = code;
+    p->setState(Process::State::Zombie);
+    p->setExitCode(code);
     bool parentAlive = false;
     for (Process *&slot : table) {
         if (!slot) {
             continue;
         }
-        if (slot->pidValue == p->ppidValue && slot->stateValue != Process::State::Zombie) {
+        if (slot->pid() == p->ppid() && slot->state() != Process::State::Zombie) {
             parentAlive = true;
         }
-        if (slot->ppidValue == p->pidValue && slot->waitable) {
-            slot->waitable = false;
-            if (slot->exited) {
+        if (slot->ppid() == p->pid() && slot->scheduling.waitable) {
+            slot->scheduling.waitable = false;
+            if (slot->scheduling.exited) {
                 Process *dead = slot;
                 slot = nullptr;
                 delete dead;
@@ -545,18 +545,18 @@ Scheduler::exit(TrapFrame *frame, int code) {
         }
     }
     if (!parentAlive) {
-        p->waitable = false;
+        p->scheduling.waitable = false;
     }
     p->returnScreen();
-    if (p->ownsConsoleValue && code != 0) {
-        Consoles::retire(p->consoleValue, p->nameBuffer, code);
-    } else if (p->ownsConsoleValue) {
-        bool wasVisible = VirtualConsole::active() == p->consoleValue;
-        Consoles::release(p->consoleValue);
+    if (p->ownsConsole() && code != 0) {
+        Consoles::retire(p->console(), p->name(), code);
+    } else if (p->ownsConsole()) {
+        bool wasVisible = VirtualConsole::active() == p->console();
+        Consoles::release(p->console());
         if (wasVisible) {
             for (Process *parent : table) {
-                if (parent && parent->pidValue == p->ppidValue && parent->stateValue != Process::State::Zombie) {
-                    Consoles::switchTo(parent->consoleValue);
+                if (parent && parent->pid() == p->ppid() && parent->state() != Process::State::Zombie) {
+                    Consoles::switchTo(parent->console());
                     break;
                 }
             }
@@ -571,8 +571,8 @@ Scheduler::exec(TrapFrame *, const Program &program, const ArgList &args) {
     Process *p = cpus[cpuIndex()].current;
     ArgList copy = args;
     p->setProgram(program, copy);
-    p->stateValue = Process::State::Running;
-    return p->frame;
+    p->setState(Process::State::Running);
+    return p->trapFrame();
 }
 
 unsigned
@@ -584,15 +584,15 @@ Scheduler::snapshot(Syscalls::ProcessInfo *out, unsigned max) {
             continue;
         }
         Syscalls::ProcessInfo &info = out[n++];
-        info.pid = p->pidValue;
-        info.ppid = p->ppidValue;
-        String::copy(info.name, p->nameBuffer, sizeof(info.name));
-        info.state = (uint8_t)p->stateValue;
-        info.cpu = p->cpuValue;
-        info.console = (uint8_t)p->consoleValue;
-        String::copy(info.terminal, p->terminalValue ? p->terminalValue->name() : "?", sizeof(info.terminal));
-        info.ticks = lapicTimers ? p->cpuTicks / TICKS_PER_PIT_TICK : p->cpuTicks;
-        info.affinity = p->affinityMask.low64();
+        info.pid = p->pid();
+        info.ppid = p->ppid();
+        String::copy(info.name, p->name(), sizeof(info.name));
+        info.state = (uint8_t)p->state();
+        info.cpu = p->cpu();
+        info.console = (uint8_t)p->console();
+        String::copy(info.terminal, p->terminal() ? p->terminal()->name() : "?", sizeof(info.terminal));
+        info.ticks = lapicTimers ? p->ticks() / TICKS_PER_PIT_TICK : p->ticks();
+        info.affinity = p->affinity().low64();
     }
     return n;
 }

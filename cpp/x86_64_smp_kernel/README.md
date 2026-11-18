@@ -12,11 +12,10 @@ SceneEditorApplication running on the minimalistic kernel on a real 32-bit machi
 
 ## Build and run
 
-The build requires CMake, LLVM (`clang`, `clang++`, `ld.lld`, `llvm-objcopy`), mtools and the Vitral base library at `../base`. QEMU is needed to run the images. GRUB and xorriso are also required for the GRUB image. On macOS:
+The build requires CMake, LLVM (`clang`, `clang++`, `ld.lld`, `llvm-objcopy`), mtools and the Vitral base library at `../base`. QEMU is needed to run the images. On macOS:
 
 ```sh
 brew install cmake qemu llvm lld mtools
-brew install i686-elf-grub xorriso  # GRUB image only
 ```
 
 ```sh
@@ -24,12 +23,11 @@ scripts/run64.sh          # x86_64, one CPU per online host logical CPU
 scripts/run64smp.sh       # x86_64 SMP, one CPU per online host logical CPU
 scripts/run64smpSVGA.sh   # one CPU per online host logical CPU, Bochs VBE and more graphics memory
 scripts/run32.sh          # i386, one CPU per online host logical CPU
-scripts/rungrub.sh        # x86_64 via GRUB and Multiboot2 (ARCH=i386: the i386 kernel, in VGA text mode)
 scripts/run32failon64.sh  # verify rejection of a CPU without long mode
 scripts/run16.sh          # simulate rejection of a 286; pass 8086 for an 8086
 ```
 
-These run scripts accept `-n` to build without starting QEMU. `CPU`, `QEMU`, `SMP` (where supported), `QEMU_RAM` and `JOBS` override their defaults. The BIOS scripts produce a disk image; `rungrub.sh` produces `build/vitral.iso`.
+These run scripts accept `-n` to build without starting QEMU. `CPU`, `QEMU`, `SMP` (where supported), `QEMU_RAM` (512 MB by default) and `JOBS` override their defaults. They produce a disk image (`boot.img`) and the kernel alone (`kernel64.bin` in `build/`, `kernel32.bin` in `build32/`), which GRUB 2 can boot (see [Installing on a GRUB 2 system](#installing-on-a-grub-2-system)).
 
 The scripts default to a bridged e1000 network connection, which may require `sudo`. Set `QEMU_BRIDGE_IF` to choose the host interface, `QEMU_NET=user` for QEMU NAT, or `QEMU_NET=none` to omit the NIC. On Linux, macvtap requires a wired interface and does not allow the host itself to reach the guest; a bridge requires QEMU bridge-helper configuration.
 
@@ -40,9 +38,77 @@ cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake -DBUILD_TESTS=O
 cmake --build build --parallel
 ```
 
+## Installing on a GRUB 2 system
+
+Both kernel images are Multiboot2 images, so an existing GRUB 2 installation (for example the boot loader of a Linux
+distribution) can boot them as one more menu entry, next to the installed operating systems. Nothing is written to
+the disk other than the kernel file and the GRUB configuration.
+
+1. Build the kernel on the development host. `kernel64.bin` needs a CPU with long mode; `kernel32.bin` runs on any
+   386 or later.
+
+   ```sh
+   scripts/run64.sh -n    # build/kernel64.bin
+   scripts/run32.sh -n    # build32/kernel32.bin
+   ```
+
+2. Copy the images to the target machine's `/boot` (with `scp` when it is another machine):
+
+   ```sh
+   sudo mkdir -p /boot/vitral
+   sudo cp build/kernel64.bin build32/kernel32.bin /boot/vitral/
+   ```
+
+3. Add the menu entries to `/etc/grub.d/40_custom`, after its `exec tail` line. `search` finds the partition that
+   holds the files, so the entries work whether `/boot` is on the root partition or not; when `/boot` is a separate
+   partition, the paths are relative to it (`/vitral/kernel64.bin`).
+
+   ```
+   menuentry "Vitral Kernel (x86_64)" {
+       insmod multiboot2
+       search --no-floppy --file --set=root /boot/vitral/kernel64.bin
+       set gfxmode=1024x768x32,auto
+       set gfxpayload=keep
+       multiboot2 /boot/vitral/kernel64.bin
+       boot
+   }
+
+   menuentry "Vitral Kernel (i386)" {
+       insmod multiboot2
+       search --no-floppy --file --set=root /boot/vitral/kernel32.bin
+       set gfxpayload=text
+       multiboot2 /boot/vitral/kernel32.bin
+       boot
+   }
+   ```
+
+4. Regenerate the GRUB configuration and reboot:
+
+   ```sh
+   sudo update-grub                                  # Debian, Ubuntu
+   sudo grub2-mkconfig -o /boot/grub2/grub.cfg       # Fedora, RHEL, openSUSE
+   sudo grub-reboot "Vitral Kernel (i386)"           # optional: boot it only once, then the default entry again
+   sudo reboot
+   ```
+
+   If the menu is hidden, set `GRUB_TIMEOUT_STYLE=menu` and a non-zero `GRUB_TIMEOUT` in `/etc/default/grub`
+   before regenerating the configuration.
+
+Notes:
+
+- The x86_64 image asks GRUB for a graphics framebuffer. The programs run there, but no text is drawn: the kernel
+  copies its font from VGA plane 2, which only holds the BIOS font after a text mode boot. Prefer the i386 entry
+  for interactive use until that is solved; it asks for the EGA text console, so it starts in VGA text mode with
+  its font.
+- The kernel drives the VGA, the PS/2 controller and other legacy PC devices. Use a BIOS (legacy or CSM) GRUB
+  installation (`i386-pc`); a UEFI GRUB has no EGA text console for the i386 image.
+- `init` configures `eth0` with a fixed address (see [Kernel and programs](#kernel-and-programs)); adjust it for the
+  target network before building.
+- To uninstall, delete `/boot/vitral` and the entries of `/etc/grub.d/40_custom`, and regenerate the configuration.
+
 ## Kernel and programs
 
-The BIOS bootloader loads the kernel after checking the CPU and collecting the memory map. Both images can also boot through Multiboot2: the x86_64 one uses a GRUB framebuffer when available, and the i386 one asks GRUB for the EGA text console, so it starts in VGA text mode. For GRUB, `kernel32.bin` is loaded with `multiboot2` and `set gfxpayload=text` inside the `menuentry`. The kernel provides memory allocation, per-CPU round-robin scheduling, affinity, threads and futexes. CPU load is measured per core from cumulative busy and idle TSC cycles.
+The BIOS bootloader loads the kernel after checking the CPU and collecting the memory map. Both images can also boot through Multiboot2: the x86_64 one uses a GRUB framebuffer when available, and the i386 one asks GRUB for the EGA text console, so it starts in VGA text mode. The kernel provides memory allocation, per-CPU round-robin scheduling, affinity, threads and futexes. CPU load is measured per core from cumulative busy and idle TSC cycles.
 
 The VFS provides an in-memory root and `/dev`. An embedded FAT image is available at `/dev/loop0` and mounted at `/media/ramdisk`. The build populates the generated `loopKernelRootFileSystem/etc` with the GUI definitions and icons, the startup palette, the `.ray` examples and their assets, and `cow.obj` with its material; it also adds the HTTP frontend to the image. The generated `etc` directory is replaced when its selected contents change, so keep custom files elsewhere in `loopKernelRootFileSystem`. Drivers include VGA, Bochs VBE, PS/2 keyboard and mouse, USB (UHCI host controllers, EHCI controllers routed to their UHCI companions, hubs, and HID keyboards and mice in boot protocol, with hot plugging), COM1, RTC and network devices. The kernel log goes to the screen and to COM1 at 115200 baud, 8N1.
 

@@ -1,6 +1,6 @@
 # Shared by run16.sh / run32.sh / run32failon64.sh / run64.sh (sourced, not executed).
 # Extra QEMU options (e.g. -smp) go in the QEMU_EXTRA array before calling run_qemu. QEMU_VGA (array, default
-# -vga std) selects the display adapter and QEMU_RAM (default 64) the megabytes of RAM.
+# -vga std) selects the display adapter and QEMU_RAM (default 512) the megabytes of RAM.
 # Network: an Intel e1000 card. QEMU_NET=bridge (default) puts it on the host's physical network, as another station of
 # the LAN (QEMU_BRIDGE_IF = the host interface; default en0 on macOS, the interface of the default route on Linux);
 # QEMU_NET=user is QEMU's built-in NAT network (no privileges needed, but nothing outside can reach the guest) and
@@ -69,7 +69,7 @@ launch_qemu() {
     local display_opts="$display"
     [[ "$display" == "cocoa" ]] && display_opts="cocoa,zoom-to-fit=on"  # content follows the window size
 
-    ${runner[@]+"${runner[@]}"} "$qemu" -machine pc -cpu "$cpu" -m "${QEMU_RAM:-64}" ${QEMU_EXTRA[@]+"${QEMU_EXTRA[@]}"} \
+    ${runner[@]+"${runner[@]}"} "$qemu" -machine pc -cpu "$cpu" -m "${QEMU_RAM:-512}" ${QEMU_EXTRA[@]+"${QEMU_EXTRA[@]}"} \
         "${vga[@]}" ${nic[@]+"${nic[@]}"} -display "$display_opts" -serial "$serial" "$@" &
     local qemu_pid=$!
     trap 'kill "$qemu_pid" 2>/dev/null' INT TERM

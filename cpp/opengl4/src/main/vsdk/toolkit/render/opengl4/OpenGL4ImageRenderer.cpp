@@ -270,6 +270,10 @@ void OpenGL4ImageRenderer::setShaderBasePath(const java::String& basePath) {
     shaderBasePath = basePath;
 }
 
+java::String OpenGL4ImageRenderer::getShaderBasePath() {
+    return shaderBasePath;
+}
+
 void OpenGL4ImageRenderer::ensureBuffers() {
     if (quadVaoId != 0) {
         return;

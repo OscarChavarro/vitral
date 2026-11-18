@@ -107,8 +107,16 @@ public:
         void close();
         bool isVisible() const;
 
+        /**
+        Builds the form of a dialog definition, as `XtDialogHost::form`
+        (which calls it): a member, so it fills the private state.
+        */
+        static Form* build(XtWidget shell, XtWidgetSet* widgetSet,
+                           XFontSet fontSet, const MessageSource& messages,
+                           const WidgetDialog* definition,
+                           const ActionListener& onAction);
+
     private:
-        friend class XtDialogHost;
         struct Button;
 
         XtWidgetSet* widgetSet;

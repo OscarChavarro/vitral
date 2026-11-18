@@ -101,20 +101,20 @@ NvidiaPreTesla2d::NvidiaPreTesla2d(NvidiaPreTesla &owner)
 
 uint32_t
 NvidiaPreTesla2d::read32(uint32_t reg) const {
-    return *(volatile uint32_t *)(display.card.mmio + reg);
+    return *(volatile uint32_t *)(display.cardInfo().mmio + reg);
 }
 
 void
 NvidiaPreTesla2d::write32(uint32_t reg, uint32_t value) {
-    *(volatile uint32_t *)(display.card.mmio + reg) = value;
+    *(volatile uint32_t *)(display.cardInfo().mmio + reg) = value;
 }
 
 // nvidiafb's NVLoadStateExt up to the display registers, which NvidiaPreTesla owns: engines reset, tiling off, the
 // objects in RAMIN, PGRAPH set up for the chip, PFIFO's cache 1 on channel 0 in DMA mode with the push buffer.
 void
 NvidiaPreTesla2d::loadEngine() {
-    bool nv40 = display.card.chipset >= 0x40;
-    uint32_t implementation = display.card.implementation & 0xFFF0;
+    bool nv40 = display.cardInfo().chipset >= 0x40;
+    uint32_t implementation = display.cardInfo().implementation & 0xFFF0;
     uint32_t map = display.mapBytes();
 
     write32(PMC + 0x0140, 0x00000000);
@@ -155,12 +155,12 @@ NvidiaPreTesla2d::loadEngine() {
         }
         write32(PRAMIN + 0x0801 * 4, map - 1);
         write32(PRAMIN + 0x0826 * 4, pushBufferOffset | 0x00000002);
-        if ((display.card.device & 0x0FFF) == 0x0020) {
+        if ((display.cardInfo().device & 0x0FFF) == 0x0020) {
             // The first TNT reads its push buffer through the PCI address of the frame buffer.
             write32(PRAMIN + 0x0824 * 4, read32(PRAMIN + 0x0824 * 4) | 0x00020000);
-            write32(PRAMIN + 0x0826 * 4, read32(PRAMIN + 0x0826 * 4) + (uint32_t)display.card.frameAddress);
-            uint16_t command = Pci::read16(display.card.at, Pci::COMMAND);
-            Pci::write16(display.card.at, Pci::COMMAND, command | Pci::COMMAND_BUS_MASTER);
+            write32(PRAMIN + 0x0826 * 4, read32(PRAMIN + 0x0826 * 4) + (uint32_t)display.cardInfo().frameAddress);
+            uint16_t command = Pci::read16(display.cardInfo().at, Pci::COMMAND);
+            Pci::write16(display.cardInfo().at, Pci::COMMAND, command | Pci::COMMAND_BUS_MASTER);
         }
         loadNv04Graph();
     }
@@ -182,7 +182,7 @@ NvidiaPreTesla2d::loadNv04Graph() {
 // out: the display is NvidiaPreTesla's, and works without them.
 void
 NvidiaPreTesla2d::loadNv40Graph() {
-    uint32_t implementation = display.card.implementation & 0xFFF0;
+    uint32_t implementation = display.cardInfo().implementation & 0xFFF0;
     uint32_t map = display.mapBytes();
     write32(PGRAPH + 0x0080, 0xFFFFFFFF);
     write32(PGRAPH + 0x0080, 0x00000000);
@@ -314,7 +314,7 @@ NvidiaPreTesla2d::loadNv40Graph() {
 // Cache 1 of PFIFO on channel 0, pulling from the push buffer's DMA object.
 void
 NvidiaPreTesla2d::loadFifo() {
-    bool nv40 = display.card.chipset >= 0x40;
+    bool nv40 = display.cardInfo().chipset >= 0x40;
     const Nv2dWrite FIFO[] = {
         {0x0140, 0x00000000}, {0x0141, 0x00000001}, {0x0480, 0x00000000}, {0x0494, 0x00000000},
         {0x0481, nv40 ? 0x00010000u : 0x00000100u}, {0x0490, 0x00000000}, {0x0491, 0x00000000},
@@ -333,7 +333,7 @@ bool
 NvidiaPreTesla2d::start() {
     running = nullptr;
     pushBufferOffset = display.usableBytes();
-    pushBuffer = (volatile uint32_t *)(display.card.frame + pushBufferOffset);
+    pushBuffer = (volatile uint32_t *)(display.cardInfo().frame + pushBufferOffset);
     loadEngine();
     for (uint32_t i = 0; i < SKIPS; i++) {
         pushBuffer[i] = 0;
@@ -373,7 +373,7 @@ NvidiaPreTesla2d::lockup(const char *what) {
 
 bool
 NvidiaPreTesla2d::usable() const {
-    return started && !lockedUp && surfaceReady && display.modeBytes != 0;
+    return started && !lockedUp && surfaceReady && display.modeBytesPerPixel() != 0;
 }
 
 // The CPU's writes reach video memory (write combining) before the engine is told to read them; nvidiafb also reads
@@ -382,7 +382,7 @@ void
 NvidiaPreTesla2d::writePut(uint32_t value) {
     __atomic_thread_fence(__ATOMIC_SEQ_CST);
     Ports::outb(0x80, 0);
-    (void)display.card.frame[0];
+    (void)display.cardInfo().frame[0];
     write32(USER_DMA_PUT, value << 2);
     __atomic_thread_fence(__ATOMIC_SEQ_CST);
 }
@@ -539,18 +539,18 @@ NvidiaPreTesla2d::surface(unsigned bytes, uint32_t surfacePitch, uint32_t offset
 
 void
 NvidiaPreTesla2d::setSurface() {
-    if (!started || lockedUp || display.modeBytes == 0) {
+    if (!started || lockedUp || display.modeBytesPerPixel() == 0) {
         surfaceReady = false;
         return;
     }
-    surface(display.scanBytes, display.pitch, 0, display.width, display.height);
+    surface(display.scanLineBytes(), display.bytesPerLine(), 0, display.modeWidth(), display.modeHeight());
     surfaceReady = !lockedUp;
 }
 
 void
 NvidiaPreTesla2d::clear() {
     if (usable()) {
-        fill(0, 0, display.width, display.height, 0);
+        fill(0, 0, display.modeWidth(), display.modeHeight(), 0);
     }
 }
 
@@ -614,23 +614,23 @@ NvidiaPreTesla2d::engineFill(unsigned x, unsigned y, unsigned width, unsigned he
         return;
     }
     NvidiaPreTesla &display = engine->display;
-    if (!engine->usable() || bytesPerPixel != display.modeBytes) {
+    if (!engine->usable() || bytesPerPixel != display.modeBytesPerPixel()) {
         if (engine->busy) {
             engine->idle();
         }
         display.fillRect(x, y, width, height, bytesPerPixel, color);
         return;
     }
-    if (x >= display.width || y >= display.height) {
+    if (x >= display.modeWidth() || y >= display.modeHeight()) {
         return;
     }
-    if (width > display.width - x) {
-        width = display.width - x;
+    if (width > display.modeWidth() - x) {
+        width = display.modeWidth() - x;
     }
-    if (height > display.height - y) {
-        height = display.height - y;
+    if (height > display.modeHeight() - y) {
+        height = display.modeHeight() - y;
     }
-    engine->fill(x, y, width, height, color & (display.scanBytes == 4 ? 0xFFFFFFu : 0xFFFFFFFFu));
+    engine->fill(x, y, width, height, color & (display.scanLineBytes() == 4 ? 0xFFFFFFu : 0xFFFFFFFFu));
 }
 
 bool
@@ -641,16 +641,16 @@ NvidiaPreTesla2d::engineCopy(unsigned fromX, unsigned fromY, unsigned toX, unsig
         return false;
     }
     NvidiaPreTesla &display = engine->display;
-    if (fromX >= display.width || toX >= display.width || fromY >= display.height || toY >= display.height) {
+    if (fromX >= display.modeWidth() || toX >= display.modeWidth() || fromY >= display.modeHeight() || toY >= display.modeHeight()) {
         return true;
     }
     unsigned right = fromX > toX ? fromX : toX;
     unsigned bottom = fromY > toY ? fromY : toY;
-    if (width > display.width - right) {
-        width = display.width - right;
+    if (width > display.modeWidth() - right) {
+        width = display.modeWidth() - right;
     }
-    if (height > display.height - bottom) {
-        height = display.height - bottom;
+    if (height > display.modeHeight() - bottom) {
+        height = display.modeHeight() - bottom;
     }
     engine->copy(fromX, fromY, toX, toY, width, height);
     return true;
@@ -691,7 +691,7 @@ NvidiaPreTesla2d::selfTest(NvidiaInfo::Test &out) {
         Format::print(out.failure, sizeof(out.failure), "the 2D engine does not finish its work");
         return false;
     }
-    uint32_t visible = display.modeBytes ? display.pitch * display.height : 0;
+    uint32_t visible = display.modeBytesPerPixel() ? display.bytesPerLine() * display.modeHeight() : 0;
     uint32_t usable = display.usableBytes();
     uint32_t testBytes = NV2D_TEST_PITCH * NV2D_TEST_HEIGHT;
     if (usable < NV2D_TEST_BELOW_PUSH_BUFFER + testBytes) {
@@ -703,7 +703,7 @@ NvidiaPreTesla2d::selfTest(NvidiaInfo::Test &out) {
         Format::print(out.failure, sizeof(out.failure), "no video memory beyond the screen");
         return false;
     }
-    volatile uint32_t *pixels = (volatile uint32_t *)(display.card.frame + area);
+    volatile uint32_t *pixels = (volatile uint32_t *)(display.cardInfo().frame + area);
     const unsigned half = NV2D_TEST_HEIGHT / 2;
     for (unsigned y = 0; y < NV2D_TEST_HEIGHT; y++) {
         for (unsigned x = 0; x < NV2D_TEST_WIDTH; x++) {
@@ -778,7 +778,7 @@ NvidiaPreTesla2d::selfTest(NvidiaInfo::Test &out) {
     }
     out.cpuCopy = nv2dRate(cpuRounds * halfPixels, Clock::nanoseconds() - started0);
 
-    if (display.modeBytes != 0) {
+    if (display.modeBytesPerPixel() != 0) {
         setSurface();
     } else {
         surfaceReady = false;

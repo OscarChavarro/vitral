@@ -71,6 +71,9 @@ public:
 protected:
     java::ArrayList<Node*> attributes;
 
+    /** Adds an attribute node owned by this node (and sets its parent) */
+    void addAttribute(Node* attribute);
+
 private:
     short nodeType;
     java::String nodeName;
@@ -82,7 +85,6 @@ private:
     Node(const Node& other);
     Node& operator=(const Node& other);
 
-    friend class Element;
 };
 
 }

@@ -90,9 +90,9 @@ Gtk4DialogHost::Form::~Form()
     }
 }
 
-Gtk4DialogHost::Form* Gtk4DialogHost::form(GtkWindow* owner, Widget* messages,
-                                           const WidgetDialog* definition,
-                                           const ActionListener& onAction)
+Gtk4DialogHost::Form* Gtk4DialogHost::Form::build(GtkWindow* owner, Widget* messages,
+                                                  const WidgetDialog* definition,
+                                                  const ActionListener& onAction)
 {
     Form* form = new Form(definition, onAction);
     GtkWidget* content = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
@@ -148,6 +148,13 @@ Gtk4DialogHost::Form* Gtk4DialogHost::form(GtkWindow* owner, Widget* messages,
     g_object_set_data_full(G_OBJECT(form->window), "vitral-dialog-form", form,
                            &Form::deleteForm);
     return form;
+}
+
+Gtk4DialogHost::Form* Gtk4DialogHost::form(GtkWindow* owner, Widget* messages,
+                                           const WidgetDialog* definition,
+                                           const ActionListener& onAction)
+{
+    return Form::build(owner, messages, definition, onAction);
 }
 
 GtkWidget* Gtk4DialogHost::Form::dialog() const

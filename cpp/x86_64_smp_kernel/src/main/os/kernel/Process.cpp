@@ -20,9 +20,7 @@ Process::Process()
     : pidValue(0), ppidValue(0), consoleValue(0), ownsConsoleValue(true), terminalValue(nullptr),
       stateValue(State::Ready), cpuValue(-1), program(nullptr),
       stack(nullptr), stackSize(STACK_SIZE), threadEntry(nullptr), threadArgument(nullptr), threadData(nullptr),
-      waitAddress(nullptr), frame(nullptr), wakeNs(0), cpuTicks(0), waitNext(nullptr), errorValue(0), exitCodeValue(0), waitable(false),
-      exited(false), waitingFor(0), waitStatus(nullptr), resources(nullptr),
-      nextInQueue(nullptr) {
+      frame(nullptr), cpuTicks(0), errorValue(0), exitCodeValue(0), resources(nullptr), scheduling() {
     nameBuffer[0] = 0;
     for (void *&v : keyValues) {
         v = nullptr;

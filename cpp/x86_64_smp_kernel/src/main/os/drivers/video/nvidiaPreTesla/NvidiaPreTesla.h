@@ -45,7 +45,6 @@ public:
     const SvgaPrimitives *startAcceleration() override;
     void stopAcceleration() override;
 
-protected:
     // What probe() learns of the card before choosing its family.
     class Card {
     public:
@@ -66,6 +65,18 @@ protected:
         uint32_t apertureBytes;
         uint32_t memoryBytes;
     };
+
+    // The card and the current mode, for the 2D engine driver (NvidiaPreTesla2d).
+    const Card &cardInfo() const { return card; }
+    unsigned modeWidth() const { return width; }
+    unsigned modeHeight() const { return height; }
+    // Bytes per pixel of the current mode (0: no mode set), and of a scan line of the frame buffer.
+    unsigned modeBytesPerPixel() const { return modeBytes; }
+    unsigned scanLineBytes() const { return scanBytes; }
+    uint32_t mapBytes() const;
+    uint32_t usableBytes() const;
+
+protected:
 
     // What a mode change writes, for head A: the VGA registers, the extended CRTC registers and the 32-bit PCRTC,
     // PRAMDAC and PLL registers of the family (a family leaves the ones it lacks alone).
@@ -170,14 +181,11 @@ protected:
     HeadState *mode;
 
 private:
-    friend class NvidiaPreTesla2d;
 
     static NvidiaPreTesla *probed;
 
     bool init();
     void nameChip();
-    uint32_t mapBytes() const;
-    uint32_t usableBytes() const;
     bool timingFor(unsigned newWidth, unsigned newHeight, DisplayTiming &out) const;
     void save(HeadState &s);
     void computeStandard(const DisplayTiming &t, unsigned bytes, uint32_t newPitch, HeadState &s);

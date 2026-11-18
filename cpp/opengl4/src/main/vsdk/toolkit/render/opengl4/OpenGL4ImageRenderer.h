@@ -49,12 +49,17 @@ public:
     static GLint magFilterParam();
 
     static void setShaderBasePath(const java::String& basePath);
+    static java::String getShaderBasePath();
+
+    /**
+    Shader loading helpers, shared with `OpenGL4ColorDepthImageRenderer`.
+    */
+    static java::String readShaderFile(const java::String& filename);
+    static GLuint compileShader(const java::String& source, int type);
 
     static void dispose();
 
 private:
-    // Shares the shader base path and the shader loading helpers
-    friend class OpenGL4ColorDepthImageRenderer;
 
     static TextureFilterMode textureFilterMode;
     static GLuint quadVaoId;
@@ -66,8 +71,6 @@ private:
 
     static void ensureBuffers();
     static void initializeShaderProgram();
-    static java::String readShaderFile(const java::String& filename);
-    static GLuint compileShader(const java::String& source, int type);
 };
 
 #endif

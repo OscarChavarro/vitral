@@ -55,7 +55,4 @@ Makefile
 .DS_Store
 *.code-workspace
 
-# FreeDOS (only used by scripts/runFreeDos.sh) is downloaded by hand into bin/ and never committed
-bin/*
-!bin/readme.txt
 .aider*
