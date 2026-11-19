@@ -33,6 +33,12 @@ LEGACY_CXXFLAGS = -fhandle-exceptions -frtti -fno-inline \
 else
 LEGACY_CXXFLAGS =
 endif
+# Alpha traps on infinities, NaNs and denormals unless the code is compiled
+# for IEEE semantics: the raytracer divides by the zero components of a ray
+# direction, as other processors allow
+ifeq ($(shell uname -m),alpha)
+LEGACY_CXXFLAGS += -mieee
+endif
 
 # Optional features of the base library, with the libraries they need
 DEFINES =
@@ -66,6 +72,19 @@ BASE_INCLUDES = -I$(VITRAL_DIR)/base/src -I$(VITRAL_DIR)/base/src/main
 BASE_LIBRARY = $(VITRAL_DIR)/base/build/libvitral_base.a \
     $(VITRAL_DIR)/base/build/libvitral_base_geometry.a
 BASE_LINK = -Wl,--start-group $(BASE_LIBRARY) -Wl,--end-group
+# Tru64 UNIX (OSF1): its ld has no --start-group, so the archives are listed
+# repeatedly to resolve their mutual references, and nanosleep is in librt.
+# /usr/local/lib goes first: /usr/shlib/libjpeg.so is the private one of Java.
+# The libraries of /usr/local/lib were built with the system cc, whose code
+# calls the _Ots* routines of libots without listing it: g++ links it here
+ifeq ($(shell uname -s),OSF1)
+BASE_LINK = -L/usr/local/lib $(BASE_LIBRARY) $(BASE_LIBRARY) $(BASE_LIBRARY)
+SYSTEM_LIBS += -lrt -lots
+# Its X11 and Motif are in the system folders (/usr/include, /usr/lib)
+ifndef X11_DIR
+X11_DIR = /usr
+endif
+endif
 
 # X11 (the Xt layer, its Athena widget set and the scene editor). The `String`
 # type of Xt is renamed `XtString` around its headers (see XtIntrinsics.h)
@@ -81,7 +100,8 @@ ifneq ($(shell grep -l _Xsetlocale $(X11_DIR)/lib/libX11.so 2>/dev/null),)
 X11_DEFINES += -DVITRAL_X_LOCALE
 endif
 
-# OpenGL and GLU: Mesa until 2.x names its libraries MesaGL and MesaGLU
+# OpenGL and GLU: Mesa up to 3.0 names its libraries MesaGL and MesaGLU
+# (shared, or static as the osf1 target of Mesa 3.0 builds them)
 ifneq ($(GL_DIR),)
 GL_INCLUDES = -I$(GL_DIR)/include
 GL_LDFLAGS = -L$(GL_DIR)/lib
@@ -90,7 +110,8 @@ GL_INCLUDES =
 GL_LDFLAGS =
 endif
 ifneq ($(wildcard $(GL_DIR)/lib/libMesaGL.so /usr/lib/libMesaGL.so \
-    /usr/local/lib/libMesaGL.so $(X11_DIR)/lib/libMesaGL.so),)
+    /usr/local/lib/libMesaGL.so $(X11_DIR)/lib/libMesaGL.so \
+    $(GL_DIR)/lib/libMesaGL.a),)
 GL_LIBS = $(GL_LDFLAGS) -lMesaGLU -lMesaGL
 else
 GL_LIBS = $(GL_LDFLAGS) -lGLU -lGL

@@ -281,9 +281,9 @@ vitralTestCast(const Entity *entity, const Class &type, T *)
 }
 
 // The rounding-mode tests need <fenv.h> (C99), that Turbo C++ 3.0 and the
-// libc5 of gcc 2.7.2 lack: there, changing the rounding mode always fails
-// and the tests that need it are skipped
-#if defined(__GNUC__) && __GNUC__ >= 3
+// libc5 of gcc 2.7.2 lack, as Tru64 UNIX 5.1 (__osf__): there, changing the
+// rounding mode always fails and the tests that need it are skipped
+#if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__osf__)
 #include <fenv.h>
 #define VITRAL_TEST_HAS_FENV
 #else

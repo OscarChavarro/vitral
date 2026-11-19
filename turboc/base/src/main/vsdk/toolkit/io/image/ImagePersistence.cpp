@@ -233,6 +233,18 @@ extern "C" {
 
 #ifdef VITRAL_WITH_PNG
 #include <png.h>
+// libpng before 1.0.6 (i.e. 1.0.3 of Tru64 UNIX 5.1) has no png_jmpbuf
+#ifndef png_jmpbuf
+#define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
+#endif
+// Before 1.2.9 the expansions of palettes, gray levels of 1, 2 or 4 bits and
+// tRNS chunks are all done by png_set_expand (its newer, specific names are
+// missing in 1.0.x)
+#if defined(PNG_LIBPNG_VER) && PNG_LIBPNG_VER < 10209
+#define png_set_palette_to_rgb(png_ptr) png_set_expand(png_ptr)
+#define png_set_expand_gray_1_2_4_to_8(png_ptr) png_set_expand(png_ptr)
+#define png_set_tRNS_to_alpha(png_ptr) png_set_expand(png_ptr)
+#endif
 #endif
 
 BOOLEAN ImagePersistence::isTextComment(const String& line) {

@@ -45,6 +45,10 @@ A key property of the project is the "pure" base layer (`java/base`): it minimiz
 
 The Java code in this repository is a **port** of the toolkit architecture. The same high-level design used in `java/base` is intended to be replicated across other ports (such as C++, TypeScript, and others): a clean core model plus backend-specific rendering adapters.
 
+## Supported platforms
+
+Vitral aims to be portable across CPU architectures (from the 16-bit Intel 8086 to x86_64, MIPS, Alpha, SPARC and Apple M1), GPUs (from none to OpenGL 4.x), operating systems (MS-DOS, a minimalistic SMP kernel, classic Unix workstations, legacy and modern Linux, macOS) and development stacks (from Turbo C++ 3.0 and gcc 2.7.2 to modern clang, Java and TypeScript). Ports are verified on a distributed set of real and virtual test machines, described in a local, git-ignored `etc/portMachines/secrets.json` file (see `etc/portMachines/secrets-example.json`). See [doc/portability.md](doc/portability.md) for the table of supported systems and the deployment procedure of the test environment.
+
 ## Turbo C++ 3.0 / DOS maintenance notes
 
 The `turboc/` port is built on MS-DOS with Borland Turbo C++ 3.0. It is a
@@ -61,18 +65,47 @@ reach it:
   This affects `String`, `ColorRgb`, `Vector3Dd`, and similar value types.
 - Avoid `new T[count]()` and `for (int i = ...)`. Allocate normally, initialize
   elements explicitly, and declare loop indices before the loop.
+- Do not name variables or parameters `near`, `far`, `huge`, `pascal`,
+  `cdecl`, `interrupt` or `asm`: they are Turbo C++ keywords.
+- A variable declared in a `for` header belongs to the enclosing block
+  (pre-ISO scoping): two `for (int i ...)` loops in one block, or one and
+  a plain `int i`, are a "Multiple declaration". No declarations inside
+  `if`/`while` conditions either.
+- Do not define a nested class outside its enclosing class
+  (`class Outer::Inner { ... };`): make it a top-level class and name it
+  inside `Outer` with a `typedef`. Legacy compilers (TCC, gcc 2.7.2) do not
+  let a nested class read the private members of its enclosing class: give
+  it what it needs through public members or constructor parameters.
+- Vitral does not use `friend` declarations (in any port).
+- No `static` function templates, and no template functions whose
+  parameter must be deduced through another template (`List<T*>&`): use
+  overloads, generated with a macro when there are several types.
+- Overloads that take a derived pointer and `const void*` are ambiguous in
+  TCC (it ranks both conversions equally); use an ellipsis fallback.
+- In the definition of a static array member, qualify the constants of its
+  bound (`Class::SIZE`, not `SIZE`).
+- No loops in an `inline` constructor defined outside its class
+  (`inline A::A(...) { for (...) ... }` in a header): TCC reports
+  "Expression syntax". Define such a constructor in the `.cpp`
+  (constructors with loops written inside the class body compile).
+- No function template deduction from a pointer argument through
+  `const T &`: add a non-template overload (i.e. `hashMapKey(const void*)`).
+- Run `turboc/scripts/checkTurboCpp.py` before a transfer: it finds most
+  of these constructs on the host.
 - TCC rejects `delete` on const-qualified pointers. Keep a non-const local
   pointer when an owned `const T*` must be released.
-- Its nested-class access rules are stricter. Under `__TURBOC__`, expose only
-  required helper declarations and qualify calls to outer static members.
+- Its nested-class access rules are stricter: qualify calls to outer static
+  members.
 - With `VITRAL_WITHOUT_PTHREADS`, provide a synchronous path for code that
   otherwise creates `Future`, `FutureTask`, or `ExecutorService` objects.
 - TCC response files need one option per line. Batch builds should print a
   compact `Compiling <source>` line, redirect successful output to a log, and
   print the log only after an error.
-- DOS release batches use `-O1 -d -v-`: optimize for size, merge duplicate
-  strings, and explicitly omit debug records. Debug the corresponding source
-  on a modern platform instead.
+- DOS release batches use `-O1 -d -v- -vi-`: optimize for size, merge
+  duplicate strings, explicitly omit debug records, and do not expand inline
+  functions (`-vi-` after `-v-`, which enables expansion again; without it
+  the code is some 15% larger, and a TLINK image must fit in 1 MB). Debug the
+  corresponding source on a modern platform instead.
 - The generated `BASE.BAT` compiles the objects and `BASELINK.BAT` archives
   them into `BUILD\\BASE.LIB`. Run the latter separately when investigating a
   Turbo Librarian failure; it does not need to recompile the base library.

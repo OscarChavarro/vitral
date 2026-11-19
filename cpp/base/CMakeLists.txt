@@ -371,6 +371,9 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/material/MicroFacetedMaterial.cpp
     src/main/vsdk/toolkit/environment/material/ShadingType.cpp
     src/main/vsdk/toolkit/environment/material/RendererConfiguration.cpp
+    src/main/vsdk/toolkit/environment/material/PhongLobe.cpp
+    src/main/vsdk/toolkit/environment/material/PhongMaterial.cpp
+    src/main/vsdk/toolkit/environment/material/Texture.cpp
     src/main/vsdk/toolkit/processing/CurveModeler.cpp
     src/main/vsdk/toolkit/processing/ImageProcessing.cpp
     src/main/vsdk/toolkit/processing/BezierPatchTessellator.cpp
@@ -620,6 +623,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/heightfield_solid_tests.cpp
     src/test/subdivided_bezier_patch_tests.cpp
     src/test/microfaceted_material_csv_tests.cpp
+    src/test/phong_material_tests.cpp
     src/test/ray_affine_contract_tests.cpp
     src/test/ray_crossing_tests.cpp
     src/test/bounding_volume_hierarchy_tests.cpp
