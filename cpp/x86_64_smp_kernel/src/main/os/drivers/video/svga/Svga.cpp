@@ -1,6 +1,8 @@
 #include "drivers/video/svga/Svga.h"
 #include "drivers/video/bochsVBE/BochsVbe.h"
 #include "drivers/video/bootFramebuffer/BootFramebuffer.h"
+#include "drivers/video/nvidiaPascal/NvidiaPascal.h"
+#include "drivers/video/nvidiaPascal/NvidiaPascalSvga.h"
 #include "drivers/video/nvidiaPreTesla/NvidiaPreTesla.h"
 #include "kernel/KernelLog.h"
 #include "kernel/Paging.h"
@@ -9,6 +11,9 @@
 
 SvgaDriver *Svga::driver = nullptr;
 bool Svga::on = false;
+unsigned Svga::modeWidth = 0;
+unsigned Svga::modeHeight = 0;
+unsigned Svga::modeBytes = 0;
 const SvgaPrimitives Svga::FRAMEBUFFER = {
     "framebuffer", &Svga::framebufferPlot, &Svga::framebufferSpan, &Svga::framebufferFill, &Svga::framebufferCopy,
     &Svga::framebufferSync,
@@ -28,6 +33,9 @@ Svga::init() {
         nvidiaDefaultAcceleration = driver != nullptr;
     }
     if (!driver) {
+        // A Pascal card is described now; its display engine needs the timer, so the boot frame buffer draws the
+        // screen until takeOverDisplay().
+        NvidiaPascal::describe();
         driver = BootFramebuffer::probe();
     }
     uint64_t ramMb = PhysicalMemory::totalFrames() * PhysicalMemory::FRAME >> 20;
@@ -51,13 +59,58 @@ Svga::startDefaultAcceleration() {
 }
 
 bool
+Svga::takeOverDisplay() {
+    // Only from a frame buffer mode in use: the display taken from the video BIOS shows nothing until a mode is set
+    if (!driver || !on || !NvidiaPascal::present()) {
+        return false;
+    }
+    SvgaDriver *next = NvidiaPascalSvga::create();
+    if (!next) {
+        return false;
+    }
+    bool combining = Paging::mapWriteCombining((uint64_t)(uintptr_t)next->frameBuffer(), next->videoMemoryBytes());
+    SvgaDriver *old = nullptr;
+    {
+        Exclusive guard;
+        if (next->setMode(modeWidth, modeHeight, modeBytes)) {
+            primitives->sync();
+            if (primitives != &FRAMEBUFFER) {
+                primitives = &FRAMEBUFFER;
+                driver->stopAcceleration();
+            }
+            old = driver;
+            driver = next;
+        }
+    }
+    if (!old) {
+        kprintf("Video: %s cannot show the %ux%u mode in use: boot framebuffer kept (the screen may stay dark)\n",
+                next->name(), modeWidth, modeHeight);
+        delete next;
+        return false;
+    }
+    delete old;
+    kprintf("Video: %s, modes up to %ux%u, frame buffer memory type: %s\n", driver->name(),
+            NvidiaPascal::rasterWidth(), NvidiaPascal::rasterHeight(), combining ? "write-combining" : "uncached");
+    return true;
+}
+
+bool
 Svga::enter(unsigned width, unsigned height, unsigned bytesPerPixel) {
     Exclusive guard;
     if (!driver || !driver->setMode(width, height, bytesPerPixel)) {
         return false;
     }
     on = true;
+    modeWidth = width;
+    modeHeight = height;
+    modeBytes = bytesPerPixel;
     return true;
+}
+
+bool
+Svga::loadPalette(const uint8_t *rgb) {
+    Exclusive guard;
+    return driver && driver->loadPalette(rgb);
 }
 
 void

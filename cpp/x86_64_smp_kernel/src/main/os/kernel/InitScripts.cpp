@@ -1,5 +1,6 @@
 #include "kernel/InitScripts.h"
 #include "drivers/char/uart/Uart.h"
+#include "drivers/usb/pl2303/Pl2303.h"
 #include "kernel/KernelLog.h"
 #include "net/NetDevice.h"
 #include "syscalls/Syscalls.h"
@@ -9,6 +10,7 @@
 
 const InitScripts::Step InitScripts::script[] = {
     {Need::Serial, nullptr, Mode::Respawn, "shell", "/dev/ttyS0"},
+    {Need::UsbSerial, nullptr, Mode::Respawn, "shell", "/dev/ttyUSB0"},
     {Need::Interface, "eth0", Mode::Run, "ifconfig eth0 192.168.1.199 netmask 255.255.255.0 up", nullptr},
     {Need::Interface, "eth0", Mode::WaitLink, "eth0", nullptr},
     {Need::Nic, nullptr, Mode::Background, "httpd", nullptr},
@@ -36,6 +38,7 @@ InitScripts::satisfied(const Step &step) {
     switch (step.need) {
     case Need::Nothing: return true;
     case Need::Serial: return Uart::ready();
+    case Need::UsbSerial: return Pl2303::ready();
     case Need::Interface: return NetDevices::find(step.interfaceName) != nullptr;
     case Need::Nic:
         if (hasNic()) {

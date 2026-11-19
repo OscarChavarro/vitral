@@ -26,6 +26,8 @@ public:
     static int consoleOf(uint32_t pid);
     static unsigned currentConsole();
     static unsigned cpuCount() { return cpuTotal; }
+    // The index of the CPU this code runs on (0 is the one the USB monitor thread is pinned to)
+    static unsigned currentCpu() { return cpuIndex(); }
     static bool setAffinity(uint32_t pid, const unsigned long *bits);
     static unsigned onlineCount();
     static constexpr unsigned TICKS_PER_PIT_TICK = 4;

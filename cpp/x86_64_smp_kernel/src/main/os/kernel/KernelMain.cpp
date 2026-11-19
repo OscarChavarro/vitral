@@ -85,6 +85,9 @@ kernelMain() {
     kprintf("Timer running: %u ticks, %u ms since boot\n", (uint32_t)Clock::ticks(),
              (uint32_t)Clock::uptimeMs());
     kprintf("Idle operation: %s\n", Idle::name());
+    if (Svga::takeOverDisplay()) {
+        VirtualConsole::switchTo(VirtualConsole::active());
+    }
     Svga::startDefaultAcceleration();
     Usb::start();
     kprintf("Input: PS/2 keyboard %s, PS/2 mouse %s, %u USB keyboard%s, %u USB %s\n",

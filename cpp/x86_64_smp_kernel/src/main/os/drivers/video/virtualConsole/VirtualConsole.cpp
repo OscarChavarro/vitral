@@ -8,6 +8,7 @@
 VirtualConsole::Screen VirtualConsole::screens[VirtualConsole::COUNT];
 unsigned VirtualConsole::activeIndex = 0;
 VgaMode::Id VirtualConsole::hardwareMode = VgaMode::Id::Text80x25;
+VgaMode::Id VirtualConsole::textMode = VgaMode::Id::Text80x25;
 bool VirtualConsole::panicking = false;
 SpinLock VirtualConsole::lock;
 int VirtualConsole::pendingConsole = -1;
@@ -94,8 +95,8 @@ void
 VirtualConsole::takeOver() {
     panicking = true;
     Screen &s = screens[activeIndex];
-    if (s.mode != VgaMode::Id::Text80x25) {
-        s.mode = VgaMode::Id::Text80x25;
+    if (s.mode != textMode) {
+        s.mode = textMode;
         s.pixels = nullptr;
         show(activeIndex);
     }
@@ -151,7 +152,7 @@ VirtualConsole::leaveGraphics(unsigned console) {
     Screen &s = screens[console];
     uint8_t *old = s.pixels;
     s.pixels = nullptr;
-    s.mode = VgaMode::Id::Text80x25;
+    s.mode = textMode;
     delete[] old;
     if (console == activeIndex) {
         show(console);
@@ -160,6 +161,9 @@ VirtualConsole::leaveGraphics(unsigned console) {
 
 bool
 VirtualConsole::setMode(unsigned console, VgaMode::Id mode) {
+    if (mode == VgaMode::Id::Text80x25) {
+        mode = textMode;
+    }
     const VgaMode::Info &info = VgaMode::info(mode);
     uint8_t *pixels = nullptr;
     if (info.graphics()) {
@@ -177,7 +181,7 @@ VirtualConsole::setMode(unsigned console, VgaMode::Id mode) {
     console = resolve(console);
     Screen &s = screens[console];
     s.overlayRows = nullptr;
-    if (info.layout == VgaMode::Layout::Text) {
+    if (VgaMode::isConsoleText(mode)) {
         if (s.mode != mode) {
             leaveGraphics(console);
             s.mode = mode;
@@ -207,6 +211,7 @@ VirtualConsole::setTextMode(VgaMode::Id mode) {
         return false;
     }
     Locked guard;
+    textMode = mode;
     for (Screen &s : screens) {
         uint8_t *old = s.pixels;
         s.pixels = nullptr;
@@ -374,8 +379,10 @@ VirtualConsole::setPalette(unsigned console, unsigned first, unsigned count, con
         return;
     }
     Memory::copy(s.palette + first * 3, rgb, count * 3);
-    if (console == activeIndex) {
-        VgaMode::loadPalette(s.mode, s.palette);
+    if (console == activeIndex && VgaMode::loadPalette(s.mode, s.palette) && !panicking) {
+        // The driver converts the indexes as they are written: the whole screen again
+        pendingRow = 0;
+        __atomic_store_n(&pendingConsole, (int)console, __ATOMIC_RELEASE);
     }
 }
 

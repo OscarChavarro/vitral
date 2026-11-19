@@ -84,7 +84,8 @@ public:
     static void loadPalette(const uint8_t *rgb);
     // Loads the DAC entries the pixel values of the mode show: all of them with a DAC, or the 16 that the attribute
     // controller selects in 16 colour planar modes. Nothing for the modes without a palette.
-    static void loadPalette(Id id, const uint8_t *rgb);
+    // True when the SVGA driver keeps the palette of a linear mode itself: what the screen shows must be drawn again
+    static bool loadPalette(Id id, const uint8_t *rgb);
     static bool hasPalette(Id id) {
         return info(id).usesDac() || (info(id).layout == Layout::Planar && info(id).colors == 16);
     }

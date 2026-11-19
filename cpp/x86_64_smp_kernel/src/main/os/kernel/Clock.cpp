@@ -24,7 +24,7 @@ uint64_t
 Clock::nanoseconds() {
     uint64_t hz = tscPerSecond;
     if (!hz) {
-        return uptimeMs() * 1000000;
+        return tickCount * 1000000000000ull / HZ_MILLI;
     }
     uint64_t delta = readTsc() - tscAtFirstTick;
     uint64_t base = 1000000000000ull / HZ_MILLI;

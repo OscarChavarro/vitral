@@ -29,18 +29,32 @@ NvidiaCommand::main(const ArgList &args) {
     if (String::equals(what, "test") && args.count() == 1) {
         return test();
     }
+    if (String::equals(what, "evo") && args.count() == 2 && String::equals(args.at(1), "state")) {
+        int64_t result = Syscalls::nvidia(NvidiaInfo::EVO_DUMP);
+        printf64(result == 0 ? "nvidia: display state written to the kernel log\n" : "nvidia: no Pascal card\n");
+        return result == 0 ? 0 : 1;
+    }
+    if (String::equals(what, "evo") && args.count() == 1) {
+        int64_t result = Syscalls::nvidia(NvidiaInfo::EVO_TEST);
+        printf64(result == 0 ? "nvidia: the core channel runs, see dmesg\n"
+                             : "nvidia: evo failed (error %d), see dmesg\n", (int)result);
+        return result == 0 ? 0 : 1;
+    }
     usage();
     return String::equals(what, "help") ? 0 : 1;
 }
 
 void
 NvidiaCommand::usage() {
-    printf64("usage: nvidia [info | accel [on | off] | test | help]\n"
+    printf64("usage: nvidia [info | accel [on | off] | test | evo [state] | help]\n"
              "  info       the NVIDIA card (RIVA TNT to GeForce 7), its monitor, mode and 2D engine\n"
              "  accel      whether the SVGA modes draw with the 2D engine\n"
              "  accel on   fills and copies of the SVGA modes by the 2D engine\n"
              "  accel off  back to drawing with the CPU in the frame buffer\n"
-             "  test       the 2D engine checked against the CPU, and both timed\n");
+             "  test       the 2D engine checked against the CPU, and both timed\n"
+             "  evo        Pascal (GTX 10x0): starts the display engine's core channel, unless the SVGA driver\n"
+             "             already did at boot\n"
+             "  evo state  Pascal: the display engine's armed state, in the kernel log\n");
 }
 
 bool

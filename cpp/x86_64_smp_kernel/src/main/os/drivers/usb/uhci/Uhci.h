@@ -8,7 +8,8 @@
 // A UHCI (USB 1.1) host controller. Every frame of its list points to one skeleton queue head followed by a queue
 // head per interrupt pipe, each with a single transfer descriptor that poll() rearms, and then by the queue head of
 // control transfers. Interrupt endpoints are therefore polled every frame, whatever their bInterval asks for: the
-// bandwidth of a few keyboards and mice is negligible. The schedule lives in DMA memory below 4 GB.
+// bandwidth of a few keyboards and mice is negligible. Bulk OUT transfers go in their own queue head, after the
+// control one. The schedule lives in DMA memory below 4 GB.
 class Uhci : public UsbHostController {
 public:
     static Uhci *create(const Pci::Location &at, unsigned number, unsigned &irq);
@@ -25,6 +26,8 @@ public:
     void *openInterruptPipe(uint8_t address, UsbSpeed speed, uint8_t endpoint, unsigned maxPacket,
                             UsbReportHandler handler, void *context) override;
     void closeInterruptPipe(void *pipe) override;
+    int bulkOut(uint8_t address, UsbSpeed speed, uint8_t endpoint, unsigned maxPacket, uint8_t &toggle,
+                const void *data, unsigned length) override;
     bool poll() override;
     bool takeFault() override;
 
@@ -116,6 +119,11 @@ private:
     static constexpr unsigned PIPE_STRIDE = 128;
     static constexpr unsigned PIPE_BUFFER = 64;
     static constexpr unsigned MAX_PIPES = 16;
+    // After the pipes, in the third page: the bulk queue head, its transfer descriptors and its data
+    static constexpr unsigned BULK_AREA = PIPE_AREA + MAX_PIPES * PIPE_STRIDE;
+    static constexpr unsigned BULK_TDS = 8;
+    static constexpr unsigned BULK_BUFFER = 512;
+    static constexpr unsigned BULK_TIMEOUT_MS = 500;
     static constexpr unsigned MAX_PORTS = 7;
     static constexpr unsigned CONTROL_TIMEOUT_MS = 1000;
 
@@ -129,6 +137,9 @@ private:
     Td *controlTds;
     uint8_t *setupBuffer;
     uint8_t *dataBuffer;
+    Qh *bulkQh;
+    Td *bulkTds;
+    uint8_t *bulkBuffer;
     Pipe pipes[MAX_PIPES];
     SpinLock lock;
     volatile bool fault;

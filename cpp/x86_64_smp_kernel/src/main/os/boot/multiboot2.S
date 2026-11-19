@@ -6,9 +6,19 @@
 
    The loader enters mb2_entry in 32-bit protected mode, paging off, A20 on, EAX = 0x36D76289 and
    EBX = physical address of the Multiboot2 information. mb2_entry checks that the CPU has long mode,
-   builds a 4 GB identity map, switches to long mode and continues at _start64 (entry64.S), which then
-   converts the loader's memory map into the BootInfo the kernel uses (kernel/Multiboot2.cpp). */
+   asks the BIOS for its 8x16 font (see mb2_bios_font_thunk), builds a 4 GB identity map, switches to
+   long mode and continues at _start64 (entry64.S), which then converts the loader's memory map into
+   the BootInfo the kernel uses (kernel/Multiboot2.cpp).
+
+   The font: GRUB hands over a graphics framebuffer, so VGA plane 2 does not hold the BIOS font that
+   the kernel copies after a text mode boot (VgaMode::saveFont). A BIOS GRUB (i386-pc) leaves the BIOS
+   usable, so mb2_entry returns to real mode for a moment, as the BIOS boot path runs, and gets the
+   address of the font with INT 10h AX=1130h BH=06h. The address goes to multiboot_bios_font and from
+   there to BootInfo::biosFontAddress. */
 #define MB2_MAGIC 0xE85250D6
+/* Low memory address where mb2_bios_font_thunk runs in real mode (one page, its stack at the top) */
+#define MB2_THUNK 0x7000
+#define MB2_THUNK_ADDRESS(label) (MB2_THUNK + ((label) - mb2_bios_font_thunk))
 
     .section .multiboot2, "a"
     .balign 8
@@ -45,6 +55,9 @@ mb2_header_end:
     .globl multiboot_info
     .balign 8
 multiboot_info: .quad 0                             /* physical address of the info; 0 = not Multiboot2 */
+    .globl multiboot_bios_font
+multiboot_bios_font: .long 0                        /* physical address of the BIOS 8x16 font; 0 = none */
+mb2_saved_esp: .long 0
 
     .section .rodata
 msg_loader: .asciz "MULTIBOOT2 ERROR: not started by a Multiboot2 loader (bad magic)."
@@ -56,6 +69,8 @@ mb2_gdt:
     .quad 0x00CF9A000000FFFF    /* 0x08: code, 32-bit */
     .quad 0x00CF92000000FFFF    /* 0x10: data */
     .quad 0x00AF9A000000FFFF    /* 0x18: code, 64-bit */
+    .quad 0x00009A000000FFFF    /* 0x20: code, 16-bit, 64 KB (the way back to real mode) */
+    .quad 0x000092000000FFFF    /* 0x28: data, 16-bit, 64 KB */
 mb2_gdt_end:
 mb2_gdt_ptr:
     .word mb2_gdt_end - mb2_gdt - 1
@@ -104,6 +119,38 @@ mb2_entry:
     cpuid
     btl $29, %edx
     jnc error_cpu
+
+    /* The BIOS 8x16 font. The thunk runs at MB2_THUNK, below the AP trampoline page, which is free
+       until the kernel starts the other CPUs; it is skipped when the loader left its information
+       below 0x8000, where the copy could overwrite it. */
+    cmpl $0x8000, multiboot_info        /* (CPUID changed EBX) */
+    jb 5f
+    lgdt mb2_gdt_ptr
+    movl $mb2_bios_font_thunk, %esi
+    movl $MB2_THUNK, %edi
+    movl $(mb2_bios_font_thunk_end - mb2_bios_font_thunk), %ecx
+    rep movsb
+    movl %esp, mb2_saved_esp
+    ljmpl $0x20, $MB2_THUNK
+mb2_bios_font_back:             /* back in 32-bit protected mode, from the thunk */
+    movw $0x10, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+    movw %ax, %ss
+    movl mb2_saved_esp, %esp
+    movzwl MB2_THUNK + (mb2_font_segment - mb2_bios_font_thunk), %eax
+    shll $4, %eax
+    movzwl MB2_THUNK + (mb2_font_offset - mb2_bios_font_thunk), %ecx
+    addl %ecx, %eax
+    /* A font of 256 glyphs of 16 bytes in the ROM area (the VGA BIOS, or the system BIOS) */
+    cmpl $0xA0000, %eax
+    jb 5f
+    cmpl $(0x100000 - 4096), %eax
+    ja 5f
+    movl %eax, multiboot_bios_font
+5:  movl multiboot_info, %ebx
 
     /* Identity map of the first 4 GB with 2 MB pages: PML4 -> PDPT -> 4 PDs. */
     movl $mb2_pml4, %edi
@@ -166,6 +213,49 @@ error_show:                     /* white on red at the top left of the VGA text 
 4:  cli
     hlt
     jmp 4b
+
+/* Copied to MB2_THUNK and entered through the 16-bit code segment 0x20 (base 0): leaves protected
+   mode, calls INT 10h AX=1130h BH=06h (ES:BP = the 8x16 font of the BIOS) and goes back to 32-bit
+   protected mode at mb2_bios_font_back. It runs with interrupts off and the IVT of the BIOS. */
+    .code16
+mb2_bios_font_thunk:
+    movw $0x28, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+    movw %ax, %ss
+    lidt MB2_THUNK_ADDRESS(mb2_real_idt)
+    movl %cr0, %eax
+    andl $0xFFFFFFFE, %eax      /* PE off */
+    movl %eax, %cr0
+    ljmp $(MB2_THUNK >> 4), $(mb2_real - mb2_bios_font_thunk)
+mb2_real:
+    xorw %ax, %ax
+    movw %ax, %ds
+    movw %ax, %ss
+    movw $(MB2_THUNK + 0x0FF0), %sp
+    movw %ax, %es               /* ES:BP stays 0:0 if the BIOS does not answer */
+    xorw %bp, %bp
+    movw $0x1130, %ax
+    movw $0x0600, %bx
+    int $0x10
+    cli
+    movw %es, %dx
+    xorw %ax, %ax
+    movw %ax, %ds
+    movw %dx, MB2_THUNK_ADDRESS(mb2_font_segment)
+    movw %bp, MB2_THUNK_ADDRESS(mb2_font_offset)
+    movl %cr0, %eax
+    orl $1, %eax                /* PE on: the GDTR still holds mb2_gdt */
+    movl %eax, %cr0
+    ljmpl $0x08, $mb2_bios_font_back
+mb2_real_idt:
+    .word 0x3FF                 /* the real mode interrupt vector table */
+    .long 0
+mb2_font_offset:  .word 0
+mb2_font_segment: .word 0
+mb2_bios_font_thunk_end:
 
     .code64
 mb2_long:

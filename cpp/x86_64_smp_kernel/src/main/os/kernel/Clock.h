@@ -8,8 +8,12 @@ public:
     static constexpr uint32_t HZ_MILLI = 18206;
 
     static void init();
+    // The PIT interrupts counted so far. Only CPU 0 takes them, so the count stands still for code that runs there
+    // with interrupts off (a syscall, an interrupt handler, a spin lock held): measure waits with uptimeMs().
     static uint64_t ticks() { return tickCount; }
-    static uint64_t uptimeMs() { return tickCount * 1000000 / HZ_MILLI; }
+    // From the TSC once it is calibrated (about a second after the timer starts), so that it advances on every CPU
+    // with interrupts off too; from the ticks before.
+    static uint64_t uptimeMs() { return nanoseconds() / 1000000; }
     static uint64_t msToTicks(uint64_t ms);
     static uint64_t nanoseconds();
     static uint64_t cycles() {

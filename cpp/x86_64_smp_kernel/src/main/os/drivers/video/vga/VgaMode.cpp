@@ -2,6 +2,7 @@
 #include "drivers/video/svga/Svga.h"
 #include "lib/vitralKernel/Ports.h"
 #include "drivers/video/vga/ModeRegisters.h"
+#include "boot/BootInfo.h"
 
 uint8_t VgaMode::fontCopy[VgaMode::FONT_BYTES];
 bool VgaMode::fontSaved = false;
@@ -238,20 +239,23 @@ VgaMode::loadPalette(const uint8_t *rgb) {
     }
 }
 
-void
+bool
 VgaMode::loadPalette(Id id, const uint8_t *rgb) {
+    if (info(id).layout == Layout::Linear && info(id).usesDac() && Svga::loadPalette(rgb)) {
+        return true;
+    }
     if (info(id).usesDac()) {
         loadPalette(rgb);
-        return;
+        return false;
     }
     if (!hasPalette(id)) {
-        return;
+        return false;
     }
     const ModeRegisters &r = REGISTERS[(unsigned)id];
     Ports::outb(PEL_MASK, 0xFF);
     for (unsigned i = 0; i < 16; i++) {
         dac(r.ac[i], rgb[i * 3] & 0x3F, rgb[i * 3 + 1] & 0x3F, rgb[i * 3 + 2] & 0x3F);
-    }
+    }    return false;
 }
 
 // Maps plane 2 (the character generator) linearly at 0xA0000. The sequencer memory mode must disable odd/even
@@ -282,6 +286,18 @@ VgaMode::endFontAccess() {
 void
 VgaMode::saveFont() {
     if (fontSaved) {
+        return;
+    }
+    // After a Multiboot2 boot in a graphics mode plane 2 holds no font: the Multiboot2 entry got the address of the
+    // 8x16 font of the BIOS instead (boot/multiboot2.S), the font a text mode boot leaves in plane 2.
+    uint32_t biosFont = BootInfo::get().biosFontAddress;
+    if (biosFont >= 0xA0000 && biosFont <= 0x100000 - FONT_GLYPHS * 16) {
+        volatile const uint8_t *rom = (volatile const uint8_t *)(uintptr_t)biosFont;
+        for (unsigned i = 0; i < FONT_BYTES; i++) {
+            unsigned row = i % FONT_SLOT;
+            fontCopy[i] = row < 16 ? rom[(i / FONT_SLOT) * 16 + row] : 0;
+        }
+        fontSaved = true;
         return;
     }
     // The character height of the text mode in use: CRTC Maximum Scan Line, bits 0 to 4, plus one. The rows of a
@@ -361,7 +377,7 @@ VgaMode::available(Id id) {
     if (m.layout == Layout::FramebufferText) {
         return Svga::supportsFramebufferText() && Svga::canSet(frameWidth(id), frameHeight(id), m.bytes);
     }
-    return true;
+    return Svga::vgaRegisterModes();
 }
 
 void

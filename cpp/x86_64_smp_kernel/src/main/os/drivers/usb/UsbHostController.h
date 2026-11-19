@@ -47,6 +47,10 @@ public:
     virtual void *openInterruptPipe(uint8_t address, UsbSpeed speed, uint8_t endpoint, unsigned maxPacket,
                                     UsbReportHandler handler, void *context) = 0;
     virtual void closeInterruptPipe(void *pipe) = 0;
+    // Sends data to a bulk OUT endpoint and waits for it: the bytes the device took, or -1 when none could be sent.
+    // toggle is the endpoint's data toggle, kept by the caller between transfers. Like control transfers, bulk
+    // transfers are issued one at a time (from the USB monitor thread). A controller without them returns -1.
+    virtual int bulkOut(uint8_t, UsbSpeed, uint8_t, unsigned, uint8_t &, const void *, unsigned) { return -1; }
     // Services finished transfers; true when the controller had something to report (its interrupt was pending).
     virtual bool poll() = 0;
     // True once after the controller stopped on a host system or process error.

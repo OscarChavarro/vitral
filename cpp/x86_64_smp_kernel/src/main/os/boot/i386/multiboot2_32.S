@@ -43,6 +43,8 @@ mb2_header_end:
     .globl multiboot_info
     .balign 4
 multiboot_info: .long 0                             /* physical address of the info; 0 = not Multiboot2 */
+    .globl multiboot_bios_font
+multiboot_bios_font: .long 0                        /* none: GRUB leaves the EGA text mode and its font in plane 2 */
 
     .section .rodata
 mb2_msg_loader: .asciz "MULTIBOOT2 ERROR: not started by a Multiboot2 loader (bad magic)."

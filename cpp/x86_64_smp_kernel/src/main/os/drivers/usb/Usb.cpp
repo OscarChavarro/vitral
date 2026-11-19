@@ -1,5 +1,6 @@
 #include "drivers/usb/Usb.h"
 #include "drivers/hid/usbKeyboard/UsbKeyboard.h"
+#include "drivers/usb/pl2303/Pl2303.h"
 #include "drivers/hid/usbMouse/UsbMouse.h"
 #include "drivers/pci/Pci.h"
 #include "drivers/usb/UsbHub.h"
@@ -140,6 +141,7 @@ Usb::start() {
     started = true;
     kprintf("USB: %u keyboard%s and %u %s found\n", keyboards, keyboards == 1 ? "" : "s", mice,
             mice == 1 ? "mouse" : "mice");
+    Pl2303::pump();
 }
 
 void
@@ -160,8 +162,15 @@ Usb::startMonitor(Process *creator) {
 void
 Usb::monitor(void *) {
     threaded = true;
+    unsigned waited = 0;
     for (;;) {
-        Syscalls::sleep(MONITOR_MS);
+        Syscalls::sleep(PUMP_MS);
+        Pl2303::pump();
+        waited += PUMP_MS;
+        if (waited < MONITOR_MS) {
+            continue;
+        }
+        waited = 0;
         for (unsigned i = 0; i < controllerCount; i++) {
             if (controllers[i]->takeFault()) {
                 kprintf("USB: %s stopped on a host controller error\n", controllers[i]->name());
@@ -355,6 +364,12 @@ Usb::bindInterfaces(UsbDevice &device, const uint8_t *configuration, unsigned le
     uint8_t interfaceProtocol = 0;
     bool handled = true;
     bool hub = device.deviceClass == CLASS_HUB;
+    bool pl2303 = device.vendor == Pl2303::VENDOR && device.product == Pl2303::PRODUCT;
+    int serialInterface = -1;
+    uint8_t serialOut = 0;
+    uint8_t serialIn = 0;
+    unsigned serialOutPacket = 0;
+    unsigned serialInPacket = 0;
     for (unsigned at = 0; at + 2 <= length;) {
         uint8_t size = configuration[at];
         uint8_t type = configuration[at + 1];
@@ -387,9 +402,27 @@ Usb::bindInterfaces(UsbDevice &device, const uint8_t *configuration, unsigned le
                     device.drivers[bound++] = driver;
                 }
             }
-            handled = interruptIn || handled;
+            // The PL2303 has its interrupt IN endpoint (line status), then its bulk OUT and IN ones
+            if (pl2303 && (attributes & 3) == 2 && (serialInterface < 0 || serialInterface == interfaceNumber)) {
+                serialInterface = interfaceNumber;
+                if (endpoint & 0x80) {
+                    serialIn = endpoint & 0x0F;
+                    serialInPacket = maxPacket;
+                } else {
+                    serialOut = endpoint & 0x0F;
+                    serialOutPacket = maxPacket;
+                }
+            }
+            handled = (interruptIn && !pl2303) || handled;
         }
         at += size;
+    }
+    if (serialOut && bound < UsbDevice::MAX_DRIVERS) {
+        UsbInterfaceDriver *driver = Pl2303::attach(device, (uint8_t)serialInterface, serialOut, serialOutPacket,
+                                                    serialIn, serialInPacket);
+        if (driver) {
+            device.drivers[bound++] = driver;
+        }
     }
     if (hub && bound < UsbDevice::MAX_DRIVERS) {
         device.hub = UsbHub::attach(device);

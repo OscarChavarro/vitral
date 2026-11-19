@@ -14,7 +14,9 @@ uhciBarrier() {
 
 Uhci::Uhci(uint16_t ioBase, unsigned number)
     : io(ioBase), ports(0), memory(nullptr), frameList(nullptr), interruptSkeleton(nullptr),
-      controlQh(nullptr), controlTds(nullptr), setupBuffer(nullptr), dataBuffer(nullptr), fault(false) {
+      controlQh(nullptr), controlTds(nullptr), setupBuffer(nullptr), dataBuffer(nullptr), bulkQh(nullptr),
+      bulkTds(nullptr), bulkBuffer(nullptr), fault(false) {
+    static_assert(BULK_AREA + 32 + BULK_TDS * sizeof(Td) + BULK_BUFFER <= PAGE, "the bulk area must fit its page");
     Format::print(nameText, sizeof(nameText), "UHCI %u", number);
     for (Pipe &pipe : pipes) {
         pipe.used = false;
@@ -87,7 +89,12 @@ Uhci::initialize() {
         pipes[i].td = (Td *)(slot + 32);
         pipes[i].buffer = slot + 64;
     }
-    controlQh->link = LINK_TERMINATE;
+    bulkQh = (Qh *)(memory + 2 * PAGE + BULK_AREA);
+    bulkTds = (Td *)(memory + 2 * PAGE + BULK_AREA + 32);
+    bulkBuffer = memory + 2 * PAGE + BULK_AREA + 32 + BULK_TDS * sizeof(Td);
+    bulkQh->link = LINK_TERMINATE;
+    bulkQh->element = LINK_TERMINATE;
+    controlQh->link = physical(bulkQh) | LINK_QH;
     controlQh->element = LINK_TERMINATE;
     interruptSkeleton->link = physical(controlQh) | LINK_QH;
     interruptSkeleton->element = LINK_TERMINATE;
@@ -276,6 +283,78 @@ Uhci::controlTransfer(uint8_t address, UsbSpeed speed, unsigned maxPacket, const
         Memory::copy(data, dataBuffer, (size_t)result);
     }
     return result;
+}
+
+int
+Uhci::bulkOut(uint8_t address, UsbSpeed speed, uint8_t endpoint, unsigned maxPacket, uint8_t &toggle,
+              const void *data, unsigned length) {
+    if (maxPacket == 0 || maxPacket > 64) {
+        maxPacket = 64;
+    }
+    if (length > BULK_TDS * maxPacket) {
+        length = BULK_TDS * maxPacket;
+    }
+    if (length == 0 || !data) {
+        return 0;
+    }
+    Memory::copy(bulkBuffer, data, length);
+    uint32_t base = TD_ACTIVE | TD_ERROR_LIMIT | (speed == UsbSpeed::Low ? TD_LOW_SPEED : 0);
+    unsigned count = 0;
+    unsigned packetToggle = toggle;
+    for (unsigned offset = 0; offset < length; offset += maxPacket) {
+        unsigned chunk = length - offset < maxPacket ? length - offset : maxPacket;
+        bulkTds[count].status = base;
+        bulkTds[count].token = token(PID_OUT, address, endpoint, packetToggle, chunk);
+        bulkTds[count].buffer = physical(bulkBuffer + offset);
+        packetToggle ^= 1;
+        count++;
+    }
+    bulkTds[count - 1].status = base | TD_INTERRUPT;
+    for (unsigned i = 0; i < count; i++) {
+        bulkTds[i].link = i + 1 < count ? physical(&bulkTds[i + 1]) | LINK_DEPTH_FIRST : LINK_TERMINATE;
+    }
+    uhciBarrier();
+    bulkQh->element = physical(bulkTds);
+
+    // A device that is not ready answers NAK, and the controller retries the descriptor in the next frames.
+    uint64_t deadline = Usb::nowMs() + BULK_TIMEOUT_MS;
+    bool finished = false;
+    for (;;) {
+        unsigned i = 0;
+        bool failed = false;
+        for (; i < count; i++) {
+            uint32_t status = bulkTds[i].status;
+            if (status & TD_ACTIVE) {
+                break;
+            }
+            if (status & TD_ERRORS) {
+                failed = true;
+                break;
+            }
+        }
+        if (failed || i == count) {
+            finished = !failed;
+            break;
+        }
+        if (Usb::nowMs() > deadline) {
+            break;
+        }
+        asm volatile("pause");
+    }
+    if (!finished) {
+        bulkQh->element = LINK_TERMINATE;
+        Usb::delayMs(2);
+    }
+    int sent = 0;
+    for (unsigned i = 0; i < count; i++) {
+        uint32_t status = bulkTds[i].status;
+        if (status & (TD_ACTIVE | TD_ERRORS)) {
+            break;
+        }
+        sent += (int)actualLength(status);
+        toggle ^= 1;
+    }
+    return sent > 0 || finished ? sent : -1;
 }
 
 void

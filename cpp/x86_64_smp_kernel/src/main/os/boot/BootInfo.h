@@ -31,6 +31,9 @@ public:
     uint8_t frameBufferGreenSize;
     uint8_t frameBufferBluePosition;
     uint8_t frameBufferBlueSize;
+    // Physical address of the 8x16 font of the BIOS (256 glyphs of 16 bytes), from INT 10h AX=1130h BH=06h
+    // when a Multiboot2 loader left a graphics mode (boot/multiboot2.S); 0 when the font is in VGA plane 2
+    uint32_t biosFontAddress;
     alignas(8) E820Entry e820[MAX_E820];
 
     static BootInfo &get() { return *(BootInfo *)(uintptr_t)ADDRESS; }

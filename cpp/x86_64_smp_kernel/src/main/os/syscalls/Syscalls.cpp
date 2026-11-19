@@ -13,6 +13,7 @@
 #include "kernel/WallClock.h"
 #include "net/Net.h"
 #include "net/Tcp.h"
+#include "drivers/video/nvidiaPascal/NvidiaPascal.h"
 #include "drivers/video/nvidiaPreTesla/NvidiaPreTesla.h"
 #include "lib/vitralKernel/InterruptsOff.h"
 #include "lib/vitralKernel/Memory.h"
@@ -408,7 +409,13 @@ Syscalls::handle(TrapFrame *f) {
         f->setResult(arg1 ? (uint64_t)Net::describe((unsigned)arg0, *(NetInterfaceInfo *)arg1) : (uint64_t)-Err::FAULT);
         return f;
     case SYS_NVIDIA:
-        f->setResult((uint64_t)NvidiaPreTesla::control((uint32_t)arg0, (NvidiaInfo *)arg1));
+        if ((uint32_t)arg0 == NvidiaInfo::EVO_TEST) {
+            f->setResult((uint64_t)(int64_t)NvidiaPascal::start());
+        } else if ((uint32_t)arg0 == NvidiaInfo::EVO_DUMP) {
+            f->setResult((uint64_t)(int64_t)NvidiaPascal::dumpArmedState());
+        } else {
+            f->setResult((uint64_t)NvidiaPreTesla::control((uint32_t)arg0, (NvidiaInfo *)arg1));
+        }
         return f;
     case SYS_NET_CONFIGURE:
         f->setResult(arg0 ? (uint64_t)Net::configure(*(const NetConfig *)arg0) : (uint64_t)-Err::FAULT);

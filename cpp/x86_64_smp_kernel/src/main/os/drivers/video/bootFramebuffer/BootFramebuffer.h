@@ -15,6 +15,7 @@ public:
     uint32_t bytesPerLine() const override { return pitch; }
     void writePixel(unsigned x, unsigned y, unsigned sourceBytesPerPixel, uint32_t color) override;
     bool supportsFramebufferText() const override { return true; }
+    bool vgaRegisterModes() const override { return false; }
     unsigned framebufferWidth() const override { return width; }
     unsigned framebufferHeight() const override { return height; }
 

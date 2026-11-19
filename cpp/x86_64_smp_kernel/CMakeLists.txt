@@ -71,6 +71,7 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/Multiboo
                   src/main/programs/mode/ModeCommand.cpp src/main/programs/chvt/ChvtCommand.cpp
                   src/main/os/drivers/usb/Usb.cpp src/main/os/drivers/usb/UsbDevice.cpp src/main/os/drivers/usb/UsbHub.cpp
                   src/main/os/drivers/usb/uhci/Uhci.cpp src/main/os/drivers/usb/ehci/Ehci.cpp
+                  src/main/os/drivers/usb/pl2303/Pl2303.cpp
                   src/main/os/drivers/hid/usbKeyboard/UsbKeyboard.cpp src/main/os/drivers/hid/usbMouse/UsbMouse.cpp
                   src/main/os/kernel/ProgramRegistry.cpp src/main/os/kernel/ArgList.cpp src/main/os/kernel/Process.cpp
                   src/main/os/kernel/Scheduler.cpp src/main/os/kernel/Kernel.cpp src/main/os/kernel/InitScripts.cpp src/main/os/kernel/KernelLog.cpp
@@ -100,6 +101,8 @@ set(SOURCES_KERNEL src/main/os/kernel/KernelMain.cpp src/main/os/kernel/Multiboo
                   src/main/os/drivers/video/bootFramebuffer/BootFramebuffer.cpp
                   src/main/os/drivers/video/nvidiaPreTesla/NvidiaPreTesla.cpp src/main/os/drivers/video/nvidiaPreTesla/NvidiaNv04.cpp
                   src/main/os/drivers/video/nvidiaPreTesla/NvidiaNv4x.cpp src/main/os/drivers/video/nvidiaPreTesla/NvidiaPll.cpp
+                  src/main/os/drivers/video/nvidiaPascal/NvidiaPascal.cpp
+                  src/main/os/drivers/video/nvidiaPascal/NvidiaPascalSvga.cpp
                   src/main/os/drivers/video/nvidiaPreTesla2d/NvidiaPreTesla2d.cpp src/main/programs/nvidia/NvidiaCommand.cpp
                   src/main/os/drivers/video/edid/Edid.cpp src/main/os/drivers/video/edid/DisplayTiming.cpp
                   src/main/os/kernel/PhysicalMemory.cpp src/main/os/kernel/KernelHeap.cpp src/main/lib/vitralKernel/Memory.cpp

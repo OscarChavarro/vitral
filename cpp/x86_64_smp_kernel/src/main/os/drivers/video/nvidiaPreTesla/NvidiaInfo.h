@@ -15,6 +15,11 @@ public:
     static constexpr uint32_t ACCELERATION_ON = 1;
     static constexpr uint32_t ACCELERATION_OFF = 2;
     static constexpr uint32_t TEST = 3;
+    // Pascal (GP10x): takes the display from the video BIOS and starts the core channel, unless it already runs (the
+    // SVGA driver starts it at boot); steps in the kernel log
+    static constexpr uint32_t EVO_TEST = 4;
+    // Pascal: the display engine's armed state (kernel log)
+    static constexpr uint32_t EVO_DUMP = 5;
 
     // What TEST did: a check of the 2D engine against the CPU in video memory the screen does not show, and the
     // speed of both.

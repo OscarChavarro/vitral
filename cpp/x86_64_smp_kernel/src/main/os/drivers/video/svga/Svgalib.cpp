@@ -198,7 +198,7 @@ vga_lastmodenumber() { return LAST_MODE; }
 int
 vga_hasmode(int mode) {
     VgaMode::Id id;
-    return lookup(mode, id) && VgaMode::available(id) ? 1 : 0;
+    return lookup(mode, id) && (mode == TEXT || VgaMode::available(id)) ? 1 : 0;
 }
 
 int
@@ -211,7 +211,7 @@ vga_setmode(int mode) {
         saveTermios(console);
     }
     VgaMode::Id id;
-    if (!lookup(mode, id) || !VgaMode::available(id)) {
+    if (!lookup(mode, id) || (mode != TEXT && !VgaMode::available(id))) {
         return -1;
     }
     if (mode != TEXT) {

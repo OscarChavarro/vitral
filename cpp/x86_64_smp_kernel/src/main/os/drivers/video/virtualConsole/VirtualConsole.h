@@ -122,6 +122,9 @@ private:
     static int pendingConsole;
     static int pendingRow;
     static VgaMode::Id hardwareMode;
+    // The text mode of the consoles, Text80x25 unless setTextMode() chose another (the boot framebuffer's text):
+    // where they go back when they leave a graphics mode
+    static VgaMode::Id textMode;
     static bool panicking;
     static SpinLock lock;
 

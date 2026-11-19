@@ -13,6 +13,9 @@ public:
     static constexpr uint32_t MIN_RAM_MB = 128;
     static void init();
     static void startDefaultAcceleration();
+    // With the timer running: a driver that takes the display over from the firmware's frame buffer (an NVIDIA
+    // Pascal card) replaces it, in the mode in use. True when it did; the console must then be drawn again.
+    static bool takeOverDisplay();
     static bool present() { return driver != nullptr; }
     static const char *name() { return driver ? driver->name() : "none"; }
     static uint32_t videoMemoryBytes() { return driver ? driver->videoMemoryBytes() : 0; }
@@ -21,9 +24,11 @@ public:
         return driver && driver->canSet(width, height, bytesPerPixel);
     }
     static bool enter(unsigned width, unsigned height, unsigned bytesPerPixel);
+    static bool loadPalette(const uint8_t *rgb);
     static void leave();
     static bool active() { return on; }
     static bool supportsFramebufferText() { return driver && driver->supportsFramebufferText(); }
+    static bool vgaRegisterModes() { return !driver || driver->vgaRegisterModes(); }
     static unsigned framebufferWidth() { return driver ? driver->framebufferWidth() : 0; }
     static unsigned framebufferHeight() { return driver ? driver->framebufferHeight() : 0; }
 
@@ -56,6 +61,9 @@ public:
 private:
     static SvgaDriver *driver;
     static bool on;
+    static unsigned modeWidth;
+    static unsigned modeHeight;
+    static unsigned modeBytes;
     static const SvgaPrimitives FRAMEBUFFER;
     static const SvgaPrimitives *primitives;
     static SpinLock lock;

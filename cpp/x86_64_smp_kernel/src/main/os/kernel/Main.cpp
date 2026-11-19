@@ -35,6 +35,7 @@ kmain() {
     info.frameBufferGreenSize = 0;
     info.frameBufferBluePosition = 0;
     info.frameBufferBlueSize = 0;
+    info.biosFontAddress = 0;
 
     if (!A20::enable()) {
         fail("A20 gate cannot be enabled.");

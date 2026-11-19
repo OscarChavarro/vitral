@@ -13,7 +13,8 @@ class Process;
 // (a KVM switch detaches its keyboard and mouse when it selects another computer).
 //
 // Supported: UHCI controllers, and EHCI controllers by routing their ports to their UHCI companions (full and low
-// speed only); external hubs; HID keyboards and mice in boot protocol.
+// speed only); external hubs; HID keyboards and mice in boot protocol; a PL2303 serial adapter, as the line of the
+// kernel log and of the terminal /dev/ttyUSB0.
 class Usb {
 public:
     static constexpr uint8_t DESCRIPTOR_DEVICE = 1;
@@ -49,6 +50,8 @@ private:
     static constexpr unsigned MAX_CONTROLLERS = 8;
     static constexpr unsigned MAX_DEVICES = 32;
     static constexpr unsigned MONITOR_MS = 250;
+    // How often the monitor thread sends what waits for a USB serial adapter
+    static constexpr unsigned PUMP_MS = 10;
     static constexpr unsigned CONFIGURATION_MAX = 512;
 
     static UsbHostController *controllers[MAX_CONTROLLERS];

@@ -7,6 +7,9 @@ extern const char imageSizeSymbol[] asm("__image_size");
 extern const char kernelEndSymbol[] asm("__kernel_end");
 // _start64 or _start32, named by the linker script.
 extern const char entrySymbol[] asm("__kernel_entry");
+// Address of the 8x16 font of the BIOS that the Multiboot2 entry got, or 0 (boot/multiboot2.S,
+// boot/i386/multiboot2_32.S).
+extern const uint32_t multibootBiosFont asm("multiboot_bios_font");
 
 void
 Multiboot2::fillBootInfo(uint32_t info) {
@@ -19,6 +22,7 @@ Multiboot2::fillBootInfo(uint32_t info) {
     boot.kernelImageBytes = (uint32_t)(uintptr_t)imageSizeSymbol;
     boot.kernelEntry = (uint32_t)(uintptr_t)entrySymbol;
     boot.kernelEnd = (uint32_t)(uintptr_t)kernelEndSymbol;
+    boot.biosFontAddress = multibootBiosFont;
 
     const uint8_t *base = (const uint8_t *)(uintptr_t)info;
     uint32_t total = read32(base);

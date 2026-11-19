@@ -39,7 +39,14 @@ public:
     // start. Svga calls stopAcceleration() once it has put its frame buffer operations back.
     virtual const SvgaPrimitives *startAcceleration() { return nullptr; }
     virtual void stopAcceleration() {}
+    // The palette of the 1 byte modes, 256 entries of the VGA DAC's 6 bit red, green and blue. True when the driver
+    // keeps it (the indexes are converted as they are written, so what the screen shows must be written again); false
+    // when the VGA DAC is the card's palette.
+    virtual bool loadPalette(const uint8_t *) { return false; }
     virtual bool supportsFramebufferText() const { return false; }
+    // False when the card was left by the firmware in a mode of its own (a boot framebuffer on an unknown card): the
+    // standard VGA register sets of the text and planar modes then do not take the display over, they garble it.
+    virtual bool vgaRegisterModes() const { return true; }
     virtual unsigned framebufferWidth() const { return 0; }
     virtual unsigned framebufferHeight() const { return 0; }
 };

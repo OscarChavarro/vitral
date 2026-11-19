@@ -12,6 +12,8 @@ public:
     static size_t copy(char *buffer, size_t size);
     static void clear();
     static size_t read(uint64_t &position, char *buffer, size_t size);
+    // Bytes appended since the start, the position a reader reaches once it has read everything
+    static uint64_t written();
 
 private:
     static char data[SIZE];

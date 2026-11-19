@@ -78,6 +78,12 @@ KernelLog::read(uint64_t &position, char *buffer, size_t size) {
     return count;
 }
 
+uint64_t
+KernelLog::written() {
+    LockGuard guard(lock);
+    return total;
+}
+
 void
 KernelLog::clear() {
     LockGuard guard(lock);
