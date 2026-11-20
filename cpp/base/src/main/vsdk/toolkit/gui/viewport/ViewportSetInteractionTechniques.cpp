@@ -70,7 +70,7 @@ bool ViewportSetInteractionTechniques::processSelectedViewportCommand(
     }
 
     if ( event.keycode == KeyEvent::KEY_9 ) {
-        viewport->toggleRenderMode();
+        viewportSet->cycleRenderMode(viewport);
         return true;
     }
     if ( event.keycode == KeyEvent::KEY_NUM0 ) {
@@ -80,7 +80,7 @@ bool ViewportSetInteractionTechniques::processSelectedViewportCommand(
 
     switch ( event.unicodeId ) {
       case '.':
-        viewport->toggleRenderMode();
+        viewportSet->cycleRenderMode(viewport);
         return true;
       case 'g':
         viewport->toggleGrid();

@@ -262,6 +262,9 @@ set(SCENE_EDITOR_APPLICATION_DIR "/media/ramdisk/${SCENE_EDITOR_APPLICATION_SUBD
 set(SCENE_EDITOR_APPLICATION_SOURCES
     application/framebuffer/FramebufferSceneEditor.cpp
     render/framebuffer/FramebufferDrawingAreaRenderer.cpp
+    render/BrepExportCache.cpp
+    render/ProjectedPolygonScanConverter.cpp
+    render/ProjectedSurfacesViewBuilder.cpp
     application/commands/GeometryCreationCommandsExecutor.cpp
     application/commands/GuiEventExecutor.cpp
     gui/DrawingAreaInteractionTechniques.cpp

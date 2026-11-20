@@ -21,8 +21,10 @@ Each of its items must have as modifier the corresponding command:
 The `VIEWPORT_SET_RENDER_MODE` popup lists the ways a viewport can be
 rendered: `IDV_VIEWPORT_SET_RENDER_MODE_GPU` (the graphics API in use, i.e.
 OpenGL; the default), `IDV_VIEWPORT_SET_RENDER_MODE_CPU` (raytracing in the
-processor) and `IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES` (lines computed
-in the processor: wireframe or hidden line removal). Applications present it
+processor), `IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES` (lines computed
+in the processor: wireframe or hidden line removal) and
+`IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES` (visible polygons computed
+in the processor: hidden surface removal). Applications present it
 after the projection location items, separated from them.
 
 The `VIEWPORT_SET_RENDER_TECHNOLOGY` popup lists the technologies an
@@ -58,6 +60,8 @@ public:
         "IDV_VIEWPORT_SET_RENDER_MODE_CPU";
     static constexpr const char* IDV_RENDER_MODE_CPU_HIDDEN_LINES =
         "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES";
+    static constexpr const char* IDV_RENDER_MODE_CPU_HIDDEN_SURFACES =
+        "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES";
 
     static constexpr const char* POPUP_RENDER_TECHNOLOGY =
         "VIEWPORT_SET_RENDER_TECHNOLOGY";

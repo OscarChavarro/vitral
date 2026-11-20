@@ -76,6 +76,10 @@ bool RendererConfigurationController::processKeyPressedEvent(const KeyEvent& key
             qualitySelection->changeBumpMap();
             updated = true;
             break;
+        case KeyEvent::KEY_F10:
+            qualitySelection->changeWithShadows();
+            updated = true;
+            break;
         default:
             break;
     }

@@ -261,6 +261,19 @@ void SimpleBody::setScale(const Vector3Dd& s)
     markModified();
 }
 
+Vector3Dd SimpleBody::transformNormalToWorld(const Vector3Dd& normal) const
+{
+    if (explicitAffinePlacement) {
+        const Matrix4x4d inverse = affinePlacement.getInverse();
+        return normalizeIfPossible(Vector3Dd(
+            inverse.get(0,0)*normal.x()+inverse.get(1,0)*normal.y()+inverse.get(2,0)*normal.z(),
+            inverse.get(0,1)*normal.x()+inverse.get(1,1)*normal.y()+inverse.get(2,1)*normal.z(),
+            inverse.get(0,2)*normal.x()+inverse.get(1,2)*normal.y()+inverse.get(2,2)*normal.z()));
+    }
+    Vector3Dd scaledNormal = scaleComponents(normal, inverseScale);
+    return normalizeIfPossible(rotationQuaternion.rotate(scaledNormal));
+}
+
 Ray* SimpleBody::doIntersectionFirstHit(const Ray& inRay) const
 {
     RayHit hit;
@@ -645,3 +658,18 @@ AffinePlacementStatus SimpleBody::queryAffinePlacement(Matrix4x4d& forward, Matr
     return affinePlacement.getStatus();
 }
 
+Vector3Dd SimpleBody::scaleComponents(const Vector3Dd& value, const Vector3Dd& factors)
+{
+    return Vector3Dd(
+        value.x() * factors.x(),
+        value.y() * factors.y(),
+        value.z() * factors.z());
+}
+
+Vector3Dd SimpleBody::normalizeIfPossible(const Vector3Dd& vector)
+{
+    if ( vector.length() <= VSDK::EPSILON ) {
+        return vector;
+    }
+    return vector.normalized();
+}

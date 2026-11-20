@@ -19,6 +19,7 @@ class ScaleGizmo;
 class SceneSelectionEditor;
 class TranslateGizmo;
 class Viewport;
+class ProjectedSurfacesViewBuilder;
 
 /**
 CPU presentation of the complete viewport set on a `Framebuffer`, the
@@ -51,6 +52,9 @@ private:
     Gizmo2DDrawList* gizmoDrawList;
     Gizmo2DDrawList* cameraControlDrawList;
     CameraControlGizmo2DPainter* cameraControlPainter;
+    /// The solids of the views as visible polygons (see
+    /// `ProjectedSurfacesViewBuilder`), in hidden surfaces render mode
+    ProjectedSurfacesViewBuilder* surfacesBuilder;
 
     void drawLines(Framebuffer& surface, const Calligraphic2DBuffer& lines,
                    int x, int y, int width, int height, uint32_t color,
@@ -59,6 +63,8 @@ private:
                   int width, int height);
     void drawView(Framebuffer& surface, Viewport* viewport, int x, int y,
                   int width, int height);
+    void drawHiddenSurfaces(Framebuffer& surface, Viewport* viewport, int x,
+                            int y, int width, int height);
     void drawTitle(Framebuffer& surface, Viewport* viewport, int x, int y);
     void drawGizmos(Framebuffer& surface, Viewport* viewport, int x, int y,
                     int width, int height);

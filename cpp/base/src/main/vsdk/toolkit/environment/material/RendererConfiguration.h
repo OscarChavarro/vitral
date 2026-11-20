@@ -24,6 +24,9 @@ private:
     bool points;
     bool normals;
     bool trianglesNormals;
+    // Cast shadows in the renderers that compute them as an option (i.e. the
+    // hidden surface removal of Weiler and Atherton)
+    bool withShadows;
     bool useVertexColors;
     double vertexNormalSmoothingThresholdDegrees;
     ColorRgb wireColor;
@@ -55,6 +58,12 @@ public:
     void setPoints(bool b);
     void setNormals(bool b);
     void setTrianglesNormals(bool b);
+    /**
+    Selects wether or not the renderers that compute shadows as an option
+    cast them (i.e. the hidden surface removal of Weiler and Atherton)
+    @param b true to cast shadows
+    */
+    void setWithShadows(bool b);
     void setShadingType(int type);
     void setShadingType(ShadingType type);
     void setVertexNormalSmoothingThresholdDegrees(double thresholdDegrees);
@@ -68,6 +77,7 @@ public:
     bool isPointsSet() const;
     bool isNormalsSet() const;
     bool isTrianglesNormalsSet() const;
+    bool isWithShadowsSet() const;
 
     int getShadingType() const;
     ShadingType getShadingTypeEnum() const;
@@ -82,6 +92,7 @@ public:
     void changePoints();
     void changeNormals();
     void changeTrianglesNormals();
+    void changeWithShadows();
     void changeShadingType();
 
     bool getUseVertexColors() const;

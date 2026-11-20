@@ -201,10 +201,12 @@ FramebufferSceneEditor::FramebufferSceneEditor(Framebuffer& target,
         techniques->getScaleGizmo());
     executor = new GuiEventExecutor(model, this);
 
-    // No GPU: the views are hidden line drawings or raytraced images.
+    // No GPU: the views are hidden line drawings, raytraced images or
+    // hidden surface drawings.
     java::ArrayList<int> modes;
     modes.add(Viewport::RENDER_MODE_HIDDEN_LINES);
     modes.add(Viewport::RENDER_MODE_RAYTRACING);
+    modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
     model->getDrawingArea()->getViewportSet()->setAvailableRenderModes(modes);
     status = message("IDM_INTRO_MESSAGE");
 }

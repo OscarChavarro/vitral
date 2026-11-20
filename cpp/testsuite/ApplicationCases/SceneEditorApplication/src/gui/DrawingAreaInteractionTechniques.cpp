@@ -1089,7 +1089,7 @@ bool DrawingAreaInteractionTechniques::processGlobalKeyPressedEvent(
         cancelInputGizmoEditing();
         selectionEditor->deleteSelected();
         break;
-      case KeyEvent::KEY_F10:
+      case KeyEvent::KEY_F11:
         listener->raytracingRequested();
         break;
       default:

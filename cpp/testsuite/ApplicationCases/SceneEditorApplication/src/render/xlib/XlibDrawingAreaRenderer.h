@@ -17,6 +17,7 @@ class TranslateGizmo;
 class Viewport;
 class XlibGizmo2DDrawListRenderer;
 class ProjectedLinesViewBuilder;
+class ProjectedSurfacesViewBuilder;
 
 /**
 CPU presentation of the complete viewport set, without a GL context. Over
@@ -45,11 +46,17 @@ class XlibDrawingAreaRenderer {
     XlibGizmo2DDrawListRenderer* gizmoRenderer;
     /// The bodies of the views as projected lines (see `ProjectedLinesViewBuilder`)
     ProjectedLinesViewBuilder* linesBuilder;
+    /// The solids of the views as visible polygons (see
+    /// `ProjectedSurfacesViewBuilder`), in hidden surfaces render mode
+    ProjectedSurfacesViewBuilder* surfacesBuilder;
 
     void ensureTitleFont(Display* display, int size);
     void drawView(Display* display, Drawable frame, GC gc, Visual* visual,
                   int depth, Viewport* viewport, int x, int y, int width,
                   int height);
+    void drawHiddenSurfaces(Display* display, Drawable frame, GC gc,
+                            Visual* visual, Viewport* viewport, int x, int y,
+                            int width, int height);
     void drawTitle(Display* display, Drawable frame, GC gc, Visual* visual,
                    Viewport* viewport, int x, int y);
     void drawGizmos(Display* display, Drawable frame, GC gc, Visual* visual,

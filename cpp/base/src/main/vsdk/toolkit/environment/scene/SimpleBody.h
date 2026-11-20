@@ -73,6 +73,8 @@ private:
     static bool isIdentityRotation(const Matrix4x4d& matrix);
     bool doIntersectionWithTranslationOnly(const Ray& inOutRay, RayHit* outHit, int requiredDetailMask) const;
     bool doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const;
+    static Vector3Dd scaleComponents(const Vector3Dd& value, const Vector3Dd& factors);
+    static Vector3Dd normalizeIfPossible(const Vector3Dd& vector);
 
 public:
     virtual bool supportsDecomposedPlacement() const { return !explicitAffinePlacement; }
@@ -140,6 +142,12 @@ public:
     void resetAffinePlacement() override;
     AffinePlacementStatus queryAffinePlacement(Matrix4x4d& forward, Matrix4x4d& inverse) const override;
     virtual void setScale(const Vector3Dd& s);
+
+    /**
+    Java-only helper (kept from the previous Java port, used by the hidden
+    surface renderer): object-space normal to unit world-space normal.
+    */
+    Vector3Dd transformNormalToWorld(const Vector3Dd& normal) const;
 
     Ray* doIntersectionFirstHit(const Ray& inRay) const;
     bool doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const override;

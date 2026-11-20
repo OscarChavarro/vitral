@@ -22,8 +22,11 @@ int renderModeFromName(const java::String& name)
     if ( name.equalsIgnoreCase("hidden_lines") ) {
         return Viewport::RENDER_MODE_HIDDEN_LINES;
     }
+    if ( name.equalsIgnoreCase("hidden_surfaces") ) {
+        return Viewport::RENDER_MODE_HIDDEN_SURFACES;
+    }
     throw java::IllegalArgumentException(
-        "renderMode must be gpu, cpu or hidden_lines");
+        "renderMode must be gpu, cpu, hidden_lines or hidden_surfaces");
 }
 
 const char* renderModeName(int mode)
@@ -31,6 +34,7 @@ const char* renderModeName(int mode)
     switch ( mode ) {
       case Viewport::RENDER_MODE_RAYTRACING: return "cpu";
       case Viewport::RENDER_MODE_HIDDEN_LINES: return "hidden_lines";
+      case Viewport::RENDER_MODE_HIDDEN_SURFACES: return "hidden_surfaces";
       default: return "gpu";
     }
 }
@@ -127,6 +131,7 @@ void MCPViewportTools::setRendererConfiguration(const java::String& request)
         if ( MCPJson::booleanProperty(request, "surfaces", value) ) q->setSurfaces(value);
         if ( MCPJson::booleanProperty(request, "texture", value) ) q->setTexture(value);
         if ( MCPJson::booleanProperty(request, "bumpMap", value) ) q->setBumpMap(value);
+        if ( MCPJson::booleanProperty(request, "withShadows", value) ) q->setWithShadows(value);
         if ( MCPJson::booleanProperty(request, "boundingVolume", value) ) q->setBoundingVolume(value);
         if ( MCPJson::booleanProperty(request, "normals", value) ) q->setNormals(value);
         if ( MCPJson::booleanProperty(request, "trianglesNormals", value) ) q->setTrianglesNormals(value);
@@ -170,7 +175,7 @@ java::String MCPViewportTools::setSelectedRendering(const java::String& request)
     java::String algorithm = MCPJson::stringProperty(request, "algorithm", "");
     if ( algorithm.isEmpty() ) {
         throw java::IllegalArgumentException(
-            "algorithm must be gpu, hidden_lines or raytracing");
+            "algorithm must be gpu, hidden_lines, hidden_surfaces or raytracing");
     }
     int mode;
     if ( algorithm.equalsIgnoreCase("gpu") ) {
@@ -180,6 +185,10 @@ java::String MCPViewportTools::setSelectedRendering(const java::String& request)
               algorithm.equalsIgnoreCase("hidden-line") ) {
         mode = Viewport::RENDER_MODE_HIDDEN_LINES;
     }
+    else if ( algorithm.equalsIgnoreCase("hidden_surfaces") ||
+              algorithm.equalsIgnoreCase("hidden-surface") ) {
+        mode = Viewport::RENDER_MODE_HIDDEN_SURFACES;
+    }
     else if ( algorithm.equalsIgnoreCase("raytracing") ||
               algorithm.equalsIgnoreCase("raytrace") ||
               algorithm.equalsIgnoreCase("cpu") ) {
@@ -187,7 +196,7 @@ java::String MCPViewportTools::setSelectedRendering(const java::String& request)
     }
     else {
         throw java::IllegalArgumentException(
-            "algorithm must be gpu, hidden_lines or raytracing");
+            "algorithm must be gpu, hidden_lines, hidden_surfaces or raytracing");
     }
     if ( !set->isRenderModeAvailable(mode) ) {
         throw java::IllegalArgumentException((java::String("algorithm ") +
@@ -230,6 +239,7 @@ java::String MCPViewportTools::describeRendererConfigurations(
             .append(",\"surfaces\":").append(q->isSurfacesSet())
             .append(",\"texture\":").append(q->isTextureSet())
             .append(",\"bumpMap\":").append(q->isBumpMapSet())
+            .append(",\"withShadows\":").append(q->isWithShadowsSet())
             .append(",\"boundingVolume\":").append(q->isBoundingVolumeSet())
             .append(",\"normals\":").append(q->isNormalsSet())
             .append(",\"trianglesNormals\":").append(q->isTrianglesNormalsSet())

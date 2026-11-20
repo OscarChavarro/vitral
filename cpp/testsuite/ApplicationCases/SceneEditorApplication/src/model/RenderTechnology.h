@@ -8,8 +8,9 @@
 Technologies the editor can use to present the viewport set of its drawing
 area (port of the Java `model.RenderTechnology` enum). Each one offers a set
 of render modes to the viewports: a 2D canvas without a 3D API has no GPU
-z-buffer, so its viewports are drawn by the processor, as raytraced images
-or as projected lines (wireframe or hidden line removal).
+z-buffer, so its viewports are drawn by the processor, as raytraced images,
+as projected lines (wireframe or hidden line removal) or as projected
+visible polygons (hidden surface removal).
 
 The Java port presents with OpenGL 4 (JOGL) or with AWT 2D drawing; this
 one with the OpenGL version it is built with (GLX) or with Xlib 2D drawing,

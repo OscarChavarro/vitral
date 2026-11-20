@@ -16,6 +16,9 @@ java::ArrayList<int> RenderTechnology::getRenderModes(Value technology)
     modes.add(technology == XLIB ? Viewport::RENDER_MODE_HIDDEN_LINES :
                                    Viewport::RENDER_MODE_Z_BUFFER);
     modes.add(Viewport::RENDER_MODE_RAYTRACING);
+    if ( technology == XLIB ) {
+        modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
+    }
     return modes;
 }
 

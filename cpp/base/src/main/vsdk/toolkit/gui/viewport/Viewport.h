@@ -31,6 +31,10 @@ public:
     static const int RENDER_MODE_Z_BUFFER = 1;
     static const int RENDER_MODE_RAYTRACING = 2;
     static const int RENDER_MODE_HIDDEN_LINES = 3;
+    /// Visible surfaces computed in the processor as polygons: hidden
+    /// surface removal by polygon area sorting (Weiler and Atherton's
+    /// algorithm)
+    static const int RENDER_MODE_HIDDEN_SURFACES = 4;
 
 private:
     int requestedSizeXInPixels;
@@ -188,7 +192,9 @@ public:
     /**
     Selects the render mode given by one of the standard commands of the
     render mode popup (see `ViewportSetCommands`): GPU is the z-buffer of the
-    graphics API, CPU is raytracing.
+    graphics API, CPU is raytracing, hidden lines or hidden surfaces. It does
+    not check if the mode is available in the technology presenting the
+    viewport (see `ViewportSet::isRenderModeAvailable`).
     @return true if the command was a render mode one and was applied
     */
     bool selectRenderMode(const java::String& command);

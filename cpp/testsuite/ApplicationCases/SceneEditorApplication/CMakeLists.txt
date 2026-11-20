@@ -40,6 +40,9 @@ if(SCENE_EDITOR_VARIANT STREQUAL "x11_framebuffer")
         src/application/framebuffer/xlib/XlibFramebufferSceneEditorApplication.cpp
         src/application/framebuffer/FramebufferSceneEditor.cpp
         src/render/framebuffer/FramebufferDrawingAreaRenderer.cpp
+        src/render/BrepExportCache.cpp
+        src/render/ProjectedPolygonScanConverter.cpp
+        src/render/ProjectedSurfacesViewBuilder.cpp
         src/application/commands/GeometryCreationCommandsExecutor.cpp
         src/application/commands/GuiEventExecutor.cpp
         src/gui/DrawingAreaInteractionTechniques.cpp
@@ -330,6 +333,8 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/render/BrepExportCache.cpp
     src/render/ClipSpaceLineProjector.cpp
     src/render/ProjectedLinesViewBuilder.cpp
+    src/render/ProjectedPolygonScanConverter.cpp
+    src/render/ProjectedSurfacesViewBuilder.cpp
     ${SCENE_EDITOR_OPENGL_SOURCES}
     ${SCENE_EDITOR_WIDGET_SET_SOURCES}
 )

@@ -55,6 +55,9 @@ set_target_properties(vitral_base PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_R
 set(SCENE_EDITOR_APPLICATION_SOURCES
     application/framebuffer/FramebufferSceneEditor.cpp
     render/framebuffer/FramebufferDrawingAreaRenderer.cpp
+    render/BrepExportCache.cpp
+    render/ProjectedPolygonScanConverter.cpp
+    render/ProjectedSurfacesViewBuilder.cpp
     application/commands/GeometryCreationCommandsExecutor.cpp
     application/commands/GuiEventExecutor.cpp
     gui/DrawingAreaInteractionTechniques.cpp
@@ -69,6 +72,7 @@ set(SCENE_EDITOR_APPLICATION_SOURCES
     model/DrawingArea.cpp
     model/GuiState.cpp
     model/ProjectedViewsDebugPlan.cpp
+    model/RenderTechnology.cpp
     model/Scene.cpp
     model/SceneLightFactory.cpp
     model/dialog/SceneHierarchyPresenter.cpp

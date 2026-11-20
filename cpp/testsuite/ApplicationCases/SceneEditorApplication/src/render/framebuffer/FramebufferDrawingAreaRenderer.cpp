@@ -5,6 +5,7 @@
 #include "render/framebuffer/FramebufferDrawingAreaRenderer.h"
 
 #include <cmath>
+#include <cstdio>
 #include "java/util/ArrayList.txx"
 
 #include "model/ApplicationModel.h"
@@ -16,6 +17,10 @@
 #include "render/DrawingAreaHost.h"
 #include "render/FrameBufferSource.h"
 #include "render/FrameCaptureService.h"
+#include "java/lang/Exception.h"
+#include "render/ProjectedPolygon.h"
+#include "render/ProjectedPolygonScanConverter.h"
+#include "render/ProjectedSurfacesViewBuilder.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
@@ -134,7 +139,8 @@ FramebufferDrawingAreaRenderer::FramebufferDrawingAreaRenderer(
       selectionEditor(new SceneSelectionEditor(m->getScene())),
       gizmoPresenter(nullptr), gizmoDrawList(new Gizmo2DDrawList()),
       cameraControlDrawList(new Gizmo2DDrawList()),
-      cameraControlPainter(new CameraControlGizmo2DPainter())
+      cameraControlPainter(new CameraControlGizmo2DPainter()),
+      surfacesBuilder(new ProjectedSurfacesViewBuilder())
 {
     gizmoPresenter = new DrawingAreaGizmoPresenter(m->getDrawingArea(),
         selectionEditor, translationGizmo, rotateGizmo, scaleGizmo);
@@ -142,6 +148,7 @@ FramebufferDrawingAreaRenderer::FramebufferDrawingAreaRenderer(
 
 FramebufferDrawingAreaRenderer::~FramebufferDrawingAreaRenderer()
 {
+    delete surfacesBuilder;
     delete cameraControlPainter;
     delete cameraControlDrawList;
     delete gizmoDrawList;
@@ -252,6 +259,60 @@ void FramebufferDrawingAreaRenderer::drawTitle(Framebuffer& surface,
                  packed(set->getTitleColorFor(viewport)));
 }
 
+namespace {
+
+/**
+Fills the spans of a projected polygon with one color.
+*/
+class FramebufferSpanSink : public ProjectedPolygonScanConverter::SpanSink {
+private:
+    Framebuffer& surface;
+    uint32_t color;
+
+public:
+    FramebufferSpanSink(Framebuffer& surface, uint32_t color)
+        : surface(surface), color(color) {}
+
+    virtual void fillSpan(int x0, int x1, int y) override
+    {
+        surface.fillRectangle(x0, y, x1 - x0, 1, color);
+    }
+};
+
+}
+
+/**
+Fills the visible polygons of the solids of a viewport (hidden surface
+removal of `HiddenSurfaceRenderer`), as `AwtProjectedPolygonRenderer` does
+in the AWT presentation of the Java port.
+*/
+void FramebufferDrawingAreaRenderer::drawHiddenSurfaces(Framebuffer& surface,
+    Viewport* viewport, int x, int y, int width, int height)
+{
+    const java::ArrayList<ProjectedPolygon*>* polygons = nullptr;
+
+    try {
+        polygons = &surfacesBuilder->buildView(model->getScene(), viewport,
+            width, height, model->getDrawingArea()->getContentGeneration(),
+            viewport->getRendererConfiguration()->isWithShadowsSet());
+    }
+    catch ( const java::Exception& e ) {
+        // As with the lines, a failure over some body must not break the
+        // presentation of the whole set
+        fprintf(stderr, "FramebufferDrawingAreaRenderer: can not compute the "
+                "visible surfaces of viewport \"%s\": %s\n",
+                model->getDrawingArea()->getViewportSet()->getTitleFor(
+                    viewport).c_str(), e.getMessage().c_str());
+        return;
+    }
+    for ( long i = 0; i < polygons->size(); i++ ) {
+        const ProjectedPolygon* polygon = (*polygons)[i];
+        FramebufferSpanSink sink(surface, packed(polygon->getColor()));
+        ProjectedPolygonScanConverter::fill(*polygon, x, y, width, height,
+                                            sink);
+    }
+}
+
 void FramebufferDrawingAreaRenderer::drawView(Framebuffer& surface,
     Viewport* viewport, int x, int y, int width, int height)
 {
@@ -265,6 +326,8 @@ void FramebufferDrawingAreaRenderer::drawView(Framebuffer& surface,
     scene->qualityTemplate->cloneFrom(*quality);
     bool raytraced =
         viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING;
+    bool hiddenSurfaces =
+        viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_SURFACES;
 
     if ( raytraced ) {
         scene->activateSelectedBackground();
@@ -360,6 +423,13 @@ void FramebufferDrawingAreaRenderer::drawView(Framebuffer& surface,
             }
             surface.putImage(x, y, width, height, pixels.data());
         }
+    }
+    else if ( hiddenSurfaces ) {
+        // The visible polygons over the background; as over a raytraced
+        // image, only the annotations are drawn over them
+        surface.fillRectangle(x, y, width, height, packed(
+            scene->simpleBackground->colorInDireccion(camera->getFront())));
+        drawHiddenSurfaces(surface, viewport, x, y, width, height);
     }
     else {
         surface.fillRectangle(x, y, width, height, packed(

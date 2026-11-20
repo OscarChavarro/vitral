@@ -18,6 +18,7 @@ constexpr const char* ViewportSetCommands::POPUP_RENDER_MODE;
 constexpr const char* ViewportSetCommands::IDV_RENDER_MODE_GPU;
 constexpr const char* ViewportSetCommands::IDV_RENDER_MODE_CPU;
 constexpr const char* ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES;
+constexpr const char* ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_SURFACES;
 
 namespace {
 

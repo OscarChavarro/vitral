@@ -4,7 +4,8 @@
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(true), wires(false), boundingVolume(false), selectionCorners(false),
-      texture(true), bumpMap(false), points(false), normals(false), trianglesNormals(false), useVertexColors(false),
+      texture(true), bumpMap(false), points(false), normals(false), trianglesNormals(false), withShadows(false),
+      useVertexColors(false),
       vertexNormalSmoothingThresholdDegrees(15.0),
       wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0),
       meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
@@ -23,6 +24,7 @@ int RendererConfiguration::compareTo(const RendererConfiguration& other) const
     if ( points ) valThis += 0x0040;
     if ( normals ) valThis += 0x0080;
     if ( trianglesNormals ) valThis += 0x0100;
+    if ( withShadows ) valThis += 0x0200;
     valThis += shadingType * 0x1000;
     valThis += std::lround(vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
@@ -36,6 +38,7 @@ int RendererConfiguration::compareTo(const RendererConfiguration& other) const
     if ( other.points ) valOther += 0x0040;
     if ( other.normals ) valOther += 0x0080;
     if ( other.trianglesNormals ) valOther += 0x0100;
+    if ( other.withShadows ) valOther += 0x0200;
     valOther += other.shadingType * 0x1000;
     valOther += std::lround(other.vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
@@ -56,6 +59,7 @@ void RendererConfiguration::cloneFrom(const RendererConfiguration& other)
     points = other.points;
     normals = other.normals;
     trianglesNormals = other.trianglesNormals;
+    withShadows = other.withShadows;
     wireColor = ColorRgb(other.wireColor);
     boundingVolumeColor = ColorRgb(other.boundingVolumeColor);
     useVertexColors = other.useVertexColors;
@@ -87,6 +91,7 @@ void RendererConfiguration::setBumpMap(bool b) { bumpMap = b; }
 void RendererConfiguration::setPoints(bool b) { points = b; }
 void RendererConfiguration::setNormals(bool b) { normals = b; }
 void RendererConfiguration::setTrianglesNormals(bool b) { trianglesNormals = b; }
+void RendererConfiguration::setWithShadows(bool b) { withShadows = b; }
 void RendererConfiguration::setShadingType(int type) { shadingType = type; }
 void RendererConfiguration::setShadingType(ShadingType type) { shadingType = static_cast<int>(type); }
 
@@ -119,6 +124,7 @@ bool RendererConfiguration::isBumpMapSet() const { return bumpMap; }
 bool RendererConfiguration::isPointsSet() const { return points; }
 bool RendererConfiguration::isNormalsSet() const { return normals; }
 bool RendererConfiguration::isTrianglesNormalsSet() const { return trianglesNormals; }
+bool RendererConfiguration::isWithShadowsSet() const { return withShadows; }
 
 int RendererConfiguration::getShadingType() const { return shadingType; }
 ShadingType RendererConfiguration::getShadingTypeEnum() const { return ShadingTypeUtil::fromCode(shadingType); }
@@ -132,6 +138,7 @@ void RendererConfiguration::changeBumpMap() { bumpMap = !bumpMap; }
 void RendererConfiguration::changePoints() { points = !points; }
 void RendererConfiguration::changeNormals() { normals = !normals; }
 void RendererConfiguration::changeTrianglesNormals() { trianglesNormals = !trianglesNormals; }
+void RendererConfiguration::changeWithShadows() { withShadows = !withShadows; }
 void RendererConfiguration::changeShadingType() { setShadingType(ShadingTypeUtil::next(getShadingTypeEnum())); }
 
 bool RendererConfiguration::getUseVertexColors() const { return useVertexColors; }
@@ -170,6 +177,7 @@ java::String RendererConfiguration::toString() const
     msg += "  - Draw triangles normals: " + java::String(trianglesNormals ? "ON" : "OFF") + "\n";
     msg += "  - With texture: " + java::String(texture ? "ON" : "OFF") + "\n";
     msg += "  - With bump map: " + java::String(bumpMap ? "ON" : "OFF") + "\n";
+    msg += "  - With shadows: " + java::String(withShadows ? "ON" : "OFF") + "\n";
     msg += "  - Vertex normal smoothing threshold: " +
         java::String::valueOf(vertexNormalSmoothingThresholdDegrees) + " deg\n";
     msg += "  - Mesh acceleration method: " +

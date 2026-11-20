@@ -17,6 +17,9 @@ private:
     bool previousOut;
     bool coincidentPoints[4];
     PolygonTopologicalMerger topologicalMerger;
+    // True when the last traversal had to be abandoned (see
+    // `isLastClipAbandoned`).
+    bool lastClipAbandoned;
 
     void makeCut(
         _Polygon2DContourWA* p2DContClip, _Polygon2DContourWA* p2DContSubj,
@@ -53,12 +56,19 @@ private:
     static void resetOutputPolygon(Polygon2D* polygon);
     static void appendNonEmptyContours(const Polygon2D* source, Polygon2D* target);
     static bool hasAnyVertex(const Polygon2D* polygon);
+    static int countVertexNodes(_Polygon2DWA* polygon);
 
 public:
     WeilerAthertonPolygonClipper();
     ~WeilerAthertonPolygonClipper();
     void unionPolygons(Polygon2D* polygonA, Polygon2D* polygonB, Polygon2D* unionPolyOut);
     void clipPolygons(Polygon2D* clipPoly, Polygon2D* subjectPoly, Polygon2D* innerPolyOut, Polygon2D* outerPolyOut);
+    /**
+    @return true if a traversal of the last call to `clipPolygons` was caught
+    in a cycle and abandoned, so its output is not complete. This is only
+    possible with degenerate contacts between the contours.
+    */
+    bool isLastClipAbandoned() const;
     _Polygon2DWA* getClipPolyWA();
     _Polygon2DWA* getSubjectPolyWA();
 };

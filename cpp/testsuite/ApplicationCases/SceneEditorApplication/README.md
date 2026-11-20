@@ -70,8 +70,12 @@ window the desktop allows, not full screen). The font is `10x20` unless
 `-fn` names another one, and the language comes from the argument or the
 `SCENE_EDITOR_GUI_LANGUAGE` variable.
 
-The viewports are rendered in CPU (hidden lines, or raytracing chosen from
-the menu of the viewport title); there is no OpenGL. The translation,
+The viewports are rendered in CPU (hidden lines, raytracing or hidden
+surfaces chosen from the menu of the viewport title); there is no OpenGL.
+The hidden surfaces mode fills the visible polygons of the solids that are
+(or export to) a `PolyhedralBoundedSolid`, flat shaded, computed by Weiler
+and Atherton's polygon area sorting (`vsdk/toolkit/render/hiddenSurface`),
+with the shadows of the solids when the viewport asks for them. The translation,
 rotation and scale gizmos and the input boxes are drawn over them as 2D
 primitives (painter's algorithm, see `vsdk/toolkit/render/gizmo` and
 `FramebufferGizmo2DDrawListRenderer`), as in the CPU modes of the Xt

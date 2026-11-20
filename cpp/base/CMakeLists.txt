@@ -313,6 +313,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.cpp
     src/main/vsdk/toolkit/render/raster/Rasterizer2D.cpp
     src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.cpp
+    src/main/vsdk/toolkit/render/hiddenSurface/HiddenSurfaceRenderer.cpp
     src/main/vsdk/toolkit/render/PolyhedralBoundedSolidDebugger.cpp
     src/main/vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.cpp
     src/main/vsdk/toolkit/render/shaders/LightingShader.cpp
@@ -650,6 +651,8 @@ if(VITRAL_BUILD_TESTS)
     src/test/TessellationMeshCheck.cpp
     src/test/triangle_mesh_contract_tests.cpp
     src/test/sphere_polyhedral_cache_tests.cpp
+    src/test/hidden_surface_renderer_tests.cpp
+    src/test/viewport_set_render_modes_tests.cpp
     src/test/box_cone_containment_tests.cpp
     src/test/voxel_volume_tests.cpp
     src/test/polyhedral_bounded_solid_containment_tests.cpp

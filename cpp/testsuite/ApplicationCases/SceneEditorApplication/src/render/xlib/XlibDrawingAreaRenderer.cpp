@@ -20,6 +20,9 @@
 #include "render/FrameCaptureService.h"
 #include "render/ProjectedLineLayer.h"
 #include "render/ProjectedLinesViewBuilder.h"
+#include "render/ProjectedPolygon.h"
+#include "render/ProjectedPolygonScanConverter.h"
+#include "render/ProjectedSurfacesViewBuilder.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
@@ -205,7 +208,8 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
       cameraControlDrawList(new Gizmo2DDrawList()),
       cameraControlPainter(new CameraControlGizmo2DPainter()),
       gizmoRenderer(new XlibGizmo2DDrawListRenderer()),
-      linesBuilder(new ProjectedLinesViewBuilder())
+      linesBuilder(new ProjectedLinesViewBuilder()),
+      surfacesBuilder(new ProjectedSurfacesViewBuilder())
 {
     gizmoPresenter = new DrawingAreaGizmoPresenter(m->getDrawingArea(),
         selectionEditor, translationGizmo, rotateGizmo, scaleGizmo);
@@ -215,6 +219,7 @@ XlibDrawingAreaRenderer::~XlibDrawingAreaRenderer()
 {
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
     delete linesBuilder;
+    delete surfacesBuilder;
     delete gizmoRenderer;
     delete cameraControlPainter;
     delete cameraControlDrawList;
@@ -337,6 +342,8 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
     scene->activeCamera = camera;
     scene->qualityTemplate->cloneFrom(*quality);
     bool raytraced = viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING;
+    bool hiddenSurfaces =
+        viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_SURFACES;
 
     if (raytraced) {
         scene->activateSelectedBackground();
@@ -354,13 +361,19 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
         XFillRectangle(display, frame, gc, x, y, width, height);
     }
 
+    if (hiddenSurfaces) {
+        drawHiddenSurfaces(display, frame, gc, visual, viewport, x, y, width,
+                           height);
+    }
+
     // The bodies as hidden lines (wireframe, or Appel hidden line removal
     // when surfaces are on) and the annotations, as the AWT presentation of
     // the Java port does
     java::ArrayList<ProjectedLineLayer*> layers;
     try {
         linesBuilder->buildView(scene, viewport,
-            host->getBodyEditFeedbackProvider(), !raytraced, layers);
+            host->getBodyEditFeedbackProvider(), !raytraced && !hiddenSurfaces,
+            layers);
     }
     catch (const java::Exception& e) {
         // A failure of the line algorithms over some body must not break
@@ -389,6 +402,71 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
     XlibFrameBufferSource source(display, frame, visual, x, y, width, height);
     frameCapture->copyColorBufferIfNeeded(&source,
         model->getDrawingArea()->getViewportSet()->isSelected(viewport));
+}
+
+namespace {
+
+/**
+Fills the spans of a projected polygon with the color of a GC.
+*/
+class XlibSpanSink : public ProjectedPolygonScanConverter::SpanSink {
+private:
+    Display* display;
+    Drawable frame;
+    GC gc;
+
+public:
+    XlibSpanSink(Display* display, Drawable frame, GC gc)
+        : display(display), frame(frame), gc(gc) {}
+
+    virtual void fillSpan(int x0, int x1, int y) override
+    {
+        XFillRectangle(display, frame, gc, x0, y, x1 - x0, 1);
+    }
+};
+
+}
+
+/**
+Fills the visible polygons of the solids of a viewport (hidden surface
+removal of `HiddenSurfaceRenderer`), as `AwtProjectedPolygonRenderer` does
+in the AWT presentation of the Java port. The contours of a polygon are
+filled at once with the even-odd rule (`ProjectedPolygonScanConverter`).
+*/
+void XlibDrawingAreaRenderer::drawHiddenSurfaces(Display* display,
+    Drawable frame, GC gc, Visual* visual, Viewport* viewport, int x, int y,
+    int width, int height)
+{
+    const java::ArrayList<ProjectedPolygon*>* polygons = nullptr;
+
+    try {
+        polygons = &surfacesBuilder->buildView(model->getScene(), viewport,
+            width, height, model->getDrawingArea()->getContentGeneration(),
+            viewport->getRendererConfiguration()->isWithShadowsSet());
+    }
+    catch (const java::Exception& e) {
+        // As with the lines, a failure over some body must not break the
+        // presentation of the whole set
+        fprintf(stderr, "XlibDrawingAreaRenderer: can not compute the visible "
+                "surfaces of viewport \"%s\": %s\n",
+                model->getDrawingArea()->getViewportSet()->getTitleFor(
+                    viewport).c_str(), e.getMessage().c_str());
+        return;
+    }
+    catch (const std::exception& e) {
+        fprintf(stderr, "XlibDrawingAreaRenderer: can not compute the visible "
+                "surfaces of viewport \"%s\": %s\n",
+                model->getDrawingArea()->getViewportSet()->getTitleFor(
+                    viewport).c_str(), e.what());
+        return;
+    }
+    XlibSpanSink sink(display, frame, gc);
+    for (long i = 0; i < polygons->size(); i++) {
+        const ProjectedPolygon* polygon = (*polygons)[i];
+        XSetForeground(display, gc, pixel(visual, polygon->getColor()));
+        ProjectedPolygonScanConverter::fill(*polygon, x, y, width, height,
+                                            sink);
+    }
 }
 
 void XlibDrawingAreaRenderer::display(Display* display, Window window,
