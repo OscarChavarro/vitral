@@ -77,6 +77,8 @@ private:
     BOOLEAN doIntersectionWithAffinePlacement(const Ray& ray, RayHit* hit) const;
     void doExtraInformationWithAffinePlacement(const Ray& ray, double t, RayHit* hit) const;
     static BOOLEAN isIdentityRotation(const Matrix4x4d& matrix);
+    static Vector3Dd scaleComponents(const Vector3Dd& value, const Vector3Dd& factors);
+    static Vector3Dd normalizeIfPossible(const Vector3Dd& vector);
     BOOLEAN doIntersectionWithTranslationOnly(const Ray& inOutRay, RayHit* outHit, int requiredDetailMask) const;
     BOOLEAN doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const;
 
@@ -149,6 +151,11 @@ public:
     virtual void resetAffinePlacement();
     virtual AffinePlacementStatus::Value queryAffinePlacement(Matrix4x4d& forward, Matrix4x4d& inverse) const;
     virtual void setScale(const Vector3Dd& s);
+    /**
+    @return an object space normal in world space (by the inverse transpose
+    of the placement), normalized when it is not null
+    */
+    Vector3Dd transformNormalToWorld(const Vector3Dd& normal) const;
 
     Ray* doIntersectionFirstHit(const Ray& inRay) const;
     virtual BOOLEAN doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const;

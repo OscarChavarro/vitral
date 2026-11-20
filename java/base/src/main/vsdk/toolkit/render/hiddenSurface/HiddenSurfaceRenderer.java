@@ -93,6 +93,9 @@ class _WeilerAthertonSourcePolygon extends RenderingElement
     /// False if the near, far or window clips of the view removed part of
     /// the face
     boolean complete;
+    /// Polygon of the whole view this one was clipped from by the screen
+    /// subdivision (itself if it was not clipped)
+    _WeilerAthertonSourcePolygon original = this;
 
     double depthAt(double x, double y)
     {
@@ -293,6 +296,12 @@ The output never overlaps on the x-y plane, as each visible area had all
 the polygons behind it removed, so it solves the hidden lines as well as the
 hidden surfaces [WEIL1977].215.
 
+As the number of sorting steps can grow exponentially with the number of
+polygons, the view is first divided by the screen subdivision of
+[WEIL1977].219 in windows with a bounded number of polygons, each one solved
+separately (see `solveWindow`). Visible areas of a face crossing several
+windows are output in several pieces.
+
 Two additions to [WEIL1977] make it usable with the solids of a scene:
   - Polygons that penetrate each other are not considered by [WEIL1977]
     (between two polygons in a window, one is entirely in front of the
@@ -348,6 +357,10 @@ public class HiddenSurfaceRenderer extends RenderingElement
     /// clip, in units of the viewing space; it grows in each retry
     private static final double RETRY_SHIFT = 1.0e-2;
     private static final int MAXIMUM_RETRIES = 6;
+    /// Most polygons solved together in a window of the screen subdivision
+    private static final int MAXIMUM_POLYGONS_PER_WINDOW = 32;
+    /// Deepest level of the screen subdivision (4^8 windows at most)
+    private static final int MAXIMUM_SUBDIVISION_DEPTH = 8;
     /// Edges shorter than this (in units of the viewing space) are ignored by
     /// the clips by half planes
     private static final double MINIMUM_EDGE_LENGTH = 1.0e-6;
@@ -501,11 +514,131 @@ public class HiddenSurfaceRenderer extends RenderingElement
                                                Camera camera)
     {
         HiddenSurfaceRenderer renderer = new HiddenSurfaceRenderer();
-        List<_WeilerAthertonSourcePolygon> sources;
+
+        renderer.solveWindow(-SCALE, -SCALE, SCALE, SCALE,
+            renderer.buildInputPolygons(solids, camera), 0);
+        return renderer;
+    }
+
+    //= Screen subdivision ================================================
+
+    /**
+    Screen subdivision of [WEIL1977].219: "by taking the approach of a
+    Warnock style screen area subdivision, the image can be divided into
+    areas each containing a specified maximum number of polygons", each one
+    processed separately by the hidden surface removal. This bounds the
+    exponential growth of the number of sorting steps with the number of
+    polygons, so the whole process becomes almost linear (the subdivision
+    itself grows as n log n).
+
+    A window with more than `MAXIMUM_POLYGONS_PER_WINDOW` polygons is divided
+    in four quadrants, and the polygons are clipped to each of them (to a
+    convex window, by its half planes). The division stops at
+    `MAXIMUM_SUBDIVISION_DEPTH` levels, and also in a quadrant where it did
+    not reduce the number of polygons (all of them cover it, as a floor seen
+    from above).
+    @param sources the polygons of the window, clipped to it
+    @param depth level of the window in the subdivision
+    */
+    private void solveWindow(double minX, double minY, double maxX,
+                             double maxY,
+                             List<_WeilerAthertonSourcePolygon> sources,
+                             int depth)
+    {
+        if ( sources.size() <= MAXIMUM_POLYGONS_PER_WINDOW ||
+             depth >= MAXIMUM_SUBDIVISION_DEPTH ) {
+            solveArea(sources);
+            return;
+        }
+        double middleX = (minX + maxX) / 2.0;
+        double middleY = (minY + maxY) / 2.0;
+        double[][] quadrants = {
+            {minX, minY, middleX, middleY}, {middleX, minY, maxX, middleY},
+            {minX, middleY, middleX, maxY}, {middleX, middleY, maxX, maxY}
+        };
+        for ( double[] q : quadrants ) {
+            List<_WeilerAthertonSourcePolygon> inside =
+                new ArrayList<_WeilerAthertonSourcePolygon>();
+            for ( _WeilerAthertonSourcePolygon source : sources ) {
+                _WeilerAthertonSourcePolygon clipped =
+                    clippedToWindow(source, q[0], q[1], q[2], q[3]);
+                if ( clipped != null ) {
+                    inside.add(clipped);
+                }
+            }
+            if ( inside.size() < sources.size() ) {
+                solveWindow(q[0], q[1], q[2], q[3], inside, depth + 1);
+            }
+            else {
+                solveArea(inside);
+            }
+        }
+    }
+
+    /**
+    @return the part of a polygon inside a window (the same polygon if it is
+    entirely inside), or null if no part is inside
+    */
+    private static _WeilerAthertonSourcePolygon clippedToWindow(
+        _WeilerAthertonSourcePolygon source, double minX, double minY,
+        double maxX, double maxY)
+    {
+        _WeilerAthertonArea template = source.template;
+
+        if ( template.maxX <= minX || template.minX >= maxX ||
+             template.maxY <= minY || template.minY >= maxY ) {
+            return null;
+        }
+        if ( template.minX >= minX && template.maxX <= maxX &&
+             template.minY >= minY && template.maxY <= maxY ) {
+            return source;
+        }
+        Polygon2D polygon = clipByHalfPlane(template.polygon, 1.0, 0.0, -minX);
+        if ( polygon != null ) {
+            polygon = clipByHalfPlane(polygon, -1.0, 0.0, maxX);
+        }
+        if ( polygon != null ) {
+            polygon = clipByHalfPlane(polygon, 0.0, 1.0, -minY);
+        }
+        if ( polygon != null ) {
+            polygon = clipByHalfPlane(polygon, 0.0, -1.0, maxY);
+        }
+        List<_WeilerAthertonArea> parts = new ArrayList<_WeilerAthertonArea>();
+        addWithoutSlivers(parts, polygon);
+        if ( parts.isEmpty() ) {
+            return null;
+        }
+
+        _WeilerAthertonSourcePolygon clipped = new _WeilerAthertonSourcePolygon();
+        clipped.template = merged(parts);
+        clipped.a = source.a;
+        clipped.b = source.b;
+        clipped.c = source.c;
+        clipped.body = source.body;
+        clipped.face = source.face;
+        clipped.worldPlane = source.worldPlane;
+        clipped.complete = false;
+        clipped.original = source.original;
+        clipped.nearestDepth = Double.MAX_VALUE;
+        for ( _Polygon2DContour loop : clipped.template.polygon.loops ) {
+            for ( Vertex2D v : loop.vertices ) {
+                clipped.nearestDepth = Math.min(clipped.nearestDepth,
+                    clipped.depthAt(v.x, v.y));
+            }
+        }
+        return clipped;
+    }
+
+    /**
+    Hidden surface removal of the polygons of a window, as in
+    [WEIL1977].215-216.
+    */
+    private void solveArea(List<_WeilerAthertonSourcePolygon> sources)
+    {
         List<_WeilerAthertonPiece> polygonList;
         int i;
 
-        sources = renderer.buildInputPolygons(solids, camera);
+        sources = new ArrayList<_WeilerAthertonSourcePolygon>(sources);
 
         // Step a) of [WEIL1977].215: preliminary rough depth sort, from the
         // polygons closest to the observer to those furthest away
@@ -521,10 +654,8 @@ public class HiddenSurfaceRenderer extends RenderingElement
         // [WEIL1977].216: the process is continued until the outside list
         // is exhausted
         while ( !polygonList.isEmpty() ) {
-            polygonList = renderer.subdivide(polygonList.get(0).source,
-                polygonList);
+            polygonList = subdivide(polygonList.get(0).source, polygonList);
         }
-        return renderer;
     }
 
     //= Shadows ===========================================================
@@ -556,11 +687,13 @@ public class HiddenSurfaceRenderer extends RenderingElement
             Map<_WeilerAthertonSourcePolygon, double[]> visibleAreas =
                 new IdentityHashMap<_WeilerAthertonSourcePolygon, double[]>();
 
+            // The visible areas of a face, added over the windows of the
+            // screen subdivision
             for ( _WeilerAthertonPiece piece : renderer.output ) {
-                double[] sum = visibleAreas.get(piece.source);
+                double[] sum = visibleAreas.get(piece.source.original);
                 if ( sum == null ) {
                     sum = new double[1];
-                    visibleAreas.put(piece.source, sum);
+                    visibleAreas.put(piece.source.original, sum);
                 }
                 sum[0] += piece.area.area;
             }
@@ -582,9 +715,12 @@ public class HiddenSurfaceRenderer extends RenderingElement
                     continue;
                 }
                 // A face entirely in the view and not hidden at all is lit
-                // whole: its visible pieces add up to its area
-                if ( source.complete && visibleAreas.get(source)[0] >=
-                     source.template.area * (1.0 - 1.0e-9) - AREA_EPSILON ) {
+                // whole: its visible pieces add up to its area (but for the
+                // slivers the screen subdivision may discard)
+                _WeilerAthertonSourcePolygon original = source.original;
+                if ( original.complete && visibleAreas.get(original)[0] >=
+                     original.template.area * (1.0 - 1.0e-9) - AREA_EPSILON -
+                     SLIVER_WIDTH * original.template.perimeter ) {
                     litFace.whole = true;
                     litFace.regions.clear();
                     continue;

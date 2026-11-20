@@ -32,7 +32,11 @@ public:
     enum {
         RENDER_MODE_Z_BUFFER = 1,
         RENDER_MODE_RAYTRACING = 2,
-        RENDER_MODE_HIDDEN_LINES = 3
+        RENDER_MODE_HIDDEN_LINES = 3,
+        /// Visible surfaces computed in the processor as polygons: hidden
+        /// surface removal by polygon area sorting (Weiler and Atherton's
+        /// algorithm)
+        RENDER_MODE_HIDDEN_SURFACES = 4
     };
 
 private:
@@ -191,7 +195,7 @@ public:
     /**
     Selects the render mode given by one of the standard commands of the
     render mode popup (see `ViewportSetCommands`): GPU is the z-buffer of the
-    graphics API, CPU is raytracing.
+    graphics API, CPU is raytracing, hidden lines or hidden surfaces.
     @return true if the command was a render mode one and was applied
     */
     BOOLEAN selectRenderMode(const String& command);

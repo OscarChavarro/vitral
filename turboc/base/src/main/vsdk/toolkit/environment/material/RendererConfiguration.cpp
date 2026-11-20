@@ -6,7 +6,8 @@
 #include "vsdk/toolkit/common/Cpp98Support.h"
 RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(TRUE), wires(FALSE), boundingVolume(FALSE), selectionCorners(FALSE),
-      texture(TRUE), bumpMap(FALSE), points(FALSE), normals(FALSE), trianglesNormals(FALSE), useVertexColors(FALSE),
+      texture(TRUE), bumpMap(FALSE), points(FALSE), normals(FALSE), trianglesNormals(FALSE), withShadows(FALSE),
+      useVertexColors(FALSE),
       vertexNormalSmoothingThresholdDegrees(15.0),
       wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0),
       meshAccelerationMethod(TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH)
@@ -25,6 +26,7 @@ int RendererConfiguration::compareTo(const RendererConfiguration& other) const
     if ( points ) valThis += 0x0040;
     if ( normals ) valThis += 0x0080;
     if ( trianglesNormals ) valThis += 0x0100;
+    if ( withShadows ) valThis += 0x0200;
     valThis += shadingType * 0x1000;
     valThis += Cpp98Support::lround(vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
@@ -38,6 +40,7 @@ int RendererConfiguration::compareTo(const RendererConfiguration& other) const
     if ( other.points ) valOther += 0x0040;
     if ( other.normals ) valOther += 0x0080;
     if ( other.trianglesNormals ) valOther += 0x0100;
+    if ( other.withShadows ) valOther += 0x0200;
     valOther += other.shadingType * 0x1000;
     valOther += Cpp98Support::lround(other.vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
@@ -58,6 +61,7 @@ void RendererConfiguration::cloneFrom(const RendererConfiguration& other)
     points = other.points;
     normals = other.normals;
     trianglesNormals = other.trianglesNormals;
+    withShadows = other.withShadows;
     wireColor = ColorRgb(other.wireColor);
     boundingVolumeColor = ColorRgb(other.boundingVolumeColor);
     useVertexColors = other.useVertexColors;
@@ -89,6 +93,13 @@ void RendererConfiguration::setBumpMap(BOOLEAN b) { bumpMap = b; }
 void RendererConfiguration::setPoints(BOOLEAN b) { points = b; }
 void RendererConfiguration::setNormals(BOOLEAN b) { normals = b; }
 void RendererConfiguration::setTrianglesNormals(BOOLEAN b) { trianglesNormals = b; }
+
+/**
+Selects wether or not the renderers that compute shadows as an option
+cast them (i.e. the hidden surface removal of Weiler and Atherton)
+@param b true to cast shadows
+*/
+void RendererConfiguration::setWithShadows(BOOLEAN b) { withShadows = b; }
 void RendererConfiguration::setShadingType(int type) { shadingType = type; }
 void RendererConfiguration::setShadingType(ShadingType type) { shadingType = ((int)(type)); }
 
@@ -121,6 +132,7 @@ BOOLEAN RendererConfiguration::isBumpMapSet() const { return bumpMap; }
 BOOLEAN RendererConfiguration::isPointsSet() const { return points; }
 BOOLEAN RendererConfiguration::isNormalsSet() const { return normals; }
 BOOLEAN RendererConfiguration::isTrianglesNormalsSet() const { return trianglesNormals; }
+BOOLEAN RendererConfiguration::isWithShadowsSet() const { return withShadows; }
 
 int RendererConfiguration::getShadingType() const { return shadingType; }
 ShadingType RendererConfiguration::getShadingTypeEnum() const { return ShadingTypeUtil::fromCode(shadingType); }
@@ -134,6 +146,7 @@ void RendererConfiguration::changeBumpMap() { bumpMap = !bumpMap; }
 void RendererConfiguration::changePoints() { points = !points; }
 void RendererConfiguration::changeNormals() { normals = !normals; }
 void RendererConfiguration::changeTrianglesNormals() { trianglesNormals = !trianglesNormals; }
+void RendererConfiguration::changeWithShadows() { withShadows = !withShadows; }
 void RendererConfiguration::changeShadingType() { setShadingType(ShadingTypeUtil::next(getShadingTypeEnum())); }
 
 BOOLEAN RendererConfiguration::getUseVertexColors() const { return useVertexColors; }
@@ -172,6 +185,7 @@ String RendererConfiguration::toString() const
     msg += "  - Draw triangles normals: " + String(trianglesNormals ? "ON" : "OFF") + "\n";
     msg += "  - With texture: " + String(texture ? "ON" : "OFF") + "\n";
     msg += "  - With bump map: " + String(bumpMap ? "ON" : "OFF") + "\n";
+    msg += "  - With shadows: " + String(withShadows ? "ON" : "OFF") + "\n";
     msg += "  - Vertex normal smoothing threshold: " +
         String::valueOf(vertexNormalSmoothingThresholdDegrees) + " deg\n";
     msg += "  - Mesh acceleration method: " +

@@ -77,6 +77,10 @@ BOOLEAN RendererConfigurationController::processKeyPressedEvent(const KeyEvent& 
             qualitySelection->changeBumpMap();
             updated = TRUE;
             break;
+        case KeyEvent::KEY_F10:
+            qualitySelection->changeWithShadows();
+            updated = TRUE;
+            break;
         default:
             break;
     }

@@ -104,7 +104,10 @@ SOURCES = \
     src/render/opengl1/OpenGL1SceneRenderer.cpp \
     src/render/opengl1/XtOpenGL1SceneBridge.cpp \
     src/render/xlib/XlibDrawingAreaRenderer.cpp \
+    src/render/xlib/XlibProjectedPolygonRenderer.cpp \
     src/render/BrepExportCache.cpp \
+    src/render/ProjectedPolygon.cpp \
+    src/render/ProjectedSurfacesViewBuilder.cpp \
     $(WIDGET_SET_SOURCES)
 
 # The widget set first, as in CMakeLists.txt (Motif before Xt: its

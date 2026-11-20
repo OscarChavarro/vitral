@@ -198,6 +198,7 @@ SOURCES = \
     src/main/vsdk/toolkit/render/raytracing/SimpleRaytracer.cpp \
     src/main/vsdk/toolkit/render/AutoStereogramGenerator.cpp \
     src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.cpp \
+    src/main/vsdk/toolkit/render/hiddenSurface/HiddenSurfaceRenderer.cpp \
     src/main/vsdk/toolkit/render/dithering/Dithering.cpp \
     src/main/vsdk/toolkit/render/raster/Rasterizer2D.cpp \
     src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.cpp \

@@ -2985,6 +2985,29 @@ byte-identical to Java's for every model of the module; see the
 reference-driver record under `PolyhedralBoundedSolidExample`. The phase stays
 Pending.
 
+Fourth partial advance — 2026-11-20 (following the Java commit that adds the
+Weiler-Atherton hidden surface renderer): `render.hiddenSurface.HiddenSurfaceRenderer`
+is ported 1:1 with its package-private `_WeilerAthertonArea`,
+`_WeilerAthertonSourcePolygon`, `_WeilerAthertonPiece`,
+`_WeilerAthertonLitFace`, `_WeilerAthertonEdgeGrid` and
+`_WeilerAthertonShadedPart`, and its public `VisiblePolygon` as a member of
+the `HiddenSurfaceRenderer` namespace; `HiddenSurfaceRendererTest` is
+translated. Its dependencies were aligned with Java at the same time: the
+abandoned-traversal guard of `WeilerAthertonPolygonClipper`
+(`isLastClipAbandoned`), `RendererConfiguration.withShadows` (F10 in
+`RendererConfigurationController`), the render modes of the viewport set
+(`Viewport.RENDER_MODE_HIDDEN_LINES` / `RENDER_MODE_HIDDEN_SURFACES`,
+`commandForRenderMode`, `renderModeForCommand`, the available render modes of
+`ViewportSet`, their cycling in `ViewportSetInteractionTechniques`, with
+`ViewportSetRenderModesTest`), and `SimpleBody.transformNormalToWorld` /
+`transformPointToWorld`, which now use the rotation quaternion and the scale
+as Java does instead of the inverse placement matrix. Parity: the visible
+polygons (body, face, lights and every vertex as raw IEEE-754 bits) of the
+scenes of `HiddenSurfaceRendererTest`, plus a 16-body scene that exercises the
+screen subdivision and the two shadow scenes with one light each, are
+identical to Java's (5521 polygons, Java run with
+`-XX:-UseLibmIntrinsic`). The phase stays Pending.
+
 Exit: satisfy the standard phase gate before starting Phase 41.
 
 ### Phase 41: GPU rendering architecture checkpoint

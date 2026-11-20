@@ -88,7 +88,7 @@ public:
         virtual void fullScreenGuiToggleRequested() = 0;
 
         /**
-        The user requested (F10) the raytraced image of the scene, to be
+        The user requested (F11) the raytraced image of the scene, to be
         computed (see `doRaytracingImage`) and shown.
         */
         virtual void raytracingRequested() = 0;

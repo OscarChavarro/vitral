@@ -142,6 +142,7 @@ public:
         modes.add(useXlib ? Viewport::RENDER_MODE_HIDDEN_LINES :
                             Viewport::RENDER_MODE_Z_BUFFER);
         modes.add(Viewport::RENDER_MODE_RAYTRACING);
+        if (useXlib) modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
         set->setAvailableRenderModes(modes);
     }
 
@@ -597,7 +598,8 @@ void XtOpenGL1SceneBridge::executeViewportCommand(const String& command)
     if ( viewport == NULL || !impl->isKnownViewport(viewport) ) {
         return;
     }
-    if (command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES)
+    if (command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES ||
+        command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_SURFACES)
         impl->useXlibRendering(TRUE);
     else if (command == ViewportSetCommands::IDV_RENDER_MODE_GPU)
         impl->useXlibRendering(FALSE);

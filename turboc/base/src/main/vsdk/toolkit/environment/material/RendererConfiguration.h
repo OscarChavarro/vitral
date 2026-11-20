@@ -27,6 +27,9 @@ private:
     BOOLEAN points;
     BOOLEAN normals;
     BOOLEAN trianglesNormals;
+    // Cast shadows in the renderers that compute them as an option (i.e. the
+    // hidden surface removal of Weiler and Atherton)
+    BOOLEAN withShadows;
     BOOLEAN useVertexColors;
     double vertexNormalSmoothingThresholdDegrees;
     ColorRgb wireColor;
@@ -58,6 +61,7 @@ public:
     void setPoints(BOOLEAN b);
     void setNormals(BOOLEAN b);
     void setTrianglesNormals(BOOLEAN b);
+    void setWithShadows(BOOLEAN b);
     void setShadingType(int type);
     void setShadingType(ShadingType type);
     void setVertexNormalSmoothingThresholdDegrees(double thresholdDegrees);
@@ -71,6 +75,7 @@ public:
     BOOLEAN isPointsSet() const;
     BOOLEAN isNormalsSet() const;
     BOOLEAN isTrianglesNormalsSet() const;
+    BOOLEAN isWithShadowsSet() const;
 
     int getShadingType() const;
     ShadingType getShadingTypeEnum() const;
@@ -85,6 +90,7 @@ public:
     void changePoints();
     void changeNormals();
     void changeTrianglesNormals();
+    void changeWithShadows();
     void changeShadingType();
 
     BOOLEAN getUseVertexColors() const;

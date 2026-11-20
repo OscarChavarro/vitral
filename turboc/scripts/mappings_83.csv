@@ -767,6 +767,8 @@ base/src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.cpp,BASE/SRC/MAI
 base/src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h,BASE/SRC/MAIN/V/T/RENDER/HIDDLINE/HIDLINRE.H,HiddenLineRenderer.h,HIDLINRE.H
 base/src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.cpp,BASE/SRC/MAIN/V/T/RENDER/HIDDLINE/WIREREND.CPP,WireframeRenderer.cpp,WIREREND.CPP
 base/src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.h,BASE/SRC/MAIN/V/T/RENDER/HIDDLINE/WIREREND.H,WireframeRenderer.h,WIREREND.H
+base/src/main/vsdk/toolkit/render/hiddenSurface/HiddenSurfaceRenderer.cpp,BASE/SRC/MAIN/V/T/RENDER/HIDDSURF/HIDSURRE.CPP,HiddenSurfaceRenderer.cpp,HIDSURRE.CPP
+base/src/main/vsdk/toolkit/render/hiddenSurface/HiddenSurfaceRenderer.h,BASE/SRC/MAIN/V/T/RENDER/HIDDSURF/HIDSURRE.H,HiddenSurfaceRenderer.h,HIDSURRE.H
 base/src/main/vsdk/toolkit/render/dithering/Dithering.cpp,BASE/SRC/MAIN/V/T/RENDER/DITHERIN/DITHERIN.CPP,Dithering.cpp,DITHERIN.CPP
 base/src/main/vsdk/toolkit/render/dithering/Dithering.h,BASE/SRC/MAIN/V/T/RENDER/DITHERIN/DITHERIN.H,Dithering.h,DITHERIN.H
 base/src/main/vsdk/toolkit/render/raster/Rasterizer2D.cpp,BASE/SRC/MAIN/V/T/RENDER/RASTER/RASTER2D.CPP,Rasterizer2D.cpp,RASTER2D.CPP
@@ -1688,6 +1690,7 @@ base/src/test/csg_placement_tests.cpp,BASE/SRC/TEST/CSGPLATE.CPP,csg_placement_t
 base/src/test/csg_point_workspace_tests.cpp,BASE/SRC/TEST/CSPOWOTE.CPP,csg_point_workspace_tests.cpp,CSPOWOTE.CPP
 base/src/test/csg_quadric_reference.inc,BASE/SRC/TEST/CSGQUARE.INC,csg_quadric_reference.inc,CSGQUARE.INC
 base/src/test/heightfield_solid_tests.cpp,BASE/SRC/TEST/HEISOLTE.CPP,heightfield_solid_tests.cpp,HEISOLTE.CPP
+base/src/test/hidden_surface_renderer_tests.cpp,BASE/SRC/TEST/HISURETE.CPP,hidden_surface_renderer_tests.cpp,HISURETE.CPP
 base/src/test/implicit_solid_tests.cpp,BASE/SRC/TEST/IMPSOLTE.CPP,implicit_solid_tests.cpp,IMPSOLTE.CPP
 base/src/test/microfaceted_material_csv_tests.cpp,BASE/SRC/TEST/MIMACSTE.CPP,microfaceted_material_csv_tests.cpp,MIMACSTE.CPP
 base/src/test/ray_affine_contract_tests.cpp,BASE/SRC/TEST/RAAFCOTE.CPP,ray_affine_contract_tests.cpp,RAAFCOTE.CPP

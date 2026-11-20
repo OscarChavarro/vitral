@@ -4,7 +4,8 @@
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.h"
 WeilerAthertonPolygonClipper::WeilerAthertonPolygonClipper()
-    : clipPolyWA(0), subjectPolyWA(0), firstIntersection(FALSE), previousOut(FALSE)
+    : clipPolyWA(0), subjectPolyWA(0), firstIntersection(FALSE), previousOut(FALSE),
+      lastClipAbandoned(FALSE)
 {
     coincidentPoints[0] = coincidentPoints[1] = coincidentPoints[2] = coincidentPoints[3] = FALSE;
 }
@@ -36,6 +37,10 @@ void WeilerAthertonPolygonClipper::unionPolygons(Polygon2D* polygonA, Polygon2D*
 void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* subjectPoly, Polygon2D* innerPolyOut, Polygon2D* outerPolyOut)
 {
     if (!innerPolyOut || !outerPolyOut || !clipPoly || !subjectPoly) return;
+    long int traversalLimit;
+    long int steps;
+
+    lastClipAbandoned = FALSE;
 
     if (clipPolyWA) { delete clipPolyWA; clipPolyWA = 0; }
     if (subjectPolyWA) { delete subjectPolyWA; subjectPolyWA = 0; }
@@ -60,6 +65,7 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
             long int guardC = 0;
             do {
                 if (++guardC > 5000) {
+                    lastClipAbandoned = TRUE;
                     return;
                 }
                 _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodePrevC = dllnVertNodeC->previous;
@@ -75,6 +81,7 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
                         long int guardS = 0;
                         do {
                             if (++guardS > 5000) {
+                                lastClipAbandoned = TRUE;
                                 return;
                             }
                             _DoubleLinkedListNode<_VertexNode2D>* dllnVertNodePrevS = dllnVertNodeS->previous;
@@ -96,6 +103,11 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
         }
     }
 
+    // A traversal visits each vertex node at most once (once in each
+    // direction): a longer one is caught in a cycle that does not pass
+    // again by its start, as some degenerate contacts can produce.
+    traversalLimit = 2 * (countVertexNodes(clipPolyWA) +
+        countVertexNodes(subjectPolyWA)) + 4;
     for (i = 0; i < intersecVertListOut.size(); ++i) {
         _DoubleLinkedListNode<_VertexNode2D>* dllnNodeS = intersecVertListOut.get(i);
         if ((dllnNodeS->data.flags & 0x01) == 0) {
@@ -103,10 +115,11 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
             else innerPolyOut->nextLoop();
 
             _DoubleLinkedListNode<_VertexNode2D>* iterator = dllnNodeS;
-            long int guardInner = 0;
+            steps = 0;
             do {
-                if (++guardInner > 5000) {
-                    return;
+                if (++steps > traversalLimit) {
+                    lastClipAbandoned = TRUE;
+                    break;
                 }
                 iterator->data.flags = (unsigned char)(iterator->data.flags | 0x01);
                 innerPolyOut->addVertex(iterator->data.x, iterator->data.y,
@@ -126,10 +139,11 @@ void WeilerAthertonPolygonClipper::clipPolygons(Polygon2D* clipPoly, Polygon2D* 
             else outerPolyOut->nextLoop();
 
             _DoubleLinkedListNode<_VertexNode2D>* iterator = dllnNodeS;
-            long int guardOuter = 0;
+            steps = 0;
             do {
-                if (++guardOuter > 5000) {
-                    return;
+                if (++steps > traversalLimit) {
+                    lastClipAbandoned = TRUE;
+                    break;
                 }
                 iterator->data.flags = (unsigned char)(iterator->data.flags | 0x02);
                 outerPolyOut->addVertex(iterator->data.x, iterator->data.y,
@@ -713,6 +727,17 @@ BOOLEAN WeilerAthertonPolygonClipper::intersecLineLine2D(
         return TRUE;
     }
     return point0ToPoint2Coincidence;
+}
+
+BOOLEAN WeilerAthertonPolygonClipper::isLastClipAbandoned() { return lastClipAbandoned; }
+
+long int WeilerAthertonPolygonClipper::countVertexNodes(_Polygon2DWA* polygon)
+{
+    long int count = 0;
+    for (long int i = 0; i < polygon->loops.size(); ++i) {
+        count += polygon->loops.get(i)->vertices.size();
+    }
+    return count;
 }
 
 _Polygon2DWA* WeilerAthertonPolygonClipper::getClipPolyWA() { return clipPolyWA; }

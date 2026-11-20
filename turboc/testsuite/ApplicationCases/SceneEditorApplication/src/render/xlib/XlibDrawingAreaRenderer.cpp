@@ -18,6 +18,10 @@
 #include "render/FrameBufferSource.h"
 #include "render/FrameCaptureService.h"
 #include "render/BrepExportCache.h"
+#include "render/ProjectedSurfacesViewBuilder.h"
+#include "render/xlib/XlibProjectedPolygonRenderer.h"
+#include "java/lang/RuntimeException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryCalligraphicExporter.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
@@ -320,7 +324,8 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
       gizmoRenderer(new XlibGizmo2DDrawListRenderer()),
       cameraControlDrawList(new Gizmo2DDrawList()),
       cameraControlPainter(new CameraControlGizmo2DPainter()),
-      brepCache(new BrepExportCache())
+      brepCache(new BrepExportCache()),
+      surfacesBuilder(new ProjectedSurfacesViewBuilder())
 {
     gizmoPresenter = new DrawingAreaGizmoPresenter(m->getDrawingArea(),
         selectionEditor, translationGizmo, rotateGizmo, scaleGizmo);
@@ -329,6 +334,7 @@ XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
 XlibDrawingAreaRenderer::~XlibDrawingAreaRenderer()
 {
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
+    delete surfacesBuilder;
     delete brepCache;
     delete cameraControlPainter;
     delete cameraControlDrawList;
@@ -447,6 +453,8 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
     scene->activeCamera = camera;
     scene->qualityTemplate->cloneFrom(*quality);
     BOOLEAN raytraced = viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING;
+    BOOLEAN hiddenSurfaces =
+        viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_SURFACES;
 
     if (raytraced) {
         scene->activateSelectedBackground();
@@ -464,8 +472,13 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
         XFillRectangle(display, frame, gc, x, y, width, height);
     }
 
+    if (hiddenSurfaces) {
+        drawHiddenSurfaces(display, frame, gc, visual, viewport, x, y, width,
+                           height);
+    }
+
     ArrayList<SimpleBody*>& bodies = scene->scene->getSimpleBodies();
-    if (!raytraced) {
+    if (!raytraced && !hiddenSurfaces) {
         // As the Java `ProjectedLinesViewBuilder`: the volumes are drawn by
         // the hidden line algorithm over their boundary representation; the
         // curves and surfaces (and the grid) are free lines, hidden by the
@@ -575,6 +588,33 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
     XlibFrameBufferSource source(display, frame, visual, x, y, width, height);
     frameCapture->copyColorBufferIfNeeded(&source,
         model->getDrawingArea()->getViewportSet()->isSelected(viewport));
+}
+
+void XlibDrawingAreaRenderer::drawHiddenSurfaces(Display* display,
+    Drawable frame, GC gc, Visual* visual, Viewport* viewport, int x, int y,
+    int width, int height)
+{
+    DrawingArea* area = model->getDrawingArea();
+    const ArrayList<ProjectedPolygon*>* polygons = NULL;
+
+    try {
+        polygons = &surfacesBuilder->buildView(model->getScene(), viewport,
+            width, height, area->getContentGeneration(),
+            viewport->getRendererConfiguration()->isWithShadowsSet());
+    }
+    catch (const RuntimeException& e) {
+        // As with the lines, a failure over some body must not break the
+        // presentation of the whole set
+        String message("Can not compute the visible surfaces of viewport \"");
+        message += area->getViewportSet()->getTitleFor(viewport);
+        message += "\": ";
+        message += e.getMessage();
+        Logger::reportMessage("XlibDrawingAreaRenderer", Logger::WARNING,
+            "drawHiddenSurfaces", message);
+        return;
+    }
+    XlibProjectedPolygonRenderer::draw(display, frame, gc, visual, *polygons,
+                                       x, y, width, height);
 }
 
 void XlibDrawingAreaRenderer::display(Display* display, Window window,

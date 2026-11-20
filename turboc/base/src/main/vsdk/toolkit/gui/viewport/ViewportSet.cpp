@@ -30,6 +30,8 @@ const char* const ViewportSetCommands::IDV_RENDER_MODE_CPU =
     "IDV_VIEWPORT_SET_RENDER_MODE_CPU";
 const char* const ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES =
     "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES";
+const char* const ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_SURFACES =
+    "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES";
 
 
 static const double T1 = 1.0 / 3.0;

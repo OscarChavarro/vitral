@@ -101,14 +101,23 @@ void MCPViewportTools::setRendererConfiguration(const String& request)
     if ( !renderMode.isEmpty() ) {
         mode = renderMode.equalsIgnoreCase("gpu") ? Viewport::RENDER_MODE_Z_BUFFER :
             renderMode.equalsIgnoreCase("cpu") ? Viewport::RENDER_MODE_RAYTRACING :
-            renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES : 0;
+            renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES :
+            renderMode.equalsIgnoreCase("hidden_surfaces") ? Viewport::RENDER_MODE_HIDDEN_SURFACES : 0;
         if ( mode == 0 )
-            throw IllegalArgumentException("renderMode must be gpu, cpu or hidden_lines");
+            throw IllegalArgumentException("renderMode must be gpu, cpu, hidden_lines or hidden_surfaces");
         if ( supportsXlib && (mode == Viewport::RENDER_MODE_HIDDEN_LINES ||
+                              mode == Viewport::RENDER_MODE_HIDDEN_SURFACES ||
                               mode == Viewport::RENDER_MODE_Z_BUFFER) ) {
+            // The modes of each technology, as `useXlibRendering` of
+            // XtOpenGL1SceneBridge
             ArrayList<int> modes;
-            modes.add(mode);
+            modes.add(mode == Viewport::RENDER_MODE_Z_BUFFER ?
+                      Viewport::RENDER_MODE_Z_BUFFER :
+                      Viewport::RENDER_MODE_HIDDEN_LINES);
             modes.add(Viewport::RENDER_MODE_RAYTRACING);
+            if ( mode != Viewport::RENDER_MODE_Z_BUFFER ) {
+                modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
+            }
             set->setAvailableRenderModes(modes);
         }
         if ( !set->isRenderModeAvailable(mode) )
@@ -125,6 +134,7 @@ void MCPViewportTools::setRendererConfiguration(const String& request)
         if ( MCPJson::booleanProperty(request, "surfaces", value) ) q->setSurfaces(value);
         if ( MCPJson::booleanProperty(request, "texture", value) ) q->setTexture(value);
         if ( MCPJson::booleanProperty(request, "bumpMap", value) ) q->setBumpMap(value);
+        if ( MCPJson::booleanProperty(request, "withShadows", value) ) q->setWithShadows(value);
         if ( MCPJson::booleanProperty(request, "boundingVolume", value) ) q->setBoundingVolume(value);
         if ( MCPJson::booleanProperty(request, "normals", value) ) q->setNormals(value);
         if ( MCPJson::booleanProperty(request, "trianglesNormals", value) ) q->setTrianglesNormals(value);
@@ -173,6 +183,7 @@ String MCPViewportTools::describeRendererConfigurations(
             .append(",\"surfaces\":").appendBoolean(q->isSurfacesSet())
             .append(",\"texture\":").appendBoolean(q->isTextureSet())
             .append(",\"bumpMap\":").appendBoolean(q->isBumpMapSet())
+            .append(",\"withShadows\":").appendBoolean(q->isWithShadowsSet())
             .append(",\"boundingVolume\":").appendBoolean(q->isBoundingVolumeSet())
             .append(",\"normals\":").appendBoolean(q->isNormalsSet())
             .append(",\"trianglesNormals\":").appendBoolean(q->isTrianglesNormalsSet())
@@ -181,7 +192,8 @@ String MCPViewportTools::describeRendererConfigurations(
             .append(",\"grid\":").appendBoolean(viewport->isShowGrid())
             .append(",\"renderMode\":\"")
             .append(viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING ? "cpu" :
-                    viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_LINES ? "hidden_lines" : "gpu")
+                    viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_LINES ? "hidden_lines" :
+                    viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_SURFACES ? "hidden_surfaces" : "gpu")
             .append("\"}");
     }
     sb.append("]}");

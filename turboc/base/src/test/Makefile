@@ -56,6 +56,7 @@ TESTS = \
     csg_point_workspace_tests \
     euler_operator_sequence_fuzz_tests \
     heightfield_solid_tests \
+    hidden_surface_renderer_tests \
     implicit_solid_tests \
     interior_overlap_predicate_tests \
     lamina_policy_tests \

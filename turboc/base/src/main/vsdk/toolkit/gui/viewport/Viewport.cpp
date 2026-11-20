@@ -435,6 +435,9 @@ String Viewport::commandForRenderMode(int renderMode)
     if ( renderMode == RENDER_MODE_HIDDEN_LINES ) {
         return ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES;
     }
+    if ( renderMode == RENDER_MODE_HIDDEN_SURFACES ) {
+        return ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_SURFACES;
+    }
     return ViewportSetCommands::IDV_RENDER_MODE_GPU;
 }
 
@@ -443,6 +446,7 @@ int Viewport::renderModeForCommand(const String& command)
     if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_GPU) ) return RENDER_MODE_Z_BUFFER;
     if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_CPU) ) return RENDER_MODE_RAYTRACING;
     if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES) ) return RENDER_MODE_HIDDEN_LINES;
+    if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_SURFACES) ) return RENDER_MODE_HIDDEN_SURFACES;
     return 0;
 }
 

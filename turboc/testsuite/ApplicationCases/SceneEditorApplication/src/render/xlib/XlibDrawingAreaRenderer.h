@@ -14,6 +14,7 @@ class DrawingAreaGizmoPresenter;
 class DrawingAreaHost;
 class FrameCaptureService;
 class Gizmo2DDrawList;
+class ProjectedSurfacesViewBuilder;
 class RotateGizmo;
 class ScaleGizmo;
 class SceneSelectionEditor;
@@ -28,6 +29,12 @@ gizmo (numeric boxes) of the selected viewport are drawn as 2D primitives
 computed by the gizmo painters of `vsdk/toolkit/render/gizmo` (hidden
 surfaces solved with the painter's algorithm) and drawn by
 `XlibGizmo2DDrawListRenderer`, as the Java `AwtDrawingAreaRenderer` does.
+
+In hidden surfaces mode, the visible polygons of the solids, computed by
+`ProjectedSurfacesViewBuilder` (hidden surface removal by polygon area
+sorting of Weiler and Atherton, with the shadows of the solids if the
+viewport asks for them), are filled by `XlibProjectedPolygonRenderer`, and
+the gizmos are drawn over them as over a raytraced image.
 
 Over the selected viewport the camera control gizmo (ViewCube) is drawn as
 a HUD at its upper right corner, with the hidden lines of its parts removed
@@ -49,11 +56,16 @@ class XlibDrawingAreaRenderer {
     CameraControlGizmo2DPainter* cameraControlPainter;
     /// Boundary representations of the volumes drawn in the views
     BrepExportCache* brepCache;
+    /// Visible polygons of the views in hidden surfaces mode
+    ProjectedSurfacesViewBuilder* surfacesBuilder;
 
     void ensureTitleFont(Display* display, int size);
     void drawView(Display* display, Drawable frame, GC gc, Visual* visual,
                   int depth, Viewport* viewport, int x, int y, int width,
                   int height);
+    void drawHiddenSurfaces(Display* display, Drawable frame, GC gc,
+                            Visual* visual, Viewport* viewport, int x, int y,
+                            int width, int height);
     void drawTitle(Display* display, Drawable frame, GC gc, Visual* visual,
                    Viewport* viewport, int x, int y);
     void drawGizmos(Display* display, Drawable frame, GC gc, Visual* visual,

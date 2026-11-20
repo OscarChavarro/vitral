@@ -20,9 +20,12 @@ Each of its items must have as modifier the corresponding command:
 
 The `VIEWPORT_SET_RENDER_MODE` popup lists the ways a viewport can be
 rendered: `IDV_VIEWPORT_SET_RENDER_MODE_GPU` (the graphics API in use, i.e.
-OpenGL; the default) and `IDV_VIEWPORT_SET_RENDER_MODE_CPU` (raytracing in the
-processor). Applications present it after the projection location items,
-separated from them.
+OpenGL; the default), `IDV_VIEWPORT_SET_RENDER_MODE_CPU` (raytracing in the
+processor), `IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES` (lines computed
+in the processor: wireframe or hidden line removal) and
+`IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES` (visible polygons computed
+in the processor: hidden surface removal). Applications present it after the
+projection location items, separated from them.
 */
 class ViewportSetCommands {
 public:
@@ -39,6 +42,7 @@ public:
     static const char* const IDV_RENDER_MODE_GPU;
     static const char* const IDV_RENDER_MODE_CPU;
     static const char* const IDV_RENDER_MODE_CPU_HIDDEN_LINES;
+    static const char* const IDV_RENDER_MODE_CPU_HIDDEN_SURFACES;
 
 private:
     ViewportSetCommands() {}
