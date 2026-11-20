@@ -212,6 +212,11 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayHit.cpp
     src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/PrimitiveRayTest.cpp
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/SpatialIndex.cpp
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/SpatialIndexWorkspace.cpp
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/LinearSpatialIndex.cpp
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/BinnedSahSpatialIndex.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex2D.cpp
@@ -508,6 +513,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp
     src/main/java/lang/Double.cpp
     PROPERTIES COMPILE_OPTIONS "-fno-fast-math;-ffp-contract=off")
+  # Without semantic interposition, PlanarFace's ray kernel (rayHit and the
+  # functions it calls) is inlined inside the file instead of called through
+  # the PLT of the shared library; this changes no arithmetic
+  set_property(SOURCE src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp
+    APPEND PROPERTY COMPILE_OPTIONS "-fno-semantic-interposition")
 endif()
 add_library(vitral_base SHARED ${VITRAL_BASE_SOURCES})
 
@@ -627,6 +637,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/microfaceted_material_csv_tests.cpp
     src/test/phong_material_tests.cpp
     src/test/planar_face_tests.cpp
+    src/test/spatial_index_tests.cpp
     src/test/ray_affine_contract_tests.cpp
     src/test/ray_crossing_tests.cpp
     src/test/bounding_volume_hierarchy_tests.cpp

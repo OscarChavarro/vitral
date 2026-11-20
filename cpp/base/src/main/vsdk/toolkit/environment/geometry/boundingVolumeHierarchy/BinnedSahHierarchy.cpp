@@ -180,6 +180,10 @@ BinnedSahLeafVisitor::~BinnedSahLeafVisitor()
 {
 }
 
+BinnedSahStoppingLeafVisitor::~BinnedSahStoppingLeafVisitor()
+{
+}
+
 BinnedSahHierarchy::BinnedSahHierarchy()
 {
 }
@@ -326,25 +330,57 @@ BinnedSahHierarchy::build(const java::ArrayList<double> &boxValues,
 
 }
 
-bool
-BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visitor,
-    double &inOutBestT) const
-{
-    if (nodes.size() == 0 || primitiveOrder.size() == 0) {
-        return true;
+namespace {
+
+/** Adapts a closest hit visitor, which never stops, to the shared loop */
+class NeverStoppingVisitor {
+  private:
+    BinnedSahLeafVisitor &visitor;
+  public:
+    explicit NeverStoppingVisitor(BinnedSahLeafVisitor &inVisitor) : visitor(inVisitor) {}
+    bool visit(int primitive, double &inOutBestT)
+    {
+        visitor.visit(primitive, inOutBestT);
+        return false;
     }
-    const RaySlab slab(ray);
-    const BinnedSahHierarchyNode *nodeArray = nodes.data();
+};
+
+/** Adapts a stopping visitor to the shared loop */
+class StoppingVisitor {
+  private:
+    BinnedSahStoppingLeafVisitor &visitor;
+  public:
+    explicit StoppingVisitor(BinnedSahStoppingLeafVisitor &inVisitor) : visitor(inVisitor) {}
+    bool visit(int primitive, double &inOutBestT)
+    {
+        return visitor.visit(primitive, inOutBestT);
+    }
+};
+
+/**
+The traversal loop shared by traverseClosest and traverse, on a non empty
+hierarchy: a stack, nearest child first, nodes farther than the closest hit
+skipped. Counts node visits and leaf entries locally; returns false on stack
+overflow.
+*/
+template <class Visitor>
+bool
+traverseNodes(
+    const BinnedSahHierarchyNode *nodeArray,
+    const java::ArrayList<int> &primitiveOrder,
+    const Ray &ray,
+    Visitor &visitor,
+    double &inOutBestT,
+    long int &nodeVisits,
+    long int &entryTests)
+{
+    const BinnedSahHierarchy::RaySlab slab(ray);
     const double rootDistance = slab.entry(nodeArray[0], inOutBestT);
     if (rootDistance < 0.0) {
-        RaytraceStatistics::recordInstanceLevelTraversal(0, 0);
         return true;
     }
-    // Counted locally, reported once: no shared write per node.
-    long int nodeVisits = 0;
-    long int entryTests = 0;
-    int nodeStack[STACK_SIZE];
-    double distanceStack[STACK_SIZE];
+    int nodeStack[BinnedSahHierarchy::STACK_SIZE];
+    double distanceStack[BinnedSahHierarchy::STACK_SIZE];
     int sp = 0;
     nodeStack[sp] = 0;
     distanceStack[sp] = rootDistance;
@@ -358,7 +394,10 @@ BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visito
         nodeVisits++;
         if (node.count > 0) {
             for (int i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++) {
-                visitor.visit(primitiveOrder[i], inOutBestT);
+                if (visitor.visit(primitiveOrder[i], inOutBestT)) {
+                    entryTests += i - node.leftOrFirst + 1;
+                    return true;
+                }
             }
             entryTests += node.count;
             continue;
@@ -376,8 +415,7 @@ BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visito
             dl = dr;
             dr = swapDistance;
         }
-        if (sp + 2 > STACK_SIZE) {
-            RaytraceStatistics::recordInstanceLevelTraversal(nodeVisits, entryTests);
+        if (sp + 2 > BinnedSahHierarchy::STACK_SIZE) {
             return false;
         }
         if (dl >= 0.0) {
@@ -391,8 +429,38 @@ BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visito
             sp++;
         }
     }
-    RaytraceStatistics::recordInstanceLevelTraversal(nodeVisits, entryTests);
     return true;
+}
+
+}
+
+bool
+BinnedSahHierarchy::traverseClosest(const Ray &ray, BinnedSahLeafVisitor &visitor,
+    double &inOutBestT) const
+{
+    if (nodes.size() == 0 || primitiveOrder.size() == 0) {
+        return true;
+    }
+    // Counted locally, reported once: no shared write per node.
+    long int nodeVisits = 0;
+    long int entryTests = 0;
+    NeverStoppingVisitor loopVisitor(visitor);
+    const bool completed = traverseNodes(nodes.data(), primitiveOrder, ray,
+        loopVisitor, inOutBestT, nodeVisits, entryTests);
+    RaytraceStatistics::recordInstanceLevelTraversal(nodeVisits, entryTests);
+    return completed;
+}
+
+bool
+BinnedSahHierarchy::traverse(const Ray &ray, BinnedSahStoppingLeafVisitor &visitor,
+    double &inOutBestT, long int &nodeVisits, long int &entryTests) const
+{
+    if (nodes.size() == 0 || primitiveOrder.size() == 0) {
+        return true;
+    }
+    StoppingVisitor loopVisitor(visitor);
+    return traverseNodes(nodes.data(), primitiveOrder, ray, loopVisitor,
+        inOutBestT, nodeVisits, entryTests);
 }
 
 const java::ArrayList<BinnedSahHierarchyNode> &

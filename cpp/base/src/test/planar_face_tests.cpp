@@ -137,18 +137,18 @@ TEST(PlanarFace, RayHitInOneCall) {
 
     PlanarFace::RayHit hit;
     ASSERT_TRUE(face.rayHit(origin, down, true, false, 0.0F, 10.0F, &hit));
-    EXPECT_EQ(PlanarFace::Side::FRONT, hit.side);
-    EXPECT_FLOAT_EQ(2.0F, hit.distance);
-    EXPECT_FLOAT_EQ(0.5F, hit.pointX);
-    EXPECT_FLOAT_EQ(0.25F, hit.pointY);
-    EXPECT_FLOAT_EQ(1.0F, hit.pointZ);
-    EXPECT_NEAR(0.5, hit.u, 1e-6);
-    EXPECT_NEAR(0.25, hit.v, 1e-6);
+    EXPECT_EQ(PlanarFace::Side::FRONT, hit.getSide());
+    EXPECT_FLOAT_EQ(2.0F, hit.getDistance());
+    EXPECT_FLOAT_EQ(0.5F, hit.getPointX());
+    EXPECT_FLOAT_EQ(0.25F, hit.getPointY());
+    EXPECT_FLOAT_EQ(1.0F, hit.getPointZ());
+    EXPECT_NEAR(0.5, hit.getU(), 1e-6);
+    EXPECT_NEAR(0.25, hit.getV(), 1e-6);
 
     // Same answers as the separate calls
     float normalDotDirection;
     face.sideFacing(down, &normalDotDirection);
-    EXPECT_EQ(face.planeHitParameter(origin, normalDotDirection), hit.distance);
+    EXPECT_EQ(face.planeHitParameter(origin, normalDotDirection), hit.getDistance());
 
     EXPECT_FALSE(face.rayHit(origin, down, false, true, 0.0F, 10.0F, &hit));     // Front side not accepted
     EXPECT_FALSE(face.rayHit(origin, down, true, false, 0.0F, 1.5F, &hit));      // Too far
@@ -157,7 +157,7 @@ TEST(PlanarFace, RayHitInOneCall) {
     EXPECT_FALSE(face.rayHit(Vector3Df(5.0F, 0.25F, 3.0F), down, true, false, 0.0F, 10.0F, &hit)); // Outside
 
     ASSERT_TRUE(face.rayHit(Vector3Df(0.5F, 0.25F, -1.0F), Vector3Df(0, 0, 1), false, true, 0.0F, 10.0F, &hit));
-    EXPECT_EQ(PlanarFace::Side::BACK, hit.side);
+    EXPECT_EQ(PlanarFace::Side::BACK, hit.getSide());
 }
 
 TEST(PlanarFace, Facing) {

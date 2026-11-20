@@ -26,6 +26,28 @@ export function expectDoubleEq(expected: number, actual: number, message?: strin
     expect(almostEquals(expected, actual), `${message ?? ""} expected ${expected} but was ${actual}`).toBe(true);
 }
 
+function biasedFloat(value: number): bigint {
+    const view = new DataView(new ArrayBuffer(4));
+    view.setFloat32(0, value);
+    const bits = BigInt(view.getUint32(0));
+    const sign = 1n << 31n;
+    return (bits & sign) !== 0n ? (~bits + 1n) & 0xffffffffn : bits | sign;
+}
+
+/** True when the single precision `a` and `b` are within 4 ULPs (GoogleTest `AlmostEquals<float>`). */
+export function almostEqualsFloat(a: number, b: number): boolean {
+    if (Number.isNaN(a) || Number.isNaN(b)) return false;
+    const ba = biasedFloat(a);
+    const bb = biasedFloat(b);
+    const distance = ba >= bb ? ba - bb : bb - ba;
+    return distance <= MAXIMUM_ULPS;
+}
+
+/** `EXPECT_FLOAT_EQ(expected, actual)`: both values are rounded to single precision. */
+export function expectFloatEq(expected: number, actual: number, message?: string): void {
+    expect(almostEqualsFloat(expected, actual), `${message ?? ""} expected ${expected} but was ${actual}`).toBe(true);
+}
+
 /** `EXPECT_NEAR(expected, actual, tolerance)`. */
 export function expectNear(expected: number, actual: number, tolerance: number, message?: string): void {
     expect(

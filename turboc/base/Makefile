@@ -110,6 +110,7 @@ SOURCES = \
     src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/RayHit.cpp \
+    src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/Vertex2D.cpp \

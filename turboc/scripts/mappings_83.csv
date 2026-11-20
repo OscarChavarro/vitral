@@ -280,6 +280,8 @@ base/src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp,BASE/SRC/MAIN/V/
 base/src/main/vsdk/toolkit/environment/geometry/element/Ray.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/RAY.H,Ray.h,RAY.H
 base/src/main/vsdk/toolkit/environment/geometry/element/RayHit.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/RAYHIT.CPP,RayHit.cpp,RAYHIT.CPP
 base/src/main/vsdk/toolkit/environment/geometry/element/RayHit.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/RAYHIT.H,RayHit.h,RAYHIT.H
+base/src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/PLANFACE.CPP,PlanarFace.cpp,PLANFACE.CPP
+base/src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/PLANFACE.H,PlanarFace.h,PLANFACE.H
 base/src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/TRIANGLE.CPP,Triangle.cpp,TRIANGLE.CPP
 base/src/main/vsdk/toolkit/environment/geometry/element/Triangle.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/TRIANGLE.H,Triangle.h,TRIANGLE.H
 base/src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/ELEMENT/VERTEX.CPP,Vertex.cpp,VERTEX.CPP
@@ -1693,6 +1695,7 @@ base/src/test/ray_crossing_tests.cpp,BASE/SRC/TEST/RAYCROTE.CPP,ray_crossing_tes
 base/src/test/reader_mit_scene_commands_tests.cpp,BASE/SRC/TEST/REMISCCO.CPP,reader_mit_scene_commands_tests.cpp,REMISCCO.CPP
 base/src/test/reader_mit_triangles_tests.cpp,BASE/SRC/TEST/REMITRTE.CPP,reader_mit_triangles_tests.cpp,REMITRTE.CPP
 base/src/test/refraction_tests.cpp,BASE/SRC/TEST/REFRTEST.CPP,refraction_tests.cpp,REFRTEST.CPP
+base/src/test/planar_face_tests.cpp,BASE/SRC/TEST/PLAFACTE.CPP,planar_face_tests.cpp,PLAFACTE.CPP
 base/src/test/solid_boundary_tessellator_tests.cpp,BASE/SRC/TEST/SOBOTETE.CPP,solid_boundary_tessellator_tests.cpp,SOBOTETE.CPP
 base/src/test/subdivided_bezier_patch_tests.cpp,BASE/SRC/TEST/SUBEPATE.CPP,subdivided_bezier_patch_tests.cpp,SUBEPATE.CPP
 base/src/test/triangle_mesh_contract_tests.cpp,BASE/SRC/TEST/TRMECOTE.CPP,triangle_mesh_contract_tests.cpp,TRMECOTE.CPP

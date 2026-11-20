@@ -273,6 +273,7 @@ export { RayInstanceStep } from "./vsdk/toolkit/environment/geometry/element/Ray
 export { RaySolidBoundary } from "./vsdk/toolkit/environment/geometry/element/RaySolidBoundary.js";
 export { RaySolidClassification } from "./vsdk/toolkit/environment/geometry/element/RaySolidClassification.js";
 export { RaySolidQueryStatus } from "./vsdk/toolkit/environment/geometry/element/RaySolidQueryStatus.js";
+export { PlanarFace } from "./vsdk/toolkit/environment/geometry/element/PlanarFace.js";
 export { FloatingInterval } from "./vsdk/toolkit/common/numerics/FloatingInterval.js";
 export { RayCrossingQuery } from "./vsdk/toolkit/environment/geometry/element/RayCrossingQuery.js";
 export { type RayCrossingSink } from "./vsdk/toolkit/environment/geometry/element/RayCrossingSink.js";

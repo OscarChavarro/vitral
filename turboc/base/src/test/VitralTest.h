@@ -24,7 +24,8 @@ first 32 characters only).
 
 - `EXPECT_*` report the failure and continue; `ASSERT_*` report it and leave
   the case (`return`), so they are only used in `void` functions.
-- `EXPECT_DOUBLE_EQ` accepts 4 units in the last place, as GoogleTest.
+- `EXPECT_DOUBLE_EQ` and `EXPECT_FLOAT_EQ` accept 4 units in the last place,
+  as GoogleTest.
 - `EXPECT_THROW` needs exceptions: without them (`VSDK_WITHOUT_EXCEPTIONS`,
   Turbo C++ 3.0) the statement is not run and the expectation is counted
   as skipped.
@@ -176,6 +177,30 @@ vitralTestDoubleEquals(double a, double b)
     return fabs(a - b) <= 4.0 * ulp;
 }
 
+/**
+As `vitralTestDoubleEquals`, for binary32: at most 4 units in the last place
+of the float operands (GoogleTest's EXPECT_FLOAT_EQ).
+*/
+inline BOOLEAN
+vitralTestFloatEquals(float a, float b)
+{
+    if ( a == b ) {
+        return TRUE;
+    }
+    if ( a != a || b != b ) {
+        return FALSE;
+    }
+    double magnitude = fabs((double)a) > fabs((double)b) ? fabs((double)a) : fabs((double)b);
+    int exponent = 0;
+    frexp(magnitude, &exponent);
+    double ulp = ldexp(1.0, exponent - 24);
+    double smallest = ldexp(1.0, -149);
+    if ( ulp < smallest ) {
+        ulp = smallest;
+    }
+    return fabs((double)a - (double)b) <= 4.0 * ulp;
+}
+
 inline BOOLEAN
 vitralTestDoubleCheck(BOOLEAN condition, const char *file, int line,
     const char *text, double a, double b)
@@ -213,6 +238,9 @@ vitralTestDoubleCheck(BOOLEAN condition, const char *file, int line,
 #define EXPECT_GE(a, b) VT_CHECK((a) >= (b), #a " >= " #b)
 #define EXPECT_DOUBLE_EQ(a, b) \
     vitralTestDoubleCheck(vitralTestDoubleEquals((a), (b)), __FILE__, \
+        __LINE__, #a " == " #b, (a), (b))
+#define EXPECT_FLOAT_EQ(a, b) \
+    vitralTestDoubleCheck(vitralTestFloatEquals((a), (b)), __FILE__, \
         __LINE__, #a " == " #b, (a), (b))
 #define EXPECT_NEAR(a, b, tolerance) \
     vitralTestDoubleCheck(fabs((double)(a) - (double)(b)) <= (tolerance), \

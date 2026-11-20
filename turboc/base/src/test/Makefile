@@ -61,6 +61,7 @@ TESTS = \
     lamina_policy_tests \
     microfaceted_material_csv_tests \
     near_degenerate_boolean_fuzz_gate_tests \
+    planar_face_tests \
     polyhedral_bounded_solid_euler_operators_tests \
     polyhedral_bounded_solid_face_geometry_tests \
     polyhedral_bounded_solid_splitter_degenerate_plane_tests \
