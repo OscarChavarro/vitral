@@ -21,6 +21,7 @@ RendererConfiguration.prototype.compareTo = function (other: RendererConfigurati
         (value.isPointsSet() ? 64 : 0) +
         (value.isNormalsSet() ? 128 : 0) +
         (value.isTrianglesNormalsSet() ? 256 : 0) +
+        (value.isWithShadowsSet() ? 512 : 0) +
         value.getShadingType() * 0x1000 +
         Math.round(value.getVertexNormalSmoothingThresholdDegrees()) * 0x100000;
     return Math.sign(packed(this) - packed(other));
@@ -37,5 +38,5 @@ RendererConfiguration.prototype.toString = function (): string {
             this.getShadingType()
         ] ?? "INVALID!";
     const state = (value: boolean): string => (value ? "ON" : "OFF");
-    return `<RendererConfiguration>:\n  - Shading type: ${shading}\n  - Draw points: ${state(this.isPointsSet())}\n  - Draw wires: ${state(this.isWiresSet())}\n  - Draw surfaces: ${state(this.isSurfacesSet())}\n  - Draw bounding volume: ${state(this.isBoundingVolumeSet())}\n  - Draw selection corners: ${state(this.isSelectionCornersSet())}\n  - Draw normals: ${state(this.isNormalsSet())}\n  - Draw triangles normals: ${state(this.isTrianglesNormalsSet())}\n  - With texture: ${state(this.isTextureSet())}\n  - With bump map: ${state(this.isBumpMapSet())}\n  - Vertex normal smoothing threshold: ${this.getVertexNormalSmoothingThresholdDegrees()} deg\n  - Mesh acceleration method: ${TriangleMeshAccelerationMethodUtil.name(this.getMeshAccelerationMethod())}\n`;
+    return `<RendererConfiguration>:\n  - Shading type: ${shading}\n  - Draw points: ${state(this.isPointsSet())}\n  - Draw wires: ${state(this.isWiresSet())}\n  - Draw surfaces: ${state(this.isSurfacesSet())}\n  - Draw bounding volume: ${state(this.isBoundingVolumeSet())}\n  - Draw selection corners: ${state(this.isSelectionCornersSet())}\n  - Draw normals: ${state(this.isNormalsSet())}\n  - Draw triangles normals: ${state(this.isTrianglesNormalsSet())}\n  - With texture: ${state(this.isTextureSet())}\n  - With bump map: ${state(this.isBumpMapSet())}\n  - With shadows: ${state(this.isWithShadowsSet())}\n  - Vertex normal smoothing threshold: ${this.getVertexNormalSmoothingThresholdDegrees()} deg\n  - Mesh acceleration method: ${TriangleMeshAccelerationMethodUtil.name(this.getMeshAccelerationMethod())}\n`;
 };

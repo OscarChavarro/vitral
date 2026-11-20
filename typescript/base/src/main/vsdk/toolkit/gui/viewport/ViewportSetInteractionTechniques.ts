@@ -1,6 +1,6 @@
 import { KeyEvent } from "../KeyEvent.js";
 import { MouseEvent } from "../MouseEvent.js";
-import type { Viewport } from "./Viewport.js";
+import { Viewport } from "./Viewport.js";
 import type { ViewportSet } from "./ViewportSet.js";
 import type { ViewportSetInteractionListener } from "./ViewportSetInteractionListener.js";
 
@@ -23,8 +23,9 @@ Keyboard commands:
     restores the selected viewport.
   - Over the selected viewport: `g` toggles the grid, `t`, `l`, `f`, `b` and
     `p` select the Top, Left, Front, Bottom and Perspective cameras, `.` (and
-    `9`) toggles the render mode between GPU (z-buffer) and CPU (raytracing)
-    and `0` cycles the requested size.
+    `9`) cycles the render modes available in the technology presenting the
+    set (GPU z-buffer, CPU raytracing, CPU hidden lines) and `0` cycles the
+    requested size.
 */
 export class ViewportSetInteractionTechniques {
     private readonly viewportSet: ViewportSet;
@@ -64,6 +65,10 @@ export class ViewportSetInteractionTechniques {
         if (target === null) {
             return false;
         }
+        const renderMode: number = Viewport.renderModeForCommand(command);
+        if (renderMode !== 0 && !this.viewportSet.isRenderModeAvailable(renderMode)) {
+            return false;
+        }
         return target.selectProjectionLocation(command) || target.selectRenderMode(command);
     }
 
@@ -101,7 +106,7 @@ export class ViewportSetInteractionTechniques {
         }
 
         if (event.keycode === KeyEvent.KEY_9) {
-            viewport.toggleRenderMode();
+            this.viewportSet.cycleRenderMode(viewport);
             return true;
         }
         if (event.keycode === KeyEvent.KEY_NUM0) {
@@ -111,7 +116,7 @@ export class ViewportSetInteractionTechniques {
 
         switch (event.unicodeId) {
             case KeyEvent.charCode("."):
-                viewport.toggleRenderMode();
+                this.viewportSet.cycleRenderMode(viewport);
                 return true;
             case KeyEvent.charCode("g"):
                 viewport.toggleGrid();

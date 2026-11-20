@@ -341,24 +341,32 @@ export class SimpleBody extends SceneSolid {
     }
 
     /**
-    Transforms an object-space surface normal into world space (TypeScript
-    helper kept for HiddenLineRenderer): the inverse transpose of the placement,
-    renormalized.
+    Java-only helper (kept from the previous Java port, used by the hidden
+    line renderer): object-space normal to unit world-space normal.
     */
     public transformNormalToWorld(normal: Vector3Dd): Vector3Dd {
-        const inverse = this.affinePlacement.getInverse();
-        const n = normal;
-        const world = new Vector3Dd(
-            inverse.get(0, 0) * n.x() + inverse.get(1, 0) * n.y() + inverse.get(2, 0) * n.z(),
-            inverse.get(0, 1) * n.x() + inverse.get(1, 1) * n.y() + inverse.get(2, 1) * n.z(),
-            inverse.get(0, 2) * n.x() + inverse.get(1, 2) * n.y() + inverse.get(2, 2) * n.z(),
-        );
-        return world.length() <= VSDK.EPSILON ? world : world.normalized();
+        if (this.explicitAffinePlacement) {
+            const inverse: Matrix4x4d = this.affinePlacement.getInverse();
+            return SimpleBody.normalizeIfPossible(
+                new Vector3Dd(
+                    inverse.get(0, 0) * normal.x() + inverse.get(1, 0) * normal.y() + inverse.get(2, 0) * normal.z(),
+                    inverse.get(0, 1) * normal.x() + inverse.get(1, 1) * normal.y() + inverse.get(2, 1) * normal.z(),
+                    inverse.get(0, 2) * normal.x() + inverse.get(1, 2) * normal.y() + inverse.get(2, 2) * normal.z(),
+                ),
+            );
+        }
+        const scaledNormal: Vector3Dd = SimpleBody.scaleComponents(normal, this.inverseScale);
+        return SimpleBody.normalizeIfPossible(this.rotationQuaternion.rotate(scaledNormal));
     }
 
-    /** Transforms an object-space point into world space (TypeScript helper). */
+    /**
+    Java-only helper (kept from the previous Java port): object-space point
+    to world space.
+    */
     public transformPointToWorld(point: Vector3Dd): Vector3Dd {
-        return this.affinePlacement.getForward().multiply(point);
+        if (this.explicitAffinePlacement) return this.affinePlacement.getForward().multiply(point);
+        const scaledPoint: Vector3Dd = SimpleBody.scaleComponents(point, this.scale);
+        return this.rotationQuaternion.rotate(scaledPoint).add(this.position);
     }
 
     public doIntersectionFirstHit(inRay: Ray): Ray | null;
@@ -782,5 +790,16 @@ export class SimpleBody extends SceneSolid {
         forward[0] = this.affinePlacement.getForward();
         inverse[0] = this.affinePlacement.getInverse();
         return this.affinePlacement.getStatus();
+    }
+
+    private static scaleComponents(value: Vector3Dd, factors: Vector3Dd): Vector3Dd {
+        return new Vector3Dd(value.x() * factors.x(), value.y() * factors.y(), value.z() * factors.z());
+    }
+
+    private static normalizeIfPossible(vector: Vector3Dd): Vector3Dd {
+        if (vector.length() <= VSDK.EPSILON) {
+            return vector;
+        }
+        return vector.normalized();
     }
 }

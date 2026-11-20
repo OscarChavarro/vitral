@@ -17,6 +17,9 @@ export class WeilerAthertonPolygonClipper {
     private previousOut = false;
     private readonly coincidentPoints = [false, false, false, false];
     private readonly topologicalMerger = new PolygonTopologicalMerger();
+    // True when the last traversal had to be abandoned (see
+    // `isLastClipAbandoned`).
+    private lastClipAbandoned = false;
 
     public unionPolygons(a: Polygon2D | null, b: Polygon2D | null, out: Polygon2D | null): void {
         if (a === null || b === null || out === null) return;
@@ -39,6 +42,9 @@ export class WeilerAthertonPolygonClipper {
         const entries: _DoubleLinkedListNode<_VertexNode2D>[] = [];
         let emptyInner = true;
         let emptyOuter = true;
+        let traversalLimit: number;
+        let steps: number;
+        this.lastClipAbandoned = false;
         this.clipPolyWA = new _Polygon2DWA(clip, true);
         this.subjectPolyWA = new _Polygon2DWA(subject, true);
 
@@ -88,13 +94,26 @@ export class WeilerAthertonPolygonClipper {
             }
         }
 
+        // A traversal visits each vertex node at most once (once in each
+        // direction): a longer one is caught in a cycle that does not pass
+        // again by its start, as some degenerate contacts can produce.
+        traversalLimit =
+            2 *
+                (WeilerAthertonPolygonClipper.countVertexNodes(this.clipPolyWA) +
+                    WeilerAthertonPolygonClipper.countVertexNodes(this.subjectPolyWA)) +
+            4;
         // Inner polygons.
         for (const start of exits) {
             if ((start.data.flags & 0x01) === 0) {
                 if (emptyInner) emptyInner = false;
                 else inner.nextLoop();
                 let iterator = start;
+                steps = 0;
                 do {
+                    if (++steps > traversalLimit) {
+                        this.lastClipAbandoned = true;
+                        break;
+                    }
                     iterator.data.flags |= 0x01;
                     this.addNode(inner, iterator);
                     iterator = iterator.next;
@@ -110,7 +129,12 @@ export class WeilerAthertonPolygonClipper {
                 else outer.nextLoop();
                 let iterator = start;
                 let isSubject = true;
+                steps = 0;
                 do {
+                    if (++steps > traversalLimit) {
+                        this.lastClipAbandoned = true;
+                        break;
+                    }
                     iterator.data.flags |= 0x02;
                     this.addNode(outer, iterator);
                     iterator = isSubject ? iterator.next : iterator.previous;
@@ -684,6 +708,23 @@ export class WeilerAthertonPolygonClipper {
             return anyEndpoint ? p0p2 : true;
         }
         return p0p2;
+    }
+
+    /**
+     * @return true if a traversal of the last call to `clipPolygons`
+     * was caught in a cycle and abandoned, so its output is not complete.
+     * This is only possible with degenerate contacts between the contours.
+     */
+    public isLastClipAbandoned(): boolean {
+        return this.lastClipAbandoned;
+    }
+
+    private static countVertexNodes(polygon: _Polygon2DWA): number {
+        let count = 0;
+        for (const loop of polygon.loops) {
+            count += loop.vertices.size();
+        }
+        return count;
     }
 
     public getClipPolyWA(): _Polygon2DWA | null {

@@ -1,7 +1,7 @@
 import {
   ViewportSetCommands,
+  Viewport,
   WidgetMenuItem,
-  type Viewport,
   type ViewportSet,
   type Widget,
   type WidgetMenu,
@@ -17,7 +17,8 @@ import { MouseEventKind, PopupDismissClickFilter } from '../popup-dismiss-click-
  * `VIEWPORT_SET_PROJECTION_LOCATION` popup of the viewport set, to change the
  * projection location of a viewport (Perspective, Top, ...), followed, after a
  * separator, by the `VIEWPORT_SET_RENDER_MODE` popup, to render it with the GPU
- * or the CPU (raytracing). Texts come from the I18N context of the viewport set
+ * or the CPU (raytracing), showing only the render modes available in the
+ * technology presenting the set (see `ViewportSet.getAvailableRenderModes`). Texts come from the I18N context of the viewport set
  * (so it always shows the language currently selected by the user). The
  * projection and the render mode currently used are marked.
  *
@@ -146,6 +147,10 @@ export class HtmlProjectionLocationPopup {
       }
 
       const command: string = element.getCommandName();
+      const renderMode: number = Viewport.renderModeForCommand(command);
+      if (renderMode !== 0 && !this.viewportSet.isRenderModeAvailable(renderMode)) {
+        continue;
+      }
       const mnemonic: string = element.getMnemonic();
       const item: HtmlMenuItem = popup.addRadioItem(
         element.getName(),

@@ -17,9 +17,21 @@ Each of its items must have as modifier the corresponding command:
 
 The `VIEWPORT_SET_RENDER_MODE` popup lists the ways a viewport can be
 rendered: `IDV_VIEWPORT_SET_RENDER_MODE_GPU` (the graphics API in use, i.e.
-OpenGL; the default) and `IDV_VIEWPORT_SET_RENDER_MODE_CPU` (raytracing in the
-processor). Applications present it after the projection location items,
-separated from them.
+OpenGL; the default), `IDV_VIEWPORT_SET_RENDER_MODE_CPU` (raytracing in the
+processor), `IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES` (lines computed
+in the processor: wireframe or hidden line removal) and
+`IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES` (visible polygons computed
+in the processor: hidden surface removal). Applications present it
+after the projection location items, separated from them, showing only the
+modes available in the technology presenting the set (see
+`ViewportSet.getAvailableRenderModes`).
+
+The `VIEWPORT_SET_RENDER_TECHNOLOGY` popup lists the technologies an
+application can use to present the whole viewport set:
+`IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4` and
+`IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT` (2D drawing only, without any 3D
+API). The viewport set model does not process these commands: only the
+application knows how to replace the drawing surface.
 */
 export class ViewportSetCommands {
     public static readonly POPUP_PROJECTION_LOCATION = "VIEWPORT_SET_PROJECTION_LOCATION";
@@ -34,6 +46,13 @@ export class ViewportSetCommands {
 
     public static readonly IDV_RENDER_MODE_GPU = "IDV_VIEWPORT_SET_RENDER_MODE_GPU";
     public static readonly IDV_RENDER_MODE_CPU = "IDV_VIEWPORT_SET_RENDER_MODE_CPU";
+    public static readonly IDV_RENDER_MODE_CPU_HIDDEN_LINES = "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES";
+    public static readonly IDV_RENDER_MODE_CPU_HIDDEN_SURFACES = "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES";
+
+    public static readonly POPUP_RENDER_TECHNOLOGY = "VIEWPORT_SET_RENDER_TECHNOLOGY";
+
+    public static readonly IDV_RENDER_TECHNOLOGY_OPENGL4 = "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4";
+    public static readonly IDV_RENDER_TECHNOLOGY_AWT = "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT";
 
     private constructor() {}
 }

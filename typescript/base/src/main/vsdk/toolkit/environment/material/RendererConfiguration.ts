@@ -19,6 +19,9 @@ export class RendererConfiguration extends FundamentalEntity {
     private points = false;
     private normals = false;
     private trianglesNormals = false;
+    // Cast shadows in the renderers that compute them as an option (i.e. the
+    // hidden surface removal of Weiler and Atherton)
+    private withShadows = false;
     private useVertexColors = false;
     private vertexNormalSmoothingThresholdDegrees = 15;
     private wireColor = new ColorRgb(1, 1, 1);
@@ -36,6 +39,7 @@ export class RendererConfiguration extends FundamentalEntity {
             (configuration.points ? 0x0040 : 0) +
             (configuration.normals ? 0x0080 : 0) +
             (configuration.trianglesNormals ? 0x0100 : 0) +
+            (configuration.withShadows ? 0x0200 : 0) +
             configuration.shadingType * 0x1000 +
             Math.round(configuration.vertexNormalSmoothingThresholdDegrees) * 0x100000;
         const thisValue = value(this),
@@ -174,11 +178,25 @@ export class RendererConfiguration extends FundamentalEntity {
     public setTrianglesNormals(x: boolean) {
         this.trianglesNormals = x;
     }
+    /**
+    Selects wether or not the renderers that compute shadows as an option
+    cast them (i.e. the hidden surface removal of Weiler and Atherton)
+    @param b true to cast shadows
+    */
+    public setWithShadows(b: boolean) {
+        this.withShadows = b;
+    }
     public isTrianglesNormalsSet() {
         return this.trianglesNormals;
     }
+    public isWithShadowsSet() {
+        return this.withShadows;
+    }
     public changeTrianglesNormals() {
         this.trianglesNormals = !this.trianglesNormals;
+    }
+    public changeWithShadows() {
+        this.withShadows = !this.withShadows;
     }
     public changeShadingType() {
         this.shadingType = ShadingType.next(this.getShadingTypeEnum());
@@ -201,6 +219,7 @@ export class RendererConfiguration extends FundamentalEntity {
         message += `  - Draw triangles normals: ${this.trianglesNormals ? "ON" : "OFF"}\n`;
         message += `  - With texture: ${this.texture ? "ON" : "OFF"}\n`;
         message += `  - With bump map: ${this.bumpMap ? "ON" : "OFF"}\n`;
+        message += `  - With shadows: ${this.withShadows ? "ON" : "OFF"}\n`;
         message += `  - Vertex normal smoothing threshold: ${this.vertexNormalSmoothingThresholdDegrees} deg\n`;
         message += `  - Mesh acceleration method: ${TriangleMeshAccelerationMethodUtil.name(this.meshAccelerationMethod)}\n`;
         return message;

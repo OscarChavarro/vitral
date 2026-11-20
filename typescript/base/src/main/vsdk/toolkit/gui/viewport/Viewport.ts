@@ -27,6 +27,13 @@ The area occupied is specified in two ways:
 export class Viewport {
     public static readonly RENDER_MODE_Z_BUFFER = 1;
     public static readonly RENDER_MODE_RAYTRACING = 2;
+    /// Lines computed in the processor: wireframe, or hidden line removal
+    /// (Appel's algorithm) when the rendering configuration asks for surfaces
+    public static readonly RENDER_MODE_HIDDEN_LINES = 3;
+    /// Visible surfaces computed in the processor as polygons: hidden
+    /// surface removal by polygon area sorting (Weiler and Atherton's
+    /// algorithm)
+    public static readonly RENDER_MODE_HIDDEN_SURFACES = 4;
 
     private requestedSizeXInPixels: number;
     private requestedSizeYInPixels: number;
@@ -453,28 +460,65 @@ export class Viewport {
     the render mode of this viewport (see `ViewportSetCommands`)
     */
     public getRenderModeCommand(): string {
-        if (this.renderMode === Viewport.RENDER_MODE_RAYTRACING) {
+        return Viewport.commandForRenderMode(this.renderMode);
+    }
+
+    /**
+    @param renderMode one of the `RENDER_MODE_*` constants
+    @return the standard command of the render mode popup that selects the
+    given render mode (see `ViewportSetCommands`)
+    */
+    public static commandForRenderMode(renderMode: number): string {
+        if (renderMode === Viewport.RENDER_MODE_RAYTRACING) {
             return ViewportSetCommands.IDV_RENDER_MODE_CPU;
+        }
+        if (renderMode === Viewport.RENDER_MODE_HIDDEN_LINES) {
+            return ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_LINES;
+        }
+        if (renderMode === Viewport.RENDER_MODE_HIDDEN_SURFACES) {
+            return ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_SURFACES;
         }
         return ViewportSetCommands.IDV_RENDER_MODE_GPU;
     }
 
     /**
+    @param command a command of the render mode popup
+    @return the render mode (`RENDER_MODE_*`) selected by the command, or 0
+    if it is not a render mode command
+    */
+    public static renderModeForCommand(command: string | null): number {
+        if (ViewportSetCommands.IDV_RENDER_MODE_GPU === command) {
+            return Viewport.RENDER_MODE_Z_BUFFER;
+        }
+        if (ViewportSetCommands.IDV_RENDER_MODE_CPU === command) {
+            return Viewport.RENDER_MODE_RAYTRACING;
+        }
+        if (ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_LINES === command) {
+            return Viewport.RENDER_MODE_HIDDEN_LINES;
+        }
+        if (ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_SURFACES === command) {
+            return Viewport.RENDER_MODE_HIDDEN_SURFACES;
+        }
+        return 0;
+    }
+
+    /**
     Selects the render mode given by one of the standard commands of the
     render mode popup (see `ViewportSetCommands`): GPU is the z-buffer of the
-    graphics API, CPU is raytracing.
+    graphics API, CPU is raytracing, hidden lines or hidden surfaces. It does
+    not check if the mode is available in the technology presenting the
+    viewport (see
+    `ViewportSet.isRenderModeAvailable`).
     @return true if the command was a render mode one and was applied
     */
     public selectRenderMode(command: string | null): boolean {
-        if (ViewportSetCommands.IDV_RENDER_MODE_GPU === command) {
-            this.renderMode = Viewport.RENDER_MODE_Z_BUFFER;
-            return true;
+        const mode: number = Viewport.renderModeForCommand(command);
+
+        if (mode === 0) {
+            return false;
         }
-        if (ViewportSetCommands.IDV_RENDER_MODE_CPU === command) {
-            this.renderMode = Viewport.RENDER_MODE_RAYTRACING;
-            return true;
-        }
-        return false;
+        this.renderMode = mode;
+        return true;
     }
 
     /**

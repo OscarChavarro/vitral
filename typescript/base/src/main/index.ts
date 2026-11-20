@@ -460,6 +460,7 @@ export { TranslateGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/TranslateGi
 export { CameraControlGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/CameraControlGizmo2DPainter.js";
 export { WireframeRenderer } from "./vsdk/toolkit/render/hiddenLine/WireframeRenderer.js";
 export { HiddenLineRenderer } from "./vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.js";
+export { HiddenSurfaceRenderer } from "./vsdk/toolkit/render/hiddenSurface/HiddenSurfaceRenderer.js";
 export { TraceWorkspace } from "./vsdk/toolkit/render/TraceWorkspace.js";
 export { SpherePolyhedralCache, SpherePolyhedralCacheEntry } from "./vsdk/toolkit/render/SpherePolyhedralCache.js";
 export { Shader } from "./vsdk/toolkit/render/shaders/Shader.js";

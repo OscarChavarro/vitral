@@ -32,6 +32,7 @@ export class RendererConfigurationController extends Controller {
                 case KeyEvent.KEY_F7:
                 case KeyEvent.KEY_F8:
                 case KeyEvent.KEY_F9:
+                case KeyEvent.KEY_F10:
                     throw new TypeError("RendererConfigurationController has no RendererConfiguration");
                 default:
                     return false;
@@ -85,6 +86,10 @@ export class RendererConfigurationController extends Controller {
                 break;
             case KeyEvent.KEY_F9:
                 qualitySelection.changeBumpMap();
+                updated = true;
+                break;
+            case KeyEvent.KEY_F10:
+                qualitySelection.changeWithShadows();
                 updated = true;
                 break;
         }

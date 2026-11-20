@@ -26,6 +26,11 @@ last one for each of them where only the selected viewport is visible (see
 `getLayoutStyleCount`); the percent-based area of each viewport has its origin
 at the lower left corner of the set area. If the set has more viewports than the supported layouts, only
 the first one is shown, maximized.
+
+The technology presenting the set decides which render modes its viewports
+can use (i.e. a 2D canvas without a 3D API has no GPU z-buffer): they are
+given with `setAvailableRenderModes`, and the viewports of the set are kept
+in one of them.
 */
 export class ViewportSet {
     private static readonly T1 = 1.0 / 3.0;
@@ -121,6 +126,7 @@ export class ViewportSet {
     private selectedTitleColor: ColorRgb;
     private elementScaler: ViewportElementScaler;
     private i18nContext: Widget | null;
+    private availableRenderModes: number[];
 
     public constructor() {
         this.name = "Viewport set";
@@ -134,6 +140,7 @@ export class ViewportSet {
         this.selectedTitleColor = new ColorRgb(1, 1, 0);
         this.elementScaler = new ViewportElementScaler();
         this.i18nContext = null;
+        this.availableRenderModes = [Viewport.RENDER_MODE_Z_BUFFER, Viewport.RENDER_MODE_RAYTRACING];
     }
 
     /**
@@ -194,7 +201,85 @@ export class ViewportSet {
             return;
         }
         this.viewports.push(viewport);
+        this.coerceRenderMode(viewport);
         this.updateLayout();
+    }
+
+    /**
+    @return the render modes (`Viewport.RENDER_MODE_*`) the viewports of this
+    set can use, in the order they are cycled; the first one is the default
+    */
+    public getAvailableRenderModes(): number[] {
+        return this.availableRenderModes.slice();
+    }
+
+    /**
+    Sets the render modes the viewports of this set can use, as given by the
+    technology presenting the set. Viewports in a mode that is no longer
+    available change to the first given mode.
+    @param modes render modes (`Viewport.RENDER_MODE_*`), the default first;
+    null or empty is ignored
+    */
+    public setAvailableRenderModes(...modes: number[]): void;
+    public setAvailableRenderModes(modes: readonly number[] | null): void;
+    public setAvailableRenderModes(...args: (number | readonly number[] | null)[]): void {
+        const first = args[0];
+        const modes: readonly number[] | null =
+            args.length === 1 && (first === null || Array.isArray(first))
+                ? (first as readonly number[] | null)
+                : (args as number[]);
+        if (modes === null || modes.length === 0) {
+            return;
+        }
+        this.availableRenderModes = modes.slice();
+        this.enforceAvailableRenderModes();
+    }
+
+    /**
+    Changes to the default render mode the viewports whose mode is not
+    available (i.e. restored from a view history recorded while the set was
+    presented by other technology). Renderers call it before each frame.
+    */
+    public enforceAvailableRenderModes(): void {
+        for (const viewport of this.viewports) {
+            this.coerceRenderMode(viewport);
+        }
+    }
+
+    /**
+    @param renderMode one of the `Viewport.RENDER_MODE_*` constants
+    @return true if the viewports of this set can use the given render mode
+    */
+    public isRenderModeAvailable(renderMode: number): boolean {
+        for (const mode of this.availableRenderModes) {
+            if (mode === renderMode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+    Changes the render mode of a viewport to the next available one.
+    */
+    public cycleRenderMode(viewport: Viewport | null): void {
+        if (viewport === null) {
+            return;
+        }
+        let next: number = this.availableRenderModes[0]!;
+        for (let i = 0; i < this.availableRenderModes.length; i++) {
+            if (this.availableRenderModes[i] === viewport.getRenderMode()) {
+                next = this.availableRenderModes[(i + 1) % this.availableRenderModes.length]!;
+                break;
+            }
+        }
+        viewport.setRenderMode(next);
+    }
+
+    private coerceRenderMode(viewport: Viewport): void {
+        if (!this.isRenderModeAvailable(viewport.getRenderMode())) {
+            viewport.setRenderMode(this.availableRenderModes[0]!);
+        }
     }
 
     /**
