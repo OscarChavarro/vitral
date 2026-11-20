@@ -100,7 +100,8 @@ class ViewportSetRenderModesTest
     {
         for ( int mode : new int[] {Viewport.RENDER_MODE_Z_BUFFER,
                                     Viewport.RENDER_MODE_RAYTRACING,
-                                    Viewport.RENDER_MODE_HIDDEN_LINES} ) {
+                                    Viewport.RENDER_MODE_HIDDEN_LINES,
+                                    Viewport.RENDER_MODE_HIDDEN_SURFACES} ) {
             // Act
             String command = Viewport.commandForRenderMode(mode);
 

@@ -1077,6 +1077,13 @@
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES"
           ]
+        },
+        {
+          "type": "item",
+          "name": "CPU mode (hidden &surfaces)",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES"
+          ]
         }
       ]
     },
@@ -1400,6 +1407,11 @@
       "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES",
       "name": "CPU mode (hidden lines)",
       "brief": "Render the viewport with the processor as lines (wireframe, or Appel hidden line removal when surfaces are shown)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES",
+      "name": "CPU mode (hidden surfaces)",
+      "brief": "Render the viewport with the processor as visible polygons (Weiler-Atherton hidden surface removal of the solids)"
     },
     {
       "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4",

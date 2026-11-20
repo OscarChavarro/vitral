@@ -220,26 +220,29 @@ has not been created`).
 
 - `render.get_configuration`: returns the rendering configuration of the
   viewports: `index`, `title`, the booleans `points`, `wires`, `surfaces`,
-  `texture`, `bumpMap`, `boundingVolume`, `normals`, `trianglesNormals`,
+  `texture`, `bumpMap`, `withShadows` (shadows cast by the `hidden_surfaces`
+  mode), `boundingVolume`, `normals`, `trianglesNormals`,
   `selectionCorners`, `grid` (reference grid of the viewport), `shading`
   (uppercase, i.e. `PHONG`) and `renderMode` (`gpu` for rasterization, `cpu`
-  for raytracing, `hidden_lines` for lines computed in the processor), plus
+  for raytracing, `hidden_lines` for lines computed in the processor,
+  `hidden_surfaces` for visible polygons computed in the processor), plus
   the `technology` presenting the viewport set (`opengl4` or `awt`).
   Arguments: `viewport` (index; default all).
 - `render.set_configuration`: changes the rendering configuration of the
   viewports, only in the given values. Arguments: `viewport` (index; default
   all), any of the booleans reported by `render.get_configuration`, `shading`
   (`nolight`, `flat`, `gouraud`, `phong` or `cook_terrance`, in any case) and
-  `renderMode` (`gpu`, `cpu` or `hidden_lines`; only the modes available in
-  the current technology: `gpu`/`cpu` with `opengl4`, `hidden_lines`/`cpu`
-  with `awt`). Returns the new configuration. These changes are not
+  `renderMode` (`gpu`, `cpu`, `hidden_lines` or `hidden_surfaces`; only the
+  modes available in the current technology: `gpu`/`cpu` with `opengl4`,
+  `hidden_lines`/`cpu`/`hidden_surfaces` with `awt`). Returns the new configuration. These changes are not
   recorded in the view histories.
 - `viewport.set_rendering`: atomically requests a canvas technology and an
   algorithm for the selected viewport (or the `viewport` argument). Arguments
   are `technology` (`opengl4` or `awt`) and `algorithm` (`gpu`,
-  `hidden_lines` or `raytracing`). A request for `opengl4` rebuilds an AWT
-  drawing canvas as JOGL before applying the algorithm. GPU is available only
-  with OpenGL; hidden lines only with AWT; raytracing works with both.
+  `hidden_lines`, `hidden_surfaces` or `raytracing`). A request for `opengl4`
+  rebuilds an AWT drawing canvas as JOGL before applying the algorithm. GPU
+  is available only with OpenGL; hidden lines and hidden surfaces only with
+  AWT; raytracing works with both.
 - `render.set_technology`: presents the viewport set with other technology,
   rebuilding the GUI (wait about a second before the next call). Arguments:
   `technology` (`opengl4` or `awt`). With `awt` no OpenGL is used: viewports
@@ -337,5 +340,5 @@ the main menubar:
   viewports, and the application gives it the GUI definition each time it is
   loaded, so names follow the language selected by the user.
 - `VIEWPORT_SET_RENDER_MODE`, with the commands
-  `IDV_VIEWPORT_SET_RENDER_MODE_{GPU,CPU}`, shown after the former in the menu
-  of the title of a viewport.
+  `IDV_VIEWPORT_SET_RENDER_MODE_{GPU,CPU,CPU_HIDDEN_LINES,CPU_HIDDEN_SURFACES}`,
+  shown after the former in the menu of the title of a viewport.

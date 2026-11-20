@@ -31,6 +31,10 @@ public class Viewport
     /// Lines computed in the processor: wireframe, or hidden line removal
     /// (Appel's algorithm) when the rendering configuration asks for surfaces
     public static final int RENDER_MODE_HIDDEN_LINES = 3;
+    /// Visible surfaces computed in the processor as polygons: hidden
+    /// surface removal by polygon area sorting (Weiler and Atherton's
+    /// algorithm)
+    public static final int RENDER_MODE_HIDDEN_SURFACES = 4;
 
     private int requestedSizeXInPixels;
     private int requestedSizeYInPixels;
@@ -532,6 +536,9 @@ public class Viewport
         if ( renderMode == RENDER_MODE_HIDDEN_LINES ) {
             return ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_LINES;
         }
+        if ( renderMode == RENDER_MODE_HIDDEN_SURFACES ) {
+            return ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_SURFACES;
+        }
         return ViewportSetCommands.IDV_RENDER_MODE_GPU;
     }
 
@@ -551,14 +558,18 @@ public class Viewport
         if ( ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_LINES.equals(command) ) {
             return RENDER_MODE_HIDDEN_LINES;
         }
+        if ( ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_SURFACES.equals(command) ) {
+            return RENDER_MODE_HIDDEN_SURFACES;
+        }
         return 0;
     }
 
     /**
     Selects the render mode given by one of the standard commands of the
     render mode popup (see `ViewportSetCommands`): GPU is the z-buffer of the
-    graphics API, CPU is raytracing or hidden lines. It does not check if the
-    mode is available in the technology presenting the viewport (see
+    graphics API, CPU is raytracing, hidden lines or hidden surfaces. It does
+    not check if the mode is available in the technology presenting the
+    viewport (see
     `ViewportSet.isRenderModeAvailable`).
     @param command
     @return true if the command was a render mode one and was applied

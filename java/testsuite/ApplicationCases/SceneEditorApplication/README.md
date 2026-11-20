@@ -17,15 +17,18 @@ here independently of any implementation.
   (`f`).
 - Per viewport display settings: reference grid (`g`), points, wires,
   surfaces, bounding volumes, normals, textures and bump maps (`F1`..`F9`),
-  and shading model (none, flat, Gouraud, Phong, Cook-Torrance).
+  shadows (`F10`, cast by the CPU hidden surfaces mode) and shading model
+  (none, flat, Gouraud, Phong, Cook-Torrance).
 - Per viewport render mode: GPU rasterization or CPU raytracing (`.`), with
   the grid, gizmos and selection marks correctly occluded by the raytraced
   objects.
 - Render technology of the whole viewport set, from the menu of a viewport
   title: OpenGL 4 (JOGL), or AWT 2D drawing only (`src/render/awt`), where
-  viewports are CPU raytraced or CPU hidden lines: wireframe, or hidden line
-  removal with Appel's quantitative invisibility for the solids that are (or
-  export to) a `PolyhedralBoundedSolid` when surfaces are shown. `.` cycles
+  viewports are CPU raytraced, CPU hidden lines (wireframe, or hidden line
+  removal with Appel's quantitative invisibility for the solids that are, or
+  export to, a `PolyhedralBoundedSolid` when surfaces are shown) or CPU hidden
+  surfaces (the visible polygons of those solids, flat shaded, by Weiler and
+  Atherton's polygon area sorting with their general polygon clipper). `.` cycles
   only the render modes of the technology in use. Choosing in that menu a
   render mode the technology in use does not offer (GPU mode over AWT, CPU
   hidden lines over OpenGL 4) first changes to the technology that offers it,
@@ -69,7 +72,7 @@ here independently of any implementation.
 - Import of objects from 3ds, vtk, gts, obj and ply files; complete MIT `.ray`
   scenes (including their camera, lights, materials and background) can be
   loaded from `../../../../etc/geometry/mitscenes`; export to obj, gts and vtk.
-- Raytraced image of the scene (`F10`).
+- Raytraced image of the scene (`F11`).
 - Color and depth images of the rasterized view, with selectable palettes,
   and contour images.
 

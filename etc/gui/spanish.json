@@ -631,6 +631,13 @@
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES"
           ]
+        },
+        {
+          "type": "item",
+          "name": "Modo CPU (s&uperficies ocultas)",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES"
+          ]
         }
       ]
     },
@@ -950,6 +957,11 @@
       "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES",
       "name": "Modo CPU (líneas ocultas)",
       "brief": "Dibujar la vista con el procesador como líneas (alambre, o eliminación de líneas ocultas de Appel cuando se muestran superficies)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES",
+      "name": "Modo CPU (superficies ocultas)",
+      "brief": "Dibujar la vista con el procesador como polígonos visibles (eliminación de superficies ocultas de Weiler-Atherton para los sólidos)"
     },
     {
       "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4",

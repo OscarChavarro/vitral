@@ -38,6 +38,9 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     private boolean points;
     private boolean normals;
     private boolean trianglesNormals;
+    // Cast shadows in the renderers that compute them as an option (i.e. the
+    // hidden surface removal of Weiler and Atherton)
+    private boolean withShadows;
     private boolean useVertexColors;
     private double vertexNormalSmoothingThresholdDegrees;
     private ColorRgb wireColor;
@@ -59,6 +62,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         if ( this.points ) valThis += 0x0040;
         if ( this.normals ) valThis += 0x0080;
         if ( this.trianglesNormals ) valThis += 0x0100;
+        if ( this.withShadows ) valThis += 0x0200;
         valThis += this.shadingType * 0x1000;
         valThis += Math.round(this.vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
@@ -72,6 +76,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         if ( other.points ) valOther += 0x0040;
         if ( other.normals ) valOther += 0x0080;
         if ( other.trianglesNormals ) valOther += 0x0100;
+        if ( other.withShadows ) valOther += 0x0200;
         valOther += other.shadingType * 0x1000;
         valOther += Math.round(other.vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
@@ -96,6 +101,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.points = other.points;
         this.normals = other.normals;
         this.trianglesNormals = other.trianglesNormals;
+        this.withShadows = other.withShadows;
         this.wireColor = new ColorRgb(other.wireColor);
         this.boundingVolumeColor = new ColorRgb(other.boundingVolumeColor);
         this.useVertexColors = other.useVertexColors;
@@ -135,6 +141,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         points = false;
         normals = false;
         trianglesNormals = false;
+        withShadows = false;
         wireColor = new ColorRgb(1, 1, 1);
         boundingVolumeColor = new ColorRgb(1, 1, 0);
         useVertexColors = false;
@@ -205,6 +212,16 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     public void setTrianglesNormals(boolean b)
     {
         this.trianglesNormals = b;
+    }
+
+    /**
+    Selects wether or not the renderers that compute shadows as an option
+    cast them (i.e. the hidden surface removal of Weiler and Atherton)
+    @param b true to cast shadows
+    */
+    public void setWithShadows(boolean b)
+    {
+        this.withShadows = b;
     }
 
     public void setShadingType(int shadingType)
@@ -281,6 +298,11 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         return this.trianglesNormals;
     }
 
+    public boolean isWithShadowsSet()
+    {
+        return this.withShadows;
+    }
+
     public int getShadingType()
     {
         return this.shadingType;
@@ -341,6 +363,11 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.trianglesNormals = !this.trianglesNormals;
     }
 
+    public void changeWithShadows()
+    {
+        this.withShadows = !this.withShadows;
+    }
+
     public void changeShadingType()
     {
         setShadingType(getShadingTypeEnum().next());
@@ -384,6 +411,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         msg = msg + "  - Draw triangles normals: " + (trianglesNormals?"ON":"OFF") + "\n";
         msg = msg + "  - With texture: " + (texture?"ON":"OFF") + "\n";
         msg = msg + "  - With bump map: " + (bumpMap?"ON":"OFF") + "\n";
+        msg = msg + "  - With shadows: " + (withShadows?"ON":"OFF") + "\n";
         msg = msg + "  - Vertex normal smoothing threshold: " +
             vertexNormalSmoothingThresholdDegrees + " deg\n";
         msg = msg + "  - Mesh acceleration method: " +
@@ -418,6 +446,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         copy.points = points;
         copy.normals = normals;
         copy.trianglesNormals = trianglesNormals;
+        copy.withShadows = withShadows;
         copy.lodHint = lodHint;
         copy.wireColor = new ColorRgb(wireColor);
         copy.boundingVolumeColor = new ColorRgb(boundingVolumeColor);

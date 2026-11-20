@@ -1,5 +1,5 @@
 //= References:                                                             =
-//= [WEATH1977] Kevin Weiler and Peter Atherton. "HIDDEN SURFACE REMOVAL    =
+//= [WEIL1977] Kevin Weiler and Peter Atherton. "HIDDEN SURFACE REMOVAL     =
 //= USING POLYGON AREA SORTING",                                            =
 //= Program of Computer Graphics, Cornell University. Ithaca, New York, 1977=
 package vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper;
@@ -16,7 +16,7 @@ import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
  * clip polygon and the subject polygon lie on each other's boundary.
  *
  * The code in this class corresponds to the "POLYGON CLIPPING ALGORITHM"
- * section of [WEATH1977].
+ * section of [WEIL1977].
 */
 public class WeilerAthertonPolygonClipper {
 
@@ -27,6 +27,9 @@ public class WeilerAthertonPolygonClipper {
     private boolean previousOut;
     private final boolean coincidentPoints[] = new boolean[4];
     private final PolygonTopologicalMerger topologicalMerger;
+    // True when the last traversal had to be abandoned (see
+    // `isLastClipAbandoned`).
+    private boolean lastClipAbandoned;
 
     public WeilerAthertonPolygonClipper()
     {
@@ -103,6 +106,8 @@ public class WeilerAthertonPolygonClipper {
         boolean emptyInnerPolyOut = true;
         boolean emptyOuterPolyOut = true;
         int i,j;
+        int traversalLimit;
+        int steps;
 
         if ( innerPolyOut == null ) {
             return;
@@ -110,6 +115,7 @@ public class WeilerAthertonPolygonClipper {
         if ( outerPolyOut == null ) {
             return;
         }
+        lastClipAbandoned = false;
         clipPolyWA = new _Polygon2DWA(clipPoly, true);
         subjectPolyWA = new _Polygon2DWA(subjectPoly, true);
         // Find all intersections and populate the entry/exit lists.
@@ -145,6 +151,11 @@ public class WeilerAthertonPolygonClipper {
                 } while ( dllnVertNodeC != p2DContClip.vertices.getHead() );
             }
         }
+        // A traversal visits each vertex node at most once (once in each
+        // direction): a longer one is caught in a cycle that does not pass
+        // again by its start, as some degenerate contacts can produce.
+        traversalLimit = 2 * (countVertexNodes(clipPolyWA) +
+            countVertexNodes(subjectPolyWA)) + 4;
         // Traverse the generated intersection structure to build the result.
         // Inner polygons:
         for ( i=0; i < intersecVertListOut.size(); ++i ) {
@@ -156,7 +167,12 @@ public class WeilerAthertonPolygonClipper {
                     innerPolyOut.nextLoop();
                 }
                 iterator = dllnNodeS;
+                steps = 0;
                 do {
+                    if ( ++steps > traversalLimit ) {
+                        lastClipAbandoned = true;
+                        break;
+                    }
                     iterator.data.flags = (byte) (iterator.data.flags | 0x01); //Now this node may not be used in an interior polygon.
                     innerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r(), iterator.data.color.g(), iterator.data.color.b());
                     iterator = iterator.next;
@@ -180,7 +196,12 @@ public class WeilerAthertonPolygonClipper {
                 }
                 iterator = dllnNodeS;
                 isSubject = true;
+                steps = 0;
                 do {
+                    if ( ++steps > traversalLimit ) {
+                        lastClipAbandoned = true;
+                        break;
+                    }
                     iterator.data.flags = (byte) (iterator.data.flags | 0x02); //Now this node may not be used in an outer polygon.
                     outerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r(), iterator.data.color.g(), iterator.data.color.b());
                     if ( isSubject ) {
@@ -1047,6 +1068,23 @@ public class WeilerAthertonPolygonClipper {
         } else {
             return point0ToPoint2Coincidence;
         }
+    }
+
+    /**
+     * @return true if a traversal of the last call to {@code clipPolygons}
+     * was caught in a cycle and abandoned, so its output is not complete.
+     * This is only possible with degenerate contacts between the contours.
+     */
+    public boolean isLastClipAbandoned() {
+        return lastClipAbandoned;
+    }
+
+    private static int countVertexNodes(_Polygon2DWA polygon) {
+        int count = 0;
+        for ( _Polygon2DContourWA loop : polygon.loops ) {
+            count += loop.vertices.size();
+        }
+        return count;
     }
 
     /**

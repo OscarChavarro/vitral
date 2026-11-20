@@ -52,7 +52,7 @@ boxes of the gizmo (see `InputGizmo`), that show coordinates, angles in
 degrees or scale factors; in rotation mode the mouse highlights (hover) and
 chooses (click) the rings of the gizmo (see
 `RotateGizmoInteractionTechnique`); `DELETE`
-removes the selected things; `F10` requests a raytraced image; `T` / `B`
+removes the selected things; `F11` requests a raytraced image; `T` / `B`
 toggle a sample texture / bump map on the selected body; `h` shows the object
 selector; `ESC` closes the application. Commands of the visual debug ray and
 of the viewport set are processed by their own techniques.
@@ -1160,7 +1160,7 @@ public class DrawingAreaInteractionTechniques
             cancelInputGizmoEditing();
             selectionEditor.deleteSelected();
             break;
-          case KeyEvent.KEY_F10:
+          case KeyEvent.KEY_F11:
             listener.raytracingRequested();
             break;
           default:

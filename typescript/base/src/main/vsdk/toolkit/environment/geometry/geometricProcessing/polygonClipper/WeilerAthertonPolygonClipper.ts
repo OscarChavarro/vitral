@@ -1,4 +1,4 @@
-// References: [WEATH1977] Kevin Weiler and Peter Atherton, "Hidden Surface
+// References: [WEIL1977] Kevin Weiler and Peter Atherton, "Hidden Surface
 // Removal Using Polygon Area Sorting", Cornell University, 1977.
 import { Polygon2D } from "../../surface/polygon/Polygon2D.js";
 import { _CircularDoubleLinkedList } from "./_CircularDoubleLinkedList.js";

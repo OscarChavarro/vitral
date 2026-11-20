@@ -78,6 +78,10 @@ public class RendererConfigurationController extends Controller {
           qualitySelection.changeBumpMap();
           updated = true;
           break;
+        case KeyEvent.KEY_F10:
+          qualitySelection.changeWithShadows();
+          updated = true;
+          break;
     }
     return updated;
   }

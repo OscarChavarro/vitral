@@ -7,8 +7,8 @@ import vsdk.toolkit.gui.viewport.ViewportSetCommands;
 Technologies the editor can use to present the viewport set of its drawing
 area. Each one offers a set of render modes to the viewports: a 2D canvas
 without a 3D API (AWT) has no GPU z-buffer, so its viewports are drawn by the
-processor, as raytraced images or as projected lines (wireframe or hidden
-line removal).
+processor, as raytraced images, as projected lines (wireframe or hidden
+line removal) or as projected visible polygons (hidden surface removal).
 */
 public enum RenderTechnology
 {
@@ -17,7 +17,8 @@ public enum RenderTechnology
         Viewport.RENDER_MODE_Z_BUFFER, Viewport.RENDER_MODE_RAYTRACING),
     /** AWT canvas drawn with 2D operations only */
     AWT(ViewportSetCommands.IDV_RENDER_TECHNOLOGY_AWT,
-        Viewport.RENDER_MODE_HIDDEN_LINES, Viewport.RENDER_MODE_RAYTRACING);
+        Viewport.RENDER_MODE_HIDDEN_LINES, Viewport.RENDER_MODE_RAYTRACING,
+        Viewport.RENDER_MODE_HIDDEN_SURFACES);
 
     private final String command;
     private final int[] renderModes;

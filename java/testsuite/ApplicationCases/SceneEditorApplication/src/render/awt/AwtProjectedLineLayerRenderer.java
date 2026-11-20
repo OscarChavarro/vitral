@@ -125,7 +125,7 @@ public class AwtProjectedLineLayerRenderer
     /**
     @param ndcX horizontal normalized device coordinate (-1 is the left side)
     */
-    private static double toPixelX(double ndcX, int x0, int width)
+    static double toPixelX(double ndcX, int x0, int width)
     {
         return x0 + (ndcX + 1.0) / 2.0 * width;
     }
@@ -134,7 +134,7 @@ public class AwtProjectedLineLayerRenderer
     @param ndcY vertical normalized device coordinate (-1 is the bottom side,
     while AWT pixels grow downwards)
     */
-    private static double toPixelY(double ndcY, int y0, int height)
+    static double toPixelY(double ndcY, int y0, int height)
     {
         return y0 + (1.0 - ndcY) / 2.0 * height;
     }

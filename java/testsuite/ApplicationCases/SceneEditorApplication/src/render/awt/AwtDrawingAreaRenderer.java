@@ -39,6 +39,8 @@ import render.DrawingAreaHost;
 import render.FrameCaptureService;
 import render.ProjectedLineLayer;
 import render.ProjectedLinesViewBuilder;
+import render.ProjectedPolygon;
+import render.ProjectedSurfacesViewBuilder;
 
 /**
 Draws the scene in the viewports of a `DrawingArea` using only the 2D
@@ -53,6 +55,11 @@ modes AWT offers (see `model.RenderTechnology.AWT`):
   - Raytracing: the raytraced image is drawn as is, and the editor
     annotations (selection corners, lights...) are drawn over it as lines,
     without depth test.
+  - Hidden surfaces: the visible polygons of the solids, computed by
+    `ProjectedSurfacesViewBuilder` (hidden surface removal by polygon area
+    sorting of Weiler and Atherton, with the shadows of the solids if the
+    viewport asks for them), are filled by `AwtProjectedPolygonRenderer`, and
+    the annotations are drawn over them as over a raytraced image.
 
 Over the selected viewport the camera control gizmo (ViewCube) is drawn as
 a HUD at its upper right corner, with the hidden lines of its parts removed
@@ -81,6 +88,7 @@ public class AwtDrawingAreaRenderer
     private final DrawingAreaHost host;
     private final FrameCaptureService frameCapture;
     private final ProjectedLinesViewBuilder linesBuilder;
+    private final ProjectedSurfacesViewBuilder surfacesBuilder;
     private final AwtViewportSetRenderer viewportSetRenderer;
     private final DrawingAreaGizmoPresenter gizmoPresenter;
     private final Gizmo2DDrawList gizmoDrawList;
@@ -111,6 +119,7 @@ public class AwtDrawingAreaRenderer
         this.host = host;
         this.frameCapture = new FrameCaptureService(model, host);
         this.linesBuilder = new ProjectedLinesViewBuilder();
+        this.surfacesBuilder = new ProjectedSurfacesViewBuilder();
         this.frame = null;
         this.gizmoPresenter = new DrawingAreaGizmoPresenter(drawingArea,
             new SceneSelectionEditor(theScene), translationGizmo, rotateGizmo, scaleGizmo);
@@ -190,6 +199,8 @@ public class AwtDrawingAreaRenderer
     {
         List<ProjectedLineLayer> layers;
         boolean raytraced = viewport.getRenderMode() == Viewport.RENDER_MODE_RAYTRACING;
+        boolean hiddenSurfaces =
+            viewport.getRenderMode() == Viewport.RENDER_MODE_HIDDEN_SURFACES;
 
         theScene.activeCamera = viewport.getActiveCamera();
         theScene.qualityTemplate = viewport.getRendererConfiguration();
@@ -208,9 +219,14 @@ public class AwtDrawingAreaRenderer
             g.fillRect(x, y, width, height);
         }
 
+        if ( hiddenSurfaces ) {
+            drawHiddenSurfaces(g, viewport, x, y, width, height);
+        }
+
         try {
             layers = linesBuilder.buildView(theScene, viewport,
-                host.getBodyEditFeedbackProvider(), !raytraced);
+                host.getBodyEditFeedbackProvider(),
+                !raytraced && !hiddenSurfaces);
         }
         catch ( RuntimeException e ) {
             // A failure of the line algorithms over some body must not break
@@ -229,6 +245,27 @@ public class AwtDrawingAreaRenderer
         frameCapture.copyColorBufferIfNeeded(
             new AwtFrameBufferSource(frame, x, y, width, height),
             viewportSet.isSelected(viewport));
+    }
+
+    private void drawHiddenSurfaces(Graphics2D g, Viewport viewport, int x,
+                                    int y, int width, int height)
+    {
+        List<ProjectedPolygon> polygons;
+
+        try {
+            polygons = surfacesBuilder.buildView(theScene, viewport, width,
+                height, drawingArea.getContentGeneration(),
+                viewport.getRendererConfiguration().isWithShadowsSet());
+        }
+        catch ( RuntimeException e ) {
+            // As with the lines, a failure over some body must not break the
+            // presentation of the whole set
+            Logger.reportMessage(this, VSDK.WARNING, "drawHiddenSurfaces",
+                "Can not compute the visible surfaces of viewport \"" +
+                viewportSet.getTitleFor(viewport) + "\": " + e);
+            return;
+        }
+        AwtProjectedPolygonRenderer.draw(g, polygons, x, y, width, height);
     }
 
     private void drawGizmos(Graphics2D g, Viewport viewport, int x, int y,

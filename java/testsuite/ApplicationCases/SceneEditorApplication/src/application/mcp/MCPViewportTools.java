@@ -90,6 +90,8 @@ class MCPViewportTools
             if ( value != null ) q.setTexture(value);
             value = MCPJson.booleanProperty(request, "bumpMap");
             if ( value != null ) q.setBumpMap(value);
+            value = MCPJson.booleanProperty(request, "withShadows");
+            if ( value != null ) q.setWithShadows(value);
             value = MCPJson.booleanProperty(request, "boundingVolume");
             if ( value != null ) q.setBoundingVolume(value);
             value = MCPJson.booleanProperty(request, "normals");
@@ -135,14 +137,15 @@ class MCPViewportTools
         String algorithm = MCPJson.stringProperty(request, "algorithm", "");
         if ( algorithm.isEmpty() ) {
             throw new IllegalArgumentException(
-                "algorithm must be gpu, hidden_lines or raytracing");
+                "algorithm must be gpu, hidden_lines, hidden_surfaces or raytracing");
         }
         int mode = switch ( algorithm.toLowerCase() ) {
             case "gpu" -> Viewport.RENDER_MODE_Z_BUFFER;
             case "hidden_lines", "hidden-line" -> Viewport.RENDER_MODE_HIDDEN_LINES;
+            case "hidden_surfaces", "hidden-surface" -> Viewport.RENDER_MODE_HIDDEN_SURFACES;
             case "raytracing", "raytrace", "cpu" -> Viewport.RENDER_MODE_RAYTRACING;
             default -> throw new IllegalArgumentException(
-                "algorithm must be gpu, hidden_lines or raytracing");
+                "algorithm must be gpu, hidden_lines, hidden_surfaces or raytracing");
         };
         if ( !set.isRenderModeAvailable(mode) ) {
             throw new IllegalArgumentException("algorithm " + algorithm +
@@ -177,6 +180,7 @@ class MCPViewportTools
                 .append(",\"surfaces\":").append(q.isSurfacesSet())
                 .append(",\"texture\":").append(q.isTextureSet())
                 .append(",\"bumpMap\":").append(q.isBumpMapSet())
+                .append(",\"withShadows\":").append(q.isWithShadowsSet())
                 .append(",\"boundingVolume\":").append(q.isBoundingVolumeSet())
                 .append(",\"normals\":").append(q.isNormalsSet())
                 .append(",\"trianglesNormals\":").append(q.isTrianglesNormalsSet())
@@ -198,8 +202,9 @@ class MCPViewportTools
             case "gpu" -> Viewport.RENDER_MODE_Z_BUFFER;
             case "cpu" -> Viewport.RENDER_MODE_RAYTRACING;
             case "hidden_lines" -> Viewport.RENDER_MODE_HIDDEN_LINES;
+            case "hidden_surfaces" -> Viewport.RENDER_MODE_HIDDEN_SURFACES;
             default -> throw new IllegalArgumentException(
-                "renderMode must be gpu, cpu or hidden_lines");
+                "renderMode must be gpu, cpu, hidden_lines or hidden_surfaces");
         };
     }
 
@@ -208,6 +213,7 @@ class MCPViewportTools
         return switch ( mode ) {
             case Viewport.RENDER_MODE_RAYTRACING -> "cpu";
             case Viewport.RENDER_MODE_HIDDEN_LINES -> "hidden_lines";
+            case Viewport.RENDER_MODE_HIDDEN_SURFACES -> "hidden_surfaces";
             default -> "gpu";
         };
     }
