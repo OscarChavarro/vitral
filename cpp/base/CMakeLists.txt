@@ -211,6 +211,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayHit.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex2D.cpp
@@ -504,6 +505,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     src/main/vsdk/toolkit/environment/scene/SceneSolid.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBody.cpp
     src/main/vsdk/toolkit/environment/geometry/element/GeometryBounds.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp
     src/main/java/lang/Double.cpp
     PROPERTIES COMPILE_OPTIONS "-fno-fast-math;-ffp-contract=off")
 endif()
@@ -624,6 +626,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/subdivided_bezier_patch_tests.cpp
     src/test/microfaceted_material_csv_tests.cpp
     src/test/phong_material_tests.cpp
+    src/test/planar_face_tests.cpp
     src/test/ray_affine_contract_tests.cpp
     src/test/ray_crossing_tests.cpp
     src/test/bounding_volume_hierarchy_tests.cpp
