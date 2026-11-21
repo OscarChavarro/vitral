@@ -8,6 +8,7 @@ import { RaySolidQueryStatus } from "../../geometry/element/RaySolidQueryStatus.
 import { AffinePlacementStatus } from "../AffinePlacementStatus.js";
 import type { CsgExpression } from "./CsgExpression.js";
 import { CsgMembershipRule } from "./CsgMembershipRule.js";
+import { CsgMembershipTest } from "./CsgMembershipTest.js";
 import type { CsgOperandView } from "./CsgOperandView.js";
 import { CsgPointClassification } from "./CsgPointClassification.js";
 import { CsgPointWorkspace } from "./CsgPointWorkspace.js";
@@ -21,13 +22,81 @@ import type { CsgRaySurfaceEvents } from "./CsgRaySurfaceEvents.js";
 // operand event, so internal surfaces remain. An intersection keeps an event
 // of operand i when every other operand contains the point. A difference keeps
 // a minuend event when no subtrahend contains it, and a subtrahend event when
-// the minuend contains it and no other subtrahend does. Membership is the
-// certified classification of the tolerance ball, measured in the coordinates
-// of the node whose operands are tested; Boundary counts as contained for an
-// intersection operand and for the complement of a subtrahend, as in POV.
-// An event is kept only when membership is proven and dropped when one sibling
-// proves exclusion; otherwise the query fails with that sibling's status.
+// the minuend contains it and no other subtrahend does. Membership is
+// measured in the coordinates of the node whose operands are tested, with the
+// test chosen by setMembershipTest (see CsgMembershipTest): by default the
+// sign of each primitive at the point, as POV-Ray 1.0 does, and otherwise the
+// certified classification of the tolerance ball (also the fallback when the
+// sign cannot be taken). Boundary counts as contained for an intersection
+// operand and for the complement of a subtrahend, as in POV. An event is kept
+// only when membership is decided and dropped when one sibling excludes it;
+// otherwise the query fails with that sibling's status.
 export class CsgCrossingMembershipFilter {
+    private static membershipTest: CsgMembershipTest = CsgMembershipTest.SIGN;
+    // Deepest nesting of expressions that the sign test follows
+    private static readonly MAX_SIGN_DEPTH = 64;
+
+    // SIGN by default
+    public static setMembershipTest(test: CsgMembershipTest): void {
+        CsgCrossingMembershipFilter.membershipTest = test;
+    }
+
+    public static getMembershipTest(): CsgMembershipTest {
+        return CsgCrossingMembershipFilter.membershipTest;
+    }
+
+    // POV-Ray 1.0 inside test of an operand: Inside, Outside or Boundary, or
+    // Indeterminate when it cannot decide (the certified test is used then).
+    private static signContainment(operand: CsgOperandView, point: Vector3Dd, depth: number): GeometryContainment {
+        if (depth > CsgCrossingMembershipFilter.MAX_SIGN_DEPTH) return GeometryContainment.Indeterminate;
+        const forward: Matrix4x4d[] = [new Matrix4x4d()];
+        const inverse: Matrix4x4d[] = [new Matrix4x4d()];
+        if (operand.queryAffinePlacement(forward, inverse) !== AffinePlacementStatus.Valid)
+            return GeometryContainment.Indeterminate;
+        const local = inverse[0]!.multiply(point);
+        const child = operand.getChildExpression();
+        if (child === null) {
+            const geometry = operand.getGeometry();
+            return geometry !== null ? geometry.classifyPoint(local, 0) : GeometryContainment.Indeterminate;
+        }
+        const operation = child.getOperation();
+        let inside = false;
+        for (let j = 0; j < child.getOperandCount(); ++j) {
+            if (j > 0 && CsgMembershipRule.isDecided(operation, inside)) break;
+            const next = child.getOperand(j);
+            if (next === null) return GeometryContainment.Indeterminate;
+            const c = CsgCrossingMembershipFilter.signContainment(next, local, depth + 1);
+            if (
+                c !== GeometryContainment.Inside &&
+                c !== GeometryContainment.Outside &&
+                c !== GeometryContainment.Boundary
+            )
+                return GeometryContainment.Indeterminate;
+            const operandInside = c !== GeometryContainment.Outside;
+            inside = j === 0 ? operandInside : CsgMembershipRule.combine(operation, inside, operandInside);
+        }
+        return inside ? GeometryContainment.Inside : GeometryContainment.Outside;
+    }
+
+    // The membership of a sibling operand under the configured test.
+    private static classifySibling(
+        sibling: CsgOperandView,
+        point: Vector3Dd,
+        tolerance: number,
+        workspace: CsgPointWorkspace,
+    ): GeometryContainment {
+        if (CsgCrossingMembershipFilter.membershipTest === CsgMembershipTest.SIGN) {
+            const c = CsgCrossingMembershipFilter.signContainment(sibling, point, 0);
+            if (
+                c === GeometryContainment.Inside ||
+                c === GeometryContainment.Outside ||
+                c === GeometryContainment.Boundary
+            )
+                return c;
+        }
+        return CsgPointClassification.classifyOperandContainment(sibling, point, tolerance, workspace);
+    }
+
     private static toStatus(containment: GeometryContainment): RaySolidQueryStatus {
         if (containment === GeometryContainment.InvalidInput) return RaySolidQueryStatus.InvalidInput;
         if (containment === GeometryContainment.Unsupported) return RaySolidQueryStatus.Unsupported;
@@ -110,7 +179,7 @@ export class CsgCrossingMembershipFilter {
             const sibling = expression.getOperand(j);
             const c =
                 sibling !== null
-                    ? CsgPointClassification.classifyOperandContainment(sibling, point, tolerance, workspace)
+                    ? CsgCrossingMembershipFilter.classifySibling(sibling, point, tolerance, workspace)
                     : GeometryContainment.InvalidInput;
             if (c === GeometryContainment.InvalidInput) return RaySolidQueryStatus.InvalidInput;
             if (c === GeometryContainment.Boundary) continue;

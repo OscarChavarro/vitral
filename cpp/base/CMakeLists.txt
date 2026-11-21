@@ -217,6 +217,8 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/spatialIndex/SpatialIndexWorkspace.cpp
     src/main/vsdk/toolkit/environment/geometry/spatialIndex/LinearSpatialIndex.cpp
     src/main/vsdk/toolkit/environment/geometry/spatialIndex/BinnedSahSpatialIndex.cpp
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/SpatialGroupTree.cpp
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/GridSpatialIndex.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex2D.cpp

@@ -288,6 +288,10 @@ class CsgEvaluatorTest
     @Test
     void CsgCrossingMembershipFilterContract_BoundaryMembershipKeepsCoincidentFacesAndUncertaintyFails()
     {
+    // An uncertified sibling only matters to the certified membership test.
+    final CsgMembershipTest previous=CsgCrossingMembershipFilter.getMembershipTest();
+    CsgCrossingMembershipFilter.setMembershipTest(CsgMembershipTest.CERTIFIED_BALL);
+    try {
     SimpleBody first = new SimpleBody();
     SimpleBody same = new SimpleBody();
     first.setGeometry(new Box(2,2,2)); same.setGeometry(new Box(2,2,2));
@@ -325,6 +329,9 @@ class CsgEvaluatorTest
     expectEq(0, events.size());
     expectEq(RaySolidQueryStatus.InvalidInput, CsgCrossingMembershipFilter.select(
         probe,alongX,new RayCrossingQuery(0,20),-1,events));
+    } finally {
+        CsgCrossingMembershipFilter.setMembershipTest(previous);
+    }
 }
 
     @Test

@@ -17,6 +17,7 @@ import { CsgBody } from "vsdk/toolkit/environment/scene/csg/CsgBody.js";
 import { CsgBodyEvaluator } from "vsdk/toolkit/environment/scene/csg/CsgBodyEvaluator.js";
 import { CsgBodyOperand } from "vsdk/toolkit/environment/scene/csg/CsgBodyOperand.js";
 import { CsgCrossingMembershipFilter } from "vsdk/toolkit/environment/scene/csg/CsgCrossingMembershipFilter.js";
+import { CsgMembershipTest } from "vsdk/toolkit/environment/scene/csg/CsgMembershipTest.js";
 import { CsgMembershipRule } from "vsdk/toolkit/environment/scene/csg/CsgMembershipRule.js";
 import { CsgOperation } from "vsdk/toolkit/environment/scene/csg/CsgOperation.js";
 import { CsgPlacedExpression } from "vsdk/toolkit/environment/scene/csg/CsgPlacedExpression.js";
@@ -384,61 +385,68 @@ test("CsgCrossingMembershipFilterContract_PovHeuristicKeepsUnionInternalSurfaces
 });
 
 test("CsgCrossingMembershipFilterContract_BoundaryMembershipKeepsCoincidentFacesAndUncertaintyFails", () => {
-    const first = new SimpleBody();
-    const same = new SimpleBody();
-    first.setGeometry(new Box(2, 2, 2));
-    same.setGeometry(new Box(2, 2, 2));
-    const a = new CsgBodyOperand(first);
-    const c = new CsgBodyOperand(same);
-    const identical = new CsgTree(CsgOperation.INTERSECTION);
-    expectTrue(identical.addOperand(a));
-    expectTrue(identical.addOperand(c));
-    const events = new CsgRaySurfaceEvents();
-    // Both coincident faces satisfy the boundary-inclusive membership; Roth
-    // reports a single boundary for each pair.
-    expectEq(
-        RaySolidQueryStatus.Supported,
-        CsgCrossingMembershipFilter.select(identical, alongX, new RayCrossingQuery(0, 20), 1e-9, events),
-    );
-    expectEq(4, events.size());
-    expectDoubleEq(2, events.getT(0));
-    expectDoubleEq(2, events.getT(1));
-    expectEq(0, events.get(0)!.leafIndex);
-    expectEq(1, events.get(1)!.leafIndex);
+    // An uncertified sibling only matters to the certified membership test.
+    const previous = CsgCrossingMembershipFilter.getMembershipTest();
+    CsgCrossingMembershipFilter.setMembershipTest(CsgMembershipTest.CERTIFIED_BALL);
+    try {
+        const first = new SimpleBody();
+        const same = new SimpleBody();
+        first.setGeometry(new Box(2, 2, 2));
+        same.setGeometry(new Box(2, 2, 2));
+        const a = new CsgBodyOperand(first);
+        const c = new CsgBodyOperand(same);
+        const identical = new CsgTree(CsgOperation.INTERSECTION);
+        expectTrue(identical.addOperand(a));
+        expectTrue(identical.addOperand(c));
+        const events = new CsgRaySurfaceEvents();
+        // Both coincident faces satisfy the boundary-inclusive membership; Roth
+        // reports a single boundary for each pair.
+        expectEq(
+            RaySolidQueryStatus.Supported,
+            CsgCrossingMembershipFilter.select(identical, alongX, new RayCrossingQuery(0, 20), 1e-9, events),
+        );
+        expectEq(4, events.size());
+        expectDoubleEq(2, events.getT(0));
+        expectDoubleEq(2, events.getT(1));
+        expectEq(0, events.get(0)!.leafIndex);
+        expectEq(1, events.get(1)!.leafIndex);
 
-    const opaque = new UncertifiedTestBody();
-    opaque.setGeometry(new Sphere(1));
-    opaque.setPosition(new Vector3Dd(0.5, 0, 0));
-    const u = new CsgBodyOperand(opaque);
-    const uncertain = new CsgTree(CsgOperation.INTERSECTION);
-    expectTrue(uncertain.addOperand(a));
-    expectTrue(uncertain.addOperand(u));
-    expectEq(
-        RaySolidQueryStatus.Unsupported,
-        CsgCrossingMembershipFilter.select(uncertain, alongX, new RayCrossingQuery(0, 20), 1e-9, events),
-    );
-    expectEq(0, events.size());
+        const opaque = new UncertifiedTestBody();
+        opaque.setGeometry(new Sphere(1));
+        opaque.setPosition(new Vector3Dd(0.5, 0, 0));
+        const u = new CsgBodyOperand(opaque);
+        const uncertain = new CsgTree(CsgOperation.INTERSECTION);
+        expectTrue(uncertain.addOperand(a));
+        expectTrue(uncertain.addOperand(u));
+        expectEq(
+            RaySolidQueryStatus.Unsupported,
+            CsgCrossingMembershipFilter.select(uncertain, alongX, new RayCrossingQuery(0, 20), 1e-9, events),
+        );
+        expectEq(0, events.size());
 
-    // A proven exclusion by another sibling makes the uncertain one irrelevant.
-    const far = new SimpleBody();
-    far.setGeometry(new Sphere(0.5));
-    far.setPosition(new Vector3Dd(0, 5, 0));
-    const f = new CsgBodyOperand(far);
-    const excluded = new CsgTree(CsgOperation.INTERSECTION);
-    expectTrue(excluded.addOperand(a));
-    expectTrue(excluded.addOperand(u));
-    expectTrue(excluded.addOperand(f));
-    const probe = new CsgTree(CsgOperation.UNION);
-    expectTrue(probe.addOperand(a));
-    expectEq(
-        RaySolidQueryStatus.Supported,
-        CsgCrossingMembershipFilter.select(excluded, alongX, new RayCrossingQuery(0, 20), 1e-9, events),
-    );
-    expectEq(0, events.size());
-    expectEq(
-        RaySolidQueryStatus.InvalidInput,
-        CsgCrossingMembershipFilter.select(probe, alongX, new RayCrossingQuery(0, 20), -1, events),
-    );
+        // A proven exclusion by another sibling makes the uncertain one irrelevant.
+        const far = new SimpleBody();
+        far.setGeometry(new Sphere(0.5));
+        far.setPosition(new Vector3Dd(0, 5, 0));
+        const f = new CsgBodyOperand(far);
+        const excluded = new CsgTree(CsgOperation.INTERSECTION);
+        expectTrue(excluded.addOperand(a));
+        expectTrue(excluded.addOperand(u));
+        expectTrue(excluded.addOperand(f));
+        const probe = new CsgTree(CsgOperation.UNION);
+        expectTrue(probe.addOperand(a));
+        expectEq(
+            RaySolidQueryStatus.Supported,
+            CsgCrossingMembershipFilter.select(excluded, alongX, new RayCrossingQuery(0, 20), 1e-9, events),
+        );
+        expectEq(0, events.size());
+        expectEq(
+            RaySolidQueryStatus.InvalidInput,
+            CsgCrossingMembershipFilter.select(probe, alongX, new RayCrossingQuery(0, 20), -1, events),
+        );
+    } finally {
+        CsgCrossingMembershipFilter.setMembershipTest(previous);
+    }
 });
 
 test("CsgVersionStampContract_ResultsDetectEditsOfBorrowedOperands", () => {

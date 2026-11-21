@@ -3,6 +3,7 @@ package vsdk.toolkit.environment.scene.csg;
 import java.util.ArrayList;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.element.GeometryContainment;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.RayCrossingQuery;
@@ -15,14 +16,69 @@ membership of the event point in sibling operands. A union keeps every
 operand event, so internal surfaces remain. An intersection keeps an event
 of operand i when every other operand contains the point. A difference keeps
 a minuend event when no subtrahend contains it, and a subtrahend event when
-the minuend contains it and no other subtrahend does. Membership is the
-certified classification of the tolerance ball, measured in the coordinates
-of the node whose operands are tested; Boundary counts as contained for an
-intersection operand and for the complement of a subtrahend, as in POV.
-An event is kept only when membership is proven and dropped when one sibling
-proves exclusion; otherwise the query fails with that sibling's status.
+the minuend contains it and no other subtrahend does. Membership is
+measured in the coordinates of the node whose operands are tested, with the
+test chosen by setMembershipTest (see CsgMembershipTest): by default the
+sign of each primitive at the point, as POV-Ray 1.0 does, and otherwise the
+certified classification of the tolerance ball (also the fallback when the
+sign cannot be taken). Boundary counts as contained for an intersection
+operand and for the complement of a subtrahend, as in POV. An event is kept
+only when membership is decided and dropped when one sibling excludes it;
+otherwise the query fails with that sibling's status.
 */
 public class CsgCrossingMembershipFilter {
+    private static CsgMembershipTest membershipTest=CsgMembershipTest.SIGN;
+    // Deepest nesting of expressions that the sign test follows
+    private static final int MAX_SIGN_DEPTH=64;
+
+    // SIGN by default
+    public static void setMembershipTest(CsgMembershipTest test) {
+        membershipTest=test;
+    }
+
+    public static CsgMembershipTest getMembershipTest() {
+        return membershipTest;
+    }
+
+    // POV-Ray 1.0 inside test of an operand: Inside, Outside or Boundary, or
+    // Indeterminate when it cannot decide (the certified test is used then).
+    private static GeometryContainment signContainment(CsgOperandView operand, Vector3Dd point, int depth) {
+        if (depth>MAX_SIGN_DEPTH) return GeometryContainment.Indeterminate;
+        Matrix4x4d[] forward={new Matrix4x4d()},inverse={new Matrix4x4d()};
+        if (operand.queryAffinePlacement(forward,inverse)!=AffinePlacementStatus.Valid)
+            return GeometryContainment.Indeterminate;
+        final Vector3Dd local=inverse[0].multiply(point);
+        final CsgExpression child=operand.getChildExpression();
+        if (child == null) {
+            final Geometry geometry=operand.getGeometry();
+            return geometry != null ? geometry.classifyPoint(local,0) : GeometryContainment.Indeterminate;
+        }
+        final CsgOperation operation=child.getOperation();
+        boolean inside=false;
+        for (long j=0;j<child.getOperandCount();++j) {
+            if (j>0 && CsgMembershipRule.isDecided(operation,inside)) break;
+            final CsgOperandView next=child.getOperand(j);
+            if (next == null) return GeometryContainment.Indeterminate;
+            final GeometryContainment c=signContainment(next,local,depth+1);
+            if (c!=GeometryContainment.Inside && c!=GeometryContainment.Outside &&
+                c!=GeometryContainment.Boundary) return GeometryContainment.Indeterminate;
+            final boolean operandInside=c!=GeometryContainment.Outside;
+            inside=j==0 ? operandInside : CsgMembershipRule.combine(operation,inside,operandInside);
+        }
+        return inside ? GeometryContainment.Inside : GeometryContainment.Outside;
+    }
+
+    // The membership of a sibling operand under the configured test.
+    private static GeometryContainment classifySibling(CsgOperandView sibling, Vector3Dd point,
+        double tolerance, CsgPointWorkspace workspace) {
+        if (membershipTest==CsgMembershipTest.SIGN) {
+            final GeometryContainment c=signContainment(sibling,point,0);
+            if (c==GeometryContainment.Inside || c==GeometryContainment.Outside ||
+                c==GeometryContainment.Boundary) return c;
+        }
+        return CsgPointClassification.classifyOperandContainment(sibling,point,tolerance,workspace);
+    }
+
     private static RaySolidQueryStatus toStatus(GeometryContainment containment) {
         if (containment==GeometryContainment.InvalidInput) return RaySolidQueryStatus.InvalidInput;
         if (containment==GeometryContainment.Unsupported) return RaySolidQueryStatus.Unsupported;
@@ -74,7 +130,7 @@ public class CsgCrossingMembershipFilter {
             final boolean mustContain=CsgMembershipRule.requiresContainment(operation,operandIndex,j);
             final CsgOperandView sibling=expression.getOperand(j);
             final GeometryContainment c=sibling != null ?
-                CsgPointClassification.classifyOperandContainment(sibling,point,tolerance,workspace) :
+                classifySibling(sibling,point,tolerance,workspace) :
                 GeometryContainment.InvalidInput;
             if (c==GeometryContainment.InvalidInput) return RaySolidQueryStatus.InvalidInput;
             if (c==GeometryContainment.Boundary) continue;

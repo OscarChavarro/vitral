@@ -3,10 +3,12 @@
 #include <thread>
 #include <vector>
 
+#include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/element/PlanarFace.h"
 #include "vsdk/toolkit/environment/geometry/spatialIndex/BinnedSahSpatialIndex.h"
+#include "vsdk/toolkit/environment/geometry/spatialIndex/GridSpatialIndex.h"
 #include "vsdk/toolkit/environment/geometry/spatialIndex/LinearSpatialIndex.h"
 
 namespace {
@@ -161,6 +163,94 @@ randomRay(Sequence &s, Vector3Df *origin, Vector3Df *direction)
     // Not normalized: the index works with the affine parameter of the test
     *direction = Vector3Df(static_cast<float>(-1.0 + 2.0 * s.next()), static_cast<float>(-1.0 + 2.0 * s.next()), static_cast<float>(-1.0 + 2.0 * s.next()));
 }
+
+// Union of the boxes of primitives first .. last
+void
+unionBox(const Scene &scene, const int first, const int last, double *box)
+{
+    for ( int k = 0; k < 3; k++ ) {
+        box[k] = 1e30;
+        box[3 + k] = -1e30;
+    }
+    for ( int i = first; i <= last; i++ ) {
+        for ( int k = 0; k < 3; k++ ) {
+            const double lo = scene.getBoxes()[6 * i + k];
+            const double hi = scene.getBoxes()[6 * i + 3 + k];
+            box[k] = lo < box[k] ? lo : box[k];
+            box[3 + k] = hi > box[3 + k] ? hi : box[3 + k];
+        }
+    }
+}
+
+// A scene of small clusters of triangles (as the objects of an RPK scene),
+// the cluster sizes cycling through 1 .. 8 and 15, plus a few large
+// triangles; and the group tree a grid is built from: the root holds one
+// group per cluster, then the large triangles as primitives of their own
+class ClusteredScene {
+  private:
+    Scene scene;
+    SpatialGroupTree *tree;
+
+  public:
+    explicit ClusteredScene(const unsigned int seed) : scene(), tree(nullptr)
+    {
+        Sequence s(seed);
+        java::ArrayList<int> clusterFirst;
+        for ( int c = 0; c < 60; c++ ) {
+            const int count = c % 9 == 8 ? 15 : 1 + c % 8;
+            clusterFirst.add(scene.size());
+            const double cx = 10.0 * s.next();
+            const double cy = 10.0 * s.next();
+            const double cz = 10.0 * s.next();
+            for ( int i = 0; i < count; i++ ) {
+                const float x = static_cast<float>(cx + 0.4 * s.next());
+                const float y = static_cast<float>(cy + 0.4 * s.next());
+                const float z = static_cast<float>(cz + 0.4 * s.next());
+                scene.add(Vector3Df(x, y, z),
+                    Vector3Df(x + static_cast<float>(0.2 * s.next()), y + static_cast<float>(0.05 * s.next()), z + static_cast<float>(0.1 * s.next())),
+                    Vector3Df(x + static_cast<float>(0.05 * s.next()), y + static_cast<float>(0.2 * s.next()), z + static_cast<float>(0.1 * s.next())));
+            }
+        }
+        clusterFirst.add(scene.size());
+        const int firstLarge = scene.size();
+        for ( int i = 0; i < 6; i++ ) {
+            const float z = static_cast<float>(10.0 * s.next());
+            scene.add(Vector3Df(-1.0F, -1.0F, z), Vector3Df(11.0F, -1.0F, z + 0.5F), Vector3Df(5.0F, 11.0F, z - 0.5F));
+        }
+
+        double box[6];
+        unionBox(scene, 0, scene.size() - 1, box);
+        tree = new SpatialGroupTree(scene.getBoxes(), box);
+        for ( long int c = 0; c + 1 < clusterFirst.size(); c++ ) {
+            unionBox(scene, clusterFirst[c], clusterFirst[c + 1] - 1, box);
+            const int group = tree->addGroup(0, box);
+            for ( int i = clusterFirst[c]; i < clusterFirst[c + 1]; i++ ) {
+                tree->addPrimitive(group, i);
+            }
+        }
+        for ( int i = firstLarge; i < scene.size(); i++ ) {
+            tree->addPrimitive(0, i);
+        }
+    }
+
+    ~ClusteredScene()
+    {
+        delete tree;
+    }
+
+    ClusteredScene(const ClusteredScene &) = delete;
+    ClusteredScene &operator=(const ClusteredScene &) = delete;
+
+    const Scene &getScene() const
+    {
+        return scene;
+    }
+
+    const SpatialGroupTree &getTree() const
+    {
+        return *tree;
+    }
+};
 
 }
 
@@ -381,6 +471,166 @@ TEST(SpatialIndex, ConcurrentQueriesEqualSequentialOnes)
             SpatialIndexWorkspace workspace(binned.getWorkspaceSize());
             for ( int i = w; i < numberOfRays; i += numberOfWorkers ) {
                 concurrent[i] = ask(binned, scene, origins[i], directions[i], 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, workspace);
+            }
+        }));
+    }
+    for ( int w = 0; w < numberOfWorkers; w++ ) {
+        workers[w].join();
+    }
+    for ( int i = 0; i < numberOfRays; i++ ) {
+        ASSERT_EQ(sequential[i].hit, concurrent[i].hit) << "ray " << i;
+        ASSERT_EQ(sequential[i].primitive, concurrent[i].primitive) << "ray " << i;
+        ASSERT_EQ(sequential[i].t, concurrent[i].t) << "ray " << i;
+    }
+}
+
+TEST(GridSpatialIndex, BuildsTheGridsAsRenderPark)
+{
+    const ClusteredScene clustered(31U);
+    const GridSpatialIndex grid(clustered.getTree());
+    const int count = clustered.getScene().size();
+    // floor(count^(1/3) + 1) cells along each axis at the top level
+    EXPECT_EQ(static_cast<int>(java::Math::floor(java::Math::pow(static_cast<double>(count), 0.33333) + 1.0)), grid.getResolution(0));
+    // The clusters of 15 triangles fit in a top level cell: sub grids
+    EXPECT_GT(grid.getNumberOfGrids(), 1);
+    for ( int g = 1; g < grid.getNumberOfGrids(); g++ ) {
+        EXPECT_EQ(static_cast<int>(java::Math::floor(java::Math::pow(15.0, 0.33333) + 1.0)), grid.getResolution(g));
+    }
+    // One mailbox entry per item, fewer items than primitives (group items)
+    EXPECT_EQ(grid.getNumberOfItems(), grid.getWorkspaceSize());
+    EXPECT_EQ(count, grid.getNumberOfPrimitives());
+}
+
+TEST(GridSpatialIndex, ClosestHitAgreesWithTheLinearReference)
+{
+    const ClusteredScene clustered(37U);
+    const Scene &scene = clustered.getScene();
+    const LinearSpatialIndex linear(scene.size());
+    const GridSpatialIndex grid(clustered.getTree());
+    SpatialIndexWorkspace linearWorkspace(linear.getWorkspaceSize());
+    SpatialIndexWorkspace gridWorkspace(grid.getWorkspaceSize());
+    Sequence s(41U);
+    int hits = 0;
+    for ( int i = 0; i < 3000; i++ ) {
+        Vector3Df origin;
+        Vector3Df direction;
+        randomRay(s, &origin, &direction);
+        const Answer a = ask(linear, scene, origin, direction, 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, linearWorkspace);
+        const Answer b = ask(grid, scene, origin, direction, 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, gridWorkspace);
+        ASSERT_EQ(a.hit, b.hit) << "ray " << i;
+        if ( a.hit ) {
+            hits++;
+            EXPECT_EQ(a.primitive, b.primitive) << "ray " << i;
+            EXPECT_EQ(a.t, b.t) << "ray " << i;
+        }
+    }
+    EXPECT_GT(hits, 300);
+    EXPECT_LT(gridWorkspace.getPrimitiveTests(), linearWorkspace.getPrimitiveTests() / 4);
+    EXPECT_GT(gridWorkspace.getNodeVisits(), 0);
+}
+
+TEST(GridSpatialIndex, AnyHitAgreesOnVisibility)
+{
+    const ClusteredScene clustered(43U);
+    const Scene &scene = clustered.getScene();
+    const LinearSpatialIndex linear(scene.size());
+    const GridSpatialIndex grid(clustered.getTree());
+    SpatialIndexWorkspace linearWorkspace;
+    SpatialIndexWorkspace gridWorkspace(grid.getWorkspaceSize());
+    Sequence s(47U);
+    int blocked = 0;
+    for ( int i = 0; i < 3000; i++ ) {
+        Vector3Df origin;
+        Vector3Df direction;
+        randomRay(s, &origin, &direction);
+        const Answer a = ask(linear, scene, origin, direction, 1e-3, 1.0, SpatialQueryMode::ANY_HIT, linearWorkspace);
+        const Answer b = ask(grid, scene, origin, direction, 1e-3, 1.0, SpatialQueryMode::ANY_HIT, gridWorkspace);
+        ASSERT_EQ(a.hit, b.hit) << "ray " << i;
+        if ( b.hit ) {
+            blocked++;
+            EXPECT_GE(b.t, 1e-3);
+            EXPECT_LE(b.t, 1.0);
+        }
+    }
+    EXPECT_GT(blocked, 100);
+}
+
+TEST(GridSpatialIndex, IntervalEndsAndExclusionsAreTheTestsOnes)
+{
+    // Two parallel triangles crossing the whole scene, in one group that does
+    // not fit in a cell, so that they are items of their own
+    Scene scene;
+    scene.add(Vector3Df(-1, -1, 1), Vector3Df(1, -1, 1), Vector3Df(0, 1, 1)); // t = 1
+    scene.add(Vector3Df(-1, -1, 3), Vector3Df(1, -1, 3), Vector3Df(0, 1, 3)); // t = 3
+    double box[6];
+    unionBox(scene, 0, 1, box);
+    SpatialGroupTree tree(scene.getBoxes(), box);
+    tree.addPrimitive(0, 0);
+    tree.addPrimitive(0, 1);
+    const GridSpatialIndex grid(tree);
+    SpatialIndexWorkspace workspace(grid.getWorkspaceSize());
+    const Vector3Df origin(0, 0, 0);
+    const Vector3Df up(0, 0, 1);
+    Answer a = ask(grid, scene, origin, up, 1.5, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    ASSERT_TRUE(a.hit);
+    EXPECT_EQ(1, a.primitive);
+    a = ask(grid, scene, origin, up, 1.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    EXPECT_EQ(0, a.primitive);
+    a = ask(grid, scene, origin, up, 1.5, 3.0, SpatialQueryMode::ANY_HIT, workspace);
+    EXPECT_EQ(1, a.primitive);
+    a = ask(grid, scene, origin, up, 1.5, 2.999, SpatialQueryMode::ANY_HIT, workspace);
+    EXPECT_FALSE(a.hit);
+    // An excluded face does not hide the one behind
+    a = ask(grid, scene, origin, up, 0.0, 10.0, SpatialQueryMode::ANY_HIT, workspace, 0);
+    EXPECT_EQ(1, a.primitive);
+    // A ray starting inside the scene box, along an axis
+    a = ask(grid, scene, Vector3Df(0.1F, 0.0F, 2.0F), Vector3Df(0, 0, -1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    ASSERT_TRUE(a.hit);
+    EXPECT_EQ(0, a.primitive);
+}
+
+TEST(GridSpatialIndex, EmptyTree)
+{
+    const Scene scene;
+    const double box[6] = {0, 0, 0, 1, 1, 1};
+    const SpatialGroupTree tree(scene.getBoxes(), box);
+    const GridSpatialIndex grid(tree);
+    SpatialIndexWorkspace workspace(grid.getWorkspaceSize());
+    EXPECT_FALSE(ask(grid, scene, Vector3Df(0, 0, -1), Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace).hit);
+    EXPECT_EQ(0, workspace.getPrimitiveTests());
+}
+
+TEST(GridSpatialIndex, ConcurrentQueriesEqualSequentialOnes)
+{
+    const ClusteredScene clustered(53U);
+    const Scene &scene = clustered.getScene();
+    const GridSpatialIndex grid(clustered.getTree());
+    const int numberOfRays = 4000;
+    std::vector<Vector3Df> origins;
+    std::vector<Vector3Df> directions;
+    Sequence s(59U);
+    for ( int i = 0; i < numberOfRays; i++ ) {
+        Vector3Df origin;
+        Vector3Df direction;
+        randomRay(s, &origin, &direction);
+        origins.push_back(origin);
+        directions.push_back(direction);
+    }
+    std::vector<Answer> sequential(numberOfRays);
+    SpatialIndexWorkspace sequentialWorkspace(grid.getWorkspaceSize());
+    for ( int i = 0; i < numberOfRays; i++ ) {
+        const SpatialQueryMode mode = i % 2 == 0 ? SpatialQueryMode::CLOSEST_HIT : SpatialQueryMode::ANY_HIT;
+        sequential[i] = ask(grid, scene, origins[i], directions[i], 0.0, i % 2 == 0 ? 1e30 : 1.0, mode, sequentialWorkspace);
+    }
+    const int numberOfWorkers = 4;
+    std::vector<Answer> concurrent(numberOfRays);
+    std::vector<std::thread> workers;
+    for ( int w = 0; w < numberOfWorkers; w++ ) {
+        workers.push_back(std::thread([&, w]() {
+            SpatialIndexWorkspace workspace(grid.getWorkspaceSize());
+            for ( int i = w; i < numberOfRays; i += numberOfWorkers ) {
+                const SpatialQueryMode mode = i % 2 == 0 ? SpatialQueryMode::CLOSEST_HIT : SpatialQueryMode::ANY_HIT;
+                concurrent[i] = ask(grid, scene, origins[i], directions[i], 0.0, i % 2 == 0 ? 1e30 : 1.0, mode, workspace);
             }
         }));
     }

@@ -12,6 +12,59 @@
 #include "vsdk/toolkit/environment/scene/csg/CsgRayLeafQuery.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgRaySurfaceEvents.h"
 #include "vsdk/toolkit/environment/scene/csg/CsgTree.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+
+CsgMembershipTest CsgCrossingMembershipFilter::membershipTest=CsgMembershipTest::SIGN;
+
+void CsgCrossingMembershipFilter::setMembershipTest(CsgMembershipTest test)
+{
+    membershipTest=test;
+}
+
+CsgMembershipTest CsgCrossingMembershipFilter::getMembershipTest()
+{
+    return membershipTest;
+}
+
+GeometryContainment CsgCrossingMembershipFilter::signContainment(const CsgOperandView& operand,
+    const Vector3Dd& point, int depth)
+{
+    if (depth>MAX_SIGN_DEPTH) return GeometryContainment::Indeterminate;
+    Matrix4x4d forward,inverse;
+    if (operand.queryAffinePlacement(forward,inverse)!=AffinePlacementStatus::Valid)
+        return GeometryContainment::Indeterminate;
+    const Vector3Dd local=inverse.multiply(point);
+    const CsgExpression* child=operand.getChildExpression();
+    if (!child) {
+        const Geometry* geometry=operand.getGeometry();
+        return geometry ? geometry->classifyPoint(local,0) : GeometryContainment::Indeterminate;
+    }
+    const CsgOperation operation=child->getOperation();
+    bool inside=false;
+    for (long int j=0;j<child->getOperandCount();++j) {
+        if (j>0 && CsgMembershipRule::isDecided(operation,inside)) break;
+        const CsgOperandView* next=child->getOperand(j);
+        if (!next) return GeometryContainment::Indeterminate;
+        const GeometryContainment c=signContainment(*next,local,depth+1);
+        if (c!=GeometryContainment::Inside && c!=GeometryContainment::Outside &&
+            c!=GeometryContainment::Boundary) return GeometryContainment::Indeterminate;
+        const bool operandInside=c!=GeometryContainment::Outside;
+        inside=j==0 ? operandInside : CsgMembershipRule::combine(operation,inside,operandInside);
+    }
+    return inside ? GeometryContainment::Inside : GeometryContainment::Outside;
+}
+
+GeometryContainment CsgCrossingMembershipFilter::classifySibling(const CsgOperandView& sibling,
+    const Vector3Dd& point, double tolerance, CsgPointWorkspace& workspace)
+{
+    if (membershipTest==CsgMembershipTest::SIGN) {
+        const GeometryContainment c=signContainment(sibling,point,0);
+        if (c==GeometryContainment::Inside || c==GeometryContainment::Outside ||
+            c==GeometryContainment::Boundary) return c;
+    }
+    return CsgPointClassification::classifyOperandContainment(sibling,point,tolerance,workspace);
+}
 
 RaySolidQueryStatus CsgCrossingMembershipFilter::toStatus(GeometryContainment containment)
 {
@@ -65,7 +118,7 @@ RaySolidQueryStatus CsgCrossingMembershipFilter::decide(const CsgExpression& exp
         const bool mustContain=CsgMembershipRule::requiresContainment(operation,operandIndex,j);
         const CsgOperandView* sibling=expression.getOperand(j);
         const GeometryContainment c=sibling ?
-            CsgPointClassification::classifyOperandContainment(*sibling,point,tolerance,workspace) :
+            classifySibling(*sibling,point,tolerance,workspace) :
             GeometryContainment::InvalidInput;
         if (c==GeometryContainment::InvalidInput) return RaySolidQueryStatus::InvalidInput;
         if (c==GeometryContainment::Boundary) continue;

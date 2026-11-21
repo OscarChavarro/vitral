@@ -249,7 +249,21 @@ TEST(CsgCrossingMembershipFilterContract, PovHeuristicKeepsUnionInternalSurfaces
     EXPECT_TRUE(events.getLeaves().get(hole->leafIndex)->getClassification().boundaries[hole->boundaryIndex].normalReversed);
 }
 
+// Selects a membership test of the POV crossing filter for the life of the
+// object, restoring the previous one even when an assertion ends the test.
+class MembershipTestScope {
+public:
+    explicit MembershipTestScope(CsgMembershipTest test) :
+        previous(CsgCrossingMembershipFilter::getMembershipTest())
+    { CsgCrossingMembershipFilter::setMembershipTest(test); }
+    ~MembershipTestScope() { CsgCrossingMembershipFilter::setMembershipTest(previous); }
+private:
+    CsgMembershipTest previous;
+};
+
 TEST(CsgCrossingMembershipFilterContract, BoundaryMembershipKeepsCoincidentFacesAndUncertaintyFails) {
+    // An uncertified sibling only matters to the certified membership test.
+    MembershipTestScope certified(CsgMembershipTest::CERTIFIED_BALL);
     SimpleBody first, same;
     first.setGeometry(new Box(2,2,2)); same.setGeometry(new Box(2,2,2));
     CsgBodyOperand a(first), c(same);
