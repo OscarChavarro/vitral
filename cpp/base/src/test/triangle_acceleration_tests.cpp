@@ -7,6 +7,7 @@
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/GridTriangleHierarchy.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
@@ -89,10 +90,9 @@ static Ray randomRay(TriangleAccelerationTestRandom &random, int k)
     return Ray(origin, direction);
 }
 
-static void expectSameAsBruteForce(const java::ArrayList<double> &positions,
-    const java::ArrayList<int> &indexes, int rayCount)
+static void expectSameAsBruteForce(TriangleAccelerationStructure &hierarchy,
+    const java::ArrayList<double> &positions, const java::ArrayList<int> &indexes, int rayCount)
 {
-    BinnedSahTriangleHierarchy hierarchy;
     hierarchy.build(positions, indexes);
     TriangleAccelerationTestRandom random(11);
     int hits = 0;
@@ -113,6 +113,13 @@ static void expectSameAsBruteForce(const java::ArrayList<double> &positions,
         }
     }
     EXPECT_GT(hits, rayCount / 10);
+}
+
+static void expectSameAsBruteForce(const java::ArrayList<double> &positions,
+    const java::ArrayList<int> &indexes, int rayCount)
+{
+    BinnedSahTriangleHierarchy hierarchy;
+    expectSameAsBruteForce(hierarchy, positions, indexes, rayCount);
 }
 
 TEST(BinnedSahTriangleHierarchy, SoupHitsMatchBruteForceExactly) {
@@ -189,6 +196,62 @@ TEST(BinnedSahTriangleHierarchy, EmptyMeshMisses) {
         positions, indexes, t, u, v, triangle));
 }
 
+TEST(GridTriangleHierarchy, SoupHitsMatchBruteForceExactly) {
+    java::ArrayList<double> positions;
+    java::ArrayList<int> indexes;
+    buildSoup(3000, positions, indexes);
+    GridTriangleHierarchy grid;
+    expectSameAsBruteForce(grid, positions, indexes, 4000);
+    // floor(3000^(1/3) + 1) cells along each axis
+    EXPECT_EQ(15, grid.getResolution());
+}
+
+TEST(GridTriangleHierarchy, SharedEdgeGridHitsMatchBruteForceExactly) {
+    java::ArrayList<double> positions;
+    java::ArrayList<int> indexes;
+    buildGrid(40, positions, indexes);
+    GridTriangleHierarchy grid;
+    expectSameAsBruteForce(grid, positions, indexes, 4000);
+}
+
+TEST(GridTriangleHierarchy, CopyAnswersAsTheOriginal) {
+    java::ArrayList<double> positions;
+    java::ArrayList<int> indexes;
+    buildSoup(500, positions, indexes);
+    GridTriangleHierarchy grid;
+    grid.build(positions, indexes);
+    TriangleAccelerationStructure *copied = grid.copy();
+    ASSERT_TRUE(copied != 0);
+    EXPECT_TRUE(copied->getMethod() == TriangleMeshAccelerationMethod::VOXEL_GRID);
+    EXPECT_TRUE(copied->matches((int)(positions.size() / 3), (int)(indexes.size() / 3)));
+    TriangleAccelerationTestRandom random(5);
+    for (int k = 0; k < 500; k++) {
+        const Ray ray = randomRay(random, k);
+        double t0 = 0, u0 = 0, v0 = 0, t1 = 0, u1 = 0, v1 = 0;
+        int tri0 = -1, tri1 = -1;
+        const bool hit0 = grid.firstHit(ray, positions, indexes, t0, u0, v0, tri0);
+        const bool hit1 = copied->firstHit(ray, positions, indexes, t1, u1, v1, tri1);
+        ASSERT_EQ(hit0, hit1) << "ray " << k;
+        if (hit0) {
+            EXPECT_EQ(tri0, tri1) << "ray " << k;
+            EXPECT_EQ(t0, t1) << "ray " << k;
+        }
+    }
+    delete copied;
+}
+
+TEST(GridTriangleHierarchy, EmptyMeshMisses) {
+    java::ArrayList<double> positions;
+    java::ArrayList<int> indexes;
+    GridTriangleHierarchy grid;
+    grid.build(positions, indexes);
+    double t = 0, u = 0, v = 0;
+    int triangle = -1;
+    EXPECT_FALSE(grid.firstHit(Ray(Vector3Dd(0, 0, 1), Vector3Dd(0, 0, -1)),
+        positions, indexes, t, u, v, triangle));
+    EXPECT_EQ(0, grid.getNodeCount());
+}
+
 TEST(TriangleMeshAccelerationMethod, NamesRoundTrip) {
     for (int code = 0; code < TriangleMeshAccelerationMethodUtil::COUNT; code++) {
         const TriangleMeshAccelerationMethod method =
@@ -202,6 +265,12 @@ TEST(TriangleMeshAccelerationMethod, NamesRoundTrip) {
     EXPECT_FALSE(TriangleMeshAccelerationMethodUtil::fromName("octree", unused));
     EXPECT_TRUE(TriangleAccelerationStructure::create(
         TriangleMeshAccelerationMethod::BRUTE_FORCE) == 0);
+    TriangleMeshAccelerationMethod voxel = TriangleMeshAccelerationMethod::BRUTE_FORCE;
+    EXPECT_TRUE(TriangleMeshAccelerationMethodUtil::fromName("voxel", voxel));
+    TriangleAccelerationStructure *grid = TriangleAccelerationStructure::create(voxel);
+    ASSERT_TRUE(grid != 0);
+    EXPECT_TRUE(grid->getMethod() == TriangleMeshAccelerationMethod::VOXEL_GRID);
+    delete grid;
 }
 
 TEST(TriangleMesh, AccelerationStructureIsPreparedCopiedAndReleased) {

@@ -113,6 +113,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.cpp
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.cpp
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.cpp
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/GridTriangleHierarchy.cpp
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.cpp
     src/main/vsdk/toolkit/environment/geometry/element/GeometryQueryWorkspace.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayInstanceStep.cpp

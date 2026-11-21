@@ -6,6 +6,7 @@
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.h"
+#include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/GridTriangleHierarchy.h"
 #include "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.h"
 
 // Relative and absolute padding of the triangle boxes: Moller-Trumbore can
@@ -22,6 +23,9 @@ TriangleMeshAccelerationMethodUtil::fromCode(int code)
     if (code == 1) {
         return TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH;
     }
+    if (code == 2) {
+        return TriangleMeshAccelerationMethod::VOXEL_GRID;
+    }
     return TriangleMeshAccelerationMethod::BRUTE_FORCE;
 }
 
@@ -31,6 +35,7 @@ TriangleMeshAccelerationMethodUtil::name(TriangleMeshAccelerationMethod value)
     switch (value) {
         case TriangleMeshAccelerationMethod::BRUTE_FORCE: return "bruteforce";
         case TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH: return "wald2007";
+        case TriangleMeshAccelerationMethod::VOXEL_GRID: return "voxel";
     }
     return "unknown";
 }
@@ -186,6 +191,8 @@ TriangleAccelerationStructure::create(TriangleMeshAccelerationMethod method)
     switch (method) {
         case TriangleMeshAccelerationMethod::WALD2007_BINNED_SAH:
             return new BinnedSahTriangleHierarchy();
+        case TriangleMeshAccelerationMethod::VOXEL_GRID:
+            return new GridTriangleHierarchy();
         case TriangleMeshAccelerationMethod::BRUTE_FORCE:
             return 0;
     }
