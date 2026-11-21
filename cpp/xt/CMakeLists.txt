@@ -22,6 +22,7 @@ if(NOT X11_Xt_LIB)
 endif()
 
 add_library(vitral_xt SHARED
+    src/main/vsdk/toolkit/gui/XFontSelection.cpp
     src/main/vsdk/toolkit/gui/XtEventQueue.cpp
     src/main/vsdk/toolkit/gui/XtSystem.cpp
     src/main/vsdk/toolkit/gui/XtWidgetSupport.cpp

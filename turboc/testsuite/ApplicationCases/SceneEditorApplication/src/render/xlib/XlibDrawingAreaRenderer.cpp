@@ -1,5 +1,6 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "render/xlib/XlibDrawingAreaRenderer.h"
+#include "vsdk/toolkit/gui/XFontSelection.h"
 
 // First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
 #include <X11/Xlib.h>
@@ -398,19 +399,7 @@ void XlibDrawingAreaRenderer::ensureTitleFont(Display* display, int size)
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
     fontDisplay = display;
     titleFontSize = size;
-    char pattern[128];
-    snprintf(pattern, sizeof(pattern),
-        "-adobe-helvetica-medium-r-normal--%d-*-*-*-*-*-iso8859-1", size);
-    char** missing = NULL;
-    int count = 0;
-    char* fallback = NULL;
-    titleFont = XCreateFontSet(display, pattern, &missing, &count, &fallback);
-    if (missing) XFreeStringList(missing);
-    if (!titleFont) {
-        missing = NULL;
-        titleFont = XCreateFontSet(display, "fixed", &missing, &count, &fallback);
-        if (missing) XFreeStringList(missing);
-    }
+    titleFont = XFontSelection::createSansFontSet(display, size, FALSE);
 }
 
 void XlibDrawingAreaRenderer::drawTitle(Display* display, Drawable frame,

@@ -2,6 +2,7 @@
 #include "java/lang/String.h"
 #include "java/util/function/Consumer.h"
 #include "render/xlib/XlibDrawingAreaRenderer.h"
+#include "vsdk/toolkit/gui/XFontSelection.h"
 
 #include <X11/Xutil.h>
 #include <cmath>
@@ -287,19 +288,7 @@ void XlibDrawingAreaRenderer::ensureTitleFont(Display* display, int size)
     if (titleFont && fontDisplay) XFreeFontSet(fontDisplay, titleFont);
     fontDisplay = display;
     titleFontSize = size;
-    char pattern[128];
-    std::snprintf(pattern, sizeof(pattern),
-        "-adobe-helvetica-medium-r-normal--%d-*-*-*-*-*-iso8859-1", size);
-    char** missing = nullptr;
-    int count = 0;
-    char* fallback = nullptr;
-    titleFont = XCreateFontSet(display, pattern, &missing, &count, &fallback);
-    if (missing) XFreeStringList(missing);
-    if (!titleFont) {
-        missing = nullptr;
-        titleFont = XCreateFontSet(display, "fixed", &missing, &count, &fallback);
-        if (missing) XFreeStringList(missing);
-    }
+    titleFont = XFontSelection::createSansFontSet(display, size, false);
 }
 
 void XlibDrawingAreaRenderer::drawTitle(Display* display, Drawable frame,

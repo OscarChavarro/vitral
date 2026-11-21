@@ -13,6 +13,7 @@ CXXFLAGS = $(OPTIMIZATION) -Wall $(LEGACY_CXXFLAGS) $(EXTRA_CXXFLAGS) \
     -Isrc/main $(BASE_INCLUDES) $(X11_INCLUDES) $(X11_DEFINES) $(DEFINES)
 
 SOURCES = \
+    src/main/vsdk/toolkit/gui/XFontSelection.cpp \
     src/main/vsdk/toolkit/gui/XtEventQueue.cpp \
     src/main/vsdk/toolkit/gui/XtSystem.cpp \
     src/main/vsdk/toolkit/gui/XtTextEncoding.cpp \

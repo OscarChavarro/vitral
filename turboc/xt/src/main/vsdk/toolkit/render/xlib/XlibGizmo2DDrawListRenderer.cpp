@@ -10,6 +10,7 @@
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/render/gizmo/Gizmo2DDrawList.h"
 #include "vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.h"
+#include "vsdk/toolkit/gui/XFontSelection.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 
 static int toPixel(double value)
@@ -79,7 +80,8 @@ void XlibGizmo2DDrawListRenderer::setDisplay(Display* d)
 }
 
 /**
-@return the font set of a size (Helvetica, or `fixed` when it is missing),
+@return the font set of a size (Helvetica, or another font the server has,
+see XFontSelection),
 created on its first use; null without a display
 */
 XFontSet XlibGizmo2DDrawListRenderer::font(int fontSize) const
@@ -93,24 +95,7 @@ XFontSet XlibGizmo2DDrawListRenderer::font(int fontSize) const
             return fonts[i];
         }
     }
-    char pattern[128];
-    snprintf(pattern, sizeof(pattern),
-        "-adobe-helvetica-medium-r-normal--%d-*-*-*-*-*-iso8859-1", fontSize);
-    char** missing = NULL;
-    int count = 0;
-    char* fallback = NULL;
-    XFontSet set = XCreateFontSet(display, pattern, &missing, &count,
-                                  &fallback);
-    if ( missing ) {
-        XFreeStringList(missing);
-    }
-    if ( !set ) {
-        missing = NULL;
-        set = XCreateFontSet(display, "fixed", &missing, &count, &fallback);
-        if ( missing ) {
-            XFreeStringList(missing);
-        }
-    }
+    XFontSet set = XFontSelection::createSansFontSet(display, fontSize, FALSE);
     // The cache is not part of the state of the renderer (no mutable)
     XlibGizmo2DDrawListRenderer* self = (XlibGizmo2DDrawListRenderer*)this;
     if ( self->numberOfFonts == MAX_FONTS ) {

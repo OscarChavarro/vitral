@@ -47,6 +47,7 @@
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtCollapsibleSection.h"
 #include "vsdk/toolkit/gui/XtEventQueue.h"
+#include "vsdk/toolkit/gui/XFontSelection.h"
 #include "gui/xt/XtImageControlWindow.h"
 #include "gui/xt/XtModifyPanel.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
@@ -738,31 +739,27 @@ private:
 
     void createMenuFontSet()
     {
-        char** missingCharsets = nullptr;
-        int missingCharsetCount = 0;
-        char* defaultString = nullptr;
-        menuFontSet = XCreateFontSet(
-            display,
+        // Helvetica, or the fixed fonts every X server has; XFontSelection
+        // verifies that the server has them and falls back to any other
+        // font otherwise
+        static const char* const menuPatterns[] = {
             "-adobe-helvetica-medium-r-normal--14-*-*-*-*-*-iso8859-1",
-            &missingCharsets,
-            &missingCharsetCount,
-            &defaultString);
-        if (missingCharsets != nullptr) XFreeStringList(missingCharsets);
+            "-misc-fixed-medium-r-normal--13-*-*-*-*-*-*-*",
+            nullptr
+        };
+        menuFontSet = XFontSelection::createFontSet(display, menuPatterns);
         if (menuFontSet == nullptr) {
             throw VSDKFatalException(
                 "Could not create the UTF-8 menu font set");
         }
 
         // Headers of the sections are bold, as in `AwtCollapsibleSection`
-        missingCharsets = nullptr;
-        missingCharsetCount = 0;
-        sectionFontSet = XCreateFontSet(
-            display,
+        static const char* const sectionPatterns[] = {
             "-adobe-helvetica-bold-r-normal--14-*-*-*-*-*-iso8859-1",
-            &missingCharsets,
-            &missingCharsetCount,
-            &defaultString);
-        if (missingCharsets != nullptr) XFreeStringList(missingCharsets);
+            "-misc-fixed-bold-r-normal--13-*-*-*-*-*-*-*",
+            nullptr
+        };
+        sectionFontSet = XFontSelection::createFontSet(display, sectionPatterns);
     }
 
     /**

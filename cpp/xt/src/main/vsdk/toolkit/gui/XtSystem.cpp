@@ -7,6 +7,7 @@
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/gui/XtSystem.h"
+#include "vsdk/toolkit/gui/XFontSelection.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 
 int XtSystem::buttonMaskFor(unsigned int button)
@@ -224,29 +225,8 @@ XFontSet getFontSet(Display* display, int pixelSize)
         return (*known);
     }
 
-    // XCreateFontSet needs a complete XLFD, including its character set.
-    // The shorter wildcard pattern previously returned null on XQuartz,
-    // leaving every OpenGL viewport label as a transparent 1x1 image.
-    char pattern[256];
-    snprintf(pattern, sizeof(pattern),
-        "-adobe-helvetica-medium-r-normal--%d-*-*-*-*-*-iso8859-1",
-        pixelSize);
-    char** missingCharsets = nullptr;
-    int missingCharsetCount = 0;
-    char* defaultString = nullptr;
-    XFontSet fontSet = XCreateFontSet(display, pattern, &missingCharsets,
-                                      &missingCharsetCount, &defaultString);
-    if ( missingCharsets != nullptr ) {
-        XFreeStringList(missingCharsets);
-    }
-    if ( fontSet == nullptr ) {
-        missingCharsets = nullptr;
-        fontSet = XCreateFontSet(display, "fixed", &missingCharsets,
-                                 &missingCharsetCount, &defaultString);
-        if ( missingCharsets != nullptr ) {
-            XFreeStringList(missingCharsets);
-        }
-    }
+    // Helvetica, or another font of the size when the server lacks it
+    XFontSet fontSet = XFontSelection::createSansFontSet(display, pixelSize, false);
     fontSets().put(key, fontSet);
     return fontSet;
 }

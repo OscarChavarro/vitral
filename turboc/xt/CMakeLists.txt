@@ -37,6 +37,7 @@ if(NOT XT_LIBRARY)
 endif(NOT XT_LIBRARY)
 
 set(VITRAL_XT_SOURCES
+    src/main/vsdk/toolkit/gui/XFontSelection.cpp
     src/main/vsdk/toolkit/gui/XtEventQueue.cpp
     src/main/vsdk/toolkit/gui/XtSystem.cpp
     src/main/vsdk/toolkit/gui/XtTextEncoding.cpp

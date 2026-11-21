@@ -37,6 +37,7 @@
 #include "java/util/ArrayList.txx"
 #include "application/XtOpenGL1ApplicationController.h"
 #include "vsdk/toolkit/gui/XtTextEncoding.h"
+#include "vsdk/toolkit/gui/XFontSelection.h"
 #include "application/XtOpenGL1GuiEventExecutor.h"
 #include "application/XtOpenGL1SceneEditorApplication.h"
 #include "application/mcp/XtOpenGL1VitralEditorMCP.h"
@@ -431,24 +432,6 @@ private:
         XtTextEncoding::selectLocale(getenv("SCENE_EDITOR_GUI_LOCALE"));
     }
 
-    /**
-    @return the first font set that X can create from the patterns (NULL
-    ends them), or NULL
-    */
-    XFontSet createFirstFontSet(const char* const* patterns)
-    {
-        for (int i = 0; patterns[i] != NULL; i++) {
-            char** missingCharsets = NULL;
-            int missingCharsetCount = 0;
-            char* defaultString = NULL;
-            XFontSet fontSet = XCreateFontSet(display, patterns[i],
-                &missingCharsets, &missingCharsetCount, &defaultString);
-            if (missingCharsets != NULL) XFreeStringList(missingCharsets);
-            if (fontSet != NULL) return fontSet;
-        }
-        return NULL;
-    }
-
     static void selectSideTab(Widget, void* clientData)
     {
         TabBinding* binding = ((TabBinding*)(clientData));
@@ -768,14 +751,14 @@ private:
     void createMenuFontSet()
     {
         // Helvetica, or the fixed fonts every X server has (i.e. Debian 1.1
-        // installs only the misc fonts)
+        // installs only the misc fonts); XFontSelection verifies that the
+        // server has them and falls back to any other font otherwise
         static const char* const menuPatterns[] = {
             "-adobe-helvetica-medium-r-normal--14-*-*-*-*-*-iso8859-1",
             "-misc-fixed-medium-r-normal--13-*-*-*-*-*-*-*",
-            "fixed",
             NULL
         };
-        panelFontSet = createFirstFontSet(menuPatterns);
+        panelFontSet = XFontSelection::createFontSet(display, menuPatterns);
         if (panelFontSet == NULL) {
             throw VSDKFatalException("Could not create the menu font set");
         }
@@ -786,7 +769,7 @@ private:
             "-misc-fixed-bold-r-normal--13-*-*-*-*-*-*-*",
             NULL
         };
-        sectionFontSet = createFirstFontSet(sectionPatterns);
+        sectionFontSet = XFontSelection::createFontSet(display, sectionPatterns);
     }
 
     /**
