@@ -13,6 +13,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(vitral_pkgs LANGUAGES C CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # On MacOSX, third party libraries (i.e. libpng) usually come from Homebrew
 # or MacPorts, whose prefixes are not searched by default on Apple Silicon.
 if(APPLE)

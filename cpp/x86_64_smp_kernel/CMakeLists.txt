@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 project(vgaboot LANGUAGES C CXX ASM)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # The same kernel, libraries and programs are built for either CPU mode. What differs lives in src/main/os/kernel/<arch>/,
 # src/main/os/syscalls/<arch>/ and the boot code, and is chosen here: the rest of the sources do not depend on BM_ARCH.
 set(BM_ARCH "x86_64" CACHE STRING "Kernel architecture: x86_64 or i386")

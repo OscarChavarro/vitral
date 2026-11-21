@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 2.4)
 project(vitral_dos_turboc CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # DOS-specific services for the Turbo C++ port.  This module deliberately
 # stays outside base: Unix and modern ports retain their normal linear-memory
 # implementations, while real-mode DOS programs can opt into XMS storage.

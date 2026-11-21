@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(vitral_xt CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # Xt layer of the toolkit, the C++ counterpart of the Java `awt` module:
 # conversion of the X events to vitral ones (XtSystem), presentation of
 # images with Xlib (render/xlib) and the interfaces of the widget sets over

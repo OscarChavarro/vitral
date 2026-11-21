@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 project(vitral_base_cpp LANGUAGES CXX)
+
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
@@ -383,6 +390,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/material/RendererConfiguration.cpp
     src/main/vsdk/toolkit/environment/material/PhongLobe.cpp
     src/main/vsdk/toolkit/environment/material/PhongMaterial.cpp
+    src/main/vsdk/toolkit/environment/material/ScatteringFrame.cpp
     src/main/vsdk/toolkit/environment/material/Texture.cpp
     src/main/vsdk/toolkit/processing/CurveModeler.cpp
     src/main/vsdk/toolkit/processing/ImageProcessing.cpp
@@ -640,6 +648,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/subdivided_bezier_patch_tests.cpp
     src/test/microfaceted_material_csv_tests.cpp
     src/test/phong_material_tests.cpp
+    src/test/phong_scattering_tests.cpp
     src/test/planar_face_tests.cpp
     src/test/spatial_index_tests.cpp
     src/test/ray_affine_contract_tests.cpp

@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 2.4)
 project(vitral_base_turboc CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # Legacy C++98 port: must build with old toolchains (e.g. CMake 2.4 and
 # g++ 4.1 on Ubuntu 7.04), so only CMake 2.4 commands are used here.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Wall")

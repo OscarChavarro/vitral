@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(VitralVgaSceneEditor CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # The Scene Editor of Vitral on the svgalib backend of the framebuffer GUI, for the text console of a Linux host:
 # the sceneEditor program of the Vitral Kernel (copied here from x86_64_smp_kernel/src/main/programs/sceneEditor) is
 # only a main that picks the graphics mode and hands the screen to FramebufferSceneEditor, compiled with the classes of

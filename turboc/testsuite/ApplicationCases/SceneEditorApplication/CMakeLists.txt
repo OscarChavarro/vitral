@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 2.4)
 # C is enabled because FindOpenGL/FindX11 run C checks in CMake 2.4
 project(SceneEditorApplication C CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # Variant of the application, chosen when building: the widget set of its
 # Xt GUI (each executable links either Motif or Athena, never both: they
 # must not share a process). Unlike the cpp port, the turboc port only

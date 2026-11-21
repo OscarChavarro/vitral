@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(vitral_xlib CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # Xlib backend of the framebuffer GUI of the base library
 # (vsdk/toolkit/gui/framebuffer): one top-level window drawn with Xlib
 # primitives and core fonts, and its keyboard and pointer input. It depends

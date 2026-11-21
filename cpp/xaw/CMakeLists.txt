@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(vitral_xaw CXX)
 
+# IEEE 754 floating point everywhere: no fast-math (no reassociation, no
+# finite-math or reciprocal shortcuts) and no fused multiply-add contraction,
+# so results do not depend on how the compiler rewrites an expression
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-fno-fast-math -ffp-contract=off)
+endif()
+
 # Athena (Xaw) widget set of the Xt layer: implementations of XtWidgetSet,
 # XtPanelWidgets and XtGuiRenderer (vitral_xt) with the Athena widgets.
 # It never uses Motif: an application links either vitral_xaw or vitral_xm.
