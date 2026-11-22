@@ -31,3 +31,57 @@ TEST(Vector4Test, DivideByW) {
     EXPECT_TRUE(Vector4Dd(4,6,8,2).dividedByW().epsilonEquals(Vector4Dd(2,3,4,1), 1e-12));
     EXPECT_TRUE(Vector4Df(4,6,8,2).dividedByW().epsilonEquals(Vector4Df(2,3,4,1), 1e-5f));
 }
+
+TEST(Vector2DfTest, SubtractAndLengthSquared) {
+    const Vector2Df d = Vector2Df(4.0f, -1.0f).subtract(Vector2Df(1.0f, 3.0f));
+    EXPECT_EQ(d.x(), 3.0f);
+    EXPECT_EQ(d.y(), -4.0f);
+    EXPECT_EQ(d.lengthSquared(), 25.0f);
+}
+
+TEST(Vector3DfTest, LengthsAndDistances) {
+    const Vector3Df a(1.0f, -2.0f, 2.0f);
+    EXPECT_EQ(a.lengthSquared(), 9.0f);
+    EXPECT_EQ(a.manhattanLength(), 5.0f);
+    const Vector3Df b(4.0f, 2.0f, 2.0f);
+    EXPECT_EQ(a.distance(b), 5.0f);
+    EXPECT_EQ(a.distanceSquared(b), 25.0f);
+    EXPECT_EQ(a.distance(b), b.subtract(a).length());
+}
+
+TEST(Vector3DfTest, MultiplyByInverseKeepsSmallDivisors) {
+    const Vector3Df v(2.0f, 4.0f, -6.0f);
+    const Vector3Df scaled = v.multiplyByInverse(2.0f, 1e-6f);
+    EXPECT_EQ(scaled.x(), 1.0f);
+    EXPECT_EQ(scaled.y(), 2.0f);
+    EXPECT_EQ(scaled.z(), -3.0f);
+    EXPECT_TRUE(v.multiplyByInverse(1e-7f, 1e-6f) == v);
+    EXPECT_TRUE(v.multiplyByInverse(-1e-7f, 1e-6f) == v);
+    // The factor is computed once: x * (1 / s), not x / s
+    const float s = 3.0f;
+    EXPECT_EQ(Vector3Df(1.0f, 0.0f, 0.0f).multiplyByInverse(s, 1e-6f).x(), (1.0f / s) * 1.0f);
+}
+
+TEST(Vector3DfTest, NormalizedWithEpsilon) {
+    const Vector3Df n = Vector3Df(3.0f, 4.0f, 12.0f).normalized(1e-6f);
+    const float factor = 1.0f / 13.0f;
+    EXPECT_EQ(n.x(), factor * 3.0f);
+    EXPECT_EQ(n.y(), factor * 4.0f);
+    EXPECT_EQ(n.z(), factor * 12.0f);
+    const Vector3Df tiny(1e-8f, 0.0f, 0.0f);
+    EXPECT_TRUE(tiny.normalized(1e-6f) == tiny);
+}
+
+TEST(Vector3DfTest, DominantAxis) {
+    EXPECT_EQ(Vector3Df(-5.0f, 1.0f, 2.0f).dominantAxis(), 0);
+    EXPECT_EQ(Vector3Df(1.0f, -5.0f, 2.0f).dominantAxis(), 1);
+    EXPECT_EQ(Vector3Df(1.0f, 2.0f, -5.0f).dominantAxis(), 2);
+    EXPECT_EQ(Vector3Df(3.0f, -3.0f, 3.0f).dominantAxis(), 0);
+    EXPECT_EQ(Vector3Df(1.0f, 3.0f, -3.0f).dominantAxis(), 1);
+}
+
+TEST(Vector3DfTest, AssignmentReplacesValue) {
+    Vector3Df v(1.0f, 2.0f, 3.0f);
+    v = v.withY(5.0f);
+    EXPECT_TRUE(v == Vector3Df(1.0f, 5.0f, 3.0f));
+}
