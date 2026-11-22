@@ -156,7 +156,11 @@ export class ProjectedLinesViewBuilder {
     const yaw: number = JavaMath.toDegrees(rotation.obtainEulerYawAngle());
     const pitch: number = JavaMath.toDegrees(rotation.obtainEulerPitchAngle());
 
-    if (camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL && pitch > -45 && pitch < 45) {
+    if (
+      camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL &&
+      pitch > -45 &&
+      pitch < 45
+    ) {
       if ((yaw > 45 && yaw < 135) || (yaw < -45 && yaw > -135)) {
         gridTransform = gridTransform.axisRotation(JavaMath.toRadians(90), 1, 0, 0);
       } else {
@@ -272,7 +276,9 @@ export class ProjectedLinesViewBuilder {
     body: SimpleBody,
   ): void {
     const transform: Matrix4x4d = body.getTransformationMatrix();
-    const set: FreeLineSet = new FreeLineSet(ProjectedLinesViewBuilder.wireColor(body.getMaterial()));
+    const set: FreeLineSet = new FreeLineSet(
+      ProjectedLinesViewBuilder.wireColor(body.getMaterial()),
+    );
     let i: number;
 
     for (i = 0; i < local.getNumLines(); i++) {
@@ -341,7 +347,8 @@ export class ProjectedLinesViewBuilder {
     );
 
     const freeInput: ArrayList<Calligraphic3DBuffer> = new ArrayList<Calligraphic3DBuffer>();
-    const freeVisibleOutput: ArrayList<Calligraphic2DBuffer> = new ArrayList<Calligraphic2DBuffer>();
+    const freeVisibleOutput: ArrayList<Calligraphic2DBuffer> =
+      new ArrayList<Calligraphic2DBuffer>();
     const freeHiddenOutput: ArrayList<Calligraphic2DBuffer> = new ArrayList<Calligraphic2DBuffer>();
     const freeVisible: ProjectedLineLayer[] = [];
     const freeHidden: ProjectedLineLayer[] = [];
@@ -474,7 +481,11 @@ export class ProjectedLinesViewBuilder {
    * world coordinates
    * @return the point, in the coordinates of the plane
    */
-  private static viewedPoint(plane: InfinitePlane, transform: Matrix4x4d, camera: Camera): Vector3Dd {
+  private static viewedPoint(
+    plane: InfinitePlane,
+    transform: Matrix4x4d,
+    camera: Camera,
+  ): Vector3Dd {
     const inverse: Matrix4x4d = transform.inverse();
     const eye: Vector3Dd = inverse.multiply(camera.getPosition());
     const direction: Vector3Dd = inverse
@@ -511,7 +522,7 @@ export class ProjectedLinesViewBuilder {
     if (brep !== null) {
       let i: number;
       for (i = 0; i < brep.getEdgesList().size(); i++) {
-        const edge = brep.getEdgesList().get(i);
+        const edge = brep.getEdgesList().get(i)!;
         if (
           edge.getStartingVertexId() < 0 ||
           edge.getEndingVertexId() < 0 ||
@@ -556,7 +567,7 @@ export class ProjectedLinesViewBuilder {
     if (brep !== null) {
       let i: number;
       for (i = 0; i < brep.getVerticesList().size(); i++) {
-        const vertex = brep.getVerticesList().get(i);
+        const vertex = brep.getVerticesList().get(i)!;
         if (vertex.position !== null) {
           projector.addPoint(layer.getLines(), transform.multiply(vertex.position));
         }
@@ -564,7 +575,8 @@ export class ProjectedLinesViewBuilder {
       return;
     }
 
-    const meshes: TriangleMeshGroup | null = GeometryTriangulator.exportToTriangleMeshGroup(geometry);
+    const meshes: TriangleMeshGroup | null =
+      GeometryTriangulator.exportToTriangleMeshGroup(geometry);
     if (meshes === null) {
       return;
     }

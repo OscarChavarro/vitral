@@ -17,6 +17,7 @@ import { WebImageFiles } from '../io/web-image-files';
 import { ApplicationModel } from '../model/application-model';
 import { GuiState } from '../model/gui-state';
 import { javaSimpleClassName } from '../model/java-class-name';
+import type { RenderTechnology } from '../model/render-technology';
 import { Scene } from '../model/scene';
 import { RaytracedViewportFrames } from '../render/raytraced-viewport-frames';
 import { WebSceneRaytracingBackend } from '../render/web-scene-raytracing-backend';
@@ -226,6 +227,28 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
 
   destroyGUI(): void {
     this.htmlGuiController.destroyGUI();
+  }
+
+  setRenderTechnology(technology: RenderTechnology | null): void {
+    if (
+      technology === null ||
+      technology === this.applicationModel.getDrawingArea().getRenderTechnology()
+    ) {
+      return;
+    }
+    this.applicationModel.getDrawingArea().setRenderTechnology(technology);
+    // After the menu that requested it has finished with the old canvas
+    setTimeout((): void => {
+      this.destroyGUI();
+      void this.createGUI();
+    });
+  }
+
+  /**
+   * @return the technology presenting the viewport set
+   */
+  getRenderTechnology(): RenderTechnology {
+    return this.applicationModel.getDrawingArea().getRenderTechnology();
   }
 
   private prepareRaytracedImage(): void {

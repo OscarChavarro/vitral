@@ -56,8 +56,8 @@ public class PhongMaterial implements Material {
     private final PhongLobe transmission;
     private final PhongLobe emission;
     private final Texture texture;
-    private final float refractionIndexReal;
-    private final float refractionIndexImaginary;
+    private final float storedRefractionIndexReal;
+    private final float storedRefractionIndexImaginary;
 
     public PhongMaterial(
         String inName,
@@ -87,8 +87,8 @@ public class PhongMaterial implements Material {
         transmission = inTransmission;
         emission = inEmission;
         texture = inTexture;
-        refractionIndexReal = inRefractionIndexReal;
-        refractionIndexImaginary = inRefractionIndexImaginary;
+        storedRefractionIndexReal = inRefractionIndexReal;
+        storedRefractionIndexImaginary = inRefractionIndexImaginary;
     }
 
     private static boolean isFiniteColor(ColorRgb color)
@@ -206,24 +206,24 @@ public class PhongMaterial implements Material {
     */
     public float getRefractionIndex()
     {
-        return transmission != null ? refractionIndexReal : 1.0F;
+        return transmission != null ? storedRefractionIndexReal : 1.0F;
     }
 
     /** Imaginary part of the transmission lobe's refraction index, 0 without one */
     public float getRefractionIndexImaginary()
     {
-        return transmission != null ? refractionIndexImaginary : 0.0F;
+        return transmission != null ? storedRefractionIndexImaginary : 0.0F;
     }
 
     /** Stored refraction index, also without transmission lobe (for persistence) */
     public float getStoredRefractionIndexReal()
     {
-        return refractionIndexReal;
+        return storedRefractionIndexReal;
     }
 
     public float getStoredRefractionIndexImaginary()
     {
-        return refractionIndexImaginary;
+        return storedRefractionIndexImaginary;
     }
 
     /**
@@ -665,7 +665,7 @@ public class PhongMaterial implements Material {
     public Material copy()
     {
         return new PhongMaterial(name, copyLobe(reflection), copyLobe(transmission), copyLobe(emission), texture, sided,
-            refractionIndexReal, refractionIndexImaginary);
+            storedRefractionIndexReal, storedRefractionIndexImaginary);
     }
 
     @Override

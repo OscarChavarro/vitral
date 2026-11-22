@@ -97,7 +97,14 @@ export class HtmlViewportSetRenderer {
       if (this.viewportSet.isSelected(viewport)) {
         this.viewRenderer.configureView(viewport);
       }
-      await this.drawClippedView(g, viewport, x, y, viewport.getPixelSizeX(), viewport.getPixelSizeY());
+      await this.drawClippedView(
+        g,
+        viewport,
+        x,
+        y,
+        viewport.getPixelSizeX(),
+        viewport.getPixelSizeY(),
+      );
     }
   }
 
@@ -156,7 +163,9 @@ export class HtmlViewportSetRenderer {
     const setWidth: number = this.viewportSet.getSizeXInPixels();
     const setHeight: number = this.viewportSet.getSizeYInPixels();
     const x1: number = Math.round(viewport.getStartXPercent() * setWidth);
-    const x2: number = Math.round((viewport.getStartXPercent() + viewport.getSizeXPercent()) * setWidth);
+    const x2: number = Math.round(
+      (viewport.getStartXPercent() + viewport.getSizeXPercent()) * setWidth,
+    );
     const y1: number = this.toCanvasY(
       Math.round((viewport.getStartYPercent() + viewport.getSizeYPercent()) * setHeight),
     );

@@ -51,7 +51,7 @@ public class GridTriangleHierarchy extends TriangleAccelerationStructure {
         private final Ray ray;
         private final double[] positions;
         private final int[] indexes;
-        private final double[] t = new double[1];
+        private final double[] rayParameter = new double[1];
         private final double[] u = new double[1];
         private final double[] v = new double[1];
 
@@ -72,19 +72,19 @@ public class GridTriangleHierarchy extends TriangleAccelerationStructure {
         @Override
         public boolean test(int primitive, double minimumT, double maximumT, double[] hitT)
         {
-            if ( !TriangleAccelerationStructure.testTriangle(ray, positions, indexes, primitive, t, u, v) ) {
+            if ( !TriangleAccelerationStructure.testTriangle(ray, positions, indexes, primitive, rayParameter, u, v) ) {
                 return false;
             }
-            if ( t[0] < minimumT || t[0] > maximumT ) {
+            if ( rayParameter[0] < minimumT || rayParameter[0] > maximumT ) {
                 return false;
             }
-            if ( t[0] == maximumT && !(best >= 0 && primitive < best) ) {
+            if ( rayParameter[0] == maximumT && !(best >= 0 && primitive < best) ) {
                 return false;
             }
             best = primitive;
             bestU = u[0];
             bestV = v[0];
-            hitT[0] = t[0];
+            hitT[0] = rayParameter[0];
             return true;
         }
     }

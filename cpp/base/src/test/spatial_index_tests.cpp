@@ -139,7 +139,7 @@ affineRay(const Vector3Df &origin, const Vector3Df &direction)
 struct Answer {
     bool hit;
     int primitive;
-    double t;
+    double parameter;
 };
 
 Answer
@@ -152,7 +152,7 @@ ask(const SpatialIndex &index, const Scene &scene, const Vector3Df &origin, cons
     Answer answer;
     answer.hit = result.hasHit();
     answer.primitive = result.getPrimitive();
-    answer.t = result.hasHit() ? result.getParameter() : 0.0;
+    answer.parameter = result.hasHit() ? result.getParameter() : 0.0;
     return answer;
 }
 
@@ -273,7 +273,7 @@ TEST(SpatialIndex, ClosestHitAgreesWithTheLinearReference)
         if ( a.hit ) {
             hits++;
             EXPECT_EQ(a.primitive, b.primitive) << "ray " << i;
-            EXPECT_EQ(a.t, b.t) << "ray " << i;
+            EXPECT_EQ(a.parameter, b.parameter) << "ray " << i;
         }
     }
     EXPECT_GT(hits, 100);
@@ -300,8 +300,8 @@ TEST(SpatialIndex, AnyHitAgreesOnVisibility)
         ASSERT_EQ(a.hit, b.hit) << "ray " << i;
         if ( b.hit ) {
             // Any accepted blocker lies in the interval
-            EXPECT_GE(b.t, 1e-3);
-            EXPECT_LE(b.t, 1.0);
+            EXPECT_GE(b.parameter, 1e-3);
+            EXPECT_LE(b.parameter, 1.0);
         }
     }
 }
@@ -323,7 +323,7 @@ TEST(SpatialIndex, AnyHitStopsAtTheFirstAcceptedBlocker)
     workspace.clearCounters();
     const Answer closest = ask(linear, scene, Vector3Df(0.1F, 0.2F, 0), Vector3Df(0, 0, 1), 0.0, 100.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(closest.hit);
-    EXPECT_DOUBLE_EQ(1.0, closest.t);
+    EXPECT_DOUBLE_EQ(1.0, closest.parameter);
     EXPECT_LT(anyTests, workspace.getPrimitiveTests());
 }
 
@@ -382,7 +382,7 @@ TEST(SpatialIndex, EqualParameterTiesFollowTheTestRule)
     ASSERT_TRUE(a.hit);
     ASSERT_TRUE(b.hit);
     EXPECT_EQ(a.primitive, b.primitive);
-    EXPECT_EQ(a.t, b.t);
+    EXPECT_EQ(a.parameter, b.parameter);
 }
 
 TEST(SpatialIndex, UnboundedPrimitivesAreAlwaysTested)
@@ -398,7 +398,7 @@ TEST(SpatialIndex, UnboundedPrimitivesAreAlwaysTested)
     const Answer a = ask(binned, scene, Vector3Df(0, 0, 0), Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(a.hit);
     EXPECT_EQ(1, a.primitive);
-    EXPECT_DOUBLE_EQ(2.0, a.t);
+    EXPECT_DOUBLE_EQ(2.0, a.parameter);
 }
 
 TEST(SpatialIndex, EmptyIndex)
@@ -480,7 +480,7 @@ TEST(SpatialIndex, ConcurrentQueriesEqualSequentialOnes)
     for ( int i = 0; i < numberOfRays; i++ ) {
         ASSERT_EQ(sequential[i].hit, concurrent[i].hit) << "ray " << i;
         ASSERT_EQ(sequential[i].primitive, concurrent[i].primitive) << "ray " << i;
-        ASSERT_EQ(sequential[i].t, concurrent[i].t) << "ray " << i;
+        ASSERT_EQ(sequential[i].parameter, concurrent[i].parameter) << "ray " << i;
     }
 }
 
@@ -521,7 +521,7 @@ TEST(GridSpatialIndex, ClosestHitAgreesWithTheLinearReference)
         if ( a.hit ) {
             hits++;
             EXPECT_EQ(a.primitive, b.primitive) << "ray " << i;
-            EXPECT_EQ(a.t, b.t) << "ray " << i;
+            EXPECT_EQ(a.parameter, b.parameter) << "ray " << i;
         }
     }
     EXPECT_GT(hits, 300);
@@ -548,8 +548,8 @@ TEST(GridSpatialIndex, AnyHitAgreesOnVisibility)
         ASSERT_EQ(a.hit, b.hit) << "ray " << i;
         if ( b.hit ) {
             blocked++;
-            EXPECT_GE(b.t, 1e-3);
-            EXPECT_LE(b.t, 1.0);
+            EXPECT_GE(b.parameter, 1e-3);
+            EXPECT_LE(b.parameter, 1.0);
         }
     }
     EXPECT_GT(blocked, 100);
@@ -640,6 +640,6 @@ TEST(GridSpatialIndex, ConcurrentQueriesEqualSequentialOnes)
     for ( int i = 0; i < numberOfRays; i++ ) {
         ASSERT_EQ(sequential[i].hit, concurrent[i].hit) << "ray " << i;
         ASSERT_EQ(sequential[i].primitive, concurrent[i].primitive) << "ray " << i;
-        ASSERT_EQ(sequential[i].t, concurrent[i].t) << "ray " << i;
+        ASSERT_EQ(sequential[i].parameter, concurrent[i].parameter) << "ray " << i;
     }
 }

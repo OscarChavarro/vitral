@@ -21,6 +21,7 @@ import type { EditHistory } from '../../model/history/edit-history';
 import type { UndoQueue } from '../../model/history/undo-queue';
 import { InteractionMode } from '../../model/interaction-mode';
 import { javaSimpleClassName } from '../../model/java-class-name';
+import { RenderTechnology } from '../../model/render-technology';
 import type { Scene } from '../../model/scene';
 import { SceneLightFactory } from '../../model/scene-light-factory';
 import { GuiEventExecutor, type CommandResult } from '../gui-event-executor';
@@ -163,6 +164,20 @@ export class HtmlWebGLVitralEditorMCPProtocol {
     if (tool === 'render.set_configuration') {
       this.setRendererConfiguration(request);
       return this.describeRendererConfigurations(request);
+    }
+    if (tool === 'viewport.set_rendering') {
+      const technology: string = HtmlWebGLVitralEditorMCPProtocol.stringProperty(
+        request,
+        'technology',
+        '',
+      );
+      if (technology.length !== 0) {
+        this.setRenderTechnology(request);
+      }
+      return this.setSelectedRendering(request);
+    }
+    if (tool === 'render.set_technology') {
+      return this.setRenderTechnology(request);
     }
     if (tool === 'render.raytrace_png') {
       return this.raytracePng(request);
@@ -592,6 +607,8 @@ export class HtmlWebGLVitralEditorMCPProtocol {
       if (value !== null) q.setTexture(value);
       value = P.booleanProperty(request, 'bumpMap');
       if (value !== null) q.setBumpMap(value);
+      value = P.booleanProperty(request, 'withShadows');
+      if (value !== null) q.setWithShadows(value);
       value = P.booleanProperty(request, 'boundingVolume');
       if (value !== null) q.setBoundingVolume(value);
       value = P.booleanProperty(request, 'normals');
@@ -609,13 +626,122 @@ export class HtmlWebGLVitralEditorMCPProtocol {
       value = P.booleanProperty(request, 'grid');
       if (value !== null) viewport.setShowGrid(value);
       const renderMode: string = P.stringProperty(request, 'renderMode', '');
-      if (renderMode.toLowerCase() === 'gpu') {
-        viewport.setRenderMode(Viewport.RENDER_MODE_Z_BUFFER);
-      } else if (renderMode.toLowerCase() === 'cpu') {
-        viewport.setRenderMode(Viewport.RENDER_MODE_RAYTRACING);
-      } else if (renderMode.length !== 0) {
-        throw new Error('renderMode must be gpu or cpu');
+      if (renderMode.length !== 0) {
+        const mode: number = HtmlWebGLVitralEditorMCPProtocol.renderModeFromName(renderMode);
+        if (!this.parent.getApplicationModel().getActiveViewportSet().isRenderModeAvailable(mode)) {
+          throw new Error(
+            'renderMode ' +
+              renderMode +
+              ' is not available with the render technology ' +
+              this.parent.getApplicationModel().getDrawingArea().getRenderTechnology().name(),
+          );
+        }
+        viewport.setRenderMode(mode);
       }
+    }
+  }
+
+  /**
+   * Sets the rendering algorithm of the selected viewport (or `viewport` when
+   * supplied). The drawing technology must already make that algorithm
+   * available; the protocol changes the canvas before calling this method.
+   */
+  private setSelectedRendering(request: string): string {
+    const set: ViewportSet = this.parent.getApplicationModel().getActiveViewportSet();
+    const selected: Viewport | null = set.getSelectedViewport();
+    const index: number = Math.trunc(
+      HtmlWebGLVitralEditorMCPProtocol.numberProperty(
+        request,
+        'viewport',
+        selected === null ? -1 : set.getViewports().indexOf(selected),
+      ),
+    );
+    if (index < 0 || index >= set.getViewportCount()) {
+      throw new Error('Viewport index out of range: ' + index);
+    }
+    const algorithm: string = HtmlWebGLVitralEditorMCPProtocol.stringProperty(
+      request,
+      'algorithm',
+      '',
+    );
+    if (algorithm.length === 0) {
+      throw new Error('algorithm must be gpu, hidden_lines, hidden_surfaces or raytracing');
+    }
+    let mode: number;
+    switch (algorithm.toLowerCase()) {
+      case 'gpu':
+        mode = Viewport.RENDER_MODE_Z_BUFFER;
+        break;
+      case 'hidden_lines':
+      case 'hidden-line':
+        mode = Viewport.RENDER_MODE_HIDDEN_LINES;
+        break;
+      case 'hidden_surfaces':
+      case 'hidden-surface':
+        mode = Viewport.RENDER_MODE_HIDDEN_SURFACES;
+        break;
+      case 'raytracing':
+      case 'raytrace':
+      case 'cpu':
+        mode = Viewport.RENDER_MODE_RAYTRACING;
+        break;
+      default:
+        throw new Error('algorithm must be gpu, hidden_lines, hidden_surfaces or raytracing');
+    }
+    if (!set.isRenderModeAvailable(mode)) {
+      throw new Error(
+        'algorithm ' +
+          algorithm +
+          ' is not available with ' +
+          this.parent.getApplicationModel().getDrawingArea().getRenderTechnology().name(),
+      );
+    }
+    set.getViewport(index).setRenderMode(mode);
+    return this.describeRendererConfigurations('{"viewport":' + index + '}');
+  }
+
+  /**
+   * Changes the technology presenting the viewport set, rebuilding the GUI
+   * (tool `render.set_technology`).
+   * @param request request with the argument technology (webgl or canvas2d;
+   * the names of the other ports, opengl4, awt and xlib, are accepted too)
+   */
+  private setRenderTechnology(request: string): string {
+    const name: string = HtmlWebGLVitralEditorMCPProtocol.stringProperty(request, 'technology', '');
+    const technology: RenderTechnology | null = RenderTechnology.fromName(name);
+
+    if (technology === null) {
+      throw new Error('Unknown technology "' + name + '": use webgl or canvas2d');
+    }
+    this.parent.setRenderTechnology(technology);
+    return '{"ok":true,"technology":"' + technology.name().toLowerCase() + '"}';
+  }
+
+  private static renderModeFromName(name: string): number {
+    switch (name.toLowerCase()) {
+      case 'gpu':
+        return Viewport.RENDER_MODE_Z_BUFFER;
+      case 'cpu':
+        return Viewport.RENDER_MODE_RAYTRACING;
+      case 'hidden_lines':
+        return Viewport.RENDER_MODE_HIDDEN_LINES;
+      case 'hidden_surfaces':
+        return Viewport.RENDER_MODE_HIDDEN_SURFACES;
+      default:
+        throw new Error('renderMode must be gpu, cpu, hidden_lines or hidden_surfaces');
+    }
+  }
+
+  private static renderModeName(mode: number): string {
+    switch (mode) {
+      case Viewport.RENDER_MODE_RAYTRACING:
+        return 'cpu';
+      case Viewport.RENDER_MODE_HIDDEN_LINES:
+        return 'hidden_lines';
+      case Viewport.RENDER_MODE_HIDDEN_SURFACES:
+        return 'hidden_surfaces';
+      default:
+        return 'gpu';
     }
   }
 
@@ -647,6 +773,8 @@ export class HtmlWebGLVitralEditorMCPProtocol {
         q.isTextureSet() +
         ',"bumpMap":' +
         q.isBumpMapSet() +
+        ',"withShadows":' +
+        q.isWithShadowsSet() +
         ',"boundingVolume":' +
         q.isBoundingVolumeSet() +
         ',"normals":' +
@@ -661,10 +789,20 @@ export class HtmlWebGLVitralEditorMCPProtocol {
         ',"grid":' +
         viewport.isShowGrid() +
         ',"renderMode":"' +
-        (viewport.getRenderMode() === Viewport.RENDER_MODE_RAYTRACING ? 'cpu' : 'gpu') +
+        HtmlWebGLVitralEditorMCPProtocol.renderModeName(viewport.getRenderMode()) +
         '"}';
     }
-    return sb + ']}';
+    return (
+      sb +
+      '],"technology":"' +
+      this.parent
+        .getApplicationModel()
+        .getDrawingArea()
+        .getRenderTechnology()
+        .name()
+        .toLowerCase() +
+      '"}'
+    );
   }
 
   private async raytracePng(request: string): Promise<string> {
@@ -832,7 +970,17 @@ export class HtmlWebGLVitralEditorMCPProtocol {
       ',' +
       tool(
         'render.set_configuration',
-        'Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu).',
+        'Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,withShadows,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu|hidden_lines|hidden_surfaces; only the ones available in the render technology: gpu|cpu with webgl, hidden_lines|cpu|hidden_surfaces with canvas2d).',
+      ) +
+      ',' +
+      tool(
+        'viewport.set_rendering',
+        'Set the canvas technology and rendering algorithm of the selected viewport (or viewport index). Arguments: technology (webgl|canvas2d, optional; opengl4 is accepted as webgl and awt or xlib as canvas2d, as in the other ports) and algorithm (gpu|hidden_lines|hidden_surfaces|raytracing). Technology changes rebuild the canvas; gpu requires webgl, hidden_lines and hidden_surfaces require canvas2d, raytracing works with either.',
+      ) +
+      ',' +
+      tool(
+        'render.set_technology',
+        'Present the viewport set with other technology, rebuilding the GUI. Arguments: technology (webgl|canvas2d; opengl4 is accepted as webgl and awt or xlib as canvas2d, as in the other ports). canvas2d draws only with the operations of the 2D context of an HTML canvas, without any WebGL context: its viewports are hidden lines (wireframe, or Appel hidden line removal when surfaces are on), hidden surfaces (Weiler-Atherton, with shadows when withShadows is set) or raytraced.',
       ) +
       ',' +
       tool(

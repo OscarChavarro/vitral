@@ -216,7 +216,11 @@ describe("CameraControlGizmoTest", () => {
             }
         }
         expect(x).toBeGreaterThanOrEqual(0);
-        const before = CameraControlGizmo.compassAngleAt(x - gizmo.getHudX(), y - gizmo.getHudY(), gizmo.getHudCamera());
+        const before = CameraControlGizmo.compassAngleAt(
+            x - gizmo.getHudX(),
+            y - gizmo.getHudY(),
+            gizmo.getHudCamera(),
+        );
 
         technique.processMousePressedEvent(mouse(x, y));
         technique.processMouseDraggedEvent(mouse(x + 20, y));

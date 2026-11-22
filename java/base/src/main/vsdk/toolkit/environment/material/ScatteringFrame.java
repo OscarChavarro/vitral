@@ -40,9 +40,9 @@ public final class ScatteringFrame {
     /** Tolerance of the normalizations */
     public static final float NORMALIZATION_EPSILON = 1e-6F;
 
-    private final Vector3Df xAxis;
-    private final Vector3Df yAxis;
-    private final Vector3Df zAxis;
+    private final Vector3Df x;
+    private final Vector3Df y;
+    private final Vector3Df z;
 
     /**
     Frame whose Z axis is the given unit vector; X is horizontal
@@ -51,9 +51,9 @@ public final class ScatteringFrame {
     */
     public ScatteringFrame(Vector3Df unitZ)
     {
-        xAxis = horizontalAxis(unitZ);
-        yAxis = completingAxis(unitZ, xAxis);
-        zAxis = new Vector3Df(unitZ);
+        x = horizontalAxis(unitZ);
+        y = completingAxis(unitZ, x);
+        z = new Vector3Df(unitZ);
     }
 
     /** [ARVO1995b] equation 6: [x|z] = Normalize(x - (x.z) z), in closed form */
@@ -77,17 +77,17 @@ public final class ScatteringFrame {
 
     public Vector3Df getX()
     {
-        return xAxis;
+        return x;
     }
 
     public Vector3Df getY()
     {
-        return yAxis;
+        return y;
     }
 
     public Vector3Df getZ()
     {
-        return zAxis;
+        return z;
     }
 
     /**
@@ -103,9 +103,9 @@ public final class ScatteringFrame {
         final float cosTheta = (float)Math.sqrt(1.0 - xi2);
         final float sinTheta = (float)Math.sqrt(xi2);
 
-        final Vector3Df planar = combine(cosPhi, xAxis, sinPhi, yAxis);
+        final Vector3Df planar = combine(cosPhi, x, sinPhi, y);
         density[0] = cosTheta / Math.PI;
-        return combine(sinTheta, planar, cosTheta, zAxis);
+        return combine(sinTheta, planar, cosTheta, z);
     }
 
     /**
@@ -122,9 +122,9 @@ public final class ScatteringFrame {
         final float cosTheta = (float)Math.pow(xi2, 1.0 / (n + 1));
         final float sinTheta = (float)Math.sqrt(1.0 - cosTheta * cosTheta);
 
-        final Vector3Df planar = combine(cosPhi, xAxis, sinPhi, yAxis);
+        final Vector3Df planar = combine(cosPhi, x, sinPhi, y);
         density[0] = (n + 1.0) * Math.pow((double)cosTheta, n) / (2.0 * Math.PI);
-        return combine(sinTheta, planar, cosTheta, zAxis);
+        return combine(sinTheta, planar, cosTheta, z);
     }
 
     /** Mirror direction of `in` about `normal`, normalized */

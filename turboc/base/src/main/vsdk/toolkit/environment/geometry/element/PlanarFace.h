@@ -76,7 +76,7 @@ class PlanarFace {
     float midPointY;
     float midPointZ;
     float planeConstant;
-    float planeTolerance;
+    float tolerance;
     float area;
     float jacobianA;
     float jacobianB;
@@ -201,7 +201,7 @@ PlanarFace::getPlaneConstant() const {
 
 inline float
 PlanarFace::getTolerance() const {
-    return planeTolerance;
+    return tolerance;
 }
 
 inline float

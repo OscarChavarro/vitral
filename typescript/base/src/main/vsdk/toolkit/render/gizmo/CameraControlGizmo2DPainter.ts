@@ -177,7 +177,13 @@ export class CameraControlGizmo2DPainter {
         this.visibleLines = new Calligraphic2DBuffer();
         const hiddenLines = new Calligraphic2DBuffer();
 
-        HiddenLineRenderer.executeAppelAlgorithm(this.brepParts, hud, this.contourLines, this.visibleLines, hiddenLines);
+        HiddenLineRenderer.executeAppelAlgorithm(
+            this.brepParts,
+            hud,
+            this.contourLines,
+            this.visibleLines,
+            hiddenLines,
+        );
     }
 
     //= Primitives ========================================================

@@ -67,4 +67,3 @@ export class ProjectedLineLayer {
     return this.lines.getNumLines() === 0;
   }
 }
-

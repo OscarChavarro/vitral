@@ -144,7 +144,7 @@ function affineRay(origin: Vector3Df, direction: Vector3Df): Ray {
 interface Answer {
     hit: boolean;
     primitive: number;
-    t: number;
+    parameter: number;
 }
 
 function ask(
@@ -163,7 +163,7 @@ function ask(
     return {
         hit: result.hasHit(),
         primitive: result.getPrimitive(),
-        t: result.hasHit() ? result.getParameter() : 0.0,
+        parameter: result.hasHit() ? result.getParameter() : 0.0,
     };
 }
 
@@ -284,7 +284,7 @@ describe("SpatialIndex", () => {
             if (a.hit) {
                 hits++;
                 expectEq(a.primitive, b.primitive, "ray " + i);
-                expectEq(a.t, b.t, "ray " + i);
+                expectEq(a.parameter, b.parameter, "ray " + i);
             }
         }
         expectGt(hits, 100);
@@ -308,8 +308,8 @@ describe("SpatialIndex", () => {
             expectEq(a.hit, b.hit, "ray " + i);
             if (b.hit) {
                 // Any accepted blocker lies in the interval
-                expectGe(b.t, 1e-3);
-                expectLe(b.t, 1.0);
+                expectGe(b.parameter, 1e-3);
+                expectLe(b.parameter, 1.0);
             }
         }
     });
@@ -348,7 +348,7 @@ describe("SpatialIndex", () => {
             workspace,
         );
         expectTrue(closest.hit);
-        expectDoubleEq(1.0, closest.t);
+        expectDoubleEq(1.0, closest.parameter);
         expectLt(anyTests, workspace.getPrimitiveTests());
     });
 
@@ -422,7 +422,7 @@ describe("SpatialIndex", () => {
         expectTrue(a.hit);
         expectTrue(b.hit);
         expectEq(a.primitive, b.primitive);
-        expectEq(a.t, b.t);
+        expectEq(a.parameter, b.parameter);
     });
 
     it("UnboundedPrimitivesAreAlwaysTested", () => {
@@ -446,7 +446,7 @@ describe("SpatialIndex", () => {
         );
         expectTrue(a.hit);
         expectEq(1, a.primitive);
-        expectDoubleEq(2.0, a.t);
+        expectDoubleEq(2.0, a.parameter);
     });
 
     it("EmptyIndex", () => {
@@ -554,7 +554,7 @@ describe("SpatialIndex", () => {
         for (let i = 0; i < numberOfRays; i++) {
             expectEq(sequential[i]!.hit, concurrent[i]!.hit, "ray " + i);
             expectEq(sequential[i]!.primitive, concurrent[i]!.primitive, "ray " + i);
-            expectEq(sequential[i]!.t, concurrent[i]!.t, "ray " + i);
+            expectEq(sequential[i]!.parameter, concurrent[i]!.parameter, "ray " + i);
         }
     });
 });
@@ -593,7 +593,7 @@ describe("GridSpatialIndex", () => {
             if (a.hit) {
                 hits++;
                 expectEq(a.primitive, b.primitive, "ray " + i);
-                expectEq(a.t, b.t, "ray " + i);
+                expectEq(a.parameter, b.parameter, "ray " + i);
             }
         }
         expectGt(hits, 300);
@@ -617,8 +617,8 @@ describe("GridSpatialIndex", () => {
             expectEq(a.hit, b.hit, "ray " + i);
             if (b.hit) {
                 blocked++;
-                expectGe(b.t, 1e-3);
-                expectLe(b.t, 1.0);
+                expectGe(b.parameter, 1e-3);
+                expectLe(b.parameter, 1.0);
             }
         }
         expectGt(blocked, 100);
@@ -736,7 +736,7 @@ describe("GridSpatialIndex", () => {
         for (let i = 0; i < numberOfRays; i++) {
             expectEq(sequential[i]!.hit, concurrent[i]!.hit, "ray " + i);
             expectEq(sequential[i]!.primitive, concurrent[i]!.primitive, "ray " + i);
-            expectEq(sequential[i]!.t, concurrent[i]!.t, "ray " + i);
+            expectEq(sequential[i]!.parameter, concurrent[i]!.parameter, "ray " + i);
         }
     });
 });

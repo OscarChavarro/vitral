@@ -16,6 +16,7 @@ import {
   TraceWorkspace,
   Vector3Dd,
   type _PolyhedralBoundedSolidFace,
+  type _PolyhedralBoundedSolidHalfEdge,
   type Geometry,
   type Light,
   type PolyhedralBoundedSolid,
@@ -259,8 +260,8 @@ export class ProjectedSurfacesViewBuilder {
       if (loop === null || loop.boundaryStartHalfEdge === null) {
         continue;
       }
-      let he = loop.boundaryStartHalfEdge;
-      const heStart = he;
+      let he: _PolyhedralBoundedSolidHalfEdge | null = loop.boundaryStartHalfEdge;
+      const heStart: _PolyhedralBoundedSolidHalfEdge = he;
       do {
         if (he === null || he.startingVertex === null) {
           break;

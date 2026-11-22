@@ -228,11 +228,7 @@ export class Tube extends Solid {
     @param out receives up to two intervals
     @return number of intervals
     */
-    private computeInteriorIntervals(
-        origin: Vector3Dd,
-        direction: Vector3Dd,
-        out: (TubeInterval | null)[],
-    ): number {
+    private computeInteriorIntervals(origin: Vector3Dd, direction: Vector3Dd, out: (TubeInterval | null)[]): number {
         if (this.isWasher()) {
             return 0;
         }

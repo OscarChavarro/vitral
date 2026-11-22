@@ -211,11 +211,7 @@ export class CameraControlGizmo extends Gizmo {
                     const bz = CameraControlGizmo.band(k);
                     // Centered boxes, placed by the position of the part
                     // (renderers tessellate boxes centered at the origin)
-                    const half = new Vector3Dd(
-                        (bx[1]! - bx[0]!) / 2,
-                        (by[1]! - by[0]!) / 2,
-                        (bz[1]! - bz[0]!) / 2,
-                    );
+                    const half = new Vector3Dd((bx[1]! - bx[0]!) / 2, (by[1]! - by[0]!) / 2, (bz[1]! - bz[0]!) / 2);
                     const box = new Box(half.multiply(-1), half);
                     this.parts.add(
                         CameraControlGizmo.createPart(
@@ -488,7 +484,11 @@ export class CameraControlGizmo extends Gizmo {
             currentRotation.get(1, 0),
             currentRotation.get(2, 0),
         );
-        const currentUp = new Vector3Dd(currentRotation.get(0, 2), currentRotation.get(1, 2), currentRotation.get(2, 2));
+        const currentUp = new Vector3Dd(
+            currentRotation.get(0, 2),
+            currentRotation.get(1, 2),
+            currentRotation.get(2, 2),
+        );
         // Tilting down to look at the TOP, what was ahead goes up on the
         // screen; tilting up to look at the BOTTOM, it goes down
         const hint = currentUp.add(currentFront.multiply(d[2]!));

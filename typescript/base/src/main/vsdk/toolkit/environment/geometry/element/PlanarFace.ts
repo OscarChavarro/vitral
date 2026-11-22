@@ -47,7 +47,7 @@ export class PlanarFace extends FundamentalEntity {
     private midPointY = 0;
     private midPointZ = 0;
     private planeConstant = 0;
-    private planeTolerance = 0;
+    private tolerance = 0;
     private area = 0;
     private jacobianA = 0;
     private jacobianB = 0;
@@ -150,7 +150,7 @@ export class PlanarFace extends FundamentalEntity {
         this.computeAreaAndJacobian();
         this.computeMidPoint();
         this.planeConstant = -PlanarFace.dot(this.getNormal(), this.getMidPoint());
-        this.planeTolerance = this.computeTolerance();
+        this.tolerance = this.computeTolerance();
         this.dominantAxis = PlanarFace.dominantCoordinate(this.getNormal());
         this.status = PlanarFace.BuildStatus.VALID;
     }
@@ -184,7 +184,7 @@ export class PlanarFace extends FundamentalEntity {
     }
 
     public getTolerance(): number {
-        return this.planeTolerance;
+        return this.tolerance;
     }
 
     public getArea(): number {
@@ -714,7 +714,7 @@ export class PlanarFace extends FundamentalEntity {
         for (let i = 0; i < this.numberOfVertices; i++) {
             const p = this.getPosition(i);
             const ep = f(PlanarFace.dot(otherNormal, p) + other.planeConstant);
-            const localTolerance = f(other.planeTolerance + PlanarFace.positionTolerance(p, PlanarFace.EPSILON_FLOAT));
+            const localTolerance = f(other.tolerance + PlanarFace.positionTolerance(p, PlanarFace.EPSILON_FLOAT));
             if (ep > localTolerance) {
                 return true;
             }

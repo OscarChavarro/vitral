@@ -78,7 +78,7 @@ public class PlanarFace extends FundamentalEntity {
     private float midPointY;
     private float midPointZ;
     private float planeConstant;
-    private float planeTolerance;
+    private float tolerance;
     private float area;
     private float jacobianA;
     private float jacobianB;
@@ -163,7 +163,7 @@ public class PlanarFace extends FundamentalEntity {
         midPointY = 0.0F;
         midPointZ = 0.0F;
         planeConstant = 0.0F;
-        planeTolerance = 0.0F;
+        tolerance = 0.0F;
         area = 0.0F;
         jacobianA = 0.0F;
         jacobianB = 0.0F;
@@ -201,7 +201,7 @@ public class PlanarFace extends FundamentalEntity {
         computeAreaAndJacobian();
         computeMidPoint();
         planeConstant = -dot(getNormal(), getMidPoint());
-        planeTolerance = computeTolerance();
+        tolerance = computeTolerance();
         dominantAxis = dominantCoordinate(getNormal());
         status = BuildStatus.VALID;
     }
@@ -235,7 +235,7 @@ public class PlanarFace extends FundamentalEntity {
     }
 
     public float getTolerance() {
-        return planeTolerance;
+        return tolerance;
     }
 
     public float getArea() {
@@ -764,7 +764,7 @@ public class PlanarFace extends FundamentalEntity {
         for ( int i = 0; i < numberOfVertices; i++ ) {
             final Vector3Df p = getPosition(i);
             final double ep = dot(otherNormal, p) + other.planeConstant;
-            final double localTolerance = other.planeTolerance + positionTolerance(p, EPSILON_FLOAT);
+            final double localTolerance = other.tolerance + positionTolerance(p, EPSILON_FLOAT);
             if ( ep > localTolerance ) {
                 return true;
             }

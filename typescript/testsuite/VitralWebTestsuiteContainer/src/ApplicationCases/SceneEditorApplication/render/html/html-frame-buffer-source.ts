@@ -23,7 +23,13 @@ export class HtmlFrameBufferSource implements FrameBufferSource {
    * @param width width of the area to read
    * @param height height of the area to read
    */
-  constructor(frame: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
+  constructor(
+    frame: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ) {
     this.frame = frame;
     this.x = Math.max(0, x);
     this.y = Math.max(0, y);

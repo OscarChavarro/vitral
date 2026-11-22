@@ -79,11 +79,12 @@ Package-private in Java; exported only for traceability.
 export class _WeilerAthertonSourcePolygon extends RenderingElement {
     /// Area of the polygon on the x-y plane of the viewing space
     public template: _WeilerAthertonArea = null as unknown as _WeilerAthertonArea;
-    /// Plane of the polygon in the viewing space, as depth = a*x + b*y + c,
+    /// Plane of the polygon in the viewing space, as depth =
+    /// depthSlopeX * x + depthSlopeY * y + depthOffset,
     /// where a smaller depth is closer to the observer
-    public a = 0.0;
-    public b = 0.0;
-    public c = 0.0;
+    public depthSlopeX = 0.0;
+    public depthSlopeY = 0.0;
+    public depthOffset = 0.0;
     /// Key of the preliminary depth sort: the nearest depth of the polygon
     public nearestDepth = 0.0;
     public body: SimpleBody | null = null;
@@ -97,7 +98,7 @@ export class _WeilerAthertonSourcePolygon extends RenderingElement {
     public original: _WeilerAthertonSourcePolygon = this;
 
     public depthAt(x: number, y: number): number {
-        return this.a * x + this.b * y + this.c;
+        return this.depthSlopeX * x + this.depthSlopeY * y + this.depthOffset;
     }
 }
 
@@ -616,9 +617,9 @@ export class HiddenSurfaceRenderer extends RenderingElement {
 
         const clipped = new _WeilerAthertonSourcePolygon();
         clipped.template = HiddenSurfaceRenderer.merged(parts);
-        clipped.a = source.a;
-        clipped.b = source.b;
-        clipped.c = source.c;
+        clipped.depthSlopeX = source.depthSlopeX;
+        clipped.depthSlopeY = source.depthSlopeY;
+        clipped.depthOffset = source.depthOffset;
         clipped.body = source.body;
         clipped.face = source.face;
         clipped.worldPlane = source.worldPlane;
@@ -1239,9 +1240,9 @@ export class HiddenSurfaceRenderer extends RenderingElement {
         remaining: ArrayList<_WeilerAthertonPiece>,
     ): void {
         // Points with da*x + db*y + dc < 0 are in front of the clip polygon
-        const da: number = piece.source.a - clipPolygon.a;
-        const db: number = piece.source.b - clipPolygon.b;
-        const dc: number = piece.source.c - clipPolygon.c;
+        const da: number = piece.source.depthSlopeX - clipPolygon.depthSlopeX;
+        const db: number = piece.source.depthSlopeY - clipPolygon.depthSlopeY;
+        const dc: number = piece.source.depthOffset - clipPolygon.depthOffset;
         const area: _WeilerAthertonArea = piece.area;
         const margin: number = 1.0 + 0.01 * (area.maxX - area.minX + (area.maxY - area.minY));
         const box: number[][] = [
@@ -1930,9 +1931,9 @@ export class HiddenSurfaceRenderer extends RenderingElement {
         cx /= n;
         cy /= n;
         cz /= n;
-        source.a = -nx / nz;
-        source.b = -ny / nz;
-        source.c = cz - source.a * cx - source.b * cy;
+        source.depthSlopeX = -nx / nz;
+        source.depthSlopeY = -ny / nz;
+        source.depthOffset = cz - source.depthSlopeX * cx - source.depthSlopeY * cy;
         return true;
     }
 

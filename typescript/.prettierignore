@@ -3,3 +3,4 @@ dist
 artifacts
 package-lock.json
 .angular
+testsuite/VitralWebTestsuiteContainer/public/etc

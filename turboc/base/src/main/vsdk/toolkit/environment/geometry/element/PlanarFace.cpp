@@ -93,7 +93,7 @@ PlanarFace::PlanarFace():
     midPointY(0.0F),
     midPointZ(0.0F),
     planeConstant(0.0F),
-    planeTolerance(0.0F),
+    tolerance(0.0F),
     area(0.0F),
     jacobianA(0.0F),
     jacobianB(0.0F),
@@ -124,7 +124,7 @@ PlanarFace::PlanarFace(const int inNumberOfVertices, const Vector3Df *inPosition
     midPointY(0.0F),
     midPointZ(0.0F),
     planeConstant(0.0F),
-    planeTolerance(0.0F),
+    tolerance(0.0F),
     area(0.0F),
     jacobianA(0.0F),
     jacobianB(0.0F),
@@ -159,7 +159,7 @@ PlanarFace::PlanarFace(const int inNumberOfVertices, const Vector3Df *inPosition
     computeAreaAndJacobian();
     computeMidPoint();
     planeConstant = -dot(getNormal(), getMidPoint());
-    planeTolerance = computeTolerance();
+    tolerance = computeTolerance();
     dominantAxis = dominantCoordinate(getNormal());
     status = BuildStatus::VALID;
 }
@@ -633,7 +633,7 @@ PlanarFace::isAtLeastPartlyInFront(const PlanarFace &other) const {
     for ( int i = 0; i < numberOfVertices; i++ ) {
         const Vector3Df p = getPosition(i);
         const double ep = dot(otherNormal, p) + other.planeConstant;
-        const double localTolerance = other.planeTolerance + positionTolerance(p, EPSILON_FLOAT);
+        const double localTolerance = other.tolerance + positionTolerance(p, EPSILON_FLOAT);
         if ( ep > localTolerance ) {
             return TRUE;
         }

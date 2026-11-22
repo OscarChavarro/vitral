@@ -16,9 +16,7 @@ describe("CameraControlGizmo2DPainterTest", () => {
     function cornerCamera(): Camera {
         const camera = new Camera();
         camera.setPosition(new Vector3Dd(5, -5, 5));
-        camera.setRotation(
-            CameraControlGizmo.createCameraRotation(new Vector3Dd(-1, 1, -1), new Vector3Dd(0, 0, 1))!,
-        );
+        camera.setRotation(CameraControlGizmo.createCameraRotation(new Vector3Dd(-1, 1, -1), new Vector3Dd(0, 0, 1))!);
         camera.setFocusedPositionDirect(new Vector3Dd(0, 0, 0));
         camera.updateVectors();
         return camera;

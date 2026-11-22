@@ -402,15 +402,15 @@ class XlibSpanSink : public ProjectedPolygonScanConverter::SpanSink {
 private:
     Display* display;
     Drawable frame;
-    GC gc;
+    GC graphicsContext;
 
 public:
     XlibSpanSink(Display* display, Drawable frame, GC gc)
-        : display(display), frame(frame), gc(gc) {}
+        : display(display), frame(frame), graphicsContext(gc) {}
 
     virtual void fillSpan(int x0, int x1, int y) override
     {
-        XFillRectangle(display, frame, gc, x0, y, x1 - x0, 1);
+        XFillRectangle(display, frame, graphicsContext, x0, y, x1 - x0, 1);
     }
 };
 

@@ -52,7 +52,12 @@ export class ClipSpaceLineProjector {
    * @return true if a segment was added
    */
   addSegment(out: Calligraphic2DBuffer, p0: Vector3Dd, p1: Vector3Dd): boolean;
-  addSegment(out: Calligraphic2DBuffer, transform: Matrix4x4d, p0: Vector3Dd, p1: Vector3Dd): boolean;
+  addSegment(
+    out: Calligraphic2DBuffer,
+    transform: Matrix4x4d,
+    p0: Vector3Dd,
+    p1: Vector3Dd,
+  ): boolean;
   addSegment(
     out: Calligraphic2DBuffer,
     a: Vector3Dd | Matrix4x4d,

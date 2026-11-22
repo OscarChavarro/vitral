@@ -152,7 +152,7 @@ class SpatialIndexTest
     private static final class Answer {
         boolean hit;
         int primitive;
-        double t;
+        double parameter;
     }
 
     private static Answer ask(SpatialIndex index, Scene scene, Vector3Df origin, Vector3Df direction,
@@ -171,7 +171,7 @@ class SpatialIndexTest
         Answer answer = new Answer();
         answer.hit = result.hasHit();
         answer.primitive = result.getPrimitive();
-        answer.t = result.hasHit() ? result.getParameter() : 0.0;
+        answer.parameter = result.hasHit() ? result.getParameter() : 0.0;
         return answer;
     }
 
@@ -280,7 +280,7 @@ class SpatialIndexTest
             if ( a.hit ) {
                 hits++;
                 expectEq(a.primitive, b.primitive, "ray " + i);
-                expectEq(a.t, b.t, "ray " + i);
+                expectEq(a.parameter, b.parameter, "ray " + i);
             }
         }
         expectGt(hits, 100);
@@ -306,8 +306,8 @@ class SpatialIndexTest
             expectEq(a.hit, b.hit, "ray " + i);
             if ( b.hit ) {
                 // Any accepted blocker lies in the interval
-                expectGe(b.t, 1e-3);
-                expectLe(b.t, 1.0);
+                expectGe(b.parameter, 1e-3);
+                expectLe(b.parameter, 1.0);
             }
         }
     }
@@ -330,7 +330,7 @@ class SpatialIndexTest
         workspace.clearCounters();
         final Answer closest = ask(linear, scene, new Vector3Df(0.1F, 0.2F, 0), new Vector3Df(0, 0, 1), 0.0, 100.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(closest.hit);
-        expectDoubleEq(1.0, closest.t);
+        expectDoubleEq(1.0, closest.parameter);
         expectLt(anyTests, workspace.getPrimitiveTests());
     }
 
@@ -392,7 +392,7 @@ class SpatialIndexTest
         expectTrue(a.hit);
         expectTrue(b.hit);
         expectEq(a.primitive, b.primitive);
-        expectEq(a.t, b.t);
+        expectEq(a.parameter, b.parameter);
     }
 
     @Test
@@ -409,7 +409,7 @@ class SpatialIndexTest
         final Answer a = ask(binned, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
         expectEq(1, a.primitive);
-        expectDoubleEq(2.0, a.t);
+        expectDoubleEq(2.0, a.parameter);
     }
 
     @Test
@@ -493,7 +493,7 @@ class SpatialIndexTest
         for ( int i = 0; i < numberOfRays; i++ ) {
             expectEq(sequential[i].hit, concurrent[i].hit, "ray " + i);
             expectEq(sequential[i].primitive, concurrent[i].primitive, "ray " + i);
-            expectEq(sequential[i].t, concurrent[i].t, "ray " + i);
+            expectEq(sequential[i].parameter, concurrent[i].parameter, "ray " + i);
         }
     }
 
@@ -534,7 +534,7 @@ class SpatialIndexTest
             if ( a.hit ) {
                 hits++;
                 expectEq(a.primitive, b.primitive, "ray " + i);
-                expectEq(a.t, b.t, "ray " + i);
+                expectEq(a.parameter, b.parameter, "ray " + i);
             }
         }
         expectGt(hits, 300);
@@ -560,8 +560,8 @@ class SpatialIndexTest
             expectEq(a.hit, b.hit, "ray " + i);
             if ( b.hit ) {
                 blocked++;
-                expectGe(b.t, 1e-3);
-                expectLe(b.t, 1.0);
+                expectGe(b.parameter, 1e-3);
+                expectLe(b.parameter, 1.0);
             }
         }
         expectGt(blocked, 100);
@@ -655,7 +655,7 @@ class SpatialIndexTest
         for ( int i = 0; i < numberOfRays; i++ ) {
             expectEq(sequential[i].hit, concurrent[i].hit, "ray " + i);
             expectEq(sequential[i].primitive, concurrent[i].primitive, "ray " + i);
-            expectEq(sequential[i].t, concurrent[i].t, "ray " + i);
+            expectEq(sequential[i].parameter, concurrent[i].parameter, "ray " + i);
         }
     }
 }

@@ -25,7 +25,7 @@ export class GridTriangleRayTest implements PrimitiveRayTest {
     private readonly ray: Ray;
     private readonly positions: ArrayLike<number>;
     private readonly indexes: ArrayLike<number>;
-    private readonly t: number[] = [0];
+    private readonly rayParameter: number[] = [0];
     private readonly u: number[] = [0];
     private readonly v: number[] = [0];
 
@@ -49,14 +49,14 @@ export class GridTriangleRayTest implements PrimitiveRayTest {
                 this.positions,
                 this.indexes,
                 primitive,
-                this.t,
+                this.rayParameter,
                 this.u,
                 this.v,
             )
         ) {
             return false;
         }
-        const t = this.t[0]!;
+        const t = this.rayParameter[0]!;
         if (t < minimumT || t > maximumT) {
             return false;
         }

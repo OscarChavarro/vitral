@@ -96,7 +96,8 @@ export class BrepExportCache {
       }
     } else if (geometry instanceof PolynomialSurface) {
       const polynomial: PolynomialSurface = geometry;
-      sb += 'polynomial ' + polynomial.getOrder() + '[' + polynomial.getCoefficients().join(', ') + ']';
+      sb +=
+        'polynomial ' + polynomial.getOrder() + '[' + polynomial.getCoefficients().join(', ') + ']';
     } else if (geometry instanceof QuadricSurface) {
       const quadric: QuadricSurface = geometry;
       sb +=

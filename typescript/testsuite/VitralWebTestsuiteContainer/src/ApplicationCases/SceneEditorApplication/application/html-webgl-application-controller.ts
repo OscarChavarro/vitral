@@ -5,16 +5,22 @@ import { HtmlDrawingAreaController } from '../gui/html/html-drawing-area-control
 import { HtmlDrawingAreaFeedback } from '../gui/html/html-drawing-area-feedback';
 import type { ApplicationModel } from '../model/application-model';
 import type { DrawingArea } from '../model/drawing-area';
+import { RenderTechnology } from '../model/render-technology';
+import { HtmlDrawingAreaRenderer } from '../render/html/html-drawing-area-renderer';
+import { HtmlViewportSetCanvas } from '../render/html/html-viewport-set-canvas';
 import { WebGLDrawingAreaRenderer } from '../render/webgl/webgl-drawing-area-renderer';
 import type { HtmlWebGLSceneEditorApplication } from './html-webgl-scene-editor-application';
 
 /**
  * Port of `application.AwtJogl4ApplicationController`.
  *
- * Composition root of the drawing area of the editor: it creates the WebGL
- * canvas and connects the drawing area model with its renderer, its interaction
- * techniques and the HTML adapters, and offers the operations that need the
- * canvas.
+ * Composition root of the drawing area of the editor: it creates the canvas of
+ * the render technology selected in the `DrawingArea` (a WebGL canvas, or a
+ * canvas drawn only with the operations of its 2D context, without any WebGL
+ * context) and connects the drawing area model with its renderer, its
+ * interaction techniques and the HTML adapters, and offers the operations
+ * that need the canvas. A canvas element gives only one kind of context in its
+ * life, so changing the technology creates a new canvas.
  *
  * Java's `GLCanvas` draws a frame on `repaint` / `display`; here `repaint`
  * schedules one frame for the next animation frame of the browser, frames are
@@ -26,10 +32,14 @@ import type { HtmlWebGLSceneEditorApplication } from './html-webgl-scene-editor-
 export class HtmlWebGLApplicationController {
   private readonly model: ApplicationModel;
   private canvas: HTMLCanvasElement | null = null;
+  /// Technology of the current canvas
+  private canvasTechnology: RenderTechnology | null = null;
   private gl: WebGL2RenderingContext | null = null;
   private htmlController: HtmlDrawingAreaController | null = null;
   private htmlFeedback: HtmlDrawingAreaFeedback | null = null;
   private renderer: WebGLDrawingAreaRenderer | null = null;
+  /// Canvas and renderer of the canvas 2D technology
+  private viewportSetCanvas: HtmlViewportSetCanvas | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private reshaped = false;
   private framePending = false;
@@ -43,23 +53,41 @@ export class HtmlWebGLApplicationController {
 
   private createDrawingArea(application: HtmlWebGLSceneEditorApplication): void {
     const drawingArea: DrawingArea = this.model.getDrawingArea();
+    let techniques: DrawingAreaInteractionTechniques;
 
     //-----------------------------------------------------------------
     const canvas: HTMLCanvasElement = document.createElement('canvas');
     canvas.className = 'scene-editor-canvas';
     canvas.style.minWidth = '8px';
     canvas.style.minHeight = '8px';
-    const gl: WebGL2RenderingContext | null = canvas.getContext('webgl2', {
-      depth: true,
-      antialias: false,
-    });
-    if (gl === null) {
-      throw new Error('The scene editor requires WebGL2 support.');
-    }
     this.canvas = canvas;
-    this.gl = gl;
+    this.canvasTechnology = drawingArea.getRenderTechnology();
+    if (this.canvasTechnology === RenderTechnology.CANVAS2D) {
+      techniques = this.createHtmlCanvas(application, canvas);
+    } else {
+      techniques = this.createWebGLCanvas(application, canvas);
+    }
 
     //-----------------------------------------------------------------
+    this.htmlController = new HtmlDrawingAreaController(
+      canvas,
+      drawingArea,
+      techniques,
+      this.htmlFeedback!,
+    );
+
+    this.resizeObserver = new ResizeObserver((): void => this.reshape());
+    this.resizeObserver.observe(canvas);
+  }
+
+  /**
+   * Creates the interaction techniques, reporting to the feedback of the
+   * current canvas.
+   */
+  private createTechniques(
+    application: HtmlWebGLSceneEditorApplication,
+    canvas: HTMLCanvasElement,
+  ): DrawingAreaInteractionTechniques {
     this.htmlFeedback = new HtmlDrawingAreaFeedback(application, canvas);
     const techniques: DrawingAreaInteractionTechniques = new DrawingAreaInteractionTechniques(
       this.model,
@@ -67,11 +95,54 @@ export class HtmlWebGLApplicationController {
     );
     // While dragging the gizmo, the cursor wraps around its viewport
     techniques.setCursorWrapEnabled(this.htmlFeedback.isCursorWarpAvailable());
+    return techniques;
+  }
+
+  /**
+   * Java's `createAwtCanvas`: a canvas drawn with its 2D context only.
+   */
+  private createHtmlCanvas(
+    application: HtmlWebGLSceneEditorApplication,
+    canvas: HTMLCanvasElement,
+  ): DrawingAreaInteractionTechniques {
+    const viewportSetCanvas: HtmlViewportSetCanvas = new HtmlViewportSetCanvas(canvas);
+    this.viewportSetCanvas = viewportSetCanvas;
+    const techniques: DrawingAreaInteractionTechniques = this.createTechniques(application, canvas);
+
+    viewportSetCanvas.setRenderer(
+      new HtmlDrawingAreaRenderer(
+        this.model,
+        this.htmlFeedback!,
+        (viewport: Viewport): void => techniques.activateViewport(viewport),
+        techniques.getTranslationGizmo(),
+        techniques.getRotateGizmo(),
+        techniques.getScaleGizmo(),
+      ),
+    );
+    return techniques;
+  }
+
+  /**
+   * Java's `createJogl4Canvas`.
+   */
+  private createWebGLCanvas(
+    application: HtmlWebGLSceneEditorApplication,
+    canvas: HTMLCanvasElement,
+  ): DrawingAreaInteractionTechniques {
+    const gl: WebGL2RenderingContext | null = canvas.getContext('webgl2', {
+      depth: true,
+      antialias: false,
+    });
+    if (gl === null) {
+      throw new Error('The scene editor requires WebGL2 support.');
+    }
+    this.gl = gl;
+    const techniques: DrawingAreaInteractionTechniques = this.createTechniques(application, canvas);
 
     //-----------------------------------------------------------------
     this.renderer = new WebGLDrawingAreaRenderer(
       this.model,
-      this.htmlFeedback,
+      this.htmlFeedback!,
       {
         createLabelImage: (
           text: string,
@@ -86,24 +157,23 @@ export class HtmlWebGLApplicationController {
     );
     this.renderer.init();
 
-    //-----------------------------------------------------------------
-    this.htmlController = new HtmlDrawingAreaController(
-      canvas,
-      drawingArea,
-      techniques,
-      this.htmlFeedback,
-    );
-
-    this.resizeObserver = new ResizeObserver((): void => this.reshape());
-    this.resizeObserver.observe(canvas);
     canvas.addEventListener('webglcontextlost', (event: Event): void => event.preventDefault());
     canvas.addEventListener('webglcontextrestored', (): void => {
       this.renderer?.init();
       this.requestFrame();
     });
+    return techniques;
   }
 
   private ensureDrawingArea(application: HtmlWebGLSceneEditorApplication): void {
+    if (
+      this.canvas !== null &&
+      this.canvasTechnology !== this.model.getDrawingArea().getRenderTechnology()
+    ) {
+      // Java's previous canvas leaves with the window that contains it; here
+      // it is released explicitly (listeners, observers, WebGL resources)
+      this.releaseDrawingArea();
+    }
     if (this.canvas === null) {
       this.createDrawingArea(application);
     }
@@ -183,7 +253,14 @@ export class HtmlWebGLApplicationController {
   private async drawFrame(): Promise<void> {
     const gl: WebGL2RenderingContext | null = this.gl;
     const canvas: HTMLCanvasElement | null = this.canvas;
-    if (gl === null || canvas === null || this.renderer === null || gl.isContextLost()) {
+    const viewportSetCanvas: HtmlViewportSetCanvas | null = this.viewportSetCanvas;
+    if (canvas === null) {
+      return;
+    }
+    if (
+      viewportSetCanvas === null &&
+      (gl === null || this.renderer === null || gl.isContextLost())
+    ) {
       return;
     }
     this.frameInProgress = true;
@@ -194,7 +271,11 @@ export class HtmlWebGLApplicationController {
       // component without size: until layout gives the canvas a size (i.e.
       // while the GUI is being rebuilt), there is nothing to draw
       if (this.reshaped && canvas.clientWidth > 0 && canvas.clientHeight > 0) {
-        await this.renderer.display(gl, canvas.width, canvas.height);
+        if (viewportSetCanvas !== null) {
+          await viewportSetCanvas.display();
+        } else {
+          await this.renderer!.display(gl!, canvas.width, canvas.height);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -212,7 +293,7 @@ export class HtmlWebGLApplicationController {
 
   private reshape(): void {
     const canvas: HTMLCanvasElement | null = this.canvas;
-    if (canvas === null || this.renderer === null) {
+    if (canvas === null || (this.renderer === null && this.viewportSetCanvas === null)) {
       return;
     }
     if (canvas.clientWidth <= 0 || canvas.clientHeight <= 0) {
@@ -225,7 +306,14 @@ export class HtmlWebGLApplicationController {
       canvas.width = width;
       canvas.height = height;
     }
-    this.renderer.reshape(width, height);
+    if (this.renderer !== null) {
+      this.renderer.reshape(width, height);
+    } else {
+      // Java's AWT canvas has no reshape: its renderer follows the size of
+      // the canvas each frame
+      this.htmlFeedback?.beforeFrame();
+      this.model.getDrawingArea().updateSurfaceSize(width, height);
+    }
     this.reshaped = true;
     this.requestFrame();
   }
@@ -297,15 +385,29 @@ export class HtmlWebGLApplicationController {
    * the application is closed).
    */
   dispose(): void {
+    this.releaseDrawingArea();
+  }
+
+  /**
+   * Releases the canvas of the current technology, its WebGL resources (if
+   * any) and its listeners.
+   */
+  private releaseDrawingArea(): void {
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.htmlController?.dispose();
+    this.htmlController = null;
     if (this.gl !== null && this.renderer !== null) {
       this.renderer.dispose(this.gl);
     }
+    this.viewportSetCanvas?.setRenderer(null);
     this.canvas?.remove();
     this.canvas = null;
+    this.canvasTechnology = null;
     this.gl = null;
     this.renderer = null;
+    this.viewportSetCanvas = null;
+    this.htmlFeedback = null;
+    this.reshaped = false;
   }
 }

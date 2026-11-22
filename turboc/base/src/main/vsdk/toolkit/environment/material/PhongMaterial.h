@@ -49,8 +49,8 @@ class PhongMaterial : public Material {
     const PhongLobe *transmission;
     const PhongLobe *emission;
     const Texture *texture;
-    const float refractionIndexReal;
-    const float refractionIndexImaginary;
+    const float storedRefractionIndexReal;
+    const float storedRefractionIndexImaginary;
 
     ColorRgb textureColor(const SurfaceShadingPoint &point) const;
     void samplingProbabilities(
@@ -274,22 +274,22 @@ PhongMaterial::getTexture() const {
 
 inline float
 PhongMaterial::getRefractionIndex() const {
-    return transmission != NULL ? refractionIndexReal : 1.0F;
+    return transmission != NULL ? storedRefractionIndexReal : 1.0F;
 }
 
 inline float
 PhongMaterial::getRefractionIndexImaginary() const {
-    return transmission != NULL ? refractionIndexImaginary : 0.0F;
+    return transmission != NULL ? storedRefractionIndexImaginary : 0.0F;
 }
 
 inline float
 PhongMaterial::getStoredRefractionIndexReal() const {
-    return refractionIndexReal;
+    return storedRefractionIndexReal;
 }
 
 inline float
 PhongMaterial::getStoredRefractionIndexImaginary() const {
-    return refractionIndexImaginary;
+    return storedRefractionIndexImaginary;
 }
 
 #endif

@@ -87,7 +87,7 @@ _WeilerAthertonArea::overlapsBox(const _WeilerAthertonArea* other) const
 //= _WeilerAthertonSourcePolygon ==========================================
 
 _WeilerAthertonSourcePolygon::_WeilerAthertonSourcePolygon()
-    : templateArea(nullptr), a(0.0), b(0.0), c(0.0), nearestDepth(0.0),
+    : templateArea(nullptr), depthSlopeX(0.0), depthSlopeY(0.0), depthOffset(0.0), nearestDepth(0.0),
       body(nullptr), face(nullptr), worldPlane(nullptr), complete(false),
       original(this)
 {
@@ -96,7 +96,7 @@ _WeilerAthertonSourcePolygon::_WeilerAthertonSourcePolygon()
 double
 _WeilerAthertonSourcePolygon::depthAt(double x, double y) const
 {
-    return a * x + b * y + c;
+    return depthSlopeX * x + depthSlopeY * y + depthOffset;
 }
 
 //= _WeilerAthertonPiece ==================================================
@@ -462,9 +462,9 @@ HiddenSurfaceRenderer::clippedToWindow(_WeilerAthertonSourcePolygon* source,
 
     _WeilerAthertonSourcePolygon* clipped = newSource();
     clipped->templateArea = merged(parts);
-    clipped->a = source->a;
-    clipped->b = source->b;
-    clipped->c = source->c;
+    clipped->depthSlopeX = source->depthSlopeX;
+    clipped->depthSlopeY = source->depthSlopeY;
+    clipped->depthOffset = source->depthOffset;
     clipped->body = source->body;
     clipped->face = source->face;
     clipped->worldPlane = source->worldPlane;
@@ -1114,9 +1114,9 @@ HiddenSurfaceRenderer::addFrontPart(_WeilerAthertonSourcePolygon* clipPolygon,
     java::ArrayList<_WeilerAthertonPiece*>& remaining)
 {
     // Points with da*x + db*y + dc < 0 are in front of the clip polygon
-    double da = piece->source->a - clipPolygon->a;
-    double db = piece->source->b - clipPolygon->b;
-    double dc = piece->source->c - clipPolygon->c;
+    double da = piece->source->depthSlopeX - clipPolygon->depthSlopeX;
+    double db = piece->source->depthSlopeY - clipPolygon->depthSlopeY;
+    double dc = piece->source->depthOffset - clipPolygon->depthOffset;
     _WeilerAthertonArea* area = piece->area;
     double margin = 1.0 + 0.01 * ((area->maxX - area->minX) +
         (area->maxY - area->minY));
@@ -1856,9 +1856,9 @@ HiddenSurfaceRenderer::fitDepthPlane(const java::ArrayList<Vector3Dd>& loop,
     cx /= n;
     cy /= n;
     cz /= n;
-    source->a = -nx / nz;
-    source->b = -ny / nz;
-    source->c = cz - source->a * cx - source->b * cy;
+    source->depthSlopeX = -nx / nz;
+    source->depthSlopeY = -ny / nz;
+    source->depthOffset = cz - source->depthSlopeX * cx - source->depthSlopeY * cy;
     return true;
 }
 

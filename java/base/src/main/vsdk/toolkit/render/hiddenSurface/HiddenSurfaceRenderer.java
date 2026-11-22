@@ -80,11 +80,12 @@ class _WeilerAthertonSourcePolygon extends RenderingElement
 {
     /// Area of the polygon on the x-y plane of the viewing space
     _WeilerAthertonArea template;
-    /// Plane of the polygon in the viewing space, as depth = a*x + b*y + c,
+    /// Plane of the polygon in the viewing space, as depth =
+    /// depthSlopeX * x + depthSlopeY * y + depthOffset,
     /// where a smaller depth is closer to the observer
-    double a;
-    double b;
-    double c;
+    double depthSlopeX;
+    double depthSlopeY;
+    double depthOffset;
     /// Key of the preliminary depth sort: the nearest depth of the polygon
     double nearestDepth;
     SimpleBody body;
@@ -99,7 +100,7 @@ class _WeilerAthertonSourcePolygon extends RenderingElement
 
     double depthAt(double x, double y)
     {
-        return a * x + b * y + c;
+        return depthSlopeX * x + depthSlopeY * y + depthOffset;
     }
 }
 
@@ -611,9 +612,9 @@ public class HiddenSurfaceRenderer extends RenderingElement
 
         _WeilerAthertonSourcePolygon clipped = new _WeilerAthertonSourcePolygon();
         clipped.template = merged(parts);
-        clipped.a = source.a;
-        clipped.b = source.b;
-        clipped.c = source.c;
+        clipped.depthSlopeX = source.depthSlopeX;
+        clipped.depthSlopeY = source.depthSlopeY;
+        clipped.depthOffset = source.depthOffset;
         clipped.body = source.body;
         clipped.face = source.face;
         clipped.worldPlane = source.worldPlane;
@@ -1218,9 +1219,9 @@ public class HiddenSurfaceRenderer extends RenderingElement
                               List<_WeilerAthertonPiece> remaining)
     {
         // Points with da*x + db*y + dc < 0 are in front of the clip polygon
-        double da = piece.source.a - clipPolygon.a;
-        double db = piece.source.b - clipPolygon.b;
-        double dc = piece.source.c - clipPolygon.c;
+        double da = piece.source.depthSlopeX - clipPolygon.depthSlopeX;
+        double db = piece.source.depthSlopeY - clipPolygon.depthSlopeY;
+        double dc = piece.source.depthOffset - clipPolygon.depthOffset;
         _WeilerAthertonArea area = piece.area;
         double margin = 1.0 + 0.01 * ((area.maxX - area.minX) +
             (area.maxY - area.minY));
@@ -1896,9 +1897,9 @@ public class HiddenSurfaceRenderer extends RenderingElement
         cx /= n;
         cy /= n;
         cz /= n;
-        source.a = -nx / nz;
-        source.b = -ny / nz;
-        source.c = cz - source.a * cx - source.b * cy;
+        source.depthSlopeX = -nx / nz;
+        source.depthSlopeY = -ny / nz;
+        source.depthOffset = cz - source.depthSlopeX * cx - source.depthSlopeY * cy;
         return true;
     }
 

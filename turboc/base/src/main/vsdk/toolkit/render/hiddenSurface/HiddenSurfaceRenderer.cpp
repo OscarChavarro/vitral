@@ -115,7 +115,7 @@ _WeilerAthertonArea::overlapsBox(const _WeilerAthertonArea* other) const
 //= _WeilerAthertonSourcePolygon ========================================
 
 _WeilerAthertonSourcePolygon::_WeilerAthertonSourcePolygon() :
-    template_(NULL), a(0.0), b(0.0), c(0.0), nearestDepth(0.0), body(NULL),
+    templateArea(NULL), depthSlopeX(0.0), depthSlopeY(0.0), depthOffset(0.0), nearestDepth(0.0), body(NULL),
     face(NULL), worldPlane(NULL), complete(FALSE)
 {
     original = this;
@@ -124,7 +124,7 @@ _WeilerAthertonSourcePolygon::_WeilerAthertonSourcePolygon() :
 double
 _WeilerAthertonSourcePolygon::depthAt(double x, double y) const
 {
-    return a * x + b * y + c;
+    return depthSlopeX * x + depthSlopeY * y + depthOffset;
 }
 
 //= _WeilerAthertonPiece ================================================
@@ -710,7 +710,7 @@ _WeilerAthertonSourcePolygon*
 HiddenSurfaceRenderer::clippedToWindow(_WeilerAthertonSourcePolygon* source,
     double minX, double minY, double maxX, double maxY)
 {
-    _WeilerAthertonArea* template_ = source->template_;
+    _WeilerAthertonArea* templateArea = source->templateArea;
     Polygon2D* polygon;
     Polygon2D* next;
     ArrayList<_WeilerAthertonArea*> parts;
@@ -718,17 +718,17 @@ HiddenSurfaceRenderer::clippedToWindow(_WeilerAthertonSourcePolygon* source,
     long int i;
     long int k;
 
-    if ( template_->maxX <= minX || template_->minX >= maxX ||
-         template_->maxY <= minY || template_->minY >= maxY ) {
+    if ( templateArea->maxX <= minX || templateArea->minX >= maxX ||
+         templateArea->maxY <= minY || templateArea->minY >= maxY ) {
         return NULL;
     }
-    if ( template_->minX >= minX && template_->maxX <= maxX &&
-         template_->minY >= minY && template_->maxY <= maxY ) {
+    if ( templateArea->minX >= minX && templateArea->maxX <= maxX &&
+         templateArea->minY >= minY && templateArea->maxY <= maxY ) {
         return source;
     }
     // C++ port note: the intermediate polygons are deleted as soon as the
     // next one is computed
-    polygon = clipByHalfPlane(template_->polygon, 1.0, 0.0, -minX);
+    polygon = clipByHalfPlane(templateArea->polygon, 1.0, 0.0, -minX);
     if ( polygon != NULL ) {
         next = clipByHalfPlane(polygon, -1.0, 0.0, maxX);
         delete polygon;
@@ -754,18 +754,18 @@ HiddenSurfaceRenderer::clippedToWindow(_WeilerAthertonSourcePolygon* source,
 
     clipped = new _WeilerAthertonSourcePolygon();
     arena->add(clipped);
-    clipped->template_ = merged(parts);
-    clipped->a = source->a;
-    clipped->b = source->b;
-    clipped->c = source->c;
+    clipped->templateArea = merged(parts);
+    clipped->depthSlopeX = source->depthSlopeX;
+    clipped->depthSlopeY = source->depthSlopeY;
+    clipped->depthOffset = source->depthOffset;
     clipped->body = source->body;
     clipped->face = source->face;
     clipped->worldPlane = source->worldPlane;
     clipped->complete = FALSE;
     clipped->original = source->original;
     clipped->nearestDepth = Double::MAX_VALUE;
-    for ( k = 0; k < clipped->template_->polygon->loops.size(); k++ ) {
-        _Polygon2DContour* loop = clipped->template_->polygon->loops[k];
+    for ( k = 0; k < clipped->templateArea->polygon->loops.size(); k++ ) {
+        _Polygon2DContour* loop = clipped->templateArea->polygon->loops[k];
         for ( i = 0; i < loop->vertices.size(); i++ ) {
             const Vertex2D& v = loop->vertices[i];
             clipped->nearestDepth = Math::min(clipped->nearestDepth,
@@ -805,7 +805,7 @@ HiddenSurfaceRenderer::solveArea(
 
     arena = &windowArena;
     for ( i = 0; i < sources.size(); i++ ) {
-        polygonList.add(newPiece(sources[i]->template_, sources[i]));
+        polygonList.add(newPiece(sources[i]->templateArea, sources[i]));
     }
 
     // [WEIL1977].216: the process is continued until the outside list
@@ -926,8 +926,8 @@ HiddenSurfaceRenderer::litFacesFromLight(ArrayList<SimpleBody*>& solids,
             // slivers the screen subdivision may discard)
             original = source->original;
             if ( original->complete && *visibleAreas.get(original) >=
-                 original->template_->area * (1.0 - 1.0e-9) - AREA_EPSILON -
-                 SLIVER_WIDTH * original->template_->perimeter ) {
+                 original->templateArea->area * (1.0 - 1.0e-9) - AREA_EPSILON -
+                 SLIVER_WIDTH * original->templateArea->perimeter ) {
                 litFace->whole = TRUE;
                 litFace->regions.clear();
                 continue;
@@ -1426,12 +1426,12 @@ HiddenSurfaceRenderer::clipPiece(_WeilerAthertonSourcePolygon* clipPolygon,
         return;
     }
     // Areas that do not overlap need no clip
-    if ( !piece->area->overlapsBox(clipPolygon->template_) ) {
+    if ( !piece->area->overlapsBox(clipPolygon->templateArea) ) {
         outsideList.add(piece);
         return;
     }
 
-    verifiedClip(clipPolygon->template_, piece->area, inside, outside);
+    verifiedClip(clipPolygon->templateArea, piece->area, inside, outside);
     for ( i = 0; i < inside.size(); i++ ) {
         insideList.add(newPiece(inside[i], piece->source));
     }
@@ -1525,9 +1525,9 @@ HiddenSurfaceRenderer::addFrontPart(
     ArrayList<_WeilerAthertonPiece*>& remaining)
 {
     // Points with da*x + db*y + dc < 0 are in front of the clip polygon
-    double da = piece->source->a - clipPolygon->a;
-    double db = piece->source->b - clipPolygon->b;
-    double dc = piece->source->c - clipPolygon->c;
+    double da = piece->source->depthSlopeX - clipPolygon->depthSlopeX;
+    double db = piece->source->depthSlopeY - clipPolygon->depthSlopeY;
+    double dc = piece->source->depthOffset - clipPolygon->depthOffset;
     _WeilerAthertonArea* area = piece->area;
     double margin = 1.0 + 0.01 * ((area->maxX - area->minX) +
         (area->maxY - area->minY));
@@ -2158,7 +2158,7 @@ HiddenSurfaceRenderer::buildInputPolygon(_PolyhedralBoundedSolidFace* face,
     long int outer;
     _WeilerAthertonSourcePolygon* source;
     Polygon2D* projected;
-    _WeilerAthertonArea* template_;
+    _WeilerAthertonArea* templateArea;
     long int i;
     long int j;
     long int k;
@@ -2247,26 +2247,26 @@ HiddenSurfaceRenderer::buildInputPolygon(_PolyhedralBoundedSolidFace* face,
     }
 
     // Clip to the window of the view
-    template_ = newArea(projected);
-    if ( !template_->overlapsBox(window) ) {
+    templateArea = newArea(projected);
+    if ( !templateArea->overlapsBox(window) ) {
         return NULL;
     }
-    if ( template_->minX < window->minX || template_->maxX > window->maxX ||
-         template_->minY < window->minY || template_->maxY > window->maxY ) {
+    if ( templateArea->minX < window->minX || templateArea->maxX > window->maxX ||
+         templateArea->minY < window->minY || templateArea->maxY > window->maxY ) {
         ArrayList<_WeilerAthertonArea*> inside;
         ArrayList<_WeilerAthertonArea*> outside;
-        verifiedClip(window, template_, inside, outside);
+        verifiedClip(window, templateArea, inside, outside);
         if ( inside.isEmpty() ) {
             return NULL;
         }
-        template_ = merged(inside);
+        templateArea = merged(inside);
         complete = FALSE;
     }
 
-    source->template_ = template_;
+    source->templateArea = templateArea;
     source->nearestDepth = Double::MAX_VALUE;
-    for ( k = 0; k < template_->polygon->loops.size(); k++ ) {
-        _Polygon2DContour* loop = template_->polygon->loops[k];
+    for ( k = 0; k < templateArea->polygon->loops.size(); k++ ) {
+        _Polygon2DContour* loop = templateArea->polygon->loops[k];
         for ( j = 0; j < loop->vertices.size(); j++ ) {
             const Vertex2D& v = loop->vertices[j];
             source->nearestDepth = Math::min(source->nearestDepth,
@@ -2346,9 +2346,9 @@ HiddenSurfaceRenderer::fitDepthPlane(
     cx /= n;
     cy /= n;
     cz /= n;
-    source->a = -nx / nz;
-    source->b = -ny / nz;
-    source->c = cz - source->a * cx - source->b * cy;
+    source->depthSlopeX = -nx / nz;
+    source->depthSlopeY = -ny / nz;
+    source->depthOffset = cz - source->depthSlopeX * cx - source->depthSlopeY * cy;
     return TRUE;
 }
 

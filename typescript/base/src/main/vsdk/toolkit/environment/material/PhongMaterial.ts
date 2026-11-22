@@ -136,8 +136,8 @@ export class PhongMaterial implements Material {
     private readonly transmission: PhongLobe | null;
     private readonly emission: PhongLobe | null;
     private readonly texture: Texture | null;
-    private readonly refractionIndexReal: number;
-    private readonly refractionIndexImaginary: number;
+    private readonly storedRefractionIndexReal: number;
+    private readonly storedRefractionIndexImaginary: number;
 
     public constructor(
         inName: string | null,
@@ -174,8 +174,8 @@ export class PhongMaterial implements Material {
         this.transmission = inTransmission;
         this.emission = inEmission;
         this.texture = inTexture;
-        this.refractionIndexReal = f(inRefractionIndexReal);
-        this.refractionIndexImaginary = f(inRefractionIndexImaginary);
+        this.storedRefractionIndexReal = f(inRefractionIndexReal);
+        this.storedRefractionIndexImaginary = f(inRefractionIndexImaginary);
     }
 
     public getName(): string {
@@ -215,21 +215,21 @@ export class PhongMaterial implements Material {
     surface: the transmission lobe's, 1 (vacuum) without one
     */
     public getRefractionIndex(): number {
-        return this.transmission !== null ? this.refractionIndexReal : 1.0;
+        return this.transmission !== null ? this.storedRefractionIndexReal : 1.0;
     }
 
     /** Imaginary part of the transmission lobe's refraction index, 0 without one */
     public getRefractionIndexImaginary(): number {
-        return this.transmission !== null ? this.refractionIndexImaginary : 0.0;
+        return this.transmission !== null ? this.storedRefractionIndexImaginary : 0.0;
     }
 
     /** Stored refraction index, also without transmission lobe (for persistence) */
     public getStoredRefractionIndexReal(): number {
-        return this.refractionIndexReal;
+        return this.storedRefractionIndexReal;
     }
 
     public getStoredRefractionIndexImaginary(): number {
-        return this.refractionIndexImaginary;
+        return this.storedRefractionIndexImaginary;
     }
 
     /**
@@ -300,8 +300,8 @@ export class PhongMaterial implements Material {
             copyLobe(this.emission),
             this.texture,
             this.sided,
-            this.refractionIndexReal,
-            this.refractionIndexImaginary,
+            this.storedRefractionIndexReal,
+            this.storedRefractionIndexImaginary,
         );
     }
 

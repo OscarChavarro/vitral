@@ -77,12 +77,13 @@ class _WeilerAthertonSourcePolygon : public RenderingElement
 {
 public:
     /// Area of the polygon on the x-y plane of the viewing space
-    _WeilerAthertonArea* template_;
-    /// Plane of the polygon in the viewing space, as depth = a*x + b*y + c,
+    _WeilerAthertonArea* templateArea;
+    /// Plane of the polygon in the viewing space, as depth =
+    /// depthSlopeX * x + depthSlopeY * y + depthOffset,
     /// where a smaller depth is closer to the observer
-    double a;
-    double b;
-    double c;
+    double depthSlopeX;
+    double depthSlopeY;
+    double depthOffset;
     /// Key of the preliminary depth sort: the nearest depth of the polygon
     double nearestDepth;
     SimpleBody* body;

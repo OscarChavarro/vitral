@@ -30,8 +30,8 @@ PhongMaterial::PhongMaterial(
     transmission(inTransmission),
     emission(inEmission),
     texture(inTexture),
-    refractionIndexReal(1.0F),
-    refractionIndexImaginary(0.0F)
+    storedRefractionIndexReal(1.0F),
+    storedRefractionIndexImaginary(0.0F)
 {
 }
 
@@ -50,8 +50,8 @@ PhongMaterial::PhongMaterial(
     transmission(inTransmission),
     emission(inEmission),
     texture(inTexture),
-    refractionIndexReal(inRefractionIndexReal),
-    refractionIndexImaginary(inRefractionIndexImaginary)
+    storedRefractionIndexReal(inRefractionIndexReal),
+    storedRefractionIndexImaginary(inRefractionIndexImaginary)
 {
 }
 
@@ -122,7 +122,7 @@ PhongMaterial::emittance(const int components) const {
 Material *
 PhongMaterial::copy() const {
     return new PhongMaterial(name, copyLobe(reflection), copyLobe(transmission), copyLobe(emission), texture, sided,
-        refractionIndexReal, refractionIndexImaginary);
+        storedRefractionIndexReal, storedRefractionIndexImaginary);
 }
 
 Material *

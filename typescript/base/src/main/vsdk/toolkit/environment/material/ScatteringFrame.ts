@@ -73,9 +73,9 @@ export class ScatteringFrame {
     /** Tolerance of the normalizations */
     public static readonly NORMALIZATION_EPSILON = f(1e-6);
 
-    private readonly xAxis: Vector3Df;
-    private readonly yAxis: Vector3Df;
-    private readonly zAxis: Vector3Df;
+    private readonly x: Vector3Df;
+    private readonly y: Vector3Df;
+    private readonly z: Vector3Df;
 
     /** [ARVO1995b] equation 6: [x|z] = Normalize(x - (x.z) z), in closed form */
     private static horizontalAxis(unitZ: Vector3Df): Vector3Df {
@@ -101,21 +101,21 @@ export class ScatteringFrame {
     [ARVO1995b] equation 6 gives X up to its sign.
     */
     public constructor(unitZ: Vector3Df) {
-        this.xAxis = ScatteringFrame.horizontalAxis(unitZ);
-        this.yAxis = ScatteringFrame.completingAxis(unitZ, this.xAxis);
-        this.zAxis = unitZ;
+        this.x = ScatteringFrame.horizontalAxis(unitZ);
+        this.y = ScatteringFrame.completingAxis(unitZ, this.x);
+        this.z = unitZ;
     }
 
     public getX(): Vector3Df {
-        return this.xAxis;
+        return this.x;
     }
 
     public getY(): Vector3Df {
-        return this.yAxis;
+        return this.y;
     }
 
     public getZ(): Vector3Df {
-        return this.zAxis;
+        return this.z;
     }
 
     /**
@@ -130,9 +130,9 @@ export class ScatteringFrame {
         const cosTheta = f(Math.sqrt(1.0 - xi2));
         const sinTheta = f(Math.sqrt(xi2));
 
-        const planar = scatteringArithmetic.combine(cosPhi, this.xAxis, sinPhi, this.yAxis);
+        const planar = scatteringArithmetic.combine(cosPhi, this.x, sinPhi, this.y);
         density[0] = cosTheta / Math.PI;
-        return scatteringArithmetic.combine(sinTheta, planar, cosTheta, this.zAxis);
+        return scatteringArithmetic.combine(sinTheta, planar, cosTheta, this.z);
     }
 
     /**
@@ -148,9 +148,9 @@ export class ScatteringFrame {
         const cosTheta = f(Math.pow(xi2, 1.0 / (n + 1)));
         const sinTheta = f(Math.sqrt(1.0 - f(cosTheta * cosTheta)));
 
-        const planar = scatteringArithmetic.combine(cosPhi, this.xAxis, sinPhi, this.yAxis);
+        const planar = scatteringArithmetic.combine(cosPhi, this.x, sinPhi, this.y);
         density[0] = ((n + 1.0) * Math.pow(cosTheta, n)) / (2.0 * Math.PI);
-        return scatteringArithmetic.combine(sinTheta, planar, cosTheta, this.zAxis);
+        return scatteringArithmetic.combine(sinTheta, planar, cosTheta, this.z);
     }
 
     /** Mirror direction of `in` about `normal`, normalized */

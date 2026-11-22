@@ -8,6 +8,7 @@ original.
 
 ## Packages
 
+<!-- prettier-ignore -->
 | Package | Folder | Contents |
 |---|---|---|
 | `@vitral/base` | `base/` | The toolkit core: linear algebra, scene model, boundary representation solids and their booleans, CSG, polygon triangulation and clipping, BVH, the CPU renderers (raytracer, hidden line removal, hidden surface removal with shadows, 2D rasterizer, software shaders), media, the interaction model (viewports, gizmos, controllers). Platform neutral: it has no Node filesystem imports, and it runs in a browser or in Node. |
@@ -52,10 +53,21 @@ mind:
 - The mesh readers are a subset (OBJ, MIT groups, altimetry, MD2, STL, part
   of STEP); there is no 3DS, ASE, PLY, VRML, VTK or GTS reader, and no XML
   scene importer.
-- The web scene editor offers GPU (WebGL) and CPU raytracing render modes.
-  `HiddenSurfaceRenderer` and `HiddenLineRenderer` are in `@vitral/base`,
-  but the editor has no render mode, drawing code or MCP name for hidden
-  surfaces yet.
+- The web scene editor presents its viewports with one of two render
+  technologies, chosen in the projection popup menu ("Render using ...") or
+  with the MCP tool `render.set_technology`. A WebGL 2 canvas gives the GPU
+  (z-buffer) and CPU raytracing modes. A canvas drawn only with its 2D
+  context gives three CPU modes, with no WebGL context:
+    - raytracing, using the same Web Worker tiles;
+    - hidden lines, which is wireframe or Appel hidden line removal
+      (`HiddenLineRenderer`);
+    - hidden surfaces, by Weiler-Atherton (`HiddenSurfaceRenderer`), with
+      shadows when `F10` is on.
+
+    The MCP names are `hidden_lines`, `hidden_surfaces` and `withShadows`.
+    Java's AWT technology and cpp's Xlib technology correspond to the canvas
+    2D technology.
+
 - In the editor, `F10` toggles the shadows flag of the renderer
   configuration and `F11` requests the raytraced image, as in the other
   ports; a browser may keep `F11` for its own full screen mode.
