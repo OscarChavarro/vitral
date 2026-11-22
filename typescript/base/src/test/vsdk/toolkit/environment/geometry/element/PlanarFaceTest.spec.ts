@@ -128,18 +128,18 @@ describe("PlanarFace", () => {
 
         const hit = new PlanarFace.RayHit();
         expectTrue(face.rayHit(origin, down, true, false, 0.0, 10.0, hit));
-        expectEq(PlanarFace.Side.FRONT, hit.side);
-        expectFloatEq(2.0, hit.distance);
-        expectFloatEq(0.5, hit.pointX);
-        expectFloatEq(0.25, hit.pointY);
-        expectFloatEq(1.0, hit.pointZ);
-        expectNear(0.5, hit.u, 1e-6);
-        expectNear(0.25, hit.v, 1e-6);
+        expectEq(PlanarFace.Side.FRONT, hit.getSide());
+        expectFloatEq(2.0, hit.getDistance());
+        expectFloatEq(0.5, hit.getPointX());
+        expectFloatEq(0.25, hit.getPointY());
+        expectFloatEq(1.0, hit.getPointZ());
+        expectNear(0.5, hit.getU(), 1e-6);
+        expectNear(0.25, hit.getV(), 1e-6);
 
         // Same answers as the separate calls
         const normalDotDirection = [0];
         face.sideFacing(down, normalDotDirection);
-        expectEq(face.planeHitParameter(origin, normalDotDirection[0]!), hit.distance);
+        expectEq(face.planeHitParameter(origin, normalDotDirection[0]!), hit.getDistance());
 
         expectFalse(face.rayHit(origin, down, false, true, 0.0, 10.0, hit)); // Front side not accepted
         expectFalse(face.rayHit(origin, down, true, false, 0.0, 1.5, hit)); // Too far
@@ -150,7 +150,7 @@ describe("PlanarFace", () => {
         expectTrue(
             face.rayHit(new Vector3Df(f(0.5), f(0.25), -1.0), new Vector3Df(0, 0, 1), false, true, 0.0, 10.0, hit),
         );
-        expectEq(PlanarFace.Side.BACK, hit.side);
+        expectEq(PlanarFace.Side.BACK, hit.getSide());
     });
 
     it("Facing", () => {

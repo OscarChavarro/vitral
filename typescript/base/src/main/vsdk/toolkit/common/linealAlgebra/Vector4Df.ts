@@ -30,7 +30,8 @@ export class Vector4Df extends FundamentalEntity {
         }
     }
     public multiply(a: number): Vector4Df {
-        return new Vector4Df(f(a * this.xv), f(a * this.yv), f(a * this.zv), f(a * this.wv));
+        const af = f(a);
+        return new Vector4Df(f(af * this.xv), f(af * this.yv), f(af * this.zv), f(af * this.wv));
     }
     public dividedByW(): Vector4Df {
         return Math.abs(this.wv) < f(VSDK.EPSILON)

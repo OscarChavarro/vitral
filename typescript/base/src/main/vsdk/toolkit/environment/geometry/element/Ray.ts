@@ -1,7 +1,7 @@
 import { FundamentalEntity } from "../../../common/FundamentalEntity.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import { VSDK } from "../../../common/VSDK.js";
-import type { GeometryRay } from "../Geometry.js";
+import type { GeometryRay } from "./GeometryRay.js";
 import { Double } from "../../../../../java/lang/Double.js";
 export class Ray extends FundamentalEntity implements GeometryRay {
     private static readonly UNIT_DIRECTION_TOLERANCE = 1e-12;

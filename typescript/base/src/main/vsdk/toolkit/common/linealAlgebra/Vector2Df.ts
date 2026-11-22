@@ -22,10 +22,11 @@ export class Vector2Df extends FundamentalEntity {
         }
     }
     public multiply(a: number): Vector2Df {
-        return new Vector2Df(f(a * this.xv), f(a * this.yv));
+        const af = f(a);
+        return new Vector2Df(f(af * this.xv), f(af * this.yv));
     }
     public length(): number {
-        return f(Math.sqrt(f(this.xv * this.xv + this.yv * this.yv)));
+        return f(Math.sqrt(f(f(this.xv * this.xv) + f(this.yv * this.yv))));
     }
     public add(b: Vector2Df): Vector2Df {
         return new Vector2Df(f(this.xv + b.xv), f(this.yv + b.yv));

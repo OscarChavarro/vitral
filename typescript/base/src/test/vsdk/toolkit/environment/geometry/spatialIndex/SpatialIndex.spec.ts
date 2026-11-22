@@ -124,7 +124,7 @@ class FaceRayTest implements PrimitiveRayTest {
         ) {
             return false;
         }
-        const t = hit.distance;
+        const t = hit.getDistance();
         if (t === maximumT && this.acceptedPrimitive >= 0 && primitive > this.acceptedPrimitive) {
             return false;
         }

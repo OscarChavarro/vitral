@@ -1,3 +1,4 @@
+import type { GeometryRay } from "./element/GeometryRay.js";
 import type { Ray } from "./element/Ray.js";
 import type { RayCrossingQuery } from "./element/RayCrossingQuery.js";
 import type { RayCrossingSink } from "./element/RayCrossingSink.js";
@@ -14,7 +15,7 @@ import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 import { Containment } from "../../processing/Containment.js";
 
 /** Structural intersection contracts implemented by Phase 19 ray elements. */
-export interface GeometryRay {}
+export type { GeometryRay };
 export interface GeometryRayHit {}
 
 /** Root contract shared by all origin-centered Vitral geometries. */

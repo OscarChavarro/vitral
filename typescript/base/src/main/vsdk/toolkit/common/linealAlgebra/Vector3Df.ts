@@ -25,18 +25,22 @@ export class Vector3Df extends FundamentalEntity {
             this.zv = f(a.z());
         }
     }
+    // Every operation rounds each product and each sum to single precision,
+    // in the order of the C++ and Java float expressions, so that the three
+    // ports give the same bits
     public multiply(a: number): Vector3Df {
-        return new Vector3Df(f(a * this.xv), f(a * this.yv), f(a * this.zv));
+        const af = f(a);
+        return new Vector3Df(f(af * this.xv), f(af * this.yv), f(af * this.zv));
     }
     public crossProduct(o: Vector3Df): Vector3Df {
         return new Vector3Df(
-            f(this.yv * o.zv - this.zv * o.yv),
-            f(this.zv * o.xv - this.xv * o.zv),
-            f(this.xv * o.yv - this.yv * o.xv),
+            f(f(this.yv * o.zv) - f(this.zv * o.yv)),
+            f(f(this.zv * o.xv) - f(this.xv * o.zv)),
+            f(f(this.xv * o.yv) - f(this.yv * o.xv)),
         );
     }
     public dotProduct(o: Vector3Df): number {
-        return f(f(this.xv * o.xv) + f(this.yv * o.yv) + f(this.zv * o.zv));
+        return f(f(f(this.xv * o.xv) + f(this.yv * o.yv)) + f(this.zv * o.zv));
     }
     public normalized(): Vector3Df;
     /**
