@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static vsdk.toolkit.GTestAssertions.*;
 
 class Vector2DfTest
 {
@@ -80,5 +81,17 @@ class Vector2DfTest
         assertThat(a.epsilonEquals(b, 1.0e-6f)).isFalse();
         assertThatThrownBy(() -> a.epsilonEquals(b, -1.0f))
             .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    // Port of the Vector2DfTest case of `cpp/base/src/test/vector_tests.cpp`;
+    // the test method is named `<cpp suite>_<cpp test>`.
+
+    @Test
+    void Vector2DfTest_SubtractAndLengthSquared()
+    {
+        final Vector2Df d = new Vector2Df(4.0f, -1.0f).subtract(new Vector2Df(1.0f, 3.0f));
+        expectEq(d.x(), 3.0f);
+        expectEq(d.y(), -4.0f);
+        expectEq(d.lengthSquared(), 25.0f);
     }
 }

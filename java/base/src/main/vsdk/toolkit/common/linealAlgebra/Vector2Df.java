@@ -40,6 +40,17 @@ public final class Vector2Df extends FundamentalEntity {
         return new Vector2Df(x + b.x, y + b.y);
     }
 
+    public Vector2Df subtract(Vector2Df b) {
+        return new Vector2Df(x - b.x, y - b.y);
+    }
+
+    /**
+    Square of the length (the dot product with itself)
+    */
+    public float lengthSquared() {
+        return x * x + y * y;
+    }
+
     public Vector2Df withX(float nx) { return new Vector2Df(nx, y); }
     public Vector2Df withY(float ny) { return new Vector2Df(x, ny); }
     public float x() { return x; }

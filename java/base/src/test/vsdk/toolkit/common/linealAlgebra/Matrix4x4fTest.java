@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static vsdk.toolkit.GTestAssertions.*;
 
 class Matrix4x4fTest
 {
@@ -137,5 +138,82 @@ class Matrix4x4fTest
         Matrix4x4f rebuilt = matrix.transpose().transpose();
 
         assertThat(rebuilt.epsilonEquals(matrix, EPS)).isTrue();
+    }
+
+    // Ports of the Matrix4x4fTest cases of `cpp/base/src/test/matrix4x4_tests.cpp`;
+    // each test method is named `<cpp suite>_<cpp test>`.
+
+    @Test
+    void Matrix4x4fTest_StoresFloatsExactly()
+    {
+        // 0.1f is not a double-rounded value: it must come back bit for bit
+        final float[][] values = {
+            {0.1f, 0.2f, 0.3f, 0.4f},
+            {1.0f / 3.0f, 2.0f, 3.0f, 4.0f},
+            {5.0f, 6.0f, 7.0f, 8.0f},
+            {9.0f, 10.0f, 11.0f, 12.0f}
+        };
+        final Matrix4x4f m = new Matrix4x4f(values);
+        for ( int i = 0; i < 4; i++ ) {
+            for ( int j = 0; j < 4; j++ ) {
+                expectEq(m.get(i, j), values[i][j]);
+            }
+        }
+        expectEq(m.withVal(2, 1, 0.7f).get(2, 1), 0.7f);
+    }
+
+    @Test
+    void Matrix4x4fTest_ProductsComputeInFloatFromTheFirstTerm()
+    {
+        final float[][] a = {
+            {0.1f, 0.2f, 0.3f, 0.4f},
+            {0.5f, 0.6f, 0.7f, 0.8f},
+            {0.9f, 1.1f, 1.2f, 1.3f},
+            {1.4f, 1.5f, 1.6f, 1.7f}
+        };
+        final float[][] b = {
+            {1.7f, 0.3f, 0.11f, 2.0f},
+            {0.13f, 1.9f, 0.4f, 0.5f},
+            {0.6f, 0.23f, 1.3f, 0.7f},
+            {0.8f, 0.9f, 0.31f, 1.0f}
+        };
+        final Matrix4x4f p = new Matrix4x4f(a).multiply(new Matrix4x4f(b));
+        for ( int i = 0; i < 4; i++ ) {
+            for ( int j = 0; j < 4; j++ ) {
+                final float expected = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j] + a[i][3] * b[3][j];
+                expectEq(p.get(i, j), expected);
+            }
+        }
+        final Vector4Df v = new Matrix4x4f(a).multiply(new Vector4Df(0.3f, -1.1f, 2.5f, 1.0f));
+        expectEq(v.x(), a[0][0] * 0.3f + a[0][1] * -1.1f + a[0][2] * 2.5f + a[0][3] * 1.0f);
+        expectEq(v.w(), a[3][0] * 0.3f + a[3][1] * -1.1f + a[3][2] * 2.5f + a[3][3] * 1.0f);
+    }
+
+    @Test
+    void Matrix4x4fTest_RotationProjectionAndInverse()
+    {
+        final Matrix4x4f r = new Matrix4x4f().axisRotation((float) (Math.PI / 2.0), 0, 0, 1);
+        expectTrue(r.multiply(new Vector3Df(1, 0, 0)).epsilonEquals(new Vector3Df(0, 1, 0), 1e-6f));
+        expectTrue(r.multiply(r.transpose()).epsilonEquals(new Matrix4x4f(), 1e-6f));
+
+        final Matrix4x4f o = new Matrix4x4f().orthogonalProjection(-2, 2, -1, 1, 1, 10);
+        final Matrix4x4d od = new Matrix4x4d().orthogonalProjection(-2, 2, -1, 1, 1, 10);
+        for ( int i = 0; i < 4; i++ ) {
+            for ( int j = 0; j < 4; j++ ) {
+                expectNear(o.get(i, j), od.get(i, j), 1e-6);
+            }
+        }
+
+        final Matrix4x4f m = new Matrix4x4f().axisRotation(0.3f, 1, 2, 3).multiply(new Matrix4x4f().translation(1, -2, 0.5f));
+        expectTrue(m.multiply(m.invert()).epsilonEquals(new Matrix4x4f(), 1e-5f));
+        expectNear(m.determinant(), 1.0f, 1e-5f);
+        expectTrue(m.withoutTranslation().extractTranslation().equals(new Vector3Df(0, 0, 0)));
+    }
+
+    @Test
+    void Matrix4x4fTest_QuaternionRoundTrip()
+    {
+        final Matrix4x4f r = new Matrix4x4f().axisRotation(0.7f, 0.0f, 1.0f, 0.0f);
+        expectTrue(r.importFromQuaternion(r.exportToQuaternion()).epsilonEquals(r, 1e-5f));
     }
 }
