@@ -109,7 +109,13 @@ FileUncompressWrapper::openInputStreamCompressWrapper(const char *fileName, int 
     delete[] command;
 
     if ( stream == NULL ) {
-        Logger::error(NULL, "Can't open file '%s' for %s", fileName, modeToLogAction(StreamOpenMode::READ));
+        // C++ port note: String::format of the cpp port, through
+        // Formatter (the same formatting)
+        const int messageLength = ((int)(strlen(fileName))) + 40;
+        char *message = new char[messageLength];
+        Formatter::format(message, messageLength, "Can't open file '%s' for %s", fileName, modeToLogAction(StreamOpenMode::READ));
+        Logger::reportMessage("FileUncompressWrapper", Logger::ERROR, "", String(message));
+        delete[] message;
         if ( isPipe != NULL ) {
             *isPipe = 0;
         }
@@ -147,7 +153,13 @@ FileUncompressWrapper::openOutputStreamCompressWrapper(const char *fileName, int
     delete[] command;
 
     if ( stream == NULL ) {
-        Logger::error(NULL, "Can't open file '%s' for %s", fileName, modeToLogAction(StreamOpenMode::WRITE));
+        // C++ port note: String::format of the cpp port, through
+        // Formatter (the same formatting)
+        const int messageLength = ((int)(strlen(fileName))) + 40;
+        char *message = new char[messageLength];
+        Formatter::format(message, messageLength, "Can't open file '%s' for %s", fileName, modeToLogAction(StreamOpenMode::WRITE));
+        Logger::reportMessage("FileUncompressWrapper", Logger::ERROR, "", String(message));
+        delete[] message;
         if ( isPipe != NULL ) {
             *isPipe = 0;
         }

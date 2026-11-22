@@ -219,6 +219,7 @@ base/src/main/vsdk/toolkit/common/dataStructures/CircularArrayList.h,BASE/SRC/MA
 base/src/main/vsdk/toolkit/common/linealAlgebra/AlgebraPrimitives.cpp,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/ALGEPRIM.CPP,AlgebraPrimitives.cpp,ALGEPRIM.CPP
 base/src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/COMPLEX.CPP,Complex.cpp,COMPLEX.CPP
 base/src/main/vsdk/toolkit/common/linealAlgebra/Complex.h,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/COMPLEX.H,Complex.h,COMPLEX.H
+base/src/main/vsdk/toolkit/common/linealAlgebra/Matrix2x2.h,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/MATRI2X2.H,Matrix2x2.h,MATRI2X2.H
 base/src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.cpp,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/MATR4X4D.CPP,Matrix4x4d.cpp,MATR4X4D.CPP
 base/src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/MATR4X4D.H,Matrix4x4d.h,MATR4X4D.H
 base/src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.cpp,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/MATR4X4F.CPP,Matrix4x4f.cpp,MATR4X4F.CPP

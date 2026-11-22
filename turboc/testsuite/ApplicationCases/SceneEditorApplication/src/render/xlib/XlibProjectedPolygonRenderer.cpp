@@ -40,6 +40,54 @@ static XPoint toPoint(const Vertex2D& v, int x0, int y0, int width,
     return point;
 }
 
+static unsigned long toPixel(Visual* visual, const ColorRgb& color)
+{
+    return XlibRGBImageUncompressedRenderer::rgbToPixel(visual,
+        toChannel(color.r()), toChannel(color.g()), toChannel(color.b()));
+}
+
+/**
+Builds the contours of a polygon, in pixels of the viewport, as one path:
+each contour is closed and followed by the first vertex of the polygon (the
+bridge joining the contours for `XFillPolygon`).
+@param path [out] the path
+@param loopStarts [out] index in the path of the start of each contour,
+followed by the size of the path: the contour `i`, closed, goes from
+`loopStarts[i]` to `loopStarts[i + 1] - 2`
+*/
+static void toPath(ProjectedPolygon* polygon, int x0, int y0, int width,
+                   int height, ArrayList<XPoint>& path,
+                   ArrayList<int>& loopStarts)
+{
+    Polygon2D* area = polygon->getArea();
+    XPoint start;
+    BOOLEAN started = FALSE;
+    long j;
+    long k;
+
+    start.x = 0;
+    start.y = 0;
+
+    for ( j = 0; j < area->loops.size(); j++ ) {
+        _Polygon2DContour* loop = area->loops[j];
+        if ( loop == NULL || loop->vertices.size() == 0 ) {
+            continue;
+        }
+        XPoint first = toPoint(loop->vertices[0], x0, y0, width, height);
+        if ( !started ) {
+            start = first;
+            started = TRUE;
+        }
+        loopStarts.add((int)path.size());
+        for ( k = 0; k < loop->vertices.size(); k++ ) {
+            path.add(toPoint(loop->vertices[k], x0, y0, width, height));
+        }
+        path.add(first);
+        path.add(start);
+    }
+    loopStarts.add((int)path.size());
+}
+
 XlibProjectedPolygonRenderer::XlibProjectedPolygonRenderer()
 {
 }
@@ -49,43 +97,58 @@ void XlibProjectedPolygonRenderer::draw(Display* display, Drawable frame,
     int x0, int y0, int width, int height)
 {
     long i;
-    long j;
-    long k;
 
     XSetFillRule(display, gc, EvenOddRule);
     for ( i = 0; i < polygons.size(); i++ ) {
-        Polygon2D* area = polygons[i]->getArea();
         ArrayList<XPoint> path;
-        XPoint start;
-        BOOLEAN started = FALSE;
+        ArrayList<int> loopStarts;
 
-        start.x = 0;
-        start.y = 0;
-
-        for ( j = 0; j < area->loops.size(); j++ ) {
-            _Polygon2DContour* loop = area->loops[j];
-            if ( loop == NULL || loop->vertices.size() == 0 ) {
-                continue;
-            }
-            XPoint first = toPoint(loop->vertices[0], x0, y0, width, height);
-            if ( !started ) {
-                start = first;
-                started = TRUE;
-            }
-            for ( k = 0; k < loop->vertices.size(); k++ ) {
-                path.add(toPoint(loop->vertices[k], x0, y0, width, height));
-            }
-            path.add(first);
-            path.add(start);
-        }
+        toPath(polygons[i], x0, y0, width, height, path, loopStarts);
         if ( path.size() < 3 ) {
             continue;
         }
-        const ColorRgb& color = polygons[i]->getColor();
-        XSetForeground(display, gc, XlibRGBImageUncompressedRenderer::rgbToPixel(
-            visual, toChannel(color.r()), toChannel(color.g()),
-            toChannel(color.b())));
+        XSetForeground(display, gc, toPixel(visual, polygons[i]->getColor()));
         XFillPolygon(display, frame, gc, &path[0], (int)path.size(), Complex,
                      CoordModeOrigin);
     }
+}
+
+void XlibProjectedPolygonRenderer::drawContours(Display* display,
+    Drawable frame, GC gc, Visual* visual,
+    const ArrayList<ProjectedPolygon*>& polygons,
+    int x0, int y0, int width, int height,
+    float lineWidth, const ColorRgb* lineColor)
+{
+    XGCValues previousStroke;
+    long i;
+    long j;
+
+    XGetGCValues(display, gc,
+        GCLineWidth | GCLineStyle | GCCapStyle | GCJoinStyle,
+        &previousStroke);
+
+    XSetLineAttributes(display, gc,
+        ((unsigned int)Math::floor(lineWidth + 0.5)), LineSolid, CapRound,
+        JoinRound);
+    if ( lineColor != NULL ) {
+        XSetForeground(display, gc, toPixel(visual, *lineColor));
+    }
+    for ( i = 0; i < polygons.size(); i++ ) {
+        ArrayList<XPoint> path;
+        ArrayList<int> loopStarts;
+
+        if ( lineColor == NULL ) {
+            XSetForeground(display, gc,
+                toPixel(visual, polygons[i]->getColor()));
+        }
+        toPath(polygons[i], x0, y0, width, height, path, loopStarts);
+        for ( j = 0; j + 1 < loopStarts.size(); j++ ) {
+            // Without the bridge to the first vertex of the polygon
+            XDrawLines(display, frame, gc, &path[loopStarts[j]],
+                loopStarts[j + 1] - loopStarts[j] - 1, CoordModeOrigin);
+        }
+    }
+    XSetLineAttributes(display, gc, previousStroke.line_width,
+        previousStroke.line_style, previousStroke.cap_style,
+        previousStroke.join_style);
 }

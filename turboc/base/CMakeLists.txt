@@ -259,6 +259,11 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/shaders/ShaderSelector.cpp
     src/main/vsdk/toolkit/io/PersistenceElement.cpp
     src/main/vsdk/toolkit/io/FileLocator.cpp
+    src/main/vsdk/toolkit/io/wrapper/FileUncompressWrapper.cpp
+    src/main/vsdk/toolkit/io/wrapper/PipeInputStream.cpp
+    src/main/vsdk/toolkit/io/wrapper/PipeOutputStream.cpp
+    src/main/vsdk/toolkit/io/wrapper/Matrix2x2Printer.cpp
+    src/main/vsdk/toolkit/io/wrapper/Vector3DPrinter.cpp
     src/main/vsdk/toolkit/io/gui/DialogPersistence.cpp
     src/main/vsdk/toolkit/io/geometry/EnvironmentPersistence.cpp
     src/main/vsdk/toolkit/io/geometry/WriterObj.cpp

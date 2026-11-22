@@ -602,8 +602,23 @@ void XlibDrawingAreaRenderer::drawHiddenSurfaces(Display* display,
             "drawHiddenSurfaces", message);
         return;
     }
-    XlibProjectedPolygonRenderer::draw(display, frame, gc, visual, *polygons,
-                                       x, y, width, height);
+
+    RendererConfiguration* quality = viewport->getRendererConfiguration();
+    if ( !quality->isSurfacesSet() && quality->isWiresSet() ) {
+        ColorRgb wireColor = quality->getWireColor();
+        const ColorRgb* lineColor = NULL;
+        if ( quality->getShadingType() == RendererConfiguration::SHADING_TYPE_NOLIGHT ) {
+            lineColor = &wireColor;
+        }
+        XlibProjectedPolygonRenderer::drawContours(display, frame, gc, visual,
+            *polygons, x, y, width, height,
+            ((float)Math::max(1.0, area->getViewportSet()->getElementScaler()->getScale())),
+            lineColor);
+    }
+    else {
+        XlibProjectedPolygonRenderer::draw(display, frame, gc, visual,
+            *polygons, x, y, width, height);
+    }
 }
 
 void XlibDrawingAreaRenderer::display(Display* display, Window window,

@@ -105,20 +105,21 @@ void MCPViewportTools::setRendererConfiguration(const String& request)
             renderMode.equalsIgnoreCase("hidden_surfaces") ? Viewport::RENDER_MODE_HIDDEN_SURFACES : 0;
         if ( mode == 0 )
             throw IllegalArgumentException("renderMode must be gpu, cpu, hidden_lines or hidden_surfaces");
-        if ( supportsXlib && (mode == Viewport::RENDER_MODE_HIDDEN_LINES ||
-                              mode == Viewport::RENDER_MODE_HIDDEN_SURFACES ||
-                              mode == Viewport::RENDER_MODE_Z_BUFFER) ) {
-            // The modes of each technology, as `useXlibRendering` of
-            // XtOpenGL1SceneBridge
+        if ( supportsXlib ) {
+            // The modes of each technology, as `setAvailableRenderModes` of
+            // XtOpenGL1SceneBridge: the technologies share no render mode
             ArrayList<int> modes;
-            modes.add(mode == Viewport::RENDER_MODE_Z_BUFFER ?
-                      Viewport::RENDER_MODE_Z_BUFFER :
-                      Viewport::RENDER_MODE_HIDDEN_LINES);
-            modes.add(Viewport::RENDER_MODE_RAYTRACING);
-            if ( mode != Viewport::RENDER_MODE_Z_BUFFER ) {
-                modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
+            if ( mode == Viewport::RENDER_MODE_Z_BUFFER ) {
+                modes.add(Viewport::RENDER_MODE_Z_BUFFER);
             }
-            set->setAvailableRenderModes(modes);
+            else {
+                modes.add(Viewport::RENDER_MODE_HIDDEN_LINES);
+                modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
+                modes.add(Viewport::RENDER_MODE_RAYTRACING);
+            }
+            if ( !set->isRenderModeAvailable(mode) ) {
+                set->setAvailableRenderModes(modes);
+            }
         }
         if ( !set->isRenderModeAvailable(mode) )
             throw IllegalArgumentException("renderMode is not available with this rendering technology");

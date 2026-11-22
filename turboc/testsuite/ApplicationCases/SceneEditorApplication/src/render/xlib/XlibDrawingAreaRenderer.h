@@ -34,7 +34,11 @@ In hidden surfaces mode, the visible polygons of the solids, computed by
 `ProjectedSurfacesViewBuilder` (hidden surface removal by polygon area
 sorting of Weiler and Atherton, with the shadows of the solids if the
 viewport asks for them), are filled by `XlibProjectedPolygonRenderer`, and
-the gizmos are drawn over them as over a raytraced image.
+the gizmos are drawn over them as over a raytraced image. When the
+rendering configuration turns the surfaces off and the lines on, only the
+contours of those polygons are drawn: with constant shading (no light) all
+of them with the line color of the configuration, otherwise each one with
+the color of its polygon.
 
 Over the selected viewport the camera control gizmo (ViewCube) is drawn as
 a HUD at its upper right corner, with the hidden lines of its parts removed

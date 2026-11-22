@@ -104,6 +104,8 @@ public:
           pointerGestureInCourse(FALSE)
     {
         createModel();
+        // The editor starts over OpenGL
+        setAvailableRenderModes(FALSE);
         selectionEditor = new SceneSelectionEditor(model->getScene());
         techniques = new DrawingAreaInteractionTechniques(model, this);
         // While dragging a gizmo, the pointer wraps around its viewport
@@ -133,17 +135,37 @@ public:
         delete model;
     }
 
+    /**
+    Sets the render modes the technology presenting the viewport set offers
+    to its viewports, the default one first (as the Java
+    `model.RenderTechnology`): OpenGL is used only for the GPU z-buffer, and
+    every mode computed by the processor is drawn with Xlib, a 2D canvas
+    without a 3D API: projected lines (wireframe or Appel hidden line
+    removal), projected visible polygons (Weiler/Atherton hidden surface
+    removal) or Whitted raytraced images. The technologies share no render
+    mode: the viewports change to the default mode of the new one.
+    */
+    void setAvailableRenderModes(BOOLEAN useXlib)
+    {
+        ViewportSet* set = model->getDrawingArea()->getViewportSet();
+        ArrayList<int> modes;
+        if (useXlib) {
+            modes.add(Viewport::RENDER_MODE_HIDDEN_LINES);
+            modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
+            modes.add(Viewport::RENDER_MODE_RAYTRACING);
+        }
+        else {
+            modes.add(Viewport::RENDER_MODE_Z_BUFFER);
+        }
+        set->setAvailableRenderModes(modes);
+    }
+
     void useXlibRendering(BOOLEAN useXlib)
     {
         ViewportSet* set = model->getDrawingArea()->getViewportSet();
         if (set->isRenderModeAvailable(Viewport::RENDER_MODE_HIDDEN_LINES)
             == useXlib) return;
-        ArrayList<int> modes;
-        modes.add(useXlib ? Viewport::RENDER_MODE_HIDDEN_LINES :
-                            Viewport::RENDER_MODE_Z_BUFFER);
-        modes.add(Viewport::RENDER_MODE_RAYTRACING);
-        if (useXlib) modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
-        set->setAvailableRenderModes(modes);
+        setAvailableRenderModes(useXlib);
     }
 
     /**
@@ -598,8 +620,12 @@ void XtOpenGL1SceneBridge::executeViewportCommand(const String& command)
     if ( viewport == NULL || !impl->isKnownViewport(viewport) ) {
         return;
     }
+    // A render mode the technology in use does not offer (i.e. any CPU mode
+    // over OpenGL, or the GPU over Xlib) changes the technology of the whole
+    // set before selecting the mode
     if (command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES ||
-        command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_SURFACES)
+        command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_SURFACES ||
+        command == ViewportSetCommands::IDV_RENDER_MODE_CPU)
         impl->useXlibRendering(TRUE);
     else if (command == ViewportSetCommands::IDV_RENDER_MODE_GPU)
         impl->useXlibRendering(FALSE);

@@ -275,7 +275,13 @@ public:
 
     /**
     Executes a command of the viewport menu over the viewport whose title
-    was clicked, recording the change of its view.
+    was clicked, recording the change of its view. The render modes of the
+    menu are always the same, in the order of the I18N definition: the GPU
+    (z-buffer over OpenGL) or the CPU (Appel hidden lines, Weiler/Atherton
+    hidden surfaces or Whitted raytracing, drawn with Xlib). Choosing one
+    that the technology in use does not offer changes the technology of the
+    whole set: its other viewports change to the default mode of that
+    technology.
     */
     void executeViewportCommand(const String& command);
 

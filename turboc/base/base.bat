@@ -2,7 +2,7 @@
 if not exist BUILD\NUL md BUILD
 if not exist BUILDTC\NUL md BUILDTC
 
-echo [1/409] Compiling SRC\MAIN\V\T\COMMON\VSDK.CPP
+echo [1/414] Compiling SRC\MAIN\V\T\COMMON\VSDK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -24,7 +24,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VSDK.OBJ goto error
 
-echo [2/409] Compiling SRC\MAIN\V\T\COMMON\CPP98SUP.CPP
+echo [2/414] Compiling SRC\MAIN\V\T\COMMON\CPP98SUP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -46,7 +46,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CPP98SUP.OBJ goto error
 
-echo [3/409] Compiling SRC\MAIN\V\T\COMMON\ENTITY.CPP
+echo [3/414] Compiling SRC\MAIN\V\T\COMMON\ENTITY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -68,7 +68,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ENTITY.OBJ goto error
 
-echo [4/409] Compiling SRC\MAIN\V\T\COMMON\ENTCONAC.CPP
+echo [4/414] Compiling SRC\MAIN\V\T\COMMON\ENTCONAC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -90,7 +90,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ENTCONAC.OBJ goto error
 
-echo [5/409] Compiling SRC\MAIN\V\T\GUI\EDITOR\CONTSPEC.CPP
+echo [5/414] Compiling SRC\MAIN\V\T\GUI\EDITOR\CONTSPEC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -112,7 +112,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CONTSPEC.OBJ goto error
 
-echo [6/409] Compiling SRC\MAIN\V\T\GUI\EDITOR\GENEEDIT.CPP
+echo [6/414] Compiling SRC\MAIN\V\T\GUI\EDITOR\GENEEDIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -134,7 +134,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GENEEDIT.OBJ goto error
 
-echo [7/409] Compiling SRC\MAIN\V\T\COMMON\LOGGING\LOGGER.CPP
+echo [7/414] Compiling SRC\MAIN\V\T\COMMON\LOGGING\LOGGER.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -156,7 +156,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LOGGER.OBJ goto error
 
-echo [8/409] Compiling SRC\MAIN\V\T\COMMON\STATISTI\RAYTSTAT.CPP
+echo [8/414] Compiling SRC\MAIN\V\T\COMMON\STATISTI\RAYTSTAT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -178,7 +178,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYTSTAT.OBJ goto error
 
-echo [9/409] Compiling SRC\MAIN\V\T\COMMON\STATISTI\SOLTEXST.CPP
+echo [9/414] Compiling SRC\MAIN\V\T\COMMON\STATISTI\SOLTEXST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -200,7 +200,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SOLTEXST.OBJ goto error
 
-echo [10/409] Compiling SRC\MAIN\V\T\COMMON\STATISTI\GEOMSTAT.CPP
+echo [10/414] Compiling SRC\MAIN\V\T\COMMON\STATISTI\GEOMSTAT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -222,7 +222,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GEOMSTAT.OBJ goto error
 
-echo [11/409] Compiling SRC\MAIN\V\T\COMMON\COLOR\COLORRGB.CPP
+echo [11/414] Compiling SRC\MAIN\V\T\COMMON\COLOR\COLORRGB.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -244,7 +244,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\COLORRGB.OBJ goto error
 
-echo [12/409] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\COMPLEX.CPP
+echo [12/414] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\COMPLEX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -266,7 +266,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\COMPLEX.OBJ goto error
 
-echo [13/409] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATRINXM.CPP
+echo [13/414] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATRINXM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -288,7 +288,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MATRINXM.OBJ goto error
 
-echo [14/409] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4D.CPP
+echo [14/414] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4D.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -310,7 +310,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MATR4X4D.OBJ goto error
 
-echo [15/409] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4F.CPP
+echo [15/414] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\MATR4X4F.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -332,7 +332,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MATR4X4F.OBJ goto error
 
-echo [16/409] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\ALGEPRIM.CPP
+echo [16/414] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\ALGEPRIM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -354,7 +354,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ALGEPRIM.OBJ goto error
 
-echo [17/409] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\PROCESSI\LINALGEN.CPP
+echo [17/414] Compiling SRC\MAIN\V\T\COMMON\LINEALGE\PROCESSI\LINALGEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -376,7 +376,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LINALGEN.OBJ goto error
 
-echo [18/409] Compiling SRC\MAIN\V\T\PROCESSI\COMPGEOM.CPP
+echo [18/414] Compiling SRC\MAIN\V\T\PROCESSI\COMPGEOM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -398,7 +398,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\COMPGEOM.OBJ goto error
 
-echo [19/409] Compiling SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTAC1.CPP
+echo [19/414] Compiling SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTAC1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -420,7 +420,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LOUPTAC1.OBJ goto error
 
-echo [20/409] Compiling SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTASI.CPP
+echo [20/414] Compiling SRC\MAIN\V\T\NUMEANAL\LOOUPTAB\LOUPTASI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -442,7 +442,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LOUPTASI.OBJ goto error
 
-echo [21/409] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\POLYSOLV.CPP
+echo [21/414] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\POLYSOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -464,7 +464,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POLYSOLV.OBJ goto error
 
-echo [22/409] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\CUBISOLV.CPP
+echo [22/414] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\CUBISOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -486,7 +486,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CUBISOLV.OBJ goto error
 
-echo [23/409] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUADSOLV.CPP
+echo [23/414] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUADSOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -508,7 +508,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\QUADSOLV.OBJ goto error
 
-echo [24/409] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUARSOLV.CPP
+echo [24/414] Compiling SRC\MAIN\V\T\NUMEANAL\POLYNOMI\QUARSOLV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -530,7 +530,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\QUARSOLV.OBJ goto error
 
-echo [25/409] Compiling SRC\MAIN\JACKSON\DATABIND\JSONNODE.CPP
+echo [25/414] Compiling SRC\MAIN\JACKSON\DATABIND\JSONNODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -552,7 +552,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\JSONNODE.OBJ goto error
 
-echo [26/409] Compiling SRC\MAIN\JACKSON\DATABIND\OBJEMAPP.CPP
+echo [26/414] Compiling SRC\MAIN\JACKSON\DATABIND\OBJEMAPP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -574,7 +574,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\OBJEMAPP.OBJ goto error
 
-echo [27/409] Compiling SRC\MAIN\JAVA\LANG\OBJECT.CPP
+echo [27/414] Compiling SRC\MAIN\JAVA\LANG\OBJECT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -596,7 +596,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\OBJECT.OBJ goto error
 
-echo [28/409] Compiling SRC\MAIN\JAVA\LANG\MATH.CPP
+echo [28/414] Compiling SRC\MAIN\JAVA\LANG\MATH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -618,7 +618,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MATH.OBJ goto error
 
-echo [29/409] Compiling SRC\MAIN\JAVA\LANG\INTECONS.CPP
+echo [29/414] Compiling SRC\MAIN\JAVA\LANG\INTECONS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -640,7 +640,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INTECONS.OBJ goto error
 
-echo [30/409] Compiling SRC\MAIN\JAVA\LANG\STRING.CPP
+echo [30/414] Compiling SRC\MAIN\JAVA\LANG\STRING.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -662,7 +662,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\STRING.OBJ goto error
 
-echo [31/409] Compiling SRC\MAIN\JAVA\LANG\SYSTEM.CPP
+echo [31/414] Compiling SRC\MAIN\JAVA\LANG\SYSTEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -684,7 +684,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SYSTEM.OBJ goto error
 
-echo [32/409] Compiling SRC\MAIN\JAVA\LANG\CHARACTE.CPP
+echo [32/414] Compiling SRC\MAIN\JAVA\LANG\CHARACTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -706,7 +706,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CHARACTE.OBJ goto error
 
-echo [33/409] Compiling SRC\MAIN\JAVA\LANG\FLOAT.CPP
+echo [33/414] Compiling SRC\MAIN\JAVA\LANG\FLOAT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -728,7 +728,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FLOAT.OBJ goto error
 
-echo [34/409] Compiling SRC\MAIN\JAVA\LANG\DOUBLE.CPP
+echo [34/414] Compiling SRC\MAIN\JAVA\LANG\DOUBLE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -750,7 +750,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DOUBLE.OBJ goto error
 
-echo [35/409] Compiling SRC\MAIN\JAVA\LANG\STRIBUIL.CPP
+echo [35/414] Compiling SRC\MAIN\JAVA\LANG\STRIBUIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -772,7 +772,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\STRIBUIL.OBJ goto error
 
-echo [36/409] Compiling SRC\MAIN\JAVA\LANG\PROCBUIL.CPP
+echo [36/414] Compiling SRC\MAIN\JAVA\LANG\PROCBUIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -794,7 +794,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PROCBUIL.OBJ goto error
 
-echo [37/409] Compiling SRC\MAIN\JAVA\LANG\THREAD.CPP
+echo [37/414] Compiling SRC\MAIN\JAVA\LANG\THREAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -816,7 +816,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\THREAD.OBJ goto error
 
-echo [38/409] Compiling SRC\MAIN\JAVA\IO\INPUSTRE.CPP
+echo [38/414] Compiling SRC\MAIN\JAVA\IO\INPUSTRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -838,7 +838,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INPUSTRE.OBJ goto error
 
-echo [39/409] Compiling SRC\MAIN\JAVA\IO\FILE.CPP
+echo [39/414] Compiling SRC\MAIN\JAVA\IO\FILE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -860,7 +860,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FILE.OBJ goto error
 
-echo [40/409] Compiling SRC\MAIN\JAVA\IO\FILINPST.CPP
+echo [40/414] Compiling SRC\MAIN\JAVA\IO\FILINPST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -882,7 +882,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FILINPST.OBJ goto error
 
-echo [41/409] Compiling SRC\MAIN\JAVA\IO\FILOUTST.CPP
+echo [41/414] Compiling SRC\MAIN\JAVA\IO\FILOUTST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -904,7 +904,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FILOUTST.OBJ goto error
 
-echo [42/409] Compiling SRC\MAIN\JAVA\IO\BUFINPST.CPP
+echo [42/414] Compiling SRC\MAIN\JAVA\IO\BUFINPST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -926,7 +926,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BUFINPST.OBJ goto error
 
-echo [43/409] Compiling SRC\MAIN\JAVA\IO\BUFOUTST.CPP
+echo [43/414] Compiling SRC\MAIN\JAVA\IO\BUFOUTST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -948,7 +948,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BUFOUTST.OBJ goto error
 
-echo [44/409] Compiling SRC\MAIN\JAVA\IO\PRINSTRE.CPP
+echo [44/414] Compiling SRC\MAIN\JAVA\IO\PRINSTRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -970,7 +970,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRINSTRE.OBJ goto error
 
-echo [45/409] Compiling SRC\MAIN\JAVA\IO\BUFFREAD.CPP
+echo [45/414] Compiling SRC\MAIN\JAVA\IO\BUFFREAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -992,7 +992,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BUFFREAD.OBJ goto error
 
-echo [46/409] Compiling SRC\MAIN\JAVA\IO\PRINWRIT.CPP
+echo [46/414] Compiling SRC\MAIN\JAVA\IO\PRINWRIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1014,7 +1014,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRINWRIT.OBJ goto error
 
-echo [47/409] Compiling SRC\MAIN\JAVA\IO\READER.CPP
+echo [47/414] Compiling SRC\MAIN\JAVA\IO\READER.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1036,7 +1036,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\READER.OBJ goto error
 
-echo [48/409] Compiling SRC\MAIN\JAVA\IO\INPSTRRE.CPP
+echo [48/414] Compiling SRC\MAIN\JAVA\IO\INPSTRRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1058,7 +1058,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INPSTRRE.OBJ goto error
 
-echo [49/409] Compiling SRC\MAIN\JAVA\IO\FILEREAD.CPP
+echo [49/414] Compiling SRC\MAIN\JAVA\IO\FILEREAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1080,7 +1080,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FILEREAD.OBJ goto error
 
-echo [50/409] Compiling SRC\MAIN\JAVA\IO\STRETOKE.CPP
+echo [50/414] Compiling SRC\MAIN\JAVA\IO\STRETOKE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1102,7 +1102,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\STRETOKE.OBJ goto error
 
-echo [51/409] Compiling SRC\MAIN\JAVA\NIO\FILE\FILES.CPP
+echo [51/414] Compiling SRC\MAIN\JAVA\NIO\FILE\FILES.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1124,7 +1124,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FILES.OBJ goto error
 
-echo [52/409] Compiling SRC\MAIN\JAVA\UTIL\FORMATTE.CPP
+echo [52/414] Compiling SRC\MAIN\JAVA\UTIL\FORMATTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1146,7 +1146,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FORMATTE.OBJ goto error
 
-echo [53/409] Compiling SRC\MAIN\JAVA\UTIL\STRITOKE.CPP
+echo [53/414] Compiling SRC\MAIN\JAVA\UTIL\STRITOKE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1168,7 +1168,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\STRITOKE.OBJ goto error
 
-echo [54/409] Compiling SRC\MAIN\JAVA\UTIL\CONCURRE\EXECUTOR.CPP
+echo [54/414] Compiling SRC\MAIN\JAVA\UTIL\CONCURRE\EXECUTOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1190,7 +1190,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\EXECUTOR.OBJ goto error
 
-echo [55/409] Compiling SRC\MAIN\V\T\GUI\KEYEVENT.CPP
+echo [55/414] Compiling SRC\MAIN\V\T\GUI\KEYEVENT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1212,7 +1212,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\KEYEVENT.OBJ goto error
 
-echo [56/409] Compiling SRC\MAIN\V\T\GUI\MOUSEVEN.CPP
+echo [56/414] Compiling SRC\MAIN\V\T\GUI\MOUSEVEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1234,7 +1234,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MOUSEVEN.OBJ goto error
 
-echo [57/409] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FRAMEBUF.CPP
+echo [57/414] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FRAMEBUF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1256,7 +1256,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FRAMEBUF.OBJ goto error
 
-echo [58/409] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBTHEME.CPP
+echo [58/414] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBTHEME.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1278,7 +1278,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FBTHEME.OBJ goto error
 
-echo [59/409] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBPAINT.CPP
+echo [59/414] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBPAINT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1300,7 +1300,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FBPAINT.OBJ goto error
 
-echo [60/409] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBSNAP.CPP
+echo [60/414] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBSNAP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1322,7 +1322,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FBSNAP.OBJ goto error
 
-echo [61/409] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENBAR.CPP
+echo [61/414] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENBAR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1344,7 +1344,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FBMENBAR.OBJ goto error
 
-echo [62/409] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENRD.CPP
+echo [62/414] Compiling SRC\MAIN\V\T\GUI\FRAMEBUF\FBMENRD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1366,7 +1366,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FBMENRD.OBJ goto error
 
-echo [63/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\LIGIOMBI.CPP
+echo [63/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\LIGIOMBI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1388,7 +1388,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LIGIOMBI.OBJ goto error
 
-echo [64/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\INFPLAGI.CPP
+echo [64/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\INFPLAGI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1410,7 +1410,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INFPLAGI.OBJ goto error
 
-echo [65/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\RAYGIZMO.CPP
+echo [65/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\RAYGIZMO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1432,7 +1432,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYGIZMO.OBJ goto error
 
-echo [66/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\RAGIINTE.CPP
+echo [66/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\RAGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1454,7 +1454,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAGIINTE.OBJ goto error
 
-echo [67/409] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TANINTEV.CPP
+echo [67/414] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TANINTEV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1476,7 +1476,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TANINTEV.OBJ goto error
 
-echo [68/409] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TIE2IPGM.CPP
+echo [68/414] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TIE2IPGM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1498,7 +1498,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TIE2IPGM.OBJ goto error
 
-echo [69/409] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TAIE2RGM.CPP
+echo [69/414] Compiling SRC\MAIN\V\T\GUI\TANGINTE\TAIE2RGM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1520,7 +1520,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TAIE2RGM.OBJ goto error
 
-echo [70/409] Compiling SRC\MAIN\V\T\GUI\RENCONCO.CPP
+echo [70/414] Compiling SRC\MAIN\V\T\GUI\RENCONCO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1542,7 +1542,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RENCONCO.OBJ goto error
 
-echo [71/409] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PROMONCO.CPP
+echo [71/414] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PROMONCO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1564,7 +1564,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PROMONCO.OBJ goto error
 
-echo [72/409] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PRMOCOLF.CPP
+echo [72/414] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PRMOCOLF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1586,7 +1586,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRMOCOLF.OBJ goto error
 
-echo [73/409] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PRMOINRA.CPP
+echo [73/414] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PRMOINRA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1608,7 +1608,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRMOINRA.OBJ goto error
 
-echo [74/409] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOPR.CPP
+echo [74/414] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOPR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1630,7 +1630,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PAPRMOPR.OBJ goto error
 
-echo [75/409] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOC1.CPP
+echo [75/414] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PARALLEL\PAPRMOC1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1652,7 +1652,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PAPRMOC1.OBJ goto error
 
-echo [76/409] Compiling SRC\MAIN\V\T\ENVI\CAMERA\CAMERA.CPP
+echo [76/414] Compiling SRC\MAIN\V\T\ENVI\CAMERA\CAMERA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1674,7 +1674,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CAMERA.OBJ goto error
 
-echo [77/409] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\SIMPBACK.CPP
+echo [77/414] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\SIMPBACK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1696,7 +1696,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SIMPBACK.OBJ goto error
 
-echo [78/409] Compiling SRC\MAIN\V\T\ENVI\LIGHT\LIGHT.CPP
+echo [78/414] Compiling SRC\MAIN\V\T\ENVI\LIGHT\LIGHT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1718,7 +1718,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LIGHT.OBJ goto error
 
-echo [79/409] Compiling SRC\MAIN\V\T\ENVI\LIGHT\AMBILIGH.CPP
+echo [79/414] Compiling SRC\MAIN\V\T\ENVI\LIGHT\AMBILIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1740,7 +1740,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AMBILIGH.OBJ goto error
 
-echo [80/409] Compiling SRC\MAIN\V\T\ENVI\LIGHT\DIRELIGH.CPP
+echo [80/414] Compiling SRC\MAIN\V\T\ENVI\LIGHT\DIRELIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1762,7 +1762,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DIRELIGH.OBJ goto error
 
-echo [81/409] Compiling SRC\MAIN\V\T\ENVI\LIGHT\POINLIGH.CPP
+echo [81/414] Compiling SRC\MAIN\V\T\ENVI\LIGHT\POINLIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1784,7 +1784,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POINLIGH.OBJ goto error
 
-echo [82/409] Compiling SRC\MAIN\V\T\ENVI\LIGHT\SPOTLIGH.CPP
+echo [82/414] Compiling SRC\MAIN\V\T\ENVI\LIGHT\SPOTLIGH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1806,7 +1806,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SPOTLIGH.OBJ goto error
 
-echo [83/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMPSCEN.CPP
+echo [83/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMPSCEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1828,7 +1828,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SIMPSCEN.OBJ goto error
 
-echo [84/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMSCESN.CPP
+echo [84/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMSCESN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1850,7 +1850,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SIMSCESN.OBJ goto error
 
-echo [85/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMBODGR.CPP
+echo [85/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMBODGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1872,7 +1872,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SIMBODGR.OBJ goto error
 
-echo [86/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMPBODY.CPP
+echo [86/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\SIMPBODY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1894,7 +1894,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SIMPBODY.OBJ goto error
 
-echo [87/409] Compiling SRC\MAIN\V\T\PROCESSI\STOPWATC.CPP
+echo [87/414] Compiling SRC\MAIN\V\T\PROCESSI\STOPWATC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1916,7 +1916,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\STOPWATC.OBJ goto error
 
-echo [88/409] Compiling SRC\MAIN\V\T\COMMON\SYMBALGE\ALGEEXPR.CPP
+echo [88/414] Compiling SRC\MAIN\V\T\COMMON\SYMBALGE\ALGEEXPR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1938,7 +1938,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ALGEEXPR.OBJ goto error
 
-echo [89/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAY.CPP
+echo [89/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1960,7 +1960,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAY.OBJ goto error
 
-echo [90/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYHIT.CPP
+echo [90/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYHIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -1982,7 +1982,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYHIT.OBJ goto error
 
-echo [91/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\PLANFACE.CPP
+echo [91/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\PLANFACE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2004,7 +2004,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PLANFACE.OBJ goto error
 
-echo [92/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\PRIRAYTE.CPP
+echo [92/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\PRIRAYTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2026,7 +2026,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRIRAYTE.OBJ goto error
 
-echo [93/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\SPATINDE.CPP
+echo [93/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\SPATINDE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2048,7 +2048,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SPATINDE.OBJ goto error
 
-echo [94/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\SPINWORK.CPP
+echo [94/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\SPINWORK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2070,7 +2070,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SPINWORK.OBJ goto error
 
-echo [95/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\LINSPAIN.CPP
+echo [95/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\LINSPAIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2092,7 +2092,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LINSPAIN.OBJ goto error
 
-echo [96/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\BISASPIN.CPP
+echo [96/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\BISASPIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2114,7 +2114,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BISASPIN.OBJ goto error
 
-echo [97/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\SPAGRTRE.CPP
+echo [97/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\SPAGRTRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2136,7 +2136,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SPAGRTRE.OBJ goto error
 
-echo [98/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\GRSPAIND.CPP
+echo [98/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SPATINDX\GRSPAIND.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2158,7 +2158,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GRSPAIND.OBJ goto error
 
-echo [99/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\TRIANGLE.CPP
+echo [99/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\TRIANGLE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2180,7 +2180,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRIANGLE.OBJ goto error
 
-echo [100/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX.CPP
+echo [100/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2202,7 +2202,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VERTEX.OBJ goto error
 
-echo [101/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX2D.CPP
+echo [101/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\VERTEX2D.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2224,7 +2224,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VERTEX2D.OBJ goto error
 
-echo [102/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\CURVE\CURVE.CPP
+echo [102/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\CURVE\CURVE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2246,7 +2246,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CURVE.OBJ goto error
 
-echo [103/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\CURVE\PARACURV.CPP
+echo [103/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\CURVE\PARACURV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2268,7 +2268,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PARACURV.OBJ goto error
 
-echo [104/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEOMETRY.CPP
+echo [104/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEOMETRY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2290,7 +2290,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GEOMETRY.OBJ goto error
 
-echo [105/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SURFACE.CPP
+echo [105/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SURFACE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2312,7 +2312,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SURFACE.OBJ goto error
 
-echo [106/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\HALFSPAC.CPP
+echo [106/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\HALFSPAC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2334,7 +2334,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\HALFSPAC.OBJ goto error
 
-echo [107/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\INFIPLAN.CPP
+echo [107/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\INFIPLAN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2356,7 +2356,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INFIPLAN.OBJ goto error
 
-echo [108/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\FUNEXPSU.CPP
+echo [108/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\FUNEXPSU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2378,7 +2378,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FUNEXPSU.OBJ goto error
 
-echo [109/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\MD2MESH.CPP
+echo [109/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\MD2MESH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2400,7 +2400,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MD2MESH.OBJ goto error
 
-echo [110/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\PABICUPA.CPP
+echo [110/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\PABICUPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2422,7 +2422,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PABICUPA.OBJ goto error
 
-echo [111/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\_PABICPI.CPP
+echo [111/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\_PABICPI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2444,7 +2444,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PABICPI.OBJ goto error
 
-echo [112/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRISTRME.CPP
+echo [112/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRISTRME.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2466,7 +2466,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRISTRME.OBJ goto error
 
-echo [113/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIAMESH.CPP
+echo [113/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIAMESH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2488,7 +2488,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRIAMESH.OBJ goto error
 
-echo [114/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\QUADMESH.CPP
+echo [114/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\QUADMESH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2510,7 +2510,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\QUADMESH.OBJ goto error
 
-echo [115/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIMESGR.CPP
+echo [115/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRIMESGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2532,7 +2532,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRIMESGR.OBJ goto error
 
-echo [116/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\VOXELIZA.CPP
+echo [116/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\VOXELIZA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2554,7 +2554,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VOXELIZA.OBJ goto error
 
-echo [117/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\TRIMESVO.CPP
+echo [117/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\TRIMESVO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2576,7 +2576,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRIMESVO.OBJ goto error
 
-echo [118/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\TRMEGRVO.CPP
+echo [118/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\TRMEGRVO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2598,7 +2598,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRMEGRVO.OBJ goto error
 
-echo [119/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\FUEXSUVO.CPP
+echo [119/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\FUEXSUVO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2620,7 +2620,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FUEXSUVO.OBJ goto error
 
-echo [120/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\SURRAYIN.CPP
+echo [120/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\SURRAYIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2642,7 +2642,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SURRAYIN.OBJ goto error
 
-echo [121/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\GEOMTRIA.CPP
+echo [121/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\GEOMTRIA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2664,7 +2664,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GEOMTRIA.OBJ goto error
 
-echo [122/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\GEOCALEX.CPP
+echo [122/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\GEOCALEX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2686,7 +2686,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GEOCALEX.OBJ goto error
 
-echo [123/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDECTR.CPP
+echo [123/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDECTR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2708,7 +2708,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MONDECTR.OBJ goto error
 
-echo [124/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_COAWPOT.CPP
+echo [124/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_COAWPOT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2730,7 +2730,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_COAWPOT.OBJ goto error
 
-echo [125/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_CONSTRU.CPP
+echo [125/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_CONSTRU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2752,7 +2752,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_CONSTRU.OBJ goto error
 
-echo [126/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INCSEIN.CPP
+echo [126/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INCSEIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2774,7 +2774,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_INCSEIN.OBJ goto error
 
-echo [127/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INSBASC.CPP
+echo [127/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_INSBASC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2796,7 +2796,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_INSBASC.OBJ goto error
 
-echo [128/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_MONOTON.CPP
+echo [128/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_MONOTON.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2818,7 +2818,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_MONOTON.OBJ goto error
 
-echo [129/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_RANSEOR.CPP
+echo [129/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_RANSEOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2840,7 +2840,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_RANSEOR.OBJ goto error
 
-echo [130/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_SEGTABU.CPP
+echo [130/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_SEGTABU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2862,7 +2862,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_SEGTABU.OBJ goto error
 
-echo [131/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRIATRA.CPP
+echo [131/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRIATRA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2884,7 +2884,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_TRIATRA.OBJ goto error
 
-echo [132/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRTRQUN.CPP
+echo [132/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLTR\MONDE\_TRTRQUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2906,7 +2906,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_TRTRQUN.OBJ goto error
 
-echo [133/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\_POL2DWA.CPP
+echo [133/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\_POL2DWA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2928,7 +2928,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POL2DWA.OBJ goto error
 
-echo [134/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\POLTOPME.CPP
+echo [134/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\POLTOPME.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2950,7 +2950,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POLTOPME.OBJ goto error
 
-echo [135/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\WEATPOCL.CPP
+echo [135/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\POLYCLIP\WEATPOCL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2972,7 +2972,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WEATPOCL.OBJ goto error
 
-echo [136/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\_POL2DCO.CPP
+echo [136/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\_POL2DCO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -2994,7 +2994,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POL2DCO.OBJ goto error
 
-echo [137/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\POLYGO2D.CPP
+echo [137/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\POLYGON\POLYGO2D.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3016,7 +3016,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POLYGO2D.OBJ goto error
 
-echo [138/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOLUME.CPP
+echo [138/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOLUME.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3038,7 +3038,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VOLUME.OBJ goto error
 
-echo [139/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SOLID.CPP
+echo [139/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SOLID.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3060,7 +3060,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SOLID.OBJ goto error
 
-echo [140/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SPHERE.CPP
+echo [140/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\SPHERE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3082,7 +3082,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SPHERE.OBJ goto error
 
-echo [141/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BOX.CPP
+echo [141/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BOX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3104,7 +3104,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BOX.OBJ goto error
 
-echo [142/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\CONE.CPP
+echo [142/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\CONE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3126,7 +3126,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CONE.OBJ goto error
 
-echo [143/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ARROW.CPP
+echo [143/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ARROW.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3148,7 +3148,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ARROW.OBJ goto error
 
-echo [144/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\TORUS.CPP
+echo [144/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\TORUS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3170,7 +3170,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TORUS.OBJ goto error
 
-echo [145/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\TUBE.CPP
+echo [145/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\TUBE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3192,7 +3192,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TUBE.OBJ goto error
 
-echo [146/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOXEVOLU.CPP
+echo [146/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\VOXEVOLU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3214,7 +3214,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VOXEVOLU.OBJ goto error
 
-echo [147/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POLBOUSO.CPP
+echo [147/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POLBOUSO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3236,7 +3236,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POLBOUSO.OBJ goto error
 
-echo [148/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEO.CPP
+echo [148/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3258,7 +3258,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOEO.OBJ goto error
 
-echo [149/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSONP.CPP
+echo [149/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSONP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3280,7 +3280,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSONP.OBJ goto error
 
-echo [150/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOPR.CPP
+echo [150/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOPR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3302,7 +3302,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOPR.OBJ goto error
 
-echo [151/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOGV.CPP
+echo [151/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOGV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3324,7 +3324,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOGV.OBJ goto error
 
-echo [152/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOVE.CPP
+echo [152/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOVE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3346,7 +3346,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOVE.OBJ goto error
 
-echo [153/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTE.CPP
+echo [153/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3368,7 +3368,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOTE.OBJ goto error
 
-echo [154/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOFG.CPP
+echo [154/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOFG.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3390,7 +3390,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOFG.OBJ goto error
 
-echo [155/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSORE.CPP
+echo [155/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSORE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3412,7 +3412,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSORE.OBJ goto error
 
-echo [156/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSTV.CPP
+echo [156/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSTV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3434,7 +3434,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSTV.OBJ goto error
 
-echo [157/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBSBTP.CPP
+echo [157/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBSBTP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3456,7 +3456,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBSBTP.OBJ goto error
 
-echo [158/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSVS.CPP
+echo [158/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\_POBOSVS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3478,7 +3478,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSVS.OBJ goto error
 
-echo [159/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTS.CPP
+echo [159/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOTS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3500,7 +3500,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOTS.OBJ goto error
 
-echo [160/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOE.CPP
+echo [160/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3522,7 +3522,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSOE.OBJ goto error
 
-echo [161/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSHE.CPP
+echo [161/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSHE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3544,7 +3544,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSHE.OBJ goto error
 
-echo [162/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOL.CPP
+echo [162/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3566,7 +3566,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSOL.OBJ goto error
 
-echo [163/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOF.CPP
+echo [163/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBOSOF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3588,7 +3588,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSOF.OBJ goto error
 
-echo [164/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBSNTS.CPP
+echo [164/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\NODE\_POBSNTS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3610,7 +3610,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBSNTS.OBJ goto error
 
-echo [165/409] Compiling SRC\MAIN\V\T\GUI\CAMCONAQ.CPP
+echo [165/414] Compiling SRC\MAIN\V\T\GUI\CAMCONAQ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3632,7 +3632,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CAMCONAQ.OBJ goto error
 
-echo [166/409] Compiling SRC\MAIN\V\T\GUI\CAMCONOR.CPP
+echo [166/414] Compiling SRC\MAIN\V\T\GUI\CAMCONOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3654,7 +3654,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CAMCONOR.OBJ goto error
 
-echo [167/409] Compiling SRC\MAIN\V\T\GUI\CAMCONBL.CPP
+echo [167/414] Compiling SRC\MAIN\V\T\GUI\CAMCONBL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3676,7 +3676,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CAMCONBL.OBJ goto error
 
-echo [168/409] Compiling SRC\MAIN\V\T\GUI\CACOGOEA.CPP
+echo [168/414] Compiling SRC\MAIN\V\T\GUI\CACOGOEA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3698,7 +3698,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CACOGOEA.OBJ goto error
 
-echo [169/409] Compiling SRC\MAIN\V\T\RENDER\TRACWORK.CPP
+echo [169/414] Compiling SRC\MAIN\V\T\RENDER\TRACWORK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3720,7 +3720,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRACWORK.OBJ goto error
 
-echo [170/409] Compiling SRC\MAIN\V\T\RENDER\SPHPOLCA.CPP
+echo [170/414] Compiling SRC\MAIN\V\T\RENDER\SPHPOLCA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3742,7 +3742,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SPHPOLCA.OBJ goto error
 
-echo [171/409] Compiling SRC\MAIN\V\T\RENDER\FRAMEBUF\FRGI2DDR.CPP
+echo [171/414] Compiling SRC\MAIN\V\T\RENDER\FRAMEBUF\FRGI2DDR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3764,7 +3764,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FRGI2DDR.OBJ goto error
 
-echo [172/409] Compiling SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DDRL.CPP
+echo [172/414] Compiling SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DDRL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3786,7 +3786,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GIZ2DDRL.OBJ goto error
 
-echo [173/409] Compiling SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DPRO.CPP
+echo [173/414] Compiling SRC\MAIN\V\T\RENDER\GIZMO\GIZ2DPRO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3808,7 +3808,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GIZ2DPRO.OBJ goto error
 
-echo [174/409] Compiling SRC\MAIN\V\T\RENDER\GIZMO\INGI2DPA.CPP
+echo [174/414] Compiling SRC\MAIN\V\T\RENDER\GIZMO\INGI2DPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3830,7 +3830,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INGI2DPA.OBJ goto error
 
-echo [175/409] Compiling SRC\MAIN\V\T\RENDER\GIZMO\ROGI2DPA.CPP
+echo [175/414] Compiling SRC\MAIN\V\T\RENDER\GIZMO\ROGI2DPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3852,7 +3852,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ROGI2DPA.OBJ goto error
 
-echo [176/409] Compiling SRC\MAIN\V\T\RENDER\GIZMO\CCGI2DPA.CPP
+echo [176/414] Compiling SRC\MAIN\V\T\RENDER\GIZMO\CCGI2DPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3874,7 +3874,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CCGI2DPA.OBJ goto error
 
-echo [177/409] Compiling SRC\MAIN\V\T\RENDER\GIZMO\SCGI2DPA.CPP
+echo [177/414] Compiling SRC\MAIN\V\T\RENDER\GIZMO\SCGI2DPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3896,7 +3896,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SCGI2DPA.OBJ goto error
 
-echo [178/409] Compiling SRC\MAIN\V\T\RENDER\GIZMO\TRGI2DPA.CPP
+echo [178/414] Compiling SRC\MAIN\V\T\RENDER\GIZMO\TRGI2DPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3918,7 +3918,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRGI2DPA.OBJ goto error
 
-echo [179/409] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\DEPBUFEN.CPP
+echo [179/414] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\DEPBUFEN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3940,7 +3940,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DEPBUFEN.OBJ goto error
 
-echo [180/409] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\PARARAYT.CPP
+echo [180/414] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\PARARAYT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3962,7 +3962,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PARARAYT.OBJ goto error
 
-echo [181/409] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILAR.CPP
+echo [181/414] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILAR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -3984,7 +3984,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RASTILAR.OBJ goto error
 
-echo [182/409] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILGE.CPP
+echo [182/414] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\RASTILGE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4006,7 +4006,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RASTILGE.OBJ goto error
 
-echo [183/409] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\SIMPRAYT.CPP
+echo [183/414] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\SIMPRAYT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4028,7 +4028,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SIMPRAYT.OBJ goto error
 
-echo [184/409] Compiling SRC\MAIN\V\T\RENDER\AUTSTEGE.CPP
+echo [184/414] Compiling SRC\MAIN\V\T\RENDER\AUTSTEGE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4050,7 +4050,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AUTSTEGE.OBJ goto error
 
-echo [185/409] Compiling SRC\MAIN\V\T\RENDER\HIDDLINE\HIDLINRE.CPP
+echo [185/414] Compiling SRC\MAIN\V\T\RENDER\HIDDLINE\HIDLINRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4072,7 +4072,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\HIDLINRE.OBJ goto error
 
-echo [186/409] Compiling SRC\MAIN\V\T\RENDER\HIDDSURF\HIDSURRE.CPP
+echo [186/414] Compiling SRC\MAIN\V\T\RENDER\HIDDSURF\HIDSURRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4094,7 +4094,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\HIDSURRE.OBJ goto error
 
-echo [187/409] Compiling SRC\MAIN\V\T\RENDER\DITHERIN\DITHERIN.CPP
+echo [187/414] Compiling SRC\MAIN\V\T\RENDER\DITHERIN\DITHERIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4116,7 +4116,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DITHERIN.OBJ goto error
 
-echo [188/409] Compiling SRC\MAIN\V\T\RENDER\RASTER\RASTER2D.CPP
+echo [188/414] Compiling SRC\MAIN\V\T\RENDER\RASTER\RASTER2D.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4138,7 +4138,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RASTER2D.OBJ goto error
 
-echo [189/409] Compiling SRC\MAIN\V\T\RENDER\HIDDLINE\WIREREND.CPP
+echo [189/414] Compiling SRC\MAIN\V\T\RENDER\HIDDLINE\WIREREND.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4160,7 +4160,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIREREND.OBJ goto error
 
-echo [190/409] Compiling SRC\MAIN\V\T\RENDER\POBOSODE.CPP
+echo [190/414] Compiling SRC\MAIN\V\T\RENDER\POBOSODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4182,7 +4182,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSODE.OBJ goto error
 
-echo [191/409] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CPTESACO.CPP
+echo [191/414] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CPTESACO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4204,7 +4204,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CPTESACO.OBJ goto error
 
-echo [192/409] Compiling SRC\MAIN\V\T\RENDER\SHADERS\LIGHSHAD.CPP
+echo [192/414] Compiling SRC\MAIN\V\T\RENDER\SHADERS\LIGHSHAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4226,7 +4226,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\LIGHSHAD.OBJ goto error
 
-echo [193/409] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CONSSHAD.CPP
+echo [193/414] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CONSSHAD.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4248,7 +4248,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CONSSHAD.OBJ goto error
 
-echo [194/409] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CONTEXSH.CPP
+echo [194/414] Compiling SRC\MAIN\V\T\RENDER\SHADERS\CONTEXSH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4270,7 +4270,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CONTEXSH.OBJ goto error
 
-echo [195/409] Compiling SRC\MAIN\V\T\RENDER\SHADERS\COOTORSH.CPP
+echo [195/414] Compiling SRC\MAIN\V\T\RENDER\SHADERS\COOTORSH.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4292,7 +4292,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\COOTORSH.OBJ goto error
 
-echo [196/409] Compiling SRC\MAIN\V\T\RENDER\SHADERS\SHADSELE.CPP
+echo [196/414] Compiling SRC\MAIN\V\T\RENDER\SHADERS\SHADSELE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4314,7 +4314,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SHADSELE.OBJ goto error
 
-echo [197/409] Compiling SRC\MAIN\V\T\IO\PERSELEM.CPP
+echo [197/414] Compiling SRC\MAIN\V\T\IO\PERSELEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4336,7 +4336,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PERSELEM.OBJ goto error
 
-echo [198/409] Compiling SRC\MAIN\V\T\IO\FILELOCA.CPP
+echo [198/414] Compiling SRC\MAIN\V\T\IO\FILELOCA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4358,7 +4358,117 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FILELOCA.OBJ goto error
 
-echo [199/409] Compiling SRC\MAIN\V\T\IO\GUI\DIALPERS.CPP
+echo [199/414] Compiling SRC\MAIN\V\T\IO\WRAPPER\FILUNCWR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\FILUNCWR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\WRAPPER\FILUNCWR.CPP >> TC.RSP
+if exist BUILDTC\FILUNCWR.OBJ del BUILDTC\FILUNCWR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\FILUNCWR.OBJ goto error
+
+echo [200/414] Compiling SRC\MAIN\V\T\IO\WRAPPER\PIPINPST.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\PIPINPST.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\WRAPPER\PIPINPST.CPP >> TC.RSP
+if exist BUILDTC\PIPINPST.OBJ del BUILDTC\PIPINPST.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\PIPINPST.OBJ goto error
+
+echo [201/414] Compiling SRC\MAIN\V\T\IO\WRAPPER\PIPOUTST.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\PIPOUTST.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\WRAPPER\PIPOUTST.CPP >> TC.RSP
+if exist BUILDTC\PIPOUTST.OBJ del BUILDTC\PIPOUTST.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\PIPOUTST.OBJ goto error
+
+echo [202/414] Compiling SRC\MAIN\V\T\IO\WRAPPER\MAT2X2PR.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\MAT2X2PR.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\WRAPPER\MAT2X2PR.CPP >> TC.RSP
+if exist BUILDTC\MAT2X2PR.OBJ del BUILDTC\MAT2X2PR.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\MAT2X2PR.OBJ goto error
+
+echo [203/414] Compiling SRC\MAIN\V\T\IO\WRAPPER\VEC3DPRI.CPP
+echo -c > TC.RSP
+echo -ml >> TC.RSP
+echo -f87 >> TC.RSP
+echo -O1 >> TC.RSP
+echo -d >> TC.RSP
+echo -v- >> TC.RSP
+echo -vi- >> TC.RSP
+echo -w-inl >> TC.RSP
+echo -DVITRAL_WITHOUT_PTHREADS >> TC.RSP
+echo -DTURBO_C_286_ENABLED >> TC.RSP
+echo -IC:\TURBOC\INCLUDE >> TC.RSP
+echo -I..\DOS\SRC\MAIN >> TC.RSP
+echo -I..\DOS\SRC\MAIN\V\KERNEL\286 >> TC.RSP
+echo -ISRC;SRC\MAIN >> TC.RSP
+echo -oBUILDTC\VEC3DPRI.OBJ >> TC.RSP
+echo SRC\MAIN\V\T\IO\WRAPPER\VEC3DPRI.CPP >> TC.RSP
+if exist BUILDTC\VEC3DPRI.OBJ del BUILDTC\VEC3DPRI.OBJ
+tcc @TC.RSP > TC.LOG
+if errorlevel 1 goto error
+if not exist BUILDTC\VEC3DPRI.OBJ goto error
+
+echo [204/414] Compiling SRC\MAIN\V\T\IO\GUI\DIALPERS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4380,7 +4490,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DIALPERS.OBJ goto error
 
-echo [200/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\ENVIPERS.CPP
+echo [205/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\ENVIPERS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4402,7 +4512,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ENVIPERS.OBJ goto error
 
-echo [201/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEOBJ.CPP
+echo [206/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEOBJ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4424,7 +4534,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WRITEOBJ.OBJ goto error
 
-echo [202/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEGTS.CPP
+echo [207/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEGTS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4446,7 +4556,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WRITEGTS.OBJ goto error
 
-echo [203/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEVTK.CPP
+echo [208/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\WRITEVTK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4468,7 +4578,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WRITEVTK.OBJ goto error
 
-echo [204/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READEOBJ.CPP
+echo [209/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READEOBJ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4490,7 +4600,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\READEOBJ.OBJ goto error
 
-echo [205/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READEPLY.CPP
+echo [210/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READEPLY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4512,7 +4622,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\READEPLY.OBJ goto error
 
-echo [206/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REAPLYRE.CPP
+echo [211/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REAPLYRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4534,7 +4644,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\REAPLYRE.OBJ goto error
 
-echo [207/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REAMITSC.CPP
+echo [212/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REAMITSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4556,7 +4666,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\REAMITSC.OBJ goto error
 
-echo [208/409] Compiling SRC\MAIN\V\T\IO\IMAGE\IMAGPERS.CPP
+echo [213/414] Compiling SRC\MAIN\V\T\IO\IMAGE\IMAGPERS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4578,7 +4688,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\IMAGPERS.OBJ goto error
 
-echo [209/409] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\TEXTUTIL.CPP
+echo [214/414] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\TEXTUTIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4600,7 +4710,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TEXTUTIL.OBJ goto error
 
-echo [210/409] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\CORGIMHU.CPP
+echo [215/414] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\CORGIMHU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4622,7 +4732,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CORGIMHU.OBJ goto error
 
-echo [211/409] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\IMAGTEXT.CPP
+echo [216/414] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\IMAGTEXT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4644,7 +4754,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\IMAGTEXT.OBJ goto error
 
-echo [212/409] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\SOTECOMA.CPP
+echo [217/414] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\FROM2D\SOTECOMA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4666,7 +4776,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SOTECOMA.OBJ goto error
 
-echo [213/409] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\BUMTEXFI.CPP
+echo [218/414] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\BUMTEXFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4688,7 +4798,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BUMTEXFI.OBJ goto error
 
-echo [214/409] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\COLTEXFI.CPP
+echo [219/414] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\COLTEXFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4710,7 +4820,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\COLTEXFI.OBJ goto error
 
-echo [215/409] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\PROCNOIS.CPP
+echo [220/414] Compiling SRC\MAIN\V\T\MEDIA\SOLITEXT\PROCEDUR\PROCNOIS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4732,7 +4842,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PROCNOIS.OBJ goto error
 
-echo [216/409] Compiling SRC\MAIN\V\T\MEDIA\RGBPIXEL.CPP
+echo [221/414] Compiling SRC\MAIN\V\T\MEDIA\RGBPIXEL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4754,7 +4864,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGBPIXEL.OBJ goto error
 
-echo [217/409] Compiling SRC\MAIN\V\T\MEDIA\RGBAPIXE.CPP
+echo [222/414] Compiling SRC\MAIN\V\T\MEDIA\RGBAPIXE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4776,7 +4886,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGBAPIXE.OBJ goto error
 
-echo [218/409] Compiling SRC\MAIN\V\T\MEDIA\SHAPDESC.CPP
+echo [223/414] Compiling SRC\MAIN\V\T\MEDIA\SHAPDESC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4798,7 +4908,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SHAPDESC.OBJ goto error
 
-echo [219/409] Compiling SRC\MAIN\V\T\MEDIA\RGBCOLP1.CPP
+echo [224/414] Compiling SRC\MAIN\V\T\MEDIA\RGBCOLP1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4820,7 +4930,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGBCOLP1.OBJ goto error
 
-echo [220/409] Compiling SRC\MAIN\V\T\MEDIA\RGBCOLPA.CPP
+echo [225/414] Compiling SRC\MAIN\V\T\MEDIA\RGBCOLPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4842,7 +4952,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGBCOLPA.OBJ goto error
 
-echo [221/409] Compiling SRC\MAIN\V\T\MEDIA\RGPRCOPA.CPP
+echo [226/414] Compiling SRC\MAIN\V\T\MEDIA\RGPRCOPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4864,7 +4974,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGPRCOPA.OBJ goto error
 
-echo [222/409] Compiling SRC\MAIN\V\T\MEDIA\GRASCAPA.CPP
+echo [227/414] Compiling SRC\MAIN\V\T\MEDIA\GRASCAPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4886,7 +4996,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GRASCAPA.OBJ goto error
 
-echo [223/409] Compiling SRC\MAIN\V\T\MEDIA\IMAGE.CPP
+echo [228/414] Compiling SRC\MAIN\V\T\MEDIA\IMAGE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4908,7 +5018,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\IMAGE.OBJ goto error
 
-echo [224/409] Compiling SRC\MAIN\V\T\MEDIA\RGBIMAU1.CPP
+echo [229/414] Compiling SRC\MAIN\V\T\MEDIA\RGBIMAU1.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4930,7 +5040,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGBIMAU1.OBJ goto error
 
-echo [225/409] Compiling SRC\MAIN\V\T\MEDIA\RGBIMAUN.CPP
+echo [230/414] Compiling SRC\MAIN\V\T\MEDIA\RGBIMAUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4952,7 +5062,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGBIMAUN.OBJ goto error
 
-echo [226/409] Compiling SRC\MAIN\V\T\MEDIA\RGIMHDUN.CPP
+echo [231/414] Compiling SRC\MAIN\V\T\MEDIA\RGIMHDUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4974,7 +5084,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGIMHDUN.OBJ goto error
 
-echo [227/409] Compiling SRC\MAIN\V\T\MEDIA\INCOIMUN.CPP
+echo [232/414] Compiling SRC\MAIN\V\T\MEDIA\INCOIMUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -4996,7 +5106,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INCOIMUN.OBJ goto error
 
-echo [228/409] Compiling SRC\MAIN\V\T\MEDIA\INCOIMHU.CPP
+echo [233/414] Compiling SRC\MAIN\V\T\MEDIA\INCOIMHU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5018,7 +5128,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INCOIMHU.OBJ goto error
 
-echo [229/409] Compiling SRC\MAIN\V\T\MEDIA\RGBIMACO.CPP
+echo [234/414] Compiling SRC\MAIN\V\T\MEDIA\RGBIMACO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5040,7 +5150,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGBIMACO.OBJ goto error
 
-echo [230/409] Compiling SRC\MAIN\V\T\MEDIA\ZBUFFER.CPP
+echo [235/414] Compiling SRC\MAIN\V\T\MEDIA\ZBUFFER.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5062,7 +5172,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ZBUFFER.OBJ goto error
 
-echo [231/409] Compiling SRC\MAIN\V\T\MEDIA\NORMAMAP.CPP
+echo [236/414] Compiling SRC\MAIN\V\T\MEDIA\NORMAMAP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5084,7 +5194,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\NORMAMAP.OBJ goto error
 
-echo [232/409] Compiling SRC\MAIN\V\T\MEDIA\CAL2DBUF.CPP
+echo [237/414] Compiling SRC\MAIN\V\T\MEDIA\CAL2DBUF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5106,7 +5216,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CAL2DBUF.OBJ goto error
 
-echo [233/409] Compiling SRC\MAIN\V\T\MEDIA\CAL3DBUF.CPP
+echo [238/414] Compiling SRC\MAIN\V\T\MEDIA\CAL3DBUF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5128,7 +5238,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CAL3DBUF.OBJ goto error
 
-echo [234/409] Compiling SRC\MAIN\V\T\MEDIA\PRCOSHDE.CPP
+echo [239/414] Compiling SRC\MAIN\V\T\MEDIA\PRCOSHDE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5150,7 +5260,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRCOSHDE.OBJ goto error
 
-echo [235/409] Compiling SRC\MAIN\V\T\MEDIA\FOUSHADE.CPP
+echo [240/414] Compiling SRC\MAIN\V\T\MEDIA\FOUSHADE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5172,7 +5282,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FOUSHADE.OBJ goto error
 
-echo [236/409] Compiling SRC\MAIN\V\T\MEDIA\GEOMMETA.CPP
+echo [241/414] Compiling SRC\MAIN\V\T\MEDIA\GEOMMETA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5194,7 +5304,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GEOMMETA.OBJ goto error
 
-echo [237/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SIMPMATE.CPP
+echo [242/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SIMPMATE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5216,7 +5326,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SIMPMATE.OBJ goto error
 
-echo [238/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\MICFACMA.CPP
+echo [243/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\MICFACMA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5238,7 +5348,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MICFACMA.OBJ goto error
 
-echo [239/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SHADTYPE.CPP
+echo [244/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SHADTYPE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5260,7 +5370,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SHADTYPE.OBJ goto error
 
-echo [240/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\RENDCONF.CPP
+echo [245/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\RENDCONF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5282,7 +5392,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RENDCONF.OBJ goto error
 
-echo [241/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\PHONLOBE.CPP
+echo [246/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\PHONLOBE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5304,7 +5414,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PHONLOBE.OBJ goto error
 
-echo [242/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\PHONMATE.CPP
+echo [247/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\PHONMATE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5326,7 +5436,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PHONMATE.OBJ goto error
 
-echo [243/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SCATFRAM.CPP
+echo [248/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\SCATFRAM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5348,7 +5458,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SCATFRAM.OBJ goto error
 
-echo [244/409] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\TEXTURE.CPP
+echo [249/414] Compiling SRC\MAIN\V\T\ENVI\MATERIAL\TEXTURE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5370,7 +5480,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TEXTURE.OBJ goto error
 
-echo [245/409] Compiling SRC\MAIN\V\T\PROCESSI\CURVMODE.CPP
+echo [250/414] Compiling SRC\MAIN\V\T\PROCESSI\CURVMODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5392,7 +5502,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CURVMODE.OBJ goto error
 
-echo [246/409] Compiling SRC\MAIN\V\T\PROCESSI\IMAGPROC.CPP
+echo [251/414] Compiling SRC\MAIN\V\T\PROCESSI\IMAGPROC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5414,7 +5524,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\IMAGPROC.OBJ goto error
 
-echo [247/409] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\CUBEBACK.CPP
+echo [252/414] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\CUBEBACK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5436,7 +5546,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CUBEBACK.OBJ goto error
 
-echo [248/409] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\FIXEBACK.CPP
+echo [253/414] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\FIXEBACK.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5458,7 +5568,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FIXEBACK.OBJ goto error
 
-echo [249/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\POBOSOMO.CPP
+echo [254/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\POBOSOMO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5480,7 +5590,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOMO.OBJ goto error
 
-echo [250/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSOO.CPP
+echo [255/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSOO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5502,7 +5612,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSOO.OBJ goto error
 
-echo [251/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSIN.CPP
+echo [256/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FALLBA\_POBOSIN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5524,7 +5634,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSIN.OBJ goto error
 
-echo [252/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOSC.CPP
+echo [257/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5546,7 +5656,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOSC.OBJ goto error
 
-echo [253/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSVN.CPP
+echo [258/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\_POBOSVN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5568,7 +5678,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSVN.OBJ goto error
 
-echo [254/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_PBSSOA.CPP
+echo [259/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_PBSSOA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5590,7 +5700,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSOA.OBJ goto error
 
-echo [255/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSIO.CPP
+echo [260/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSIO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5612,7 +5722,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSIO.OBJ goto error
 
-echo [256/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\SLICIN\_POBOSOS.CPP
+echo [261/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\SLICIN\_POBOSOS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5634,7 +5744,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSOS.OBJ goto error
 
-echo [257/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_SETOPTR.CPP
+echo [262/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_SETOPTR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5656,7 +5766,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_SETOPTR.OBJ goto error
 
-echo [258/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSONE.CPP
+echo [263/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSONE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5678,7 +5788,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSONE.OBJ goto error
 
-echo [259/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSNEC.CPP
+echo [264/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_PBSSNEC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5700,7 +5810,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSNEC.OBJ goto error
 
-echo [260/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_POBOSSF.CPP
+echo [265/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\TOP\_POBOSSF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5722,7 +5832,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSSF.OBJ goto error
 
-echo [261/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSICB.CPP
+echo [266/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSICB.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5744,7 +5854,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSICB.OBJ goto error
 
-echo [262/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_POBOSSI.CPP
+echo [267/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_POBOSSI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5766,7 +5876,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSSI.OBJ goto error
 
-echo [263/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_POBOSSO.CPP
+echo [268/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\_POBOSSO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5788,7 +5898,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSSO.OBJ goto error
 
-echo [264/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSGPP.CPP
+echo [269/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\INT\_PBSSGPP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5810,7 +5920,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSGPP.OBJ goto error
 
-echo [265/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSOSC.CPP
+echo [270/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSOSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5832,7 +5942,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSOSC.OBJ goto error
 
-echo [266/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVFC.CPP
+echo [271/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVFC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5854,7 +5964,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSVFC.OBJ goto error
 
-echo [267/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVVC.CPP
+echo [272/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSVVC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5876,7 +5986,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSVVC.OBJ goto error
 
-echo [268/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSSC.CPP
+echo [273/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_POBOSSC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5898,7 +6008,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSSC.OBJ goto error
 
-echo [269/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSNIC.CPP
+echo [274/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\BOO\CLA\_PBSSNIC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5920,7 +6030,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_PBSSNIC.OBJ goto error
 
-echo [270/409] Compiling SRC\MAIN\V\T\COMMON\STATISTI\POBOSOST.CPP
+echo [275/414] Compiling SRC\MAIN\V\T\COMMON\STATISTI\POBOSOST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5942,7 +6052,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOST.OBJ goto error
 
-echo [271/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\SITEGELI.CPP
+echo [276/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\SITEGELI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5964,7 +6074,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SITEGELI.OBJ goto error
 
-echo [272/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\CSKUBOFI.CPP
+echo [277/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\FIXTUR\CSKUBOFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -5986,7 +6096,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSKUBOFI.OBJ goto error
 
-echo [273/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\VALIDA\_POBOSFV.CPP
+echo [278/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\GEP\PSO\VALIDA\_POBOSFV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6008,7 +6118,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\_POBOSFV.OBJ goto error
 
-echo [274/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\PARCURPE.CPP
+echo [279/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\PARCURPE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6030,7 +6140,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PARCURPE.OBJ goto error
 
-echo [275/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\PABICUPP.CPP
+echo [280/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\PABICUPP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6052,7 +6162,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PABICUPP.OBJ goto error
 
-echo [276/409] Compiling SRC\MAIN\V\T\IO\IMAGE\RGCOPAPE.CPP
+echo [281/414] Compiling SRC\MAIN\V\T\IO\IMAGE\RGCOPAPE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6074,7 +6184,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RGCOPAPE.OBJ goto error
 
-echo [277/409] Compiling SRC\MAIN\ORG\W3C\DOM\NODE.CPP
+echo [282/414] Compiling SRC\MAIN\ORG\W3C\DOM\NODE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6096,7 +6206,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\NODE.OBJ goto error
 
-echo [278/409] Compiling SRC\MAIN\JAVAX\XML\PARSERS\DOCUBUIL.CPP
+echo [283/414] Compiling SRC\MAIN\JAVAX\XML\PARSERS\DOCUBUIL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6118,7 +6228,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DOCUBUIL.OBJ goto error
 
-echo [279/409] Compiling SRC\MAIN\JAVAX\XML\TRANSFOR\TRANSFOR.CPP
+echo [284/414] Compiling SRC\MAIN\JAVAX\XML\TRANSFOR\TRANSFOR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6140,7 +6250,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRANSFOR.OBJ goto error
 
-echo [280/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGET.CPP
+echo [285/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGET.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6162,7 +6272,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDGET.OBJ goto error
 
-echo [281/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDBUTGR.CPP
+echo [286/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDBUTGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6184,7 +6294,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDBUTGR.OBJ goto error
 
-echo [282/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGCOMM.CPP
+echo [287/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGCOMM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6206,7 +6316,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDGCOMM.OBJ goto error
 
-echo [283/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGDIAL.CPP
+echo [288/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGDIAL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6228,7 +6338,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDGDIAL.OBJ goto error
 
-echo [284/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDDIAEL.CPP
+echo [289/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDDIAEL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6250,7 +6360,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDDIAEL.OBJ goto error
 
-echo [285/409] Compiling SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIAFILFI.CPP
+echo [290/414] Compiling SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIAFILFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6272,7 +6382,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DIAFILFI.OBJ goto error
 
-echo [286/409] Compiling SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIATRENO.CPP
+echo [291/414] Compiling SRC\MAIN\V\T\GUI\DIALOG\COMPONEN\DIATRENO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6294,7 +6404,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DIATRENO.OBJ goto error
 
-echo [287/409] Compiling SRC\MAIN\V\T\GUI\DIALOG\RUNTIME\DIALSESS.CPP
+echo [292/414] Compiling SRC\MAIN\V\T\GUI\DIALOG\RUNTIME\DIALSESS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6316,7 +6426,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\DIALSESS.OBJ goto error
 
-echo [288/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGMENU.CPP
+echo [293/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGMENU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6338,7 +6448,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDGMENU.OBJ goto error
 
-echo [289/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDMENEL.CPP
+echo [294/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDMENEL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6360,7 +6470,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDMENEL.OBJ goto error
 
-echo [290/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDMENIT.CPP
+echo [295/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDMENIT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6382,7 +6492,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDMENIT.OBJ goto error
 
-echo [291/409] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPORT.CPP
+echo [296/414] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPORT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6404,7 +6514,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VIEWPORT.OBJ goto error
 
-echo [292/409] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEELESC.CPP
+echo [297/414] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEELESC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6426,7 +6536,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VIEELESC.OBJ goto error
 
-echo [293/409] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPSET.CPP
+echo [298/414] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEWPSET.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6448,7 +6558,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VIEWPSET.OBJ goto error
 
-echo [294/409] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VISEINTE.CPP
+echo [299/414] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VISEINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6470,7 +6580,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VISEINTE.OBJ goto error
 
-echo [295/409] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEINTTE.CPP
+echo [300/414] Compiling SRC\MAIN\V\T\GUI\VIEWPORT\VIEINTTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6492,7 +6602,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\VIEINTTE.OBJ goto error
 
-echo [296/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIZSOLTE.CPP
+echo [301/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIZSOLTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6514,7 +6624,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GIZSOLTE.OBJ goto error
 
-echo [297/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIVEARBU.CPP
+echo [302/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIVEARBU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6536,7 +6646,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GIVEARBU.OBJ goto error
 
-echo [298/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\INPUGIZM.CPP
+echo [303/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\INPUGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6558,7 +6668,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INPUGIZM.OBJ goto error
 
-echo [299/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\INGIVACR.CPP
+echo [304/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\INGIVACR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6580,7 +6690,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INGIVACR.OBJ goto error
 
-echo [300/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\REFFRAGI.CPP
+echo [305/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\REFFRAGI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6602,7 +6712,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\REFFRAGI.OBJ goto error
 
-echo [301/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\TRANGIZM.CPP
+echo [306/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\TRANGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6624,7 +6734,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRANGIZM.OBJ goto error
 
-echo [302/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\TRGIINTE.CPP
+echo [307/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\TRGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6646,7 +6756,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRGIINTE.OBJ goto error
 
-echo [303/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\ROTAGIZM.CPP
+echo [308/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\ROTAGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6668,7 +6778,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ROTAGIZM.OBJ goto error
 
-echo [304/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\ROGIINTE.CPP
+echo [309/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\ROGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6690,7 +6800,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ROGIINTE.OBJ goto error
 
-echo [305/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\CACOGIZM.CPP
+echo [310/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\CACOGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6712,7 +6822,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CACOGIZM.OBJ goto error
 
-echo [306/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\CACOGIAN.CPP
+echo [311/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\CACOGIAN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6734,7 +6844,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CACOGIAN.OBJ goto error
 
-echo [307/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\CCGIINTE.CPP
+echo [312/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\CCGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6756,7 +6866,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CCGIINTE.OBJ goto error
 
-echo [308/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\SCALGIZM.CPP
+echo [313/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\SCALGIZM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6778,7 +6888,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SCALGIZM.OBJ goto error
 
-echo [309/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\SCGIINTE.CPP
+echo [314/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\SCGIINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6800,7 +6910,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SCGIINTE.OBJ goto error
 
-echo [310/409] Compiling SRC\MAIN\V\T\GUI\PRESELEM.CPP
+echo [315/414] Compiling SRC\MAIN\V\T\GUI\PRESELEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6822,7 +6932,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRESELEM.OBJ goto error
 
-echo [311/409] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\BACKGROU.CPP
+echo [316/414] Compiling SRC\MAIN\V\T\ENVI\BACKGROU\BACKGROU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6844,7 +6954,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BACKGROU.OBJ goto error
 
-echo [312/409] Compiling SRC\MAIN\V\T\MEDIA\MEDIENTI.CPP
+echo [317/414] Compiling SRC\MAIN\V\T\MEDIA\MEDIENTI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6866,7 +6976,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\MEDIENTI.OBJ goto error
 
-echo [313/409] Compiling SRC\MAIN\V\T\GUI\CAMECONT.CPP
+echo [318/414] Compiling SRC\MAIN\V\T\GUI\CAMECONT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6888,7 +6998,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CAMECONT.OBJ goto error
 
-echo [314/409] Compiling SRC\MAIN\V\T\GUI\COMMLIST.CPP
+echo [319/414] Compiling SRC\MAIN\V\T\GUI\COMMLIST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6910,7 +7020,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\COMMLIST.OBJ goto error
 
-echo [315/409] Compiling SRC\MAIN\V\T\GUI\CONTROLL.CPP
+echo [320/414] Compiling SRC\MAIN\V\T\GUI\CONTROLL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6932,7 +7042,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CONTROLL.OBJ goto error
 
-echo [316/409] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIZMO.CPP
+echo [321/414] Compiling SRC\MAIN\V\T\GUI\GIZMO\GIZMO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6954,7 +7064,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GIZMO.OBJ goto error
 
-echo [317/409] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PROGMONI.CPP
+echo [322/414] Compiling SRC\MAIN\V\T\GUI\FEEDBACK\PROGMONI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6976,7 +7086,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PROGMONI.OBJ goto error
 
-echo [318/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGELEM.CPP
+echo [323/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\WIDGELEM.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -6998,7 +7108,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDGELEM.OBJ goto error
 
-echo [319/409] Compiling SRC\MAIN\V\T\GUI\WIDGET\VARIABLE\WIDGVARI.CPP
+echo [324/414] Compiling SRC\MAIN\V\T\GUI\WIDGET\VARIABLE\WIDGVARI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7020,7 +7130,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\WIDGVARI.OBJ goto error
 
-echo [320/409] Compiling SRC\MAIN\V\T\COMMON\NUMERICS\FLOAINTE.CPP
+echo [325/414] Compiling SRC\MAIN\V\T\COMMON\NUMERICS\FLOAINTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7042,7 +7152,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\FLOAINTE.OBJ goto error
 
-echo [321/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSS.CPP
+echo [326/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSS.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7064,7 +7174,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYCROSS.OBJ goto error
 
-echo [322/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROQU.CPP
+echo [327/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROQU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7086,7 +7196,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYCROQU.OBJ goto error
 
-echo [323/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSI.CPP
+echo [328/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYCROSI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7108,7 +7218,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYCROSI.OBJ goto error
 
-echo [324/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYBOUND.CPP
+echo [329/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYBOUND.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7130,7 +7240,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYBOUND.OBJ goto error
 
-echo [325/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLBO.CPP
+echo [330/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLBO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7152,7 +7262,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYSOLBO.OBJ goto error
 
-echo [326/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLCL.CPP
+echo [331/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYSOLCL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7174,7 +7284,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYSOLCL.OBJ goto error
 
-echo [327/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSPA.CPP
+echo [332/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7196,7 +7306,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYINSPA.OBJ goto error
 
-echo [328/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSST.CPP
+echo [333/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\RAYINSST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7218,7 +7328,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYINSST.OBJ goto error
 
-echo [329/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOMBOUN.CPP
+echo [334/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOMBOUN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7240,7 +7350,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GEOMBOUN.OBJ goto error
 
-echo [330/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOQUEWO.CPP
+echo [335/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\ELEMENT\GEOQUEWO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7262,7 +7372,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GEOQUEWO.OBJ goto error
 
-echo [331/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRMEININ.CPP
+echo [336/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\TRMEININ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7284,7 +7394,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRMEININ.OBJ goto error
 
-echo [332/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFFELLDI.CPP
+echo [337/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFFELLDI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7306,7 +7416,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AFFELLDI.OBJ goto error
 
-echo [333/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDIBO.CPP
+echo [338/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDIBO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7328,7 +7438,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AFELDIBO.OBJ goto error
 
-echo [334/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDUBO.CPP
+echo [339/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELDUBO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7350,7 +7460,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AFELDUBO.OBJ goto error
 
-echo [335/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELMIDI.CPP
+echo [340/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\AFELMIDI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7372,7 +7482,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AFELMIDI.OBJ goto error
 
-echo [336/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ORTELLDI.CPP
+echo [341/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\ORTELLDI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7394,7 +7504,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\ORTELLDI.OBJ goto error
 
-echo [337/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUAINTBO.CPP
+echo [342/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUAINTBO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7416,7 +7526,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\QUAINTBO.OBJ goto error
 
-echo [338/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEU.CPP
+echo [343/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOEU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7438,7 +7548,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOEU.OBJ goto error
 
-echo [339/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOFC.CPP
+echo [344/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOFC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7460,7 +7570,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOFC.OBJ goto error
 
-echo [340/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOMC.CPP
+echo [345/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POBS\POBOSOMC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7482,7 +7592,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POBOSOMC.OBJ goto error
 
-echo [341/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\AFFIPLAC.CPP
+echo [346/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\AFFIPLAC.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7504,7 +7614,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AFFIPLAC.OBJ goto error
 
-echo [342/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\AFFTOLMA.CPP
+echo [347/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\AFFTOLMA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7526,7 +7636,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AFFTOLMA.OBJ goto error
 
-echo [343/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\INRACRBU.CPP
+echo [348/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\INRACRBU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7548,7 +7658,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\INRACRBU.OBJ goto error
 
-echo [344/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\SCENSOLI.CPP
+echo [349/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\SCENSOLI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7570,7 +7680,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SCENSOLI.OBJ goto error
 
-echo [345/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBINHI.CPP
+echo [350/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBINHI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7592,7 +7702,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AABBINHI.OBJ goto error
 
-echo [346/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\TRIACCST.CPP
+echo [351/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\TRIACCST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7614,7 +7724,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\TRIACCST.OBJ goto error
 
-echo [347/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BINSAHHI.CPP
+echo [352/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BINSAHHI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7636,7 +7746,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BINSAHHI.OBJ goto error
 
-echo [348/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BISATRHI.CPP
+echo [353/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BISATRHI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7658,7 +7768,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BISATRHI.OBJ goto error
 
-echo [349/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BISAINHI.CPP
+echo [354/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BISAINHI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7680,7 +7790,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BISAINHI.OBJ goto error
 
-echo [350/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\GRTRIHIE.CPP
+echo [355/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\GRTRIHIE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7702,7 +7812,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\GRTRIHIE.OBJ goto error
 
-echo [351/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBOUVO.CPP
+echo [356/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AABBOUVO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7724,7 +7834,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AABBOUVO.OBJ goto error
 
-echo [352/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AXALBOBO.CPP
+echo [357/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\AXALBOBO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7746,7 +7856,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\AXALBOBO.OBJ goto error
 
-echo [353/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BOUVOLHI.CPP
+echo [358/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\BOUVOLHI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7768,7 +7878,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BOUVOLHI.OBJ goto error
 
-echo [354/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\PRRAHIEL.CPP
+echo [359/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\PRRAHIEL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7790,7 +7900,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PRRAHIEL.OBJ goto error
 
-echo [355/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\RAYSLARE.CPP
+echo [360/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\BVH\RAYSLARE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7812,7 +7922,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\RAYSLARE.OBJ goto error
 
-echo [356/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SUBBEZPA.CPP
+echo [361/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\SURFACE\SUBBEZPA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7834,7 +7944,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SUBBEZPA.OBJ goto error
 
-echo [357/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBCOMP.CPP
+echo [362/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBCOMP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7856,7 +7966,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BLOBCOMP.OBJ goto error
 
-echo [358/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBSOLI.CPP
+echo [363/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\BLOBSOLI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7878,7 +7988,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BLOBSOLI.OBJ goto error
 
-echo [359/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\HEIFIESO.CPP
+echo [364/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\HEIFIESO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7900,7 +8010,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\HEIFIESO.OBJ goto error
 
-echo [360/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\IMPLSOLI.CPP
+echo [365/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\IMPLSOLI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7922,7 +8032,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\IMPLSOLI.OBJ goto error
 
-echo [361/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\PLAHALSP.CPP
+echo [366/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\PLAHALSP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7944,7 +8054,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\PLAHALSP.OBJ goto error
 
-echo [362/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POLYSURF.CPP
+echo [367/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\POLYSURF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7966,7 +8076,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\POLYSURF.OBJ goto error
 
-echo [363/409] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUADSURF.CPP
+echo [368/414] Compiling SRC\MAIN\V\T\ENVI\GEOM\VOLUM\QUADSURF.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -7988,7 +8098,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\QUADSURF.OBJ goto error
 
-echo [364/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READALTI.CPP
+echo [369/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\READALTI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8010,7 +8120,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\READALTI.OBJ goto error
 
-echo [365/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REMIQUGR.CPP
+echo [370/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REMIQUGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8032,7 +8142,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\REMIQUGR.OBJ goto error
 
-echo [366/409] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REMITRGR.CPP
+echo [371/414] Compiling SRC\MAIN\V\T\IO\GEOMETRY\REMITRGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8054,7 +8164,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\REMITRGR.OBJ goto error
 
-echo [367/409] Compiling SRC\MAIN\V\T\PROCESSI\BEZPATTE.CPP
+echo [372/414] Compiling SRC\MAIN\V\T\PROCESSI\BEZPATTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8076,7 +8186,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\BEZPATTE.OBJ goto error
 
-echo [368/409] Compiling SRC\MAIN\V\T\PROCESSI\SOBOTERE.CPP
+echo [373/414] Compiling SRC\MAIN\V\T\PROCESSI\SOBOTERE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8098,7 +8208,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SOBOTERE.OBJ goto error
 
-echo [369/409] Compiling SRC\MAIN\V\T\PROCESSI\SOLBOUTE.CPP
+echo [374/414] Compiling SRC\MAIN\V\T\PROCESSI\SOLBOUTE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8120,7 +8230,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SOLBOUTE.OBJ goto error
 
-echo [370/409] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\SNELREFR.CPP
+echo [375/414] Compiling SRC\MAIN\V\T\RENDER\RAYTRACI\SNELREFR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8142,7 +8252,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SNELREFR.OBJ goto error
 
-echo [371/409] Compiling SRC\MAIN\V\T\RENDER\SHADERS\SHADTRAN.CPP
+echo [376/414] Compiling SRC\MAIN\V\T\RENDER\SHADERS\SHADTRAN.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8164,7 +8274,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\SHADTRAN.OBJ goto error
 
-echo [372/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODY.CPP
+echo [377/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODY.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8186,7 +8296,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGBODY.OBJ goto error
 
-echo [373/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODOP.CPP
+echo [378/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGBODOP.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8208,7 +8318,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGBODOP.OBJ goto error
 
-echo [374/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSCRMEFI.CPP
+echo [379/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSCRMEFI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8230,7 +8340,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSCRMEFI.OBJ goto error
 
-echo [375/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYADI.CPP
+echo [380/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYADI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8252,7 +8362,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGDYADI.OBJ goto error
 
-echo [376/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYASO.CPP
+echo [381/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYASO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8274,7 +8384,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGDYASO.OBJ goto error
 
-echo [377/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYATR.CPP
+echo [382/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGDYATR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8296,7 +8406,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGDYATR.OBJ goto error
 
-echo [378/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAAR.CPP
+echo [383/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAAR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8318,7 +8428,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGEXAAR.OBJ goto error
 
-echo [379/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAPL.CPP
+echo [384/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAPL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8340,7 +8450,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGEXAPL.OBJ goto error
 
-echo [380/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAQU.CPP
+echo [385/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXAQU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8362,7 +8472,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGEXAQU.OBJ goto error
 
-echo [381/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXATR.CPP
+echo [386/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXATR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8384,7 +8494,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGEXATR.OBJ goto error
 
-echo [382/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPRE.CPP
+echo [387/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8406,7 +8516,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGEXPRE.OBJ goto error
 
-echo [383/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPEQ.CPP
+echo [388/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGEXPEQ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8428,7 +8538,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGEXPEQ.OBJ goto error
 
-echo [384/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGOPEVI.CPP
+echo [389/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGOPEVI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8450,7 +8560,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGOPEVI.OBJ goto error
 
-echo [385/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPLAEX.CPP
+echo [390/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPLAEX.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8472,7 +8582,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPLAEX.OBJ goto error
 
-echo [386/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIAT.CPP
+echo [391/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIAT.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8494,7 +8604,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPOIAT.OBJ goto error
 
-echo [387/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICA.CPP
+echo [392/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8516,7 +8626,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPOICA.OBJ goto error
 
-echo [388/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICL.CPP
+echo [393/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOICL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8538,7 +8648,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPOICL.OBJ goto error
 
-echo [389/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIEV.CPP
+echo [394/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIEV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8560,7 +8670,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPOIEV.OBJ goto error
 
-echo [390/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIPR.CPP
+echo [395/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIPR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8582,7 +8692,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPOIPR.OBJ goto error
 
-echo [391/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWI.CPP
+echo [396/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWI.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8604,7 +8714,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPOIWI.OBJ goto error
 
-echo [392/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWO.CPP
+echo [397/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGPOIWO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8626,7 +8736,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGPOIWO.OBJ goto error
 
-echo [393/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYCL.CPP
+echo [398/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYCL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8648,7 +8758,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGRAYCL.OBJ goto error
 
-echo [394/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVBA.CPP
+echo [399/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVBA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8670,7 +8780,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRAEVBA.OBJ goto error
 
-echo [395/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVCU.CPP
+echo [400/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVCU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8692,7 +8802,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRAEVCU.OBJ goto error
 
-echo [396/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVGR.CPP
+echo [401/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVGR.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8714,7 +8824,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRAEVGR.OBJ goto error
 
-echo [397/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVQU.CPP
+echo [402/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVQU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8736,7 +8846,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRAEVQU.OBJ goto error
 
-echo [398/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVRE.CPP
+echo [403/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRAEVRE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8758,7 +8868,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRAEVRE.OBJ goto error
 
-echo [399/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYLE.CPP
+echo [404/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYLE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8780,7 +8890,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGRAYLE.OBJ goto error
 
-echo [400/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEBA.CPP
+echo [405/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEBA.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8802,7 +8912,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRALEBA.OBJ goto error
 
-echo [401/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEQU.CPP
+echo [406/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRALEQU.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8824,7 +8934,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRALEQU.OBJ goto error
 
-echo [402/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYPL.CPP
+echo [407/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYPL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8846,7 +8956,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGRAYPL.OBJ goto error
 
-echo [403/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRASUEV.CPP
+echo [408/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRASUEV.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8868,7 +8978,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRASUEV.OBJ goto error
 
-echo [404/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYWO.CPP
+echo [409/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGRAYWO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8890,7 +9000,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGRAYWO.OBJ goto error
 
-echo [405/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRORACL.CPP
+echo [410/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSRORACL.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8912,7 +9022,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSRORACL.OBJ goto error
 
-echo [406/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLBO.CPP
+echo [411/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLBO.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8934,7 +9044,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGSOLBO.OBJ goto error
 
-echo [407/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLEQ.CPP
+echo [412/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGSOLEQ.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8956,7 +9066,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGSOLEQ.OBJ goto error
 
-echo [408/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGTREE.CPP
+echo [413/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGTREE.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
@@ -8978,7 +9088,7 @@ tcc @TC.RSP > TC.LOG
 if errorlevel 1 goto error
 if not exist BUILDTC\CSGTREE.OBJ goto error
 
-echo [409/409] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGVERST.CPP
+echo [414/414] Compiling SRC\MAIN\V\T\ENVI\SCENE\CSG\CSGVERST.CPP
 echo -c > TC.RSP
 echo -ml >> TC.RSP
 echo -f87 >> TC.RSP
