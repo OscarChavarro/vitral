@@ -16,7 +16,6 @@ import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
 import vsdk.toolkit.gui.viewport.Viewport;
-import vsdk.toolkit.gui.viewport.ViewportSetCommands;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 
 import model.Scene;
@@ -1282,8 +1281,9 @@ public class DrawingAreaInteractionTechniques
     viewport, recording the change of its view. A render technology command
     is passed to the listener, as only the application can replace the
     drawing surface; so is a render mode the technology in use does not
-    offer (i.e. the hidden lines over OpenGL 4), with the technology that
-    offers it, before selecting the mode.
+    offer (i.e. any CPU mode over OpenGL 4, or the GPU over AWT), with the
+    technology that offers it, before selecting the mode: the other viewports
+    of the set change to the default mode of that technology.
     @param command the id of the command, starting with `IDV_`
     @param viewport viewport to change
     @return true if the command was a viewport set one and was processed
@@ -1296,23 +1296,10 @@ public class DrawingAreaInteractionTechniques
         // The technology presents the whole set: it is not part of the view
         // history of a viewport
         if ( technology != null ) {
+            // The technologies share no render mode: the viewports change to
+            // the default mode of the new one
             if ( technology != drawingArea.getRenderTechnology() ) {
                 listener.renderTechnologyChangeRequested(technology);
-                // Choosing OpenGL in the menu of a raytraced viewport means
-                // rasterizing it: raytracing is available with both
-                // technologies, so it would be kept otherwise
-                if ( technology == RenderTechnology.OPENGL4 &&
-                     viewport.getRenderMode() == Viewport.RENDER_MODE_RAYTRACING ) {
-                    editRecorder.beginAction();
-                    try {
-                        viewportSetTechniques.processCommand(
-                            ViewportSetCommands.IDV_RENDER_MODE_GPU, viewport);
-                    }
-                    finally {
-                        editRecorder.endAction(sceneOperationName(
-                            drawingArea.getInteractionMode()), false);
-                    }
-                }
             }
             return true;
         }

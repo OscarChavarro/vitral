@@ -233,16 +233,16 @@ has not been created`).
   all), any of the booleans reported by `render.get_configuration`, `shading`
   (`nolight`, `flat`, `gouraud`, `phong` or `cook_terrance`, in any case) and
   `renderMode` (`gpu`, `cpu`, `hidden_lines` or `hidden_surfaces`; only the
-  modes available in the current technology: `gpu`/`cpu` with `opengl4`,
-  `hidden_lines`/`cpu`/`hidden_surfaces` with `awt`). Returns the new configuration. These changes are not
+  modes available in the current technology: `gpu` with `opengl4`,
+  `hidden_lines`/`hidden_surfaces`/`cpu` with `awt`). Returns the new configuration. These changes are not
   recorded in the view histories.
 - `viewport.set_rendering`: atomically requests a canvas technology and an
   algorithm for the selected viewport (or the `viewport` argument). Arguments
   are `technology` (`opengl4` or `awt`) and `algorithm` (`gpu`,
   `hidden_lines`, `hidden_surfaces` or `raytracing`). A request for `opengl4`
   rebuilds an AWT drawing canvas as JOGL before applying the algorithm. GPU
-  is available only with OpenGL; hidden lines and hidden surfaces only with
-  AWT; raytracing works with both.
+  is available only with OpenGL; hidden lines, hidden surfaces and
+  raytracing only with AWT (OpenGL is used only for the GPU z-buffer).
 - `render.set_technology`: presents the viewport set with other technology,
   rebuilding the GUI (wait about a second before the next call). Arguments:
   `technology` (`opengl4` or `awt`). With `awt` no OpenGL is used: viewports
@@ -315,12 +315,12 @@ the creation of the sphere and reports the edition history.
   a bug.
 - Prefer explicit positions and colors (i.e. in `scene.add_point_light`) for
   reproducible scenes.
-- To compare both render modes of the same view, export the workspace after
-  `render.set_configuration` with `renderMode` `gpu` and then `cpu` (wait a
-  few seconds after switching to `cpu`). In CPU mode the raytracer also
-  produces the depth of each pixel as the rasterizer would, so the grid, the
-  gizmos and the selection corners are depth tested against the raytraced
-  bodies.
+- To compare the rasterizer and the raytracer over the same view, export the
+  workspace after `viewport.set_rendering` with `technology` `opengl4` and
+  `algorithm` `gpu`, and then with `technology` `awt` and `algorithm`
+  `raytracing` (wait a few seconds after each change). All the viewports
+  share the technology: over `awt` each one can use any of the CPU
+  algorithms, over `opengl4` all of them are `gpu`.
 - Use `render.raytrace_png` and `viewport.export_jpg` together to find
   mismatches between the raytracer and the rasterizer.
 - Keep each request on a single line. If a sandbox blocks TCP access, run the

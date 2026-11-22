@@ -11,8 +11,10 @@ import java.util.function.Consumer;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
@@ -59,7 +61,11 @@ modes AWT offers (see `model.RenderTechnology.AWT`):
     `ProjectedSurfacesViewBuilder` (hidden surface removal by polygon area
     sorting of Weiler and Atherton, with the shadows of the solids if the
     viewport asks for them), are filled by `AwtProjectedPolygonRenderer`, and
-    the annotations are drawn over them as over a raytraced image.
+    the annotations are drawn over them as over a raytraced image. When the
+    rendering configuration turns the surfaces off and the lines on, only
+    the contours of those polygons are drawn: with constant shading (no
+    light) all of them with the line color of the configuration, otherwise
+    each one with the color of its polygon.
 
 Over the selected viewport the camera control gizmo (ViewCube) is drawn as
 a HUD at its upper right corner, with the hidden lines of its parts removed
@@ -265,7 +271,20 @@ public class AwtDrawingAreaRenderer
                 viewportSet.getTitleFor(viewport) + "\": " + e);
             return;
         }
-        AwtProjectedPolygonRenderer.draw(g, polygons, x, y, width, height);
+
+        RendererConfiguration quality = viewport.getRendererConfiguration();
+        if ( !quality.isSurfacesSet() && quality.isWiresSet() ) {
+            ColorRgb lineColor = null;
+            if ( quality.getShadingType() == RendererConfiguration.SHADING_TYPE_NOLIGHT ) {
+                lineColor = quality.getWireColor();
+            }
+            AwtProjectedPolygonRenderer.drawContours(g, polygons, x, y, width,
+                height, (float)Math.max(1.0, viewportSet.getElementScaler().getScale()),
+                lineColor);
+        }
+        else {
+            AwtProjectedPolygonRenderer.draw(g, polygons, x, y, width, height);
+        }
     }
 
     private void drawGizmos(Graphics2D g, Viewport viewport, int x, int y,

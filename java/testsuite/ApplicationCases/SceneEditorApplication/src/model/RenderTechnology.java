@@ -5,20 +5,23 @@ import vsdk.toolkit.gui.viewport.ViewportSetCommands;
 
 /**
 Technologies the editor can use to present the viewport set of its drawing
-area. Each one offers a set of render modes to the viewports: a 2D canvas
-without a 3D API (AWT) has no GPU z-buffer, so its viewports are drawn by the
-processor, as raytraced images, as projected lines (wireframe or hidden
-line removal) or as projected visible polygons (hidden surface removal).
+area. Each one offers a set of render modes to the viewports: OpenGL 4 is
+used only for the GPU z-buffer, and every mode computed by the processor is
+drawn over a 2D canvas without a 3D API (AWT): projected lines (wireframe or
+Appel hidden line removal), projected visible polygons (Weiler/Atherton
+hidden surface removal) or Whitted raytraced images. As the whole set is
+presented by one technology, choosing a mode of the other one changes the
+technology of the set (see `forRenderMode`).
 */
 public enum RenderTechnology
 {
     /** OpenGL 4 (JOGL) canvas */
     OPENGL4(ViewportSetCommands.IDV_RENDER_TECHNOLOGY_OPENGL4,
-        Viewport.RENDER_MODE_Z_BUFFER, Viewport.RENDER_MODE_RAYTRACING),
+        Viewport.RENDER_MODE_Z_BUFFER),
     /** AWT canvas drawn with 2D operations only */
     AWT(ViewportSetCommands.IDV_RENDER_TECHNOLOGY_AWT,
-        Viewport.RENDER_MODE_HIDDEN_LINES, Viewport.RENDER_MODE_RAYTRACING,
-        Viewport.RENDER_MODE_HIDDEN_SURFACES);
+        Viewport.RENDER_MODE_HIDDEN_LINES, Viewport.RENDER_MODE_HIDDEN_SURFACES,
+        Viewport.RENDER_MODE_RAYTRACING);
 
     private final String command;
     private final int[] renderModes;
@@ -51,8 +54,7 @@ public enum RenderTechnology
     @param renderMode a `Viewport.RENDER_MODE_*`
     @param current the technology in use
     @return the technology offering the render mode: the current one if it
-    offers it (raytracing is offered by every technology), or null if none
-    does
+    offers it, or null if none does
     */
     public static RenderTechnology forRenderMode(int renderMode,
                                                  RenderTechnology current)

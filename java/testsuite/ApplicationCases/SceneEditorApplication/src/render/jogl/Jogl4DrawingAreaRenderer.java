@@ -16,7 +16,6 @@ import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
-import vsdk.toolkit.render.jogl.Jogl4ColorDepthImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4RotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4RayGizmoRenderer;
@@ -145,26 +144,13 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
             return;
         }
 
-        if ( view.getRenderMode() == Jogl4ViewportWindow.RENDER_MODE_ZBUFFER ) {
-            Jogl4SceneRenderer.draw(gl, theScene, host.getBodyEditFeedbackProvider());
-            if ( theScene.showCorridor ) {
-                corridor.drawGL(gl, theScene.activeCamera.calculateProjectionMatrix());
-                // The corridor turns on face culling, what follows expects it off
-                gl.glDisable(GL.GL_CULL_FACE);
-            }
-        }
-        else {
-            theScene.activateSelectedBackground();
-            model.setRaytracedImageWidth(view.getViewportSizeX());
-            model.setRaytracedImageHeight(view.getViewportSizeY());
-            host.raytraceImage();
-            // The raytraced image comes with its OpenGL depth: after this,
-            // what is rasterized (grid, gizmos, selection) is depth tested
-            // against the raytraced bodies as against rasterized ones
-            Jogl4ColorDepthImageRenderer.draw(gl, model.getRaytracedImage(),
-                model.getRaytracedDepth());
-            Jogl4SceneRenderer.drawEditorOverlays(gl, theScene,
-                host.getBodyEditFeedbackProvider());
+        // OpenGL 4 offers only the GPU z-buffer (see `RenderTechnology`):
+        // the algorithms computed by the processor are drawn over AWT
+        Jogl4SceneRenderer.draw(gl, theScene, host.getBodyEditFeedbackProvider());
+        if ( theScene.showCorridor ) {
+            corridor.drawGL(gl, theScene.activeCamera.calculateProjectionMatrix());
+            // The corridor turns on face culling, what follows expects it off
+            gl.glDisable(GL.GL_CULL_FACE);
         }
 
         //-----------------------------------------------------------------

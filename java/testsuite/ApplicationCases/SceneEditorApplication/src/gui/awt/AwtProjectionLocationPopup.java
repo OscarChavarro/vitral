@@ -31,13 +31,14 @@ Awt/Swing presentation of the menu of a viewport: the
 `VIEWPORT_SET_PROJECTION_LOCATION` popup of the viewport set, to change the
 projection location of a viewport (Perspective, Top, ...), followed, after a
 separator, by the `VIEWPORT_SET_RENDER_MODE` popup, to render it with the GPU
-or the CPU (raytracing or hidden lines; only the modes available in the
-render technology in use are listed), and by the
-`VIEWPORT_SET_RENDER_TECHNOLOGY` popup, to present the whole viewport set with
-other technology (OpenGL 4 or AWT). Texts come from the I18N context of the
-viewport set (so it always shows the language currently selected by the
-user). The projection, the render mode and the technology currently used are
-marked.
+(z-buffer over OpenGL 4) or the CPU (Appel hidden lines, Weiler/Atherton
+hidden surfaces or Whitted raytracing, drawn over AWT). The render modes are
+always the same, in the order of the I18N definition: choosing one that the
+technology in use does not offer changes the technology of the whole set
+(see `DrawingAreaInteractionTechniques.processViewportCommand`). Texts come
+from the I18N context of the viewport set (so it always shows the language
+currently selected by the user). The projection and the render mode
+currently used are marked.
 
 The menu is built each time it is requested. It is a heavyweight popup, since
 it is shown over a heavyweight canvas (i.e. OpenGL), and it is posted over the
@@ -50,7 +51,6 @@ the canvas.
 */
 public class AwtProjectionLocationPopup
 {
-    private final DrawingArea drawingArea;
     private final ViewportSet viewportSet;
     private final DrawingAreaInteractionTechniques techniques;
     private final Component canvas;
@@ -69,7 +69,6 @@ public class AwtProjectionLocationPopup
                                       DrawingAreaInteractionTechniques techniques,
                                       Component canvas)
     {
-        this.drawingArea = drawingArea;
         this.viewportSet = drawingArea.getViewportSet();
         this.techniques = techniques;
         this.canvas = canvas;
@@ -117,13 +116,6 @@ public class AwtProjectionLocationPopup
         if ( renderModeDefinition != null ) {
             popup.addSeparator();
             fillMenu(renderModeDefinition, viewport, viewport.getRenderModeCommand());
-        }
-        WidgetMenu technologyDefinition =
-            context.getPopup(ViewportSetCommands.POPUP_RENDER_TECHNOLOGY);
-        if ( technologyDefinition != null ) {
-            popup.addSeparator();
-            fillMenu(technologyDefinition, viewport,
-                drawingArea.getRenderTechnology().getCommand());
         }
         popup.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -184,10 +176,6 @@ public class AwtProjectionLocationPopup
             }
 
             final String command = definitionItem.getCommandName();
-            int renderMode = Viewport.renderModeForCommand(command);
-            if ( renderMode != 0 && !viewportSet.isRenderModeAvailable(renderMode) ) {
-                continue;
-            }
             JRadioButtonMenuItem item = new JRadioButtonMenuItem(definitionItem.getName());
             if ( definitionItem.getMnemonic() != 0 ) {
                 item.setMnemonic(KeyEvent.getExtendedKeyCodeForChar(definitionItem.getMnemonic()));

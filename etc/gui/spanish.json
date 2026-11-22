@@ -613,30 +613,30 @@
       "children": [
         {
           "type": "item",
-          "name": "Modo &GPU",
+          "name": "&GPU: Z-buffer (OpenGL4)",
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_MODE_GPU"
           ]
         },
         {
           "type": "item",
-          "name": "Modo &CPU (raytracing)",
-          "modifiers": [
-            "IDV_VIEWPORT_SET_RENDER_MODE_CPU"
-          ]
-        },
-        {
-          "type": "item",
-          "name": "Modo CPU (&líneas ocultas)",
+          "name": "CPU: &Líneas ocultas (Appel)",
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES"
           ]
         },
         {
           "type": "item",
-          "name": "Modo CPU (s&uperficies ocultas)",
+          "name": "CPU: Superficies &ocultas (Weiler/Atherton)",
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_SURFACES"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "CPU: &Raytracing (Whitted)",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_MODE_CPU"
           ]
         }
       ]
