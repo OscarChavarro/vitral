@@ -599,18 +599,6 @@ XtOpenGL4SceneBridge::getViewportMenuItems() const
         items.add(separator);
     }
     items.addAll(renderModes);
-#ifdef VITRAL_SCENE_EDITOR_XLIB_CANVAS
-    java::ArrayList<ViewportMenuItem> technologies;
-    impl->addMenuItems(technologies, ViewportSetCommands::POPUP_RENDER_TECHNOLOGY,
-        RenderTechnology::getCommand(getRenderTechnology()));
-    if ( !items.isEmpty() && !technologies.isEmpty() ) {
-        ViewportMenuItem separator;
-        separator.separator = true;
-        separator.current = false;
-        items.add(separator);
-    }
-    items.addAll(technologies);
-#endif
     return items;
 }
 

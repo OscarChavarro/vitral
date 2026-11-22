@@ -194,6 +194,57 @@ void drawLayers(Display* display, Drawable frame, GC gc, Visual* visual,
     XSetLineAttributes(display, gc, 1, LineSolid, CapButt, JoinMiter);
 }
 
+/**
+Strokes the contours (outer and holes) of `ProjectedPolygon`s with Xlib, as
+lines of the given width (as `drawContours` of the Java
+`AwtProjectedPolygonRenderer`).
+@param polygons polygons whose contours to draw, in order
+@param x0 left pixel of the viewport
+@param y0 top pixel of the viewport
+@param width width of the viewport, in pixels
+@param height height of the viewport, in pixels
+@param lineWidth width of the lines, in pixels
+@param lineColor color of every contour, or null to draw each one with the
+color of its polygon
+*/
+void drawContours(Display* display, Drawable frame, GC gc, Visual* visual,
+                  const java::ArrayList<ProjectedPolygon*>& polygons,
+                  int x0, int y0, int width, int height, float lineWidth,
+                  const ColorRgb* lineColor)
+{
+    std::vector<XPoint> path;
+
+    XSetLineAttributes(display, gc,
+        static_cast<int>(std::lround(lineWidth)), LineSolid, CapRound,
+        JoinRound);
+    if (lineColor != nullptr) {
+        XSetForeground(display, gc, pixel(visual, *lineColor));
+    }
+    for (long i = 0; i < polygons.size(); i++) {
+        const ProjectedPolygon* polygon = polygons.get(i);
+        if (lineColor == nullptr) {
+            XSetForeground(display, gc, pixel(visual, polygon->getColor()));
+        }
+        const Polygon2D* area = polygon->getArea();
+        for (long l = 0; l < area->loops.size(); l++) {
+            const _Polygon2DContour* loop = area->loops[l];
+            path.clear();
+            for (long v = 0; v < loop->vertices.size(); v++) {
+                path.push_back(toPoint(
+                    x0 + (loop->vertices[v].x + 1.0) / 2.0 * width,
+                    y0 + (1.0 - loop->vertices[v].y) / 2.0 * height));
+            }
+            if (!path.empty()) {
+                // Closes the contour
+                path.push_back(path[0]);
+                XDrawLines(display, frame, gc, path.data(),
+                           static_cast<int>(path.size()), CoordModeOrigin);
+            }
+        }
+    }
+    XSetLineAttributes(display, gc, 1, LineSolid, CapButt, JoinMiter);
+}
+
 } // namespace
 
 XlibDrawingAreaRenderer::XlibDrawingAreaRenderer(
@@ -421,6 +472,10 @@ Fills the visible polygons of the solids of a viewport (hidden surface
 removal of `HiddenSurfaceRenderer`), as `AwtProjectedPolygonRenderer` does
 in the AWT presentation of the Java port. The contours of a polygon are
 filled at once with the even-odd rule (`ProjectedPolygonScanConverter`).
+When the rendering configuration turns the surfaces off and the lines on,
+only the contours of those polygons are drawn: with constant shading (no
+light) all of them with the line color of the configuration, otherwise each
+one with the color of its polygon.
 */
 void XlibDrawingAreaRenderer::drawHiddenSurfaces(Display* display,
     Drawable frame, GC gc, Visual* visual, Viewport* viewport, int x, int y,
@@ -449,12 +504,29 @@ void XlibDrawingAreaRenderer::drawHiddenSurfaces(Display* display,
                     viewport).c_str(), e.what());
         return;
     }
-    XlibSpanSink sink(display, frame, gc);
-    for (long i = 0; i < polygons->size(); i++) {
-        const ProjectedPolygon* polygon = (*polygons)[i];
-        XSetForeground(display, gc, pixel(visual, polygon->getColor()));
-        ProjectedPolygonScanConverter::fill(*polygon, x, y, width, height,
-                                            sink);
+
+    RendererConfiguration* quality = viewport->getRendererConfiguration();
+    if (!quality->isSurfacesSet() && quality->isWiresSet()) {
+        ColorRgb wireColor = quality->getWireColor();
+        const ColorRgb* lineColor = nullptr;
+        if (quality->getShadingType() ==
+            RendererConfiguration::SHADING_TYPE_NOLIGHT) {
+            lineColor = &wireColor;
+        }
+        drawContours(display, frame, gc, visual, *polygons, x, y, width,
+            height, static_cast<float>(java::Math::max(1.0,
+                model->getDrawingArea()->getViewportSet()->getElementScaler()
+                    ->getScale())),
+            lineColor);
+    }
+    else {
+        XlibSpanSink sink(display, frame, gc);
+        for (long i = 0; i < polygons->size(); i++) {
+            const ProjectedPolygon* polygon = (*polygons)[i];
+            XSetForeground(display, gc, pixel(visual, polygon->getColor()));
+            ProjectedPolygonScanConverter::fill(*polygon, x, y, width,
+                                                height, sink);
+        }
     }
 }
 

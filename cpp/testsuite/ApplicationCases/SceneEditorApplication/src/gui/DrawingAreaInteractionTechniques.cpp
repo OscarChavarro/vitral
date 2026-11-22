@@ -17,7 +17,6 @@
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportInteractionTechniques.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
-#include "vsdk/toolkit/gui/viewport/ViewportSetCommands.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSetInteractionTechniques.h"
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
@@ -1222,32 +1221,17 @@ bool DrawingAreaInteractionTechniques::processViewportCommand(
     // The technology presents the whole set: it is not part of the view
     // history of a viewport
     if ( RenderTechnology::fromCommand(command, technology) ) {
+        // The technologies share no render mode: the viewports change to
+        // the default mode of the new one
         if ( technology != drawingArea->getRenderTechnology() ) {
-            bool changed = listener->renderTechnologyChangeRequested(technology);
-            // Choosing OpenGL in the menu of a raytraced viewport means
-            // rasterizing it: raytracing is available with both
-            // technologies, so it would be kept otherwise
-            if ( changed && technology == RenderTechnology::OPENGL &&
-                 viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING ) {
-                editRecorder->beginAction();
-                try {
-                    viewportSetTechniques->processCommand(
-                        ViewportSetCommands::IDV_RENDER_MODE_GPU, viewport);
-                }
-                catch ( ... ) {
-                    editRecorder->endAction(sceneOperationName(
-                        drawingArea->getInteractionMode()), false);
-                    throw;
-                }
-                editRecorder->endAction(sceneOperationName(
-                    drawingArea->getInteractionMode()), false);
-            }
+            listener->renderTechnologyChangeRequested(technology);
         }
         return true;
     }
 
     // A render mode that the technology in use does not offer (i.e. the
-    // hidden lines over OpenGL) first changes to the technology offering it
+    // hidden lines over OpenGL) first changes to the technology offering
+    // it, which makes the mode available
     int mode = Viewport::renderModeForCommand(command);
     if ( mode != 0 && !viewportSet->isRenderModeAvailable(mode) &&
          RenderTechnology::forRenderMode(mode,

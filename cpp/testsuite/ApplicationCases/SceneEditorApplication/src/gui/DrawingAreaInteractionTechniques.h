@@ -275,8 +275,9 @@ public:
     viewport, recording the change of its view. A render technology command
     is passed to the listener, as only the application can replace the
     drawing surface; so is a render mode the technology in use does not
-    offer (i.e. the hidden lines over OpenGL), with the technology that
-    offers it, before selecting the mode.
+    offer (i.e. any CPU mode over OpenGL, or the GPU over Xlib), with the
+    technology that offers it, before selecting the mode: the other viewports
+    of the set change to the default mode of that technology.
     @param command the id of the command, starting with `IDV_`
     @param viewport viewport to change
     @return true if the command was a viewport set one and was processed

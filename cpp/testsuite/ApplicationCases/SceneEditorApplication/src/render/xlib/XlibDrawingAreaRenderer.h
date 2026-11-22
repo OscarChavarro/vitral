@@ -20,7 +20,11 @@ class ProjectedLinesViewBuilder;
 class ProjectedSurfacesViewBuilder;
 
 /**
-CPU presentation of the complete viewport set, without a GL context. Over
+CPU presentation of the complete viewport set, without a GL context, in the
+render modes Xlib offers (see `RenderTechnology::XLIB`): hidden lines,
+hidden surfaces (the visible polygons of Weiler and Atherton, filled, or
+only their contours when the rendering configuration turns the surfaces off
+and the lines on) or raytracing. Over
 the views, the manipulation gizmo of the interaction mode and the input
 gizmo (numeric boxes) of the selected viewport are drawn as 2D primitives
 computed by the gizmo painters of `vsdk/toolkit/render/gizmo` (hidden

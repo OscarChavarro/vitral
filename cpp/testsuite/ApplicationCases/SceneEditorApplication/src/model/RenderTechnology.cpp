@@ -13,11 +13,13 @@ const char* RenderTechnology::getCommand(Value technology)
 java::ArrayList<int> RenderTechnology::getRenderModes(Value technology)
 {
     java::ArrayList<int> modes;
-    modes.add(technology == XLIB ? Viewport::RENDER_MODE_HIDDEN_LINES :
-                                   Viewport::RENDER_MODE_Z_BUFFER);
-    modes.add(Viewport::RENDER_MODE_RAYTRACING);
     if ( technology == XLIB ) {
+        modes.add(Viewport::RENDER_MODE_HIDDEN_LINES);
         modes.add(Viewport::RENDER_MODE_HIDDEN_SURFACES);
+        modes.add(Viewport::RENDER_MODE_RAYTRACING);
+    }
+    else {
+        modes.add(Viewport::RENDER_MODE_Z_BUFFER);
     }
     return modes;
 }

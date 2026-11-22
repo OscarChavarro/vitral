@@ -573,16 +573,6 @@ XtOpenGL1SceneBridge::getViewportMenuItems() const
         items.add(separator);
     }
     items.addAll(renderModes);
-    java::ArrayList<ViewportMenuItem> technologies;
-    impl->addMenuItems(technologies, ViewportSetCommands::POPUP_RENDER_TECHNOLOGY,
-        RenderTechnology::getCommand(getRenderTechnology()));
-    if ( !items.isEmpty() && !technologies.isEmpty() ) {
-        ViewportMenuItem separator;
-        separator.separator = true;
-        separator.current = false;
-        items.add(separator);
-    }
-    items.addAll(technologies);
     return items;
 }
 
