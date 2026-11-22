@@ -135,9 +135,9 @@ class TriangleAccelerationTest
         return new Ray(origin, direction);
     }
 
-    private static void expectSameAsBruteForce(double[] positions, int[] indexes, int rayCount)
+    private static void expectSameAsBruteForce(TriangleAccelerationStructure hierarchy,
+        double[] positions, int[] indexes, int rayCount)
     {
-        BinnedSahTriangleHierarchy hierarchy = new BinnedSahTriangleHierarchy();
         hierarchy.build(positions, indexes);
         TriangleAccelerationTestRandom random = new TriangleAccelerationTestRandom(11);
         int hits = 0;
@@ -158,6 +158,12 @@ class TriangleAccelerationTest
             }
         }
         expectGt(hits, rayCount / 10);
+    }
+
+    private static void expectSameAsBruteForce(double[] positions, int[] indexes, int rayCount)
+    {
+        BinnedSahTriangleHierarchy hierarchy = new BinnedSahTriangleHierarchy();
+        expectSameAsBruteForce(hierarchy, positions, indexes, rayCount);
     }
 
     @Test
@@ -250,6 +256,71 @@ class TriangleAccelerationTest
     }
 
     @Test
+    void GridTriangleHierarchy_SoupHitsMatchBruteForceExactly()
+    {
+        ArrayList<Double> positions = new ArrayList<>();
+        ArrayList<Integer> indexes = new ArrayList<>();
+        buildSoup(3000, positions, indexes);
+        GridTriangleHierarchy grid = new GridTriangleHierarchy();
+        expectSameAsBruteForce(grid, toDoubleArray(positions), toIntArray(indexes), 4000);
+        // floor(3000^(1/3) + 1) cells along each axis
+        expectEq(15, grid.getResolution());
+    }
+
+    @Test
+    void GridTriangleHierarchy_SharedEdgeGridHitsMatchBruteForceExactly()
+    {
+        ArrayList<Double> positions = new ArrayList<>();
+        ArrayList<Integer> indexes = new ArrayList<>();
+        buildGrid(40, positions, indexes);
+        GridTriangleHierarchy grid = new GridTriangleHierarchy();
+        expectSameAsBruteForce(grid, toDoubleArray(positions), toIntArray(indexes), 4000);
+    }
+
+    @Test
+    void GridTriangleHierarchy_CopyAnswersAsTheOriginal()
+    {
+        ArrayList<Double> positionList = new ArrayList<>();
+        ArrayList<Integer> indexList = new ArrayList<>();
+        buildSoup(500, positionList, indexList);
+        final double[] positions = toDoubleArray(positionList);
+        final int[] indexes = toIntArray(indexList);
+        GridTriangleHierarchy grid = new GridTriangleHierarchy();
+        grid.build(positions, indexes);
+        TriangleAccelerationStructure copied = grid.copy();
+        assertThat(copied).isNotNull();
+        expectTrue(copied.getMethod() == TriangleMeshAccelerationMethod.VOXEL_GRID);
+        expectTrue(copied.matches(positions.length / 3, indexes.length / 3));
+        TriangleAccelerationTestRandom random = new TriangleAccelerationTestRandom(5);
+        for ( int k = 0; k < 500; k++ ) {
+            final Ray ray = randomRay(random, k);
+            double[] t0 = {0}, u0 = {0}, v0 = {0}, t1 = {0}, u1 = {0}, v1 = {0};
+            int[] tri0 = {-1}, tri1 = {-1};
+            final boolean hit0 = grid.firstHit(ray, positions, indexes, t0, u0, v0, tri0);
+            final boolean hit1 = copied.firstHit(ray, positions, indexes, t1, u1, v1, tri1);
+            assertThat(hit1).as("ray " + k).isEqualTo(hit0);
+            if ( hit0 ) {
+                expectEq(tri0[0], tri1[0], "ray " + k);
+                expectEq(t0[0], t1[0], "ray " + k);
+            }
+        }
+    }
+
+    @Test
+    void GridTriangleHierarchy_EmptyMeshMisses()
+    {
+        final double[] positions = new double[0];
+        final int[] indexes = new int[0];
+        GridTriangleHierarchy grid = new GridTriangleHierarchy();
+        grid.build(positions, indexes);
+        double[] t = {0}, u = {0}, v = {0};
+        int[] triangle = {-1};
+        expectFalse(grid.firstHit(new Ray(new Vector3Dd(0, 0, 1), new Vector3Dd(0, 0, -1)),
+            positions, indexes, t, u, v, triangle));
+        expectEq(0, grid.getNodeCount());
+    }
+
+    @Test
     void TriangleMeshAccelerationMethod_NamesRoundTrip()
     {
         for ( int code = 0; code < TriangleMeshAccelerationMethodUtil.COUNT; code++ ) {
@@ -264,6 +335,11 @@ class TriangleAccelerationTest
         expectFalse(TriangleMeshAccelerationMethodUtil.fromName("octree", unused));
         expectTrue(TriangleAccelerationStructure.create(
             TriangleMeshAccelerationMethod.BRUTE_FORCE) == null);
+        TriangleMeshAccelerationMethod[] voxel = {TriangleMeshAccelerationMethod.BRUTE_FORCE};
+        expectTrue(TriangleMeshAccelerationMethodUtil.fromName("voxel", voxel));
+        TriangleAccelerationStructure grid = TriangleAccelerationStructure.create(voxel[0]);
+        assertThat(grid).isNotNull();
+        expectTrue(grid.getMethod() == TriangleMeshAccelerationMethod.VOXEL_GRID);
     }
 
     @Test

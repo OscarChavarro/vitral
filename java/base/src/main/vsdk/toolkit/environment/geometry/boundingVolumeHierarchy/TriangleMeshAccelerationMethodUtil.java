@@ -5,7 +5,7 @@ C++ declares it in `TriangleMeshAccelerationMethod.h` and defines it in
 `TriangleAccelerationStructure.cpp`.
 */
 public final class TriangleMeshAccelerationMethodUtil {
-    public static final int COUNT = 2;
+    public static final int COUNT = 3;
 
     private TriangleMeshAccelerationMethodUtil()
     {
@@ -16,15 +16,19 @@ public final class TriangleMeshAccelerationMethodUtil {
         if ( code == 1 ) {
             return TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
         }
+        if ( code == 2 ) {
+            return TriangleMeshAccelerationMethod.VOXEL_GRID;
+        }
         return TriangleMeshAccelerationMethod.BRUTE_FORCE;
     }
 
-    /** Short name used by command lines: "bruteforce", "wald2007" */
+    /** Short name used by command lines: "bruteforce", "wald2007", "voxel" */
     public static String name(TriangleMeshAccelerationMethod value)
     {
         switch ( value ) {
           case BRUTE_FORCE: return "bruteforce";
           case WALD2007_BINNED_SAH: return "wald2007";
+          case VOXEL_GRID: return "voxel";
         }
         return "unknown";
     }

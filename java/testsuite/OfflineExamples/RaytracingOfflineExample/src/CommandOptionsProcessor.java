@@ -109,8 +109,9 @@ final class CommandOptionsProcessor {
         System.out.println("  -parallel, --parallel  Render tiles in parallel");
         System.out.println("  --mesh-acceleration, -m <method>");
         System.out.println("                         Triangle mesh ray acceleration:");
-        System.out.println("                         bruteforce (none) or wald2007 (binned SAH");
-        System.out.println("                         BVH, default)");
+        System.out.println("                         bruteforce (none), wald2007 (binned SAH");
+        System.out.println("                         BVH, default) or voxel (uniform grid,");
+        System.out.println("                         RenderPark's voxel grid)");
         System.out.println("  --stats                Count rays and acceleration structure work");
         System.out.println("                         (RaytraceStatistics) and print a summary");
         System.out.println("  --help, -h             Show this help");

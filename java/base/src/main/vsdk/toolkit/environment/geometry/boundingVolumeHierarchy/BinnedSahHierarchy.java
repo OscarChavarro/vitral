@@ -342,15 +342,94 @@ public class BinnedSahHierarchy {
         if ( nodes.size() == 0 || primitiveOrder.size() == 0 ) {
             return true;
         }
-        final RaySlab slab = new RaySlab(ray);
-        final double rootDistance = slab.entry(nodes.get(0), inOutBestT[0]);
-        if ( rootDistance < 0.0 ) {
-            RaytraceStatistics.recordInstanceLevelTraversal(0, 0);
+        // Counted locally, reported once: no shared write per node.
+        long[] nodeVisits = {0};
+        long[] entryTests = {0};
+        NeverStoppingVisitor loopVisitor = new NeverStoppingVisitor(visitor);
+        final boolean completed = traverseNodes(nodes, primitiveOrder, ray,
+            loopVisitor, inOutBestT, nodeVisits, entryTests);
+        RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits[0], entryTests[0]);
+        return completed;
+    }
+
+    /**
+    The traversal of `traverseClosest` for callers that keep their own
+    statistics and may stop early: the visitor ends the traversal by
+    returning true, and node visits and leaf entries are added to the given
+    counters instead of being reported to `RaytraceStatistics` (nothing
+    static is written, so concurrent callers share the hierarchy freely).
+    Node entry is clipped at parameter zero: a caller with a minimum
+    parameter applies it in its visitor. Returns false when the stack would
+    overflow, as `traverseClosest`.
+    @param inOutBestT one-element input/output holder
+    @param nodeVisits one-element accumulator (cpp reference)
+    @param entryTests one-element accumulator (cpp reference)
+    */
+    public boolean traverse(Ray ray, BinnedSahStoppingLeafVisitor visitor,
+        double[] inOutBestT, long[] nodeVisits, long[] entryTests)
+    {
+        if ( nodes.size() == 0 || primitiveOrder.size() == 0 ) {
             return true;
         }
-        // Counted locally, reported once: no shared write per node.
-        long nodeVisits = 0;
-        long entryTests = 0;
+        StoppingVisitor loopVisitor = new StoppingVisitor(visitor);
+        return traverseNodes(nodes, primitiveOrder, ray, loopVisitor,
+            inOutBestT, nodeVisits, entryTests);
+    }
+
+    /** Adapts a closest hit visitor, which never stops, to the shared loop */
+    private static final class NeverStoppingVisitor implements BinnedSahStoppingLeafVisitor {
+        private final BinnedSahLeafVisitor visitor;
+
+        NeverStoppingVisitor(BinnedSahLeafVisitor inVisitor)
+        {
+            visitor = inVisitor;
+        }
+
+        @Override
+        public boolean visit(int primitive, double[] inOutBestT)
+        {
+            visitor.visit(primitive, inOutBestT);
+            return false;
+        }
+    }
+
+    /** Adapts a stopping visitor to the shared loop */
+    private static final class StoppingVisitor implements BinnedSahStoppingLeafVisitor {
+        private final BinnedSahStoppingLeafVisitor visitor;
+
+        StoppingVisitor(BinnedSahStoppingLeafVisitor inVisitor)
+        {
+            visitor = inVisitor;
+        }
+
+        @Override
+        public boolean visit(int primitive, double[] inOutBestT)
+        {
+            return visitor.visit(primitive, inOutBestT);
+        }
+    }
+
+    /**
+    The traversal loop shared by traverseClosest and traverse, on a non empty
+    hierarchy: a stack, nearest child first, nodes farther than the closest hit
+    skipped. Counts node visits and leaf entries locally; returns false on stack
+    overflow.
+    (cpp: a template over the visitor type in an anonymous namespace)
+    */
+    private static boolean traverseNodes(
+        ArrayList<BinnedSahHierarchyNode> nodeArray,
+        ArrayList<Integer> primitiveOrder,
+        Ray ray,
+        BinnedSahStoppingLeafVisitor visitor,
+        double[] inOutBestT,
+        long[] nodeVisits,
+        long[] entryTests)
+    {
+        final RaySlab slab = new RaySlab(ray);
+        final double rootDistance = slab.entry(nodeArray.get(0), inOutBestT[0]);
+        if ( rootDistance < 0.0 ) {
+            return true;
+        }
         int[] nodeStack = new int[STACK_SIZE];
         double[] distanceStack = new double[STACK_SIZE];
         int sp = 0;
@@ -362,19 +441,22 @@ public class BinnedSahHierarchy {
             if ( distanceStack[sp] > inOutBestT[0] ) {
                 continue;
             }
-            final BinnedSahHierarchyNode node = nodes.get(nodeStack[sp]);
-            nodeVisits++;
+            final BinnedSahHierarchyNode node = nodeArray.get(nodeStack[sp]);
+            nodeVisits[0]++;
             if ( node.count > 0 ) {
                 for ( int i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++ ) {
-                    visitor.visit(primitiveOrder.get(i), inOutBestT);
+                    if ( visitor.visit(primitiveOrder.get(i), inOutBestT) ) {
+                        entryTests[0] += i - node.leftOrFirst + 1;
+                        return true;
+                    }
                 }
-                entryTests += node.count;
+                entryTests[0] += node.count;
                 continue;
             }
             int left = node.leftOrFirst;
             int right = left + 1;
-            double dl = slab.entry(nodes.get(left), inOutBestT[0]);
-            double dr = slab.entry(nodes.get(right), inOutBestT[0]);
+            double dl = slab.entry(nodeArray.get(left), inOutBestT[0]);
+            double dr = slab.entry(nodeArray.get(right), inOutBestT[0]);
             // Push the farther child first, so the nearer one is visited first.
             if ( dl >= 0.0 && dr >= 0.0 && dl < dr ) {
                 final int swapNode = left;
@@ -385,7 +467,6 @@ public class BinnedSahHierarchy {
                 dr = swapDistance;
             }
             if ( sp + 2 > STACK_SIZE ) {
-                RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits, entryTests);
                 return false;
             }
             if ( dl >= 0.0 ) {
@@ -399,7 +480,6 @@ public class BinnedSahHierarchy {
                 sp++;
             }
         }
-        RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits, entryTests);
         return true;
     }
 

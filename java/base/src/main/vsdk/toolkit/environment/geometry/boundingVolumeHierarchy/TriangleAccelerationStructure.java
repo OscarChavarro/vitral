@@ -209,6 +209,8 @@ public abstract class TriangleAccelerationStructure {
         switch ( method ) {
           case WALD2007_BINNED_SAH:
             return new BinnedSahTriangleHierarchy();
+          case VOXEL_GRID:
+            return new GridTriangleHierarchy();
           case BRUTE_FORCE:
             return null;
         }
