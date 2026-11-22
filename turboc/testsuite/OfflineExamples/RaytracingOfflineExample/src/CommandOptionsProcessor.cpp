@@ -149,8 +149,9 @@ void CommandOptionsProcessor::printUsage()
     printf("  -parallel, --parallel  Render tiles in parallel\n");
     printf("  --mesh-acceleration, -m <method>\n");
     printf("                         Triangle mesh ray acceleration:\n");
-    printf("                         bruteforce (none) or wald2007 (binned SAH\n");
-    printf("                         BVH, default)\n");
+    printf("                         bruteforce (none), wald2007 (binned SAH\n");
+    printf("                         BVH, default) or voxel (uniform grid,\n");
+    printf("                         RenderPark's voxel grid)\n");
     printf("  --stats                Count rays and acceleration structure work\n");
     printf("                         (RaytraceStatistics) and print a summary\n");
     printf("  --help, -h             Show this help\n\n");

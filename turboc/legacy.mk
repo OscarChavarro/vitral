@@ -39,6 +39,18 @@ endif
 ifeq ($(shell uname -m),alpha)
 LEGACY_CXXFLAGS += -mieee
 endif
+# IEEE 754 floating point everywhere, as the CMakeLists of the port and of
+# cpp: no fast-math (no reassociation, no finite-math or reciprocal
+# shortcuts) and no fused multiply-add contraction, so results do not depend
+# on how the compiler rewrites an expression. Only for gcc 4.6 and later,
+# which know -ffp-contract (gcc 2.7.2 and 4.1 do not; they never enable
+# fast-math by default, and their i386 and Alpha targets have no fused
+# multiply-add)
+GXX_MAJOR := $(firstword $(subst ., ,$(GXX_VERSION)))
+GXX_MINOR := $(word 2,$(subst ., ,$(GXX_VERSION)))
+ifeq ($(shell [ "$(GXX_MAJOR)" -gt 4 ] 2>/dev/null || { [ "$(GXX_MAJOR)" -eq 4 ] && [ "0$(GXX_MINOR)" -ge 6 ]; } 2>/dev/null && echo yes),yes)
+LEGACY_CXXFLAGS += -fno-fast-math -ffp-contract=off
+endif
 
 # Optional features of the base library, with the libraries they need
 DEFINES =

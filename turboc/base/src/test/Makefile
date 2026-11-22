@@ -62,6 +62,8 @@ TESTS = \
     lamina_policy_tests \
     microfaceted_material_csv_tests \
     near_degenerate_boolean_fuzz_gate_tests \
+    phong_material_tests \
+    phong_scattering_tests \
     planar_face_tests \
     polyhedral_bounded_solid_euler_operators_tests \
     polyhedral_bounded_solid_face_geometry_tests \
@@ -83,6 +85,7 @@ TESTS = \
     set_op_whole_shell_tests \
     set_operand_aligner_tests \
     solid_boundary_tessellator_tests \
+    spatial_index_tests \
     splitter_general_plane_oracle_fuzz_tests \
     splitter_oracle_fuzz_tests \
     subdivided_bezier_patch_tests \

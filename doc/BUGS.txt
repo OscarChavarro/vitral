@@ -1,24 +1,232 @@
-Following a list of detected BUGS.
-  - SimpleBody.doIntersection is not taking into account current body
-    scale. Moreover, this method is apparently inducing errors on
-    raytracing (probably on the normal managment). Compare reference
-    raytracer implementation against original MIT sample or other raytracings.
-    Method needs formal verification / reconstruction.
-  - JOGL/OpenGL related
-    . On JoglView (SceneEditorApplication), tex labels renderered using the
-      transparent image technique changes the colors wrongly when a scene
-      with textured objects is displayed. This bug is appearing only
-      on Windows Vista with intel videocards.
-  - Torus
+VITRAL: KNOWN BUGS, DEVIATIONS AND TECHNICAL DEBT
 
-Previous working things that have detected errors:
-  - To check Stereo examples on several computers (was tested on Quadro)
-  - SceneEditorApplication example is failing when regenerating GUI on
+State of the production code (the `src/main` trees and the applications; test
+code is not covered) reviewed on 2026-11-22. Each entry names the code that
+shows it. Counts are approximate and were taken with text searches. Entries
+of sections 1 to 5 were checked against the current sources; section 6 keeps
+old reports that could not be checked by reading code.
+
+==========================================================================
+1. DEFECTS
+==========================================================================
+
+  - Mesh readers terminate the process. `ReaderAse` (three places, i.e. a
+    non consecutive vertex list) and `ReaderBinNeedForSpeed` (seven places,
+    i.e. "Bad body start") print a message and call `System.exit(0)`: a malformed file
+    closes the application that tried to read it, with a success exit code.
+    They should report the error to the caller. (java/base, io/geometry)
+
+  - Fatal errors of the toolkit end the process by default.
+    `Logger.processFatalError` calls `System.exit(1)` (`std::exit` in the
+    C++ ports) unless it is turned off with `Logger.setWithSystemExit` or
+    `-Dvsdk.withSystemExit=false`. An application embedding the toolkit
+    must turn it off to get exceptions instead. (java, cpp and turboc,
+    common/logging)
+
+  - Errors are swallowed in readers. Empty `catch` blocks in `ReaderObj`
+    (three), `ReaderAse` (one) and `ImagePersistence` (four): a failed
+    parse or a failed image helper gives no message and partial data.
+    (java/base, io)
+
+  - `Camera.setFocusedPositionMaintainingOrthogonality` fails when the
+    current `up` vector is parallel to the new front direction: the cross
+    product is null and `left` and `up` become invalid. It is documented in
+    the method (`\todo`) and not validated. (all ports, environment/camera)
+
+  - Polygon triangulation is not reentrant. The monotone decomposition
+    keeps its work arrays and counters in static fields (`_Construct`,
+    `_Monotone`, `_RandomSegmentOrder`), in Java, C++ and TypeScript: two
+    triangulations can not run at the same time, and a failed one leaves
+    state behind. (geometricProcessing/polygonTriangulation)
+
+  - Several readers are not reentrant either: `Reader3ds` (ten static
+    "current" fields), `ReaderBinNeedForSpeed`, `ReaderVtk` keep the state
+    of the file being read in static fields. (java/base, io/geometry)
+
+  - Hidden surface removal (`HiddenSurfaceRenderer`):
+      . Bodies that are not, and can not be exported to, a
+        `PolyhedralBoundedSolid` are not drawn, and cast no shadows; the
+        reference grid of the editor is not drawn in this mode.
+      . A face lit at a grazing angle (the cosine between its normal and
+        the light under about 0.001) may be given as shadowed: its
+        projection in the view from the light is discarded as degenerate.
+        The difference in the image is not visible.
+      . A clip that the polygon clipper can not solve after seven attempts
+        is solved by half planes, which leaves degenerate edges in the
+        output polygons (harmless for filling them).
+    (all ports, render/hiddenSurface)
+
+  - `WeilerAthertonPolygonClipper` gives wrong results (areas that do not
+    add up, or parts on the wrong side) with degenerate contacts: vertices
+    on edges of the other polygon, or contours that coincide in part. An
+    iteration guard stops the traversal that used to loop forever
+    (`isLastClipAbandoned`), but the result of such a clip is not correct.
+    `HiddenSurfaceRenderer` works around it by verifying every clip; other
+    callers get the raw result. (seen in java; the other ports are literal
+    ports of it. geometricProcessing/polygonClipper)
+
+  - TypeScript web scene editor: the hidden surfaces render mode is not
+    offered (no render mode, drawing code nor MCP name), although
+    `@vitral/base` has the renderer. `F11` (raytraced image) may be taken by
+    the browser for its full screen mode. (typescript/testsuite)
+
+==========================================================================
+2. DEVIATIONS FROM THE DESIGN RULES OF THE PROJECT
+==========================================================================
+
+  - "No `friend` declarations in any port": `cpp/base` has one, in
+    `environment/geometry/element/PlanarFace.h` (its nested `RayHit`
+    class declares `friend class PlanarFace`), a file shared with rpkCpp,
+    which has the same declaration.
+
+  - "Keep code and documentation in English": `Camera.updateVectors` has
+    its precondition written in Spanish; `Torus.java` has Spanish debug
+    texts inside its commented-out code.
+
+  - "Pure core without external dependencies": `java/base` depends on
+    `jackson-databind`, and on `org.w3c.dom` / `javax.xml` for the XML
+    importer. The other cores have only optional native libraries.
+
+  - "Sources free of platform forks": the C++ cores keep platform
+    differences in few macros (`VITRAL_WITH_POSIX_THREADS`,
+    `VITRAL_WITH_PNG`, `VITRAL_WITH_JPEG`, `_WIN32`), which holds. But
+    `cpp/base` and `turboc/base` are two trees: 954 files have the same
+    path in both and only 64 are identical, so every change is written
+    twice.
+
+  - "The toolkit reports through `Logger`": about 320 active
+    `System.out` / `System.err` calls remain in `java/base` (against about
+    140 `Logger` calls), most of them in the boolean classifiers, the mesh
+    readers and the statistics classes; about 240 `printf` calls in each
+    C++ core.
+
+==========================================================================
+3. TECHNICAL DEBT
+==========================================================================
+
+  - Dead code. `Torus.java` (1551 lines) carries a commented-out block of
+    1126 lines, an abandoned analytic quartic solver; `ReaderAse` another
+    of 186 lines. About 350 single lines of commented-out code remain in
+    `java/base`.
+
+  - Global mutable state. About 48 non-final static fields in `java/base`
+    (and their equivalents in the other ports), besides the ones of section
+    1: identifier counters of the half-edge nodes
+    (`_PolyhedralBoundedSolidEdge.currentId`, `_PolyhedralBoundedSolidHalfEdge.currentId`),
+    the CSG membership test selected for the whole process
+    (`CsgCrossingMembershipFilter.membershipTest`), debug switches
+    (`HiddenLineRenderer.debugEdgeIndex`, public). The boolean set operator
+    keeps per-call state in static fields and `ThreadLocal`s, which is why
+    the Java tests run serially inside each JVM.
+
+  - Public mutable fields. About 200 in `java/base` (`RayHit.point`,
+    `RayHit.normal`, `Vertex2D.x`, the nodes of the half-edge structure):
+    invariants of those classes can not be enforced.
+
+  - Tolerances. `VSDK.EPSILON` is used about 250 times next to some 13
+    different literal tolerances (1e-12, 1e-9, 1e-6, 1e-5, 1e-3, ...). The
+    boundary representation kernel has a numeric policy class
+    (`PolyhedralBoundedSolidNumericPolicy`); the polygon clipper (absolute
+    1e-4 tolerances, which forces its callers to scale their coordinates),
+    the hidden surface renderer and the raytracer each have their own.
+    There is no shared layer of robust geometric predicates.
+
+  - Overlapping APIs in `Geometry`. Containment has three entry points
+    (`doContainmentTest` returning `int` constants, `classifyPoint` and
+    `classifyPointCertified` returning `GeometryContainment`), and ray
+    queries two (`doIntersectionFirstHit` and `queryFirstHit`): the older
+    ones were kept when the CSG ray operations were added.
+
+  - Large classes. 22 files of `java/base` are over 1000 lines
+    (`HiddenSurfaceRenderer` 2152, `TriangleMesh` 1845,
+    `_PolyhedralBoundedSolidSetNullEdgesConnector` 1673, `Reader3ds` 1656,
+    `Camera` 1647). `HiddenSurfaceRenderer` holds the algorithm, the
+    shadows, the screen subdivision, the verified clips and the 2D polygon
+    utilities in one file.
+
+  - Exception handling. About 78 `catch (Exception ...)` blocks in
+    `java/base`, which also hide programming errors.
+
+  - C++ memory management. Explicit `new` / `delete` by design (about 820
+    and 670 occurrences in `cpp/base`, no smart pointers); ownership is
+    stated in comments in some headers only. The CMake build of `cpp/`
+    sets no warning flags (`turboc/` builds with `-Wall`). About 850 C
+    style numeric casts.
+
+  - TypeScript. Compiled in `strict` mode with almost no `any` (13) and no
+    `@ts-ignore`, but with about 3300 non-null assertions (`!`), the trace
+    of porting Java references literally, and about 90 mutable static
+    fields. About 140 `console` calls in `@vitral/base`.
+
+  - No continuous integration. The test suites, the name checks
+    (`scripts/checkAttributeNames.py`) and the deployment to the test
+    machines run on request; nothing checks that a change reached every
+    port.
+
+  - Documentation. `doc/TODO.txt` and `doc/readme.txt` describe the Java
+    toolkit of 2008 (Swing rules, JOGL renderers) and were not reviewed
+    here. `doc/ArchitectureAndDesignSpecification.doc` is a binary
+    document.
+
+==========================================================================
+4. DIFFERENCES BETWEEN PORTS
+==========================================================================
+
+  - Mesh readers: Java has OBJ, PLY, 3DS, ASE, VRML, VTK, GTS, MD2, STL,
+    STEP (in part) and the XML scene importer. C++ and turboc have OBJ,
+    PLY, MIT groups and scenes, altimetry (C++ also STL and part of STEP).
+    TypeScript has OBJ, MIT groups, altimetry, MD2, STL and part of STEP.
+  - Animation: complete in Java and TypeScript, the event generator only in
+    C++, absent in turboc.
+  - Parallel raytracing: not available where there are no threads (DOS,
+    Debian 1.1 builds without POSIX threads).
+  - Radiosity and global illumination (Galerkin, stochastic raytracing,
+    bidirectional path tracing, photon map, tone mapping) exist only in the
+    rpkCpp project. Of its 681 source files, 122 are already at the same
+    path in `cpp/base` (121 identical): linear algebra, geometry, materials
+    and IO wrappers.
+
+==========================================================================
+5. PLATFORM LIMITATIONS (see doc/portability.md)
+==========================================================================
+
+  - DOS, 286 protected mode: the libraries build, but the raytracer image
+    (about 1.27 MB) does not fit in the 1 MB of a TLINK image.
+  - Minimalistic kernel, GRUB 2 Multiboot2 x86_64: with QEMU's standard VGA
+    the screen stays black; no video mode changes on real hardware yet.
+  - OSF/1, Tru64, IRIX, Solaris and macOS are listed as targets but are
+    not verified on the test environment.
+  - The DOS scene editor (BGI) browses the menus only; it does not draw
+    scenes.
+
+==========================================================================
+6. OLD REPORTS, NOT RE-VERIFIED
+==========================================================================
+
+They come from the previous version of this file and need a running
+application (or old hardware) to be checked.
+
+  - SceneEditorApplication (Java): failures when the GUI is rebuilt after
     a language or look and feel change.
-  - Multiple viewport event selection of subwindow is failing: double click
-    needed to select a viewport
-  - SceneEditorApplication Swing windows failling to rebuild on GUI
-    configuration change
+  - Multiple viewports: a double click was needed to select a viewport.
+  - Stereo examples were tested on one graphics card only.
+  - JOGL: text labels drawn with the transparent image technique changed
+    the colors of textured scenes (seen on Windows Vista with Intel video).
+  - Torus: reported without a description. The solver left commented out
+    in `Torus.java` (section 3) is not the one in use.
+  - "Warnings in `ComputationalGeometry.cohenSutherlandLineClipping2D` may
+    reflect hidden bugs": the method now delegates to
+    `cohenSutherlandLineClipping2DResult`; the warnings were not looked
+    for.
 
-There are some warnings that may reflect hidden bugs, to check:
-  - Implementation of ComputationalGeometry.cohenSutherlandLineClipping2D
+==========================================================================
+7. CLOSED SINCE THE PREVIOUS VERSION OF THIS FILE
+==========================================================================
+
+  - "`SimpleBody.doIntersection` does not take the scale of the body into
+    account": `SimpleBody.doIntersectionFirstHit` now transforms the ray by
+    the inverse scale, rescales the distance and transforms the normal by
+    the inverse scale; bodies with a non invertible scale are rejected.
+  - "Change `getClass().getName().equals` tests to `instanceof`" (from
+    TODO.txt): the remaining `getClass().getName()` calls only build
+    messages.

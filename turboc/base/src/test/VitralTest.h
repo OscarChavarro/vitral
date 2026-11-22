@@ -242,6 +242,7 @@ vitralTestDoubleCheck(BOOLEAN condition, const char *file, int line,
 #define EXPECT_FLOAT_EQ(a, b) \
     vitralTestDoubleCheck(vitralTestFloatEquals((a), (b)), __FILE__, \
         __LINE__, #a " == " #b, (a), (b))
+#define EXPECT_STREQ(a, b) VT_CHECK(strcmp((a), (b)) == 0, #a " == " #b)
 #define EXPECT_NEAR(a, b, tolerance) \
     vitralTestDoubleCheck(fabs((double)(a) - (double)(b)) <= (tolerance), \
         __FILE__, __LINE__, #a " near " #b, (a), (b))

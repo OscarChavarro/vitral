@@ -17,9 +17,12 @@ The turboc port includes:
   4.1 (`opengl4/`), GLFW nor GTK 4
 - **Xt GUI layer**: `xt/`, with the Motif (`xm/`) and Athena (`xaw/`)
   widget sets
+- **DOS layers**: `dos/` (the services DOS lacks, the 286 protected mode
+  loader) and `bgi/` (drawing through the Borland Graphics Interface)
 - **Testsuite** (`testsuite/`): offline examples (no window system), OpenGL
-  1.2 / GLUT examples, VGA examples (SVGALIB), API tests and the Xt scene
-  editor
+  1.2 / GLUT examples, VGA examples (SVGALIB), BGI examples for DOS (a
+  menu-only scene editor), API tests and the Xt scene editor, whose Xlib
+  drawing offers raytracing, hidden lines and hidden surfaces with shadows
 - **Native library integration**: optional libpng, libjpeg and FreeType
 
 ## Gradual derivation from the cpp port
@@ -380,6 +383,15 @@ after changing headers. With gcc 2.x the Makefiles compile with
 catches exceptions by a base class with RTTI (which needs `<typeinfo>`),
 crashes when inlining, and its optimized exception tables refer to deleted
 labels.
+
+Floating point follows IEEE 754 in every build, as in the cpp port: the
+CMakeLists add `-fno-fast-math -ffp-contract=off` for gcc and clang (no
+reassociation, no finite-math or reciprocal shortcuts, no fused
+multiply-add contraction), and `legacy.mk` adds the same flags for gcc 4.6
+and later only, as gcc 2.7.2 and 4.1 do not know `-ffp-contract` (they
+never enable fast-math by default, and their i386 and Alpha targets have no
+fused multiply-add). On Alpha, `legacy.mk` also adds `-mieee`. Turbo C++
+3.0 (`-f87`) needs no flag.
 
 When OpenGL is found (`<GL/gl.h>` in `/usr/include`, `/usr/X11R6/include`
 or `$GL_DIR/include`), `compileWithMake.sh` also builds the opengl1, xt and
@@ -856,8 +868,8 @@ display.
 
 1. **Image I/O**: Uses native `libpng` and `libjpeg` instead of Java AWT or JNI bindings
 2. **Memory management**: Explicit `new`/`delete` (no garbage collection)
-4. **Build system**: CMake instead of Gradle
-5. **Collections**: Java-like collections are used throughout the port
+3. **Build system**: GNU make (and CMake on modern hosts) instead of Gradle
+4. **Collections**: Java-like collections are used throughout the port
 
 ### Design Principles
 
@@ -869,8 +881,9 @@ display.
 ## Related Documentation
 
 - [Main README](../README.md)
-- [C++ Implementation Summary](base/src/main/vsdk/toolkit/io/IMPLEMENTATION_SUMMARY.md)
-- [Java Port](../java/README.md)
+- [Portability and test environment](../doc/portability.md)
+- [Known bugs and technical debt](../doc/BUGS.txt)
+- [C++ port](../cpp/README.md)
 
 ## Contributing
 

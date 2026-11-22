@@ -6,15 +6,32 @@ This directory contains the C++ port of the Vitral graphics toolkit. It follows 
 
 The C++ port includes:
 
-- **Core module** (`base/`): Linear algebra, geometry, media, and IO foundations
+- **Core module** (`base/`): linear algebra, scene model, the solid modeling
+  kernel (boundary representation solids, booleans, CSG), computational
+  geometry (triangulation, Weiler-Atherton clipping, BVH), the CPU renderers
+  (raytracer, hidden line, hidden surface with shadows, rasterizer, software
+  shaders), media and IO. It is written in C++11 without the containers,
+  strings or streams of the C++ standard library: `base/src/main/java` holds
+  a Java-like layer (`java::lang`, `java::util`, `java::io`,
+  `java::util::concurrent`) that the toolkit uses instead, which keeps the
+  code close to the Java port and lets `turboc/` derive from it. The math,
+  geometry, material and IO wrapper classes are shared, file by file, with
+  the rpkCpp project, from which radiosity and global illumination are being
+  brought in (they are not in this port yet).
 - **Rendering backends**: OpenGL 4.1 core with GLSL shaders (`opengl4/`),
   OpenGL 1.2 fixed function pipeline without shaders (`opengl1/`, a
   mechanical port of `opengl4/` without Phong / Cook-Torrance shading nor
-  bump mapping), GLFW, GLUT, and others
-- **Testsuite** (`testsuite/`): Examples and benchmarks
-- **Native library integration**: Direct bindings for image processing (libpng,
-  libjpeg), computer vision (OpenCV), and CAD/B-Rep interoperability
-  (Open CASCADE Technology, OCCT)
+  bump mapping), plain X11 drawing (`xlib/`) and SVGALIB (`svgalib/`)
+- **Window systems and GUI toolkits**: GLFW (`glfw/`), GLUT (`glut/`),
+  GTK 4 (`gtk4/`), Xt (`xt/`) with Motif (`xm/`) or Athena (`xaw/`)
+- **Minimalistic kernel** (`x86_64_smp_kernel/`): a small preemptive SMP
+  kernel for i386 and x86_64 that runs the raytracer and the scene editor
+  over `base/` without an operating system (see its README)
+- **Testsuite** (`testsuite/`): the scene editor (`ApplicationCases`),
+  offline examples, OpenGL 4 and VGA examples, API tests and tools
+- **Native library integration**: optional libpng, libjpeg and FreeType in
+  the core; OpenCV and Open CASCADE Technology (OCCT) only in tools of the
+  testsuite (the marker detector server and the boolean comparison tool)
 
 ## Build
 
@@ -252,7 +269,9 @@ This allows you to defer building optional dependencies until needed.
 2. **Memory management**: Explicit `new`/`delete` (no garbage collection)
 3. **Namespaces**: Avoid introducing project-specific C++ namespaces; preserve only `java::` where needed for the Java-compatibility layer
 4. **Build system**: CMake instead of Gradle
-5. **Standard library**: C++11 STL instead of Java Collections
+5. **Standard library**: the Java-like layer of `base/src/main/java` instead
+   of the STL containers, strings and streams; from the standard library
+   only the C functions (`<cmath>`, `<cstring>`, `<cstdio>`) are used
 
 ### Design Principles
 
@@ -264,8 +283,10 @@ This allows you to defer building optional dependencies until needed.
 ## Related Documentation
 
 - [Main README](../README.md)
-- [C++ Implementation Summary](base/src/main/vsdk/toolkit/io/IMPLEMENTATION_SUMMARY.md)
-- [Java Port](../java/README.md)
+- [Portability and test environment](../doc/portability.md)
+- [Known bugs and technical debt](../doc/BUGS.txt)
+- [Minimalistic kernel](x86_64_smp_kernel/README.md)
+- [Legacy port](../turboc/README.md)
 
 ## Contributing
 
@@ -273,6 +294,8 @@ When porting features from Java or adding new capabilities:
 
 1. Maintain architectural consistency with `java/base`
 2. Follow the coding conventions established in existing C++ files
-3. Use `new`/`delete` explicitly (no smart pointers per project style)
-4. Preserve academic references and documentation comments
-5. Test with both optional dependencies enabled and disabled
+3. Use `new`/`delete` explicitly (no smart pointers per project style), and
+   state in the header who owns each pointer a class keeps or returns
+4. No `friend` declarations, no `goto`, no project namespaces
+5. Preserve academic references and documentation comments
+6. Test with both optional dependencies enabled and disabled

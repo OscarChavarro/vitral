@@ -111,6 +111,13 @@ SOURCES = \
     src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/RayHit.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/PlanarFace.cpp \
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/PrimitiveRayTest.cpp \
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/SpatialIndex.cpp \
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/SpatialIndexWorkspace.cpp \
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/LinearSpatialIndex.cpp \
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/BinnedSahSpatialIndex.cpp \
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/SpatialGroupTree.cpp \
+    src/main/vsdk/toolkit/environment/geometry/spatialIndex/GridSpatialIndex.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp \
     src/main/vsdk/toolkit/environment/geometry/element/Vertex2D.cpp \
@@ -253,6 +260,10 @@ SOURCES = \
     src/main/vsdk/toolkit/environment/material/MicroFacetedMaterial.cpp \
     src/main/vsdk/toolkit/environment/material/ShadingType.cpp \
     src/main/vsdk/toolkit/environment/material/RendererConfiguration.cpp \
+    src/main/vsdk/toolkit/environment/material/PhongLobe.cpp \
+    src/main/vsdk/toolkit/environment/material/PhongMaterial.cpp \
+    src/main/vsdk/toolkit/environment/material/ScatteringFrame.cpp \
+    src/main/vsdk/toolkit/environment/material/Texture.cpp \
     src/main/vsdk/toolkit/processing/CurveModeler.cpp \
     src/main/vsdk/toolkit/processing/ImageProcessing.cpp \
     src/main/vsdk/toolkit/environment/background/CubemapBackground.cpp \
@@ -358,6 +369,7 @@ SOURCES = \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceHierarchy.cpp \
+    src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/GridTriangleHierarchy.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AabbBoundingVolume.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/AxisAlignedBoundingBox.cpp \
     src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BoundingVolumeHierarchy.cpp \
