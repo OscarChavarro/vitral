@@ -1,7 +1,7 @@
 import {
   ViewportSetCommands,
-  Viewport,
   WidgetMenuItem,
+  type Viewport,
   type ViewportSet,
   type Widget,
   type WidgetMenu,
@@ -18,14 +18,15 @@ import { MouseEventKind, PopupDismissClickFilter } from '../popup-dismiss-click-
  * `VIEWPORT_SET_PROJECTION_LOCATION` popup of the viewport set, to change the
  * projection location of a viewport (Perspective, Top, ...), followed, after a
  * separator, by the `VIEWPORT_SET_RENDER_MODE` popup, to render it with the GPU
- * or the CPU (raytracing, hidden lines or hidden surfaces; only the modes
- * available in the render technology in use are listed, see
- * `ViewportSet.getAvailableRenderModes`), and by the
- * `VIEWPORT_SET_RENDER_TECHNOLOGY` popup, to present the whole viewport set
- * with other technology (WebGL or the 2D context of a canvas). Texts come
- * from the I18N context of the viewport set (so it always shows the language
- * currently selected by the user). The projection, the render mode and the
- * technology currently used are marked.
+ * (z-buffer over WebGL) or the CPU (Appel hidden lines, Weiler/Atherton
+ * hidden surfaces or Whitted raytracing, drawn over the 2D context of a
+ * canvas). The render modes are always the same, in the order of the I18N
+ * definition: choosing one that the technology in use does not offer changes
+ * the technology of the whole set (see
+ * `DrawingAreaInteractionTechniques.processViewportCommand`). Texts come from
+ * the I18N context of the viewport set (so it always shows the language
+ * currently selected by the user). The projection and the render mode
+ * currently used are marked.
  *
  * The menu is built each time it is requested, and it floats over the canvas
  * (see `HtmlPopupMenu`), with the keyboard focus: the user can move with the
@@ -36,7 +37,6 @@ import { MouseEventKind, PopupDismissClickFilter } from '../popup-dismiss-click-
  * back to the canvas.
  */
 export class HtmlProjectionLocationPopup {
-  private readonly drawingArea: DrawingArea;
   private readonly viewportSet: ViewportSet;
   private readonly techniques: DrawingAreaInteractionTechniques;
   private readonly canvas: HTMLElement;
@@ -59,7 +59,6 @@ export class HtmlProjectionLocationPopup {
     canvas: HTMLElement,
     repaint: () => void,
   ) {
-    this.drawingArea = drawingArea;
     this.viewportSet = drawingArea.getViewportSet();
     this.techniques = techniques;
     this.canvas = canvas;
@@ -112,18 +111,6 @@ export class HtmlProjectionLocationPopup {
       popup.addSeparator();
       this.fillMenu(popup, renderModeDefinition, viewport, viewport.getRenderModeCommand());
     }
-    const technologyDefinition: WidgetMenu | null = context.getPopup(
-      ViewportSetCommands.POPUP_RENDER_TECHNOLOGY,
-    );
-    if (technologyDefinition !== null) {
-      popup.addSeparator();
-      this.fillMenu(
-        popup,
-        technologyDefinition,
-        viewport,
-        this.drawingArea.getRenderTechnology().getCommand(),
-      );
-    }
     popup.addCloseListener((): void => {
       this.dismissClickFilter.popupClosed(Date.now());
       // Give the focus back once the menu is gone
@@ -167,10 +154,6 @@ export class HtmlProjectionLocationPopup {
       }
 
       const command: string = element.getCommandName();
-      const renderMode: number = Viewport.renderModeForCommand(command);
-      if (renderMode !== 0 && !this.viewportSet.isRenderModeAvailable(renderMode)) {
-        continue;
-      }
       const mnemonic: string = element.getMnemonic();
       const item: HtmlMenuItem = popup.addRadioItem(
         element.getName(),

@@ -109,6 +109,7 @@ export { Quaterniond } from "./vsdk/toolkit/common/linealAlgebra/Quaterniond.js"
 export { Quaternionf } from "./vsdk/toolkit/common/linealAlgebra/Quaternionf.js";
 export { MatrixNxM } from "./vsdk/toolkit/common/linealAlgebra/MatrixNxM.js";
 export { Matrix4x4d } from "./vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
+export { Matrix2x2 } from "./vsdk/toolkit/common/linealAlgebra/Matrix2x2.js";
 export { Matrix4x4f } from "./vsdk/toolkit/common/linealAlgebra/Matrix4x4f.js";
 export { AlgebraicExpression } from "./vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.js";
 export { AlgebraicExpressionException } from "./vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.js";

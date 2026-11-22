@@ -4,11 +4,14 @@ import { Viewport, ViewportSetCommands } from '@vitral/base';
  * Port of `model.RenderTechnology`.
  *
  * Technologies the editor can use to present the viewport set of its drawing
- * area. Each one offers a set of render modes to the viewports: a canvas
- * drawn with the operations of its 2D context, without any WebGL context, has
- * no GPU z-buffer, so its viewports are drawn by the processor, as raytraced
- * images, as projected lines (wireframe or hidden line removal) or as
- * projected visible polygons (hidden surface removal).
+ * area. Each one offers a set of render modes to the viewports: WebGL is used
+ * only for the GPU z-buffer, and every mode computed by the processor is
+ * drawn over a canvas with the operations of its 2D context, without any
+ * WebGL context: projected lines (wireframe or Appel hidden line removal),
+ * projected visible polygons (Weiler/Atherton hidden surface removal) or
+ * Whitted raytraced images. As the whole set is presented by one technology,
+ * choosing a mode of the other one changes the technology of the set (see
+ * `forRenderMode`).
  *
  * The Java port presents with OpenGL 4 (JOGL) or with AWT 2D drawing, and the
  * cpp port with OpenGL or with Xlib 2D drawing; this one with WebGL 2 or with
@@ -23,15 +26,14 @@ export class RenderTechnology {
     'WEBGL',
     ViewportSetCommands.IDV_RENDER_TECHNOLOGY_OPENGL4,
     Viewport.RENDER_MODE_Z_BUFFER,
-    Viewport.RENDER_MODE_RAYTRACING,
   );
   /** HTML canvas drawn with 2D context operations only (Java's `AWT`) */
   static readonly CANVAS2D = new RenderTechnology(
     'CANVAS2D',
     ViewportSetCommands.IDV_RENDER_TECHNOLOGY_AWT,
     Viewport.RENDER_MODE_HIDDEN_LINES,
-    Viewport.RENDER_MODE_RAYTRACING,
     Viewport.RENDER_MODE_HIDDEN_SURFACES,
+    Viewport.RENDER_MODE_RAYTRACING,
   );
 
   /** Java's `RenderTechnology.values()` */
@@ -78,8 +80,7 @@ export class RenderTechnology {
    * @param renderMode a `Viewport.RENDER_MODE_*`
    * @param current the technology in use
    * @return the technology offering the render mode: the current one if it
-   * offers it (raytracing is offered by every technology), or null if none
-   * does
+   * offers it, or null if none does
    */
   static forRenderMode(
     renderMode: number,

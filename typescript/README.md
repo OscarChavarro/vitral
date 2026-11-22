@@ -54,15 +54,18 @@ mind:
   of STEP); there is no 3DS, ASE, PLY, VRML, VTK or GTS reader, and no XML
   scene importer.
 - The web scene editor presents its viewports with one of two render
-  technologies, chosen in the projection popup menu ("Render using ...") or
-  with the MCP tool `render.set_technology`. A WebGL 2 canvas gives the GPU
-  (z-buffer) and CPU raytracing modes. A canvas drawn only with its 2D
-  context gives three CPU modes, with no WebGL context:
-    - raytracing, using the same Web Worker tiles;
+  technologies. The projection popup menu of a viewport always lists the
+  four render modes, and choosing one that the technology in use does not
+  offer changes the technology of the whole viewport set (the MCP tools
+  `viewport.set_rendering` and `render.set_technology` do it too). A WebGL 2
+  canvas is used only for the GPU (z-buffer) mode. A canvas drawn only with
+  its 2D context gives the three CPU modes, with no WebGL context:
     - hidden lines, which is wireframe or Appel hidden line removal
       (`HiddenLineRenderer`);
     - hidden surfaces, by Weiler-Atherton (`HiddenSurfaceRenderer`), with
-      shadows when `F10` is on.
+      shadows when `F10` is on; with the surfaces off and the lines on, only
+      the contours of the visible polygons are drawn;
+    - raytracing (Whitted), by tiles in Web Workers.
 
     The MCP names are `hidden_lines`, `hidden_surfaces` and `withShadows`.
     Java's AWT technology and cpp's Xlib technology correspond to the canvas

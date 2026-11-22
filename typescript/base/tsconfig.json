@@ -44,6 +44,7 @@
         "src/main/vsdk/toolkit/common/linealAlgebra/Quaterniond.ts",
         "src/main/vsdk/toolkit/common/linealAlgebra/Quaternionf.ts",
         "src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Matrix2x2.ts",
         "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.ts",
         "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.ts",
         "src/main/vsdk/toolkit/common/linealAlgebra/exceptions/**/*.ts",

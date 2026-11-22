@@ -975,12 +975,12 @@ export class HtmlWebGLVitralEditorMCPProtocol {
       ',' +
       tool(
         'viewport.set_rendering',
-        'Set the canvas technology and rendering algorithm of the selected viewport (or viewport index). Arguments: technology (webgl|canvas2d, optional; opengl4 is accepted as webgl and awt or xlib as canvas2d, as in the other ports) and algorithm (gpu|hidden_lines|hidden_surfaces|raytracing). Technology changes rebuild the canvas; gpu requires webgl, hidden_lines and hidden_surfaces require canvas2d, raytracing works with either.',
+        'Set the canvas technology and rendering algorithm of the selected viewport (or viewport index). Arguments: technology (webgl|canvas2d, optional; opengl4 is accepted as webgl and awt or xlib as canvas2d, as in the other ports) and algorithm (gpu|hidden_lines|hidden_surfaces|raytracing). Technology changes rebuild the canvas; gpu requires webgl; hidden_lines, hidden_surfaces and raytracing require canvas2d.',
       ) +
       ',' +
       tool(
         'render.set_technology',
-        'Present the viewport set with other technology, rebuilding the GUI. Arguments: technology (webgl|canvas2d; opengl4 is accepted as webgl and awt or xlib as canvas2d, as in the other ports). canvas2d draws only with the operations of the 2D context of an HTML canvas, without any WebGL context: its viewports are hidden lines (wireframe, or Appel hidden line removal when surfaces are on), hidden surfaces (Weiler-Atherton, with shadows when withShadows is set) or raytraced.',
+        'Present the viewport set with other technology, rebuilding the GUI. Arguments: technology (webgl|canvas2d; opengl4 is accepted as webgl and awt or xlib as canvas2d, as in the other ports). canvas2d draws only with the operations of the 2D context of an HTML canvas, without any WebGL context: its viewports are hidden lines (wireframe, or Appel hidden line removal when surfaces are on), hidden surfaces (Weiler/Atherton, with shadows when withShadows is set) or raytraced (Whitted). WebGL is used only for the GPU z-buffer.',
       ) +
       ',' +
       tool(

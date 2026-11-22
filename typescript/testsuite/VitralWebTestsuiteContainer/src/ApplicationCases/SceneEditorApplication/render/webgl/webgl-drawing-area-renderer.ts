@@ -7,7 +7,6 @@ import type {
   ViewportSet,
 } from '@vitral/base';
 import {
-  WebGLColorDepthImageRenderer,
   WebGLOffscreenFrameBuffer,
   WebGLRayGizmoRenderer,
   WebGLRenderer,
@@ -16,8 +15,8 @@ import {
   WebGLSimpleCorridorSample,
   WebGLTranslateGizmoRenderer,
   WebGLViewportSetRenderer,
-  WebGLViewportWindow,
   type WebGLLabelImageProvider,
+  type WebGLViewportWindow,
 } from '@vitral/webgl';
 import type { ApplicationModel } from '../../model/application-model';
 import type { DrawingArea } from '../../model/drawing-area';
@@ -158,31 +157,13 @@ export class WebGLDrawingAreaRenderer {
       return;
     }
 
-    if (view.getRenderMode() === WebGLViewportWindow.RENDER_MODE_ZBUFFER) {
-      await WebGLSceneRenderer.draw(gl, this.theScene, this.host.getBodyEditFeedbackProvider());
-      if (this.theScene.showCorridor) {
-        await this.corridor.drawGL(gl, this.theScene.activeCamera.calculateProjectionMatrix());
-        // The corridor turns on face culling, what follows expects it off
-        gl.disable(gl.CULL_FACE);
-      }
-    } else {
-      await this.theScene.activateSelectedBackground();
-      this.model.setRaytracedImageWidth(view.getViewportSizeX());
-      this.model.setRaytracedImageHeight(view.getViewportSizeY());
-      await this.host.raytraceImage();
-      // The raytraced image comes with its OpenGL depth: after this,
-      // what is rasterized (grid, gizmos, selection) is depth tested
-      // against the raytraced bodies as against rasterized ones
-      await WebGLColorDepthImageRenderer.draw(
-        gl,
-        this.model.getRaytracedImage(),
-        this.model.getRaytracedDepth(),
-      );
-      await WebGLSceneRenderer.drawEditorOverlays(
-        gl,
-        this.theScene,
-        this.host.getBodyEditFeedbackProvider(),
-      );
+    // WebGL offers only the GPU z-buffer (see `RenderTechnology`): the
+    // algorithms computed by the processor are drawn over the 2D canvas
+    await WebGLSceneRenderer.draw(gl, this.theScene, this.host.getBodyEditFeedbackProvider());
+    if (this.theScene.showCorridor) {
+      await this.corridor.drawGL(gl, this.theScene.activeCamera.calculateProjectionMatrix());
+      // The corridor turns on face culling, what follows expects it off
+      gl.disable(gl.CULL_FACE);
     }
 
     //-----------------------------------------------------------------

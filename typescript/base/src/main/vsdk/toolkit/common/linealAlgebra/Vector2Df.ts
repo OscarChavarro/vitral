@@ -30,6 +30,15 @@ export class Vector2Df extends FundamentalEntity {
     public add(b: Vector2Df): Vector2Df {
         return new Vector2Df(f(this.xv + b.xv), f(this.yv + b.yv));
     }
+    public subtract(b: Vector2Df): Vector2Df {
+        return new Vector2Df(f(this.xv - b.xv), f(this.yv - b.yv));
+    }
+    /**
+    Square of the length (the dot product with itself)
+    */
+    public lengthSquared(): number {
+        return f(f(this.xv * this.xv) + f(this.yv * this.yv));
+    }
     public withX(x: number): Vector2Df {
         return new Vector2Df(x, this.yv);
     }

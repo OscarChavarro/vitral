@@ -3,6 +3,7 @@ import {
   Gizmo2DDrawList,
   InputGizmo2DPainter,
   Logger,
+  RendererConfiguration,
   RotateGizmo2DPainter,
   ScaleGizmo2DPainter,
   TranslateGizmo2DPainter,
@@ -10,6 +11,7 @@ import {
   Viewport,
   type Camera,
   type CameraControlGizmo,
+  type ColorRgb,
   type InputGizmo,
   type RotateGizmo,
   type ScaleGizmo,
@@ -54,7 +56,11 @@ import { HtmlViewportSetRenderer } from './html-viewport-set-renderer';
  *     `ProjectedSurfacesViewBuilder` (hidden surface removal by polygon area
  *     sorting of Weiler and Atherton, with the shadows of the solids if the
  *     viewport asks for them), are filled by `HtmlProjectedPolygonRenderer`,
- *     and the annotations are drawn over them as over a raytraced image.
+ *     and the annotations are drawn over them as over a raytraced image. When
+ *     the rendering configuration turns the surfaces off and the lines on,
+ *     only the contours of those polygons are drawn: with constant shading
+ *     (no light) all of them with the line color of the configuration,
+ *     otherwise each one with the color of its polygon.
  *
  * Over the selected viewport the camera control gizmo (ViewCube) is drawn as a
  * HUD at its upper right corner, with the hidden lines of its parts removed by
@@ -323,7 +329,26 @@ export class HtmlDrawingAreaRenderer {
       );
       return;
     }
-    HtmlProjectedPolygonRenderer.draw(g, polygons, x, y, width, height);
+
+    const quality: RendererConfiguration = viewport.getRendererConfiguration();
+    if (!quality.isSurfacesSet() && quality.isWiresSet()) {
+      let lineColor: ColorRgb | null = null;
+      if (quality.getShadingType() === RendererConfiguration.SHADING_TYPE_NOLIGHT) {
+        lineColor = quality.getWireColor();
+      }
+      HtmlProjectedPolygonRenderer.drawContours(
+        g,
+        polygons,
+        x,
+        y,
+        width,
+        height,
+        Math.max(1.0, this.viewportSet.getElementScaler().getScale()),
+        lineColor,
+      );
+    } else {
+      HtmlProjectedPolygonRenderer.draw(g, polygons, x, y, width, height);
+    }
   }
 
   private drawGizmos(

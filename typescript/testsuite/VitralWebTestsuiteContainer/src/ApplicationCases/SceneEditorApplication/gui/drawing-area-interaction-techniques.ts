@@ -6,7 +6,6 @@ import {
   RayGizmoInteractionTechniques,
   ViewportInteractionTechniques,
   Viewport,
-  ViewportSetCommands,
   ViewportSetInteractionTechniques,
   type CursorWarp,
   type RendererConfiguration,
@@ -1265,8 +1264,9 @@ export class DrawingAreaInteractionTechniques {
    * viewport, recording the change of its view. A render technology command
    * is passed to the listener, as only the application can replace the
    * drawing surface; so is a render mode the technology in use does not
-   * offer (i.e. the hidden lines over WebGL), with the technology that
-   * offers it, before selecting the mode.
+   * offer (i.e. any CPU mode over WebGL, or the GPU over the 2D canvas), with
+   * the technology that offers it, before selecting the mode: the other
+   * viewports of the set change to the default mode of that technology.
    * @param command the id of the command, starting with `IDV_`
    * @param viewport viewport to change
    * @return true if the command was a viewport set one and was processed
@@ -1278,30 +1278,10 @@ export class DrawingAreaInteractionTechniques {
     // The technology presents the whole set: it is not part of the view
     // history of a viewport
     if (technology !== null) {
+      // The technologies share no render mode: the viewports change to
+      // the default mode of the new one
       if (technology !== this.drawingArea.getRenderTechnology()) {
         this.listener.renderTechnologyChangeRequested(technology);
-        // Choosing WebGL in the menu of a raytraced viewport means
-        // rasterizing it: raytracing is available with both
-        // technologies, so it would be kept otherwise
-        if (
-          technology === RenderTechnology.WEBGL &&
-          viewport.getRenderMode() === Viewport.RENDER_MODE_RAYTRACING
-        ) {
-          this.editRecorder.beginAction();
-          try {
-            this.viewportSetTechniques.processCommand(
-              ViewportSetCommands.IDV_RENDER_MODE_GPU,
-              viewport,
-            );
-          } finally {
-            this.editRecorder.endAction(
-              DrawingAreaInteractionTechniques.sceneOperationName(
-                this.drawingArea.getInteractionMode(),
-              ),
-              false,
-            );
-          }
-        }
       }
       return true;
     }
