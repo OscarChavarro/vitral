@@ -5,6 +5,8 @@ import {
   MouseEvent,
   RayGizmoInteractionTechniques,
   ViewportInteractionTechniques,
+  Viewport,
+  ViewportSetCommands,
   ViewportSetInteractionTechniques,
   type CursorWarp,
   type RendererConfiguration,
@@ -13,12 +15,12 @@ import {
   type SimpleBody,
   type TranslateGizmo,
   type Vector3Dd,
-  type Viewport,
   type ViewportSet,
 } from '@vitral/base';
 import type { ApplicationModel } from '../model/application-model';
 import type { DrawingArea } from '../model/drawing-area';
 import { InteractionMode } from '../model/interaction-mode';
+import { RenderTechnology } from '../model/render-technology';
 import type { Scene } from '../model/scene';
 import { ScenePicker } from '../model/selection/scene-picker';
 import { SceneSelectionEditor } from '../model/selection/scene-selection-editor';
@@ -1260,13 +1262,63 @@ export class DrawingAreaInteractionTechniques {
   /**
    * Processes one of the standard commands of the viewport set (projection
    * location or render mode, i.e. chosen in the menu of a viewport) over a
-   * viewport, recording the change of its view.
+   * viewport, recording the change of its view. A render technology command
+   * is passed to the listener, as only the application can replace the
+   * drawing surface; so is a render mode the technology in use does not
+   * offer (i.e. the hidden lines over WebGL), with the technology that
+   * offers it, before selecting the mode.
    * @param command the id of the command, starting with `IDV_`
    * @param viewport viewport to change
    * @return true if the command was a viewport set one and was processed
    */
   processViewportCommand(command: string, viewport: Viewport): boolean {
     let processed: boolean;
+    const technology: RenderTechnology | null = RenderTechnology.fromCommand(command);
+
+    // The technology presents the whole set: it is not part of the view
+    // history of a viewport
+    if (technology !== null) {
+      if (technology !== this.drawingArea.getRenderTechnology()) {
+        this.listener.renderTechnologyChangeRequested(technology);
+        // Choosing WebGL in the menu of a raytraced viewport means
+        // rasterizing it: raytracing is available with both
+        // technologies, so it would be kept otherwise
+        if (
+          technology === RenderTechnology.WEBGL &&
+          viewport.getRenderMode() === Viewport.RENDER_MODE_RAYTRACING
+        ) {
+          this.editRecorder.beginAction();
+          try {
+            this.viewportSetTechniques.processCommand(
+              ViewportSetCommands.IDV_RENDER_MODE_GPU,
+              viewport,
+            );
+          } finally {
+            this.editRecorder.endAction(
+              DrawingAreaInteractionTechniques.sceneOperationName(
+                this.drawingArea.getInteractionMode(),
+              ),
+              false,
+            );
+          }
+        }
+      }
+      return true;
+    }
+
+    // A render mode that the technology in use does not offer (i.e. the
+    // hidden lines over WebGL) first changes to the technology offering
+    // it, which makes the mode available
+    const renderMode: number = Viewport.renderModeForCommand(command);
+    if (renderMode !== 0 && !this.viewportSet.isRenderModeAvailable(renderMode)) {
+      const needed: RenderTechnology | null = RenderTechnology.forRenderMode(
+        renderMode,
+        this.drawingArea.getRenderTechnology(),
+      );
+      if (needed !== null && needed !== this.drawingArea.getRenderTechnology()) {
+        this.listener.renderTechnologyChangeRequested(needed);
+      }
+    }
 
     this.editRecorder.beginAction();
     try {

@@ -7,6 +7,7 @@ import {
   type ViewportSet,
 } from '@vitral/base';
 import { InteractionMode } from './interaction-mode';
+import { RenderTechnology } from './render-technology';
 
 /**
  * Port of `model.DrawingArea`.
@@ -25,6 +26,7 @@ import { InteractionMode } from './interaction-mode';
  */
 export class DrawingArea {
   private readonly viewportSet: ViewportSet;
+  private renderTechnology!: RenderTechnology;
 
   private interactionMode: InteractionMode;
   private lastInteractionMode: InteractionMode;
@@ -49,6 +51,7 @@ export class DrawingArea {
    */
   constructor(viewportSet: ViewportSet) {
     this.viewportSet = viewportSet;
+    this.setRenderTechnology(RenderTechnology.WEBGL);
 
     // As in 3ds Max, the application starts in selection mode
     this.interactionMode = InteractionMode.SELECT;
@@ -68,6 +71,29 @@ export class DrawingArea {
 
   getViewportSet(): ViewportSet {
     return this.viewportSet;
+  }
+
+  //= Render technology =================================================
+
+  /**
+   * @return the technology presenting the viewport set
+   */
+  getRenderTechnology(): RenderTechnology {
+    return this.renderTechnology;
+  }
+
+  /**
+   * Changes the technology presenting the viewport set, which changes the
+   * render modes its viewports can use. The application must replace the
+   * drawing surface accordingly.
+   * @param renderTechnology the new technology; null is ignored
+   */
+  setRenderTechnology(renderTechnology: RenderTechnology | null): void {
+    if (renderTechnology === null) {
+      return;
+    }
+    this.renderTechnology = renderTechnology;
+    this.viewportSet.setAvailableRenderModes(renderTechnology.getRenderModes());
   }
 
   //= Interaction mode ==================================================

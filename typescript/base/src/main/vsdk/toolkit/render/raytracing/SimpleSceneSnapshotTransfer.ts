@@ -22,6 +22,8 @@ import { TriangleMeshGroup } from "../../environment/geometry/surface/TriangleMe
 import { BinnedSahHierarchy } from "../../environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.js";
 import { BinnedSahHierarchyNode } from "../../environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchyNode.js";
 import { BinnedSahTriangleHierarchy } from "../../environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
+import { GridTriangleHierarchy } from "../../environment/geometry/boundingVolumeHierarchy/GridTriangleHierarchy.js";
+import { GridSpatialIndex } from "../../environment/geometry/spatialIndex/GridSpatialIndex.js";
 import { Arrow } from "../../environment/geometry/volume/Arrow.js";
 import { Box } from "../../environment/geometry/volume/Box.js";
 import { Cone } from "../../environment/geometry/volume/Cone.js";
@@ -140,6 +142,8 @@ function sceneTransfer(): ObjectGraphTransfer {
             TriangleMeshGroup,
             // Ray acceleration structures prepared on meshes and groups
             BinnedSahTriangleHierarchy,
+            GridTriangleHierarchy,
+            GridSpatialIndex,
             BinnedSahHierarchy,
             BinnedSahHierarchyNode,
             PlanarHalfSpace,

@@ -8,6 +8,7 @@ import { RaytraceStatistics } from "../../../common/statistics/RaytraceStatistic
 import type { Ray } from "../element/Ray.js";
 import { BinnedSahHierarchyNode } from "./BinnedSahHierarchyNode.js";
 import type { BinnedSahLeafVisitor } from "./BinnedSahLeafVisitor.js";
+import type { BinnedSahStoppingLeafVisitor } from "./BinnedSahStoppingLeafVisitor.js";
 import { _BinnedSahBox } from "./_BinnedSahBox.js";
 import { _BinnedSahBuildTask } from "./_BinnedSahBuildTask.js";
 
@@ -341,65 +342,47 @@ export class BinnedSahHierarchy {
         if (this.nodes.size() === 0 || this.primitiveOrder.size() === 0) {
             return true;
         }
-        const slab = new BinnedSahHierarchy.RaySlab(ray);
-        const rootDistance = slab.entry(this.nodes.get(0), inOutBestT[0]!);
-        if (rootDistance < 0.0) {
-            RaytraceStatistics.recordInstanceLevelTraversal(0, 0);
+        // Counted locally, reported once: no shared write per node.
+        const nodeVisits: number[] = [0];
+        const entryTests: number[] = [0];
+        const loopVisitor = new _NeverStoppingVisitor(visitor);
+        const completed = _traverseNodes(
+            this.nodes,
+            this.primitiveOrder,
+            ray,
+            loopVisitor,
+            inOutBestT,
+            nodeVisits,
+            entryTests,
+        );
+        RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits[0]!, entryTests[0]!);
+        return completed;
+    }
+
+    /**
+    The traversal of `traverseClosest` for callers that keep their own
+    statistics and may stop early: the visitor ends the traversal by
+    returning true, and node visits and leaf entries are added to the given
+    counters instead of being reported to `RaytraceStatistics` (nothing
+    static is written, so concurrent callers share the hierarchy freely).
+    Node entry is clipped at parameter zero: a caller with a minimum
+    parameter applies it in its visitor. Returns false when the stack would
+    overflow, as `traverseClosest`.
+    @param inOutBestT, nodeVisits, entryTests one-element input/output
+    holders (C++ references)
+    */
+    public traverse(
+        ray: Ray,
+        visitor: BinnedSahStoppingLeafVisitor,
+        inOutBestT: number[],
+        nodeVisits: number[],
+        entryTests: number[],
+    ): boolean {
+        if (this.nodes.size() === 0 || this.primitiveOrder.size() === 0) {
             return true;
         }
-        // Counted locally, reported once: no shared write per node.
-        let nodeVisits = 0;
-        let entryTests = 0;
-        const nodeStack = new Int32Array(BinnedSahHierarchy.STACK_SIZE);
-        const distanceStack = new Float64Array(BinnedSahHierarchy.STACK_SIZE);
-        let sp = 0;
-        nodeStack[sp] = 0;
-        distanceStack[sp] = rootDistance;
-        sp++;
-        while (sp > 0) {
-            sp--;
-            if (distanceStack[sp]! > inOutBestT[0]!) {
-                continue;
-            }
-            const node = this.nodes.get(nodeStack[sp]!);
-            nodeVisits++;
-            if (node.count > 0) {
-                for (let i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++) {
-                    visitor.visit(this.primitiveOrder.get(i), inOutBestT);
-                }
-                entryTests += node.count;
-                continue;
-            }
-            let left = node.leftOrFirst;
-            let right = left + 1;
-            let dl = slab.entry(this.nodes.get(left), inOutBestT[0]!);
-            let dr = slab.entry(this.nodes.get(right), inOutBestT[0]!);
-            // Push the farther child first, so the nearer one is visited first.
-            if (dl >= 0.0 && dr >= 0.0 && dl < dr) {
-                const swapNode = left;
-                left = right;
-                right = swapNode;
-                const swapDistance = dl;
-                dl = dr;
-                dr = swapDistance;
-            }
-            if (sp + 2 > BinnedSahHierarchy.STACK_SIZE) {
-                RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits, entryTests);
-                return false;
-            }
-            if (dl >= 0.0) {
-                nodeStack[sp] = left;
-                distanceStack[sp] = dl;
-                sp++;
-            }
-            if (dr >= 0.0) {
-                nodeStack[sp] = right;
-                distanceStack[sp] = dr;
-                sp++;
-            }
-        }
-        RaytraceStatistics.recordInstanceLevelTraversal(nodeVisits, entryTests);
-        return true;
+        const loopVisitor = new _StoppingVisitor(visitor);
+        return _traverseNodes(this.nodes, this.primitiveOrder, ray, loopVisitor, inOutBestT, nodeVisits, entryTests);
     }
 
     public getNodes(): ArrayList<BinnedSahHierarchyNode> {
@@ -501,4 +484,105 @@ export namespace BinnedSahHierarchy {
             return tNear;
         }
     }
+}
+
+/** The visitor of the shared loop (C++ template parameter of traverseNodes) */
+interface _LoopVisitor {
+    visit(primitive: number, inOutBestT: number[]): boolean;
+}
+
+/** Adapts a closest hit visitor, which never stops, to the shared loop */
+class _NeverStoppingVisitor implements _LoopVisitor {
+    private readonly visitor: BinnedSahLeafVisitor;
+    public constructor(inVisitor: BinnedSahLeafVisitor) {
+        this.visitor = inVisitor;
+    }
+    public visit(primitive: number, inOutBestT: number[]): boolean {
+        this.visitor.visit(primitive, inOutBestT);
+        return false;
+    }
+}
+
+/** Adapts a stopping visitor to the shared loop */
+class _StoppingVisitor implements _LoopVisitor {
+    private readonly visitor: BinnedSahStoppingLeafVisitor;
+    public constructor(inVisitor: BinnedSahStoppingLeafVisitor) {
+        this.visitor = inVisitor;
+    }
+    public visit(primitive: number, inOutBestT: number[]): boolean {
+        return this.visitor.visit(primitive, inOutBestT);
+    }
+}
+
+/**
+The traversal loop shared by traverseClosest and traverse, on a non empty
+hierarchy: a stack, nearest child first, nodes farther than the closest hit
+skipped. Counts node visits and leaf entries locally; returns false on stack
+overflow.
+*/
+function _traverseNodes(
+    nodeArray: ArrayList<BinnedSahHierarchyNode>,
+    primitiveOrder: ArrayList<number>,
+    ray: Ray,
+    visitor: _LoopVisitor,
+    inOutBestT: number[],
+    nodeVisits: number[],
+    entryTests: number[],
+): boolean {
+    const slab = new BinnedSahHierarchy.RaySlab(ray);
+    const rootDistance = slab.entry(nodeArray.get(0), inOutBestT[0]!);
+    if (rootDistance < 0.0) {
+        return true;
+    }
+    const nodeStack = new Int32Array(BinnedSahHierarchy.STACK_SIZE);
+    const distanceStack = new Float64Array(BinnedSahHierarchy.STACK_SIZE);
+    let sp = 0;
+    nodeStack[sp] = 0;
+    distanceStack[sp] = rootDistance;
+    sp++;
+    while (sp > 0) {
+        sp--;
+        if (distanceStack[sp]! > inOutBestT[0]!) {
+            continue;
+        }
+        const node = nodeArray.get(nodeStack[sp]!);
+        nodeVisits[0] = nodeVisits[0]! + 1;
+        if (node.count > 0) {
+            for (let i = node.leftOrFirst; i < node.leftOrFirst + node.count; i++) {
+                if (visitor.visit(primitiveOrder.get(i), inOutBestT)) {
+                    entryTests[0] = entryTests[0]! + (i - node.leftOrFirst + 1);
+                    return true;
+                }
+            }
+            entryTests[0] = entryTests[0]! + node.count;
+            continue;
+        }
+        let left = node.leftOrFirst;
+        let right = left + 1;
+        let dl = slab.entry(nodeArray.get(left), inOutBestT[0]!);
+        let dr = slab.entry(nodeArray.get(right), inOutBestT[0]!);
+        // Push the farther child first, so the nearer one is visited first.
+        if (dl >= 0.0 && dr >= 0.0 && dl < dr) {
+            const swapNode = left;
+            left = right;
+            right = swapNode;
+            const swapDistance = dl;
+            dl = dr;
+            dr = swapDistance;
+        }
+        if (sp + 2 > BinnedSahHierarchy.STACK_SIZE) {
+            return false;
+        }
+        if (dl >= 0.0) {
+            nodeStack[sp] = left;
+            distanceStack[sp] = dl;
+            sp++;
+        }
+        if (dr >= 0.0) {
+            nodeStack[sp] = right;
+            distanceStack[sp] = dr;
+            sp++;
+        }
+    }
+    return true;
 }

@@ -88,6 +88,8 @@ export {
 export { HtmlActionEvent, type HtmlActionListener } from "./vsdk/toolkit/render/html/HtmlActionListener.js";
 export { HtmlCollapsablePanel } from "./vsdk/toolkit/render/html/HtmlCollapsablePanel.js";
 export { HtmlImageRenderer } from "./vsdk/toolkit/render/html/HtmlImageRenderer.js";
+export { HtmlCalligraphic2DBufferRenderer } from "./vsdk/toolkit/render/html/HtmlCalligraphic2DBufferRenderer.js";
+export { HtmlGizmo2DDrawListRenderer } from "./vsdk/toolkit/render/html/HtmlGizmo2DDrawListRenderer.js";
 export {
     HtmlMenuBar,
     HtmlMenuItem,

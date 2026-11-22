@@ -26,6 +26,7 @@ import { TriangleAccelerationStructure } from "../boundingVolumeHierarchy/Triang
 import { TriangleMeshAccelerationMethod } from "../boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
 // Installs `TriangleAccelerationStructure.create` for WALD2007_BINNED_SAH.
 import "../boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
+import "../boundingVolumeHierarchy/GridTriangleHierarchy.js";
 
 /** Indexed triangle mesh with optional vertex attributes and material spans. */
 export class TriangleMesh extends Surface<Ray, RayHit> {

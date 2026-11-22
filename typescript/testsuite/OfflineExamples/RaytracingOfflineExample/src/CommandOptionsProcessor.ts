@@ -104,8 +104,9 @@ export class CommandOptionsProcessor {
         console.log("  -parallel, --parallel  Render tiles in parallel");
         console.log("  --mesh-acceleration, -m <method>");
         console.log("                         Triangle mesh ray acceleration:");
-        console.log("                         bruteforce (none) or wald2007 (binned SAH");
-        console.log("                         BVH, default)");
+        console.log("                         bruteforce (none), wald2007 (binned SAH");
+        console.log("                         BVH, default) or voxel (uniform grid,");
+        console.log("                         RenderPark's voxel grid)");
         console.log("  --stats                Count rays and acceleration structure work");
         console.log("                         (RaytraceStatistics) and print a summary");
         console.log("  --help, -h             Show this help");

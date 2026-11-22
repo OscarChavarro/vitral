@@ -254,6 +254,12 @@ export { SimpleMaterial } from "./vsdk/toolkit/environment/material/SimpleMateri
 export { MicroFacetedMaterial, MicrofacetConfig } from "./vsdk/toolkit/environment/material/MicroFacetedMaterial.js";
 export { RendererConfiguration } from "./vsdk/toolkit/environment/material/RendererConfiguration.js";
 export { ShadingType } from "./vsdk/toolkit/environment/material/ShadingType.js";
+export { ScatteringComponent } from "./vsdk/toolkit/environment/material/ScatteringComponent.js";
+export { SurfaceShadingPoint } from "./vsdk/toolkit/environment/material/SurfaceShadingPoint.js";
+export { Texture } from "./vsdk/toolkit/environment/material/Texture.js";
+export { ScatteringFrame, scatteringArithmetic } from "./vsdk/toolkit/environment/material/ScatteringFrame.js";
+export { PhongLobe } from "./vsdk/toolkit/environment/material/PhongLobe.js";
+export { PhongMaterial } from "./vsdk/toolkit/environment/material/PhongMaterial.js";
 export { Geometry, type GeometryRay, type GeometryRayHit } from "./vsdk/toolkit/environment/geometry/Geometry.js";
 export { Curve } from "./vsdk/toolkit/environment/geometry/curve/Curve.js";
 export { ParametricCurve } from "./vsdk/toolkit/environment/geometry/curve/ParametricCurve.js";
@@ -334,6 +340,20 @@ export type { BinnedSahInstanceVisitor } from "./vsdk/toolkit/environment/geomet
 export { TriangleAccelerationStructure } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.js";
 export { TriangleMeshAccelerationMethod } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
 export { TriangleMeshAccelerationMethodUtil } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethodUtil.js";
+export type { BinnedSahStoppingLeafVisitor } from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahStoppingLeafVisitor.js";
+export {
+    GridTriangleHierarchy,
+    GridTriangleRayTest,
+} from "./vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/GridTriangleHierarchy.js";
+export { SpatialIndex } from "./vsdk/toolkit/environment/geometry/spatialIndex/SpatialIndex.js";
+export type { PrimitiveRayTest } from "./vsdk/toolkit/environment/geometry/spatialIndex/PrimitiveRayTest.js";
+export { SpatialIndexWorkspace } from "./vsdk/toolkit/environment/geometry/spatialIndex/SpatialIndexWorkspace.js";
+export { SpatialQueryMode } from "./vsdk/toolkit/environment/geometry/spatialIndex/SpatialQueryMode.js";
+export { SpatialQueryResult } from "./vsdk/toolkit/environment/geometry/spatialIndex/SpatialQueryResult.js";
+export { LinearSpatialIndex } from "./vsdk/toolkit/environment/geometry/spatialIndex/LinearSpatialIndex.js";
+export { BinnedSahSpatialIndex } from "./vsdk/toolkit/environment/geometry/spatialIndex/BinnedSahSpatialIndex.js";
+export { SpatialGroupTree } from "./vsdk/toolkit/environment/geometry/spatialIndex/SpatialGroupTree.js";
+export { GridSpatialIndex } from "./vsdk/toolkit/environment/geometry/spatialIndex/GridSpatialIndex.js";
 export { Box } from "./vsdk/toolkit/environment/geometry/volume/Box.js";
 export { VoxelVolume } from "./vsdk/toolkit/environment/geometry/volume/VoxelVolume.js";
 export { Cone } from "./vsdk/toolkit/environment/geometry/volume/Cone.js";

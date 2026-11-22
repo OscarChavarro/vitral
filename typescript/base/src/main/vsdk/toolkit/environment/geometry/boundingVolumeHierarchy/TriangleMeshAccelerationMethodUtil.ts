@@ -6,22 +6,27 @@ C++ declares it in `TriangleMeshAccelerationMethod.h` and defines it in
 because a static `name` member of a class would clash with `Function.name`.
 */
 export namespace TriangleMeshAccelerationMethodUtil {
-    export const COUNT = 2;
+    export const COUNT = 3;
 
     export function fromCode(code: number): TriangleMeshAccelerationMethod {
         if (code === 1) {
             return TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH;
         }
+        if (code === 2) {
+            return TriangleMeshAccelerationMethod.VOXEL_GRID;
+        }
         return TriangleMeshAccelerationMethod.BRUTE_FORCE;
     }
 
-    /** Short name used by command lines: "bruteforce", "wald2007" */
+    /** Short name used by command lines: "bruteforce", "wald2007", "voxel" */
     export function name(value: TriangleMeshAccelerationMethod): string {
         switch (value) {
             case TriangleMeshAccelerationMethod.BRUTE_FORCE:
                 return "bruteforce";
             case TriangleMeshAccelerationMethod.WALD2007_BINNED_SAH:
                 return "wald2007";
+            case TriangleMeshAccelerationMethod.VOXEL_GRID:
+                return "voxel";
         }
         return "unknown";
     }

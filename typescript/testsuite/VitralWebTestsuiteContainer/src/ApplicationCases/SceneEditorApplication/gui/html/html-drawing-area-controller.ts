@@ -78,7 +78,7 @@ export class HtmlDrawingAreaController {
     this.listener = listener;
 
     this.projectionLocationPopup = new HtmlProjectionLocationPopup(
-      drawingArea.getViewportSet(),
+      drawingArea,
       techniques,
       canvas,
       (): void => listener.repaintRequested(),

@@ -36,6 +36,8 @@ export abstract class TriangleAccelerationStructure {
     through this constructor, which its module installs.
     */
     private static binnedSahTriangleHierarchyFactory: (() => TriangleAccelerationStructure) | null = null;
+    /** As `binnedSahTriangleHierarchyFactory`, for `GridTriangleHierarchy` */
+    private static gridTriangleHierarchyFactory: (() => TriangleAccelerationStructure) | null = null;
 
     protected builtVertexCount: number;
     protected builtTriangleCount: number;
@@ -244,6 +246,10 @@ export abstract class TriangleAccelerationStructure {
                 return TriangleAccelerationStructure.binnedSahTriangleHierarchyFactory !== null
                     ? TriangleAccelerationStructure.binnedSahTriangleHierarchyFactory()
                     : null;
+            case TriangleMeshAccelerationMethod.VOXEL_GRID:
+                return TriangleAccelerationStructure.gridTriangleHierarchyFactory !== null
+                    ? TriangleAccelerationStructure.gridTriangleHierarchyFactory()
+                    : null;
             case TriangleMeshAccelerationMethod.BRUTE_FORCE:
                 return null;
         }
@@ -253,5 +259,10 @@ export abstract class TriangleAccelerationStructure {
     /** @internal Called once by the module of `BinnedSahTriangleHierarchy` */
     public static installBinnedSahTriangleHierarchyFactory(factory: () => TriangleAccelerationStructure): void {
         TriangleAccelerationStructure.binnedSahTriangleHierarchyFactory = factory;
+    }
+
+    /** @internal Called once by the module of `GridTriangleHierarchy` */
+    public static installGridTriangleHierarchyFactory(factory: () => TriangleAccelerationStructure): void {
+        TriangleAccelerationStructure.gridTriangleHierarchyFactory = factory;
     }
 }

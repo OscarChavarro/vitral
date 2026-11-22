@@ -10,6 +10,7 @@ import { BinnedSahInstanceHierarchy } from "vsdk/toolkit/environment/geometry/bo
 import type { BinnedSahInstanceVisitor } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahInstanceVisitor.js";
 import { BinnedSahHierarchy } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahHierarchy.js";
 import { BinnedSahTriangleHierarchy } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/BinnedSahTriangleHierarchy.js";
+import { GridTriangleHierarchy } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/GridTriangleHierarchy.js";
 import { TriangleAccelerationStructure } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleAccelerationStructure.js";
 import { TriangleMeshAccelerationMethod } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethod.js";
 import { TriangleMeshAccelerationMethodUtil } from "vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/TriangleMeshAccelerationMethodUtil.js";
@@ -109,8 +110,12 @@ const expectVectorEq = (expected: Vector3Dd, actual: Vector3Dd, message: string)
     expect([actual.x(), actual.y(), actual.z()], message).toEqual([expected.x(), expected.y(), expected.z()]);
 };
 
-const expectSameAsBruteForce = (positions: number[], indexes: number[], rayCount: number): void => {
-    const hierarchy = new BinnedSahTriangleHierarchy();
+const expectSameAsBruteForceWith = (
+    hierarchy: TriangleAccelerationStructure,
+    positions: number[],
+    indexes: number[],
+    rayCount: number,
+): void => {
     hierarchy.build(positions, indexes);
     const random = new TriangleAccelerationTestRandom(11);
     let hits = 0;
@@ -136,6 +141,11 @@ const expectSameAsBruteForce = (positions: number[], indexes: number[], rayCount
         }
     }
     expect(hits).toBeGreaterThan(Math.trunc(rayCount / 10));
+};
+
+const expectSameAsBruteForce = (positions: number[], indexes: number[], rayCount: number): void => {
+    const hierarchy = new BinnedSahTriangleHierarchy();
+    expectSameAsBruteForceWith(hierarchy, positions, indexes, rayCount);
 };
 
 describe("BinnedSahTriangleHierarchy", () => {
@@ -236,6 +246,80 @@ describe("BinnedSahTriangleHierarchy", () => {
     });
 });
 
+describe("GridTriangleHierarchy", () => {
+    it("SoupHitsMatchBruteForceExactly", () => {
+        const positions: number[] = [];
+        const indexes: number[] = [];
+        buildSoup(3000, positions, indexes);
+        const grid = new GridTriangleHierarchy();
+        expectSameAsBruteForceWith(grid, positions, indexes, 4000);
+        // floor(3000^(1/3) + 1) cells along each axis
+        expect(grid.getResolution()).toBe(15);
+    }, 120_000);
+
+    it("SharedEdgeGridHitsMatchBruteForceExactly", () => {
+        const positions: number[] = [];
+        const indexes: number[] = [];
+        buildGrid(40, positions, indexes);
+        const grid = new GridTriangleHierarchy();
+        expectSameAsBruteForceWith(grid, positions, indexes, 4000);
+    }, 120_000);
+
+    it("CopyAnswersAsTheOriginal", () => {
+        const positions: number[] = [];
+        const indexes: number[] = [];
+        buildSoup(500, positions, indexes);
+        const grid = new GridTriangleHierarchy();
+        grid.build(positions, indexes);
+        const copied = grid.copy();
+        expect(copied !== null).toBe(true);
+        expect(copied.getMethod() === TriangleMeshAccelerationMethod.VOXEL_GRID).toBe(true);
+        expect(copied.matches(Math.trunc(positions.length / 3), Math.trunc(indexes.length / 3))).toBe(true);
+        const random = new TriangleAccelerationTestRandom(5);
+        for (let k = 0; k < 500; k++) {
+            const ray = randomRay(random, k);
+            const t0 = [0],
+                u0 = [0],
+                v0 = [0],
+                t1 = [0],
+                u1 = [0],
+                v1 = [0];
+            const tri0 = [-1],
+                tri1 = [-1];
+            const hit0 = grid.firstHit(ray, positions, indexes, t0, u0, v0, tri0);
+            const hit1 = copied.firstHit(ray, positions, indexes, t1, u1, v1, tri1);
+            expect(hit1, "ray " + k).toBe(hit0);
+            if (hit0) {
+                expect(tri1[0], "ray " + k).toBe(tri0[0]);
+                expect(t1[0], "ray " + k).toBe(t0[0]);
+            }
+        }
+    });
+
+    it("EmptyMeshMisses", () => {
+        const positions: number[] = [];
+        const indexes: number[] = [];
+        const grid = new GridTriangleHierarchy();
+        grid.build(positions, indexes);
+        const t = [0],
+            u = [0],
+            v = [0];
+        const triangle = [-1];
+        expect(
+            grid.firstHit(
+                new Ray(new Vector3Dd(0, 0, 1), new Vector3Dd(0, 0, -1)),
+                positions,
+                indexes,
+                t,
+                u,
+                v,
+                triangle,
+            ),
+        ).toBe(false);
+        expect(grid.getNodeCount()).toBe(0);
+    });
+});
+
 describe("TriangleMeshAccelerationMethod", () => {
     it("NamesRoundTrip", () => {
         for (let code = 0; code < TriangleMeshAccelerationMethodUtil.COUNT; code++) {
@@ -249,6 +333,11 @@ describe("TriangleMeshAccelerationMethod", () => {
         const unused = [TriangleMeshAccelerationMethod.BRUTE_FORCE];
         expect(TriangleMeshAccelerationMethodUtil.fromName("octree", unused)).toBe(false);
         expect(TriangleAccelerationStructure.create(TriangleMeshAccelerationMethod.BRUTE_FORCE) === null).toBe(true);
+        const voxel = [TriangleMeshAccelerationMethod.BRUTE_FORCE];
+        expect(TriangleMeshAccelerationMethodUtil.fromName("voxel", voxel)).toBe(true);
+        const grid = TriangleAccelerationStructure.create(voxel[0]!);
+        expect(grid !== null).toBe(true);
+        expect(grid!.getMethod() === TriangleMeshAccelerationMethod.VOXEL_GRID).toBe(true);
     });
 });
 

@@ -1,4 +1,5 @@
 import type { ApplicationModel } from '../../model/application-model';
+import type { RenderTechnology } from '../../model/render-technology';
 import type { HtmlApplicationModel } from './html-application-model';
 
 /**
@@ -63,4 +64,11 @@ export interface HtmlApplicationHost {
    * Creates the main window of the GUI.
    */
   createGUI(): Promise<void>;
+
+  /**
+   * Presents the viewport set with other technology, replacing the drawing
+   * surface.
+   * @param technology the technology to use
+   */
+  setRenderTechnology(technology: RenderTechnology): void;
 }

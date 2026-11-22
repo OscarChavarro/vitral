@@ -1,3 +1,4 @@
+import type { RenderTechnology } from '../model/render-technology';
 import type { PointerCursor } from './pointer-cursor';
 
 /**
@@ -71,6 +72,12 @@ export interface DrawingAreaInteractionListener {
    * The user requested to toggle the full screen GUI mode.
    */
   fullScreenGuiToggleRequested(): void;
+
+  /**
+   * The user requested to present the viewport set with other technology.
+   * @param technology the requested technology
+   */
+  renderTechnologyChangeRequested(technology: RenderTechnology): void;
 
   /**
    * An animation started (i.e. the camera turning to a view chosen with the

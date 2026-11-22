@@ -1,5 +1,6 @@
 import { Logger, VSDK, type RGBImageUncompressed, type SimpleBody } from '@vitral/base';
 import type { DrawingArea } from '../../model/drawing-area';
+import type { RenderTechnology } from '../../model/render-technology';
 import { SceneSelectionEditor } from '../../model/selection/scene-selection-editor';
 import type { BodyEditFeedbackProvider } from '../../render/body-edit-feedback-provider';
 import type { DrawingAreaHost } from '../../render/drawing-area-host';
@@ -248,6 +249,10 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
     this.application.getApplicationModel().getGuiState().toggleFullScreenGuiMode();
     this.application.destroyGUI();
     void this.application.createGUI();
+  }
+
+  renderTechnologyChangeRequested(technology: RenderTechnology): void {
+    this.application.setRenderTechnology(technology);
   }
 
   //= DrawingAreaHost ===================================================

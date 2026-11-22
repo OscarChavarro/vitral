@@ -7,6 +7,7 @@ import {
   type WidgetMenu,
 } from '@vitral/base';
 import { HtmlPopupMenu, type HtmlMenuItem } from '@vitral/webgl';
+import type { DrawingArea } from '../../model/drawing-area';
 import type { DrawingAreaInteractionTechniques } from '../drawing-area-interaction-techniques';
 import { MouseEventKind, PopupDismissClickFilter } from '../popup-dismiss-click-filter';
 
@@ -17,10 +18,14 @@ import { MouseEventKind, PopupDismissClickFilter } from '../popup-dismiss-click-
  * `VIEWPORT_SET_PROJECTION_LOCATION` popup of the viewport set, to change the
  * projection location of a viewport (Perspective, Top, ...), followed, after a
  * separator, by the `VIEWPORT_SET_RENDER_MODE` popup, to render it with the GPU
- * or the CPU (raytracing), showing only the render modes available in the
- * technology presenting the set (see `ViewportSet.getAvailableRenderModes`). Texts come from the I18N context of the viewport set
- * (so it always shows the language currently selected by the user). The
- * projection and the render mode currently used are marked.
+ * or the CPU (raytracing, hidden lines or hidden surfaces; only the modes
+ * available in the render technology in use are listed, see
+ * `ViewportSet.getAvailableRenderModes`), and by the
+ * `VIEWPORT_SET_RENDER_TECHNOLOGY` popup, to present the whole viewport set
+ * with other technology (WebGL or the 2D context of a canvas). Texts come
+ * from the I18N context of the viewport set (so it always shows the language
+ * currently selected by the user). The projection, the render mode and the
+ * technology currently used are marked.
  *
  * The menu is built each time it is requested, and it floats over the canvas
  * (see `HtmlPopupMenu`), with the keyboard focus: the user can move with the
@@ -31,6 +36,7 @@ import { MouseEventKind, PopupDismissClickFilter } from '../popup-dismiss-click-
  * back to the canvas.
  */
 export class HtmlProjectionLocationPopup {
+  private readonly drawingArea: DrawingArea;
   private readonly viewportSet: ViewportSet;
   private readonly techniques: DrawingAreaInteractionTechniques;
   private readonly canvas: HTMLElement;
@@ -39,7 +45,8 @@ export class HtmlProjectionLocationPopup {
   private readonly dismissClickFilter: PopupDismissClickFilter;
 
   /**
-   * @param viewportSet the set whose I18N context gives the texts
+   * @param drawingArea the area presenting the set, whose I18N context gives
+   * the texts
    * @param techniques the techniques that execute the chosen command (and
    * record it in the view history of the viewport)
    * @param canvas the element where the viewport set is presented; it
@@ -47,12 +54,13 @@ export class HtmlProjectionLocationPopup {
    * @param repaint requests a new frame of the canvas
    */
   constructor(
-    viewportSet: ViewportSet,
+    drawingArea: DrawingArea,
     techniques: DrawingAreaInteractionTechniques,
     canvas: HTMLElement,
     repaint: () => void,
   ) {
-    this.viewportSet = viewportSet;
+    this.drawingArea = drawingArea;
+    this.viewportSet = drawingArea.getViewportSet();
     this.techniques = techniques;
     this.canvas = canvas;
     this.repaint = repaint;
@@ -103,6 +111,18 @@ export class HtmlProjectionLocationPopup {
     if (renderModeDefinition !== null) {
       popup.addSeparator();
       this.fillMenu(popup, renderModeDefinition, viewport, viewport.getRenderModeCommand());
+    }
+    const technologyDefinition: WidgetMenu | null = context.getPopup(
+      ViewportSetCommands.POPUP_RENDER_TECHNOLOGY,
+    );
+    if (technologyDefinition !== null) {
+      popup.addSeparator();
+      this.fillMenu(
+        popup,
+        technologyDefinition,
+        viewport,
+        this.drawingArea.getRenderTechnology().getCommand(),
+      );
     }
     popup.addCloseListener((): void => {
       this.dismissClickFilter.popupClosed(Date.now());

@@ -126,6 +126,7 @@
         "src/main/vsdk/toolkit/environment/geometry/volume/Arrow.ts",
         "src/main/vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.ts",
         "src/main/vsdk/toolkit/environment/geometry/boundingVolumeHierarchy/**/*.ts",
+        "src/main/vsdk/toolkit/environment/geometry/spatialIndex/**/*.ts",
         "src/main/vsdk/toolkit/environment/geometry/volume/OrthogonalEllipsoidDistance.ts",
         "src/main/vsdk/toolkit/environment/geometry/volume/AffineEllipsoidDistance.ts",
         "src/main/vsdk/toolkit/environment/geometry/volume/AffineEllipsoidDistanceBounds.ts",

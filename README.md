@@ -1,49 +1,120 @@
 # Vitral
 
-Vitral is a computer graphics testbed focused on experimentation and learning. It is designed to build small graphics applications quickly while switching between multiple algorithms on both CPU and GPU pipelines.
+Vitral is a computer graphics toolkit and testbed focused on experimentation
+and learning. It is designed to build small graphics applications quickly
+while switching between several algorithms for the same problem (visibility,
+shading, solid modeling), on both CPU and GPU pipelines, and to keep the same
+code base alive on platforms from a 16-bit DOS machine to a modern
+workstation or a web browser.
 
 ## What this project does
 
-Vitral provides a compact but broad graphics toolkit with:
+The toolkit core (`base` in every port) contains, with no window system and
+no GPU needed:
 
-- Core math, geometry, scene, media, and processing foundations
-- CPU-side rendering and shading (wireframe, hidden-line, rasterization, ray tracing, software shaders)
-- GPU-side rendering adapters (OpenGL/JOGL backends)
-- IO and persistence layers for geometry, images, XML, and scene resources
-- A testsuite with offline examples, interactive apps, techniques demos, and benchmarks
+- **Foundations**: linear algebra, color, data structures, symbolic algebra,
+  numerical analysis (polynomial solvers, look-up tables).
+- **Scene model**: cameras, lights, materials, backgrounds, bodies with
+  rigid or affine placement, scene containers.
+- **Solid modeling kernel**: boundary representation solids
+  (`PolyhedralBoundedSolid`, a half-edge structure built with Euler
+  operators), boolean set operations and slicing over them, CSG trees
+  evaluated by ray crossing membership, and analytic or implicit volumes
+  (box, sphere, cone, tube, torus, quadrics, polynomial surfaces, blobs,
+  height fields, voxels, half spaces), most of them exportable to a
+  boundary representation.
+- **Computational geometry**: polygon triangulation, the general 2D polygon
+  clipper of Weiler and Atherton, bounding volume hierarchies (binned SAH)
+  for triangle meshes and scene instances.
+- **Visibility and rendering on the CPU**: wireframe, hidden line removal
+  (Appel's quantitative invisibility), hidden surface removal by polygon area
+  sorting (Weiler and Atherton, with shadows from several lights and screen
+  subdivision), a 2D rasterizer, a Whitted style raytracer (serial and
+  parallel by tiles), software shaders (constant, flat, Gouraud, Phong,
+  Cook-Torrance, bump mapping), dithering.
+- **Media and IO**: RGB / RGBA / indexed images, palettes, z-buffers, image
+  formats, mesh and scene readers and writers (in Java: OBJ, PLY, 3DS, ASE,
+  VRML, VTK, GTS, MD2, STL and part of STEP; a subset in the other ports).
+- **Interaction model**: viewports and viewport sets, gizmos, key and mouse
+  events and the controllers that interpret them, independent of any GUI
+  toolkit.
 
-This repository contains multiple implementations:
+Rendering technologies (OpenGL, WebGL, X11, a frame buffer) and GUI toolkits
+(AWT / Swing, Xt with Motif or Athena, GTK 4, HTML) live in separate
+adapter modules over that core.
 
-### Java Implementation
+Global illumination (Galerkin radiosity, stochastic raytracing,
+bidirectional path tracing, photon maps, tone mapping) is **not part of
+this repository yet**: it is being brought in from the rpkCpp project (a
+modernization of RenderPark), whose math, geometry and material classes are
+already shared, file by file, with `cpp/base`.
 
-- `java/base`: dependency-light core toolkit
-- `java/awt`: AWT/Swing integration layer
-- `java/jogl2` and `java/jogl4`: JOGL rendering backends
-- `java/testsuite`: runnable examples, API tests, and application cases
+## Implementations (ports)
 
-### C++ Port
+The same architecture and, as far as each language allows, the same classes
+and method names are kept in four ports. Java is the reference for names
+(`doc/attributesGettersAndSettersNames.md`).
 
-- `cpp/base`: C++ core toolkit (see [C++ README](cpp/README.md) for details)
-- `cpp/opengl4`: OpenGL 4.1 rendering backend via GLFW
-- `cpp/glfw`: GLFW window management
-- `cpp/glut`: GLUT/FreeGLUT backend
-- `cpp/testsuite`: C++ examples and benchmarks
+| Port | Core | Rendering and GUI adapters | Applications |
+|---|---|---|---|
+| `java/` | `java/base` (558 source files) | `awt` (AWT / Swing), `jogl2`, `jogl4` (OpenGL through JOGL), `android`, `jme` | `java/testsuite`: scene editor, offline examples, techniques, benchmarks, tools |
+| `cpp/` | `cpp/base` (C++11, no STL containers: a Java-like layer in `base/src/main/java`) | `opengl4`, `opengl1`, `glfw`, `glut`, `gtk4`, `xlib`, `xt` / `xm` / `xaw`, `svgalib` | `cpp/testsuite`: scene editor (Xt + OpenGL, Xlib, frame buffer), offline and OpenGL examples |
+| `cpp/x86_64_smp_kernel/` | uses `cpp/base` | its own VGA / VBE video and drivers | a small preemptive SMP kernel for i386 and x86_64 that runs the raytracer and the scene editor without an operating system |
+| `turboc/` | `turboc/base` (pre-ISO C++ subset of `cpp/base`) | `opengl1`, `glut`, `xt` / `xm` / `xaw`, `bgi`, `dos` | scene editor (Xt), offline examples, BGI examples for DOS |
+| `typescript/` | `@vitral/base` (platform neutral), `@vitral/fs` (Node files) | `@vitral/webgl` | Angular web container with the scene editor and examples; offline examples for Node |
 
-For building the C++ port and installing optional image format dependencies (JPEG, PNG), see the [C++ port documentation](cpp/README.md#requirements).
+### Feature status by port
+
+The table lists what is present in the production code of each core (not
+what is planned). ✅ present, ◐ partial, — absent.
+
+| Capability | java | cpp | turboc | typescript |
+|---|---|---|---|---|
+| Linear algebra, color, numerical analysis | ✅ | ✅ | ✅ | ✅ |
+| Scene model, CSG trees | ✅ | ✅ | ✅ | ✅ |
+| Boundary representation solids and booleans | ✅ | ✅ | ✅ | ✅ |
+| Polygon triangulation and clipping, BVH | ✅ | ✅ | ✅ | ✅ |
+| Raytracer (serial) | ✅ | ✅ | ✅ | ✅ |
+| Raytracer (parallel) | ✅ threads | ✅ POSIX threads | ◐ only where threads exist (not on DOS) | ✅ Web Workers |
+| Hidden line removal | ✅ | ✅ | ✅ | ✅ |
+| Hidden surface removal with shadows | ✅ | ✅ | ✅ | ✅ (core only: the web editor does not offer the mode) |
+| Software shaders | ✅ | ✅ | ✅ | ✅ |
+| Mesh and scene readers | ✅ | ◐ | ◐ | ◐ |
+| STEP and STL | ✅ | ◐ STEP in part | — | ◐ STEP in part |
+| XML scene importer | ✅ | — | — | — |
+| Animation | ✅ | ◐ | — | ✅ |
+| GPU rendering | JOGL 2 / 4 | OpenGL 1.2 and 4.1 | OpenGL 1.2 | WebGL |
+| Scene editor application | ✅ | ✅ | ✅ | ✅ |
+| Radiosity and global illumination | — | — (in rpkCpp) | — | — |
 
 ## Architecture and learning focus
 
-Vitral uses a modular, organized design where model/domain code is separated from rendering technology-specific code. The rendering layer is decoupled from core entities, which keeps the codebase easier to understand, modify, and use for education.
+Model and domain code is separated from rendering technology code: the
+entities of the core know nothing about how they are drawn, and each
+technology adds its renderers in its own module. This keeps the code easier
+to understand, modify and use for education, and is what makes the ports
+and the legacy platforms possible.
 
-A key property of the project is the "pure" base layer (`java/base`): it minimizes external dependencies and keeps core logic independent from specific rendering frameworks. This makes the toolkit suitable for:
+The core of each port is meant to be "pure", with these current exceptions:
 
-- Learning graphics fundamentals with clear boundaries between concerns
-- Swapping rendering implementations without rewriting the domain model
-- Building new ports and supporting different technologies/platforms (for example Vulkan-oriented backends)
+- `java/base` depends on `jackson-databind` (JSON) and uses `org.w3c.dom` /
+  `javax.xml` for the XML importer; optional JNI libraries (`pkgs/`) are
+  loaded when present.
+- `cpp/base` and `turboc/base` optionally link libpng, libjpeg and FreeType.
+- `@vitral/base` has no Node imports; file access is in `@vitral/fs`.
+
+Known deviations from the design rules, defects and technical debt of the
+production code are listed in [doc/BUGS.txt](doc/BUGS.txt).
 
 ## Portability and ports
 
-The Java code in this repository is a **port** of the toolkit architecture. The same high-level design used in `java/base` is intended to be replicated across other ports (such as C++, TypeScript, and others): a clean core model plus backend-specific rendering adapters.
+The same high-level design used in `java/base` is replicated in every port:
+a clean core model plus backend-specific rendering adapters. Ports are kept
+in step by porting literally (class by class, method by method), so a fix
+or a feature is expected to land in all of them; the differences that
+remain are in the feature table above. There is no continuous integration:
+the test suites of each port, and the deployment to the test machines, are
+run on request.
 
 ## Supported platforms
 
@@ -133,18 +204,20 @@ requires overlay-aware module boundaries or an explicit runtime loader.
 
 The project maintains traceability to classic computer graphics literature used to guide algorithms and implementation decisions. The `doc/` folder includes architectural notes and a curated set of important references (including foundational papers) that support the toolkit's technical direction.
 
-## Feature table
+## Where to look (Java paths; the other ports mirror them)
 
 | Area | Main capabilities | Where to look |
 |---|---|---|
 | Core foundations | Linear algebra, color, data structures, symbolic algebra, utilities | `java/base/src/main/vsdk/toolkit/common` |
-| Scene and geometry model | Cameras, lights, materials, backgrounds, geometric entities, scene containers | `java/base/src/main/vsdk/toolkit/environment` |
-| CPU rendering | Wireframe, hidden line, 2D rasterizer, simple ray tracer, software shaders | `java/base/src/main/vsdk/toolkit/render` |
-| Shader models (CPU/software) | Constant, flat, Gouraud-textured, Phong, Cook-Torrance, bump variants | `java/base/src/main/vsdk/toolkit/render/shaders` |
+| Scene and geometry model | Cameras, lights, materials, backgrounds, geometric entities, scene containers, CSG | `java/base/src/main/vsdk/toolkit/environment` |
+| Solid modeling | Half-edge solids, Euler operators, validators | `.../environment/geometry/volume/polyhedralBoundedSolid` |
+| Solid operations | Booleans, slicing, polygon clipping and triangulation | `.../environment/geometry/geometricProcessing` |
+| CPU rendering | Wireframe, hidden line, hidden surface, 2D rasterizer, raytracer, software shaders | `java/base/src/main/vsdk/toolkit/render` |
 | Media and image data | RGB/RGBA images, palettes, z-buffers, pixel and color handling | `java/base/src/main/vsdk/toolkit/media` |
-| Persistence and import/export | Image formats, geometry IO, XML importer, metadata persistence | `java/base/src/main/vsdk/toolkit/io` |
+| Persistence and import/export | Image formats, geometry IO, STEP, STL, XML importer | `java/base/src/main/vsdk/toolkit/io` |
+| Interaction model | Viewports, gizmos, events, controllers | `java/base/src/main/vsdk/toolkit/gui` |
 | Desktop integration | AWT/Swing rendering and GUI adapters | `java/awt/src/main/vsdk/toolkit` |
-| GPU rendering adapters | JOGL2/JOGL4 renderers, fixtures, OpenGL resource helpers | `java/jogl2/src/main/vsdk/toolkit`, `java/jogl4/src/main/vsdk/toolkit` |
+| GPU rendering adapters | JOGL2/JOGL4 renderers, OpenGL resource helpers | `java/jogl2/src/main/vsdk/toolkit`, `java/jogl4/src/main/vsdk/toolkit` |
 | Experiments and demos | Application cases, offline examples, benchmarks, API tests | `java/testsuite` |
 
 ## Build and run (Java)
@@ -199,7 +272,17 @@ built, the toolkit uses its pure Java implementation. See `pkgs/README.md`.
 
 ## Repository layout
 
-- `java/`: main toolkit modules and testsuite
-- `doc/`: architecture notes, references, and historical docs
-- `etc/`: shaders, textures, materials, fonts, and sample assets
+- `java/`: Java port (core, AWT, JOGL, Android and jME adapters, testsuite)
+- `cpp/`: C++11 port, its rendering and GUI backends, and the minimalistic
+  kernel (`cpp/x86_64_smp_kernel`); see [cpp/README.md](cpp/README.md)
+- `turboc/`: legacy C++ port for compilers from 1992 to 2007 and DOS; see
+  [turboc/README.md](turboc/README.md)
+- `typescript/`: TypeScript packages and the web testsuite; see
+  [typescript/README.md](typescript/README.md)
+- `doc/`: architecture notes, plans, references, known bugs
+  ([doc/BUGS.txt](doc/BUGS.txt)) and the portability table
+  ([doc/portability.md](doc/portability.md))
+- `etc/`: shaders, textures, materials, fonts, GUI definitions, sample
+  assets and the description of the test machines (`etc/portMachines`)
 - `pkgs/`: optional native libraries used from Java through JNI (CMake projects)
+- `scripts/`: checks run on the host (attribute names, Xt layers)

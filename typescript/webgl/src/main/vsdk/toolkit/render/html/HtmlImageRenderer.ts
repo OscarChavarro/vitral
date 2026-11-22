@@ -80,6 +80,49 @@ export class HtmlImageRenderer {
     }
 
     /**
+    Java's `AwtRGBImageUncompressedRenderer.draw(Graphics, img, x0, y0)`:
+    copies an image to a canvas, its upper left corner at <`x0`, `y0`>
+    (`putImageData`, which ignores the clip and the transform of the context).
+    @param context 2D context of the canvas where to draw
+    @param img image to draw
+    @param x0 left pixel of the image in the canvas
+    @param y0 top pixel of the image in the canvas
+    */
+    public static draw(context: CanvasRenderingContext2D, img: Image, x0: number = 0, y0: number = 0): void {
+        if (img.getXSize() <= 0 || img.getYSize() <= 0) {
+            return;
+        }
+        context.putImageData(HtmlImageRenderer.exportToImageData(img), x0, y0);
+    }
+
+    /**
+    Java's `AwtRGBImageUncompressedRenderer.importFromAwtBufferedImage`: copies
+    the pixels of a canvas area (top row first) to an image, initializing it
+    when its size differs.
+    @param input pixels to copy, as read by `getImageData`
+    @param output image receiving them
+    @return false if the image could not be initialized
+    */
+    public static importFromImageData(input: ImageData, output: RGBImageUncompressed): boolean {
+        const w: number = input.width;
+        const h: number = input.height;
+        const data: Uint8ClampedArray = input.data;
+
+        if (w !== output.getXSize() || h !== output.getYSize()) {
+            if (!output.initNoFill(w, h)) {
+                return false;
+            }
+        }
+        for (let y: number = 0; y < h; y++) {
+            for (let x: number = 0; x < w; x++) {
+                const i: number = (y * w + x) * 4;
+                output.putPixel(x, y, data[i]!, data[i + 1]!, data[i + 2]!);
+            }
+        }
+        return true;
+    }
+
+    /**
     @param img image to export
     @return a `data:` URL with the image as a PNG, to use as the source of an
     `<img>` element or a CSS cursor
