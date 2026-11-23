@@ -657,6 +657,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/phong_scattering_tests.cpp
     src/test/planar_face_tests.cpp
     src/test/spatial_index_tests.cpp
+    src/test/kd_tree_tests.cpp
     src/test/ray_affine_contract_tests.cpp
     src/test/ray_crossing_tests.cpp
     src/test/bounding_volume_hierarchy_tests.cpp

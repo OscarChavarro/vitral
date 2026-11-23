@@ -85,3 +85,13 @@ TEST(Vector3DfTest, AssignmentReplacesValue) {
     v = v.withY(5.0f);
     EXPECT_TRUE(v == Vector3Df(1.0f, 5.0f, 3.0f));
 }
+
+TEST(Vector3DfTest, IndexedComponentsMatchNamedAccessors)
+{
+    const Vector3Df value(1.5f, -2.0f, 3.25f);
+    EXPECT_FLOAT_EQ(value.x(), value.component(0));
+    EXPECT_FLOAT_EQ(value.y(), value.component(1));
+    EXPECT_FLOAT_EQ(value.z(), value.component(2));
+    const Vector3Df copied(value);
+    EXPECT_FLOAT_EQ(value.component(2), copied.component(2));
+}
