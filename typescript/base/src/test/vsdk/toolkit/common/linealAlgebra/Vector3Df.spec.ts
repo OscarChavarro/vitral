@@ -49,4 +49,10 @@ describe("Vector3Df", () => {
         v = v.withY(5.0);
         expect(v.equals(new Vector3Df(1.0, 5.0, 3.0))).toBe(true);
     });
+    it("returns indexed components", () => {
+        const vector = new Vector3Df(1.5, -2, 3.25);
+        expect(vector.component(0)).toBe(vector.x());
+        expect(vector.component(1)).toBe(vector.y());
+        expect(vector.component(2)).toBe(vector.z());
+    });
 });

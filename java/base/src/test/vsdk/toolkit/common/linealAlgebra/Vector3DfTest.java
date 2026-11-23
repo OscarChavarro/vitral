@@ -130,4 +130,12 @@ class Vector3DfTest
         v = v.withY(5.0f);
         expectTrue(v.equals(new Vector3Df(1.0f, 5.0f, 3.0f)));
     }
+    @Test
+    void indexedComponentsMatchNamedAccessors()
+    {
+        Vector3Df vector = new Vector3Df(1.5f, -2.0f, 3.25f);
+        expectEq(vector.component(0), vector.x());
+        expectEq(vector.component(1), vector.y());
+        expectEq(vector.component(2), vector.z());
+    }
 }

@@ -133,6 +133,11 @@ export { ArrayListOfInts } from "./vsdk/toolkit/common/dataStructures/ArrayListO
 export { ArrayListOfLongs } from "./vsdk/toolkit/common/dataStructures/ArrayListOfLongs.js";
 export type { ArrayLinkable } from "./vsdk/toolkit/common/dataStructures/ArrayLinkable.js";
 export { CircularArrayList } from "./vsdk/toolkit/common/dataStructures/CircularArrayList.js";
+export { KDTree } from "./vsdk/toolkit/common/dataStructures/KDTree.js";
+export { KDTreeNode } from "./vsdk/toolkit/common/dataStructures/KDTreeNode.js";
+export { BalancedKDTreeNode } from "./vsdk/toolkit/common/dataStructures/BalancedKDTreeNode.js";
+export type { KDTreeAdapter } from "./vsdk/toolkit/common/dataStructures/KDTreeAdapter.js";
+export type { KDTreeVisitor } from "./vsdk/toolkit/common/dataStructures/KDTreeVisitor.js";
 export { _NAryTreeNode } from "./vsdk/toolkit/common/dataStructures/_NAryTreeNode.js";
 export { _NAryTreeIntermediateNode } from "./vsdk/toolkit/common/dataStructures/_NAryTreeIntermediateNode.js";
 export { _NAryTreeLeafNode } from "./vsdk/toolkit/common/dataStructures/_NAryTreeLeafNode.js";

@@ -58,6 +58,7 @@ TESTS = \
     heightfield_solid_tests \
     hidden_surface_renderer_tests \
     implicit_solid_tests \
+    kd_tree_tests \
     interior_overlap_predicate_tests \
     lamina_policy_tests \
     microfaceted_material_csv_tests \

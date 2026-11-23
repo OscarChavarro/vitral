@@ -1814,3 +1814,9 @@ base/src/test/spatial_index_tests.cpp,BASE/SRC/TEST/SPAINDTE.CPP,spatial_index_t
 base/src/test/phong_scattering_tests.cpp,BASE/SRC/TEST/PHSCATTE.CPP,phong_scattering_tests.cpp,PHSCATTE.CPP
 base/src/test/phong_material_tests.cpp,BASE/SRC/TEST/PHMATETE.CPP,phong_material_tests.cpp,PHMATETE.CPP
 base/src/main/vsdk/toolkit/environment/scene/csg/CsgMembershipTest.h,BASE/SRC/MAIN/V/T/ENVI/SCENE/CSG/CSGMEMTE.H,CsgMembershipTest.h,CSGMEMTE.H
+base/src/main/vsdk/toolkit/common/dataStructures/BalancedKDTreeNode.h,BASE/SRC/MAIN/V/T/COMMON/DATASTRU/BAKDTRNO.H,BalancedKDTreeNode.h,BAKDTRNO.H
+base/src/main/vsdk/toolkit/common/dataStructures/KDQuery.h,BASE/SRC/MAIN/V/T/COMMON/DATASTRU/KDQUERYK.H,KDQuery.h,KDQUERYK.H
+base/src/main/vsdk/toolkit/common/dataStructures/KDTree.h,BASE/SRC/MAIN/V/T/COMMON/DATASTRU/KDTREEKD.H,KDTree.h,KDTREEKD.H
+base/src/main/vsdk/toolkit/common/dataStructures/KDTree.txx,BASE/SRC/MAIN/V/T/COMMON/DATASTRU/KDTREEKD.TXX,KDTree.txx,KDTREEKD.TXX
+base/src/main/vsdk/toolkit/common/dataStructures/KDTreeNode.h,BASE/SRC/MAIN/V/T/COMMON/DATASTRU/KDTRNOEE.H,KDTreeNode.h,KDTRNOEE.H
+base/src/test/kd_tree_tests.cpp,BASE/SRC/TEST/KDTETEST.CPP,kd_tree_tests.cpp,KDTETEST.CPP
