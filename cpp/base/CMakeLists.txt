@@ -143,6 +143,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.cpp
     src/main/vsdk/toolkit/common/statistics/GeometryStatistics.cpp
     src/main/vsdk/toolkit/common/color/ColorRgb.cpp
+    src/main/vsdk/toolkit/common/color/Cie.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.cpp
