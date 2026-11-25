@@ -10,11 +10,13 @@
 #include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
+#include "vsdk/toolkit/environment/geometry/volume/Prism.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "vsdk/toolkit/environment/scene/csg/CsgBody.h"
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
 
 TEST(ReaderMitCommands, ClassicPrimitivesRotationAndCubemapAreRead) {
@@ -116,6 +118,49 @@ TEST(ReaderMitCommands, UnknownAndMalformedCommandsAreRejected) {
         ASSERT_NE(nullptr, file);
         fputs("eye 0 -5 0\nup 0 0 1\nlookat 0 0 0\n", file);
         fputs(bodies[i], file);
+        fclose(file);
+        SimpleScene scene;
+        ReaderMitScene reader;
+        EXPECT_THROW(reader.importEnvironment(path.c_str(), &scene), java::Exception) << i;
+    }
+    std::remove(path.c_str());
+}
+
+TEST(ReaderMitCommands, PrismsAreParametricBodiesAndCsgOperands) {
+    SimpleScene scene;
+    ReaderMitScene reader;
+    reader.importEnvironment(VITRAL_REPOSITORY_ROOT "/etc/geometry/mitscenes/prism_csg.ray", &scene);
+    java::ArrayList<SimpleBody*>& bodies = scene.getSimpleBodies();
+    ASSERT_EQ(4, bodies.size());
+    const Prism* star = dynamic_cast<const Prism*>(bodies[1]->getGeometry());
+    ASSERT_NE(nullptr, star);
+    EXPECT_EQ(10, star->getNumberOfSides());
+    EXPECT_DOUBLE_EQ(0.6, star->getHeight());
+    EXPECT_DOUBLE_EQ(-2.3, bodies[1]->getPosition().x());
+    EXPECT_NE(nullptr, dynamic_cast<CsgBody*>(bodies[2]));
+    EXPECT_NE(nullptr, dynamic_cast<CsgBody*>(bodies[3]));
+
+    // The star prism is hit on its top cap; its notch between two points is not
+    RayHit hit(RayHit::DETAIL_POINT | RayHit::DETAIL_NORMAL, false);
+    ASSERT_TRUE(bodies[1]->doIntersectionFirstHit(Ray(Vector3Dd(-2.3, 0, 5), Vector3Dd(0, 0, -1)), &hit));
+    EXPECT_NEAR(5 - 0.6, hit.getHitDistance(), 1e-9);
+    EXPECT_FALSE(bodies[1]->doIntersectionFirstHit(Ray(Vector3Dd(-2.3 - 0.411449, 0.566312, 5), Vector3Dd(0, 0, -1)), &hit));
+    // The spherical bite of the difference: the ray down the axis reaches the
+    // bottom of the bite, at z = 1.4 - 0.75
+    ASSERT_TRUE(bodies[2]->doIntersectionFirstHit(Ray(Vector3Dd(0, 0, 5), Vector3Dd(0, 0, -1)), &hit));
+    EXPECT_NEAR(5 - 0.65, hit.getHitDistance(), 1e-9);
+}
+
+TEST(ReaderMitCommands, MalformedPrismsAreRejected) {
+    const char* lines[5] = {"prism 0 0 0 1 2 0 0 1 0\n", "prism 0 0 0 -1 3 0 0 1 0 0 1\n",
+        "prism 0 0 0 1 3 0 0 1 0\n", "prism 0 0 0 1 4 0 0 1 1 1 0 0 1\n",
+        "prism 0 0 0 1 3 0 0 1 0 0 1 7\n"};
+    const std::string path = testing::TempDir() + "reader_mit_prism_malformed.ray";
+    for (int i = 0; i < 5; ++i) {
+        FILE* file = fopen(path.c_str(), "w");
+        ASSERT_NE(nullptr, file);
+        fputs("eye 0 -5 0\nup 0 0 1\nlookat 0 0 0\n", file);
+        fputs(lines[i], file);
         fclose(file);
         SimpleScene scene;
         ReaderMitScene reader;

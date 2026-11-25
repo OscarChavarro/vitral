@@ -284,6 +284,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Torus.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Tube.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Prism.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/VoxelVolume.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.cpp
@@ -708,6 +709,8 @@ if(VITRAL_BUILD_TESTS)
     src/test/set_op_finish_and_connect_invariants_tests.cpp
     src/test/boolean_volume_oracle_tests.cpp
     src/test/tube_tests.cpp
+    src/test/brep_export_variants_tests.cpp
+    src/test/prism_tests.cpp
     src/test/camera_control_gizmo_tests.cpp
     src/test/camera_control_gizmo_2d_painter_tests.cpp
     ${VITRAL_BASE_TEST_SUPPORT_SOURCES}

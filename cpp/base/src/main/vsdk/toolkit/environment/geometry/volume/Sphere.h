@@ -21,7 +21,8 @@ private:
     bool validateSurfaceQuery(const Ray& ray, const RayCrossingQuery& query,
         RayFirstHitStatus& failure) const;
     void fillSurfaceDetail(const Ray& ray, double t, RayHit* result) const;
-    PolyhedralBoundedSolid* buildPolyhedralBoundedSolid(int nmeridians, int nparalels);
+    PolyhedralBoundedSolid* buildPolyhedralBoundedSolid(int nmeridians, int nparalels,
+        bool withQuadrilaterals);
 
 public:
     explicit Sphere(double r);
@@ -65,7 +66,23 @@ public:
     void setRadius(double value);
 
     PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
-    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int meridians, int parallels);
+
+    /**
+    Boundary representation of the sphere, centered at the origin with its
+    poles on the Z axis: `parallels` bands of equal latitude step between the
+    poles, each one cut into `meridians` sectors starting at +X. The bands
+    touching the poles are triangle fans; the faces of the other bands are
+    the planar quadrilaterals between two parallels and two meridians (two
+    points of each parallel, at the same longitudes).
+    @param meridians number of sectors around the Z axis (at least 3)
+    @param parallels number of bands from pole to pole (at least 2)
+    @param withQuadrilaterals false (default) splits each quadrilateral by a
+    diagonal into two triangles, so every face is a triangle; true keeps the
+    quadrilaterals as faces
+    @return a new boundary representation, owned by the caller
+    */
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int meridians, int parallels,
+        bool withQuadrilaterals = false);
 
     Vector3Dd spherePosition(double theta, double phi);
     Vector3Dd sphereNormal(double theta, double phi);

@@ -39,6 +39,7 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4QuadricSurfaceRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4TorusRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4TubeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4PrismRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4VolumeRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/_OpenGL4SolidBoundaryMeshBuilder.cpp
     src/main/vsdk/toolkit/render/opengl4/volume/OpenGL4VoxelVolumeRenderer.cpp

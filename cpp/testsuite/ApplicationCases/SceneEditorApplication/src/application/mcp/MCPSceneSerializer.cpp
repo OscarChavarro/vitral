@@ -19,6 +19,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 #include "vsdk/toolkit/environment/geometry/volume/Tube.h"
+#include "vsdk/toolkit/environment/geometry/volume/Prism.h"
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
 #include "vsdk/toolkit/environment/geometry/volume/PolynomialSurface.h"
@@ -183,6 +184,21 @@ void MCPSceneSerializer::appendParameters(java::StringBuilder& sb,
             .append(",\"minimum\":").append(MCPJson::vector(bounds[0]))
             .append(",\"maximum\":").append(MCPJson::vector(bounds[1]))
             .append('}');
+    }
+    else if ( Prism* prism = dynamic_cast<Prism*>(geometry) ) {
+        sb.append("{\"numberOfSides\":").append(prism->getNumberOfSides())
+            .append(",\"circumradius\":").append(prism->getCircumradius())
+            .append(",\"height\":").append(prism->getHeight())
+            .append(",\"base\":[");
+        const java::ArrayList<Vector2Dd>& base = prism->getBase();
+        for ( long int i = 0; i < base.size(); i++ ) {
+            if ( i > 0 ) {
+                sb.append(',');
+            }
+            sb.append('[').append(base[i].x).append(',').append(base[i].y)
+                .append(']');
+        }
+        sb.append("]}");
     }
     else if ( Torus* torus = dynamic_cast<Torus*>(geometry) ) {
         sb.append("{\"majorRadius\":").append(torus->getMajorRadius())

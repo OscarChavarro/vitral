@@ -775,6 +775,10 @@
       "name": "Toroide"
     },
     {
+      "id": "IDC_CREATE_PRISM",
+      "name": "Prisma"
+    },
+    {
       "id": "IDC_CREATE_BLOB",
       "name": "Blob (molécula)"
     },
@@ -1010,6 +1014,7 @@
         "IDC_CREATE_TUBE",
         "IDC_CREATE_WASHER",
         "IDC_CREATE_TORUS",
+        "IDC_CREATE_PRISM",
         "IDC_CREATE_BLOB",
         "IDC_CREATE_QUADRIC",
         "IDC_CREATE_POLYNOMIAL",

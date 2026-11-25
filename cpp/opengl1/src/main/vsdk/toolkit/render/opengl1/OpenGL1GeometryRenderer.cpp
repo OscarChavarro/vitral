@@ -23,6 +23,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/ImplicitSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
+#include "vsdk/toolkit/environment/geometry/volume/Prism.h"
 #include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
@@ -55,6 +56,7 @@
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1HeightFieldSolidRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1ImplicitSolidRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1PlanarHalfSpaceRenderer.h"
+#include "vsdk/toolkit/render/opengl1/volume/OpenGL1PrismRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1QuadricSurfaceRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1SphereRenderer.h"
 #include "vsdk/toolkit/render/opengl1/volume/OpenGL1TorusRenderer.h"
@@ -100,6 +102,9 @@ java::String keyOf(Geometry* geometry)
     }
     if ( Tube* t = dynamic_cast<Tube*>(geometry) ) {
         return OpenGL1TubeRenderer::meshKey(*t);
+    }
+    if ( Prism* p = dynamic_cast<Prism*>(geometry) ) {
+        return OpenGL1PrismRenderer::meshKey(*p);
     }
     if ( TriangleMesh* m = dynamic_cast<TriangleMesh*>(geometry) ) {
         return OpenGL1TriangleMeshRenderer::meshKey(*m);
@@ -157,6 +162,9 @@ OpenGL1MeshRenderer::Mesh* buildMesh(Geometry* geometry)
     }
     if ( Tube* t = dynamic_cast<Tube*>(geometry) ) {
         return OpenGL1TubeRenderer::buildMesh(*t);
+    }
+    if ( Prism* p = dynamic_cast<Prism*>(geometry) ) {
+        return OpenGL1PrismRenderer::buildMesh(*p);
     }
     if ( TriangleMesh* m = dynamic_cast<TriangleMesh*>(geometry) ) {
         return OpenGL1TriangleMeshRenderer::buildMesh(*m);

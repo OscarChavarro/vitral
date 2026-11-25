@@ -386,6 +386,13 @@
               },
               {
                 "type": "item",
+                "name": "Prism",
+                "modifiers": [
+                  "IDC_CREATE_PRISM"
+                ]
+              },
+              {
+                "type": "item",
                 "name": "Blob (molecule)",
                 "modifiers": [
                   "IDC_CREATE_BLOB"
@@ -1225,6 +1232,10 @@
       "name": "Torus"
     },
     {
+      "id": "IDC_CREATE_PRISM",
+      "name": "Prism"
+    },
+    {
       "id": "IDC_CREATE_BLOB",
       "name": "Blob (molecule)"
     },
@@ -1460,6 +1471,7 @@
         "IDC_CREATE_TUBE",
         "IDC_CREATE_WASHER",
         "IDC_CREATE_TORUS",
+        "IDC_CREATE_PRISM",
         "IDC_CREATE_BLOB",
         "IDC_CREATE_QUADRIC",
         "IDC_CREATE_POLYNOMIAL",
