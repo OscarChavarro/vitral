@@ -5,14 +5,14 @@ import { PolyhedralBoundedSolidEulerConstructions } from "./polyhedralBoundedSol
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-import { PolyhedralBoundedSolidEulerOperators } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { VSDK } from "../../../common/VSDK.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
 import type { Ray } from "../element/Ray.js";
 import { RayHit } from "../element/RayHit.js";
 import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
-import type { _PolyhedralBoundedSolidHalfEdge } from "./polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
+import { PolyhedralBoundedSolidValidationEngine } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
+import { Tube } from "./Tube.js";
 import { Solid } from "./Solid.js";
 
 export class Cone extends Solid {
@@ -488,16 +488,56 @@ export class Cone extends Solid {
 
     /**
     Java overloads `exportToPolyhedralBoundedSolid()` and
-    `exportToPolyhedralBoundedSolid(int circumferenceDivisions, int heightDivisions)`.
+    `exportToPolyhedralBoundedSolid(int circumferenceDivisions, int heightDivisions)`,
+    with the C++ `withCaps` parameter (default true).
+
+    Boundary representation of the cone (a cylinder when both radii are
+    equal), with its base on the plane z = 0 and its axis on +Z. The rings
+    of vertices start at +X and go counterclockwise seen from +Z.
+
+    With `withCaps` true (default) it is the closed solid: the lateral
+    surface plus the base disk and, when the top radius is not zero, the top
+    disk.
+
+    With `withCaps` false it is a valid boundary representation of the
+    lateral surface alone, an open curved surface without caps: a lamina
+    ([MANT1988] 12.2, generalized from the planar circular lamina) with two
+    coincident sides of opposite orientation, so it encloses no volume.
+      - When both radii are not zero (cylinder or frustum) the lamina is
+        built from a washer (`Tube.createWasherLamina`) whose inner ring is
+        moved to z = height with the top radius, and both of its faces are
+        split into the planar quadrilaterals between the two rings (a
+        `lmekr` joins both loops of each face and `smef` splits it). The
+        lamina has the topology of a torus (genus 1). Faces 1 and
+        3 to `circumferenceDivisions` + 1 are the outer side (normals away
+        from the axis); faces 2 and `circumferenceDivisions` + 2 to
+        2 * `circumferenceDivisions` are the inner side.
+      - When the top radius is zero (cone with apex) it is a circular lamina
+        whose two faces are split into triangle fans, each one towards its
+        own apex vertex (both at the same point), so the lamina has the
+        topology of a sphere. Face 1 and faces 3 to
+        `circumferenceDivisions` + 1 are the outer side; face 2 and the
+        rest are the inner side.
+    The open lamina has a single band of faces along the axis:
+    `heightDivisions` is not used.
+
+    @param circumferenceDivisions sides of the cone base (at least 3)
+    @param heightDivisions vertical subdivisions of the closed solid (at
+    least 1)
+    @param withCaps true for the closed solid, false for the open lamina of
+    the lateral surface
+    @return a new boundary representation of the cone
     */
     public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid;
     public override exportToPolyhedralBoundedSolid(
         circumferenceDivisions: number,
         heightDivisions: number,
+        withCaps?: boolean,
     ): PolyhedralBoundedSolid;
     public override exportToPolyhedralBoundedSolid(
         circumferenceDivisions?: number,
         heightDivisions?: number,
+        withCaps = true,
     ): PolyhedralBoundedSolid {
         if (circumferenceDivisions === undefined || heightDivisions === undefined) {
             return this.buildPolyhedralBoundedSolid(
@@ -508,6 +548,9 @@ export class Cone extends Solid {
         const normalizedCircumferenceDivisions = Math.max(Cone.MIN_CIRCUMFERENCE_DIVISIONS, circumferenceDivisions);
         const normalizedHeightDivisions = Math.max(Cone.MIN_HEIGHT_DIVISIONS, heightDivisions);
 
+        if (!withCaps) {
+            return this.buildOpenLamina(normalizedCircumferenceDivisions);
+        }
         if (
             normalizedCircumferenceDivisions === Cone.DEFAULT_CIRCUMFERENCE_DIVISIONS &&
             normalizedHeightDivisions === Cone.DEFAULT_HEIGHT_DIVISIONS
@@ -525,61 +568,16 @@ export class Cone extends Solid {
     (translational sweep) operation. The cone case is done manually,
     */
     private static closeTopFaceToApex(solid: PolyhedralBoundedSolid, apexZ: number): void {
-        const topFace = solid.findFace(1);
-        if (topFace === null || topFace.boundariesList.size() <= 0) {
-            return;
-        }
+        Cone.closeFaceToApex(solid, 1, apexZ);
+    }
 
-        const loop = topFace.boundariesList.get(0)!;
-        const start = loop.boundaryStartHalfEdge;
-        if (start === null) {
-            return;
-        }
-
-        const ringVertexIds: number[] = [];
-        let he: _PolyhedralBoundedSolidHalfEdge = start;
-        do {
-            ringVertexIds.push(he.startingVertex.id);
-            he = he.next()!;
-        } while (he !== start);
-
-        if (ringVertexIds.length < 3) {
-            return;
-        }
-
-        const apexVertexId = solid.getMaxVertexId() + 1;
-        PolyhedralBoundedSolidEulerOperators.smev(
-            solid,
-            1,
-            ringVertexIds[0]!,
-            apexVertexId,
-            new Vector3Dd(0.0, 0.0, apexZ),
-        );
-
-        let i: number;
-        for (i = 0; i < ringVertexIds.length - 2; i++) {
-            PolyhedralBoundedSolidEulerOperators.mef(
-                solid,
-                1,
-                1,
-                apexVertexId,
-                ringVertexIds[i]!,
-                ringVertexIds[i + 1]!,
-                ringVertexIds[i + 2]!,
-                solid.getMaxFaceId() + 1,
-            );
-        }
-
-        PolyhedralBoundedSolidEulerOperators.mef(
-            solid,
-            1,
-            1,
-            apexVertexId,
-            ringVertexIds[ringVertexIds.length - 2]!,
-            ringVertexIds[ringVertexIds.length - 1]!,
-            ringVertexIds[0]!,
-            solid.getMaxFaceId() + 1,
-        );
+    /**
+    Splits face `faceId`, a single loop polygon, into a fan of triangles
+    towards a new vertex at (0, 0, `apexZ`); the face keeps one of the
+    triangles.
+    */
+    private static closeFaceToApex(solid: PolyhedralBoundedSolid, faceId: number, apexZ: number): void {
+        Tube.splitFaceIntoFan(solid, faceId, new Vector3Dd(0.0, 0.0, apexZ));
     }
 
     private buildPolyhedralBoundedSolid(nsides: number, heightDivisions: number): PolyhedralBoundedSolid {
@@ -636,6 +634,41 @@ export class Cone extends Solid {
             }
             Cone.closeTopFaceToApex(solid, this.height);
         }
+        return solid;
+    }
+
+    /**
+    Open lamina of the lateral surface (see `exportToPolyhedralBoundedSolid`
+    with `withCaps` false).
+    */
+    private buildOpenLamina(nsides: number): PolyhedralBoundedSolid {
+        let solid: PolyhedralBoundedSolid;
+        let k: number;
+
+        if (this.topRadius <= VSDK.EPSILON) {
+            //- Cone with apex: both faces of a disk as fans, center lifted ---
+            // The fans of faces 1 and 2 end at the vertices n+1 and n+2
+            solid = Tube.createWasherLamina(0.0, this.bottomRadius, 0.0, nsides, true);
+            solid.findVertex(nsides + 1)!.position = new Vector3Dd(0.0, 0.0, this.height);
+            solid.findVertex(nsides + 2)!.position = new Vector3Dd(0.0, 0.0, this.height);
+            PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+            return solid;
+        }
+
+        //- Washer split in quadrilaterals, internal circle lifted ----------
+        // The external circle has the vertices 1..n at z = 0; the internal
+        // vertex at the angle of the external vertex k+1 is
+        // n+1+((n-k) mod n). Each one is placed above its external pair,
+        // scaled to the top radius, so both have exactly the same longitude
+        // and the quadrilaterals between them are planar.
+        solid = Tube.createWasherLamina(0.5 * this.bottomRadius, this.bottomRadius, 0.0, nsides, true);
+        const scale = this.topRadius / this.bottomRadius;
+        for (k = 0; k < nsides; k++) {
+            const bottom = solid.findVertex(k + 1)!;
+            const top = solid.findVertex(nsides + 1 + ((nsides - k) % nsides))!;
+            top.position = new Vector3Dd(bottom.position.x() * scale, bottom.position.y() * scale, this.height);
+        }
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
 }

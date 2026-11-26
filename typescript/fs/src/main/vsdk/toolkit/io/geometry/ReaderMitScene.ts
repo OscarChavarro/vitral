@@ -26,6 +26,7 @@ import { Double } from "@vitral/base/java/lang/Double";
 import { VSDKFatalException } from "@vitral/base/vsdk/toolkit/common/VSDKFatalException";
 import { ColorRgb } from "@vitral/base/vsdk/toolkit/common/color/ColorRgb";
 import { Matrix4x4d } from "@vitral/base/vsdk/toolkit/common/linealAlgebra/Matrix4x4d";
+import { Vector2Dd } from "@vitral/base/vsdk/toolkit/common/linealAlgebra/Vector2Dd";
 import { Vector3Dd } from "@vitral/base/vsdk/toolkit/common/linealAlgebra/Vector3Dd";
 import { Logger } from "@vitral/base/vsdk/toolkit/common/logging/Logger";
 import { CubemapBackground } from "@vitral/base/vsdk/toolkit/environment/background/CubemapBackground";
@@ -44,6 +45,7 @@ import { PlanarHalfSpace } from "@vitral/base/vsdk/toolkit/environment/geometry/
 import { PolynomialSurface } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/PolynomialSurface";
 import { QuadricSurface } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/QuadricSurface";
 import { Sphere } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/Sphere";
+import { Prism } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/Prism";
 import { Torus } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/Torus";
 import type { PolyhedralBoundedSolid } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid";
 import { AmbientLight } from "@vitral/base/vsdk/toolkit/environment/light/AmbientLight";
@@ -962,6 +964,55 @@ export class ReaderMitScene extends PersistenceElement {
                 const body = new SimpleBody();
                 body.setGeometry(new Torus(majorRadius[0]!, minorRadius[0]!));
                 body.setPosition(new Vector3Dd(x[0]!, y[0]!, z[0]!));
+                body.setMaterial(new SimpleMaterial(currentMaterial));
+                this.attach(body, pending, csgBody, csgNodes, outScene);
+            } else if (cmd === "prism") {
+                // prism x y z height n x1 y1 ... xn yn: a simple polygon of n
+                // vertices on the plane z = 0 of the body, placed at (x, y, z),
+                // swept height units along +Z. It is a parametric solid, so it
+                // can be a csg operand.
+                let cursor = 0;
+                while (cursor < javaLine.length && javaLine.charAt(cursor) !== " " && javaLine.charAt(cursor) !== "\t")
+                    cursor++;
+                const values = [0, 0, 0, 0, 0];
+                let ok = true;
+                for (let i = 0; i < 5 && ok; i++) {
+                    const parsed = [0];
+                    const next = _CScanf.strtod(javaLine, cursor, parsed);
+                    values[i] = parsed[0]!;
+                    ok = next !== cursor && Double.isFinite(values[i]!);
+                    cursor = next;
+                }
+                // C++ `(int)values[4]` of a value in [3, 100000]
+                const n = ok && values[4]! >= 3 && values[4]! <= 100000 ? Math.trunc(values[4]!) : 0;
+                ok = ok && n >= 3 && values[4] === n && values[3]! > 0;
+                const polygon = new ArrayList<Vector2Dd>();
+                for (let i = 0; i < 2 * n && ok; i += 2) {
+                    const parsed = [0];
+                    let next = _CScanf.strtod(javaLine, cursor, parsed);
+                    const px = parsed[0]!;
+                    ok = next !== cursor && Double.isFinite(px);
+                    cursor = next;
+                    if (!ok) break;
+                    next = _CScanf.strtod(javaLine, cursor, parsed);
+                    const py = parsed[0]!;
+                    ok = next !== cursor && Double.isFinite(py);
+                    cursor = next;
+                    polygon.add(new Vector2Dd(px, py));
+                }
+                while (ok && (javaLine.charAt(cursor) === " " || javaLine.charAt(cursor) === "\t")) cursor++;
+                ok = ok && cursor >= javaLine.length;
+                if (!ok)
+                    fail(
+                        "ReaderMitScene: prism requires a base position, a positive height, a vertex count of at least 3 and that many x y pairs",
+                    );
+                const prism = new Prism(polygon, values[3]!);
+                if (!prism.hasValidParameters()) {
+                    fail("ReaderMitScene: prism base must be a simple polygon with non-zero area");
+                }
+                const body = new SimpleBody();
+                body.setGeometry(prism);
+                body.setPosition(new Vector3Dd(values[0]!, values[1]!, values[2]!));
                 body.setMaterial(new SimpleMaterial(currentMaterial));
                 this.attach(body, pending, csgBody, csgNodes, outScene);
             } else if (cmd === "polybox" || cmd === "appel") {

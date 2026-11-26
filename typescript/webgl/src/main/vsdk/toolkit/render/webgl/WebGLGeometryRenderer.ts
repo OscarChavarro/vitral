@@ -11,6 +11,7 @@ import {
     ParametricCurve,
     PlanarHalfSpace,
     PolyhedralBoundedSolid,
+    Prism,
     QuadMesh,
     QuadricSurface,
     Sphere,
@@ -46,6 +47,7 @@ import { WebGLConeRenderer } from "./volume/WebGLConeRenderer.js";
 import { WebGLHeightFieldSolidRenderer } from "./volume/WebGLHeightFieldSolidRenderer.js";
 import { WebGLImplicitSolidRenderer } from "./volume/WebGLImplicitSolidRenderer.js";
 import { WebGLPlanarHalfSpaceRenderer } from "./volume/WebGLPlanarHalfSpaceRenderer.js";
+import { WebGLPrismRenderer } from "./volume/WebGLPrismRenderer.js";
 import { WebGLPolyhedralBoundedSolidRenderer } from "./volume/polyhedralBoundedSolid/WebGLPolyhedralBoundedSolidRenderer.js";
 import { WebGLQuadricSurfaceRenderer } from "./volume/WebGLQuadricSurfaceRenderer.js";
 import { WebGLSphereRenderer } from "./volume/WebGLSphereRenderer.js";
@@ -304,6 +306,9 @@ export class WebGLGeometryRenderer {
         if (geometry instanceof Tube) {
             return WebGLTubeRenderer.meshKey(geometry);
         }
+        if (geometry instanceof Prism) {
+            return WebGLPrismRenderer.meshKey(geometry);
+        }
         if (geometry instanceof TriangleMesh) {
             return WebGLTriangleMeshRenderer.meshKey(geometry);
         }
@@ -356,6 +361,9 @@ export class WebGLGeometryRenderer {
         }
         if (geometry instanceof Tube) {
             return WebGLTubeRenderer.buildMesh(geometry);
+        }
+        if (geometry instanceof Prism) {
+            return WebGLPrismRenderer.buildMesh(geometry);
         }
         if (geometry instanceof TriangleMesh) {
             return WebGLTriangleMeshRenderer.buildMesh(geometry);

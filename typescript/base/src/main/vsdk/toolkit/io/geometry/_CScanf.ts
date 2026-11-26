@@ -205,6 +205,24 @@ export class _CScanf {
     }
 
     /**
+    C `strtod(s + start, &end)`: leading white space is skipped and the
+    longest floating point prefix is converted into `value[0]` (0 when there
+    is none).
+    @return the index of `end`: just after the number, or `start` when no
+    conversion is done
+    */
+    public static strtod(s: string, start: number, value: number[]): number {
+        let i = start;
+        while (i < s.length && _CScanf.isSpace(s.charAt(i))) i++;
+        const length = _CScanf.floatPrefix(s, i, value);
+        if (length === 0) {
+            value[0] = 0;
+            return start;
+        }
+        return i + length;
+    }
+
+    /**
     C `strtod` over a whole token: the number when the token is entirely a
     floating point number, otherwise null.
     */

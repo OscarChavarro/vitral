@@ -4,6 +4,7 @@ import { test } from "vitest";
 import {
     expectDoubleEq,
     expectEq,
+    expectFalse,
     expectGt,
     expectLe,
     expectLt,
@@ -20,9 +21,11 @@ import { RayHit } from "@vitral/base/vsdk/toolkit/environment/geometry/element/R
 import { QuadMesh } from "@vitral/base/vsdk/toolkit/environment/geometry/surface/QuadMesh";
 import { Box } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/Box";
 import { Cone } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/Cone";
+import { Prism } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/Prism";
 import { Torus } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/Torus";
 import { PolyhedralBoundedSolid } from "@vitral/base/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid";
 import { SimpleScene } from "@vitral/base/vsdk/toolkit/environment/scene/SimpleScene";
+import { CsgBody } from "@vitral/base/vsdk/toolkit/environment/scene/csg/CsgBody";
 import { ReaderMitScene } from "../../../../../main/vsdk/toolkit/io/geometry/ReaderMitScene.js";
 import { TEMP_DIR, VITRAL_REPOSITORY_ROOT } from "../../../../ReaderTestPaths.js";
 
@@ -130,6 +133,53 @@ test("ReaderMitCommands_UnknownAndMalformedCommandsAreRejected", () => {
     const path = TEMP_DIR + "reader_mit_commands_malformed.ray";
     for (let i = 0; i < 10; ++i) {
         fs.writeFileSync(path, "eye 0 -5 0\nup 0 0 1\nlookat 0 0 0\n" + bodies[i]!);
+        const scene = new SimpleScene();
+        const reader = new ReaderMitScene();
+        expectThrow(Exception, () => reader.importEnvironment(path, scene), String(i));
+    }
+    fs.rmSync(path);
+});
+
+test("ReaderMitCommands_PrismsAreParametricBodiesAndCsgOperands", () => {
+    const scene = new SimpleScene();
+    const reader = new ReaderMitScene();
+    reader.importEnvironment(VITRAL_REPOSITORY_ROOT + "/etc/geometry/mitscenes/prism_csg.ray", scene);
+    const bodies = scene.getSimpleBodies();
+    expectEq(4, bodies.size());
+    const star = bodies.get(1).getGeometry();
+    expectTrue(star instanceof Prism);
+    expectEq(10, (star as Prism).getNumberOfSides());
+    expectDoubleEq(0.6, (star as Prism).getHeight());
+    expectDoubleEq(-2.3, bodies.get(1).getPosition().x());
+    expectTrue(bodies.get(2) instanceof CsgBody);
+    expectTrue(bodies.get(3) instanceof CsgBody);
+
+    // The star prism is hit on its top cap; its notch between two points is not
+    const hit = new RayHit(RayHit.DETAIL_POINT | RayHit.DETAIL_NORMAL, false);
+    expectTrue(bodies.get(1).doIntersectionFirstHit(new Ray(new Vector3Dd(-2.3, 0, 5), new Vector3Dd(0, 0, -1)), hit));
+    expectNear(5 - 0.6, hit.getHitDistance(), 1e-9);
+    expectFalse(
+        bodies
+            .get(1)
+            .doIntersectionFirstHit(new Ray(new Vector3Dd(-2.3 - 0.411449, 0.566312, 5), new Vector3Dd(0, 0, -1)), hit),
+    );
+    // The spherical bite of the difference: the ray down the axis reaches the
+    // bottom of the bite, at z = 1.4 - 0.75
+    expectTrue(bodies.get(2).doIntersectionFirstHit(new Ray(new Vector3Dd(0, 0, 5), new Vector3Dd(0, 0, -1)), hit));
+    expectNear(5 - 0.65, hit.getHitDistance(), 1e-9);
+});
+
+test("ReaderMitCommands_MalformedPrismsAreRejected", () => {
+    const lines = [
+        "prism 0 0 0 1 2 0 0 1 0\n",
+        "prism 0 0 0 -1 3 0 0 1 0 0 1\n",
+        "prism 0 0 0 1 3 0 0 1 0\n",
+        "prism 0 0 0 1 4 0 0 1 1 1 0 0 1\n",
+        "prism 0 0 0 1 3 0 0 1 0 0 1 7\n",
+    ];
+    const path = TEMP_DIR + "reader_mit_prism_malformed.ray";
+    for (let i = 0; i < 5; ++i) {
+        fs.writeFileSync(path, "eye 0 -5 0\nup 0 0 1\nlookat 0 0 0\n" + lines[i]!);
         const scene = new SimpleScene();
         const reader = new ReaderMitScene();
         expectThrow(Exception, () => reader.importEnvironment(path, scene), String(i));

@@ -26,6 +26,8 @@ import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/Polyhedral
 import { PolyhedralBoundedSolidEulerConstructions } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.js";
 import { PolyhedralBoundedSolidEulerOperators } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
 import { PolyhedralBoundedSolidValidationEngine } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
+import type { _PolyhedralBoundedSolidHalfEdge } from "./polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
+import { ArrayList } from "../../../../../java/util/ArrayList.js";
 import { Solid } from "./Solid.js";
 
 /**
@@ -787,9 +789,37 @@ export class Tube extends Solid {
       5. `kfmrh`: the disk is merged into face 2 as an inner ring, so both
          faces of the lamina have the hole.
     If `ri` is 0, the lamina has no hole (steps 2 to 5 are skipped).
+
+    With `withQuadrilaterals`, each face of the lamina is further split so
+    that the lamina is made of small planar polygons instead of two faces
+    with a hole, as needed by programs that use the faces as patches:
+      - with a hole: the two loops of each face are joined by an edge
+        between the external vertex 1 and the internal vertex at its same
+        angle (`lmekr`), and the face is split (`smef`) by an edge between
+        every other external vertex and the internal vertex at its angle.
+        Each face of the lamina becomes `n` quadrilaterals; the ones facing
+        +Z are the faces 1 and 3 to n+1, and the ones facing -Z are 2 and
+        n+2 to 2n. The internal vertex at the angle of the external vertex
+        k+1 (at k*360/n degrees, k = 0 .. n-1) is n+1+((n-k) mod n).
+      - without a hole (a disk): each face is split into a fan of `n`
+        triangles towards a new vertex at its center (see `splitFaceIntoFan`);
+        the two faces get distinct, coincident center vertices (n+1 for
+        face 1 and n+2 for face 2).
+    @param ri internal radius, or 0 for a disk
+    @param re external radius
+    @param h height of the plane of the lamina
+    @param n number of sides of the circles (at least 3)
+    @param withQuadrilaterals false (the default) for two faces with a hole,
+    true to split them in quadrilaterals (triangles for a disk)
     @return the lamina; face 1 is the one facing +Z (it is the one to sweep)
     */
-    public static createWasherLamina(ri: number, re: number, h: number, n: number): PolyhedralBoundedSolid {
+    public static createWasherLamina(
+        ri: number,
+        re: number,
+        h: number,
+        n: number,
+        withQuadrilaterals = false,
+    ): PolyhedralBoundedSolid {
         const solid: PolyhedralBoundedSolid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
             0.0,
             0.0,
@@ -798,6 +828,11 @@ export class Tube extends Solid {
             n,
         );
         if (ri <= 0.0) {
+            if (withQuadrilaterals) {
+                Tube.splitFaceIntoFan(solid, 1, new Vector3Dd(0.0, 0.0, h));
+                Tube.splitFaceIntoFan(solid, 2, new Vector3Dd(0.0, 0.0, h));
+                PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+            }
             return solid;
         }
 
@@ -822,8 +857,130 @@ export class Tube extends Solid {
         const diskFace = solid.getMaxFaceId() + 1;
         PolyhedralBoundedSolidEulerOperators.smef(solid, 1, lastInternal, firstInternal, diskFace);
         PolyhedralBoundedSolidEulerOperators.kfmrh(solid, 2, diskFace);
+        if (withQuadrilaterals) {
+            Tube.splitWasherIntoQuadrilaterals(solid, n);
+        }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
+    }
+
+    /**
+    Splits face `faceId` of `solid`, a single loop polygon, into a fan of
+    triangles towards a new vertex at `center` (`smev` from the first vertex
+    of the loop, then `mef` around it). The face keeps one of the triangles
+    and the others get new face ids, in the order of the loop.
+    @return the id of the new center vertex, or 0 if the face does not
+    exist or is not a polygon of at least three vertices
+    */
+    public static splitFaceIntoFan(solid: PolyhedralBoundedSolid, faceId: number, center: Vector3Dd): number {
+        const face = solid.findFace(faceId);
+        if (face === null || face.boundariesList.size() <= 0) {
+            return 0;
+        }
+
+        const loop = face.boundariesList.get(0)!;
+        const start = loop.boundaryStartHalfEdge;
+        if (start === null) {
+            return 0;
+        }
+
+        const ringVertexIds = new ArrayList<number>();
+        let he: _PolyhedralBoundedSolidHalfEdge = start;
+        do {
+            ringVertexIds.add(he.startingVertex.id);
+            he = he.next()!;
+        } while (he !== start);
+
+        if (ringVertexIds.size() < 3) {
+            return 0;
+        }
+
+        const centerVertexId = solid.getMaxVertexId() + 1;
+        PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, ringVertexIds.get(0), centerVertexId, center);
+
+        let i: number;
+        for (i = 0; i < ringVertexIds.size() - 2; i++) {
+            PolyhedralBoundedSolidEulerOperators.mef(
+                solid,
+                faceId,
+                faceId,
+                centerVertexId,
+                ringVertexIds.get(i),
+                ringVertexIds.get(i + 1),
+                ringVertexIds.get(i + 2),
+                solid.getMaxFaceId() + 1,
+            );
+        }
+
+        PolyhedralBoundedSolidEulerOperators.mef(
+            solid,
+            faceId,
+            faceId,
+            centerVertexId,
+            ringVertexIds.get(ringVertexIds.size() - 2),
+            ringVertexIds.get(ringVertexIds.size() - 1),
+            ringVertexIds.get(0),
+            solid.getMaxFaceId() + 1,
+        );
+        return centerVertexId;
+    }
+
+    /**
+    @return the id of the face among `candidateFaceIds` that has both
+    vertices on one of its loops, or 0 if there is none
+    */
+    private static findFaceWithVertices(
+        solid: PolyhedralBoundedSolid,
+        candidateFaceIds: ArrayList<number>,
+        vertexId1: number,
+        vertexId2: number,
+    ): number {
+        let i: number;
+        let j: number;
+
+        for (i = 0; i < candidateFaceIds.size(); i++) {
+            const face = solid.findFace(candidateFaceIds.get(i));
+            if (face === null) {
+                continue;
+            }
+            for (j = 0; j < face.boundariesList.size(); j++) {
+                const loop = face.boundariesList.get(j)!;
+                if (loop.firstHalfEdgeAtVertex(vertexId1) !== null && loop.firstHalfEdgeAtVertex(vertexId2) !== null) {
+                    return face.id;
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+    Splits both faces of a washer lamina into quadrilaterals (see
+    `createWasherLamina`).
+
+    The external circle has the vertices 1..n (vertex k+1 at k*360/n degrees)
+    and the internal one n+1..2n, clockwise: vertex n+1+j is at -j*360/n
+    degrees, so the external vertex k+1 pairs with the internal vertex
+    n+1+((n-k) mod n), at its same angle.
+    */
+    private static splitWasherIntoQuadrilaterals(solid: PolyhedralBoundedSolid, n: number): void {
+        let nextFaceId = 3;
+        let side: number;
+        let k: number;
+
+        for (side = 1; side <= 2; side++) {
+            const sideFaces = new ArrayList<number>();
+            sideFaces.add(side);
+            const face = solid.findFace(side)!;
+            PolyhedralBoundedSolidEulerOperators.lmekr(solid, face.findHalfEdge(1)!, face.findHalfEdge(n + 1)!);
+            for (k = 1; k < n; k++) {
+                const externalId = k + 1;
+                const internalId = n + 1 + (n - k);
+                const faceId = Tube.findFaceWithVertices(solid, sideFaces, externalId, internalId);
+                PolyhedralBoundedSolidEulerOperators.smef(solid, faceId, externalId, internalId, nextFaceId);
+                sideFaces.add(nextFaceId);
+                nextFaceId++;
+            }
+        }
     }
 
     /**

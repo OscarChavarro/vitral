@@ -118,6 +118,7 @@ export { _AlgebraicExpressionConstantNode } from "./vsdk/toolkit/common/symbolic
 export { _AlgebraicExpressionVariableNode } from "./vsdk/toolkit/common/symbolicAlgebra/_AlgebraicExpressionVariableNode.js";
 export { _AlgebraicExpressionBinaryOperatorNode } from "./vsdk/toolkit/common/symbolicAlgebra/_AlgebraicExpressionBinaryOperatorNode.js";
 export { _AlgebraicExpressionUnaryOperatorNode } from "./vsdk/toolkit/common/symbolicAlgebra/_AlgebraicExpressionUnaryOperatorNode.js";
+export { Cie } from "./vsdk/toolkit/common/color/Cie.js";
 export { ColorRgb } from "./vsdk/toolkit/common/color/ColorRgb.js";
 export { ColorRgba } from "./vsdk/toolkit/common/color/ColorRgba.js";
 export { Background } from "./vsdk/toolkit/environment/background/Background.js";
@@ -365,6 +366,7 @@ export { VoxelVolume } from "./vsdk/toolkit/environment/geometry/volume/VoxelVol
 export { Cone } from "./vsdk/toolkit/environment/geometry/volume/Cone.js";
 export { Torus } from "./vsdk/toolkit/environment/geometry/volume/Torus.js";
 export { Tube } from "./vsdk/toolkit/environment/geometry/volume/Tube.js";
+export { Prism } from "./vsdk/toolkit/environment/geometry/volume/Prism.js";
 export { Arrow } from "./vsdk/toolkit/environment/geometry/volume/Arrow.js";
 export {
     PolyhedralBoundedSolidNumericPolicy,

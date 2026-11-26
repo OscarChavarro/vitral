@@ -21,6 +21,7 @@ import {
   PolyhedralBoundedSolidModeler,
   PolyhedralBoundedSolidValidationEngine,
   PolynomialSurface,
+  Prism,
   ProgressMonitorConsole,
   QuadricSurface,
   RGBAImageUncompressed,
@@ -169,6 +170,10 @@ export class GuiEventExecutor extends CommandListener {
       this.scene().addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
     } else if (label === 'IDC_CREATE_TORUS') {
       this.scene().addThing(new Torus(2, 1));
+    } else if (label === 'IDC_CREATE_PRISM') {
+      // A hexagonal prism; its number of sides, circumradius and height
+      // are edited with the generic editor
+      this.scene().addThing(new Prism(6, 1, 2));
     } else if (label === 'IDC_CREATE_BLOB') {
       this.createBlob();
     } else if (label === 'IDC_CREATE_QUADRIC') {

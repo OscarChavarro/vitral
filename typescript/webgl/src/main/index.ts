@@ -55,6 +55,7 @@ export { WebGLPlanarHalfSpaceRenderer } from "./vsdk/toolkit/render/webgl/volume
 export { WebGLQuadricSurfaceRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLQuadricSurfaceRenderer.js";
 export { WebGLTorusRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLTorusRenderer.js";
 export { WebGLTubeRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLTubeRenderer.js";
+export { WebGLPrismRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLPrismRenderer.js";
 export { WebGLVolumeRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLVolumeRenderer.js";
 export { _WebGLSolidBoundaryMeshBuilder } from "./vsdk/toolkit/render/webgl/volume/_WebGLSolidBoundaryMeshBuilder.js";
 export { WebGLBackgroundRenderer } from "./vsdk/toolkit/render/webgl/WebGLBackgroundRenderer.js";
