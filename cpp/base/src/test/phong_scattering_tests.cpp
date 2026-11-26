@@ -10,7 +10,7 @@
 
 namespace {
 
-const Vector3Df UP(0.0F, 0.0F, 1.0F);
+const Vector3Dd UP(0.0, 0.0, 1.0);
 
 // A deterministic low-discrepancy pair: Hammersley points
 double radicalInverse(unsigned int i) {
@@ -26,18 +26,18 @@ double radicalInverse(unsigned int i) {
     return inverse;
 }
 
-Vector3Df unit(float x, float y, float z) {
-    return scatteringArithmetic::normalize(Vector3Df(x, y, z), 1e-6F);
+Vector3Dd unit(double x, double y, double z) {
+    return scatteringArithmetic::normalize(Vector3Dd(x, y, z), 1e-6);
 }
 
-SurfaceShadingPoint pointWithNormal(const Vector3Df &normal) {
-    return SurfaceShadingPoint(normal, true, Vector3Df(), false);
+SurfaceShadingPoint pointWithNormal(const Vector3Dd &normal) {
+    return SurfaceShadingPoint(normal, true, Vector3Dd(), false);
 }
 
 }
 
 TEST(ScatteringFrame, IsOrthonormalAndSamplesTheUpperHemisphere) {
-    const Vector3Df axis = unit(0.3F, -0.5F, 0.8F);
+    const Vector3Dd axis = unit(0.3, -0.5, 0.8);
     const ScatteringFrame frame(axis);
     EXPECT_NEAR(0.0, scatteringArithmetic::dot(frame.getX(), frame.getZ()), 1e-6);
     EXPECT_NEAR(0.0, scatteringArithmetic::dot(frame.getY(), frame.getZ()), 1e-6);
@@ -45,7 +45,7 @@ TEST(ScatteringFrame, IsOrthonormalAndSamplesTheUpperHemisphere) {
     EXPECT_NEAR(1.0, scatteringArithmetic::dot(frame.getX(), frame.getX()), 1e-6);
     for ( unsigned int i = 0; i < 256; i++ ) {
         double density;
-        const Vector3Df d = frame.sampleCosine((i + 0.5) / 256.0, radicalInverse(i), &density);
+        const Vector3Dd d = frame.sampleCosine((i + 0.5) / 256.0, radicalInverse(i), &density);
         const double cosTheta = scatteringArithmetic::dot(d, axis);
         EXPECT_GE(cosTheta, -1e-6);
         EXPECT_NEAR(cosTheta / M_PI, density, 1e-6);
@@ -53,28 +53,28 @@ TEST(ScatteringFrame, IsOrthonormalAndSamplesTheUpperHemisphere) {
 }
 
 TEST(ScatteringFrame, IdealDirections) {
-    const Vector3Df in = unit(1.0F, 0.0F, -1.0F);
-    const Vector3Df mirror = ScatteringFrame::idealReflection(in, UP);
+    const Vector3Dd in = unit(1.0, 0.0, -1.0);
+    const Vector3Dd mirror = ScatteringFrame::idealReflection(in, UP);
     EXPECT_NEAR(std::sqrt(0.5), mirror.x(), 1e-6);
     EXPECT_NEAR(std::sqrt(0.5), mirror.z(), 1e-6);
     bool totalInternalReflection = true;
     // Same index on both sides: the ray goes straight on
-    const Vector3Df through = ScatteringFrame::idealRefraction(in, UP, 1.5F, 1.5F, &totalInternalReflection);
+    const Vector3Dd through = ScatteringFrame::idealRefraction(in, UP, 1.5, 1.5, &totalInternalReflection);
     EXPECT_FALSE(totalInternalReflection);
     EXPECT_NEAR(in.x(), through.x(), 1e-6);
     EXPECT_NEAR(in.z(), through.z(), 1e-6);
     // Grazing ray from glass to air: total internal reflection
-    const Vector3Df grazing = unit(1.0F, 0.0F, -0.2F);
-    ScatteringFrame::idealRefraction(grazing, UP, 1.5F, 1.0F, &totalInternalReflection);
+    const Vector3Dd grazing = unit(1.0, 0.0, -0.2);
+    ScatteringFrame::idealRefraction(grazing, UP, 1.5, 1.0, &totalInternalReflection);
     EXPECT_TRUE(totalInternalReflection);
 }
 
 TEST(PhongLobe, PureDiffuseEvaluatesToKdOverPiAndReflectsKd) {
-    const PhongLobe lobe(ColorRgb(0.6, 0.3, 0.15), ColorRgb(0.0, 0.0, 0.0), 0.0F);
-    const Vector3Df in = unit(0.2F, 0.1F, 1.0F);
-    const ColorRgb above = lobe.reflectionEvaluate(in, unit(0.5F, 0.5F, 0.7F), UP, ScatteringComponent::ALL);
+    const PhongLobe lobe(ColorRgb(0.6, 0.3, 0.15), ColorRgb(0.0, 0.0, 0.0), 0.0);
+    const Vector3Dd in = unit(0.2, 0.1, 1.0);
+    const ColorRgb above = lobe.reflectionEvaluate(in, unit(0.5, 0.5, 0.7), UP, ScatteringComponent::ALL);
     EXPECT_NEAR(0.6 / M_PI, above.getR(), 1e-12);
-    const ColorRgb below = lobe.reflectionEvaluate(in, unit(0.5F, 0.5F, -0.7F), UP, ScatteringComponent::ALL);
+    const ColorRgb below = lobe.reflectionEvaluate(in, unit(0.5, 0.5, -0.7), UP, ScatteringComponent::ALL);
     EXPECT_EQ(0.0, below.getR());
     // Integrated reflectance: E[f cos / p] over cosine samples
     const ScatteringFrame frame(UP);
@@ -82,7 +82,7 @@ TEST(PhongLobe, PureDiffuseEvaluatesToKdOverPiAndReflectsKd) {
     const unsigned int n = 4096;
     for ( unsigned int i = 0; i < n; i++ ) {
         double density;
-        const Vector3Df out = frame.sampleCosine((i + 0.5) / n, radicalInverse(i), &density);
+        const Vector3Dd out = frame.sampleCosine((i + 0.5) / n, radicalInverse(i), &density);
         sum += lobe.reflectionEvaluate(in, out, UP, ScatteringComponent::ALL).getR()
             * scatteringArithmetic::dot(out, UP) / density;
     }
@@ -91,9 +91,9 @@ TEST(PhongLobe, PureDiffuseEvaluatesToKdOverPiAndReflectsKd) {
 
 TEST(PhongLobe, GlossyEvaluationAndSamplingUseTheirOwnNormalizations) {
     // Evaluation peaks at Ks (Ns + 2) / (2 pi); the sampled density at (Ns + 1) / (2 pi)
-    const float ns = 20.0F;
+    const double ns = 20.0;
     const PhongLobe lobe(ColorRgb(0.0, 0.0, 0.0), ColorRgb(0.5, 0.5, 0.5), ns);
-    const Vector3Df in = UP;
+    const Vector3Dd in = UP;
     const ColorRgb peak = lobe.reflectionEvaluate(in, UP, UP, ScatteringComponent::GLOSSY);
     EXPECT_NEAR(0.5 * (ns + 2.0) / (2.0 * M_PI), peak.getR(), 1e-5);
     double density;
@@ -107,7 +107,7 @@ TEST(PhongLobe, GlossyEvaluationAndSamplingUseTheirOwnNormalizations) {
     const unsigned int n = 1 << 16;
     for ( unsigned int i = 0; i < n; i++ ) {
         double cosineDensity;
-        const Vector3Df out = frame.sampleCosine((i + 0.5) / n, radicalInverse(i), &cosineDensity);
+        const Vector3Dd out = frame.sampleCosine((i + 0.5) / n, radicalInverse(i), &cosineDensity);
         lobe.reflectionDensity(in, out, UP, ScatteringComponent::GLOSSY, &density, &survival);
         integral += density / cosineDensity;
     }
@@ -115,12 +115,12 @@ TEST(PhongLobe, GlossyEvaluationAndSamplingUseTheirOwnNormalizations) {
 }
 
 TEST(PhongLobe, SampledDensityMatchesTheIndependentDensity) {
-    const PhongLobe mixture(ColorRgb(0.4, 0.3, 0.2), ColorRgb(0.2, 0.2, 0.2), 12.0F);
-    const Vector3Df in = unit(0.4F, -0.3F, 0.8F);
+    const PhongLobe mixture(ColorRgb(0.4, 0.3, 0.2), ColorRgb(0.2, 0.2, 0.2), 12.0);
+    const Vector3Dd in = unit(0.4, -0.3, 0.8);
     int produced = 0;
     for ( unsigned int i = 0; i < 512; i++ ) {
         double sampled;
-        const Vector3Df out = mixture.reflectionSample(
+        const Vector3Dd out = mixture.reflectionSample(
             in, UP, false, ScatteringComponent::ALL, (i + 0.5) / 512.0, radicalInverse(i), &sampled);
         if ( sampled == 0.0 ) {
             continue;
@@ -135,57 +135,57 @@ TEST(PhongLobe, SampledDensityMatchesTheIndependentDensity) {
 }
 
 TEST(PhongLobe, RouletteAbsorbsAndDisabledComponentsSampleNothing) {
-    const PhongLobe lobe(ColorRgb(0.3, 0.3, 0.3), ColorRgb(0.0, 0.0, 0.0), 0.0F);
-    const Vector3Df in = UP;
+    const PhongLobe lobe(ColorRgb(0.3, 0.3, 0.3), ColorRgb(0.0, 0.0, 0.0), 0.0);
+    const Vector3Dd in = UP;
     double density;
     // Survival probability 0.3: a first variate above it is absorbed
     lobe.reflectionSample(in, UP, true, ScatteringComponent::ALL, 0.5, 0.5, &density);
     EXPECT_EQ(0.0, density);
     // Below it the direction survives and the density is not divided by the survival
-    const Vector3Df out = lobe.reflectionSample(in, UP, true, ScatteringComponent::ALL, 0.15, 0.5, &density);
+    const Vector3Dd out = lobe.reflectionSample(in, UP, true, ScatteringComponent::ALL, 0.15, 0.5, &density);
     EXPECT_NEAR(0.3 * scatteringArithmetic::dot(out, UP) / M_PI, density, 1e-6);
     // Requested component absent: nothing scattered
     lobe.reflectionSample(in, UP, false, ScatteringComponent::GLOSSY, 0.1, 0.5, &density);
     EXPECT_EQ(0.0, density);
     // Zero power lobe
-    const PhongLobe black(ColorRgb(0.0, 0.0, 0.0), ColorRgb(0.0, 0.0, 0.0), 0.0F);
+    const PhongLobe black(ColorRgb(0.0, 0.0, 0.0), ColorRgb(0.0, 0.0, 0.0), 0.0);
     black.reflectionSample(in, UP, false, ScatteringComponent::ALL, 0.1, 0.5, &density);
     EXPECT_EQ(0.0, density);
 }
 
 TEST(PhongLobe, DiffuseTransmissionCrossesTheSurface) {
-    const PhongLobe lobe(ColorRgb(0.5, 0.5, 0.5), ColorRgb(0.0, 0.0, 0.0), 0.0F);
-    const Vector3Df in = UP;
-    EXPECT_NEAR(0.5 / M_PI, lobe.transmissionEvaluate(1.0F, 1.5F, in, unit(0.1F, 0.0F, -1.0F), UP,
+    const PhongLobe lobe(ColorRgb(0.5, 0.5, 0.5), ColorRgb(0.0, 0.0, 0.0), 0.0);
+    const Vector3Dd in = UP;
+    EXPECT_NEAR(0.5 / M_PI, lobe.transmissionEvaluate(1.0, 1.5, in, unit(0.1, 0.0, -1.0), UP,
         ScatteringComponent::ALL).getR(), 1e-12);
-    EXPECT_EQ(0.0, lobe.transmissionEvaluate(1.0F, 1.5F, in, unit(0.1F, 0.0F, 1.0F), UP,
+    EXPECT_EQ(0.0, lobe.transmissionEvaluate(1.0, 1.5, in, unit(0.1, 0.0, 1.0), UP,
         ScatteringComponent::ALL).getR());
     double density;
-    const Vector3Df out = lobe.transmissionSample(1.0F, 1.5F, in, UP, false, ScatteringComponent::ALL, 0.3, 0.6, &density);
-    EXPECT_LT(scatteringArithmetic::dot(out, UP), 0.0F);
+    const Vector3Dd out = lobe.transmissionSample(1.0, 1.5, in, UP, false, ScatteringComponent::ALL, 0.3, 0.6, &density);
+    EXPECT_LT(scatteringArithmetic::dot(out, UP), 0.0);
     double independent;
     double survival;
-    lobe.transmissionDensity(1.0F, 1.5F, in, out, UP, ScatteringComponent::ALL, &independent, &survival);
+    lobe.transmissionDensity(1.0, 1.5, in, out, UP, ScatteringComponent::ALL, &independent, &survival);
     EXPECT_NEAR(density, -independent, 1e-6);  // RenderPark's diffuse transmission density is negative
 }
 
 TEST(PhongMaterial, SampledScatteringDensityMatchesScatteringDensity) {
     const PhongMaterial glass(
         "glass",
-        new PhongLobe(ColorRgb(0.3, 0.3, 0.3), ColorRgb(0.2, 0.2, 0.2), 30.0F),
-        new PhongLobe(ColorRgb(0.0, 0.0, 0.0), ColorRgb(0.4, 0.4, 0.4), 30.0F),
-        nullptr, nullptr, false, 1.5F, 0.0F);
+        new PhongLobe(ColorRgb(0.3, 0.3, 0.3), ColorRgb(0.2, 0.2, 0.2), 30.0),
+        new PhongLobe(ColorRgb(0.0, 0.0, 0.0), ColorRgb(0.4, 0.4, 0.4), 30.0),
+        nullptr, nullptr, false, 1.5, 0.0);
     const PhongMaterial air("air", nullptr, nullptr, nullptr, nullptr, false);
-    EXPECT_FLOAT_EQ(1.5F, glass.getRefractionIndex());
-    EXPECT_FLOAT_EQ(1.0F, air.getRefractionIndex());
+    EXPECT_FLOAT_EQ(1.5, glass.getRefractionIndex());
+    EXPECT_FLOAT_EQ(1.0, air.getRefractionIndex());
     const SurfaceShadingPoint point = pointWithNormal(UP);
-    const Vector3Df in = unit(0.3F, 0.2F, 0.9F);
+    const Vector3Dd in = unit(0.3, 0.2, 0.9);
     const int all = ScatteringComponent::REFLECTION_DIFFUSE | ScatteringComponent::REFLECTION_GLOSSY
         | ScatteringComponent::TRANSMISSION_GLOSSY;
     int produced = 0;
     for ( unsigned int i = 0; i < 512; i++ ) {
         double sampled;
-        const Vector3Df out = glass.scatteringSample(
+        const Vector3Dd out = glass.scatteringSample(
             point, &air, &glass, in, false, all, (i + 0.5) / 512.0, radicalInverse(i), &sampled);
         if ( sampled == 0.0 ) {
             continue;
@@ -203,11 +203,11 @@ TEST(PhongMaterial, SampledScatteringDensityMatchesScatteringDensity) {
 TEST(PhongMaterial, ComponentsSumToTheWholeEvaluation) {
     const PhongMaterial material(
         "plastic",
-        new PhongLobe(ColorRgb(0.5, 0.4, 0.3), ColorRgb(0.2, 0.2, 0.2), 8.0F),
+        new PhongLobe(ColorRgb(0.5, 0.4, 0.3), ColorRgb(0.2, 0.2, 0.2), 8.0),
         nullptr, nullptr, nullptr, false);
     const SurfaceShadingPoint point = pointWithNormal(UP);
-    const Vector3Df in = unit(0.2F, 0.0F, 1.0F);
-    const Vector3Df out = unit(0.25F, 0.05F, 1.0F);
+    const Vector3Dd in = unit(0.2, 0.0, 1.0);
+    const Vector3Dd out = unit(0.25, 0.05, 1.0);
     ColorRgb parts[6];
     const ColorRgb sum = material.scatteringEvaluateComponents(
         point, nullptr, nullptr, in, out, ScatteringComponent::REFLECTION_DIFFUSE | ScatteringComponent::REFLECTION_GLOSSY, parts);
@@ -221,16 +221,16 @@ TEST(PhongMaterial, ComponentsSumToTheWholeEvaluation) {
 TEST(PhongMaterial, DiffuseEmission) {
     const PhongMaterial lamp(
         "lamp", nullptr, nullptr,
-        new PhongLobe(ColorRgb(10.0, 10.0, 10.0), ColorRgb(0.0, 0.0, 0.0), 0.0F),
+        new PhongLobe(ColorRgb(10.0, 10.0, 10.0), ColorRgb(0.0, 0.0, 0.0), 0.0),
         nullptr, false);
     const SurfaceShadingPoint point = pointWithNormal(UP);
     double density;
-    const ColorRgb radiance = lamp.emissionEvaluate(&point, unit(0.0F, 0.6F, 0.8F), ScatteringComponent::DIFFUSE, &density);
+    const ColorRgb radiance = lamp.emissionEvaluate(&point, unit(0.0, 0.6, 0.8), ScatteringComponent::DIFFUSE, &density);
     EXPECT_NEAR(10.0 / M_PI, radiance.getR(), 1e-5);
     EXPECT_NEAR(0.8 / M_PI, density, 1e-6);
-    EXPECT_EQ(0.0, lamp.emissionEvaluate(&point, unit(0.0F, 0.6F, -0.8F), ScatteringComponent::DIFFUSE, &density).getR());
+    EXPECT_EQ(0.0, lamp.emissionEvaluate(&point, unit(0.0, 0.6, -0.8), ScatteringComponent::DIFFUSE, &density).getR());
     ColorRgb sampledRadiance;
-    const Vector3Df out = lamp.emissionSample(&point, ScatteringComponent::DIFFUSE, 0.25, 0.5, &sampledRadiance, &density);
+    const Vector3Dd out = lamp.emissionSample(&point, ScatteringComponent::DIFFUSE, 0.25, 0.5, &sampledRadiance, &density);
     EXPECT_NEAR(scatteringArithmetic::dot(out, UP) / M_PI, density, 1e-6);
     EXPECT_NEAR(radiance.getR(), sampledRadiance.getR(), 1e-12);
 }

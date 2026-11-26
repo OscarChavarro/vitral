@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+
 #include "java/util/ArrayList.txx"
+#include "java/util/TreeMap.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.h"

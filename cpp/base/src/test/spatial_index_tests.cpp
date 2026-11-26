@@ -36,12 +36,12 @@ class Scene {
     java::ArrayList<double> boxes;
 
   public:
-    void add(const Vector3Df &a, const Vector3Df &b, const Vector3Df &c)
+    void add(const Vector3Dd &a, const Vector3Dd &b, const Vector3Dd &c)
     {
-        const Vector3Df p[3] = {a, b, c};
+        const Vector3Dd p[3] = {a, b, c};
         faces.push_back(PlanarFace(3, p));
         const double padding = 1e-4;
-        const Vector3Df *v[3] = {&a, &b, &c};
+        const Vector3Dd *v[3] = {&a, &b, &c};
         double lo[3] = {1e30, 1e30, 1e30};
         double hi[3] = {-1e30, -1e30, -1e30};
         for ( int i = 0; i < 3; i++ ) {
@@ -81,12 +81,12 @@ randomTriangles(const int count, const unsigned int seed)
     Scene scene;
     Sequence s(seed);
     for ( int i = 0; i < count; i++ ) {
-        const float cx = static_cast<float>(10.0 * s.next());
-        const float cy = static_cast<float>(10.0 * s.next());
-        const float cz = static_cast<float>(10.0 * s.next());
-        const Vector3Df a(cx, cy, cz);
-        const Vector3Df b(cx + static_cast<float>(s.next()), cy + static_cast<float>(0.2 * s.next()), cz + static_cast<float>(0.5 * s.next()));
-        const Vector3Df c(cx + static_cast<float>(0.3 * s.next()), cy + static_cast<float>(s.next()), cz + static_cast<float>(0.4 * s.next()));
+        const double cx = static_cast<double>(10.0 * s.next());
+        const double cy = static_cast<double>(10.0 * s.next());
+        const double cz = static_cast<double>(10.0 * s.next());
+        const Vector3Dd a(cx, cy, cz);
+        const Vector3Dd b(cx + static_cast<double>(s.next()), cy + static_cast<double>(0.2 * s.next()), cz + static_cast<double>(0.5 * s.next()));
+        const Vector3Dd c(cx + static_cast<double>(0.3 * s.next()), cy + static_cast<double>(s.next()), cz + static_cast<double>(0.4 * s.next()));
         scene.add(a, b, c);
     }
     return scene;
@@ -98,13 +98,13 @@ randomTriangles(const int count, const unsigned int seed)
 class FaceRayTest final : public PrimitiveRayTest {
   private:
     const Scene &scene;
-    const Vector3Df origin;
-    const Vector3Df direction;
+    const Vector3Dd origin;
+    const Vector3Dd direction;
     const int excluded;
     int acceptedPrimitive;
 
   public:
-    FaceRayTest(const Scene &inScene, const Vector3Df &inOrigin, const Vector3Df &inDirection, const int inExcluded = -1) :
+    FaceRayTest(const Scene &inScene, const Vector3Dd &inOrigin, const Vector3Dd &inDirection, const int inExcluded = -1) :
         scene(inScene), origin(inOrigin), direction(inDirection), excluded(inExcluded), acceptedPrimitive(-1)
     {
     }
@@ -116,7 +116,7 @@ class FaceRayTest final : public PrimitiveRayTest {
         }
         PlanarFace::RayHit hit;
         if ( !scene.face(primitive).rayHit(origin, direction, true, true,
-                static_cast<float>(minimumT), static_cast<float>(maximumT), &hit) ) {
+                static_cast<double>(minimumT), static_cast<double>(maximumT), &hit) ) {
             return false;
         }
         const double t = hit.getDistance();
@@ -130,7 +130,7 @@ class FaceRayTest final : public PrimitiveRayTest {
 };
 
 Ray
-affineRay(const Vector3Df &origin, const Vector3Df &direction)
+affineRay(const Vector3Dd &origin, const Vector3Dd &direction)
 {
     return Ray::fromAffine(Vector3Dd(origin.x(), origin.y(), origin.z()),
         Vector3Dd(direction.x(), direction.y(), direction.z()));
@@ -143,7 +143,7 @@ struct Answer {
 };
 
 Answer
-ask(const SpatialIndex &index, const Scene &scene, const Vector3Df &origin, const Vector3Df &direction,
+ask(const SpatialIndex &index, const Scene &scene, const Vector3Dd &origin, const Vector3Dd &direction,
     const double minimumT, const double maximumT, const SpatialQueryMode mode,
     SpatialIndexWorkspace &workspace, const int excluded = -1)
 {
@@ -157,11 +157,11 @@ ask(const SpatialIndex &index, const Scene &scene, const Vector3Df &origin, cons
 }
 
 void
-randomRay(Sequence &s, Vector3Df *origin, Vector3Df *direction)
+randomRay(Sequence &s, Vector3Dd *origin, Vector3Dd *direction)
 {
-    *origin = Vector3Df(static_cast<float>(-2.0 + 14.0 * s.next()), static_cast<float>(-2.0 + 14.0 * s.next()), static_cast<float>(-2.0 + 14.0 * s.next()));
+    *origin = Vector3Dd(static_cast<double>(-2.0 + 14.0 * s.next()), static_cast<double>(-2.0 + 14.0 * s.next()), static_cast<double>(-2.0 + 14.0 * s.next()));
     // Not normalized: the index works with the affine parameter of the test
-    *direction = Vector3Df(static_cast<float>(-1.0 + 2.0 * s.next()), static_cast<float>(-1.0 + 2.0 * s.next()), static_cast<float>(-1.0 + 2.0 * s.next()));
+    *direction = Vector3Dd(static_cast<double>(-1.0 + 2.0 * s.next()), static_cast<double>(-1.0 + 2.0 * s.next()), static_cast<double>(-1.0 + 2.0 * s.next()));
 }
 
 // Union of the boxes of primitives first .. last
@@ -203,19 +203,19 @@ class ClusteredScene {
             const double cy = 10.0 * s.next();
             const double cz = 10.0 * s.next();
             for ( int i = 0; i < count; i++ ) {
-                const float x = static_cast<float>(cx + 0.4 * s.next());
-                const float y = static_cast<float>(cy + 0.4 * s.next());
-                const float z = static_cast<float>(cz + 0.4 * s.next());
-                scene.add(Vector3Df(x, y, z),
-                    Vector3Df(x + static_cast<float>(0.2 * s.next()), y + static_cast<float>(0.05 * s.next()), z + static_cast<float>(0.1 * s.next())),
-                    Vector3Df(x + static_cast<float>(0.05 * s.next()), y + static_cast<float>(0.2 * s.next()), z + static_cast<float>(0.1 * s.next())));
+                const double x = static_cast<double>(cx + 0.4 * s.next());
+                const double y = static_cast<double>(cy + 0.4 * s.next());
+                const double z = static_cast<double>(cz + 0.4 * s.next());
+                scene.add(Vector3Dd(x, y, z),
+                    Vector3Dd(x + static_cast<double>(0.2 * s.next()), y + static_cast<double>(0.05 * s.next()), z + static_cast<double>(0.1 * s.next())),
+                    Vector3Dd(x + static_cast<double>(0.05 * s.next()), y + static_cast<double>(0.2 * s.next()), z + static_cast<double>(0.1 * s.next())));
             }
         }
         clusterFirst.add(scene.size());
         const int firstLarge = scene.size();
         for ( int i = 0; i < 6; i++ ) {
-            const float z = static_cast<float>(10.0 * s.next());
-            scene.add(Vector3Df(-1.0F, -1.0F, z), Vector3Df(11.0F, -1.0F, z + 0.5F), Vector3Df(5.0F, 11.0F, z - 0.5F));
+            const double z = static_cast<double>(10.0 * s.next());
+            scene.add(Vector3Dd(-1.0, -1.0, z), Vector3Dd(11.0, -1.0, z + 0.5), Vector3Dd(5.0, 11.0, z - 0.5));
         }
 
         double box[6];
@@ -264,8 +264,8 @@ TEST(SpatialIndex, ClosestHitAgreesWithTheLinearReference)
     Sequence s(11U);
     int hits = 0;
     for ( int i = 0; i < 2000; i++ ) {
-        Vector3Df origin;
-        Vector3Df direction;
+        Vector3Dd origin;
+        Vector3Dd direction;
         randomRay(s, &origin, &direction);
         const Answer a = ask(linear, scene, origin, direction, 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, linearWorkspace);
         const Answer b = ask(binned, scene, origin, direction, 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, binnedWorkspace);
@@ -291,8 +291,8 @@ TEST(SpatialIndex, AnyHitAgreesOnVisibility)
     SpatialIndexWorkspace workspace;
     Sequence s(5U);
     for ( int i = 0; i < 2000; i++ ) {
-        Vector3Df origin;
-        Vector3Df direction;
+        Vector3Dd origin;
+        Vector3Dd direction;
         randomRay(s, &origin, &direction);
         // A segment: visibility between two points, as a shadow ray
         const Answer a = ask(linear, scene, origin, direction, 1e-3, 1.0, SpatialQueryMode::ANY_HIT, workspace);
@@ -311,17 +311,17 @@ TEST(SpatialIndex, AnyHitStopsAtTheFirstAcceptedBlocker)
     // A stack of parallel squares (two triangles each) along the ray
     Scene scene;
     for ( int k = 0; k < 10; k++ ) {
-        const float z = static_cast<float>(k + 1);
-        scene.add(Vector3Df(-1, -1, z), Vector3Df(1, -1, z), Vector3Df(1, 1, z));
-        scene.add(Vector3Df(-1, -1, z), Vector3Df(1, 1, z), Vector3Df(-1, 1, z));
+        const double z = static_cast<double>(k + 1);
+        scene.add(Vector3Dd(-1, -1, z), Vector3Dd(1, -1, z), Vector3Dd(1, 1, z));
+        scene.add(Vector3Dd(-1, -1, z), Vector3Dd(1, 1, z), Vector3Dd(-1, 1, z));
     }
     const LinearSpatialIndex linear(scene.size());
     SpatialIndexWorkspace workspace;
-    const Answer any = ask(linear, scene, Vector3Df(0.1F, 0.2F, 0), Vector3Df(0, 0, 1), 0.0, 100.0, SpatialQueryMode::ANY_HIT, workspace);
+    const Answer any = ask(linear, scene, Vector3Dd(0.1, 0.2, 0), Vector3Dd(0, 0, 1), 0.0, 100.0, SpatialQueryMode::ANY_HIT, workspace);
     ASSERT_TRUE(any.hit);
     const long int anyTests = workspace.getPrimitiveTests();
     workspace.clearCounters();
-    const Answer closest = ask(linear, scene, Vector3Df(0.1F, 0.2F, 0), Vector3Df(0, 0, 1), 0.0, 100.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    const Answer closest = ask(linear, scene, Vector3Dd(0.1, 0.2, 0), Vector3Dd(0, 0, 1), 0.0, 100.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(closest.hit);
     EXPECT_DOUBLE_EQ(1.0, closest.parameter);
     EXPECT_LT(anyTests, workspace.getPrimitiveTests());
@@ -330,12 +330,12 @@ TEST(SpatialIndex, AnyHitStopsAtTheFirstAcceptedBlocker)
 TEST(SpatialIndex, MinimumAndMaximumParametersAreInclusiveAndApplied)
 {
     Scene scene;
-    scene.add(Vector3Df(-1, -1, 1), Vector3Df(1, -1, 1), Vector3Df(0, 1, 1)); // t = 1
-    scene.add(Vector3Df(-1, -1, 3), Vector3Df(1, -1, 3), Vector3Df(0, 1, 3)); // t = 3
+    scene.add(Vector3Dd(-1, -1, 1), Vector3Dd(1, -1, 1), Vector3Dd(0, 1, 1)); // t = 1
+    scene.add(Vector3Dd(-1, -1, 3), Vector3Dd(1, -1, 3), Vector3Dd(0, 1, 3)); // t = 3
     const BinnedSahSpatialIndex binned(scene.getBoxes(), java::ArrayList<int>());
     SpatialIndexWorkspace workspace;
-    const Vector3Df origin(0, 0, 0);
-    const Vector3Df up(0, 0, 1);
+    const Vector3Dd origin(0, 0, 0);
+    const Vector3Dd up(0, 0, 1);
     // A blocker closer than the minimum is not accepted; the next one is
     Answer a = ask(binned, scene, origin, up, 1.5, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(a.hit);
@@ -353,15 +353,15 @@ TEST(SpatialIndex, MinimumAndMaximumParametersAreInclusiveAndApplied)
 TEST(SpatialIndex, ExcludedPrimitiveDoesNotHideTheOneBehind)
 {
     Scene scene;
-    scene.add(Vector3Df(-1, -1, 1), Vector3Df(1, -1, 1), Vector3Df(0, 1, 1));
-    scene.add(Vector3Df(-1, -1, 2), Vector3Df(1, -1, 2), Vector3Df(0, 1, 2));
+    scene.add(Vector3Dd(-1, -1, 1), Vector3Dd(1, -1, 1), Vector3Dd(0, 1, 1));
+    scene.add(Vector3Dd(-1, -1, 2), Vector3Dd(1, -1, 2), Vector3Dd(0, 1, 2));
     const LinearSpatialIndex linear(scene.size());
     const BinnedSahSpatialIndex binned(scene.getBoxes(), java::ArrayList<int>());
     SpatialIndexWorkspace workspace;
     for ( int m = 0; m < 2; m++ ) {
         const SpatialQueryMode mode = m == 0 ? SpatialQueryMode::CLOSEST_HIT : SpatialQueryMode::ANY_HIT;
-        const Answer a = ask(linear, scene, Vector3Df(0, 0, 0), Vector3Df(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
-        const Answer b = ask(binned, scene, Vector3Df(0, 0, 0), Vector3Df(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
+        const Answer a = ask(linear, scene, Vector3Dd(0, 0, 0), Vector3Dd(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
+        const Answer b = ask(binned, scene, Vector3Dd(0, 0, 0), Vector3Dd(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
         EXPECT_EQ(1, a.primitive);
         EXPECT_EQ(1, b.primitive);
     }
@@ -371,14 +371,14 @@ TEST(SpatialIndex, EqualParameterTiesFollowTheTestRule)
 {
     // Two triangles sharing an edge: a ray through the edge hits both at t = 1
     Scene scene;
-    scene.add(Vector3Df(-1, -1, 1), Vector3Df(1, -1, 1), Vector3Df(0, 1, 1));
-    scene.add(Vector3Df(-1, -1, 1), Vector3Df(0, 1, 1), Vector3Df(-2, 1, 1));
+    scene.add(Vector3Dd(-1, -1, 1), Vector3Dd(1, -1, 1), Vector3Dd(0, 1, 1));
+    scene.add(Vector3Dd(-1, -1, 1), Vector3Dd(0, 1, 1), Vector3Dd(-2, 1, 1));
     const LinearSpatialIndex linear(scene.size());
     const BinnedSahSpatialIndex binned(scene.getBoxes(), java::ArrayList<int>(), 1);
     SpatialIndexWorkspace workspace;
-    const Vector3Df origin(-0.5F, 0.0F, 0.0F);
-    const Answer a = ask(linear, scene, origin, Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
-    const Answer b = ask(binned, scene, origin, Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    const Vector3Dd origin(-0.5, 0.0, 0.0);
+    const Answer a = ask(linear, scene, origin, Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    const Answer b = ask(binned, scene, origin, Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(a.hit);
     ASSERT_TRUE(b.hit);
     EXPECT_EQ(a.primitive, b.primitive);
@@ -388,14 +388,14 @@ TEST(SpatialIndex, EqualParameterTiesFollowTheTestRule)
 TEST(SpatialIndex, UnboundedPrimitivesAreAlwaysTested)
 {
     Scene scene;
-    scene.add(Vector3Df(-1, -1, 5), Vector3Df(1, -1, 5), Vector3Df(0, 1, 5));
-    scene.add(Vector3Df(-100, -100, 2), Vector3Df(100, -100, 2), Vector3Df(0, 100, 2));
+    scene.add(Vector3Dd(-1, -1, 5), Vector3Dd(1, -1, 5), Vector3Dd(0, 1, 5));
+    scene.add(Vector3Dd(-100, -100, 2), Vector3Dd(100, -100, 2), Vector3Dd(0, 100, 2));
     java::ArrayList<int> unboundedPrimitives;
     unboundedPrimitives.add(1);
     // Primitive 1 is unbounded: its box (which would contain it) is ignored
     const BinnedSahSpatialIndex binned(scene.getBoxes(), unboundedPrimitives);
     SpatialIndexWorkspace workspace;
-    const Answer a = ask(binned, scene, Vector3Df(0, 0, 0), Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    const Answer a = ask(binned, scene, Vector3Dd(0, 0, 0), Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(a.hit);
     EXPECT_EQ(1, a.primitive);
     EXPECT_DOUBLE_EQ(2.0, a.parameter);
@@ -407,8 +407,8 @@ TEST(SpatialIndex, EmptyIndex)
     const LinearSpatialIndex linear(0);
     const BinnedSahSpatialIndex binned(scene.getBoxes(), java::ArrayList<int>());
     SpatialIndexWorkspace workspace;
-    EXPECT_FALSE(ask(linear, scene, Vector3Df(0, 0, 0), Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace).hit);
-    EXPECT_FALSE(ask(binned, scene, Vector3Df(0, 0, 0), Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::ANY_HIT, workspace).hit);
+    EXPECT_FALSE(ask(linear, scene, Vector3Dd(0, 0, 0), Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace).hit);
+    EXPECT_FALSE(ask(binned, scene, Vector3Dd(0, 0, 0), Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode::ANY_HIT, workspace).hit);
     EXPECT_EQ(0, workspace.getPrimitiveTests());
 }
 
@@ -420,8 +420,8 @@ TEST(SpatialIndex, QueriesWriteNoStaticStatistics)
     const long long before = RaytraceStatistics::getInstanceLevelTraversals();
     Sequence s(17U);
     for ( int i = 0; i < 100; i++ ) {
-        Vector3Df origin;
-        Vector3Df direction;
+        Vector3Dd origin;
+        Vector3Dd direction;
         randomRay(s, &origin, &direction);
         ask(binned, scene, origin, direction, 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, workspace);
     }
@@ -445,12 +445,12 @@ TEST(SpatialIndex, ConcurrentQueriesEqualSequentialOnes)
     const Scene scene = randomTriangles(300, 23U);
     const BinnedSahSpatialIndex binned(scene.getBoxes(), java::ArrayList<int>());
     const int numberOfRays = 4000;
-    std::vector<Vector3Df> origins;
-    std::vector<Vector3Df> directions;
+    std::vector<Vector3Dd> origins;
+    std::vector<Vector3Dd> directions;
     Sequence s(29U);
     for ( int i = 0; i < numberOfRays; i++ ) {
-        Vector3Df origin;
-        Vector3Df direction;
+        Vector3Dd origin;
+        Vector3Dd direction;
         randomRay(s, &origin, &direction);
         origins.push_back(origin);
         directions.push_back(direction);
@@ -512,8 +512,8 @@ TEST(GridSpatialIndex, ClosestHitAgreesWithTheLinearReference)
     Sequence s(41U);
     int hits = 0;
     for ( int i = 0; i < 3000; i++ ) {
-        Vector3Df origin;
-        Vector3Df direction;
+        Vector3Dd origin;
+        Vector3Dd direction;
         randomRay(s, &origin, &direction);
         const Answer a = ask(linear, scene, origin, direction, 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, linearWorkspace);
         const Answer b = ask(grid, scene, origin, direction, 0.0, 1e30, SpatialQueryMode::CLOSEST_HIT, gridWorkspace);
@@ -540,8 +540,8 @@ TEST(GridSpatialIndex, AnyHitAgreesOnVisibility)
     Sequence s(47U);
     int blocked = 0;
     for ( int i = 0; i < 3000; i++ ) {
-        Vector3Df origin;
-        Vector3Df direction;
+        Vector3Dd origin;
+        Vector3Dd direction;
         randomRay(s, &origin, &direction);
         const Answer a = ask(linear, scene, origin, direction, 1e-3, 1.0, SpatialQueryMode::ANY_HIT, linearWorkspace);
         const Answer b = ask(grid, scene, origin, direction, 1e-3, 1.0, SpatialQueryMode::ANY_HIT, gridWorkspace);
@@ -560,8 +560,8 @@ TEST(GridSpatialIndex, IntervalEndsAndExclusionsAreTheTestsOnes)
     // Two parallel triangles crossing the whole scene, in one group that does
     // not fit in a cell, so that they are items of their own
     Scene scene;
-    scene.add(Vector3Df(-1, -1, 1), Vector3Df(1, -1, 1), Vector3Df(0, 1, 1)); // t = 1
-    scene.add(Vector3Df(-1, -1, 3), Vector3Df(1, -1, 3), Vector3Df(0, 1, 3)); // t = 3
+    scene.add(Vector3Dd(-1, -1, 1), Vector3Dd(1, -1, 1), Vector3Dd(0, 1, 1)); // t = 1
+    scene.add(Vector3Dd(-1, -1, 3), Vector3Dd(1, -1, 3), Vector3Dd(0, 1, 3)); // t = 3
     double box[6];
     unionBox(scene, 0, 1, box);
     SpatialGroupTree tree(scene.getBoxes(), box);
@@ -569,8 +569,8 @@ TEST(GridSpatialIndex, IntervalEndsAndExclusionsAreTheTestsOnes)
     tree.addPrimitive(0, 1);
     const GridSpatialIndex grid(tree);
     SpatialIndexWorkspace workspace(grid.getWorkspaceSize());
-    const Vector3Df origin(0, 0, 0);
-    const Vector3Df up(0, 0, 1);
+    const Vector3Dd origin(0, 0, 0);
+    const Vector3Dd up(0, 0, 1);
     Answer a = ask(grid, scene, origin, up, 1.5, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(a.hit);
     EXPECT_EQ(1, a.primitive);
@@ -584,7 +584,7 @@ TEST(GridSpatialIndex, IntervalEndsAndExclusionsAreTheTestsOnes)
     a = ask(grid, scene, origin, up, 0.0, 10.0, SpatialQueryMode::ANY_HIT, workspace, 0);
     EXPECT_EQ(1, a.primitive);
     // A ray starting inside the scene box, along an axis
-    a = ask(grid, scene, Vector3Df(0.1F, 0.0F, 2.0F), Vector3Df(0, 0, -1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
+    a = ask(grid, scene, Vector3Dd(0.1, 0.0, 2.0), Vector3Dd(0, 0, -1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace);
     ASSERT_TRUE(a.hit);
     EXPECT_EQ(0, a.primitive);
 }
@@ -596,7 +596,7 @@ TEST(GridSpatialIndex, EmptyTree)
     const SpatialGroupTree tree(scene.getBoxes(), box);
     const GridSpatialIndex grid(tree);
     SpatialIndexWorkspace workspace(grid.getWorkspaceSize());
-    EXPECT_FALSE(ask(grid, scene, Vector3Df(0, 0, -1), Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace).hit);
+    EXPECT_FALSE(ask(grid, scene, Vector3Dd(0, 0, -1), Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode::CLOSEST_HIT, workspace).hit);
     EXPECT_EQ(0, workspace.getPrimitiveTests());
 }
 
@@ -606,12 +606,12 @@ TEST(GridSpatialIndex, ConcurrentQueriesEqualSequentialOnes)
     const Scene &scene = clustered.getScene();
     const GridSpatialIndex grid(clustered.getTree());
     const int numberOfRays = 4000;
-    std::vector<Vector3Df> origins;
-    std::vector<Vector3Df> directions;
+    std::vector<Vector3Dd> origins;
+    std::vector<Vector3Dd> directions;
     Sequence s(59U);
     for ( int i = 0; i < numberOfRays; i++ ) {
-        Vector3Df origin;
-        Vector3Df direction;
+        Vector3Dd origin;
+        Vector3Dd direction;
         randomRay(s, &origin, &direction);
         origins.push_back(origin);
         directions.push_back(direction);

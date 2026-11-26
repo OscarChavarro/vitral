@@ -10,25 +10,25 @@ namespace {
 
 PlanarFace
 triangle() {
-    const Vector3Df p[3] = {Vector3Df(0, 0, 0), Vector3Df(2, 0, 0), Vector3Df(0, 2, 0)};
+    const Vector3Dd p[3] = {Vector3Dd(0, 0, 0), Vector3Dd(2, 0, 0), Vector3Dd(0, 2, 0)};
     return PlanarFace(3, p);
 }
 
 PlanarFace
 square() {
-    const Vector3Df p[4] = {Vector3Df(0, 0, 1), Vector3Df(1, 0, 1), Vector3Df(1, 1, 1), Vector3Df(0, 1, 1)};
+    const Vector3Dd p[4] = {Vector3Dd(0, 0, 1), Vector3Dd(1, 0, 1), Vector3Dd(1, 1, 1), Vector3Dd(0, 1, 1)};
     return PlanarFace(4, p);
 }
 
 // A trapezoid: an irregular quadrilateral, whose Jacobian is not constant
 PlanarFace
 trapezoid() {
-    const Vector3Df p[4] = {Vector3Df(0, 0, 0), Vector3Df(4, 0, 0), Vector3Df(3, 2, 0), Vector3Df(1, 2, 0)};
+    const Vector3Dd p[4] = {Vector3Dd(0, 0, 0), Vector3Dd(4, 0, 0), Vector3Dd(3, 2, 0), Vector3Dd(1, 2, 0)};
     return PlanarFace(4, p);
 }
 
 void
-expectPoint(float x, float y, float z, const Vector3Df &p, float tolerance) {
+expectPoint(double x, double y, double z, const Vector3Dd &p, double tolerance) {
     EXPECT_NEAR(x, p.x(), tolerance);
     EXPECT_NEAR(y, p.y(), tolerance);
     EXPECT_NEAR(z, p.z(), tolerance);
@@ -44,35 +44,35 @@ TEST(PlanarFace, TriangleGeometry) {
     const PlanarFace face = triangle();
     ASSERT_TRUE(face.isValid());
     EXPECT_EQ(3, face.getNumberOfVertices());
-    EXPECT_FLOAT_EQ(2.0F, face.getArea());
-    expectPoint(0, 0, 1, face.getNormal(), 0.0F);
-    EXPECT_FLOAT_EQ(0.0F, face.getPlaneConstant());
+    EXPECT_FLOAT_EQ(2.0, face.getArea());
+    expectPoint(0, 0, 1, face.getNormal(), 0.0);
+    EXPECT_FLOAT_EQ(0.0, face.getPlaneConstant());
     EXPECT_EQ(2, face.getDominantAxis());
     EXPECT_FALSE(face.hasJacobian());
-    expectPoint(2.0F / 3.0F, 2.0F / 3.0F, 0, face.getMidPoint(), 1e-6F);
+    expectPoint(2.0 / 3.0, 2.0 / 3.0, 0, face.getMidPoint(), 1e-6);
 }
 
 TEST(PlanarFace, ParallelogramHasNoJacobian) {
     const PlanarFace face = square();
     ASSERT_TRUE(face.isValid());
-    EXPECT_FLOAT_EQ(1.0F, face.getArea());
+    EXPECT_FLOAT_EQ(1.0, face.getArea());
     EXPECT_FALSE(face.hasJacobian());
-    EXPECT_FLOAT_EQ(-1.0F, face.getPlaneConstant());
-    EXPECT_FLOAT_EQ(0.0F, face.planeDistance(Vector3Df(0.3F, 0.7F, 1.0F)));
+    EXPECT_FLOAT_EQ(-1.0, face.getPlaneConstant());
+    EXPECT_FLOAT_EQ(0.0, face.planeDistance(Vector3Dd(0.3, 0.7, 1.0)));
 }
 
 TEST(PlanarFace, IrregularQuadrilateralAreaAndJacobian) {
     const PlanarFace face = trapezoid();
     ASSERT_TRUE(face.isValid());
-    EXPECT_FLOAT_EQ(6.0F, face.getArea());
+    EXPECT_FLOAT_EQ(6.0, face.getArea());
     ASSERT_TRUE(face.hasJacobian());
-    EXPECT_FLOAT_EQ(face.getArea(), face.getJacobianA() + 0.5F * (face.getJacobianB() + face.getJacobianC()));
+    EXPECT_FLOAT_EQ(face.getArea(), face.getJacobianA() + 0.5 * (face.getJacobianB() + face.getJacobianC()));
 }
 
 TEST(PlanarFace, ParametersInvertTheMapping) {
     const PlanarFace faces[3] = {triangle(), square(), trapezoid()};
     for ( const PlanarFace &face : faces ) {
-        const Vector3Df p = face.pointAt(0.25, 0.375);
+        const Vector3Dd p = face.pointAt(0.25, 0.375);
         double u;
         double v;
         EXPECT_TRUE(face.parameters(p, &u, &v));
@@ -84,25 +84,25 @@ TEST(PlanarFace, ParametersInvertTheMapping) {
 TEST(PlanarFace, PointsOutsideAreReportedOutside) {
     double u;
     double v;
-    EXPECT_FALSE(triangle().parameters(Vector3Df(1.5F, 1.5F, 0), &u, &v));
-    EXPECT_FALSE(square().parameters(Vector3Df(1.5F, 0.5F, 1), &u, &v));
-    EXPECT_FALSE(trapezoid().parameters(Vector3Df(0.2F, 1.8F, 0), &u, &v));
+    EXPECT_FALSE(triangle().parameters(Vector3Dd(1.5, 1.5, 0), &u, &v));
+    EXPECT_FALSE(square().parameters(Vector3Dd(1.5, 0.5, 1), &u, &v));
+    EXPECT_FALSE(trapezoid().parameters(Vector3Dd(0.2, 1.8, 0), &u, &v));
 }
 
 TEST(PlanarFace, UniformMappingPreservesArea) {
     const PlanarFace face = trapezoid();
     // The line of uniform u = 0.5 splits the area in two equal halves: by
     // symmetry of the trapezoid it is the vertical line x = 2
-    const Vector3Df bottom = face.uniformPointAt(0.5, 0.0);
-    const Vector3Df top = face.uniformPointAt(0.5, 1.0);
-    EXPECT_NEAR(2.0F, bottom.x(), 1e-5F);
-    EXPECT_NEAR(2.0F, top.x(), 1e-5F);
+    const Vector3Dd bottom = face.uniformPointAt(0.5, 0.0);
+    const Vector3Dd top = face.uniformPointAt(0.5, 1.0);
+    EXPECT_NEAR(2.0, bottom.x(), 1e-5);
+    EXPECT_NEAR(2.0, top.x(), 1e-5);
 
     // The line of uniform v = 0.5 leaves half of the area (3) under it: the
     // trapezoid of height h under it has area (4 + (4 - h)) h / 2 = 3
-    const Vector3Df middle = face.uniformPointAt(0.5, 0.5);
-    const float h = 4.0F - static_cast<float>(java::Math::sqrt(10.0));
-    EXPECT_NEAR(h, middle.y(), 1e-5F);
+    const Vector3Dd middle = face.uniformPointAt(0.5, 0.5);
+    const double h = 4.0 - static_cast<double>(java::Math::sqrt(10.0));
+    EXPECT_NEAR(h, middle.y(), 1e-5);
 
     double u;
     double v;
@@ -113,57 +113,57 @@ TEST(PlanarFace, UniformMappingPreservesArea) {
 
 TEST(PlanarFace, RayHit) {
     const PlanarFace face = square();
-    const Vector3Df origin(0.5F, 0.25F, 3.0F);
+    const Vector3Dd origin(0.5, 0.25, 3.0);
 
-    float normalDotDirection;
-    EXPECT_EQ(PlanarFace::Side::FRONT, face.sideFacing(Vector3Df(0, 0, -1), &normalDotDirection));
-    const float t = face.planeHitParameter(origin, normalDotDirection);
-    EXPECT_FLOAT_EQ(2.0F, t);
+    double normalDotDirection;
+    EXPECT_EQ(PlanarFace::Side::FRONT, face.sideFacing(Vector3Dd(0, 0, -1), &normalDotDirection));
+    const double t = face.planeHitParameter(origin, normalDotDirection);
+    EXPECT_FLOAT_EQ(2.0, t);
 
     double u;
     double v;
-    EXPECT_TRUE(face.parameters(Vector3Df(0.5F, 0.25F, 1.0F), &u, &v));
+    EXPECT_TRUE(face.parameters(Vector3Dd(0.5, 0.25, 1.0), &u, &v));
     EXPECT_NEAR(0.5, u, 1e-6);
     EXPECT_NEAR(0.25, v, 1e-6);
 
-    EXPECT_EQ(PlanarFace::Side::BACK, face.sideFacing(Vector3Df(0, 0, 1), &normalDotDirection));
-    EXPECT_EQ(PlanarFace::Side::PARALLEL, face.sideFacing(Vector3Df(1, 0, 0), &normalDotDirection));
+    EXPECT_EQ(PlanarFace::Side::BACK, face.sideFacing(Vector3Dd(0, 0, 1), &normalDotDirection));
+    EXPECT_EQ(PlanarFace::Side::PARALLEL, face.sideFacing(Vector3Dd(1, 0, 0), &normalDotDirection));
 }
 
 TEST(PlanarFace, RayHitInOneCall) {
     const PlanarFace face = square();
-    const Vector3Df origin(0.5F, 0.25F, 3.0F);
-    const Vector3Df down(0, 0, -1);
+    const Vector3Dd origin(0.5, 0.25, 3.0);
+    const Vector3Dd down(0, 0, -1);
 
     PlanarFace::RayHit hit;
-    ASSERT_TRUE(face.rayHit(origin, down, true, false, 0.0F, 10.0F, &hit));
+    ASSERT_TRUE(face.rayHit(origin, down, true, false, 0.0, 10.0, &hit));
     EXPECT_EQ(PlanarFace::Side::FRONT, hit.getSide());
-    EXPECT_FLOAT_EQ(2.0F, hit.getDistance());
-    EXPECT_FLOAT_EQ(0.5F, hit.getPointX());
-    EXPECT_FLOAT_EQ(0.25F, hit.getPointY());
-    EXPECT_FLOAT_EQ(1.0F, hit.getPointZ());
+    EXPECT_FLOAT_EQ(2.0, hit.getDistance());
+    EXPECT_FLOAT_EQ(0.5, hit.getPointX());
+    EXPECT_FLOAT_EQ(0.25, hit.getPointY());
+    EXPECT_FLOAT_EQ(1.0, hit.getPointZ());
     EXPECT_NEAR(0.5, hit.getU(), 1e-6);
     EXPECT_NEAR(0.25, hit.getV(), 1e-6);
 
     // Same answers as the separate calls
-    float normalDotDirection;
+    double normalDotDirection;
     face.sideFacing(down, &normalDotDirection);
     EXPECT_EQ(face.planeHitParameter(origin, normalDotDirection), hit.getDistance());
 
-    EXPECT_FALSE(face.rayHit(origin, down, false, true, 0.0F, 10.0F, &hit));     // Front side not accepted
-    EXPECT_FALSE(face.rayHit(origin, down, true, false, 0.0F, 1.5F, &hit));      // Too far
-    EXPECT_FALSE(face.rayHit(origin, down, true, false, 2.5F, 10.0F, &hit));     // Too close
-    EXPECT_FALSE(face.rayHit(origin, Vector3Df(1, 0, 0), true, true, 0.0F, 10.0F, &hit)); // Parallel
-    EXPECT_FALSE(face.rayHit(Vector3Df(5.0F, 0.25F, 3.0F), down, true, false, 0.0F, 10.0F, &hit)); // Outside
+    EXPECT_FALSE(face.rayHit(origin, down, false, true, 0.0, 10.0, &hit));     // Front side not accepted
+    EXPECT_FALSE(face.rayHit(origin, down, true, false, 0.0, 1.5, &hit));      // Too far
+    EXPECT_FALSE(face.rayHit(origin, down, true, false, 2.5, 10.0, &hit));     // Too close
+    EXPECT_FALSE(face.rayHit(origin, Vector3Dd(1, 0, 0), true, true, 0.0, 10.0, &hit)); // Parallel
+    EXPECT_FALSE(face.rayHit(Vector3Dd(5.0, 0.25, 3.0), down, true, false, 0.0, 10.0, &hit)); // Outside
 
-    ASSERT_TRUE(face.rayHit(Vector3Df(0.5F, 0.25F, -1.0F), Vector3Df(0, 0, 1), false, true, 0.0F, 10.0F, &hit));
+    ASSERT_TRUE(face.rayHit(Vector3Dd(0.5, 0.25, -1.0), Vector3Dd(0, 0, 1), false, true, 0.0, 10.0, &hit));
     EXPECT_EQ(PlanarFace::Side::BACK, hit.getSide());
 }
 
 TEST(PlanarFace, Facing) {
-    const Vector3Df floor[4] = {Vector3Df(0, 0, 0), Vector3Df(1, 0, 0), Vector3Df(1, 1, 0), Vector3Df(0, 1, 0)};
-    const Vector3Df ceiling[4] = {Vector3Df(0, 0, 1), Vector3Df(0, 1, 1), Vector3Df(1, 1, 1), Vector3Df(1, 0, 1)};
-    const Vector3Df above[4] = {Vector3Df(0, 0, 2), Vector3Df(1, 0, 2), Vector3Df(1, 1, 2), Vector3Df(0, 1, 2)};
+    const Vector3Dd floor[4] = {Vector3Dd(0, 0, 0), Vector3Dd(1, 0, 0), Vector3Dd(1, 1, 0), Vector3Dd(0, 1, 0)};
+    const Vector3Dd ceiling[4] = {Vector3Dd(0, 0, 1), Vector3Dd(0, 1, 1), Vector3Dd(1, 1, 1), Vector3Dd(1, 0, 1)};
+    const Vector3Dd above[4] = {Vector3Dd(0, 0, 2), Vector3Dd(1, 0, 2), Vector3Dd(1, 1, 2), Vector3Dd(0, 1, 2)};
     const PlanarFace floorFace(4, floor);
     const PlanarFace ceilingFace(4, ceiling);
     const PlanarFace aboveFace(4, above);
@@ -173,9 +173,9 @@ TEST(PlanarFace, Facing) {
 }
 
 TEST(PlanarFace, InvalidFaces) {
-    const Vector3Df collinear[3] = {Vector3Df(0, 0, 0), Vector3Df(1, 0, 0), Vector3Df(2, 0, 0)};
+    const Vector3Dd collinear[3] = {Vector3Dd(0, 0, 0), Vector3Dd(1, 0, 0), Vector3Dd(2, 0, 0)};
     EXPECT_EQ(PlanarFace::BuildStatus::DEGENERATE_NORMAL, PlanarFace(3, collinear).getStatus());
-    const Vector3Df pentagon[5] = {Vector3Df(), Vector3Df(), Vector3Df(), Vector3Df(), Vector3Df()};
+    const Vector3Dd pentagon[5] = {Vector3Dd(), Vector3Dd(), Vector3Dd(), Vector3Dd(), Vector3Dd()};
     EXPECT_EQ(PlanarFace::BuildStatus::UNSUPPORTED_VERTEX_COUNT, PlanarFace(5, pentagon).getStatus());
     EXPECT_FALSE(PlanarFace().isValid());
 }
