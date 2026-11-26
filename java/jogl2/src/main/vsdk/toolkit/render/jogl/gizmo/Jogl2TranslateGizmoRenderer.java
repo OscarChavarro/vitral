@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.gizmo;
 
 // Java basic classes
 import java.util.ArrayList;
@@ -21,6 +21,12 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 
 public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer 
 {

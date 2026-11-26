@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 // Java basic classes
 import com.jogamp.opengl.GL;
@@ -8,6 +8,10 @@ import com.jogamp.opengl.GL2GL3;
 // VitralSDK classes
 import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
 import vsdk.toolkit.environment.material.RendererConfiguration;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 /**
  *

@@ -32,7 +32,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.render.awt.AwtFontReader;
-import vsdk.toolkit.render.jogl.Jogl2ParametricCurveRenderer;
+import vsdk.toolkit.render.jogl.curve.Jogl2ParametricCurveRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 
 public class GlyphExample extends JFrame implements 

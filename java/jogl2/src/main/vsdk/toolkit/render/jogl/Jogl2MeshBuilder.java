@@ -1,0 +1,239 @@
+package vsdk.toolkit.render.jogl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+
+/**
+Accumulates the triangles of a tessellated surface and builds a
+`Jogl2MeshRenderer.Mesh` from them. Unlike `Jogl4MeshBuilder`, no tangents
+nor binormals are built, as there is no bump mapping in the fixed function
+pipeline (as in the C++ `OpenGL1MeshBuilder`, counterpart of
+`OpenGL4MeshBuilder`).
+*/
+public final class Jogl2MeshBuilder {
+    private final List<float[]> vertices = new ArrayList<>();
+    private double characteristicSize;
+    private boolean doubleSided;
+
+    public Jogl2MeshBuilder(double characteristicSize)
+    {
+        this.characteristicSize = characteristicSize;
+    }
+
+    /**
+    Adds one triangle; vertices are given counterclockwise seen from the side
+    the normals point to.
+    */
+    public void addTriangle(
+        Vector3Dd p0, Vector3Dd n0, double u0, double v0,
+        Vector3Dd p1, Vector3Dd n1, double u1, double v1,
+        Vector3Dd p2, Vector3Dd n2, double u2, double v2)
+    {
+        addVertex(p0, n0, u0, v0);
+        addVertex(p1, n1, u1, v1);
+        addVertex(p2, n2, u2, v2);
+    }
+
+    /**
+    Adds a quad as two triangles; vertices are given counterclockwise seen from
+    the side the normals point to.
+    */
+    public void addQuad(
+        Vector3Dd p0, Vector3Dd n0, double u0, double v0,
+        Vector3Dd p1, Vector3Dd n1, double u1, double v1,
+        Vector3Dd p2, Vector3Dd n2, double u2, double v2,
+        Vector3Dd p3, Vector3Dd n3, double u3, double v3)
+    {
+        addTriangle(p0, n0, u0, v0, p1, n1, u1, v1, p2, n2, u2, v2);
+        addTriangle(p0, n0, u0, v0, p2, n2, u2, v2, p3, n3, u3, v3);
+    }
+
+    /**
+    Adds the side of a frustum of cone around the Z axis.
+
+    @param z0 height of the first ring
+    @param r0 radius of the first ring
+    @param z1 height of the second ring
+    @param r1 radius of the second ring
+    @param slices number of divisions around the axis
+    */
+    public void addFrustum(double z0, double r0, double z1, double r1, int slices)
+    {
+        double dz = z1 - z0;
+        double dr = r0 - r1;
+        double normalLength = Math.sqrt(dz * dz + dr * dr);
+
+        if ( normalLength < 1e-12 ) {
+            return;
+        }
+        double nz = dr / normalLength;
+        double nr = dz / normalLength;
+
+        for ( int i = 0; i < slices; i++ ) {
+            double a0 = 2 * Math.PI * i / slices;
+            double a1 = 2 * Math.PI * (i + 1) / slices;
+            double c0 = Math.cos(a0);
+            double s0 = Math.sin(a0);
+            double c1 = Math.cos(a1);
+            double s1 = Math.sin(a1);
+            Vector3Dd n0 = new Vector3Dd(nr * c0, nr * s0, nz);
+            Vector3Dd n1 = new Vector3Dd(nr * c1, nr * s1, nz);
+            double u0 = (double)i / slices;
+            double u1 = (double)(i + 1) / slices;
+
+            if ( r1 < 1e-12 ) {
+                Vector3Dd apex = new Vector3Dd(0, 0, z1);
+                Vector3Dd nApex = new Vector3Dd(nr * Math.cos((a0 + a1) / 2), nr * Math.sin((a0 + a1) / 2), nz);
+                addTriangle(
+                    new Vector3Dd(r0 * c0, r0 * s0, z0), n0, u0, 0,
+                    new Vector3Dd(r0 * c1, r0 * s1, z0), n1, u1, 0,
+                    apex, nApex, (u0 + u1) / 2, 1);
+            }
+            else {
+                addQuad(
+                    new Vector3Dd(r0 * c0, r0 * s0, z0), n0, u0, 0,
+                    new Vector3Dd(r0 * c1, r0 * s1, z0), n1, u1, 0,
+                    new Vector3Dd(r1 * c1, r1 * s1, z1), n1, u1, 1,
+                    new Vector3Dd(r1 * c0, r1 * s0, z1), n0, u0, 1);
+            }
+        }
+    }
+
+    /**
+    Adds a flat ring (or disk, when the inner radius is zero) perpendicular
+    to the Z axis.
+
+    @param z height of the ring
+    @param innerRadius inner radius
+    @param outerRadius outer radius
+    @param facingUp true if the normal is +Z, false for -Z
+    @param slices number of divisions around the axis
+    */
+    public void addDisk(double z, double innerRadius, double outerRadius, boolean facingUp, int slices)
+    {
+        Vector3Dd n = new Vector3Dd(0, 0, facingUp ? 1 : -1);
+
+        for ( int i = 0; i < slices; i++ ) {
+            double a0 = 2 * Math.PI * i / slices;
+            double a1 = 2 * Math.PI * (i + 1) / slices;
+            double c0 = Math.cos(a0);
+            double s0 = Math.sin(a0);
+            double c1 = Math.cos(a1);
+            double s1 = Math.sin(a1);
+            Vector3Dd o0 = new Vector3Dd(outerRadius * c0, outerRadius * s0, z);
+            Vector3Dd o1 = new Vector3Dd(outerRadius * c1, outerRadius * s1, z);
+            double uo0 = 0.5 + 0.5 * c0;
+            double vo0 = 0.5 + 0.5 * s0;
+            double uo1 = 0.5 + 0.5 * c1;
+            double vo1 = 0.5 + 0.5 * s1;
+
+            if ( innerRadius < 1e-12 ) {
+                Vector3Dd center = new Vector3Dd(0, 0, z);
+                if ( facingUp ) {
+                    addTriangle(center, n, 0.5, 0.5, o0, n, uo0, vo0, o1, n, uo1, vo1);
+                }
+                else {
+                    addTriangle(center, n, 0.5, 0.5, o1, n, uo1, vo1, o0, n, uo0, vo0);
+                }
+            }
+            else {
+                Vector3Dd i0 = new Vector3Dd(innerRadius * c0, innerRadius * s0, z);
+                Vector3Dd i1 = new Vector3Dd(innerRadius * c1, innerRadius * s1, z);
+                if ( facingUp ) {
+                    addQuad(i0, n, 0.5, 0.5, o0, n, uo0, vo0, o1, n, uo1, vo1, i1, n, 0.5, 0.5);
+                }
+                else {
+                    addQuad(i0, n, 0.5, 0.5, i1, n, 0.5, 0.5, o1, n, uo1, vo1, o0, n, uo0, vo0);
+                }
+            }
+        }
+    }
+
+    /**
+    @param minmax bounding box as given by `Geometry.getMinMax()`, or null
+    @return the longest side of the box (1 if there is no box), to be used as
+    the characteristic size of a mesh
+    */
+    public static double characteristicSize(double[] minmax)
+    {
+        double size = 1.0;
+        if ( minmax != null && minmax.length >= 6 ) {
+            size = Math.max(Math.abs(minmax[3] - minmax[0]),
+                Math.max(Math.abs(minmax[4] - minmax[1]), Math.abs(minmax[5] - minmax[2])));
+        }
+        return size;
+    }
+
+    private void addVertex(Vector3Dd p, Vector3Dd n, double u, double v)
+    {
+        Vector3Dd normal = n.normalized();
+
+        vertices.add(new float[] {
+            (float)p.x(), (float)p.y(), (float)p.z(),
+            (float)normal.x(), (float)normal.y(), (float)normal.z(),
+            (float)u, (float)v
+        });
+    }
+
+    /**
+    Makes the built mesh visible from both sides, as needed by open surfaces
+    (i.e. a patch or a height field): each triangle gets a back side copy with
+    the opposite winding and normals.
+    @param doubleSided true to add the back sides when building
+    */
+    public void setDoubleSided(boolean doubleSided)
+    {
+        this.doubleSided = doubleSided;
+    }
+
+    /**
+    @return a new mesh with the triangles added
+    */
+    public Jogl2MeshRenderer.Mesh build()
+    {
+        int frontCount = vertices.size();
+
+        if ( doubleSided ) {
+            addBackSides(frontCount);
+        }
+
+        int count = vertices.size();
+        float[] positions = new float[count * 3];
+        float[] normals = new float[count * 3];
+        float[] uvs = new float[count * 2];
+
+        for ( int i = 0; i < count; i++ ) {
+            float[] v = vertices.get(i);
+
+            System.arraycopy(v, 0, positions, i * 3, 3);
+            System.arraycopy(v, 3, normals, i * 3, 3);
+            System.arraycopy(v, 6, uvs, i * 2, 2);
+        }
+        Jogl2MeshRenderer.Mesh mesh = new Jogl2MeshRenderer.Mesh(positions,
+            normals, uvs, characteristicSize);
+
+        mesh.setFrontVertexCount(frontCount);
+        return mesh;
+    }
+
+    /**
+    Appends a back side copy of the first triangles: vertices in reverse order
+    and normals negated.
+    @param frontCount number of vertices of the front sides
+    */
+    private void addBackSides(int frontCount)
+    {
+        for ( int t = 0; t + 2 < frontCount; t += 3 ) {
+            for ( int k = 2; k >= 0; k-- ) {
+                float[] v = vertices.get(t + k).clone();
+
+                for ( int c = 3; c < 6; c++ ) {
+                    v[c] = -v[c];
+                }
+                vertices.add(v);
+            }
+        }
+    }
+}

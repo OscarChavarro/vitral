@@ -33,6 +33,7 @@ import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.Tube;
+import vsdk.toolkit.environment.geometry.volume.Prism;
 import vsdk.toolkit.environment.geometry.volume.Volume;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -59,6 +60,7 @@ import vsdk.toolkit.render.jogl.volume.Jogl4QuadricSurfaceRenderer;
 import vsdk.toolkit.render.jogl.volume.Jogl4SphereRenderer;
 import vsdk.toolkit.render.jogl.volume.Jogl4TorusRenderer;
 import vsdk.toolkit.render.jogl.volume.Jogl4TubeRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl4PrismRenderer;
 import vsdk.toolkit.render.jogl.volume.Jogl4VolumeRenderer;
 import vsdk.toolkit.render.jogl.volume.Jogl4VoxelVolumeRenderer;
 import vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
@@ -282,6 +284,9 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         if ( geometry instanceof Tube t ) {
             return Jogl4TubeRenderer.meshKey(t);
         }
+        if ( geometry instanceof Prism p ) {
+            return Jogl4PrismRenderer.meshKey(p);
+        }
         if ( geometry instanceof TriangleMesh m ) {
             return Jogl4TriangleMeshRenderer.meshKey(m);
         }
@@ -338,6 +343,9 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         }
         if ( geometry instanceof Tube t ) {
             return Jogl4TubeRenderer.buildMesh(t);
+        }
+        if ( geometry instanceof Prism p ) {
+            return Jogl4PrismRenderer.buildMesh(p);
         }
         if ( geometry instanceof TriangleMesh m ) {
             return Jogl4TriangleMeshRenderer.buildMesh(m);

@@ -501,22 +501,50 @@ public class Sphere extends Solid {
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         return buildPolyhedralBoundedSolid(DEFAULT_MERIDIANS,
-            DEFAULT_PARALLELS);
+            DEFAULT_PARALLELS, false);
     }
 
+    /**
+    Triangulated boundary representation of the sphere (see the three
+    parameter version, with `withQuadrilaterals` false).
+    @param meridians number of sectors around the Z axis (at least 3)
+    @param parallels number of bands from pole to pole (at least 2)
+    @return a new boundary representation
+    */
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(
         int meridians, int parallels)
+    {
+        return exportToPolyhedralBoundedSolid(meridians, parallels, false);
+    }
+
+    /**
+    Boundary representation of the sphere, centered at the origin with its
+    poles on the Z axis: `parallels` bands of equal latitude step between the
+    poles, each one cut into `meridians` sectors starting at +X. The bands
+    touching the poles are triangle fans; the faces of the other bands are
+    the planar quadrilaterals between two parallels and two meridians (two
+    points of each parallel, at the same longitudes).
+    @param meridians number of sectors around the Z axis (at least 3)
+    @param parallels number of bands from pole to pole (at least 2)
+    @param withQuadrilaterals false splits each quadrilateral by a diagonal
+    into two triangles, so every face is a triangle; true keeps the
+    quadrilaterals as faces
+    @return a new boundary representation
+    */
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(
+        int meridians, int parallels, boolean withQuadrilaterals)
     {
         int normalizedMeridians = Math.max(MIN_MERIDIANS, meridians);
         int normalizedParallels = Math.max(MIN_PARALLELS, parallels);
 
-        if ( normalizedMeridians == DEFAULT_MERIDIANS &&
+        if ( !withQuadrilaterals &&
+             normalizedMeridians == DEFAULT_MERIDIANS &&
              normalizedParallels == DEFAULT_PARALLELS ) {
             return exportToPolyhedralBoundedSolid();
         }
 
         return buildPolyhedralBoundedSolid(normalizedMeridians,
-            normalizedParallels);
+            normalizedParallels, withQuadrilaterals);
     }
 
     /**
@@ -539,7 +567,7 @@ public class Sphere extends Solid {
     {@code cos}/{@code sin} only in the latitude direction.</p>
     */
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid(
-        int nmeridians, int nparalels)
+        int nmeridians, int nparalels, boolean withQuadrilaterals)
     {
         double theta;
         double phi;
@@ -590,10 +618,10 @@ public class Sphere extends Solid {
         base1 = 2;
 
         //- Build triangulated side strips for sphere body ----------------
-        // Each spherical quad is split into two triangles immediately after
-        // creation via smef, adding a diagonal from TL corner to BR corner.
-        // Face IDs are tracked with a running counter to avoid conflicts with
-        // the doubled face count.
+        // Unless `withQuadrilaterals`, each spherical quad is split into two
+        // triangles immediately after creation via smef, adding a diagonal
+        // from TL corner to BR corner. Face IDs are tracked with a running
+        // counter to avoid conflicts with the doubled face count.
         int p;
         int nextFaceId = nmeridians + 2;
         for ( p = 0; p < nparalels-2; p++ ) {
@@ -605,7 +633,6 @@ public class Sphere extends Solid {
                 PolyhedralBoundedSolidEulerOperators.smev(solid, 1, (i)+base1, (i)+base2, pos);
                 if ( i > 0 ) {
                     int quadFaceId = nextFaceId++;
-                    int diagFaceId = nextFaceId++;
                     PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                               1,           /* seed face, always face 1 */
                               (i-1)+base2, /* start of half edge 1: TL */
@@ -613,16 +640,18 @@ public class Sphere extends Solid {
                               (i)+base2,   /* start of half edge 2: TR */
                               (i)+base1,   /* end of half edge 2: BR */
                               quadFaceId);
-                    // Split quad {TR,TL,BL,BR} into two triangles via TL→BR diagonal
-                    PolyhedralBoundedSolidEulerOperators.smef(solid, quadFaceId,
-                              (i-1)+base2, /* TL vertex */
-                              (i)+base1,   /* BR vertex */
-                              diagFaceId);
+                    if ( !withQuadrilaterals ) {
+                        int diagFaceId = nextFaceId++;
+                        // Split quad {TR,TL,BL,BR} into two triangles via TL→BR diagonal
+                        PolyhedralBoundedSolidEulerOperators.smef(solid, quadFaceId,
+                                  (i-1)+base2, /* TL vertex */
+                                  (i)+base1,   /* BR vertex */
+                                  diagFaceId);
+                    }
                 }
             }
             {
                 int quadFaceId = nextFaceId++;
-                int diagFaceId = nextFaceId++;
                 // Wrap-around quad: closes the ring from the last meridian back to the first
                 PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                           1,           /* seed face, always face 1 */
@@ -631,11 +660,14 @@ public class Sphere extends Solid {
                           (base2),     /* start of half edge 2 */
                           (base2+1),   /* end of half edge 2 */
                           quadFaceId);
-                // Split wrap-around quad via TL-last → BL-0 diagonal
-                PolyhedralBoundedSolidEulerOperators.smef(solid, quadFaceId,
-                          (i-1)+base2, /* TL-last vertex */
-                          base1,       /* BL-0 vertex (first old-parallel vertex) */
-                          diagFaceId);
+                if ( !withQuadrilaterals ) {
+                    int diagFaceId = nextFaceId++;
+                    // Split wrap-around quad via TL-last → BL-0 diagonal
+                    PolyhedralBoundedSolidEulerOperators.smef(solid, quadFaceId,
+                              (i-1)+base2, /* TL-last vertex */
+                              base1,       /* BL-0 vertex (first old-parallel vertex) */
+                              diagFaceId);
+                }
             }
             base1 = base2;
             base2 += nmeridians;

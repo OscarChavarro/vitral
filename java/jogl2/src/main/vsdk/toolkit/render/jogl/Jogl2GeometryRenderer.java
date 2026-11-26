@@ -1,7 +1,14 @@
 package vsdk.toolkit.render.jogl;
 
 // JOGL classes
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+
 import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GL2;
 import vsdk.toolkit.common.color.ColorRgb;
 
@@ -21,6 +28,8 @@ import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
+import vsdk.toolkit.environment.geometry.volume.Tube;
+import vsdk.toolkit.environment.geometry.volume.Prism;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
@@ -29,8 +38,35 @@ import vsdk.toolkit.environment.geometry.surface.TriangleStripMesh;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 
+import vsdk.toolkit.render.jogl.curve.Jogl2ParametricCurveRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2FunctionalExplicitSurfaceRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2InfinitePlaneRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2ParametricBiCubicPatchRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2QuadMeshRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2TriangleMeshGroupRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2TriangleMeshRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2TriangleStripMeshRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2ArrowRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2BoxRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2ConeRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2PrismRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2SphereRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2TorusRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2TubeRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2VoxelVolumeRenderer;
+import vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid.Jogl2PolyhedralBoundedSolidRenderer;
+
 public class Jogl2GeometryRenderer extends Jogl2Renderer 
 {
+    /// Meshes kept per context before the cache is flushed
+    private static final int MAX_CACHED_MESHES = 256;
+
+    /// Meshes of the mesh based renderers (see `keyOf`), by the context
+    /// that holds their display lists and by mesh key
+    private static final Map<GLContext, Map<String, Jogl2MeshRenderer.Mesh>>
+        MESHES = new WeakHashMap<GLContext, Map<String, Jogl2MeshRenderer.Mesh>>();
+    private static final Set<String> REPORTED_UNSUPPORTED = new HashSet<String>();
+
 
     public static void prepareSurfaceQuality(GL2 gl, RendererConfiguration quality)
     {
@@ -226,6 +262,12 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
         else if ( g instanceof Arrow ) {
             Jogl2ArrowRenderer.draw(gl, (Arrow)g, c, q);
         }
+        else if ( g instanceof Tube ) {
+            Jogl2TubeRenderer.draw(gl, (Tube)g, c, q);
+        }
+        else if ( g instanceof Prism ) {
+            Jogl2PrismRenderer.draw(gl, (Prism)g, c, q);
+        }
         else if ( g instanceof ParametricCurve ) {
             Jogl2ParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
         }
@@ -284,6 +326,12 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
         else if ( g instanceof Arrow ) {
             Jogl2ArrowRenderer.draw(gl, (Arrow)g, c, q);
         }
+        else if ( g instanceof Tube ) {
+            Jogl2TubeRenderer.draw(gl, (Tube)g, c, q);
+        }
+        else if ( g instanceof Prism ) {
+            Jogl2PrismRenderer.draw(gl, (Prism)g, c, q);
+        }
         else if ( g instanceof ParametricCurve ) {
             Jogl2ParametricCurveRenderer.draw(gl, (ParametricCurve)g, c, q);
         }
@@ -310,6 +358,118 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
         }
         else if ( g instanceof VoxelVolume ) {
             Jogl2VoxelVolumeRenderer.drawBinaryCubes(gl, (VoxelVolume)g, c, q);
+        }
+    }
+
+    //= Mesh based renderers =============================================
+
+    /**
+    @return a string that identifies the mesh of the geometry (given by the
+    `meshKey` of its renderer), or null if the geometry is not tessellated to
+    a mesh by this pipeline
+    */
+    private static String keyOf(Geometry geometry)
+    {
+        if ( geometry instanceof Tube t ) {
+            return Jogl2TubeRenderer.meshKey(t);
+        }
+        if ( geometry instanceof Prism p ) {
+            return Jogl2PrismRenderer.meshKey(p);
+        }
+        return null;
+    }
+
+    /**
+    @return the mesh of the geometry, built by its renderer, or null if it
+    can not be tessellated
+    */
+    private static Jogl2MeshRenderer.Mesh buildMesh(Geometry geometry)
+    {
+        if ( geometry instanceof Tube t ) {
+            return Jogl2TubeRenderer.buildMesh(t);
+        }
+        if ( geometry instanceof Prism p ) {
+            return Jogl2PrismRenderer.buildMesh(p);
+        }
+        return null;
+    }
+
+    private static void releaseMeshes(GL2 gl,
+        Map<String, Jogl2MeshRenderer.Mesh> meshes)
+    {
+        for ( Jogl2MeshRenderer.Mesh mesh : meshes.values() ) {
+            Jogl2MeshRenderer.release(gl, mesh);
+        }
+        meshes.clear();
+    }
+
+    private static Jogl2MeshRenderer.Mesh obtainMesh(GL2 gl, Geometry geometry)
+    {
+        String key = keyOf(geometry);
+
+        if ( key == null ) {
+            String name = geometry.getClass().getSimpleName();
+            if ( REPORTED_UNSUPPORTED.add(name) ) {
+                Logger.reportMessage(null, VSDK.WARNING, "Jogl2GeometryRenderer",
+                    "Geometry not supported by the JOGL2 mesh pipeline: " + name);
+            }
+            return null;
+        }
+        GLContext context = gl.getContext();
+        Map<String, Jogl2MeshRenderer.Mesh> meshes = MESHES.get(context);
+        if ( meshes == null ) {
+            meshes = new HashMap<String, Jogl2MeshRenderer.Mesh>();
+            MESHES.put(context, meshes);
+        }
+        Jogl2MeshRenderer.Mesh mesh = meshes.get(key);
+
+        if ( mesh == null ) {
+            mesh = buildMesh(geometry);
+            if ( mesh == null ) {
+                return null;
+            }
+            if ( meshes.size() >= MAX_CACHED_MESHES ) {
+                // Stale meshes (i.e. from geometries edited many times) are
+                // released, and recreated on demand
+                releaseMeshes(gl, meshes);
+            }
+            meshes.put(key, mesh);
+        }
+        return mesh;
+    }
+
+    /**
+    Draws a geometry handled by a mesh based renderer (see `keyOf`): its
+    mesh is built once per context and parameters, and drawn by
+    `Jogl2MeshRenderer` with the current lights, material and texture.
+    @param gl OpenGL context
+    @param geometry geometry to draw
+    @param camera camera that views the geometry
+    @param quality bits of rendering configuration
+    */
+    public static void drawMesh(GL2 gl, Geometry geometry, Camera camera,
+        RendererConfiguration quality)
+    {
+        if ( geometry == null || quality == null ) {
+            return;
+        }
+        Jogl2MeshRenderer.Mesh mesh = obtainMesh(gl, geometry);
+        if ( mesh == null ) {
+            return;
+        }
+        Jogl2MeshRenderer.draw(gl, mesh, geometry, camera, quality);
+    }
+
+    /**
+    Releases the meshes of the mesh based renderers created in the current
+    context. PRE: `gl` is current.
+    @param gl OpenGL context
+    */
+    public static void dispose(GL2 gl)
+    {
+        Map<String, Jogl2MeshRenderer.Mesh> meshes = MESHES.remove(gl.getContext());
+        if ( meshes != null ) {
+            releaseMeshes(gl, meshes);
         }
     }
 }

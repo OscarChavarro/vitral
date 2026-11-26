@@ -46,7 +46,7 @@ import vsdk.toolkit.gui.CameraController;            // Controller elements
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.render.jogl.Jogl2TorusRenderer;
+import vsdk.toolkit.render.jogl.volume.Jogl2TorusRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
 import vsdk.toolkit.environment.light.PointLight;

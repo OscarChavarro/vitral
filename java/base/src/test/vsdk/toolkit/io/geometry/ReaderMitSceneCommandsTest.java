@@ -11,14 +11,17 @@ import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.geometry.volume.Prism;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.environment.scene.csg.CsgBody;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static vsdk.toolkit.GTestAssertions.expectDoubleEq;
 import static vsdk.toolkit.GTestAssertions.expectEq;
+import static vsdk.toolkit.GTestAssertions.expectFalse;
 import static vsdk.toolkit.GTestAssertions.expectGt;
 import static vsdk.toolkit.GTestAssertions.expectLt;
 import static vsdk.toolkit.GTestAssertions.expectNear;
@@ -111,6 +114,49 @@ class ReaderMitSceneCommandsTest
         final String path = tempDir() + "reader_mit_commands_malformed.ray";
         for (int i = 0; i < 10; ++i) {
             writeFile(path, "eye 0 -5 0\nup 0 0 1\nlookat 0 0 0\n" + bodies[i]);
+            SimpleScene scene = new SimpleScene();
+            ReaderMitScene reader = new ReaderMitScene();
+            expectThrow(Exception.class, () -> reader.importEnvironment(path, scene), "" + i);
+        }
+        removeFile(path);
+    }
+
+    @Test
+    void ReaderMitCommands_PrismsAreParametricBodiesAndCsgOperands() throws Exception
+    {
+        SimpleScene scene = new SimpleScene();
+        ReaderMitScene reader = new ReaderMitScene();
+        reader.importEnvironment(VITRAL_REPOSITORY_ROOT + "/etc/geometry/mitscenes/prism_csg.ray", scene);
+        ArrayList<SimpleBody> bodies = scene.getSimpleBodies();
+        assertThat(bodies.size()).isEqualTo(4);
+        assertThat(bodies.get(1).getGeometry()).isInstanceOf(Prism.class);
+        final Prism star = (Prism)bodies.get(1).getGeometry();
+        expectEq(10, star.getNumberOfSides());
+        expectDoubleEq(0.6, star.getHeight());
+        expectDoubleEq(-2.3, bodies.get(1).getPosition().x());
+        assertThat(bodies.get(2)).isInstanceOf(CsgBody.class);
+        assertThat(bodies.get(3)).isInstanceOf(CsgBody.class);
+
+        // The star prism is hit on its top cap; its notch between two points is not
+        RayHit hit = new RayHit(RayHit.DETAIL_POINT | RayHit.DETAIL_NORMAL, false);
+        assertThat(bodies.get(1).doIntersectionFirstHit(new Ray(new Vector3Dd(-2.3, 0, 5), new Vector3Dd(0, 0, -1)), hit)).isTrue();
+        expectNear(5 - 0.6, hit.getHitDistance(), 1e-9);
+        expectFalse(bodies.get(1).doIntersectionFirstHit(new Ray(new Vector3Dd(-2.3 - 0.411449, 0.566312, 5), new Vector3Dd(0, 0, -1)), hit));
+        // The spherical bite of the difference: the ray down the axis reaches the
+        // bottom of the bite, at z = 1.4 - 0.75
+        assertThat(bodies.get(2).doIntersectionFirstHit(new Ray(new Vector3Dd(0, 0, 5), new Vector3Dd(0, 0, -1)), hit)).isTrue();
+        expectNear(5 - 0.65, hit.getHitDistance(), 1e-9);
+    }
+
+    @Test
+    void ReaderMitCommands_MalformedPrismsAreRejected()
+    {
+        final String[] lines = {"prism 0 0 0 1 2 0 0 1 0\n", "prism 0 0 0 -1 3 0 0 1 0 0 1\n",
+            "prism 0 0 0 1 3 0 0 1 0\n", "prism 0 0 0 1 4 0 0 1 1 1 0 0 1\n",
+            "prism 0 0 0 1 3 0 0 1 0 0 1 7\n"};
+        final String path = tempDir() + "reader_mit_prism_malformed.ray";
+        for (int i = 0; i < 5; ++i) {
+            writeFile(path, "eye 0 -5 0\nup 0 0 1\nlookat 0 0 0\n" + lines[i]);
             SimpleScene scene = new SimpleScene();
             ReaderMitScene reader = new ReaderMitScene();
             expectThrow(Exception.class, () -> reader.importEnvironment(path, scene), "" + i);

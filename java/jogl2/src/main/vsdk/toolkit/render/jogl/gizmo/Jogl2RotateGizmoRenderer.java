@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.gizmo;
 
 // JOGL classes
 import com.jogamp.opengl.GL;
@@ -7,6 +7,9 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
+
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2RotateGizmoRenderer extends Jogl2Renderer 
 {

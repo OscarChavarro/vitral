@@ -2,7 +2,7 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
 
@@ -22,6 +22,10 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
+
+import vsdk.toolkit.render.jogl.Jogl2CurvedArrowOverPlaneRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl._JoglPolygonTesselatorRoutines;
 
 public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
 {

@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.curve;
 
 import java.util.ArrayList;
 
@@ -14,6 +14,10 @@ import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl._JoglPolygonTesselatorRoutines;
 
 public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
     private static GLU glu;

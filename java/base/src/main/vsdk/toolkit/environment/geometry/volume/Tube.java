@@ -5,6 +5,7 @@
 package vsdk.toolkit.environment.geometry.volume;
 
 import java.io.Serial;
+import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
@@ -28,6 +29,9 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerConstructions;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 
 /**
 A `Tube` is a thick walled cylinder (a pipe): the solid between two coaxial
@@ -789,16 +793,57 @@ public class Tube extends Solid {
       5. `kfmrh`: the disk is merged into face 2 as an inner ring, so both
          faces of the lamina have the hole.
     If `ri` is 0, the lamina has no hole (steps 2 to 5 are skipped).
+    @param ri internal radius, or 0 for a disk
+    @param re external radius
+    @param h height of the plane of the lamina
+    @param n number of sides of the circles (at least 3)
     @return the lamina; face 1 is the one facing +Z (it is the one to sweep)
     */
     public static PolyhedralBoundedSolid createWasherLamina(double ri,
         double re, double h, int n)
+    {
+        return createWasherLamina(ri, re, h, n, false);
+    }
+
+    /**
+    Builds the washer lamina of `createWasherLamina(ri, re, h, n)`.
+
+    With `withQuadrilaterals`, each face of the lamina is further split so
+    that the lamina is made of small planar polygons instead of two faces
+    with a hole, as needed by programs that use the faces as patches:
+      - with a hole: the two loops of each face are joined by an edge
+        between the external vertex 1 and the internal vertex at its same
+        angle (`lmekr`), and the face is split (`smef`) by an edge between
+        every other external vertex and the internal vertex at its angle.
+        Each face of the lamina becomes `n` quadrilaterals; the ones facing
+        +Z are the faces 1 and 3 to n+1, and the ones facing -Z are 2 and
+        n+2 to 2n. The internal vertex at the angle of the external vertex
+        k+1 (at k*360/n degrees, k = 0 .. n-1) is n+1+((n-k) mod n).
+      - without a hole (a disk): each face is split into a fan of `n`
+        triangles towards a new vertex at its center (see `splitFaceIntoFan`);
+        the two faces get distinct, coincident center vertices (n+1 for
+        face 1 and n+2 for face 2).
+    @param ri internal radius, or 0 for a disk
+    @param re external radius
+    @param h height of the plane of the lamina
+    @param n number of sides of the circles (at least 3)
+    @param withQuadrilaterals false for two faces with a hole, true to split
+    them in quadrilaterals (triangles for a disk)
+    @return the lamina; face 1 is the one facing +Z (it is the one to sweep)
+    */
+    public static PolyhedralBoundedSolid createWasherLamina(double ri,
+        double re, double h, int n, boolean withQuadrilaterals)
     {
         PolyhedralBoundedSolid solid;
 
         solid = PolyhedralBoundedSolidEulerConstructions.createCircularLamina(
             0.0, 0.0, re, h, n);
         if ( ri <= 0.0 ) {
+            if ( withQuadrilaterals ) {
+                splitFaceIntoFan(solid, 1, new Vector3Dd(0.0, 0.0, h));
+                splitFaceIntoFan(solid, 2, new Vector3Dd(0.0, 0.0, h));
+                PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+            }
             return solid;
         }
 
@@ -816,8 +861,132 @@ public class Tube extends Solid {
         PolyhedralBoundedSolidEulerOperators.smef(solid, 1, lastInternal,
             firstInternal, diskFace);
         PolyhedralBoundedSolidEulerOperators.kfmrh(solid, 2, diskFace);
+        if ( withQuadrilaterals ) {
+            splitWasherIntoQuadrilaterals(solid, n);
+        }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
+    }
+
+    /**
+    Splits face `faceId` of `solid`, a single loop polygon, into a fan of
+    triangles towards a new vertex at `center` (`smev` from the first vertex
+    of the loop, then `mef` around it). The face keeps one of the triangles
+    and the others get new face ids, in the order of the loop.
+    @param solid solid holding the face
+    @param faceId id of the face to split
+    @param center position of the new center vertex
+    @return the id of the new center vertex, or 0 if the face does not
+    exist or is not a polygon of at least three vertices
+    */
+    public static int splitFaceIntoFan(PolyhedralBoundedSolid solid,
+        int faceId, Vector3Dd center)
+    {
+        _PolyhedralBoundedSolidFace face = solid.findFace(faceId);
+        if ( face == null || face.boundariesList.size() <= 0 ) {
+            return 0;
+        }
+
+        _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(0);
+        _PolyhedralBoundedSolidHalfEdge start = loop.boundaryStartHalfEdge;
+        if ( start == null ) {
+            return 0;
+        }
+
+        ArrayList<Integer> ringVertexIds = new ArrayList<Integer>();
+        _PolyhedralBoundedSolidHalfEdge he = start;
+        do {
+            ringVertexIds.add(Integer.valueOf(he.startingVertex.id));
+            he = he.next();
+        } while ( he != start );
+
+        if ( ringVertexIds.size() < 3 ) {
+            return 0;
+        }
+
+        int centerVertexId = solid.getMaxVertexId() + 1;
+        PolyhedralBoundedSolidEulerOperators.smev(solid, faceId,
+            ringVertexIds.get(0).intValue(), centerVertexId, center);
+
+        int i;
+        for ( i = 0; i < ringVertexIds.size() - 2; i++ ) {
+            PolyhedralBoundedSolidEulerOperators.mef(solid, faceId, faceId,
+                centerVertexId,
+                ringVertexIds.get(i).intValue(),
+                ringVertexIds.get(i+1).intValue(),
+                ringVertexIds.get(i+2).intValue(),
+                solid.getMaxFaceId() + 1);
+        }
+
+        PolyhedralBoundedSolidEulerOperators.mef(solid, faceId, faceId,
+            centerVertexId,
+            ringVertexIds.get(ringVertexIds.size()-2).intValue(),
+            ringVertexIds.get(ringVertexIds.size()-1).intValue(),
+            ringVertexIds.get(0).intValue(),
+            solid.getMaxFaceId() + 1);
+        return centerVertexId;
+    }
+
+    /**
+    @return the id of the face among `candidateFaceIds` that has both
+    vertices on one of its loops, or 0 if there is none
+    */
+    private static int findFaceWithVertices(PolyhedralBoundedSolid solid,
+        ArrayList<Integer> candidateFaceIds, int vertexId1, int vertexId2)
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < candidateFaceIds.size(); i++ ) {
+            _PolyhedralBoundedSolidFace face =
+                solid.findFace(candidateFaceIds.get(i).intValue());
+            if ( face == null ) {
+                continue;
+            }
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(j);
+                if ( loop.firstHalfEdgeAtVertex(vertexId1) != null &&
+                     loop.firstHalfEdgeAtVertex(vertexId2) != null ) {
+                    return face.id;
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+    Splits both faces of a washer lamina into quadrilaterals (see
+    `createWasherLamina`).
+
+    The external circle has the vertices 1..n (vertex k+1 at k*360/n degrees)
+    and the internal one n+1..2n, clockwise: vertex n+1+j is at -j*360/n
+    degrees, so the external vertex k+1 pairs with the internal vertex
+    n+1+((n-k) mod n), at its same angle.
+    */
+    private static void splitWasherIntoQuadrilaterals(
+        PolyhedralBoundedSolid solid, int n)
+    {
+        int nextFaceId = 3;
+        int side;
+        int k;
+
+        for ( side = 1; side <= 2; side++ ) {
+            ArrayList<Integer> sideFaces = new ArrayList<Integer>();
+            sideFaces.add(Integer.valueOf(side));
+            _PolyhedralBoundedSolidFace face = solid.findFace(side);
+            PolyhedralBoundedSolidEulerOperators.lmekr(solid,
+                face.findHalfEdge(1), face.findHalfEdge(n + 1));
+            for ( k = 1; k < n; k++ ) {
+                int externalId = k + 1;
+                int internalId = n + 1 + (n - k);
+                int faceId = findFaceWithVertices(solid, sideFaces, externalId,
+                    internalId);
+                PolyhedralBoundedSolidEulerOperators.smef(solid, faceId,
+                    externalId, internalId, nextFaceId);
+                sideFaces.add(Integer.valueOf(nextFaceId));
+                nextFaceId++;
+            }
+        }
     }
 
     /**

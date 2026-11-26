@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 // Java classes
 import java.nio.FloatBuffer;
@@ -11,6 +11,8 @@ import com.jogamp.opengl.GL2;
 // VitralSDK classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
+
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2QuadMeshRenderer extends Jogl2Renderer
 {

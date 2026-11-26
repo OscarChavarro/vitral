@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 import java.util.ArrayList;
 
@@ -7,6 +7,9 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2TriangleMeshGroupRenderer extends Jogl2Renderer {
 

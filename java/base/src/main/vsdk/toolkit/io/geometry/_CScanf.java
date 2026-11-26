@@ -170,6 +170,24 @@ final class _CScanf
     }
 
     /**
+    C `strtod(s + start, &end)`: skips leading white space and parses the
+    longest floating point prefix into `value[0]`.
+    @return the index just after the number (C `end`), or `start` when no
+    conversion is performed (then `value[0]` is 0)
+    */
+    static int strtod(String s, int start, double[] value)
+    {
+        int i = start;
+        while ( i < s.length() && isSpace(s.charAt(i)) ) i++;
+        int length = floatPrefix(s, i, value);
+        if ( length == 0 ) {
+            value[0] = 0.0;
+            return start;
+        }
+        return i + length;
+    }
+
+    /**
     C `strtod` over a whole token: the number when the token is entirely a
     floating point number, otherwise null.
     */

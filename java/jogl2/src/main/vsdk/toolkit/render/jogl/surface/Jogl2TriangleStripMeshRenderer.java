@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 // JOGL classes
 import com.jogamp.opengl.GL;
@@ -10,6 +10,9 @@ import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.element.Vertex;
 import vsdk.toolkit.environment.geometry.surface.TriangleStripMesh;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2TriangleStripMeshRenderer extends Jogl2Renderer {
 

@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 // JOGL classes
 import com.jogamp.opengl.GL;
@@ -11,6 +11,10 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2InfinitePlaneRenderer extends Jogl2Renderer {
 

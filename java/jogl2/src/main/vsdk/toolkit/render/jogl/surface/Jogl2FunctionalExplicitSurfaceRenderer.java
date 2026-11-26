@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 // Basic Java classes
 
@@ -10,6 +10,8 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.camera.Camera;
+
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2FunctionalExplicitSurfaceRenderer extends Jogl2Renderer {
 

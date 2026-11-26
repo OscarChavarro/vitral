@@ -3,6 +3,7 @@ package application.mcp;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
@@ -21,6 +22,7 @@ import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Tube;
+import vsdk.toolkit.environment.geometry.volume.Prism;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
@@ -198,6 +200,21 @@ class MCPSceneSerializer
                 .append(",\"minimum\":").append(MCPJson.vector(bounds[0]))
                 .append(",\"maximum\":").append(MCPJson.vector(bounds[1]))
                 .append('}');
+        }
+        else if ( geometry instanceof Prism prism ) {
+            sb.append("{\"numberOfSides\":").append(prism.getNumberOfSides())
+                .append(",\"circumradius\":").append(prism.getCircumradius())
+                .append(",\"height\":").append(prism.getHeight())
+                .append(",\"base\":[");
+            ArrayList<Vector2Dd> base = prism.getBase();
+            for ( int i = 0; i < base.size(); i++ ) {
+                if ( i > 0 ) {
+                    sb.append(',');
+                }
+                sb.append('[').append(base.get(i).x).append(',').append(base.get(i).y)
+                    .append(']');
+            }
+            sb.append("]}");
         }
         else if ( geometry instanceof Torus torus ) {
             sb.append("{\"majorRadius\":").append(torus.getMajorRadius())

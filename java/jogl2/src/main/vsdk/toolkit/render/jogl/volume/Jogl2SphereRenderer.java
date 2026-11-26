@@ -1,6 +1,6 @@
 //=   of GLUT/GLU utilities.                                                =
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.volume;
 
 // JOGL classes
 import com.jogamp.opengl.GL;
@@ -14,6 +14,9 @@ import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.render.SpherePolyhedralCache;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2SphereRenderer extends Jogl2Renderer {
 

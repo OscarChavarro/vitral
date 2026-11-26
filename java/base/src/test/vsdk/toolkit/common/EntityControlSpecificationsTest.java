@@ -11,6 +11,7 @@ import vsdk.toolkit.environment.geometry.volume.BlobSolid;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.PlanarHalfSpace;
+import vsdk.toolkit.environment.geometry.volume.Prism;
 import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
@@ -35,7 +36,8 @@ class EntityControlSpecificationsTest
         new PlanarHalfSpace(0.0, 0.0, 1.0, 0.0),
         new QuadricSurface(new Vector3Dd(1, 1, 1), new Vector3Dd(),
             new Vector3Dd(), -1.0),
-        new BlobSolid(0.5, false));
+        new BlobSolid(0.5, false),
+        new Prism(6, 1.0, 2.0));
 
     @Test
     void everyControlSpecificationHasMatchingAccessors() throws Exception

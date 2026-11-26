@@ -2,7 +2,7 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.volume.polyhedralBoundedSolid;
 
 // JOGL classes
 import com.jogamp.opengl.GL;
@@ -20,6 +20,9 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.environment.material.RendererConfiguration;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
 {

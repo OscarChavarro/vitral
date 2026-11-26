@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.VSDKFatalException;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.background.CubemapBackground;
@@ -40,6 +41,7 @@ import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.HeightFieldSolid;
 import vsdk.toolkit.environment.geometry.volume.PlanarHalfSpace;
 import vsdk.toolkit.environment.geometry.volume.PolynomialSurface;
+import vsdk.toolkit.environment.geometry.volume.Prism;
 import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
@@ -776,6 +778,53 @@ public class ReaderMitScene extends PersistenceElement
                 SimpleBody body = new SimpleBody();
                 body.setGeometry(new Torus(majorRadius[0], minorRadius[0]));
                 body.setPosition(new Vector3Dd(x[0], y[0], z[0]));
+                body.setMaterial(new SimpleMaterial(currentMaterial));
+                attach(body, pending, csgBody, csgNodes, outScene);
+            }
+            else if ( cmd.equals("prism") ) {
+                // prism x y z height n x1 y1 ... xn yn: a simple polygon of n
+                // vertices on the plane z = 0 of the body, placed at (x, y, z),
+                // swept height units along +Z. It is a parametric solid, so it
+                // can be a csg operand.
+                int cursor = 0;
+                while ( cursor < javaLine.length() && javaLine.charAt(cursor) != ' ' &&
+                        javaLine.charAt(cursor) != '\t' ) cursor++;
+                double[] values = new double[5];
+                boolean ok = true;
+                for ( int i = 0; i < 5 && ok; i++ ) {
+                    double[] value = {0};
+                    final int next = _CScanf.strtod(javaLine, cursor, value);
+                    values[i] = value[0];
+                    ok = next != cursor && Double.isFinite(values[i]);
+                    cursor = next;
+                }
+                final int n = ok && values[4] >= 3 && values[4] <= 100000 ? (int)values[4] : 0;
+                ok = ok && n >= 3 && values[4] == (double)n && values[3] > 0;
+                ArrayList<Vector2Dd> polygon = new ArrayList<Vector2Dd>();
+                for ( int i = 0; i < 2 * n && ok; i += 2 ) {
+                    double[] value = {0};
+                    int next = _CScanf.strtod(javaLine, cursor, value);
+                    final double px = value[0];
+                    ok = next != cursor && Double.isFinite(px);
+                    cursor = next;
+                    if ( !ok ) break;
+                    next = _CScanf.strtod(javaLine, cursor, value);
+                    final double py = value[0];
+                    ok = next != cursor && Double.isFinite(py);
+                    cursor = next;
+                    polygon.add(new Vector2Dd(px, py));
+                }
+                while ( ok && cursor < javaLine.length() &&
+                        (javaLine.charAt(cursor) == ' ' || javaLine.charAt(cursor) == '\t') ) cursor++;
+                ok = ok && cursor == javaLine.length();
+                if ( !ok ) fail("ReaderMitScene: prism requires a base position, a positive height, a vertex count of at least 3 and that many x y pairs");
+                Prism prism = new Prism(polygon, values[3]);
+                if ( !prism.hasValidParameters() ) {
+                    fail("ReaderMitScene: prism base must be a simple polygon with non-zero area");
+                }
+                SimpleBody body = new SimpleBody();
+                body.setGeometry(prism);
+                body.setPosition(new Vector3Dd(values[0], values[1], values[2]));
                 body.setMaterial(new SimpleMaterial(currentMaterial));
                 attach(body, pending, csgBody, csgNodes, outScene);
             }

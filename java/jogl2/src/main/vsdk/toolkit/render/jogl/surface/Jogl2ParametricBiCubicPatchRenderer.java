@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 // JOGL classes
 import com.jogamp.opengl.GL;
@@ -11,6 +11,10 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl.curve.Jogl2ParametricCurveRenderer;
 
 public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
 

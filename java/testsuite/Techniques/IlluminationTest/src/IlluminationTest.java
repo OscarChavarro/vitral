@@ -33,7 +33,7 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
         import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
-import vsdk.toolkit.render.jogl.Jogl2TriangleMeshRenderer;
+import vsdk.toolkit.render.jogl.surface.Jogl2TriangleMeshRenderer;
 import vsdk.toolkit.environment.light.PointLight;
 
 // Application classes

@@ -22,6 +22,7 @@ import vsdk.toolkit.environment.geometry.volume.BlobSolid;
 import vsdk.toolkit.environment.geometry.volume.HeightFieldSolid;
 import vsdk.toolkit.environment.geometry.volume.PlanarHalfSpace;
 import vsdk.toolkit.environment.geometry.volume.PolynomialSurface;
+import vsdk.toolkit.environment.geometry.volume.Prism;
 import vsdk.toolkit.environment.geometry.volume.QuadricSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
@@ -78,6 +79,11 @@ class GeometryCreationCommandsExecutor
         }
         else if ( label.equals("IDC_CREATE_TORUS") ) {
             scene().addThing(new Torus(2, 1));
+        }
+        else if ( label.equals("IDC_CREATE_PRISM") ) {
+            // A hexagonal prism; its number of sides, circumradius and height
+            // are edited with the generic editor
+            scene().addThing(new Prism(6, 1, 2));
         }
         else if ( label.equals("IDC_CREATE_BLOB") ) {
             createBlob();

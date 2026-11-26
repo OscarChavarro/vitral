@@ -1,6 +1,6 @@
 //=                                                            base version =
 
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.surface;
 
 // Basic Java classes
 import java.util.ArrayList;
@@ -22,6 +22,11 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.material.SimpleMaterial;
+
+import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 
 public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
 
