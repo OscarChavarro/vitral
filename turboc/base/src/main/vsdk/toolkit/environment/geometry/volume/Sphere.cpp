@@ -251,21 +251,25 @@ Vector3Dd Sphere::spherePosition(double theta, double t, double r) {
 }
 
 PolyhedralBoundedSolid* Sphere::exportToPolyhedralBoundedSolid() {
-    return buildPolyhedralBoundedSolid(DEFAULT_MERIDIANS, DEFAULT_PARALLELS);
+    return buildPolyhedralBoundedSolid(DEFAULT_MERIDIANS, DEFAULT_PARALLELS, FALSE);
 }
 
-PolyhedralBoundedSolid* Sphere::exportToPolyhedralBoundedSolid(int meridians, int parallels) {
+PolyhedralBoundedSolid* Sphere::exportToPolyhedralBoundedSolid(int meridians, int parallels,
+    BOOLEAN withQuadrilaterals) {
     int normalizedMeridians = meridians < MIN_MERIDIANS ? MIN_MERIDIANS : meridians;
     int normalizedParallels = parallels < MIN_PARALLELS ? MIN_PARALLELS : parallels;
 
-    if (normalizedMeridians == DEFAULT_MERIDIANS && normalizedParallels == DEFAULT_PARALLELS) {
+    if (!withQuadrilaterals && normalizedMeridians == DEFAULT_MERIDIANS &&
+        normalizedParallels == DEFAULT_PARALLELS) {
         return exportToPolyhedralBoundedSolid();
     }
 
-    return buildPolyhedralBoundedSolid(normalizedMeridians, normalizedParallels);
+    return buildPolyhedralBoundedSolid(normalizedMeridians, normalizedParallels,
+        withQuadrilaterals);
 }
 
-PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int nparalels) {
+PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int nparalels,
+    BOOLEAN withQuadrilaterals) {
     double theta;
     double phi;
     double dtheta = 2 * M_PI / ((double)nmeridians);
@@ -307,32 +311,36 @@ PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int 
             PolyhedralBoundedSolidEulerOperators::smev(solid, 1, (i) + base1, (i) + base2, pos);
             if (i > 0) {
                 int quadFaceId = nextFaceId++;
-                int diagFaceId = nextFaceId++;
                 PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1,
                     (i - 1) + base2,
                     (i - 1) + base1,
                     (i) + base2,
                     (i) + base1,
                     quadFaceId);
-                PolyhedralBoundedSolidEulerOperators::smef(solid, quadFaceId,
-                    (i - 1) + base2,
-                    (i) + base1,
-                    diagFaceId);
+                if (!withQuadrilaterals) {
+                    int diagFaceId = nextFaceId++;
+                    PolyhedralBoundedSolidEulerOperators::smef(solid, quadFaceId,
+                        (i - 1) + base2,
+                        (i) + base1,
+                        diagFaceId);
+                }
             }
         }
         {
             int quadFaceId = nextFaceId++;
-            int diagFaceId = nextFaceId++;
             PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1,
                 (i + base2 - 1),
                 (base1 + i - 1),
                 (base2),
                 (base2 + 1),
                 quadFaceId);
-            PolyhedralBoundedSolidEulerOperators::smef(solid, quadFaceId,
-                (i - 1) + base2,
-                base1,
-                diagFaceId);
+            if (!withQuadrilaterals) {
+                int diagFaceId = nextFaceId++;
+                PolyhedralBoundedSolidEulerOperators::smef(solid, quadFaceId,
+                    (i - 1) + base2,
+                    base1,
+                    diagFaceId);
+            }
         }
         base1 = base2;
         base2 += nmeridians;

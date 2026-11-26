@@ -27,6 +27,7 @@ SOURCES = \
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1PlanarHalfSpaceRenderer.cpp \
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1QuadricSurfaceRenderer.cpp \
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1TubeRenderer.cpp \
+    src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1PrismRenderer.cpp \
     src/main/vsdk/toolkit/render/opengl1/volume/OpenGL1VolumeRenderer.cpp \
     src/main/vsdk/toolkit/render/opengl1/volume/_OpenGL1SolidBoundaryMeshBuilder.cpp \
     src/main/vsdk/toolkit/render/opengl1/OpenGL1MeshRenderer.cpp \

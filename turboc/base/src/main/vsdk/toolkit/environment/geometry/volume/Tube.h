@@ -7,8 +7,10 @@
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class PolyhedralBoundedSolid;
+class Vector3Dd;
 class Ray;
 class RayHit;
 
@@ -148,6 +150,21 @@ private:
     */
     PolyhedralBoundedSolid* buildPolyhedralBoundedSolid(int nsides);
 
+    /**
+    @return the id of the face among `candidateFaceIds` that has both
+    vertices on one of its loops, or 0 if there is none
+    */
+    static int findFaceWithVertices(PolyhedralBoundedSolid* solid,
+        const ArrayList<int>& candidateFaceIds, int vertexId1,
+        int vertexId2);
+
+    /**
+    Splits both faces of a washer lamina into quadrilaterals (see
+    `createWasherLamina`).
+    */
+    static void splitWasherIntoQuadrilaterals(PolyhedralBoundedSolid* solid,
+        int n);
+
 public:
     static const Class CLASS;
     virtual const Class *getClass() const;
@@ -262,11 +279,44 @@ public:
       5. `kfmrh`: the disk is merged into face 2 as an inner ring, so both
          faces of the lamina have the hole.
     If `ri` is 0, the lamina has no hole (steps 2 to 5 are skipped).
-    @return the lamina, owned by the caller; face 1 is the one facing +Z (it
-    is the one to sweep)
+
+    With `withQuadrilaterals`, each face of the lamina is further split so
+    that the lamina is made of small planar polygons instead of two faces
+    with a hole, as needed by programs that use the faces as patches:
+      - with a hole: the two loops of each face are joined by an edge
+        between the external vertex 1 and the internal vertex at its same
+        angle (`lmekr`), and the face is split (`smef`) by an edge between
+        every other external vertex and the internal vertex at its angle.
+        Each face of the lamina becomes `n` quadrilaterals; the ones facing
+        +Z are the faces 1 and 3 to n+1, and the ones facing -Z are 2 and
+        n+2 to 2n. The internal vertex at the angle of the external vertex
+        k+1 (at k*360/n degrees, k = 0 .. n-1) is n+1+((n-k) mod n).
+      - without a hole (a disk): each face is split into a fan of `n`
+        triangles towards a new vertex at its center (see `splitFaceIntoFan`);
+        the two faces get distinct, coincident center vertices (n+1 for
+        face 1 and n+2 for face 2).
+    @param ri internal radius, or 0 for a disk
+    @param re external radius
+    @param h height of the plane of the lamina
+    @param n number of sides of the circles (at least 3)
+    @param withQuadrilaterals false (the default) for two faces with a hole,
+    true to split them in quadrilaterals (triangles for a disk)
+    @return the lamina (owned by the caller); face 1 is the one facing +Z
+    (it is the one to sweep)
     */
     static PolyhedralBoundedSolid* createWasherLamina(double ri, double re,
-        double h, int n);
+        double h, int n, BOOLEAN withQuadrilaterals = FALSE);
+
+    /**
+    Splits face `faceId` of `solid`, a single loop polygon, into a fan of
+    triangles towards a new vertex at `center` (`smev` from the first vertex
+    of the loop, then `mef` around it). The face keeps one of the triangles
+    and the others get new face ids, in the order of the loop.
+    @return the id of the new center vertex, or 0 if the face does not
+    exist or is not a polygon of at least three vertices
+    */
+    static int splitFaceIntoFan(PolyhedralBoundedSolid* solid, int faceId,
+        const Vector3Dd& center);
 };
 
 #endif

@@ -1820,3 +1820,7 @@ base/src/main/vsdk/toolkit/common/dataStructures/KDTree.h,BASE/SRC/MAIN/V/T/COMM
 base/src/main/vsdk/toolkit/common/dataStructures/KDTree.txx,BASE/SRC/MAIN/V/T/COMMON/DATASTRU/KDTREEKD.TXX,KDTree.txx,KDTREEKD.TXX
 base/src/main/vsdk/toolkit/common/dataStructures/KDTreeNode.h,BASE/SRC/MAIN/V/T/COMMON/DATASTRU/KDTRNOEE.H,KDTreeNode.h,KDTRNOEE.H
 base/src/test/kd_tree_tests.cpp,BASE/SRC/TEST/KDTETEST.CPP,kd_tree_tests.cpp,KDTETEST.CPP
+base/src/main/vsdk/toolkit/common/color/Cie.cpp,BASE/SRC/MAIN/V/T/COMMON/COLOR/CIE.CPP,Cie.cpp,CIE.CPP
+base/src/main/vsdk/toolkit/common/color/Cie.h,BASE/SRC/MAIN/V/T/COMMON/COLOR/CIE.H,Cie.h,CIE.H
+base/src/main/vsdk/toolkit/environment/geometry/volume/Prism.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/PRISM.CPP,Prism.cpp,PRISM.CPP
+base/src/main/vsdk/toolkit/environment/geometry/volume/Prism.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/PRISM.H,Prism.h,PRISM.H

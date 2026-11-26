@@ -1,6 +1,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <limits.h>
 
 #include "java/io/File.h"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -26,6 +28,8 @@
 #include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
+#include "vsdk/toolkit/environment/geometry/volume/Prism.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #ifndef TURBO_C_8086_REAL_MODE_ENABLED
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.h"
@@ -832,6 +836,53 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
             SimpleBody* body = new SimpleBody();
             body->setGeometry(new Torus(majorRadius, minorRadius));
             body->setPosition(Vector3Dd(x, y, z));
+            body->setMaterial(new SimpleMaterial(*currentMaterial));
+            dressBody(body); context.attach(body);
+        }
+        else if ( cmd == "prism" ) {
+            // prism x y z height n x1 y1 ... xn yn: a simple polygon of n
+            // vertices on the plane z = 0 of the body, placed at (x, y, z),
+            // swept height units along +Z. It is a parametric solid, so it
+            // can be a csg operand.
+            // C++ port note: the vertex count is also limited to INT_MAX, as
+            // an int has 16 bits on Turbo C++ 3.0
+            const char* cursor = javaLine.toCString();
+            while ( *cursor != '\0' && *cursor != ' ' && *cursor != '\t' ) cursor++;
+            double values[5];
+            BOOLEAN ok = TRUE;
+            int i;
+            for ( i = 0; i < 5 && ok; i++ ) {
+                char* next = NULL;
+                values[i] = strtod(cursor, &next);
+                ok = next != cursor && Double::isFinite(values[i]);
+                cursor = next;
+            }
+            const int n = ok && values[4] >= 3 && values[4] <= 100000 &&
+                values[4] <= (double)INT_MAX ? (int)values[4] : 0;
+            ok = ok && n >= 3 && values[4] == (double)n && values[3] > 0;
+            ArrayList<Vector2Dd> polygon;
+            for ( i = 0; i < 2 * n && ok; i += 2 ) {
+                char* next = NULL;
+                const double px = strtod(cursor, &next);
+                ok = next != cursor && Double::isFinite(px);
+                cursor = next;
+                if ( !ok ) break;
+                const double py = strtod(cursor, &next);
+                ok = next != cursor && Double::isFinite(py);
+                cursor = next;
+                polygon.add(Vector2Dd(px, py));
+            }
+            while ( ok && (*cursor == ' ' || *cursor == '\t') ) cursor++;
+            ok = ok && *cursor == '\0';
+            if ( !ok ) context.fail("ReaderMitScene: prism requires a base position, a positive height, a vertex count of at least 3 and that many x y pairs");
+            Prism* prism = new Prism(polygon, values[3]);
+            if ( !prism->hasValidParameters() ) {
+                delete prism;
+                context.fail("ReaderMitScene: prism base must be a simple polygon with non-zero area");
+            }
+            SimpleBody* body = new SimpleBody();
+            body->setGeometry(prism);
+            body->setPosition(Vector3Dd(values[0], values[1], values[2]));
             body->setMaterial(new SimpleMaterial(*currentMaterial));
             dressBody(body); context.attach(body);
         }

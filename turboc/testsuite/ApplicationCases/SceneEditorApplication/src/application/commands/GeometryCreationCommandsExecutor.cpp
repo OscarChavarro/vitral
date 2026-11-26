@@ -16,6 +16,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/HeightFieldSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/PlanarHalfSpace.h"
 #include "vsdk/toolkit/environment/geometry/volume/PolynomialSurface.h"
+#include "vsdk/toolkit/environment/geometry/volume/Prism.h"
 #include "vsdk/toolkit/environment/geometry/volume/QuadricSurface.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
@@ -88,6 +89,11 @@ CommandResult GeometryCreationCommandsExecutor::execute(
     }
     else if ( label.equals("IDC_CREATE_TORUS") ) {
         scene()->addThing(new Torus(2, 1));
+    }
+    else if ( label.equals("IDC_CREATE_PRISM") ) {
+        // A hexagonal prism; its number of sides, circumradius and height
+        // are edited with the generic editor
+        scene()->addThing(new Prism(6, 1, 2));
     }
     else if ( label.equals("IDC_CREATE_PLANE") ) {
         createPlane();

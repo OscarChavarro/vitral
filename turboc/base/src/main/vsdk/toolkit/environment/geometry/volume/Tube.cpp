@@ -22,6 +22,10 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
 Tube::Tube(double internalRadius, double externalRadius, double height) :
     internalRadius(internalRadius), externalRadius(externalRadius),
@@ -652,13 +656,18 @@ PolyhedralBoundedSolid* Tube::exportToPolyhedralBoundedSolid(
 }
 
 PolyhedralBoundedSolid* Tube::createWasherLamina(double ri, double re,
-    double h, int n)
+    double h, int n, BOOLEAN withQuadrilaterals)
 {
     PolyhedralBoundedSolid* solid;
 
     solid = PolyhedralBoundedSolidEulerConstructions::createCircularLamina(
         0.0, 0.0, re, h, n);
     if ( ri <= 0.0 ) {
+        if ( withQuadrilaterals ) {
+            splitFaceIntoFan(solid, 1, Vector3Dd(0.0, 0.0, h));
+            splitFaceIntoFan(solid, 2, Vector3Dd(0.0, 0.0, h));
+            PolyhedralBoundedSolidValidationEngine::validateIntermediate(solid);
+        }
         return solid;
     }
 
@@ -676,8 +685,115 @@ PolyhedralBoundedSolid* Tube::createWasherLamina(double ri, double re,
     PolyhedralBoundedSolidEulerOperators::smef(solid, 1, lastInternal,
         firstInternal, diskFace);
     PolyhedralBoundedSolidEulerOperators::kfmrh(solid, 2, diskFace);
+    if ( withQuadrilaterals ) {
+        splitWasherIntoQuadrilaterals(solid, n);
+    }
     PolyhedralBoundedSolidValidationEngine::validateIntermediate(solid);
     return solid;
+}
+
+int Tube::splitFaceIntoFan(PolyhedralBoundedSolid* solid, int faceId,
+    const Vector3Dd& center)
+{
+    _PolyhedralBoundedSolidFace* face = solid->findFace(faceId);
+    if ( face == NULL || face->boundariesList.size() <= 0 ) {
+        return 0;
+    }
+
+    _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(0);
+    _PolyhedralBoundedSolidHalfEdge* start = loop->boundaryStartHalfEdge;
+    if ( start == NULL ) {
+        return 0;
+    }
+
+    ArrayList<int> ringVertexIds;
+    _PolyhedralBoundedSolidHalfEdge* he = start;
+    do {
+        ringVertexIds.add(he->startingVertex->id);
+        he = he->next();
+    } while ( he != start );
+
+    if ( ringVertexIds.size() < 3 ) {
+        return 0;
+    }
+
+    int centerVertexId = solid->getMaxVertexId() + 1;
+    PolyhedralBoundedSolidEulerOperators::smev(solid, faceId,
+        ringVertexIds.get(0), centerVertexId, center);
+
+    long int i;
+    for ( i = 0; i < ringVertexIds.size() - 2; i++ ) {
+        PolyhedralBoundedSolidEulerOperators::mef(solid, faceId, faceId,
+            centerVertexId,
+            ringVertexIds.get(i),
+            ringVertexIds.get(i+1),
+            ringVertexIds.get(i+2),
+            solid->getMaxFaceId() + 1);
+    }
+
+    PolyhedralBoundedSolidEulerOperators::mef(solid, faceId, faceId,
+        centerVertexId,
+        ringVertexIds.get(ringVertexIds.size()-2),
+        ringVertexIds.get(ringVertexIds.size()-1),
+        ringVertexIds.get(0),
+        solid->getMaxFaceId() + 1);
+    return centerVertexId;
+}
+
+int Tube::findFaceWithVertices(PolyhedralBoundedSolid* solid,
+    const ArrayList<int>& candidateFaceIds, int vertexId1,
+    int vertexId2)
+{
+    long int i;
+    long int j;
+
+    for ( i = 0; i < candidateFaceIds.size(); i++ ) {
+        _PolyhedralBoundedSolidFace* face =
+            solid->findFace(candidateFaceIds.get(i));
+        if ( face == NULL ) {
+            continue;
+        }
+        for ( j = 0; j < face->boundariesList.size(); j++ ) {
+            _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(j);
+            if ( loop->firstHalfEdgeAtVertex(vertexId1) != NULL &&
+                 loop->firstHalfEdgeAtVertex(vertexId2) != NULL ) {
+                return face->id;
+            }
+        }
+    }
+    return 0;
+}
+
+/**
+The external circle has the vertices 1..n (vertex k+1 at k*360/n degrees)
+and the internal one n+1..2n, clockwise: vertex n+1+j is at -j*360/n
+degrees, so the external vertex k+1 pairs with the internal vertex
+n+1+((n-k) mod n), at its same angle.
+*/
+void Tube::splitWasherIntoQuadrilaterals(PolyhedralBoundedSolid* solid,
+    int n)
+{
+    int nextFaceId = 3;
+    int side;
+    int k;
+
+    for ( side = 1; side <= 2; side++ ) {
+        ArrayList<int> sideFaces;
+        sideFaces.add(side);
+        _PolyhedralBoundedSolidFace* face = solid->findFace(side);
+        PolyhedralBoundedSolidEulerOperators::lmekr(solid,
+            face->findHalfEdge(1), face->findHalfEdge(n + 1));
+        for ( k = 1; k < n; k++ ) {
+            int externalId = k + 1;
+            int internalId = n + 1 + (n - k);
+            int faceId = findFaceWithVertices(solid, sideFaces, externalId,
+                internalId);
+            PolyhedralBoundedSolidEulerOperators::smef(solid, faceId,
+                externalId, internalId, nextFaceId);
+            sideFaces.add(nextFaceId);
+            nextFaceId++;
+        }
+    }
 }
 
 PolyhedralBoundedSolid* Tube::buildPolyhedralBoundedSolid(int nsides)

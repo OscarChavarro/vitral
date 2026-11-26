@@ -7,11 +7,13 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
+#include "vsdk/toolkit/environment/geometry/volume/Tube.h"
 #include "vsdk/toolkit/environment/geometry/element/GeometryBounds.h"
 #include "java/lang/Double.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerConstructions.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
@@ -244,7 +246,7 @@ PolyhedralBoundedSolid* Cone::exportToPolyhedralBoundedSolid()
 }
 
 PolyhedralBoundedSolid* Cone::exportToPolyhedralBoundedSolid(
-    int circumferenceDivisions, int heightDivisions)
+    int circumferenceDivisions, int heightDivisions, BOOLEAN withCaps)
 {
     int normalizedCircumferenceDivisions =
         circumferenceDivisions > MIN_CIRCUMFERENCE_DIVISIONS ?
@@ -253,6 +255,9 @@ PolyhedralBoundedSolid* Cone::exportToPolyhedralBoundedSolid(
         heightDivisions > MIN_HEIGHT_DIVISIONS ?
         heightDivisions : MIN_HEIGHT_DIVISIONS;
 
+    if ( !withCaps ) {
+        return buildOpenLamina(normalizedCircumferenceDivisions);
+    }
     if ( normalizedCircumferenceDivisions == DEFAULT_CIRCUMFERENCE_DIVISIONS &&
          normalizedHeightDivisions == DEFAULT_HEIGHT_DIVISIONS ) {
         return exportToPolyhedralBoundedSolid();
@@ -270,48 +275,13 @@ cylinder is built upon a circular lamina base and an extrusion
 */
 void Cone::closeTopFaceToApex(PolyhedralBoundedSolid* solid, double apexZ)
 {
-    _PolyhedralBoundedSolidFace* topFace = solid->findFace(1);
-    if ( topFace == 0 || topFace->boundariesList.size() <= 0 ) {
-        return;
-    }
+    closeFaceToApex(solid, 1, apexZ);
+}
 
-    _PolyhedralBoundedSolidLoop* loop = topFace->boundariesList.get(0);
-    _PolyhedralBoundedSolidHalfEdge* start = loop->boundaryStartHalfEdge;
-    if ( start == 0 ) {
-        return;
-    }
-
-    ArrayList<int> ringVertexIds;
-    _PolyhedralBoundedSolidHalfEdge* he = start;
-    do {
-        ringVertexIds.add(he->startingVertex->id);
-        he = he->next();
-    } while ( he != start );
-
-    if ( ringVertexIds.size() < 3 ) {
-        return;
-    }
-
-    int apexVertexId = solid->getMaxVertexId() + 1;
-    PolyhedralBoundedSolidEulerOperators::smev(solid, 1, ringVertexIds.get(0),
-        apexVertexId, Vector3Dd(0.0, 0.0, apexZ));
-
-    long int i;
-    for ( i = 0; i < ringVertexIds.size() - 2; i++ ) {
-        PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1,
-            apexVertexId,
-            ringVertexIds.get(i),
-            ringVertexIds.get(i+1),
-            ringVertexIds.get(i+2),
-            solid->getMaxFaceId() + 1);
-    }
-
-    PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1,
-        apexVertexId,
-        ringVertexIds.get(ringVertexIds.size()-2),
-        ringVertexIds.get(ringVertexIds.size()-1),
-        ringVertexIds.get(0),
-        solid->getMaxFaceId() + 1);
+void Cone::closeFaceToApex(PolyhedralBoundedSolid* solid, int faceId,
+    double apexZ)
+{
+    Tube::splitFaceIntoFan(solid, faceId, Vector3Dd(0.0, 0.0, apexZ));
 }
 
 PolyhedralBoundedSolid* Cone::buildPolyhedralBoundedSolid(int nsides,
@@ -363,6 +333,42 @@ PolyhedralBoundedSolid* Cone::buildPolyhedralBoundedSolid(int nsides,
         }
         closeTopFaceToApex(solid, height);
     }
+    return solid;
+}
+
+PolyhedralBoundedSolid* Cone::buildOpenLamina(int nsides)
+{
+    PolyhedralBoundedSolid* solid;
+    int k;
+
+    if ( topRadius <= VSDK::EPSILON ) {
+        //- Cone with apex: both faces of a disk as fans, center lifted ---
+        // The fans of faces 1 and 2 end at the vertices n+1 and n+2
+        solid = Tube::createWasherLamina(0.0, bottomRadius, 0.0, nsides,
+            TRUE);
+        solid->findVertex(nsides + 1)->position = Vector3Dd(0.0, 0.0, height);
+        solid->findVertex(nsides + 2)->position = Vector3Dd(0.0, 0.0, height);
+        PolyhedralBoundedSolidValidationEngine::validateIntermediate(solid);
+        return solid;
+    }
+
+    //- Washer split in quadrilaterals, internal circle lifted ----------
+    // The external circle has the vertices 1..n at z = 0; the internal
+    // vertex at the angle of the external vertex k+1 is
+    // n+1+((n-k) mod n). Each one is placed above its external pair,
+    // scaled to the top radius, so both have exactly the same longitude
+    // and the quadrilaterals between them are planar.
+    solid = Tube::createWasherLamina(0.5 * bottomRadius, bottomRadius, 0.0,
+        nsides, TRUE);
+    double scale = topRadius / bottomRadius;
+    for ( k = 0; k < nsides; k++ ) {
+        _PolyhedralBoundedSolidVertex* bottom = solid->findVertex(k + 1);
+        _PolyhedralBoundedSolidVertex* top =
+            solid->findVertex(nsides + 1 + ((nsides - k) % nsides));
+        top->position = Vector3Dd(bottom->position.x() * scale,
+            bottom->position.y() * scale, height);
+    }
+    PolyhedralBoundedSolidValidationEngine::validateIntermediate(solid);
     return solid;
 }
 

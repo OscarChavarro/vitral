@@ -65,6 +65,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.cpp
     src/main/vsdk/toolkit/common/statistics/GeometryStatistics.cpp
     src/main/vsdk/toolkit/common/color/ColorRgb.cpp
+    src/main/vsdk/toolkit/common/color/Cie.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.cpp
@@ -206,6 +207,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/Arrow.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Torus.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Tube.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Prism.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/VoxelVolume.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.cpp
