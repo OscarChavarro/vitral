@@ -85,14 +85,14 @@ public final class Cie
     */
     private static final double WHITE_EFFICACY = 183.07;
 
-    private final double xRed;
-    private final double yRed;
-    private final double xGreen;
-    private final double yGreen;
-    private final double xBlue;
-    private final double yBlue;
-    private final double xWhite;
-    private final double yWhite;
+    private final double redX;
+    private final double redY;
+    private final double greenX;
+    private final double greenY;
+    private final double blueX;
+    private final double blueY;
+    private final double whiteX;
+    private final double whiteY;
 
     private final double luminousEfficacy;
     private double redGrayFactor;
@@ -132,14 +132,14 @@ public final class Cie
         double xb, double yb,
         double xw, double yw)
     {
-        xRed = xr;
-        yRed = yr;
-        xGreen = xg;
-        yGreen = yg;
-        xBlue = xb;
-        yBlue = yb;
-        xWhite = xw;
-        yWhite = yw;
+        redX = xr;
+        redY = yr;
+        greenX = xg;
+        greenY = yg;
+        blueX = xb;
+        blueY = yb;
+        whiteX = xw;
+        whiteY = yw;
         luminousEfficacy = WHITE_EFFICACY;
         redGrayFactor = 0.0;
         greenGrayFactor = 0.0;
@@ -149,14 +149,14 @@ public final class Cie
         computeColorConversionTransforms();
     }
 
-    public double getRedX() { return xRed; }
-    public double getRedY() { return yRed; }
-    public double getGreenX() { return xGreen; }
-    public double getGreenY() { return yGreen; }
-    public double getBlueX() { return xBlue; }
-    public double getBlueY() { return yBlue; }
-    public double getWhiteX() { return xWhite; }
-    public double getWhiteY() { return yWhite; }
+    public double getRedX() { return redX; }
+    public double getRedY() { return redY; }
+    public double getGreenX() { return greenX; }
+    public double getGreenY() { return greenY; }
+    public double getBlueX() { return blueX; }
+    public double getBlueY() { return blueY; }
+    public double getWhiteX() { return whiteX; }
+    public double getWhiteY() { return whiteY; }
     public double getLuminousEfficacy() { return luminousEfficacy; }
 
     /**
@@ -165,9 +165,9 @@ public final class Cie
     */
     private double cieD()
     {
-        return xRed * (yGreen - yBlue) +
-               xGreen * (yBlue - yRed) +
-               xBlue * (yRed - yGreen);
+        return redX * (greenY - blueY) +
+               greenX * (blueY - redY) +
+               blueX * (redY - greenY);
     }
 
     /**
@@ -176,10 +176,10 @@ public final class Cie
     */
     private double cieCrD()
     {
-        return (1.0 / yWhite) *
-               (xWhite * (yGreen - yBlue) -
-                yWhite * (xGreen - xBlue) +
-                xGreen * yBlue - xBlue * yGreen);
+        return (1.0 / whiteY) *
+               (whiteX * (greenY - blueY) -
+                whiteY * (greenX - blueX) +
+                greenX * blueY - blueX * greenY);
     }
 
     /**
@@ -187,10 +187,10 @@ public final class Cie
     */
     private double cieCgD()
     {
-        return (1.0 / yWhite) *
-               (xWhite * (yBlue - yRed) -
-                yWhite * (xBlue - xRed) -
-                xRed * yBlue + xBlue * yRed);
+        return (1.0 / whiteY) *
+               (whiteX * (blueY - redY) -
+                whiteY * (blueX - redX) -
+                redX * blueY + blueX * redY);
     }
 
     /**
@@ -198,10 +198,10 @@ public final class Cie
     */
     private double cieCbD()
     {
-        return (1.0 / yWhite) *
-               (xWhite * (yRed - yGreen) -
-                yWhite * (xRed - xGreen) +
-                xRed * yGreen - xGreen * yRed);
+        return (1.0 / whiteY) *
+               (whiteX * (redY - greenY) -
+                whiteY * (redX - greenX) +
+                redX * greenY - greenX * redY);
     }
 
     private static void setColorTransform(
@@ -256,33 +256,33 @@ public final class Cie
         final double cbD = cieCbD();
 
         // Second row of the RGB to XYZ matrix: the Y (gray) of each primary
-        redGrayFactor = yRed * crD / d;
-        greenGrayFactor = yGreen * cgD / d;
-        blueGrayFactor = yBlue * cbD / d;
+        redGrayFactor = redY * crD / d;
+        greenGrayFactor = greenY * cgD / d;
+        blueGrayFactor = blueY * cbD / d;
 
         setColorTransform(
             xyz2RgbMat, // XYZ to RGB
-            (yGreen - yBlue - xBlue * yGreen + yBlue * xGreen) / crD,
-            (xBlue - xGreen - xBlue * yGreen + xGreen * yBlue) / crD,
-            (xGreen * yBlue - xBlue * yGreen) / crD,
-            (yBlue - yRed - yBlue * xRed + yRed * xBlue) / cgD,
-            (xRed - xBlue - xRed * yBlue + xBlue * yRed) / cgD,
-            (xBlue * yRed - xRed * yBlue) / cgD,
-            (yRed - yGreen - yRed * xGreen + yGreen * xRed) / cbD,
-            (xGreen - xRed - xGreen * yRed + xRed * yGreen) / cbD,
-            (xRed * yGreen - xGreen * yRed) / cbD);
+            (greenY - blueY - blueX * greenY + blueY * greenX) / crD,
+            (blueX - greenX - blueX * greenY + greenX * blueY) / crD,
+            (greenX * blueY - blueX * greenY) / crD,
+            (blueY - redY - blueY * redX + redY * blueX) / cgD,
+            (redX - blueX - redX * blueY + blueX * redY) / cgD,
+            (blueX * redY - redX * blueY) / cgD,
+            (redY - greenY - redY * greenX + greenY * redX) / cbD,
+            (greenX - redX - greenX * redY + redX * greenY) / cbD,
+            (redX * greenY - greenX * redY) / cbD);
 
         setColorTransform(
             rgb2XyzMat, // RGB to XYZ
-            xRed * crD / d,
-            xGreen * cgD / d,
-            xBlue * cbD / d,
+            redX * crD / d,
+            greenX * cgD / d,
+            blueX * cbD / d,
             redGrayFactor,
             greenGrayFactor,
             blueGrayFactor,
-            (1.0 - xRed - yRed) * crD / d,
-            (1.0 - xGreen - yGreen) * cgD / d,
-            (1.0 - xBlue - yBlue) * cbD / d);
+            (1.0 - redX - redY) * crD / d,
+            (1.0 - greenX - greenY) * cgD / d,
+            (1.0 - blueX - blueY) * cbD / d);
     }
 
     /**

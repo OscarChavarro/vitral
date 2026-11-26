@@ -106,12 +106,12 @@ public class Prism extends Solid {
     /** A crossing of a line with an edge of the base, on the plane z = 0. */
     private static final class EdgeCrossing
     {
-        double t;
+        double lineParameter;
         int edge;
 
         EdgeCrossing(double t, int edge)
         {
-            this.t = t;
+            this.lineParameter = t;
             this.edge = edge;
         }
     }
@@ -615,15 +615,15 @@ public class Prism extends Solid {
                 // Insertion in increasing order of t
                 int position = crossings.size();
                 crossings.add(new EdgeCrossing(t, i));
-                while ( position > 0 && crossings.get(position - 1).t > t ) {
+                while ( position > 0 && crossings.get(position - 1).lineParameter > t ) {
                     crossings.set(position, crossings.get(position - 1));
                     position--;
                 }
                 crossings.set(position, new EdgeCrossing(t, i));
             }
             for ( int i = 0; i + 1 < crossings.size(); i += 2 ) {
-                double start = crossings.get(i).t;
-                double end = crossings.get(i + 1).t;
+                double start = crossings.get(i).lineParameter;
+                double end = crossings.get(i + 1).lineParameter;
                 if ( !(start < end) ) {
                     // The line only touches a vertex
                     continue;

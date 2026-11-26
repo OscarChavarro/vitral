@@ -19,9 +19,9 @@ template<typename T>
 class KDTree {
   private:
     int numberOfNodes;
-    int numUnbalanced;
+    int unbalancedCount;
     KDTreeNode<T> *root;
-    int numBalanced;
+    int balancedCount;
     int firstLeaf;
     BalancedKDTreeNode<T> *balancedRootNode;
     bool copyData;
@@ -61,8 +61,8 @@ class KDTree {
     void iterateNodes(KDTreeVisitor<T> &visitor);
     int query(const Vector3Df &position, int count, T **results, float *distances = NULL,
               float radius = KD_MAX_RADIUS, short excludeFlags = 0);
-    int getBalancedCount() const { return numBalanced; }
-    int getUnbalancedCount() const { return numUnbalanced; }
+    int getBalancedCount() const { return balancedCount; }
+    int getUnbalancedCount() const { return unbalancedCount; }
     int getFirstLeaf() const { return firstLeaf; }
     const BalancedKDTreeNode<T> &getBalancedNode(int index) const { return balancedRootNode[index]; }
 };

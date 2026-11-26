@@ -82,14 +82,14 @@ export class Cie {
     */
     private static readonly WHITE_EFFICACY = 183.07;
 
-    private readonly xRed: number;
-    private readonly yRed: number;
-    private readonly xGreen: number;
-    private readonly yGreen: number;
-    private readonly xBlue: number;
-    private readonly yBlue: number;
-    private readonly xWhite: number;
-    private readonly yWhite: number;
+    private readonly redX: number;
+    private readonly redY: number;
+    private readonly greenX: number;
+    private readonly greenY: number;
+    private readonly blueX: number;
+    private readonly blueY: number;
+    private readonly whiteX: number;
+    private readonly whiteY: number;
 
     private readonly luminousEfficacy: number;
     private redGrayFactor = 0.0;
@@ -126,14 +126,14 @@ export class Cie {
         xw = 0.3333333333,
         yw = 0.3333333333,
     ) {
-        this.xRed = xr;
-        this.yRed = yr;
-        this.xGreen = xg;
-        this.yGreen = yg;
-        this.xBlue = xb;
-        this.yBlue = yb;
-        this.xWhite = xw;
-        this.yWhite = yw;
+        this.redX = xr;
+        this.redY = yr;
+        this.greenX = xg;
+        this.greenY = yg;
+        this.blueX = xb;
+        this.blueY = yb;
+        this.whiteX = xw;
+        this.whiteY = yw;
         this.luminousEfficacy = Cie.WHITE_EFFICACY;
         this.computeColorConversionTransforms();
     }
@@ -144,9 +144,9 @@ export class Cie {
     */
     private cieD(): number {
         return (
-            this.xRed * (this.yGreen - this.yBlue) +
-            this.xGreen * (this.yBlue - this.yRed) +
-            this.xBlue * (this.yRed - this.yGreen)
+            this.redX * (this.greenY - this.blueY) +
+            this.greenX * (this.blueY - this.redY) +
+            this.blueX * (this.redY - this.greenY)
         );
     }
 
@@ -156,11 +156,11 @@ export class Cie {
     */
     private cieCrD(): number {
         return (
-            (1.0 / this.yWhite) *
-            (this.xWhite * (this.yGreen - this.yBlue) -
-                this.yWhite * (this.xGreen - this.xBlue) +
-                this.xGreen * this.yBlue -
-                this.xBlue * this.yGreen)
+            (1.0 / this.whiteY) *
+            (this.whiteX * (this.greenY - this.blueY) -
+                this.whiteY * (this.greenX - this.blueX) +
+                this.greenX * this.blueY -
+                this.blueX * this.greenY)
         );
     }
 
@@ -169,11 +169,11 @@ export class Cie {
     */
     private cieCgD(): number {
         return (
-            (1.0 / this.yWhite) *
-            (this.xWhite * (this.yBlue - this.yRed) -
-                this.yWhite * (this.xBlue - this.xRed) -
-                this.xRed * this.yBlue +
-                this.xBlue * this.yRed)
+            (1.0 / this.whiteY) *
+            (this.whiteX * (this.blueY - this.redY) -
+                this.whiteY * (this.blueX - this.redX) -
+                this.redX * this.blueY +
+                this.blueX * this.redY)
         );
     }
 
@@ -182,11 +182,11 @@ export class Cie {
     */
     private cieCbD(): number {
         return (
-            (1.0 / this.yWhite) *
-            (this.xWhite * (this.yRed - this.yGreen) -
-                this.yWhite * (this.xRed - this.xGreen) +
-                this.xRed * this.yGreen -
-                this.xGreen * this.yRed)
+            (1.0 / this.whiteY) *
+            (this.whiteX * (this.redY - this.greenY) -
+                this.whiteY * (this.redX - this.greenX) +
+                this.redX * this.greenY -
+                this.greenX * this.redY)
         );
     }
 
@@ -254,60 +254,60 @@ export class Cie {
         const cbD = this.cieCbD();
 
         // Second row of the RGB to XYZ matrix: the Y (gray) of each primary
-        this.redGrayFactor = (this.yRed * crD) / d;
-        this.greenGrayFactor = (this.yGreen * cgD) / d;
-        this.blueGrayFactor = (this.yBlue * cbD) / d;
+        this.redGrayFactor = (this.redY * crD) / d;
+        this.greenGrayFactor = (this.greenY * cgD) / d;
+        this.blueGrayFactor = (this.blueY * cbD) / d;
 
         Cie.setColorTransform(
             this.xyz2RgbMat, // XYZ to RGB
-            (this.yGreen - this.yBlue - this.xBlue * this.yGreen + this.yBlue * this.xGreen) / crD,
-            (this.xBlue - this.xGreen - this.xBlue * this.yGreen + this.xGreen * this.yBlue) / crD,
-            (this.xGreen * this.yBlue - this.xBlue * this.yGreen) / crD,
-            (this.yBlue - this.yRed - this.yBlue * this.xRed + this.yRed * this.xBlue) / cgD,
-            (this.xRed - this.xBlue - this.xRed * this.yBlue + this.xBlue * this.yRed) / cgD,
-            (this.xBlue * this.yRed - this.xRed * this.yBlue) / cgD,
-            (this.yRed - this.yGreen - this.yRed * this.xGreen + this.yGreen * this.xRed) / cbD,
-            (this.xGreen - this.xRed - this.xGreen * this.yRed + this.xRed * this.yGreen) / cbD,
-            (this.xRed * this.yGreen - this.xGreen * this.yRed) / cbD,
+            (this.greenY - this.blueY - this.blueX * this.greenY + this.blueY * this.greenX) / crD,
+            (this.blueX - this.greenX - this.blueX * this.greenY + this.greenX * this.blueY) / crD,
+            (this.greenX * this.blueY - this.blueX * this.greenY) / crD,
+            (this.blueY - this.redY - this.blueY * this.redX + this.redY * this.blueX) / cgD,
+            (this.redX - this.blueX - this.redX * this.blueY + this.blueX * this.redY) / cgD,
+            (this.blueX * this.redY - this.redX * this.blueY) / cgD,
+            (this.redY - this.greenY - this.redY * this.greenX + this.greenY * this.redX) / cbD,
+            (this.greenX - this.redX - this.greenX * this.redY + this.redX * this.greenY) / cbD,
+            (this.redX * this.greenY - this.greenX * this.redY) / cbD,
         );
 
         Cie.setColorTransform(
             this.rgb2XyzMat, // RGB to XYZ
-            (this.xRed * crD) / d,
-            (this.xGreen * cgD) / d,
-            (this.xBlue * cbD) / d,
+            (this.redX * crD) / d,
+            (this.greenX * cgD) / d,
+            (this.blueX * cbD) / d,
             this.redGrayFactor,
             this.greenGrayFactor,
             this.blueGrayFactor,
-            ((1.0 - this.xRed - this.yRed) * crD) / d,
-            ((1.0 - this.xGreen - this.yGreen) * cgD) / d,
-            ((1.0 - this.xBlue - this.yBlue) * cbD) / d,
+            ((1.0 - this.redX - this.redY) * crD) / d,
+            ((1.0 - this.greenX - this.greenY) * cgD) / d,
+            ((1.0 - this.blueX - this.blueY) * cbD) / d,
         );
     }
 
     public getRedX(): number {
-        return this.xRed;
+        return this.redX;
     }
     public getRedY(): number {
-        return this.yRed;
+        return this.redY;
     }
     public getGreenX(): number {
-        return this.xGreen;
+        return this.greenX;
     }
     public getGreenY(): number {
-        return this.yGreen;
+        return this.greenY;
     }
     public getBlueX(): number {
-        return this.xBlue;
+        return this.blueX;
     }
     public getBlueY(): number {
-        return this.yBlue;
+        return this.blueY;
     }
     public getWhiteX(): number {
-        return this.xWhite;
+        return this.whiteX;
     }
     public getWhiteY(): number {
-        return this.yWhite;
+        return this.whiteY;
     }
     public getLuminousEfficacy(): number {
         return this.luminousEfficacy;

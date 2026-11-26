@@ -83,11 +83,11 @@ public:
     /** A crossing of a line with an edge of the base, on the plane z = 0. */
     class EdgeCrossing {
     public:
-        double t;
+        double lineParameter;
         int edge;
 
-        EdgeCrossing() : t(0), edge(0) {}
-        EdgeCrossing(double t, int edge) : t(t), edge(edge) {}
+        EdgeCrossing() : lineParameter(0), edge(0) {}
+        EdgeCrossing(double t, int edge) : lineParameter(t), edge(edge) {}
     };
 #ifdef __TURBOC__
 private:

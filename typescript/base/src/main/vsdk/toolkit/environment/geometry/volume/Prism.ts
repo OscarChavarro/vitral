@@ -62,11 +62,11 @@ A crossing of a line with an edge of the base, on the plane z = 0.
 C++ private nested class `Prism::EdgeCrossing`.
 */
 class PrismEdgeCrossing {
-    public t: number;
+    public lineParameter: number;
     public edge: number;
 
     public constructor(t = 0, edge = 0) {
-        this.t = t;
+        this.lineParameter = t;
         this.edge = edge;
     }
 }
@@ -585,15 +585,15 @@ export class Prism extends Solid {
                 // Insertion in increasing order of t
                 let position = crossings.size();
                 crossings.add(new PrismEdgeCrossing(t, i));
-                while (position > 0 && crossings.get(position - 1).t > t) {
+                while (position > 0 && crossings.get(position - 1).lineParameter > t) {
                     crossings.set(position, crossings.get(position - 1));
                     position--;
                 }
                 crossings.set(position, new PrismEdgeCrossing(t, i));
             }
             for (let i = 0; i + 1 < crossings.size(); i += 2) {
-                const start = crossings.get(i).t;
-                const end = crossings.get(i + 1).t;
+                const start = crossings.get(i).lineParameter;
+                const end = crossings.get(i + 1).lineParameter;
                 if (!(start < end)) {
                     // The line only touches a vertex
                     continue;

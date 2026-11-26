@@ -9,10 +9,10 @@ template<typename T>
 KDTree<T>::KDTree(bool CopyData) {
     numberOfNodes = 0;
 
-    numUnbalanced = 0;
+    unbalancedCount = 0;
     root = nullptr;
 
-    numBalanced = 0;
+    balancedCount = 0;
     balancedRootNode = nullptr;
 
     copyData = CopyData;
@@ -31,7 +31,7 @@ KDTree<T>::deleteNodes(KDTreeNode<T> *node, bool deleteData) {
     deleteNodes(node->hison, deleteData);
 
     if ( deleteData ) {
-        delete node->m_data;
+        delete node->data;
     }
 
     delete node;
@@ -45,8 +45,8 @@ KDTree<T>::deleteBNodes(bool deleteData) {
     }
 
     if ( deleteData ) {
-        for ( int node = 0; node < numBalanced; node++ ) {
-            delete balancedRootNode[node].m_data;
+        for ( int node = 0; node < balancedCount; node++ ) {
+            delete balancedRootNode[node].data;
         }
     }
 
@@ -78,19 +78,19 @@ KDTree<T>::addPoint(T *data, short flags) {
     newNode = new KDTreeNode<T>;
 
     try {
-        newNode->m_data = copyData ? new T(*data) : data;
+        newNode->data = copyData ? new T(*data) : data;
     } catch ( ... ) {
         delete newNode;
         throw;
     }
-    newNode->m_flags = flags;
+    newNode->flags = flags;
     newNode->setDiscriminator(0); // Default
 
     newNode->loson = nullptr;
     newNode->hison = nullptr;
 
     numberOfNodes++;
-    numUnbalanced++;
+    unbalancedCount++;
 
     nodePtr = &root;
     parent = nullptr;
@@ -101,7 +101,7 @@ KDTree<T>::addPoint(T *data, short flags) {
         discriminator = parent->discriminator();
 
         // Test discriminator
-        if ( newPoint[discriminator] <= coordinate(parent->m_data, discriminator) ) {
+        if ( newPoint[discriminator] <= coordinate(parent->data, discriminator) ) {
             nodePtr = &(parent->loson);
         } else {
             nodePtr = &(parent->hison);
@@ -113,7 +113,7 @@ KDTree<T>::addPoint(T *data, short flags) {
         float dx;
         float dy;
         float dz;
-        const Vector3Df &parentPosition = parent->m_data->getKDPosition();
+        const Vector3Df &parentPosition = parent->data->getKDPosition();
         const float customNodeData[3] = {parentPosition.x(), parentPosition.y(), parentPosition.z()};
 
         dx = java::Math::abs(newPoint[0] - customNodeData[0]);
@@ -151,12 +151,12 @@ KDTree<T>::addPoint(T *data, short flags) {
 template<typename T>
 template<typename Visitor>
 void KDTree<T>::iterateNodes(Visitor &visitor) {
-    if ( numUnbalanced > 0 ) {
+    if ( unbalancedCount > 0 ) {
         Logger::reportMessage("KDTree", Logger::ERROR, "KDTree::iterateNodes", "Cannot iterate unbalanced trees");
         return;
     }
-    for ( int i = 0; i < numBalanced; ++i ) {
-        visitor.visit(*balancedRootNode[i].m_data);
+    for ( int i = 0; i < balancedCount; ++i ) {
+        visitor.visit(*balancedRootNode[i].data);
     }
 }
 
@@ -354,22 +354,22 @@ KDTree<T>::queryRec(const KDTreeNode<T> *node, KDQuery<T> &queryData) {
     const KDTreeNode<T> *nearNode;
     const KDTreeNode<T> *farNode;
 
-    dist = sqrDistance3D(node->m_data, queryData.point);
+    dist = sqrDistance3D(node->data, queryData.point);
 
-    if ( dist < queryData.maximumDistance && (!FilterFlags || (node->flags() & queryData.excludeFlags) == 0) ) {
+    if ( dist < queryData.maximumDistance && (!FilterFlags || (node->getFlags() & queryData.excludeFlags) == 0) ) {
         if ( queryData.notFilled ) {
             // Add this point anyway, because we haven't got enough positions yet.
             // We have to check for the radius only here, since if N positions
             // are added, maximumDistance <= radius
-            mhInsert(queryData, node->m_data, dist);
+            mhInsert(queryData, node->data, dist);
         } else {
             // Add point if distance < maximumDistance
-            mhReplaceMax(queryData, node->m_data, dist);
+            mhReplaceMax(queryData, node->data, dist);
         }
     }
 
     // Reuse distance
-    dist = coordinate(node->m_data, discriminator) - queryData.point[discriminator];
+    dist = coordinate(node->data, discriminator) - queryData.point[discriminator];
 
     if ( dist >= 0.0 ) {
         nearNode = node->loson;
@@ -411,7 +411,7 @@ KDTree<T>::balancedQueryRec(int index, KDQuery<T> &queryData) {
 
     // Test discr (reuse distance)
     if ( index < firstLeaf ) {
-        dist = coordinate(node.m_data, discr) - queryData.point[discr];
+        dist = coordinate(node.data, discr) - queryData.point[discr];
 
         if ( dist >= 0.0 ) {
             nearIndex = (index << 1) + 1; // node loson
@@ -422,12 +422,12 @@ KDTree<T>::balancedQueryRec(int index, KDQuery<T> &queryData) {
         }
 
         // Always call near node recursively
-        if ( nearIndex < numBalanced ) {
+        if ( nearIndex < balancedCount ) {
             balancedQueryRec<FilterFlags>(nearIndex, queryData);
         }
 
         dist *= dist; // Square distance to the separator plane
-        if ((farIndex < numBalanced) && (((queryData.notFilled) && // qdat_s.foundN < qdat_s.wantedN
+        if ((farIndex < balancedCount) && (((queryData.notFilled) && // qdat_s.foundN < qdat_s.wantedN
                                             (dist < queryData.sqrRadius)) ||
                                          (dist < queryData.maximumDistance)) ) {
             // Discriminator line closer than maximumDistance : nearer positions can lie
@@ -436,17 +436,17 @@ KDTree<T>::balancedQueryRec(int index, KDQuery<T> &queryData) {
         }
     }
 
-    dist = sqrDistance3D(node.m_data, queryData.point);
+    dist = sqrDistance3D(node.data, queryData.point);
 
-    if ( dist < queryData.maximumDistance && (!FilterFlags || (node.m_flags & queryData.excludeFlags) == 0) ) {
+    if ( dist < queryData.maximumDistance && (!FilterFlags || (node.flags & queryData.excludeFlags) == 0) ) {
         if ( queryData.notFilled ) {
             // Add this point anyway, because we haven't got enough positions yet.
             // We have to check for the radius only here, since if N positions
             // are added, maximumDistance <= radius
-            mhInsert(queryData, node.m_data, dist);
+            mhInsert(queryData, node.data, dist);
         } else {
             // Add point if distance < maximumDistance
-            mhReplaceMax(queryData, node.m_data, dist);
+            mhReplaceMax(queryData, node.data, dist);
         }
     }
 }
@@ -483,7 +483,7 @@ KDTree<T>::bkdswap(BalancedKDTreeNode<T> root[], int a, int b) {
 template<typename T>
 inline float
 KDTree<T>::bkdval(BalancedKDTreeNode<T> root[], int index, int discr) {
-    return coordinate(root[index].m_data, discr);
+    return coordinate(root[index].data, discr);
 }
 
 template<typename T>
@@ -707,7 +707,7 @@ template<typename T>
 void
 KDTree<T>::balance() {
     // Make an unsorted BalancedKDTreeNode<T> array pointing to the nodes
-    if ( numUnbalanced == 0 ) {
+    if ( unbalancedCount == 0 ) {
         // No balancing needed.
         return;
     }
@@ -723,13 +723,13 @@ KDTree<T>::balance() {
         throw;
     }
 
-    broot[numberOfNodes].m_data = nullptr;
-    broot[numberOfNodes].m_flags = 128;
+    broot[numberOfNodes].data = nullptr;
+    broot[numberOfNodes].flags = 128;
 
     int index = 0;
 
     // Copy balanced
-    for ( int i = 0; i < numBalanced; i++ ) {
+    for ( int i = 0; i < balancedCount; i++ ) {
         broot[index++] = balancedRootNode[i];
     }
 
@@ -739,14 +739,14 @@ KDTree<T>::balance() {
     // Clear old balanced and unbalanced part (but no data delete)
     deleteNodes(root, false);
     root = nullptr;
-    numUnbalanced = 0;
+    unbalancedCount = 0;
 
     deleteBNodes(false);
 
-    numBalanced = numberOfNodes;
+    balancedCount = numberOfNodes;
 
-    dest[numberOfNodes].m_data = nullptr;
-    dest[numberOfNodes].m_flags = 64;
+    dest[numberOfNodes].data = nullptr;
+    dest[numberOfNodes].flags = 64;
 
     // Now balance the tree recursively
     balanceRec(broot, dest, 0, 0, numberOfNodes - 1);  // High inclusive!
@@ -754,7 +754,7 @@ KDTree<T>::balance() {
     balancedRootNode = dest;
     delete[] broot;
 
-    firstLeaf = (numBalanced + 1) / 2;
+    firstLeaf = (balancedCount + 1) / 2;
 
     java::System::err.printf("done\n");
 }
