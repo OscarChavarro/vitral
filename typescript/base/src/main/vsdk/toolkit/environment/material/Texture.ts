@@ -1,11 +1,8 @@
 import { ColorRgb } from "../../common/color/ColorRgb.js";
 
-const f = Math.fround;
-
 /**
 Color texture of 1, 3 or 4 channels of bytes, sampled with wrapping
-bilinear weights. Single precision arithmetic (`float` in C++) is rounded
-with `Math.fround`.
+bilinear weights, in double precision.
 */
 export class Texture {
     private readonly width: number;
@@ -49,11 +46,9 @@ export class Texture {
     }
 
     public evaluateColor(u: number, v: number): ColorRgb {
-        u = f(u);
-        v = f(v);
-        const u1 = f(u - Math.floor(u));
+        const u1 = u - Math.floor(u);
         const u0 = 1.0 - u1;
-        const v1 = f(v - Math.floor(v));
+        const v1 = v - Math.floor(v);
         const v0 = 1.0 - v1;
         let i = Math.trunc(u1 * this.width);
         let i1 = i + 1;
@@ -88,7 +83,7 @@ export class Texture {
         const pixelIndex10 = (j * this.width + i1) * this.channels;
         const pixelIndex11 = (j1 * this.width + i1) * this.channels;
 
-        const channelValue = (pixelIndex: number, channel: number): number => f(data[pixelIndex + channel]! / 255.0);
+        const channelValue = (pixelIndex: number, channel: number): number => data[pixelIndex + channel]! / 255.0;
 
         let r00 = 0.0;
         let g00 = 0.0;

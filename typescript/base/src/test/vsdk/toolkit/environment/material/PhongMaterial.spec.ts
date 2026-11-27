@@ -1,7 +1,7 @@
 // Port of cpp/base/src/test/phong_material_tests.cpp
 import { describe, it } from "vitest";
 import { ColorRgb } from "vsdk/toolkit/common/color/ColorRgb.js";
-import { Vector3Df } from "vsdk/toolkit/common/linealAlgebra/Vector3Df.js";
+import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { PhongLobe } from "vsdk/toolkit/environment/material/PhongLobe.js";
 import { PhongMaterial } from "vsdk/toolkit/environment/material/PhongMaterial.js";
 import { ScatteringComponent } from "vsdk/toolkit/environment/material/ScatteringComponent.js";
@@ -83,7 +83,7 @@ describe("PhongMaterial", () => {
             texture,
             false,
         );
-        const coordinate = new Vector3Df(0.5, 0.5, 0.0);
+        const coordinate = new Vector3Dd(0.5, 0.5, 0.0);
         const textured = material.scatteredPower(ScatteringComponent.REFLECTION_DIFFUSE, coordinate);
         const expected = texture.evaluateColor(0.5, 0.5);
         expectColor(expected.getR(), expected.getG(), expected.getB(), textured);

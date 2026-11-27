@@ -1,9 +1,7 @@
 import { ColorRgb } from "../../common/color/ColorRgb.js";
-import { Vector3Df } from "../../common/linealAlgebra/Vector3Df.js";
+import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 import { ScatteringComponent } from "./ScatteringComponent.js";
 import { ScatteringFrame, scatteringArithmetic } from "./ScatteringFrame.js";
-
-const f = Math.fround;
 const { dot, scale } = scatteringArithmetic;
 
 // Scattered power below which nothing is sampled (RenderPark's EPSILON)
@@ -12,12 +10,12 @@ const NO_SCATTERING = 1e-6;
 const M_1_PI = 1 / Math.PI;
 
 function averageOf(color: ColorRgb): number {
-    return f((color.getR() + color.getG() + color.getB()) / 3.0);
+    return (color.getR() + color.getG() + color.getB()) / 3.0;
 }
 
-/** `java::Math::pow(float, float)` of the C++ port */
+/** `java::Math::pow(double, double)` of the C++ port */
 function powf(a: number, e: number): number {
-    return f(Math.pow(a, e));
+    return Math.pow(a, e);
 }
 
 /**
@@ -27,7 +25,7 @@ the SPECULAR component when Ns reaches LOWEST_SPECULAR_EXPONENT and as the
 GLOSSY component below it. The same lobe describes reflection, transmission
 or emission; PhongMaterial composes them.
 
-The exponent is stored in single precision, as RenderPark stores it, so that
+The exponent is stored in double precision, as RenderPark stores it, so that
 the glossy/specular threshold classifies every material the same way.
 
 Directional functions (RenderPark's modified Phong model, which is symmetric
@@ -56,7 +54,7 @@ bit-identical to RenderPark's BRDF and BTDF. C++ output pointers are
 one-element holders.
 */
 export class PhongLobe {
-    public static readonly LOWEST_SPECULAR_EXPONENT = f(250.0);
+    public static readonly LOWEST_SPECULAR_EXPONENT = 250.0;
 
     private readonly diffuse: ColorRgb;
     private readonly nonDiffuse: ColorRgb;
@@ -77,7 +75,7 @@ export class PhongLobe {
         }
         this.diffuse = new ColorRgb(a);
         this.nonDiffuse = new ColorRgb(inNonDiffuse!);
-        this.exponent = f(inExponent!);
+        this.exponent = inExponent!;
         this.averageDiffuse = averageOf(a);
         this.averageNonDiffuse = averageOf(inNonDiffuse!);
     }
@@ -136,15 +134,15 @@ export class PhongLobe {
         return new ColorRgb(r, g, b);
     }
 
-    /** ks factor cos(a)^Ns (Ns + 2) / (2 pi), in single precision */
+    /** ks factor cos(a)^Ns (Ns + 2) / (2 pi), in double precision */
     private nonDiffuseFactor(cosAlpha: number): number {
         let factor = powf(cosAlpha, this.exponent); // cos(a)^Ns
-        factor = f(factor * f(f(this.exponent + 2.0) / f(2.0 * f(Math.PI)))); // Ks -> ks
+        factor = factor * ((this.exponent + 2.0) / (2.0 * Math.PI)); // Ks -> ks
         return factor;
     }
 
     /** Reflected radiance factor (BRDF value) of the requested components */
-    public reflectionEvaluate(inDirection: Vector3Df, out: Vector3Df, normal: Vector3Df, components: number): ColorRgb {
+    public reflectionEvaluate(inDirection: Vector3Dd, out: Vector3Dd, normal: Vector3Dd, components: number): ColorRgb {
         let r = 0.0;
         let g = 0.0;
         let b = 0.0;
@@ -177,14 +175,14 @@ export class PhongLobe {
 
     /** Samples a reflected direction; its density goes to density[0] */
     public reflectionSample(
-        inDirection: Vector3Df,
-        normal: Vector3Df,
+        inDirection: Vector3Dd,
+        normal: Vector3Dd,
         russianRoulette: boolean,
         components: number,
         x1: number,
         x2: number,
         density: number[],
-    ): Vector3Df {
+    ): Vector3Dd {
         const inReversed = scale(-1.0, inDirection);
         density[0] = 0;
 
@@ -192,13 +190,13 @@ export class PhongLobe {
         const localNonDiffuse = this.sampledNonDiffuse(components);
         const scatteredPower = localDiffuse + localNonDiffuse;
         if (scatteredPower < NO_SCATTERING) {
-            return new Vector3Df(0.0, 0.0, 0.0);
+            return new Vector3Dd(0.0, 0.0, 0.0);
         }
 
         if (russianRoulette) {
             if (x1 > scatteredPower) {
                 // Absorption
-                return new Vector3Df(0.0, 0.0, 0.0);
+                return new Vector3Dd(0.0, 0.0, 0.0);
             }
             x1 /= scatteredPower;
         }
@@ -243,9 +241,9 @@ export class PhongLobe {
     turned to the side of `in`
     */
     public reflectionDensity(
-        inDirection: Vector3Df,
-        out: Vector3Df,
-        normal: Vector3Df,
+        inDirection: Vector3Dd,
+        out: Vector3Dd,
+        normal: Vector3Dd,
         components: number,
         density: number[],
         survival: number[],
@@ -296,9 +294,9 @@ export class PhongLobe {
     public transmissionEvaluate(
         inIndex: number,
         outIndex: number,
-        inDirection: Vector3Df,
-        out: Vector3Df,
-        normal: Vector3Df,
+        inDirection: Vector3Dd,
+        out: Vector3Dd,
+        normal: Vector3Dd,
         components: number,
     ): ColorRgb {
         const inReversed = scale(-1.0, inDirection);
@@ -341,14 +339,14 @@ export class PhongLobe {
     public transmissionSample(
         inIndex: number,
         outIndex: number,
-        inDirection: Vector3Df,
-        normal: Vector3Df,
+        inDirection: Vector3Dd,
+        normal: Vector3Dd,
         russianRoulette: boolean,
         components: number,
         x1: number,
         x2: number,
         density: number[],
-    ): Vector3Df {
+    ): Vector3Dd {
         const inReversed = scale(-1.0, inDirection);
         density[0] = 0;
 
@@ -356,13 +354,13 @@ export class PhongLobe {
         const localNonDiffuse = this.sampledNonDiffuse(components);
         const scatteredPower = localDiffuse + localNonDiffuse;
         if (scatteredPower < NO_SCATTERING) {
-            return new Vector3Df(0.0, 0.0, 0.0);
+            return new Vector3Dd(0.0, 0.0, 0.0);
         }
 
         if (russianRoulette) {
             if (x1 > scatteredPower) {
                 // Absorption
-                return new Vector3Df(0.0, 0.0, 0.0);
+                return new Vector3Dd(0.0, 0.0, 0.0);
             }
             x1 /= scatteredPower;
         }
@@ -413,9 +411,9 @@ export class PhongLobe {
     public transmissionDensity(
         inIndex: number,
         outIndex: number,
-        inDirection: Vector3Df,
-        out: Vector3Df,
-        normal: Vector3Df,
+        inDirection: Vector3Dd,
+        out: Vector3Dd,
+        normal: Vector3Dd,
         components: number,
         density: number[],
         survival: number[],

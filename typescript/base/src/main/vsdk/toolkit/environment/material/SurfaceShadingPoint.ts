@@ -1,4 +1,4 @@
-import type { Vector3Df } from "../../common/linealAlgebra/Vector3Df.js";
+import type { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 
 /**
 What the directional functions of PhongMaterial read about the surface point
@@ -9,15 +9,15 @@ its normal and its texture coordinate; the material only reads them.
 Immutable value.
 */
 export class SurfaceShadingPoint {
-    private readonly shadingNormal: Vector3Df;
-    private readonly textureCoordinate: Vector3Df;
+    private readonly shadingNormal: Vector3Dd;
+    private readonly textureCoordinate: Vector3Dd;
     private readonly shadingNormalKnown: boolean;
     private readonly textureCoordinateKnown: boolean;
 
     public constructor(
-        inShadingNormal: Vector3Df,
+        inShadingNormal: Vector3Dd,
         inShadingNormalKnown: boolean,
-        inTextureCoordinate: Vector3Df,
+        inTextureCoordinate: Vector3Dd,
         inTextureCoordinateKnown: boolean,
     ) {
         this.shadingNormal = inShadingNormal;
@@ -27,7 +27,7 @@ export class SurfaceShadingPoint {
     }
 
     /** Unit normal leaving the surface on the side the scattering is evaluated from */
-    public getShadingNormal(): Vector3Df {
+    public getShadingNormal(): Vector3Dd {
         return this.shadingNormal;
     }
 
@@ -36,7 +36,7 @@ export class SurfaceShadingPoint {
     }
 
     /** Texture coordinate (x and y used) */
-    public getTextureCoordinate(): Vector3Df {
+    public getTextureCoordinate(): Vector3Dd {
         return this.textureCoordinate;
     }
 

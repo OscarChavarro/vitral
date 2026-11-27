@@ -1,7 +1,7 @@
 // Port of cpp/base/src/test/phong_scattering_tests.cpp
 import { describe, it } from "vitest";
 import { ColorRgb } from "vsdk/toolkit/common/color/ColorRgb.js";
-import { Vector3Df } from "vsdk/toolkit/common/linealAlgebra/Vector3Df.js";
+import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { PhongLobe } from "vsdk/toolkit/environment/material/PhongLobe.js";
 import { PhongMaterial } from "vsdk/toolkit/environment/material/PhongMaterial.js";
 import { ScatteringComponent } from "vsdk/toolkit/environment/material/ScatteringComponent.js";
@@ -23,7 +23,7 @@ import {
 // RenderPark's VITRAL alignment): conventions, normalization, sampling
 // against density, roulette and component masks.
 
-const UP = new Vector3Df(0.0, 0.0, 1.0);
+const UP = new Vector3Dd(0.0, 0.0, 1.0);
 
 // A deterministic low-discrepancy pair: Hammersley points
 function radicalInverse(i: number): number {
@@ -39,12 +39,12 @@ function radicalInverse(i: number): number {
     return inverse;
 }
 
-function unit(x: number, y: number, z: number): Vector3Df {
-    return scatteringArithmetic.normalize(new Vector3Df(x, y, z), 1e-6);
+function unit(x: number, y: number, z: number): Vector3Dd {
+    return scatteringArithmetic.normalize(new Vector3Dd(x, y, z), 1e-6);
 }
 
-function pointWithNormal(normal: Vector3Df): SurfaceShadingPoint {
-    return new SurfaceShadingPoint(normal, true, new Vector3Df(), false);
+function pointWithNormal(normal: Vector3Dd): SurfaceShadingPoint {
+    return new SurfaceShadingPoint(normal, true, new Vector3Dd(), false);
 }
 
 describe("ScatteringFrame", () => {

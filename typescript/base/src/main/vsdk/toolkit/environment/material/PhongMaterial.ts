@@ -1,6 +1,5 @@
 import { ColorRgb } from "../../common/color/ColorRgb.js";
-import { Vector3Df } from "../../common/linealAlgebra/Vector3Df.js";
-import type { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
+import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 import { Logger } from "../../common/logging/Logger.js";
 import type { Material } from "./Material.js";
 import { PhongLobe } from "./PhongLobe.js";
@@ -9,10 +8,8 @@ import { ScatteringFrame, scatteringArithmetic } from "./ScatteringFrame.js";
 import type { SurfaceShadingPoint } from "./SurfaceShadingPoint.js";
 import type { Texture } from "./Texture.js";
 
-const f = Math.fround;
-
 function isFiniteColor(color: ColorRgb): boolean {
-    return Number.isFinite(f((color.getR() + color.getG() + color.getB()) / 3.0));
+    return Number.isFinite((color.getR() + color.getG() + color.getB()) / 3.0);
 }
 
 function copyLobe(lobe: PhongLobe | null): PhongLobe | null {
@@ -49,8 +46,8 @@ function sampleWithinPart(
     part: SampledPart,
     reflection: PhongLobe | null,
     transmission: PhongLobe | null,
-    normal: Vector3Df,
-    inDirection: Vector3Df,
+    normal: Vector3Dd,
+    inDirection: Vector3Dd,
     inIndex: number,
     outIndex: number,
     reflectionComponents: number,
@@ -58,7 +55,7 @@ function sampleWithinPart(
     x1: number,
     x2: number,
     density: number[],
-): Vector3Df {
+): Vector3Dd {
     switch (part) {
         case SampledPart.TEXTURE_PART:
             return new ScatteringFrame(normal).sampleCosine(x1, x2, density);
@@ -86,11 +83,11 @@ function sampleWithinPart(
             break;
     }
     density[0] = 0.0;
-    return new Vector3Df(0.0, 0.0, 0.0);
+    return new Vector3Dd(0.0, 0.0, 0.0);
 }
 
 /** Density of the texture's diffuse scattering: cos / pi */
-function textureDensity(out: Vector3Df, normal: Vector3Df): number {
+function textureDensity(out: Vector3Dd, normal: Vector3Dd): number {
     return scatteringArithmetic.dot(normal, out) / Math.PI;
 }
 
@@ -174,8 +171,8 @@ export class PhongMaterial implements Material {
         this.transmission = inTransmission;
         this.emission = inEmission;
         this.texture = inTexture;
-        this.storedRefractionIndexReal = f(inRefractionIndexReal);
-        this.storedRefractionIndexImaginary = f(inRefractionIndexImaginary);
+        this.storedRefractionIndexReal = inRefractionIndexReal;
+        this.storedRefractionIndexImaginary = inRefractionIndexImaginary;
     }
 
     public getName(): string {
@@ -241,7 +238,7 @@ export class PhongMaterial implements Material {
     the coordinate is unknown: a warning is reported and the texture adds
     nothing.
     */
-    public scatteredPower(components: number, textureCoordinate: Vector3Df | null): ColorRgb {
+    public scatteredPower(components: number, textureCoordinate: Vector3Dd | null): ColorRgb {
         let r = 0.0;
         let g = 0.0;
         let b = 0.0;
@@ -364,8 +361,8 @@ export class PhongMaterial implements Material {
         point: SurfaceShadingPoint,
         inMedium: PhongMaterial | null,
         outMedium: PhongMaterial | null,
-        inDirection: Vector3Df,
-        out: Vector3Df,
+        inDirection: Vector3Dd,
+        out: Vector3Dd,
         components: number,
     ): ColorRgb {
         let r = 0.0;
@@ -428,17 +425,17 @@ export class PhongMaterial implements Material {
         point: SurfaceShadingPoint,
         inMedium: PhongMaterial | null,
         outMedium: PhongMaterial | null,
-        inDirection: Vector3Df,
+        inDirection: Vector3Dd,
         russianRoulette: boolean,
         components: number,
         x1: number,
         x2: number,
         density: number[],
-    ): Vector3Df {
+    ): Vector3Dd {
         density[0] = 0;
         if (!point.hasShadingNormal()) {
             Logger.reportMessage(this, Logger.WARNING, "scatteringSample", "Couldn't determine shading normal");
-            return new Vector3Df(0.0, 0.0, 1.0);
+            return new Vector3Dd(0.0, 0.0, 1.0);
         }
         const normal = point.getShadingNormal();
 
@@ -461,7 +458,7 @@ export class PhongMaterial implements Material {
         let transmissionPart = transmissionPartHolder[0]!;
         const scattering = texturePart + reflectionPart + transmissionPart;
         if (scattering < NO_SCATTERING) {
-            return new Vector3Df(0.0, 0.0, 0.0);
+            return new Vector3Dd(0.0, 0.0, 0.0);
         }
 
         if (!russianRoulette) {
@@ -564,8 +561,8 @@ export class PhongMaterial implements Material {
         point: SurfaceShadingPoint,
         inMedium: PhongMaterial | null,
         outMedium: PhongMaterial | null,
-        inDirection: Vector3Df,
-        out: Vector3Df,
+        inDirection: Vector3Dd,
+        out: Vector3Dd,
         components: number,
         density: number[],
         survival: number[],
@@ -635,8 +632,8 @@ export class PhongMaterial implements Material {
         point: SurfaceShadingPoint,
         inMedium: PhongMaterial | null,
         outMedium: PhongMaterial | null,
-        inDirection: Vector3Df,
-        out: Vector3Df,
+        inDirection: Vector3Dd,
+        out: Vector3Dd,
         components: number,
         componentValues: ColorRgb[],
     ): ColorRgb {
@@ -666,7 +663,7 @@ export class PhongMaterial implements Material {
     */
     public emissionEvaluate(
         point: SurfaceShadingPoint | null,
-        out: Vector3Df,
+        out: Vector3Dd,
         components: number,
         density: number[] | null,
     ): ColorRgb {
@@ -683,7 +680,7 @@ export class PhongMaterial implements Material {
         }
         if ((components & ScatteringComponent.DIFFUSE) !== 0) {
             // kd = Kd / pi, with 1 / pi in single precision as RenderPark stores it
-            const toRadiance = f(1.0 / f(Math.PI));
+            const toRadiance = 1.0 / Math.PI;
             if (density !== null) {
                 density[0] = cosL / Math.PI;
             }
@@ -709,7 +706,7 @@ export class PhongMaterial implements Material {
         xi2: number,
         radiance: ColorRgb[] | null,
         density: number[] | null,
-    ): Vector3Df {
+    ): Vector3Dd {
         if (radiance !== null) {
             radiance[0] = new ColorRgb(0.0, 0.0, 0.0);
         }
@@ -717,11 +714,11 @@ export class PhongMaterial implements Material {
             density[0] = 0.0;
         }
         if ((components & ScatteringComponent.DIFFUSE) === 0) {
-            return new Vector3Df(0.0, 0.0, 1.0);
+            return new Vector3Dd(0.0, 0.0, 1.0);
         }
         if (point === null || !point.hasShadingNormal()) {
             Logger.reportMessage(this, Logger.WARNING, "emissionSample", "Couldn't determine shading normal");
-            return new Vector3Df(0.0, 0.0, 1.0);
+            return new Vector3Dd(0.0, 0.0, 1.0);
         }
         const sampleDensity: number[] = [0];
         const direction = new ScatteringFrame(point.getShadingNormal()).sampleCosine(xi1, xi2, sampleDensity);
@@ -729,7 +726,7 @@ export class PhongMaterial implements Material {
             density[0] = sampleDensity[0]!;
         }
         if (radiance !== null && this.emission !== null) {
-            const toRadiance = f(1.0 / f(Math.PI));
+            const toRadiance = 1.0 / Math.PI;
             radiance[0] = new ColorRgb(
                 toRadiance * this.emission.getDiffuse().getR(),
                 toRadiance * this.emission.getDiffuse().getG(),

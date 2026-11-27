@@ -10,7 +10,7 @@ PKGS_DIR="$(cd "${JAVA_DIR}/../pkgs" 2>/dev/null && pwd || true)"
 # pkgs/<package>/build, so they must be built there, not just configured, or
 # the toolkit silently falls back to its slower pure Java equivalents (i.e.
 # ImagePersistence uses the AWT based PNG reader instead of NativeImageReader).
-# cleanAll.sh removes those libraries (`make clean`), so they must be built
+# clean.sh removes those libraries (`make clean`), so they must be built
 # again after it; building is skipped, with a warning, if cmake is missing.
 if [[ -n "${PKGS_DIR}" ]]; then
   if command -v cmake >/dev/null 2>&1; then

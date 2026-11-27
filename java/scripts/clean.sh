@@ -8,7 +8,7 @@ PKGS_DIR="$(cd "$JAVA_DIR/../pkgs" 2>/dev/null && pwd || true)"
 cd "$JAVA_DIR" || exit 1
 
 warn() {
-    echo "cleanAll.sh: $*" >&2
+    echo "clean.sh: $*" >&2
 }
 
 rm -rf build

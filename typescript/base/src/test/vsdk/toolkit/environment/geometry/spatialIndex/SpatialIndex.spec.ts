@@ -2,7 +2,6 @@
 import { describe, it } from "vitest";
 import { ArrayList } from "java/util/ArrayList.js";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
-import { Vector3Df } from "vsdk/toolkit/common/linealAlgebra/Vector3Df.js";
 import { RaytraceStatistics } from "vsdk/toolkit/common/statistics/RaytraceStatistics.js";
 import { PlanarFace } from "vsdk/toolkit/environment/geometry/element/PlanarFace.js";
 import { Ray } from "vsdk/toolkit/environment/geometry/element/Ray.js";
@@ -25,8 +24,6 @@ import {
     expectTrue,
 } from "../../../../../GTestAssertions.js";
 
-const f = Math.fround;
-
 // Deterministic generator, so that every run builds the same scene and rays
 class Sequence {
     private state: number;
@@ -47,7 +44,7 @@ class Scene {
     private readonly faces: PlanarFace[] = [];
     private readonly boxes: ArrayList<number> = new ArrayList<number>();
 
-    public add(a: Vector3Df, b: Vector3Df, c: Vector3Df): void {
+    public add(a: Vector3Dd, b: Vector3Dd, c: Vector3Dd): void {
         this.faces.push(new PlanarFace(3, [a, b, c]));
         const padding = 1e-4;
         const v = [a, b, c];
@@ -85,12 +82,12 @@ function randomTriangles(count: number, seed: number): Scene {
     const scene = new Scene();
     const s = new Sequence(seed);
     for (let i = 0; i < count; i++) {
-        const cx = f(10.0 * s.next());
-        const cy = f(10.0 * s.next());
-        const cz = f(10.0 * s.next());
-        const a = new Vector3Df(cx, cy, cz);
-        const b = new Vector3Df(f(cx + f(s.next())), f(cy + f(0.2 * s.next())), f(cz + f(0.5 * s.next())));
-        const c = new Vector3Df(f(cx + f(0.3 * s.next())), f(cy + f(s.next())), f(cz + f(0.4 * s.next())));
+        const cx = 10.0 * s.next();
+        const cy = 10.0 * s.next();
+        const cz = 10.0 * s.next();
+        const a = new Vector3Dd(cx, cy, cz);
+        const b = new Vector3Dd(cx + s.next(), cy + 0.2 * s.next(), cz + 0.5 * s.next());
+        const c = new Vector3Dd(cx + 0.3 * s.next(), cy + s.next(), cz + 0.4 * s.next());
         scene.add(a, b, c);
     }
     return scene;
@@ -101,12 +98,12 @@ function randomTriangles(count: number, seed: number): Scene {
 // winning ties, as brute force
 class FaceRayTest implements PrimitiveRayTest {
     private readonly scene: Scene;
-    private readonly origin: Vector3Df;
-    private readonly direction: Vector3Df;
+    private readonly origin: Vector3Dd;
+    private readonly direction: Vector3Dd;
     private readonly excluded: number;
     private acceptedPrimitive: number;
 
-    public constructor(inScene: Scene, inOrigin: Vector3Df, inDirection: Vector3Df, inExcluded = -1) {
+    public constructor(inScene: Scene, inOrigin: Vector3Dd, inDirection: Vector3Dd, inExcluded = -1) {
         this.scene = inScene;
         this.origin = inOrigin;
         this.direction = inDirection;
@@ -119,9 +116,7 @@ class FaceRayTest implements PrimitiveRayTest {
             return false;
         }
         const hit = new PlanarFace.RayHit();
-        if (
-            !this.scene.face(primitive).rayHit(this.origin, this.direction, true, true, f(minimumT), f(maximumT), hit)
-        ) {
+        if (!this.scene.face(primitive).rayHit(this.origin, this.direction, true, true, minimumT, maximumT, hit)) {
             return false;
         }
         const t = hit.getDistance();
@@ -134,7 +129,7 @@ class FaceRayTest implements PrimitiveRayTest {
     }
 }
 
-function affineRay(origin: Vector3Df, direction: Vector3Df): Ray {
+function affineRay(origin: Vector3Dd, direction: Vector3Dd): Ray {
     return Ray.fromAffine(
         new Vector3Dd(origin.x(), origin.y(), origin.z()),
         new Vector3Dd(direction.x(), direction.y(), direction.z()),
@@ -150,8 +145,8 @@ interface Answer {
 function ask(
     index: SpatialIndex,
     scene: Scene,
-    origin: Vector3Df,
-    direction: Vector3Df,
+    origin: Vector3Dd,
+    direction: Vector3Dd,
     minimumT: number,
     maximumT: number,
     mode: SpatialQueryMode,
@@ -168,10 +163,10 @@ function ask(
 }
 
 /** @return origin and direction (C++ output pointers) */
-function randomRay(s: Sequence): [Vector3Df, Vector3Df] {
-    const origin = new Vector3Df(f(-2.0 + 14.0 * s.next()), f(-2.0 + 14.0 * s.next()), f(-2.0 + 14.0 * s.next()));
+function randomRay(s: Sequence): [Vector3Dd, Vector3Dd] {
+    const origin = new Vector3Dd(-2.0 + 14.0 * s.next(), -2.0 + 14.0 * s.next(), -2.0 + 14.0 * s.next());
     // Not normalized: the index works with the affine parameter of the test
-    const direction = new Vector3Df(f(-1.0 + 2.0 * s.next()), f(-1.0 + 2.0 * s.next()), f(-1.0 + 2.0 * s.next()));
+    const direction = new Vector3Dd(-1.0 + 2.0 * s.next(), -1.0 + 2.0 * s.next(), -1.0 + 2.0 * s.next());
     return [origin, direction];
 }
 
@@ -210,24 +205,24 @@ class ClusteredScene {
             const cy = 10.0 * s.next();
             const cz = 10.0 * s.next();
             for (let i = 0; i < count; i++) {
-                const x = f(cx + 0.4 * s.next());
-                const y = f(cy + 0.4 * s.next());
-                const z = f(cz + 0.4 * s.next());
+                const x = cx + 0.4 * s.next();
+                const y = cy + 0.4 * s.next();
+                const z = cz + 0.4 * s.next();
                 scene.add(
-                    new Vector3Df(x, y, z),
-                    new Vector3Df(f(x + f(0.2 * s.next())), f(y + f(0.05 * s.next())), f(z + f(0.1 * s.next()))),
-                    new Vector3Df(f(x + f(0.05 * s.next())), f(y + f(0.2 * s.next())), f(z + f(0.1 * s.next()))),
+                    new Vector3Dd(x, y, z),
+                    new Vector3Dd(x + 0.2 * s.next(), y + 0.05 * s.next(), z + 0.1 * s.next()),
+                    new Vector3Dd(x + 0.05 * s.next(), y + 0.2 * s.next(), z + 0.1 * s.next()),
                 );
             }
         }
         clusterFirst.add(scene.size());
         const firstLarge = scene.size();
         for (let i = 0; i < 6; i++) {
-            const z = f(10.0 * s.next());
+            const z = 10.0 * s.next();
             scene.add(
-                new Vector3Df(-1.0, -1.0, z),
-                new Vector3Df(11.0, -1.0, f(z + 0.5)),
-                new Vector3Df(5.0, 11.0, f(z - 0.5)),
+                new Vector3Dd(-1.0, -1.0, z),
+                new Vector3Dd(11.0, -1.0, z + 0.5),
+                new Vector3Dd(5.0, 11.0, z - 0.5),
             );
         }
 
@@ -319,16 +314,16 @@ describe("SpatialIndex", () => {
         const scene = new Scene();
         for (let k = 0; k < 10; k++) {
             const z = k + 1;
-            scene.add(new Vector3Df(-1, -1, z), new Vector3Df(1, -1, z), new Vector3Df(1, 1, z));
-            scene.add(new Vector3Df(-1, -1, z), new Vector3Df(1, 1, z), new Vector3Df(-1, 1, z));
+            scene.add(new Vector3Dd(-1, -1, z), new Vector3Dd(1, -1, z), new Vector3Dd(1, 1, z));
+            scene.add(new Vector3Dd(-1, -1, z), new Vector3Dd(1, 1, z), new Vector3Dd(-1, 1, z));
         }
         const linear = new LinearSpatialIndex(scene.size());
         const workspace = new SpatialIndexWorkspace();
         const any = ask(
             linear,
             scene,
-            new Vector3Df(0.1, 0.2, 0),
-            new Vector3Df(0, 0, 1),
+            new Vector3Dd(0.1, 0.2, 0),
+            new Vector3Dd(0, 0, 1),
             0.0,
             100.0,
             SpatialQueryMode.ANY_HIT,
@@ -340,8 +335,8 @@ describe("SpatialIndex", () => {
         const closest = ask(
             linear,
             scene,
-            new Vector3Df(0.1, 0.2, 0),
-            new Vector3Df(0, 0, 1),
+            new Vector3Dd(0.1, 0.2, 0),
+            new Vector3Dd(0, 0, 1),
             0.0,
             100.0,
             SpatialQueryMode.CLOSEST_HIT,
@@ -354,12 +349,12 @@ describe("SpatialIndex", () => {
 
     it("MinimumAndMaximumParametersAreInclusiveAndApplied", () => {
         const scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1)); // t = 1
-        scene.add(new Vector3Df(-1, -1, 3), new Vector3Df(1, -1, 3), new Vector3Df(0, 1, 3)); // t = 3
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1)); // t = 1
+        scene.add(new Vector3Dd(-1, -1, 3), new Vector3Dd(1, -1, 3), new Vector3Dd(0, 1, 3)); // t = 3
         const binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<number>());
         const workspace = new SpatialIndexWorkspace();
-        const origin = new Vector3Df(0, 0, 0);
-        const up = new Vector3Df(0, 0, 1);
+        const origin = new Vector3Dd(0, 0, 0);
+        const up = new Vector3Dd(0, 0, 1);
         // A blocker closer than the minimum is not accepted; the next one is
         let a = ask(binned, scene, origin, up, 1.5, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
@@ -376,15 +371,15 @@ describe("SpatialIndex", () => {
 
     it("ExcludedPrimitiveDoesNotHideTheOneBehind", () => {
         const scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1));
-        scene.add(new Vector3Df(-1, -1, 2), new Vector3Df(1, -1, 2), new Vector3Df(0, 1, 2));
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1));
+        scene.add(new Vector3Dd(-1, -1, 2), new Vector3Dd(1, -1, 2), new Vector3Dd(0, 1, 2));
         const linear = new LinearSpatialIndex(scene.size());
         const binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<number>());
         const workspace = new SpatialIndexWorkspace();
         for (let m = 0; m < 2; m++) {
             const mode = m === 0 ? SpatialQueryMode.CLOSEST_HIT : SpatialQueryMode.ANY_HIT;
-            const a = ask(linear, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
-            const b = ask(binned, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
+            const a = ask(linear, scene, new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
+            const b = ask(binned, scene, new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
             expectEq(1, a.primitive);
             expectEq(1, b.primitive);
         }
@@ -393,17 +388,17 @@ describe("SpatialIndex", () => {
     it("EqualParameterTiesFollowTheTestRule", () => {
         // Two triangles sharing an edge: a ray through the edge hits both at t = 1
         const scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1));
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(0, 1, 1), new Vector3Df(-2, 1, 1));
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1));
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(0, 1, 1), new Vector3Dd(-2, 1, 1));
         const linear = new LinearSpatialIndex(scene.size());
         const binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<number>(), 1);
         const workspace = new SpatialIndexWorkspace();
-        const origin = new Vector3Df(-0.5, 0.0, 0.0);
+        const origin = new Vector3Dd(-0.5, 0.0, 0.0);
         const a = ask(
             linear,
             scene,
             origin,
-            new Vector3Df(0, 0, 1),
+            new Vector3Dd(0, 0, 1),
             0.0,
             10.0,
             SpatialQueryMode.CLOSEST_HIT,
@@ -413,7 +408,7 @@ describe("SpatialIndex", () => {
             binned,
             scene,
             origin,
-            new Vector3Df(0, 0, 1),
+            new Vector3Dd(0, 0, 1),
             0.0,
             10.0,
             SpatialQueryMode.CLOSEST_HIT,
@@ -427,8 +422,8 @@ describe("SpatialIndex", () => {
 
     it("UnboundedPrimitivesAreAlwaysTested", () => {
         const scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 5), new Vector3Df(1, -1, 5), new Vector3Df(0, 1, 5));
-        scene.add(new Vector3Df(-100, -100, 2), new Vector3Df(100, -100, 2), new Vector3Df(0, 100, 2));
+        scene.add(new Vector3Dd(-1, -1, 5), new Vector3Dd(1, -1, 5), new Vector3Dd(0, 1, 5));
+        scene.add(new Vector3Dd(-100, -100, 2), new Vector3Dd(100, -100, 2), new Vector3Dd(0, 100, 2));
         const unboundedPrimitives = new ArrayList<number>();
         unboundedPrimitives.add(1);
         // Primitive 1 is unbounded: its box (which would contain it) is ignored
@@ -437,8 +432,8 @@ describe("SpatialIndex", () => {
         const a = ask(
             binned,
             scene,
-            new Vector3Df(0, 0, 0),
-            new Vector3Df(0, 0, 1),
+            new Vector3Dd(0, 0, 0),
+            new Vector3Dd(0, 0, 1),
             0.0,
             10.0,
             SpatialQueryMode.CLOSEST_HIT,
@@ -458,8 +453,8 @@ describe("SpatialIndex", () => {
             ask(
                 linear,
                 scene,
-                new Vector3Df(0, 0, 0),
-                new Vector3Df(0, 0, 1),
+                new Vector3Dd(0, 0, 0),
+                new Vector3Dd(0, 0, 1),
                 0.0,
                 10.0,
                 SpatialQueryMode.CLOSEST_HIT,
@@ -470,8 +465,8 @@ describe("SpatialIndex", () => {
             ask(
                 binned,
                 scene,
-                new Vector3Df(0, 0, 0),
-                new Vector3Df(0, 0, 1),
+                new Vector3Dd(0, 0, 0),
+                new Vector3Dd(0, 0, 1),
                 0.0,
                 10.0,
                 SpatialQueryMode.ANY_HIT,
@@ -509,8 +504,8 @@ describe("SpatialIndex", () => {
         const scene = randomTriangles(300, 23);
         const binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<number>());
         const numberOfRays = 4000;
-        const origins: Vector3Df[] = [];
-        const directions: Vector3Df[] = [];
+        const origins: Vector3Dd[] = [];
+        const directions: Vector3Dd[] = [];
         const s = new Sequence(29);
         for (let i = 0; i < numberOfRays; i++) {
             const [origin, direction] = randomRay(s);
@@ -628,8 +623,8 @@ describe("GridSpatialIndex", () => {
         // Two parallel triangles crossing the whole scene, in one group that does
         // not fit in a cell, so that they are items of their own
         const scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1)); // t = 1
-        scene.add(new Vector3Df(-1, -1, 3), new Vector3Df(1, -1, 3), new Vector3Df(0, 1, 3)); // t = 3
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1)); // t = 1
+        scene.add(new Vector3Dd(-1, -1, 3), new Vector3Dd(1, -1, 3), new Vector3Dd(0, 1, 3)); // t = 3
         const box: number[] = [0, 0, 0, 0, 0, 0];
         unionBox(scene, 0, 1, box);
         const tree = new SpatialGroupTree(scene.getBoxes(), box);
@@ -637,8 +632,8 @@ describe("GridSpatialIndex", () => {
         tree.addPrimitive(0, 1);
         const grid = new GridSpatialIndex(tree);
         const workspace = new SpatialIndexWorkspace(grid.getWorkspaceSize());
-        const origin = new Vector3Df(0, 0, 0);
-        const up = new Vector3Df(0, 0, 1);
+        const origin = new Vector3Dd(0, 0, 0);
+        const up = new Vector3Dd(0, 0, 1);
         let a = ask(grid, scene, origin, up, 1.5, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
         expectEq(1, a.primitive);
@@ -655,8 +650,8 @@ describe("GridSpatialIndex", () => {
         a = ask(
             grid,
             scene,
-            new Vector3Df(0.1, 0.0, 2.0),
-            new Vector3Df(0, 0, -1),
+            new Vector3Dd(0.1, 0.0, 2.0),
+            new Vector3Dd(0, 0, -1),
             0.0,
             10.0,
             SpatialQueryMode.CLOSEST_HIT,
@@ -676,8 +671,8 @@ describe("GridSpatialIndex", () => {
             ask(
                 grid,
                 scene,
-                new Vector3Df(0, 0, -1),
-                new Vector3Df(0, 0, 1),
+                new Vector3Dd(0, 0, -1),
+                new Vector3Dd(0, 0, 1),
                 0.0,
                 10.0,
                 SpatialQueryMode.CLOSEST_HIT,
@@ -692,8 +687,8 @@ describe("GridSpatialIndex", () => {
         const scene = clustered.getScene();
         const grid = new GridSpatialIndex(clustered.getTree());
         const numberOfRays = 4000;
-        const origins: Vector3Df[] = [];
-        const directions: Vector3Df[] = [];
+        const origins: Vector3Dd[] = [];
+        const directions: Vector3Dd[] = [];
         const s = new Sequence(59);
         for (let i = 0; i < numberOfRays; i++) {
             const [origin, direction] = randomRay(s);
