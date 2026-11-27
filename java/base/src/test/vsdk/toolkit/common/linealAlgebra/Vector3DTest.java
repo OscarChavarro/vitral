@@ -82,4 +82,61 @@ class Vector3DTest
         assertThatThrownBy(() -> a.epsilonEquals(b, -1.0))
             .isInstanceOf(IllegalArgumentException.class);
     }
+    @Test
+    void given_vector_when_lengthsAndDistances_then_resultsAreExact()
+    {
+        final Vector3Dd a = new Vector3Dd(1.0, -2.0, 2.0);
+        assertThat(a.lengthSquared()).isEqualTo(9.0);
+        assertThat(a.manhattanLength()).isEqualTo(5.0);
+        final Vector3Dd b = new Vector3Dd(4.0, 2.0, 2.0);
+        assertThat(a.distance(b)).isEqualTo(5.0);
+        assertThat(a.distanceSquared(b)).isEqualTo(25.0);
+        assertThat(a.distance(b)).isEqualTo(b.subtract(a).length());
+    }
+
+    @Test
+    void given_smallDivisor_when_multiplyByInverse_then_vectorIsKept()
+    {
+        final Vector3Dd v = new Vector3Dd(2.0, 4.0, -6.0);
+        final Vector3Dd scaled = v.multiplyByInverse(2.0, 1e-6);
+        assertThat(scaled.x()).isEqualTo(1.0);
+        assertThat(scaled.y()).isEqualTo(2.0);
+        assertThat(scaled.z()).isEqualTo(-3.0);
+        assertThat(v.multiplyByInverse(1e-7, 1e-6)).isEqualTo(v);
+        assertThat(v.multiplyByInverse(-1e-7, 1e-6)).isEqualTo(v);
+        // The factor is computed once: x * (1 / s), not x / s
+        final double s = 3.0;
+        assertThat(new Vector3Dd(1.0, 0.0, 0.0).multiplyByInverse(s, 1e-6).x()).isEqualTo((1.0 / s) * 1.0);
+    }
+
+    @Test
+    void given_epsilon_when_normalized_then_tinyVectorIsKept()
+    {
+        final Vector3Dd n = new Vector3Dd(3.0, 4.0, 12.0).normalized(1e-6);
+        final double factor = 1.0 / 13.0;
+        assertThat(n.x()).isEqualTo(factor * 3.0);
+        assertThat(n.y()).isEqualTo(factor * 4.0);
+        assertThat(n.z()).isEqualTo(factor * 12.0);
+        final Vector3Dd tiny = new Vector3Dd(1e-8, 0.0, 0.0);
+        assertThat(tiny.normalized(1e-6)).isEqualTo(tiny);
+    }
+
+    @Test
+    void given_vectors_when_dominantAxis_then_tiesGoToFirstAxis()
+    {
+        assertThat(new Vector3Dd(-5.0, 1.0, 2.0).dominantAxis()).isEqualTo(0);
+        assertThat(new Vector3Dd(1.0, -5.0, 2.0).dominantAxis()).isEqualTo(1);
+        assertThat(new Vector3Dd(1.0, 2.0, -5.0).dominantAxis()).isEqualTo(2);
+        assertThat(new Vector3Dd(3.0, -3.0, 3.0).dominantAxis()).isEqualTo(0);
+        assertThat(new Vector3Dd(1.0, 3.0, -3.0).dominantAxis()).isEqualTo(1);
+    }
+
+    @Test
+    void given_vector_when_component_then_matchesNamedAccessors()
+    {
+        final Vector3Dd value = new Vector3Dd(1.5, -2.0, 3.25);
+        assertThat(value.component(0)).isEqualTo(value.x());
+        assertThat(value.component(1)).isEqualTo(value.y());
+        assertThat(value.component(2)).isEqualTo(value.z());
+    }
 }

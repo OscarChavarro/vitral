@@ -81,4 +81,13 @@ class Vector2DTest
         assertThatThrownBy(() -> a.epsilonEquals(b, -1.0))
             .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void given_vectors_when_subtract_then_lengthSquaredIsExact()
+    {
+        final Vector2Dd d = new Vector2Dd(4.0, -1.0).subtract(new Vector2Dd(1.0, 3.0));
+        assertThat(d.x).isEqualTo(3.0);
+        assertThat(d.y).isEqualTo(-4.0);
+        assertThat(d.lengthSquared()).isEqualTo(25.0);
+    }
 }

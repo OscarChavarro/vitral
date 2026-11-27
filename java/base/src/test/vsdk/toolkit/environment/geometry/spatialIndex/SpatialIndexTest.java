@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.common.linealAlgebra.Vector3Df;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.environment.geometry.element.PlanarFace;
 import vsdk.toolkit.environment.geometry.element.Ray;
@@ -48,12 +48,12 @@ class SpatialIndexTest
         private final ArrayList<PlanarFace> faces = new ArrayList<>();
         private final ArrayList<Double> boxes = new ArrayList<>();
 
-        void add(Vector3Df a, Vector3Df b, Vector3Df c)
+        void add(Vector3Dd a, Vector3Dd b, Vector3Dd c)
         {
-            final Vector3Df[] p = {a, b, c};
+            final Vector3Dd[] p = {a, b, c};
             faces.add(new PlanarFace(3, p));
             final double padding = 1e-4;
-            final Vector3Df[] v = {a, b, c};
+            final Vector3Dd[] v = {a, b, c};
             double[] lo = {1e30, 1e30, 1e30};
             double[] hi = {-1e30, -1e30, -1e30};
             for ( int i = 0; i < 3; i++ ) {
@@ -92,12 +92,12 @@ class SpatialIndexTest
         Scene scene = new Scene();
         Sequence s = new Sequence(seed);
         for ( int i = 0; i < count; i++ ) {
-            final float cx = (float)(10.0 * s.next());
-            final float cy = (float)(10.0 * s.next());
-            final float cz = (float)(10.0 * s.next());
-            final Vector3Df a = new Vector3Df(cx, cy, cz);
-            final Vector3Df b = new Vector3Df(cx + (float)(s.next()), cy + (float)(0.2 * s.next()), cz + (float)(0.5 * s.next()));
-            final Vector3Df c = new Vector3Df(cx + (float)(0.3 * s.next()), cy + (float)(s.next()), cz + (float)(0.4 * s.next()));
+            final double cx = (double)(10.0 * s.next());
+            final double cy = (double)(10.0 * s.next());
+            final double cz = (double)(10.0 * s.next());
+            final Vector3Dd a = new Vector3Dd(cx, cy, cz);
+            final Vector3Dd b = new Vector3Dd(cx + (double)(s.next()), cy + (double)(0.2 * s.next()), cz + (double)(0.5 * s.next()));
+            final Vector3Dd c = new Vector3Dd(cx + (double)(0.3 * s.next()), cy + (double)(s.next()), cz + (double)(0.4 * s.next()));
             scene.add(a, b, c);
         }
         return scene;
@@ -108,12 +108,12 @@ class SpatialIndexTest
     // winning ties, as brute force
     private static final class FaceRayTest implements PrimitiveRayTest {
         private final Scene scene;
-        private final Vector3Df origin;
-        private final Vector3Df direction;
+        private final Vector3Dd origin;
+        private final Vector3Dd direction;
         private final int excluded;
         private int acceptedPrimitive;
 
-        FaceRayTest(Scene inScene, Vector3Df inOrigin, Vector3Df inDirection, int inExcluded)
+        FaceRayTest(Scene inScene, Vector3Dd inOrigin, Vector3Dd inDirection, int inExcluded)
         {
             scene = inScene;
             origin = inOrigin;
@@ -130,7 +130,7 @@ class SpatialIndexTest
             }
             PlanarFace.RayHit hit = new PlanarFace.RayHit();
             if ( !scene.face(primitive).rayHit(origin, direction, true, true,
-                    (float)minimumT, (float)maximumT, hit) ) {
+                    (double)minimumT, (double)maximumT, hit) ) {
                 return false;
             }
             final double t = hit.distance;
@@ -143,7 +143,7 @@ class SpatialIndexTest
         }
     }
 
-    private static Ray affineRay(Vector3Df origin, Vector3Df direction)
+    private static Ray affineRay(Vector3Dd origin, Vector3Dd direction)
     {
         return Ray.fromAffine(new Vector3Dd(origin.x(), origin.y(), origin.z()),
             new Vector3Dd(direction.x(), direction.y(), direction.z()));
@@ -155,14 +155,14 @@ class SpatialIndexTest
         double parameter;
     }
 
-    private static Answer ask(SpatialIndex index, Scene scene, Vector3Df origin, Vector3Df direction,
+    private static Answer ask(SpatialIndex index, Scene scene, Vector3Dd origin, Vector3Dd direction,
         double minimumT, double maximumT, SpatialQueryMode mode,
         SpatialIndexWorkspace workspace)
     {
         return ask(index, scene, origin, direction, minimumT, maximumT, mode, workspace, -1);
     }
 
-    private static Answer ask(SpatialIndex index, Scene scene, Vector3Df origin, Vector3Df direction,
+    private static Answer ask(SpatialIndex index, Scene scene, Vector3Dd origin, Vector3Dd direction,
         double minimumT, double maximumT, SpatialQueryMode mode,
         SpatialIndexWorkspace workspace, int excluded)
     {
@@ -176,12 +176,12 @@ class SpatialIndexTest
     }
 
     /** `randomRay(s, &origin, &direction)`: returns {origin, direction} */
-    private static Vector3Df[] randomRay(Sequence s)
+    private static Vector3Dd[] randomRay(Sequence s)
     {
-        final Vector3Df origin = new Vector3Df((float)(-2.0 + 14.0 * s.next()), (float)(-2.0 + 14.0 * s.next()), (float)(-2.0 + 14.0 * s.next()));
+        final Vector3Dd origin = new Vector3Dd((double)(-2.0 + 14.0 * s.next()), (double)(-2.0 + 14.0 * s.next()), (double)(-2.0 + 14.0 * s.next()));
         // Not normalized: the index works with the affine parameter of the test
-        final Vector3Df direction = new Vector3Df((float)(-1.0 + 2.0 * s.next()), (float)(-1.0 + 2.0 * s.next()), (float)(-1.0 + 2.0 * s.next()));
-        return new Vector3Df[] {origin, direction};
+        final Vector3Dd direction = new Vector3Dd((double)(-1.0 + 2.0 * s.next()), (double)(-1.0 + 2.0 * s.next()), (double)(-1.0 + 2.0 * s.next()));
+        return new Vector3Dd[] {origin, direction};
     }
 
     // Union of the boxes of primitives first .. last
@@ -221,19 +221,19 @@ class SpatialIndexTest
                 final double cy = 10.0 * s.next();
                 final double cz = 10.0 * s.next();
                 for ( int i = 0; i < count; i++ ) {
-                    final float x = (float)(cx + 0.4 * s.next());
-                    final float y = (float)(cy + 0.4 * s.next());
-                    final float z = (float)(cz + 0.4 * s.next());
-                    scene.add(new Vector3Df(x, y, z),
-                        new Vector3Df(x + (float)(0.2 * s.next()), y + (float)(0.05 * s.next()), z + (float)(0.1 * s.next())),
-                        new Vector3Df(x + (float)(0.05 * s.next()), y + (float)(0.2 * s.next()), z + (float)(0.1 * s.next())));
+                    final double x = (double)(cx + 0.4 * s.next());
+                    final double y = (double)(cy + 0.4 * s.next());
+                    final double z = (double)(cz + 0.4 * s.next());
+                    scene.add(new Vector3Dd(x, y, z),
+                        new Vector3Dd(x + (double)(0.2 * s.next()), y + (double)(0.05 * s.next()), z + (double)(0.1 * s.next())),
+                        new Vector3Dd(x + (double)(0.05 * s.next()), y + (double)(0.2 * s.next()), z + (double)(0.1 * s.next())));
                 }
             }
             clusterFirst.add(scene.size());
             final int firstLarge = scene.size();
             for ( int i = 0; i < 6; i++ ) {
-                final float z = (float)(10.0 * s.next());
-                scene.add(new Vector3Df(-1.0F, -1.0F, z), new Vector3Df(11.0F, -1.0F, z + 0.5F), new Vector3Df(5.0F, 11.0F, z - 0.5F));
+                final double z = (double)(10.0 * s.next());
+                scene.add(new Vector3Dd(-1.0, -1.0, z), new Vector3Dd(11.0, -1.0, z + 0.5), new Vector3Dd(5.0, 11.0, z - 0.5));
             }
 
             double[] box = new double[6];
@@ -273,7 +273,7 @@ class SpatialIndexTest
         Sequence s = new Sequence(11);
         int hits = 0;
         for ( int i = 0; i < 2000; i++ ) {
-            final Vector3Df[] ray = randomRay(s);
+            final Vector3Dd[] ray = randomRay(s);
             final Answer a = ask(linear, scene, ray[0], ray[1], 0.0, 1e30, SpatialQueryMode.CLOSEST_HIT, linearWorkspace);
             final Answer b = ask(binned, scene, ray[0], ray[1], 0.0, 1e30, SpatialQueryMode.CLOSEST_HIT, binnedWorkspace);
             expectEq(a.hit, b.hit, "ray " + i);
@@ -299,7 +299,7 @@ class SpatialIndexTest
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace();
         Sequence s = new Sequence(5);
         for ( int i = 0; i < 2000; i++ ) {
-            final Vector3Df[] ray = randomRay(s);
+            final Vector3Dd[] ray = randomRay(s);
             // A segment: visibility between two points, as a shadow ray
             final Answer a = ask(linear, scene, ray[0], ray[1], 1e-3, 1.0, SpatialQueryMode.ANY_HIT, workspace);
             final Answer b = ask(binned, scene, ray[0], ray[1], 1e-3, 1.0, SpatialQueryMode.ANY_HIT, workspace);
@@ -318,17 +318,17 @@ class SpatialIndexTest
         // A stack of parallel squares (two triangles each) along the ray
         Scene scene = new Scene();
         for ( int k = 0; k < 10; k++ ) {
-            final float z = (float)(k + 1);
-            scene.add(new Vector3Df(-1, -1, z), new Vector3Df(1, -1, z), new Vector3Df(1, 1, z));
-            scene.add(new Vector3Df(-1, -1, z), new Vector3Df(1, 1, z), new Vector3Df(-1, 1, z));
+            final double z = (double)(k + 1);
+            scene.add(new Vector3Dd(-1, -1, z), new Vector3Dd(1, -1, z), new Vector3Dd(1, 1, z));
+            scene.add(new Vector3Dd(-1, -1, z), new Vector3Dd(1, 1, z), new Vector3Dd(-1, 1, z));
         }
         final LinearSpatialIndex linear = new LinearSpatialIndex(scene.size());
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace();
-        final Answer any = ask(linear, scene, new Vector3Df(0.1F, 0.2F, 0), new Vector3Df(0, 0, 1), 0.0, 100.0, SpatialQueryMode.ANY_HIT, workspace);
+        final Answer any = ask(linear, scene, new Vector3Dd(0.1, 0.2, 0), new Vector3Dd(0, 0, 1), 0.0, 100.0, SpatialQueryMode.ANY_HIT, workspace);
         expectTrue(any.hit);
         final long anyTests = workspace.getPrimitiveTests();
         workspace.clearCounters();
-        final Answer closest = ask(linear, scene, new Vector3Df(0.1F, 0.2F, 0), new Vector3Df(0, 0, 1), 0.0, 100.0, SpatialQueryMode.CLOSEST_HIT, workspace);
+        final Answer closest = ask(linear, scene, new Vector3Dd(0.1, 0.2, 0), new Vector3Dd(0, 0, 1), 0.0, 100.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(closest.hit);
         expectDoubleEq(1.0, closest.parameter);
         expectLt(anyTests, workspace.getPrimitiveTests());
@@ -338,12 +338,12 @@ class SpatialIndexTest
     void SpatialIndex_MinimumAndMaximumParametersAreInclusiveAndApplied()
     {
         Scene scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1)); // t = 1
-        scene.add(new Vector3Df(-1, -1, 3), new Vector3Df(1, -1, 3), new Vector3Df(0, 1, 3)); // t = 3
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1)); // t = 1
+        scene.add(new Vector3Dd(-1, -1, 3), new Vector3Dd(1, -1, 3), new Vector3Dd(0, 1, 3)); // t = 3
         final BinnedSahSpatialIndex binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<>());
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace();
-        final Vector3Df origin = new Vector3Df(0, 0, 0);
-        final Vector3Df up = new Vector3Df(0, 0, 1);
+        final Vector3Dd origin = new Vector3Dd(0, 0, 0);
+        final Vector3Dd up = new Vector3Dd(0, 0, 1);
         // A blocker closer than the minimum is not accepted; the next one is
         Answer a = ask(binned, scene, origin, up, 1.5, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
@@ -362,15 +362,15 @@ class SpatialIndexTest
     void SpatialIndex_ExcludedPrimitiveDoesNotHideTheOneBehind()
     {
         Scene scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1));
-        scene.add(new Vector3Df(-1, -1, 2), new Vector3Df(1, -1, 2), new Vector3Df(0, 1, 2));
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1));
+        scene.add(new Vector3Dd(-1, -1, 2), new Vector3Dd(1, -1, 2), new Vector3Dd(0, 1, 2));
         final LinearSpatialIndex linear = new LinearSpatialIndex(scene.size());
         final BinnedSahSpatialIndex binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<>());
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace();
         for ( int m = 0; m < 2; m++ ) {
             final SpatialQueryMode mode = m == 0 ? SpatialQueryMode.CLOSEST_HIT : SpatialQueryMode.ANY_HIT;
-            final Answer a = ask(linear, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
-            final Answer b = ask(binned, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
+            final Answer a = ask(linear, scene, new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
+            final Answer b = ask(binned, scene, new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1), 0.0, 10.0, mode, workspace, 0);
             expectEq(1, a.primitive);
             expectEq(1, b.primitive);
         }
@@ -381,14 +381,14 @@ class SpatialIndexTest
     {
         // Two triangles sharing an edge: a ray through the edge hits both at t = 1
         Scene scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1));
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(0, 1, 1), new Vector3Df(-2, 1, 1));
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1));
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(0, 1, 1), new Vector3Dd(-2, 1, 1));
         final LinearSpatialIndex linear = new LinearSpatialIndex(scene.size());
         final BinnedSahSpatialIndex binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<>(), 1);
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace();
-        final Vector3Df origin = new Vector3Df(-0.5F, 0.0F, 0.0F);
-        final Answer a = ask(linear, scene, origin, new Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
-        final Answer b = ask(binned, scene, origin, new Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
+        final Vector3Dd origin = new Vector3Dd(-0.5, 0.0, 0.0);
+        final Answer a = ask(linear, scene, origin, new Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
+        final Answer b = ask(binned, scene, origin, new Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
         expectTrue(b.hit);
         expectEq(a.primitive, b.primitive);
@@ -399,14 +399,14 @@ class SpatialIndexTest
     void SpatialIndex_UnboundedPrimitivesAreAlwaysTested()
     {
         Scene scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 5), new Vector3Df(1, -1, 5), new Vector3Df(0, 1, 5));
-        scene.add(new Vector3Df(-100, -100, 2), new Vector3Df(100, -100, 2), new Vector3Df(0, 100, 2));
+        scene.add(new Vector3Dd(-1, -1, 5), new Vector3Dd(1, -1, 5), new Vector3Dd(0, 1, 5));
+        scene.add(new Vector3Dd(-100, -100, 2), new Vector3Dd(100, -100, 2), new Vector3Dd(0, 100, 2));
         ArrayList<Integer> unboundedPrimitives = new ArrayList<>();
         unboundedPrimitives.add(1);
         // Primitive 1 is unbounded: its box (which would contain it) is ignored
         final BinnedSahSpatialIndex binned = new BinnedSahSpatialIndex(scene.getBoxes(), unboundedPrimitives);
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace();
-        final Answer a = ask(binned, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
+        final Answer a = ask(binned, scene, new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
         expectEq(1, a.primitive);
         expectDoubleEq(2.0, a.parameter);
@@ -419,8 +419,8 @@ class SpatialIndexTest
         final LinearSpatialIndex linear = new LinearSpatialIndex(0);
         final BinnedSahSpatialIndex binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<>());
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace();
-        expectFalse(ask(linear, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace).hit);
-        expectFalse(ask(binned, scene, new Vector3Df(0, 0, 0), new Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode.ANY_HIT, workspace).hit);
+        expectFalse(ask(linear, scene, new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace).hit);
+        expectFalse(ask(binned, scene, new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode.ANY_HIT, workspace).hit);
         expectEq(0, workspace.getPrimitiveTests());
     }
 
@@ -433,7 +433,7 @@ class SpatialIndexTest
         final long before = RaytraceStatistics.getInstanceLevelTraversals();
         Sequence s = new Sequence(17);
         for ( int i = 0; i < 100; i++ ) {
-            final Vector3Df[] ray = randomRay(s);
+            final Vector3Dd[] ray = randomRay(s);
             ask(binned, scene, ray[0], ray[1], 0.0, 1e30, SpatialQueryMode.CLOSEST_HIT, workspace);
         }
         expectEq(before, RaytraceStatistics.getInstanceLevelTraversals());
@@ -458,11 +458,11 @@ class SpatialIndexTest
         final Scene scene = randomTriangles(300, 23);
         final BinnedSahSpatialIndex binned = new BinnedSahSpatialIndex(scene.getBoxes(), new ArrayList<>());
         final int numberOfRays = 4000;
-        final ArrayList<Vector3Df> origins = new ArrayList<>();
-        final ArrayList<Vector3Df> directions = new ArrayList<>();
+        final ArrayList<Vector3Dd> origins = new ArrayList<>();
+        final ArrayList<Vector3Dd> directions = new ArrayList<>();
         Sequence s = new Sequence(29);
         for ( int i = 0; i < numberOfRays; i++ ) {
-            final Vector3Df[] ray = randomRay(s);
+            final Vector3Dd[] ray = randomRay(s);
             origins.add(ray[0]);
             directions.add(ray[1]);
         }
@@ -527,7 +527,7 @@ class SpatialIndexTest
         Sequence s = new Sequence(41);
         int hits = 0;
         for ( int i = 0; i < 3000; i++ ) {
-            final Vector3Df[] ray = randomRay(s);
+            final Vector3Dd[] ray = randomRay(s);
             final Answer a = ask(linear, scene, ray[0], ray[1], 0.0, 1e30, SpatialQueryMode.CLOSEST_HIT, linearWorkspace);
             final Answer b = ask(grid, scene, ray[0], ray[1], 0.0, 1e30, SpatialQueryMode.CLOSEST_HIT, gridWorkspace);
             expectEq(a.hit, b.hit, "ray " + i);
@@ -554,7 +554,7 @@ class SpatialIndexTest
         Sequence s = new Sequence(47);
         int blocked = 0;
         for ( int i = 0; i < 3000; i++ ) {
-            final Vector3Df[] ray = randomRay(s);
+            final Vector3Dd[] ray = randomRay(s);
             final Answer a = ask(linear, scene, ray[0], ray[1], 1e-3, 1.0, SpatialQueryMode.ANY_HIT, linearWorkspace);
             final Answer b = ask(grid, scene, ray[0], ray[1], 1e-3, 1.0, SpatialQueryMode.ANY_HIT, gridWorkspace);
             expectEq(a.hit, b.hit, "ray " + i);
@@ -573,8 +573,8 @@ class SpatialIndexTest
         // Two parallel triangles crossing the whole scene, in one group that does
         // not fit in a cell, so that they are items of their own
         Scene scene = new Scene();
-        scene.add(new Vector3Df(-1, -1, 1), new Vector3Df(1, -1, 1), new Vector3Df(0, 1, 1)); // t = 1
-        scene.add(new Vector3Df(-1, -1, 3), new Vector3Df(1, -1, 3), new Vector3Df(0, 1, 3)); // t = 3
+        scene.add(new Vector3Dd(-1, -1, 1), new Vector3Dd(1, -1, 1), new Vector3Dd(0, 1, 1)); // t = 1
+        scene.add(new Vector3Dd(-1, -1, 3), new Vector3Dd(1, -1, 3), new Vector3Dd(0, 1, 3)); // t = 3
         double[] box = new double[6];
         unionBox(scene, 0, 1, box);
         SpatialGroupTree tree = new SpatialGroupTree(scene.getBoxes(), box);
@@ -582,8 +582,8 @@ class SpatialIndexTest
         tree.addPrimitive(0, 1);
         final GridSpatialIndex grid = new GridSpatialIndex(tree);
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace(grid.getWorkspaceSize());
-        final Vector3Df origin = new Vector3Df(0, 0, 0);
-        final Vector3Df up = new Vector3Df(0, 0, 1);
+        final Vector3Dd origin = new Vector3Dd(0, 0, 0);
+        final Vector3Dd up = new Vector3Dd(0, 0, 1);
         Answer a = ask(grid, scene, origin, up, 1.5, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
         expectEq(1, a.primitive);
@@ -597,7 +597,7 @@ class SpatialIndexTest
         a = ask(grid, scene, origin, up, 0.0, 10.0, SpatialQueryMode.ANY_HIT, workspace, 0);
         expectEq(1, a.primitive);
         // A ray starting inside the scene box, along an axis
-        a = ask(grid, scene, new Vector3Df(0.1F, 0.0F, 2.0F), new Vector3Df(0, 0, -1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
+        a = ask(grid, scene, new Vector3Dd(0.1, 0.0, 2.0), new Vector3Dd(0, 0, -1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace);
         expectTrue(a.hit);
         expectEq(0, a.primitive);
     }
@@ -610,7 +610,7 @@ class SpatialIndexTest
         final SpatialGroupTree tree = new SpatialGroupTree(scene.getBoxes(), box);
         final GridSpatialIndex grid = new GridSpatialIndex(tree);
         SpatialIndexWorkspace workspace = new SpatialIndexWorkspace(grid.getWorkspaceSize());
-        expectFalse(ask(grid, scene, new Vector3Df(0, 0, -1), new Vector3Df(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace).hit);
+        expectFalse(ask(grid, scene, new Vector3Dd(0, 0, -1), new Vector3Dd(0, 0, 1), 0.0, 10.0, SpatialQueryMode.CLOSEST_HIT, workspace).hit);
         expectEq(0, workspace.getPrimitiveTests());
     }
 
@@ -621,11 +621,11 @@ class SpatialIndexTest
         final Scene scene = clustered.getScene();
         final GridSpatialIndex grid = new GridSpatialIndex(clustered.getTree());
         final int numberOfRays = 4000;
-        final ArrayList<Vector3Df> origins = new ArrayList<>();
-        final ArrayList<Vector3Df> directions = new ArrayList<>();
+        final ArrayList<Vector3Dd> origins = new ArrayList<>();
+        final ArrayList<Vector3Dd> directions = new ArrayList<>();
         Sequence s = new Sequence(59);
         for ( int i = 0; i < numberOfRays; i++ ) {
-            final Vector3Df[] ray = randomRay(s);
+            final Vector3Dd[] ray = randomRay(s);
             origins.add(ray[0]);
             directions.add(ray[1]);
         }

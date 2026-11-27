@@ -3,7 +3,7 @@ package vsdk.toolkit.environment.material;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3Df;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 import static vsdk.toolkit.GTestAssertions.expectDoubleEq;
 import static vsdk.toolkit.GTestAssertions.expectEq;
@@ -26,7 +26,7 @@ class PhongMaterialTest
     @Test
     void PhongLobe_NonDiffuseColorIsGlossyBelowTheSpecularThreshold()
     {
-        final PhongLobe glossy = new PhongLobe(new ColorRgb(0.5, 0.25, 0.125), new ColorRgb(0.1, 0.2, 0.3), 249.99F);
+        final PhongLobe glossy = new PhongLobe(new ColorRgb(0.5, 0.25, 0.125), new ColorRgb(0.1, 0.2, 0.3), 249.99);
         expectFalse(glossy.isSpecular());
         expectColor(0.5, 0.25, 0.125, glossy.integrated(ScatteringComponent.DIFFUSE));
         expectColor(0.1, 0.2, 0.3, glossy.integrated(ScatteringComponent.GLOSSY));
@@ -57,8 +57,8 @@ class PhongMaterialTest
     {
         final PhongMaterial material = new PhongMaterial(
             "glass",
-            new PhongLobe(new ColorRgb(0.5, 0.5, 0.5), new ColorRgb(0.25, 0.25, 0.25), 10.0F),
-            new PhongLobe(new ColorRgb(0.125, 0.0, 0.0), new ColorRgb(0.0, 0.0, 0.0625), 300.0F),
+            new PhongLobe(new ColorRgb(0.5, 0.5, 0.5), new ColorRgb(0.25, 0.25, 0.25), 10.0),
+            new PhongLobe(new ColorRgb(0.125, 0.0, 0.0), new ColorRgb(0.0, 0.0, 0.0625), 300.0),
             null,
             null,
             true);
@@ -79,14 +79,14 @@ class PhongMaterialTest
         final Texture texture = new Texture(1, 1, 3, texel);
         final PhongMaterial material = new PhongMaterial(
             "painted",
-            new PhongLobe(new ColorRgb(0.5, 0.5, 0.5), new ColorRgb(0.25, 0.25, 0.25), 10.0F),
+            new PhongLobe(new ColorRgb(0.5, 0.5, 0.5), new ColorRgb(0.25, 0.25, 0.25), 10.0),
             null,
             null,
             texture,
             false);
-        final Vector3Df coordinate = new Vector3Df(0.5F, 0.5F, 0.0F);
+        final Vector3Dd coordinate = new Vector3Dd(0.5, 0.5, 0.0);
         final ColorRgb textured = material.scatteredPower(ScatteringComponent.REFLECTION_DIFFUSE, coordinate);
-        final ColorRgb expected = texture.evaluateColor(0.5F, 0.5F);
+        final ColorRgb expected = texture.evaluateColor(0.5, 0.5);
         expectColor(expected.getR(), expected.getG(), expected.getB(), textured);
         final ColorRgb withGlossy = material.scatteredPower(
             ScatteringComponent.REFLECTION_DIFFUSE | ScatteringComponent.REFLECTION_GLOSSY, coordinate);
@@ -101,7 +101,7 @@ class PhongMaterialTest
             "lamp",
             null,
             null,
-            new PhongLobe(new ColorRgb(10.0, 9.0, 8.0), new ColorRgb(0.0, 0.0, 0.0), 0.0F),
+            new PhongLobe(new ColorRgb(10.0, 9.0, 8.0), new ColorRgb(0.0, 0.0, 0.0), 0.0),
             null,
             false);
         expectColor(10.0, 9.0, 8.0, light.emittance(ScatteringComponent.DIFFUSE));
