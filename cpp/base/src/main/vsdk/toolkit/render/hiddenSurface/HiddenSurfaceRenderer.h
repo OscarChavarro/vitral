@@ -14,7 +14,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/WeilerAthertonPolygonClipper.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/render/RenderingElement.h"
 

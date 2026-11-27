@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/WeilerAthertonPolygonClipper.h"
 WeilerAthertonPolygonClipper::WeilerAthertonPolygonClipper()
     : clipPolyWA(0), subjectPolyWA(0), firstIntersection(false), previousOut(false),
       lastClipAbandoned(false)

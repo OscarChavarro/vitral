@@ -265,9 +265,10 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_SegmentTableBuilder.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationTrapezoid.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationTrapezoidQueryNode.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_Polygon2DWA.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonTopologicalMerger.cpp
-    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_Polygon2DWA.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/PolygonTopologicalMerger.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/WeilerAthertonPolygonClipper.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/convexPolygonClipper/ConvexWindowClipper.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Volume.cpp
@@ -326,6 +327,8 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/raster/Rasterizer2D.cpp
     src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.cpp
     src/main/vsdk/toolkit/render/hiddenSurface/HiddenSurfaceRenderer.cpp
+    src/main/vsdk/toolkit/render/raster/polygonScanConverter/PolygonBoxClipper.cpp
+    src/main/vsdk/toolkit/render/raster/polygonScanConverter/PolygonRasterContext.cpp
     src/main/vsdk/toolkit/render/PolyhedralBoundedSolidDebugger.cpp
     src/main/vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.cpp
     src/main/vsdk/toolkit/render/shaders/LightingShader.cpp

@@ -1,8 +1,8 @@
 #ifndef __POLYGON_2_D_CONTOUR_WA__
 #define __POLYGON_2_D_CONTOUR_WA__
 
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_CircularDoubleLinkedList.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_VertexNode2D.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_CircularDoubleLinkedList.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_VertexNode2D.h"
 class _Polygon2DContourWA {
 public:
     _CircularDoubleLinkedList<_VertexNode2D> vertices;
