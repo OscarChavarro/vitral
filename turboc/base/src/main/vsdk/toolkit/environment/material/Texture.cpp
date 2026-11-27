@@ -41,13 +41,13 @@ Texture::~Texture() {
 /**
 C++ port note: the lambda of the cpp port: one channel of a pixel, in [0, 1]
 */
-static float
+static double
 channelValue(const unsigned char *data, int pixelIndex, int channel) {
-    return (float)data[pixelIndex + channel] / 255.0F;
+    return (double)data[pixelIndex + channel] / 255.0;
 }
 
 ColorRgb
-Texture::evaluateColor(float u, float v) const {
+Texture::evaluateColor(double u, double v) const {
     double u1 = u - Math::floor(u);
     double u0 = 1.0 - u1;
     double v1 = v - Math::floor(v);

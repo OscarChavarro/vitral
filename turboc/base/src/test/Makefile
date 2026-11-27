@@ -93,7 +93,8 @@ TESTS = \
     triangle_acceleration_tests \
     triangle_mesh_contract_tests \
     tube_tests \
-    validation_does_not_modify_tests
+    validation_does_not_modify_tests \
+    vector_tests
 
 OTHER_PROGRAMS = \
     build/DitheringTest

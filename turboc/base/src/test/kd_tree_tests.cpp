@@ -4,10 +4,10 @@
 
 class KDTestPoint {
   private:
-    Vector3Df position;
+    Vector3Dd position;
   public:
-    KDTestPoint(float x, float y, float z): position(x, y, z) {}
-    const Vector3Df &getKDPosition() const { return position; }
+    KDTestPoint(double x, double y, double z): position(x, y, z) {}
+    const Vector3Dd &getKDPosition() const { return position; }
 };
 class KDTestVisitor : public KDTreeVisitor<KDTestPoint> {
   public:
@@ -23,9 +23,9 @@ TEST(KDTreeContract, FindsNearestAndFiltersBeforeAndAfterBalancing) {
     tree.addPoint(&b, 0x20);
     tree.addPoint(&c, 0);
     KDTestPoint *results[2] = {NULL, NULL};
-    float distances[2] = {0, 0};
+    double distances[2] = {0, 0};
     for (int i = 0; i < 2; ++i) {
-        EXPECT_EQ(2, tree.query(Vector3Df(0, 0, 0), 2, results, distances, 100, 0x10));
+        EXPECT_EQ(2, tree.query(Vector3Dd(0, 0, 0), 2, results, distances, 100, 0x10));
         EXPECT_FLOAT_EQ(9, distances[0]);
         EXPECT_FLOAT_EQ(1, distances[1]);
         tree.balance();

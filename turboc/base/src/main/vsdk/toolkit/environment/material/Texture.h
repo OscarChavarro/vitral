@@ -26,7 +26,7 @@ class Texture {
     int getChannels() const;
     const unsigned char *getData() const;
 
-    ColorRgb evaluateColor(float u, float v) const;
+    ColorRgb evaluateColor(double u, double v) const;
 };
 
 inline int

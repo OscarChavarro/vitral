@@ -9,7 +9,7 @@
 
 static BOOLEAN
 isFiniteColor(const ColorRgb &color) {
-    return Float::isFinite((float)((color.getR() + color.getG() + color.getB()) / 3.0));
+    return Float::isFinite((double)((color.getR() + color.getG() + color.getB()) / 3.0));
 }
 
 static const PhongLobe *
@@ -30,8 +30,8 @@ PhongMaterial::PhongMaterial(
     transmission(inTransmission),
     emission(inEmission),
     texture(inTexture),
-    storedRefractionIndexReal(1.0F),
-    storedRefractionIndexImaginary(0.0F)
+    storedRefractionIndexReal(1.0),
+    storedRefractionIndexImaginary(0.0)
 {
 }
 
@@ -42,8 +42,8 @@ PhongMaterial::PhongMaterial(
     const PhongLobe *inEmission,
     const Texture *inTexture,
     const BOOLEAN inSided,
-    const float inRefractionIndexReal,
-    const float inRefractionIndexImaginary):
+    const double inRefractionIndexReal,
+    const double inRefractionIndexImaginary):
     name(copyName(inName)),
     sided(inSided),
     reflection(inReflection),
@@ -71,7 +71,7 @@ PhongMaterial::~PhongMaterial() {
 }
 
 ColorRgb
-PhongMaterial::scatteredPower(int components, const Vector3Df *textureCoordinate) const {
+PhongMaterial::scatteredPower(int components, const Vector3Dd *textureCoordinate) const {
     double r = 0.0;
     double g = 0.0;
     double b = 0.0;
@@ -159,30 +159,30 @@ averageOf(const ColorRgb &color) {
 static const double NO_SCATTERING = 1e-6;
 
 /** Refraction index of a medium in evaluation and sampling: 0 when unknown */
-static float
+static double
 sampledIndex(const PhongMaterial *medium) {
-    return medium != NULL ? medium->getRefractionIndex() : 0.0F;
+    return medium != NULL ? medium->getRefractionIndex() : 0.0;
 }
 
 /** Refraction index of a medium in densityOf: vacuum when unknown */
-static float
+static double
 densityIndex(const PhongMaterial *medium) {
-    return medium != NULL ? medium->getRefractionIndex() : 1.0F;
+    return medium != NULL ? medium->getRefractionIndex() : 1.0;
 }
 
 /** The part of the scattering a first variate chose */
 enum SampledPart { TEXTURE_PART, REFLECTION_PART, TRANSMISSION_PART, ABSORPTION };
 
 /** Direction sampled within the chosen part, and its density there (0 when none) */
-static Vector3Df
+static Vector3Dd
 sampleWithinPart(
     const SampledPart part,
     const PhongLobe *reflection,
     const PhongLobe *transmission,
-    const Vector3Df &normal,
-    const Vector3Df &in,
-    const float inIndex,
-    const float outIndex,
+    const Vector3Dd &normal,
+    const Vector3Dd &in,
+    const double inIndex,
+    const double outIndex,
     const int reflectionComponents,
     const int transmissionComponents,
     const double x1,
@@ -207,12 +207,12 @@ sampleWithinPart(
             break;
     }
     *density = 0.0;
-    return Vector3Df(0.0F, 0.0F, 0.0F);
+    return Vector3Dd(0.0, 0.0, 0.0);
 }
 
 /** Density of the texture's diffuse scattering: cos / pi */
 static double
-textureDensity(const Vector3Df &out, const Vector3Df &normal) {
+textureDensity(const Vector3Dd &out, const Vector3Dd &normal) {
     return scatteringArithmetic::dot(normal, out) / M_PI;
 }
 
@@ -267,8 +267,8 @@ PhongMaterial::scatteringEvaluate(
     const SurfaceShadingPoint &point,
     const PhongMaterial *inMedium,
     const PhongMaterial *outMedium,
-    const Vector3Df &in,
-    const Vector3Df &out,
+    const Vector3Dd &in,
+    const Vector3Dd &out,
     int components) const
 {
     double r = 0.0;
@@ -278,7 +278,7 @@ PhongMaterial::scatteringEvaluate(
         Logger::reportMessage("PhongMaterial", Logger::WARNING, "scatteringEvaluate", "Couldn't determine shading normal");
         return ColorRgb(r, g, b);
     }
-    const Vector3Df &normal = point.getShadingNormal();
+    const Vector3Dd &normal = point.getShadingNormal();
 
     if ( texture != NULL && (components & TEXTURED_COMPONENT) ) {
         const double textureValue = 1.0 / M_PI;
@@ -311,12 +311,12 @@ PhongMaterial::scatteringEvaluate(
     return ColorRgb(r, g, b);
 }
 
-Vector3Df
+Vector3Dd
 PhongMaterial::scatteringSample(
     const SurfaceShadingPoint &point,
     const PhongMaterial *inMedium,
     const PhongMaterial *outMedium,
-    const Vector3Df &in,
+    const Vector3Dd &in,
     const BOOLEAN russianRoulette,
     const int components,
     double x1,
@@ -326,9 +326,9 @@ PhongMaterial::scatteringSample(
     *density = 0;
     if ( !point.hasShadingNormal() ) {
         Logger::reportMessage("PhongMaterial", Logger::WARNING, "scatteringSample", "Couldn't determine shading normal");
-        return Vector3Df(0.0F, 0.0F, 1.0F);
+        return Vector3Dd(0.0, 0.0, 1.0);
     }
-    const Vector3Df &normal = point.getShadingNormal();
+    const Vector3Dd &normal = point.getShadingNormal();
 
     double texturePart;
     double reflectionPart;
@@ -339,7 +339,7 @@ PhongMaterial::scatteringSample(
         &reflectionComponents, &transmissionComponents);
     const double scattering = texturePart + reflectionPart + transmissionPart;
     if ( scattering < NO_SCATTERING ) {
-        return Vector3Df(0.0F, 0.0F, 0.0F);
+        return Vector3Dd(0.0, 0.0, 0.0);
     }
 
     if ( !russianRoulette ) {
@@ -368,11 +368,11 @@ PhongMaterial::scatteringSample(
         }
     }
 
-    const float inIndex = sampledIndex(inMedium);
-    const float outIndex = sampledIndex(outMedium);
+    const double inIndex = sampledIndex(inMedium);
+    const double outIndex = sampledIndex(outMedium);
 
     double p;
-    const Vector3Df out = sampleWithinPart(
+    const Vector3Dd out = sampleWithinPart(
         mode, reflection, transmission, normal, in, inIndex, outIndex,
         reflectionComponents, transmissionComponents, x1, x2, &p);
     if ( mode == ABSORPTION ) {
@@ -414,8 +414,8 @@ PhongMaterial::scatteringDensity(
     const SurfaceShadingPoint &point,
     const PhongMaterial *inMedium,
     const PhongMaterial *outMedium,
-    const Vector3Df &in,
-    const Vector3Df &out,
+    const Vector3Dd &in,
+    const Vector3Dd &out,
     const int components,
     double *density,
     double *survival) const
@@ -425,7 +425,7 @@ PhongMaterial::scatteringDensity(
         Logger::reportMessage("PhongMaterial", Logger::WARNING, "scatteringDensity", "Couldn't determine shading normal");
         return;
     }
-    const Vector3Df &normal = point.getShadingNormal();
+    const Vector3Dd &normal = point.getShadingNormal();
 
     double texturePart;
     double reflectionPart;
@@ -440,8 +440,8 @@ PhongMaterial::scatteringDensity(
     }
     *survival = scattering;
 
-    const float inIndex = densityIndex(inMedium);
-    const float outIndex = densityIndex(outMedium);
+    const double inIndex = densityIndex(inMedium);
+    const double outIndex = densityIndex(outMedium);
     double p = textureDensity(out, normal);
     double pSurvival;
     *density = texturePart * p;
@@ -465,8 +465,8 @@ PhongMaterial::scatteringEvaluateComponents(
     const SurfaceShadingPoint &point,
     const PhongMaterial *inMedium,
     const PhongMaterial *outMedium,
-    const Vector3Df &in,
-    const Vector3Df &out,
+    const Vector3Dd &in,
+    const Vector3Dd &out,
     const int components,
     ColorRgb *componentValues) const
 {
@@ -490,7 +490,7 @@ PhongMaterial::scatteringEvaluateComponents(
 ColorRgb
 PhongMaterial::emissionEvaluate(
     const SurfaceShadingPoint *point,
-    const Vector3Df &out,
+    const Vector3Dd &out,
     const int components,
     double *density) const
 {
@@ -507,7 +507,7 @@ PhongMaterial::emissionEvaluate(
     }
     if ( components & ScatteringComponent::DIFFUSE ) {
         // kd = Kd / pi, with 1 / pi in single precision as RenderPark stores it
-        const double toRadiance = 1.00F / (float)M_PI;
+        const double toRadiance = 1.00 / (double)M_PI;
         if ( density != NULL ) {
             *density = cosL / M_PI;
         }
@@ -519,7 +519,7 @@ PhongMaterial::emissionEvaluate(
     return ColorRgb(0.0, 0.0, 0.0);
 }
 
-Vector3Df
+Vector3Dd
 PhongMaterial::emissionSample(
     const SurfaceShadingPoint *point,
     const int components,
@@ -535,19 +535,19 @@ PhongMaterial::emissionSample(
         *density = 0.0;
     }
     if ( !(components & ScatteringComponent::DIFFUSE) ) {
-        return Vector3Df(0.0F, 0.0F, 1.0F);
+        return Vector3Dd(0.0, 0.0, 1.0);
     }
     if ( point == NULL || !point->hasShadingNormal() ) {
         Logger::reportMessage("PhongMaterial", Logger::WARNING, "emissionSample", "Couldn't determine shading normal");
-        return Vector3Df(0.0F, 0.0F, 1.0F);
+        return Vector3Dd(0.0, 0.0, 1.0);
     }
     double sampleDensity;
-    const Vector3Df direction = ScatteringFrame(point->getShadingNormal()).sampleCosine(xi1, xi2, &sampleDensity);
+    const Vector3Dd direction = ScatteringFrame(point->getShadingNormal()).sampleCosine(xi1, xi2, &sampleDensity);
     if ( density != NULL ) {
         *density = sampleDensity;
     }
     if ( radiance != NULL && emission != NULL ) {
-        const double toRadiance = 1.0F / (float)M_PI;
+        const double toRadiance = 1.0 / (double)M_PI;
         *radiance = ColorRgb(
             toRadiance * emission->getDiffuse().getR(),
             toRadiance * emission->getDiffuse().getG(),

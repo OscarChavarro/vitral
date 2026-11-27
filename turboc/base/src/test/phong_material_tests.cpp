@@ -11,7 +11,7 @@ static void expectColor(double r, double g, double b, const ColorRgb &color) {
 }
 
 TEST(PhongLobe, NonDiffuseColorIsGlossyBelowTheSpecularThreshold) {
-    const PhongLobe glossy(ColorRgb(0.5, 0.25, 0.125), ColorRgb(0.1, 0.2, 0.3), 249.99F);
+    const PhongLobe glossy(ColorRgb(0.5, 0.25, 0.125), ColorRgb(0.1, 0.2, 0.3), 249.99);
     EXPECT_FALSE(glossy.isSpecular());
     expectColor(0.5, 0.25, 0.125, glossy.integrated(ScatteringComponent::DIFFUSE));
     expectColor(0.1, 0.2, 0.3, glossy.integrated(ScatteringComponent::GLOSSY));
@@ -36,8 +36,8 @@ TEST(ScatteringComponent, SplitsReflectionAndTransmissionBits) {
 TEST(PhongMaterial, ScatteredPowerAddsReflectionAndTransmissionByComponent) {
     const PhongMaterial material(
         "glass",
-        new PhongLobe(ColorRgb(0.5, 0.5, 0.5), ColorRgb(0.25, 0.25, 0.25), 10.0F),
-        new PhongLobe(ColorRgb(0.125, 0.0, 0.0), ColorRgb(0.0, 0.0, 0.0625), 300.0F),
+        new PhongLobe(ColorRgb(0.5, 0.5, 0.5), ColorRgb(0.25, 0.25, 0.25), 10.0),
+        new PhongLobe(ColorRgb(0.125, 0.0, 0.0), ColorRgb(0.0, 0.0, 0.0625), 300.0),
         NULL,
         NULL,
         true);
@@ -56,14 +56,14 @@ TEST(PhongMaterial, TextureReplacesTheDiffuseReflection) {
     const Texture texture(1, 1, 3, texel);
     const PhongMaterial material(
         "painted",
-        new PhongLobe(ColorRgb(0.5, 0.5, 0.5), ColorRgb(0.25, 0.25, 0.25), 10.0F),
+        new PhongLobe(ColorRgb(0.5, 0.5, 0.5), ColorRgb(0.25, 0.25, 0.25), 10.0),
         NULL,
         NULL,
         &texture,
         false);
-    const Vector3Df coordinate(0.5F, 0.5F, 0.0F);
+    const Vector3Dd coordinate(0.5, 0.5, 0.0);
     const ColorRgb textured = material.scatteredPower(ScatteringComponent::REFLECTION_DIFFUSE, &coordinate);
-    const ColorRgb expected = texture.evaluateColor(0.5F, 0.5F);
+    const ColorRgb expected = texture.evaluateColor(0.5, 0.5);
     expectColor(expected.getR(), expected.getG(), expected.getB(), textured);
     const ColorRgb withGlossy = material.scatteredPower(
         ScatteringComponent::REFLECTION_DIFFUSE | ScatteringComponent::REFLECTION_GLOSSY, &coordinate);
@@ -76,7 +76,7 @@ TEST(PhongMaterial, EmittanceAndDeepCopy) {
         "lamp",
         NULL,
         NULL,
-        new PhongLobe(ColorRgb(10.0, 9.0, 8.0), ColorRgb(0.0, 0.0, 0.0), 0.0F),
+        new PhongLobe(ColorRgb(10.0, 9.0, 8.0), ColorRgb(0.0, 0.0, 0.0), 0.0),
         NULL,
         false);
     expectColor(10.0, 9.0, 8.0, light.emittance(ScatteringComponent::DIFFUSE));

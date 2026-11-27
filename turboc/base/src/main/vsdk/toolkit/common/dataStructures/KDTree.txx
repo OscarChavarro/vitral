@@ -6,7 +6,7 @@
 #include "vsdk/toolkit/common/dataStructures/KDQuery.h"
 
 template<typename T>
-const float KDTree<T>::KD_MAX_RADIUS = 1e10F;
+const double KDTree<T>::KD_MAX_RADIUS = 1e10;
 
 template<typename T>
 KDTree<T>::KDTree(bool CopyData) {
@@ -74,8 +74,8 @@ KDTree<T>::addPoint(T *data, short flags) {
     KDTreeNode<T> **nodePtr;
     KDTreeNode<T> *newNode;
     KDTreeNode<T> *parent;
-    const Vector3Df &position = data->getKDPosition();
-    const float newPoint[3] = {position.x(), position.y(), position.z()};
+    const Vector3Dd &position = data->getKDPosition();
+    const double newPoint[3] = {position.x(), position.y(), position.z()};
     int discriminator;
 
     newNode = new KDTreeNode<T>;
@@ -108,11 +108,11 @@ KDTree<T>::addPoint(T *data, short flags) {
 
     if ( (parent != NULL) && (parent->loson == NULL) && (parent->hison == NULL) ) {
         // Choose an appropriate discriminator for the parent
-        float dx;
-        float dy;
-        float dz;
-        const Vector3Df &parentPosition = parent->data->getKDPosition();
-        const float customNodeData[3] = {parentPosition.x(), parentPosition.y(), parentPosition.z()};
+        double dx;
+        double dy;
+        double dz;
+        const Vector3Dd &parentPosition = parent->data->getKDPosition();
+        const double customNodeData[3] = {parentPosition.x(), parentPosition.y(), parentPosition.z()};
 
         dx = Math::abs(newPoint[0] - customNodeData[0]);
         dy = Math::abs(newPoint[1] - customNodeData[1]);
@@ -164,18 +164,18 @@ account ! (The balanced part is searched first)
 template<typename T>
 int
 KDTree<T>::query(
-    const Vector3Df &position,
+    const Vector3Dd &position,
     int N,
     T **results,
-    float *inDistances,
-    float radius,
+    double *inDistances,
+    double radius,
     short excludeFlags)
 {
     KDQuery<T> queryData;
-    const float point[3] = {position.x(), position.y(), position.z()};
+    const double point[3] = {position.x(), position.y(), position.z()};
     int numberFound;
-    float *localDistances = NULL;
-    float *usedDistances;
+    double *localDistances = NULL;
+    double *usedDistances;
 
     if ( N <= 0 ) {
         return 0;
@@ -186,7 +186,7 @@ KDTree<T>::query(
             Logger::reportMessage("KDTree", Logger::ERROR, "KDTree::query", "Too many nodes requested");
             return 0;
         }
-        localDistances = new float[1000];
+        localDistances = new double[1000];
         usedDistances = localDistances;
     } else {
         usedDistances = inDistances;
@@ -215,12 +215,12 @@ KDTree<T>::query(
 Distance calculation
 */
 template<typename T>
-inline float
-KDTree<T>::sqrDistance3D(const T *data, const float *b) {
-    float result;
-    float tmp;
+inline double
+KDTree<T>::sqrDistance3D(const T *data, const double *b) {
+    double result;
+    double tmp;
 
-    const Vector3Df &a = data->getKDPosition();
+    const Vector3Dd &a = data->getKDPosition();
     tmp = a.x() - b[0];
     result = tmp * tmp;
 
@@ -244,7 +244,7 @@ KDTree<T>::fixUp(KDQuery<T> &queryData) {
     // in the tree
     int son;
     int parent;
-    float tmpDist;
+    double tmpDist;
     T *tmpData;
 
     son = queryData.foundN;
@@ -267,7 +267,7 @@ KDTree<T>::fixUp(KDQuery<T> &queryData) {
 
 template<typename T>
 inline void
-KDTree<T>::mhInsert(KDQuery<T> &queryData, T *data, float dist) {
+KDTree<T>::mhInsert(KDQuery<T> &queryData, T *data, double dist) {
     queryData.distances[queryData.foundN] = dist;
     queryData.results[queryData.foundN] = data;
 
@@ -287,7 +287,7 @@ KDTree<T>::fixDown(KDQuery<T> &queryData) {
     // There are qdat_s.foundN nodes in the tree, starting at index 0
     int son;
     int parent;
-    float tmpDist;
+    double tmpDist;
     T *tmpData;
 
     int max = queryData.foundN;
@@ -323,7 +323,7 @@ KDTree<T>::fixDown(KDQuery<T> &queryData) {
 
 template<typename T>
 inline void
-KDTree<T>::mhReplaceMax(KDQuery<T> &queryData, T *data, float dist) {
+KDTree<T>::mhReplaceMax(KDQuery<T> &queryData, T *data, double dist) {
     // Top = maximum element. Replace it with new and ripple down
     // The heap is full (foundN == wantedN), but this is not required
 
@@ -342,7 +342,7 @@ template<typename T>
 void
 KDTree<T>::queryRec(const KDTreeNode<T> *node, KDQuery<T> &queryData) {
     int discriminator = node->discriminator();
-    float dist;
+    double dist;
     const KDTreeNode<T> *nearNode;
     const KDTreeNode<T> *farNode;
 
@@ -394,7 +394,7 @@ void
 KDTree<T>::balancedQueryRec(int index, KDQuery<T> &queryData) {
     const BalancedKDTreeNode<T> &node = balancedRootNode[index];
     int discr = node.discriminator();
-    float dist;
+    double dist;
     int nearIndex;
     int farIndex;
 
@@ -472,7 +472,7 @@ KDTree<T>::bkdswap(BalancedKDTreeNode<T> root[], int a, int b) {
 }
 
 template<typename T>
-inline float
+inline double
 KDTree<T>::bkdval(BalancedKDTreeNode<T> root[], int index, int discr) {
     return coordinate(root[index].data, discr);
 }
@@ -484,7 +484,7 @@ KDTree<T>::eSwap(BalancedKDTreeNode<T> broot[], int a, int b) {
 }
 
 template<typename T>
-inline float
+inline double
 KDTree<T>::eVal(BalancedKDTreeNode<T> broot[], int index, int discr) {
     return KDTree<T>::bkdval(broot, index, discr);
 }
@@ -608,9 +608,9 @@ KDTree<T>::copyUnbalancedRec(KDTreeNode<T> *node, BalancedKDTreeNode<T> *broot, 
 template<typename T>
 int
 KDTree<T>::bestDiscriminator(BalancedKDTreeNode<T> broot[], int low, int high) {
-    float bMin[3] = {Float::MAX_VALUE, Float::MAX_VALUE, Float::MAX_VALUE};
-    float bMax[3] = {-Float::MAX_VALUE, -Float::MAX_VALUE, -Float::MAX_VALUE};
-    float tmp;
+    double bMin[3] = {Float::MAX_VALUE, Float::MAX_VALUE, Float::MAX_VALUE};
+    double bMax[3] = {-Float::MAX_VALUE, -Float::MAX_VALUE, -Float::MAX_VALUE};
+    double tmp;
 
     for ( int i = low; i <= high; i++ ) {
         tmp = bkdval(broot, i, 0);
@@ -639,7 +639,7 @@ KDTree<T>::bestDiscriminator(BalancedKDTreeNode<T> broot[], int low, int high) {
     }
 
     int discr = 0;
-    float spread = bMax[0] - bMin[0]; // X spread
+    double spread = bMax[0] - bMin[0]; // X spread
 
     tmp = bMax[1] - bMin[1];
     if ( tmp > spread ) {

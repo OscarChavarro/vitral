@@ -4,7 +4,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/Class.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "vsdk/toolkit/common/linealAlgebra/Vector3Df.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/material/Material.h"
 #include "vsdk/toolkit/environment/material/PhongLobe.h"
 #include "vsdk/toolkit/environment/material/ScatteringComponent.h"
@@ -49,8 +49,8 @@ class PhongMaterial : public Material {
     const PhongLobe *transmission;
     const PhongLobe *emission;
     const Texture *texture;
-    const float storedRefractionIndexReal;
-    const float storedRefractionIndexImaginary;
+    const double storedRefractionIndexReal;
+    const double storedRefractionIndexImaginary;
 
     ColorRgb textureColor(const SurfaceShadingPoint &point) const;
     void samplingProbabilities(
@@ -94,8 +94,8 @@ class PhongMaterial : public Material {
         const PhongLobe *inEmission,
         const Texture *inTexture,
         BOOLEAN inSided,
-        float inRefractionIndexReal,
-        float inRefractionIndexImaginary);
+        double inRefractionIndexReal,
+        double inRefractionIndexImaginary);
     virtual ~PhongMaterial();
 
     const char *getName() const;
@@ -116,7 +116,7 @@ class PhongMaterial : public Material {
     the coordinate is unknown: a warning is reported and the texture adds
     nothing.
     */
-    ColorRgb scatteredPower(int components, const Vector3Df *textureCoordinate) const;
+    ColorRgb scatteredPower(int components, const Vector3Dd *textureCoordinate) const;
 
     /**
     Integrated emittance of the requested components (ScatteringComponent
@@ -128,14 +128,14 @@ class PhongMaterial : public Material {
     Real part of the refraction index seen by a ray that crosses the
     surface: the transmission lobe's, 1 (vacuum) without one
     */
-    float getRefractionIndex() const;
+    double getRefractionIndex() const;
 
     /** Imaginary part of the transmission lobe's refraction index, 0 without one */
-    float getRefractionIndexImaginary() const;
+    double getRefractionIndexImaginary() const;
 
     /** Stored refraction index, also without transmission lobe (for persistence) */
-    float getStoredRefractionIndexReal() const;
-    float getStoredRefractionIndexImaginary() const;
+    double getStoredRefractionIndexReal() const;
+    double getStoredRefractionIndexImaginary() const;
 
     /**
     Scattering (BSDF) value for the requested components (ScatteringComponent
@@ -146,8 +146,8 @@ class PhongMaterial : public Material {
         const SurfaceShadingPoint &point,
         const PhongMaterial *inMedium,
         const PhongMaterial *outMedium,
-        const Vector3Df &in,
-        const Vector3Df &out,
+        const Vector3Dd &in,
+        const Vector3Dd &out,
         int components) const;
 
     /**
@@ -157,11 +157,11 @@ class PhongMaterial : public Material {
     samples the direction; *density is the density of the direction summed
     over all parts, 0 when no direction was produced
     */
-    Vector3Df scatteringSample(
+    Vector3Dd scatteringSample(
         const SurfaceShadingPoint &point,
         const PhongMaterial *inMedium,
         const PhongMaterial *outMedium,
-        const Vector3Df &in,
+        const Vector3Dd &in,
         BOOLEAN russianRoulette,
         int components,
         double x1,
@@ -176,8 +176,8 @@ class PhongMaterial : public Material {
         const SurfaceShadingPoint &point,
         const PhongMaterial *inMedium,
         const PhongMaterial *outMedium,
-        const Vector3Df &in,
-        const Vector3Df &out,
+        const Vector3Dd &in,
+        const Vector3Dd &out,
         int components,
         double *density,
         double *survival) const;
@@ -191,8 +191,8 @@ class PhongMaterial : public Material {
         const SurfaceShadingPoint &point,
         const PhongMaterial *inMedium,
         const PhongMaterial *outMedium,
-        const Vector3Df &in,
-        const Vector3Df &out,
+        const Vector3Dd &in,
+        const Vector3Dd &out,
         int components,
         ColorRgb *componentValues) const;
 
@@ -204,7 +204,7 @@ class PhongMaterial : public Material {
     */
     ColorRgb emissionEvaluate(
         const SurfaceShadingPoint *point,
-        const Vector3Df &out,
+        const Vector3Dd &out,
         int components,
         double *density) const;
 
@@ -214,7 +214,7 @@ class PhongMaterial : public Material {
     normal is unknown); the radiance along it and its density go to the
     non-null pointers
     */
-    Vector3Df emissionSample(
+    Vector3Dd emissionSample(
         const SurfaceShadingPoint *point,
         int components,
         double xi1,
@@ -272,22 +272,22 @@ PhongMaterial::getTexture() const {
     return texture;
 }
 
-inline float
+inline double
 PhongMaterial::getRefractionIndex() const {
-    return transmission != NULL ? storedRefractionIndexReal : 1.0F;
+    return transmission != NULL ? storedRefractionIndexReal : 1.0;
 }
 
-inline float
+inline double
 PhongMaterial::getRefractionIndexImaginary() const {
-    return transmission != NULL ? storedRefractionIndexImaginary : 0.0F;
+    return transmission != NULL ? storedRefractionIndexImaginary : 0.0;
 }
 
-inline float
+inline double
 PhongMaterial::getStoredRefractionIndexReal() const {
     return storedRefractionIndexReal;
 }
 
-inline float
+inline double
 PhongMaterial::getStoredRefractionIndexImaginary() const {
     return storedRefractionIndexImaginary;
 }
