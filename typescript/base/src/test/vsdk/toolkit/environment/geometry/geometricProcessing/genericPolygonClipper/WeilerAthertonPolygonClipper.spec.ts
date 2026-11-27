@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Polygon2D } from "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.js";
-import { WeilerAthertonPolygonClipper } from "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.js";
-import { _VertexNode2D } from "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_VertexNode2D.js";
+import { WeilerAthertonPolygonClipper } from "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/WeilerAthertonPolygonClipper.js";
+import { _VertexNode2D } from "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_VertexNode2D.js";
 
 describe("WeilerAthertonPolygonClipper", () => {
     const intersect = (p0: _VertexNode2D, p1: _VertexNode2D, p2: _VertexNode2D, p3: _VertexNode2D) => {

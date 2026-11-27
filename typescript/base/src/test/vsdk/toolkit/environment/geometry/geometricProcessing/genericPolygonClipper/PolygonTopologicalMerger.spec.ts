@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PolygonTopologicalMerger } from "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonTopologicalMerger.js";
+import { PolygonTopologicalMerger } from "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/PolygonTopologicalMerger.js";
 import { Polygon2D } from "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.js";
 
 describe("PolygonTopologicalMerger", () => {

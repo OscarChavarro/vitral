@@ -19,7 +19,7 @@ import { Vector4Dd } from "../../common/linealAlgebra/Vector4Dd.js";
 import { Camera } from "../../environment/camera/Camera.js";
 import { Geometry } from "../../environment/geometry/Geometry.js";
 import type { Vertex2D } from "../../environment/geometry/element/Vertex2D.js";
-import { WeilerAthertonPolygonClipper } from "../../environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.js";
+import { WeilerAthertonPolygonClipper } from "../../environment/geometry/geometricProcessing/genericPolygonClipper/WeilerAthertonPolygonClipper.js";
 import { InfinitePlane } from "../../environment/geometry/surface/InfinitePlane.js";
 import { Polygon2D } from "../../environment/geometry/surface/polygon/Polygon2D.js";
 import { _Polygon2DContour } from "../../environment/geometry/surface/polygon/_Polygon2DContour.js";

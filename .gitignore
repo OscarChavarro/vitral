@@ -43,6 +43,7 @@ pkgs/SpharmonicKit27/tmp/
 testsuite/**/output/
 testsuite/**/*.ppm
 cpp/testsuite/**/*.ppm
+turboc/testsuite/**/*.ppm
 java/testsuite/OfflineExamples/RaytracingOfflineExample/*.ppm
 typescript/testsuite/OfflineExamples/RaytracingOfflineExample/*.ppm
 testsuite/**/*.jpg

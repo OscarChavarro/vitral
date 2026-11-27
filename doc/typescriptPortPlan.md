@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Build a complete, mechanically traceable TypeScript port of the current Java Vitral implementation. The immediate milestone is a fully migrated `vsdk.toolkit.common` package plus reliable user-facing clean and compile scripts that produce a consumable TypeScript/JavaScript library package. The longer plan follows the supplied dependency groups exactly.
+Build a complete, mechanically traceable TypeScript port of the current Java Vitral implementation. The port already includes reusable TypeScript packages and a browser scene editor. Restore a buildable package baseline, then close the outstanding core, platform-adapter and worker gaps using the phase inventory below.
 
 No phase may use placeholders, empty method bodies, unconditional dummy returns, "not implemented" exceptions, fake renderers, or compile-only stubs. Existing TypeScript files are candidate implementations, not proof of parity: each one must be compared method by method with the current Java source.
 
@@ -12,85 +12,127 @@ Every production migration must preserve the Java implementation textually and b
 
 For a complex algorithm, first map and migrate its complete private dependency graph (state types, predicates, allocators, ordering helpers, topology utilities, and nested result/specification types). Only then migrate its public entry points textually, followed by Java-derived regression and degeneracy tests. This rule applies to every phase, including already-completed phases when parity is re-audited.
 
-## Current Status
+## Current status and phase matrix
 
-Date of record: 2026-09-16. Java source of record: `java/base/src/main` (377
-production files) and `java/jogl4/src/main` (25 files), at `66786f21`.
-TypeScript under measurement: `typescript/base/src/main` (435 files: 328 under
-`vsdk`, 106 in the `java.*`/`org.w3c` compatibility layer, plus the package
-index), `typescript/fs/src/main` (15) and `typescript/webgl/src/main` (32).
+Review baseline: 2026-11-27, source revision `adecdd8c`. This matrix supersedes
+the September gate records and inventories as a statement of current status.
+The scope includes the current Java core, the web equivalents of the applicable
+AWT/Swing and JOGL4 behavior, and the existing TypeScript applications.
 
-Phases 1 through 28 have recorded gates, the eight `java/testsuite/Jogl4Examples`
-interactive programs and five of the eight `OfflineExamples` console programs
-are migrated, and `npm run build` is clean across the three packages; the 2026-09-16 run of
-`npm run test` passed 382 tests in 75 files with 7 skipped, exit 0, and did not
-raise the worker-RPC error Phase 27 records as intermittent. By user
-decision of 2026-09-16 no further test-suite program is scheduled: the migrated
-set is the accepted minimum, and it is no longer a completion obligation of this
-plan. What remains for a 1:1 port is therefore library work only — the pending
-I/O, GUI-controller, framework and persistence phases, plus the literal-parity
-findings recorded in `doc/typescriptParityAudit.md` and in
-`Base and WebGL parity sweep — 2026-09-16` below.
+| Production source root | Tracked source files |
+|---|---:|
+| `java/base/src/main` | 604 Java |
+| `java/awt/src/main` | 15 Java |
+| `java/jogl2/src/main` | 69 Java |
+| `java/jogl4/src/main` | 63 Java |
+| `typescript/base/src/main` | 685 TypeScript, including 576 under `vsdk` |
+| `typescript/fs/src/main` | 19 TypeScript |
+| `typescript/webgl/src/main` | 82 TypeScript |
 
-A full base-and-WebGL sweep on 2026-09-16 measured the port as follows: 296 of
-the 377 Java production files have a TypeScript counterpart and 81 do not; 31 of
-those 296 same-path classes are missing at least one Java method; the
-`@vitral/webgl` package covers 24 of the 25 `java/jogl4` classes with a full
-method inventory; and 45 `src/main` files are reachable from no package index,
-spec or test-suite program, all of which the user decided on 2026-09-16 to keep
-as part of the package. The
-literal-parity gate of the earlier phases therefore remains open: Phases 3, 4,
-15, 18, 19, 21, 22, 23--24 and 25 have open source-level findings, and no phase
-may be treated as a 1:1 baseline until they are closed.
+Comparing the tracked Java core paths with the union of the three TypeScript
+source roots gives 546 same-relative-path matches and 58 unmatched Java
+paths. This is a file inventory. Renames, split classes, runtime equivalents,
+nested declarations, package exports, and algorithm behavior require separate
+review. Of the 63 JOGL4 file basenames, 62 have a matching WebGL basename after
+replacing `Jogl4` with `WebGL`. The unmatched file is
+`Jogl4VoxelVolumeRenderer`. The AWT/Swing comparison is by responsibility.
 
-| Phase | Status | Ported | Open work |
-|---|---|---:|---|
-| 1 — Java runtime compatibility | Complete | 86 / 86 | — |
-| 2 — Common entity foundation | Parity open | 7 / 7 applicable | `VSDKJ2ME` excluded by the Web-target decision; `Entity.typeIsSupported` has no counterpart |
-| 3 — Linear algebra | Parity open | 16 / 16 | Statement-level proof for `Matrix4x4f`; `Matrix4x4d`, `Matrix4x4f` and `MatrixNxM` private helpers (`buildIdentityValues`, `deepCopy`, `validate4x4`, `validatePosition`, `determinant3x3`, `fillMinor`, the float/double conversions) have no counterpart |
-| 4 — Symbolic algebra | Parity open | 7 / 7 | `AlgebraicExpression` is a regex plus precedence-climbing rewrite (86 lines) of the Java `StreamTokenizer` recursive-descent parser (308 lines); two output divergences recorded under `AlgebraicExpressionExample` |
-| 5 — Color | Complete | 2 / 2 applicable | — |
-| 6 — Logging | Parity open | 1 / 1 | `Logger.processFatalError` has no counterpart |
-| 7 — Memory management checkpoint | Complete | 0 / 0 | — |
-| 8 — Quasi-Monte Carlo checkpoint | Complete | 0 / 0 | — |
-| 9 — Data structures | Complete | 12 / 12 | — |
-| 10 — Statistics | Complete | 3 / 3 + 2 supplemental | — |
-| 11 — Command-line options checkpoint | Complete | 0 / 0 | — |
-| 12 — GUI progress-monitor contracts | Complete | 4 / 4 | — |
-| 13 — Tangible-interface contracts | Parity open | 4 / 4 | `TangibleInterfaceNetworkClient.connectAndListen`, `extractNumbers` and `extractString` have no counterpart |
-| 14 — Media and image buffers | Parity open | 20 / 20 | `Image.clone`/`positiveMod`, `MediaEntity.clone`, `NormalMap.positiveMod`, `RGBAImageCompressed.reportUnsupportedPixelAccess`, and the `readObject`/`writeObject` serialization of both uncompressed image buffers have no counterpart |
-| 15 — General processing | In progress | 20 / 22 | `LzwWrapper` and `SpharmonicKitWrapper` (native-runtime adaptation undecided); `ComputationalGeometry.computeCohenSutherland2DCode` has no counterpart |
-| 16 — Materials | Complete | 5 / 5 | — |
-| 17 — Geometry base | Complete | 1 / 1 | — |
-| 18 — Curves | Parity open | 2 / 2 | `ParametricCurve` (163 lines) collapses Java's five `evaluateLinear`/`evaluateQuadratic`/`evaluateHermite`/`evaluateBezier`/`evaluateBspline` bodies (652 lines) into a shared `basis`/`evalControls` rewrite |
-| 19 — Geometry elements | Parity open | 6 / 6 | `Triangle.closestPointOnTriangle` has no counterpart |
-| 20 — Concrete geometry elements | Complete | 0 / 0 applicable | — |
-| 21 — Surfaces | Parity open | 13 / 13 | `TriangleMesh.appendTriangles`/`appendVertices`/`calculateMinMaxPositions`/`doIntersectionInternal` and the array-clone helpers; `QuadMesh`, `TriangleStripMesh` and `TriangleMeshGroup` min/max helpers; `ParametricBiCubicPatch` geometry-matrix builders; `FunctionalExplicitSurface.init`/`coord`; `Md2Mesh.fillAniInfo`/`getAniInfo` |
-| 22 — Volumes and boundary representation | Parity open | 30 / 30 | Private decision graphs of the validator, predicates and Euler operators (audit item) |
-| 23 — Backgrounds | Parity open | 4 / 4 | `FixedBackground` records a bug-compatibility divergence; source-level corrections pending |
-| 24 — Cameras | Parity open | 2 / 2 | `clipLineCohenSutherlandPlanes` is a sequential plane-clipping rewrite; Java's `calculateOutcodeBits` outcode machinery has no counterpart |
-| 25 — Geometric processing | Parity open | 61 / 61 files | `PolygonTopologicalMerger.compareKeys`/`compareTo`/`equals`/`hashCode`/`splitAndAccumulateSegments` and `PolygonProcessor.binaryTreeContainContour` have no counterpart; compressed containers in the fallback builders (audit item) |
-| 26 — Lights | Complete | 5 / 5 current-Java symbols | `LightType` has no source mapping in the current Java base |
-| 27 — Tone-mapping checkpoint | Complete, harness exit open | 0 / 0 | vitest worker-RPC budget still makes `verify` exit 1 |
-| 28 — Scene model | Complete | 4 / 4 | — |
-| 29 — Numerical-analysis checkpoint | Pending | empty group | Gate not run; two orphans ported |
-| 30 — I/O wrappers | Pending | 1 / 2 | `ShapeDescriptorPersistence`; `PersistenceElement.verifyLibrary` and `extractExtensionFromFile` |
-| 31 — I/O context checkpoint | Pending | empty group | Gate not run |
-| 32 — Binary I/O checkpoint | Pending | empty group | Gate not run |
-| 33 — Image I/O | Pending | 4 / 8 | `ImagePersistenceTarga`, `NativeImageReaderWrapper` (+ its header record), `RGBColorPalettePersistence`; and in the ported `ImagePersistence` the whole raster import path (`importRGB`, `importRGBA`, `importIndexedColor` from a file, `importDDSRGB`/`importDDSRGBA`, `transferPixels`, `loadPluginHelper`, the not-available image builders) plus `exportBMP`, `exportPNM` and the file-taking `exportJPG`/`exportGIF` |
-| 34 — XML I/O | Pending | 0 / 4 | Whole group |
-| 35 — VRML I/O checkpoint | Pending | empty group | Gate not run |
-| 36 — Geometry I/O | Pending | 18 / 51 | `Reader3ds`, `ReaderAse`, `ReaderPly`, `ReaderVrml`, `ReaderVtk`, `ReaderGts`, `ReaderBinNeedForSpeed` with their private state classes; `WriterObj`, `WriterGts`, `WriterVtk`; the nine-file `stepCad.writer` family; `ParametricCurvePersistence`, `ParametricBiCubicPatchPersistence`, `ViewpointBinaryPersistence`. `EnvironmentPersistence` therefore dispatches one of Java's eight formats and none of its three exports |
-| 37 — SGL checkpoint | Pending | empty group | Gate not run |
-| 38 — GUI model and controllers | Deferred | 7 / 47 | The five `CameraController` classes and `Controller`/`CommandListener`, `KeyEvent`, `MouseEvent`, `HudIcon`, `TextVisualConfiguration`, `ViewportWindow`(`SetManager`), `RendererConfigurationController`, the eighteen `gui.widget`/`widget.variable` classes, the three transform gizmos, `dialog.InformationDialog` and the four `visualAnalytics` classes. The UI target decision is still not taken, and every WebGL example module carries the recorded camera-interaction divergence because of it |
-| 39 — Software shaders | Complete | 18 / 18 | Standard gate not run |
-| 40 — CPU rendering | Pending | 33 / 35 | `AutoStereogramGenerator` and `PolyhedralBoundedSolidDebugger`; standard gate not run |
-| 41 — GPU rendering architecture checkpoint | Pending | 24 / 25 JOGL4 classes | `Jogl4Renderer` (its only member is `verifyOpenGLAvailability`) has no counterpart; checkpoint gate not run |
-| 42 — Animation | Complete | 4 / 4 | Standard gate not run |
-| 43 — Application framework | Pending | 0 / 3 | Whole group |
-| 44 — GUI persistence | Pending | 0 / 1 | `GuiPersistence`, and the widget tree it reads is Phase 38 |
-| 45 — Orphan-inventory closure | Pending | — | `io.FileLocator` is a newly found unlisted orphan; the inventory comparison has not been re-run |
-| 46 — Textual-parity and dependency-closure audit | Pending | — | The 31 same-path method gaps below are its first named input; the 45 unreachable files are kept by decision and must be audited, not deleted |
+**Finalized** means the phase has implementation and local evidence without a
+known phase-specific closure item in this review, or its inventory checkpoint
+has been confirmed. **In progress** means relevant work exists and a concrete
+implementation, parity or validation item is open. **Pending** means the
+applicable implementation has yet to begin. The shared build, packaging and
+browser verification apply to the release as a whole.
+
+| Phase | Scope | Status | Evidence or remaining work |
+|---:|---|---|---|
+| 1 | Java runtime compatibility and packaging | In progress | Workspace, strict compilation settings, runtime adapters and packaging scripts exist. Restore the public package build and re-run the consumer check. |
+| 2 | Common entity foundation | In progress | Entity metadata is used by the web editor. Compare Java's `Entity.typeIsSupported` filter with TypeScript attribute specifications. `VSDKJ2ME` remains outside the web scope. |
+| 3 | Linear algebra | In progress | Double and single precision families and recent arithmetic changes are present. Recheck float rounding, matrix helper paths and newer operations against Java. |
+| 4 | Symbolic algebra | In progress | The expression engine exists. Resolve the parser rewrite and the two historical output differences with Java's `StreamTokenizer` parser. |
+| 5 | Color | Finalized | `ColorRgb`, `ColorRgba` and the new `Cie` model are present. The focused CIE and RGB suites passed. |
+| 6 | Logging | In progress | The browser-safe fatal exception path exists. Verify Java `processFatalError` diagnostics and document the runtime exit mapping. |
+| 7 | Memory management | Pending | The original group was empty. Java now contains `MemoryPool`; review its explicit LIFO borrow/free behavior for a TypeScript mapping. |
+| 8 | Quasi-Monte Carlo checkpoint | Finalized | Empty group. No corresponding implementation was found in either core. |
+| 9 | Data structures | Finalized | Container implementations and `KDTree` have source matches, and the focused KD-tree tests passed. |
+| 10 | Statistics | Finalized | Core counters, including `RaytraceStatistics`, have TypeScript counterparts. Earlier counter and aggregation checks are recorded below. |
+| 11 | Command-line options checkpoint | Finalized | Empty library group. Entry-point arguments belong to the application host. |
+| 12 | Progress monitors | Finalized | Core monitors and the parallel producer/consumer are present. The tile scheduler routes worker progress notices back to the owner. |
+| 13 | Tangible interfaces | In progress | The browser WebSocket client is wired into the editor and its focused tests pass. Verify its JSON parsing, connection callbacks and failure behavior against Java's listener and extraction paths. |
+| 14 | Media and image buffers | In progress | Image buffers and HDR/solid textures are present. Recheck cloning, compressed-pixel errors and the mapping of Java object serialization. |
+| 15 | General processing | In progress | Core processing exists. Resolve `LzwWrapper`, `SpharmonicKitWrapper`, and the Cohen–Sutherland outcode path. |
+| 16 | Materials | In progress | Materials and recent double-precision work are present. Java's `ScatteringArithmetic` has no same-path module. Compare its callers and rounding behavior with their TypeScript equivalents. |
+| 17 | Geometry base | Finalized | The `Geometry` contract is present and used by the current geometry families. |
+| 18 | Curves | In progress | Curve evaluation and rendering exist. Compare the shared TypeScript evaluator with Java's separate interpolation paths. |
+| 19 | Geometry elements | In progress | Ray, hit and vertex types are present. Recheck triangle containment and the missing `closestPointOnTriangle` path. |
+| 20 | Concrete geometry elements checkpoint | Finalized | The historical plural package entries map to the singular package covered by Phase 19. |
+| 21 | Surfaces | In progress | Surface and mesh implementations exist. Close the `_ParametricBiCubicPatchIntersector` gap and recheck mesh and patch internals. |
+| 22 | Volumes and boundary representation | In progress | B-rep operators, validators and the recent refactor are present. Verify the private decision paths and the newer Java `VoxelVolume` behavior. |
+| 23 | Backgrounds | In progress | Background modes exist in both cores. Resolve the recorded `FixedBackground` behavior difference and verify current sampling. |
+| 24 | Cameras | In progress | Camera, projection and clipping exist. Check `clipLineCohenSutherlandPlanes` and the missing Java outcode logic. |
+| 25 | Geometric processing | In progress | CSG, BVH, triangulation and both clipping families are present. Repair the `genericPolygonClipper` references and revisit polygon-merger and CSG parity on the current sources. |
+| 26 | Lights | Finalized | The five Java light types are represented. The historical parity record covers attenuation, direction and copying. |
+| 27 | Tone-mapping checkpoint | Finalized | Empty group. Existing gamma and HDR operations remain in Phases 14 and 15. |
+| 28 | Scene model | In progress | Scene containers, CSG and worker snapshot transfer exist. Revalidate scene-instance BVH, transforms and snapshot behavior after the current revisions. |
+| 29 | Numerical analysis | Finalized | The four polynomial-source counterparts and both lookup tables were found. The historical graph group is empty. |
+| 30 | I/O wrappers | In progress | Core stream helpers, the Node file subclass and browser HTTP adapters exist. Port `ShapeDescriptorPersistence`, account for the JNI check and validate browser resource loading. |
+| 31 | I/O context checkpoint | Finalized | The runtime split is explicit in the packages. Format and stream gaps are tracked in Phases 30 and 32–36. |
+| 32 | Binary I/O | In progress | Stream and endian helpers exist. Check `PersistenceElement` use of `number` for Java `long`, and map the current pipe-stream and decompression wrappers. |
+| 33 | Image I/O | In progress | Node raster import, browser decoding, SGI, compressed DDS, palette import and PNG/PPM export exist. Review TGA, uncompressed DDS, native decoding equivalents and remaining export formats. |
+| 34 | XML I/O | Pending | `XmlImporter`, `XmlNode`, `XmlNodeParam` and `XmlException` lack TypeScript counterparts. |
+| 35 | VRML checkpoint | Finalized | The graph group is empty. The actual VRML and compressed input work is tracked in Phase 36. |
+| 36 | Geometry I/O | In progress | OBJ dispatch, independent MIT/altimetry/MD2/STEP readers, STL and OBJ/GTS/VTK writers exist. Seven geometry readers remain open, including parallel PLY assembly, plus STEP writing and curve, patch and viewpoint persistence. |
+| 37 | SGL checkpoint | Finalized | Empty group. The current GPU adapter belongs to Phase 41. |
+| 38 | GUI model and controllers | In progress | DOM/CSS widgets, dialogs, events, viewports, the Aquynza controller and gizmos are present. Map the remaining camera control schemes, HUD/text and visual analytics behaviors by responsibility. |
+| 39 | Software shaders | In progress | The shader family and a historical matching raytrace exist. Close the shader gate against current materials and the current CPU render path. |
+| 40 | CPU rendering | In progress | Canvas 2D modes and tiled worker raytracing are wired in the editor. Include Heckbert scan conversion in the library build, fix the hidden-surface import and review the stereogram and B-rep debugger gaps. |
+| 41 | GPU rendering | In progress | WebGL 2 renderers, context probing and offscreen color/depth readback are implemented. Map voxel rendering and verify shader, texture and context/resource lifecycle in a browser. |
+| 42 | Animation | Finalized | All four animation classes are present. The timer preserves the tick and listener order of the Java loop and supports teardown. |
+| 43 | Application framework | Pending | The three framework/shape-matching classes lack TypeScript counterparts. The existing editor has its own application orchestration. |
+| 44 | GUI persistence | In progress | `GuiPersistence` and `DialogPersistence` load the editor's Aquynza JSON over HTTP. Check validation, resource errors and dialog behavior against Java. |
+| 45 | Orphan-inventory closure | In progress | The source inventory was refreshed. Assign unmatched and new files to phases, and record package export and consumer reachability for each applicable entry. |
+| 46 | Parity and dependency-closure audit | In progress | The historical audit and current build findings are inputs. Repeat the API, private-algorithm and runtime checks on the refreshed inventory. |
+
+### Verification at this baseline
+
+- `cd typescript && npm run build` exits 1 in `@vitral/base` with eight
+  `TS2307` errors. Seven exports in `base/src/main/index.ts` and one import
+  in `HiddenSurfaceRenderer.ts` use `polygonClipper/`; the source files
+  live in `genericPolygonClipper/`. The build stops before `fs` and
+  `webgl`.
+- Focused Vitest runs passed 19 tests across six files (color, viewport
+  modes, tangible WebSocket, KD-tree and parallel raytracing). Two additional
+  suites, Weiler–Atherton clipping and hidden-surface rendering, failed to
+  load because of the stale path. The clipper and scan-conversion name filters
+  found no dedicated Sutherland–Hodgman or Heckbert suite. The raytracer
+  tests use an in-process executor to check scheduling and pixel output.
+- `ConvexWindowClipper` and the Heckbert `polygonScanConverter` family are
+  in both source trees. The TypeScript compiler file list includes the
+  clipper and omits the new scan-conversion family. Review the raster entries
+  in `base/tsconfig.json` and confirm both features work from an installed
+  package.
+- No clean packaging gate, Java test run or browser execution was performed
+  as part of this review. September test counts and pass results apply to
+  their recorded revisions.
+
+### Work order
+
+1. Repair the clipper references in the package and tests. Include the
+   applicable scan-conversion sources in the build. Run the workspace gate,
+   check public imports from the emitted package, then build and exercise
+   the Angular container.
+2. Verify browser worker execution for tiled raytracing, including color and
+   depth, error handling, stale results, progress and disposal. Keep the
+   parallel mesh-assembly work with the PLY reader in Phase 36.
+3. Close the format and integration gaps by following the application
+   entry points into the reusable packages. Compare AWT/Swing interactions
+   and JOGL4 rendering to their web counterparts through observable behavior.
+4. Update the symbol and export inventory as each gap closes. Revisit the
+   September parity findings against the current implementation and record
+   current reference tests or explicit runtime mappings before closing
+   Phases 45 and 46.
+
+## Historical gate records (September 2026)
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -371,6 +413,11 @@ by this sweep other than `io.FileLocator`.
 
 ## Offline Example Programs
 
+The September example sections record the original migration and comparisons.
+The eight browser example modules and five Node offline programs remain in the
+tree. The 2026-09-16 scope decision keeps that example set as the accepted
+minimum. The Scene Editor was added separately and is covered below.
+
 The Java offline examples under `java/testsuite/OfflineExamples` are migrated to
 `typescript/testsuite/OfflineExamples` as minimal Node console projects, one
 directory per Java project, each depending on `@vitral/base` and `@vitral/fs`
@@ -433,6 +480,9 @@ Migrated so far:
     silently.
 
 ## WebGL Example Programs
+
+Historical migration and verification notes. Camera-control shortcuts and
+runtime adaptations recorded here apply to the named example and revision.
 
 The Java interactive examples under `java/testsuite/Jogl4Examples` are migrated
 into the single Angular frontend application
@@ -1147,16 +1197,15 @@ Migrated so far:
     builds as synchronously as Java's event thread does, so a bowl build
     holds the page for a few seconds.
 
-## Analyzed State
+## Inventory baseline
 
-- Java production source of record: `java/base/src/main`; the repository also separates desktop and GPU integrations into `java/awt`, `java/jogl2`, and `java/jogl4`.
-- The Java base currently contains 377 production `.java` files. Its `vsdk.toolkit.common` package contains 50 production files.
-- The existing TypeScript seed contains 60 `.ts` files, 34 under its common tree. Several names and APIs represent an older model; for example, the mutable `Matrix4x4.ts` does not match the current immutable Java `Matrix4x4d` contract.
-- `typescript/package.json` declares the `base` workspace, but `typescript/base/package.json` and `typescript/base/tsconfig.json` do not exist. The root build command invokes the same missing workspace twice, the root TypeScript references include a missing testsuite project, and no clean/compile shell scripts currently exist.
-- Dependency-group source of record: `/paradigmas/master/VSDK/dependencyGraphAnalyzer/etc/vitralJava`.
-- Running `ls | sort -n` in that mirror yields 45 files. After removing one bracketed header from each file, they contain exactly 580 entries and 580 unique fully qualified class names.
-- Exhaustiveness check: the current Java common package has three public classes absent from the 580-entry graph: `ColorRgba`, `GeometryStatistics`, and `SolidTextureStatistics`. They are added to Phases 5 and 10 without changing the 45-file order. Therefore the numbered inventory remains exactly 580, while the complete-common milestone has three explicit supplemental obligations.
-- The Java tree contains 59 files in Gradle test source sets. Fifty-four contain JUnit/AssertJ tests; the remaining five are existing fixtures/diagnostics needed by those tests. These 59 files are the complete allowed test-port inventory.
+The 45 original dependency groups were imported from
+`/paradigmas/master/VSDK/dependencyGraphAnalyzer/etc/vitralJava` with 580 graph
+entries. The blocks below preserve that reference inventory. Use the current
+source roots and matrix to identify package moves, new source, platform
+equivalents and supplemental entries. Phase 46 is the final review of the
+expanded inventory. The source-of-record path and revision in a phase's dated
+record describe the comparison performed at that time.
 
 ## Scope Rules
 
@@ -1168,60 +1217,49 @@ Migrated so far:
 6. Preserve Java collection semantics deliberately: equality, hashing, insertion/iteration order, nullability, fail-fast or snapshot behavior where observable, and map-entry behavior.
 7. Keep platform-neutral model/algorithm code free of DOM, Node filesystem, and GPU dependencies. Put unavoidable runtime bindings behind concrete adapters and package subpath exports.
    The TypeScript filesystem adapters belong in a separate `typescript/fs/` workspace package (for example, `@vitral/fs`), which depends on `@vitral/base` and is built/installed only in server-side runtimes with filesystem I/O. The browser-facing `@vitral/base` artifact must neither import nor package `File`-family implementations.
-8. Do not port examples or invent new tests. Port only the 59 Java test-source files listed in this plan, adapting test-runner syntax and fixtures without weakening assertions or tolerances.
-9. When a Java test depends on classes from later phases, migrate it in the first phase where all production dependencies exist. Until then, record it as pending rather than disabling it.
-10. Swing/AWT and JOGL are not to be guessed. The platform-sensitive final phases remain deferred until the user selects the target architecture. No placeholder UI components or render backends may be committed while that decision is pending.
-11. Every Java behavior that uses multiple threads must be ported through workers compatible with a browser frontend. Worker entry points, message payloads, cancellation, error propagation, and lifecycle management must be designed for Web Workers; platform-specific worker launchers may be supplied only behind that common contract.
+8. Reuse current Java tests for the behavior being ported. Preserve assertions, fixtures and tolerances. The 59 listed files are the original migration inventory. The eight migrated browser examples and five Node examples are the accepted program scope.
+9. Migrate an applicable Java test once its production dependency closure exists. Record any pending dependencies and document browser-specific checks for web runtime boundaries.
+10. Map AWT/Swing to browser UI and Canvas 2D, and JOGL4 to WebGL 2. Compare user-facing behavior and rendering results at those boundaries.
+11. Move Java parallel computation to Web Workers in the browser. Use host callbacks for UI scheduling, timers and asynchronous network I/O. Give parallel compute tasks a worker entry point and a common protocol for inputs, results, progress, cancellation, errors and lifecycle.
 
-## Concurrency and Browser Workers
+## Concurrency and browser workers
 
-Do not translate Java multithreading directly to Node-only threads or to synchronous main-thread code. Any ported feature that uses concurrent execution must define a worker-compatible implementation that can run in a browser frontend using Web Workers. Keep the worker protocol and computational payloads platform-neutral, use message passing for inputs/results/errors and cancellation, and ensure that browser-visible state (DOM, UI, and other main-thread-only APIs) remains outside worker code. A backend or standalone runtime may provide an adapter for its own worker facility, but it must preserve the same worker contract rather than becoming the only implementation.
+| Java responsibility | TypeScript implementation and closure work |
+|---|---|
+| `ParallelRaytracer` thread pool and progress consumer (Phases 12 and 40) | `ParallelRaytracer` schedules tiles over `BrowserWorkerExecutor` in the editor and shader example and `NodeWorkerExecutor` in the offline example. `SimpleSceneSnapshotTransfer` encodes the scene for worker-local reconstruction. The owner collects color and optional depth tiles and forwards progress notices. Verify serial/parallel output, teardown and stale frame handling through the browser entry point. |
+| `ReaderPly` two-task mesh assembly (Phase 36) | Pending. After parsing the stream, dispatch vertex construction and triangle filtering as independent worker jobs over cloneable data. Preserve validated-index filtering and result order, then join before constructing the mesh, normals and material ranges. Define cancellation and cleanup on either task's failure. |
+| `TangibleInterfaceNetworkClient` connection thread (Phase 13) | The WebSocket event loop performs asynchronous I/O. Verify callback ordering, fragmented/error input behavior and disconnect/reconnect semantics. Apply the worker contract if CPU-parallel pose processing is added. |
+| `AnimationEventGenerator` thread and Swing/AWT event dispatch (Phases 38 and 42) | The generator uses a cancellable host timer. DOM handlers and the web frame scheduler own UI work. The editor MCP bridge dispatches commands in the page through a promise-based API. |
+| Java `ThreadLocal` scratch and mutable kernel state (Phases 21, 22, 25 and 40) | Audit each compute module used by workers. Give workers isolated scene and scratch state, and verify reentrancy at the appropriate call boundary. |
 
-Implemented — 2026-09-12. The contract lives in
-`@vitral/base` `java/concurrent/WorkerProtocol.ts` and has two executors that
-speak it: `BrowserWorkerExecutor` over a Web Worker, and `NodeWorkerExecutor`
-in `@vitral/fs` over `node:worker_threads`, with `installNodeWorkerRuntime` as
-the worker-side half (Node workers receive the bare message value where a
-browser worker receives a `MessageEvent`, so the state machine of
-`createWorkerMessageHandler` is installed over `parentPort` instead). The
-protocol gained one addition, an optional notice channel: a running computation
-may emit intermediate values through a `notify` callback and the owner observes
-them through `WorkerExecutionOptions.onNotice`, which is what carries per-row
-progress out of a render worker without settling its request. Computation
-payloads remain structured-clone values, so the same worker module runs in both
-runtimes.
+`WorkerProtocol.ts` defines structured-clone request, result, error and progress
+messages. The executors support request cancellation and termination. A long
+running job must observe cancellation at safe boundaries, or the owner must
+discard obsolete results and terminate workers when appropriate. The protocol
+alone does not establish in-flight cancellation in a tile renderer. Use typed
+arrays and transferable buffers where appropriate, with explicit ownership.
+The scheduler and DOM stay on the owning thread. For worker modules, use deep
+package imports as existing entry points do. `CooperativeFiberScheduler` shares
+one event loop and is used for cooperative scheduling.
 
-One packaging rule came out of measuring it: **a module that a worker loads must
-not import a package barrel**. Every worker compiles its whole module graph on
-its own. Booting one worker per core on a 72-core host took 19.7 s through the
-`@vitral/base` barrel and 1.3 s through deep module specifiers, which turned the
-parallel raytracer from three times slower than serial into four times faster.
-`@vitral/base` and `@vitral/fs` therefore publish a `"./*"` subpath export
-alongside the barrel, and the modules on a worker's import path use it; each
-such file says so at the top.
+## Persistence runtime architecture
 
-Java's `ThreadLocal`, `Thread` and `ExecutorService` idioms map onto this as
-follows: a `ThreadLocal` scratch buffer becomes a per-worker module-level value,
-a `Thread` that a JVM program joins becomes an awaited promise, and a fixed
-thread pool draining a shared queue becomes the queue owner handing each
-executor its next unit of work (the queue cannot live in the worker, because
-there is no shared heap). `CooperativeFiberScheduler` is not part of this: it
-multiplexes work onto one event loop to keep a browser frame responsive and
-cannot use more than one core, so it is never the answer to a parallel-compute
-requirement.
-
-## PersistenceElement Runtime Architecture
-
-`PersistenceElement` must be implemented as a class hierarchy with runtime-specific concrete implementations; it must not expose a single filesystem-based implementation as though it worked in every runtime.
-
-- The backend/standalone implementation may access local files and is the only implementation permitted to use filesystem APIs directly.
-- The WEB implementation must load resources published by remote web servers (for example, through `fetch` over HTTP(S)). A browser frontend runs in a sandbox and has no arbitrary local-file access, so it must not attempt to read filesystem paths.
-- Define a shared persistence contract that preserves the Java-facing behavior while making runtime selection explicit. Format-specific persistence classes must depend on that contract, not directly on Node or browser-only file APIs.
-- Add to `testsuite/Tools` a program that serves a filesystem tree over HTTP for persistence integration tests. It may be an NGINX-based, read-only server; its configuration and test fixture setup must prohibit write methods and make the published root explicit. Browser-mode tests must use this server to exercise remote resource loading.
+- `@vitral/base` owns the stream helpers and format-level parsing and writing.
+  Preserve EOF, signedness, endianness, exceptions and resource lifetime.
+- `@vitral/fs` extends the shared `PersistenceElement` with local-file operations
+  including `extractExtensionFromFile`. Java's `verifyLibrary` handles JNI
+  discovery. Record the decoder or wrapper that replaces each applicable JNI
+  capability in the target runtime.
+- Browser adapters use `fetch` for HTTP resources, browser-provided file data
+  for user-selected uploads, and downloads for exports. The editor publishes
+  fixture data through the Angular container's `etc` assets. The original
+  dedicated read-only test-server tool is unimplemented. Verify HTTP loading
+  and failures through the existing fixture server or an equivalent read-only
+  test host.
 
 ## Package and Build Foundation
 
-Implement this foundation in Phase 1 so every later phase is continuously compilable:
+Phase 1 established this foundation. Use these checks when restoring or validating it:
 
 1. Make `typescript/` the npm workspace root and `typescript/base/` a package named `@vitral/base` (or the repository-approved final name), with a pinned lockfile.
 2. Use an ESM library build with strict TypeScript project references. The base compiler configuration must enable `strict`, `noImplicitOverride`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noFallthroughCasesInSwitch`, `noEmitOnError`, declarations, declaration maps, source maps, and incremental builds.
@@ -1231,7 +1269,7 @@ Implement this foundation in Phase 1 so every later phase is continuously compil
 6. Fix root npm commands: `clean`, `build`, `test`, `pack`, and `verify`. `verify` must run clean, build, tests, and package validation in that order.
 7. Add a TypeScript test project and Vitest (or a repository-approved equivalent), configured for deterministic serial execution where shared Java test fixtures require it.
 8. Validate the package with `npm pack --dry-run`, inspect its file list, install the resulting tarball into a temporary consumer project, and compile an import against its declarations. This is packaging validation, not an invented behavioral test.
-9. Document the supported Node version for build/test tooling and the runtime-specific exports. Do not make browser claims until the final UI/render decisions are implemented and verified.
+9. Document Node.js 22+ for workspace tooling and the runtime-specific exports. Validate the Angular application separately with its own lockfile and scripts.
 
 Expected user workflow after Phase 1:
 
@@ -1265,7 +1303,7 @@ Apply this sequence to every class in every phase:
 
 ## Standard Phase Gate
 
-Every phase, including a phase whose source group is empty, must pass all applicable checks before work starts on the next phase:
+Apply the relevant checks when closing a phase. Phases with independent dependencies can proceed in parallel. Empty checkpoints close by checking the current source inventory:
 
 - Inventory: every listed entry has a source mapping and completed TypeScript export; no unaccounted omission or duplicate exists.
 - Completeness scan: no placeholder, empty implementation, unconditional dummy result, skipped test, `todo`, focused test, or blanket type suppression was introduced.
@@ -1275,30 +1313,35 @@ Every phase, including a phase whose source group is empty, must pass all applic
 - Packaging: declarations are emitted, public imports resolve, `npm pack --dry-run` succeeds, and the package contains no source-tree/build-cache leakage.
 - Review: public API and observable behavior are compared with Java, including error paths and edge cases covered by existing tests.
 
-Canonical gate command after the scripts exist:
+Use `npm run verify` for the TypeScript workspace and run the relevant Java reference tests and browser checks separately:
 
 ```sh
 cd typescript
 npm run verify
 ```
 
-## UI and Visualization Decision Boundary
+## Web platform mapping
 
-The 580-entry inventory describes the base dependency graph. The Java `awt`, `jogl2`, and `jogl4` module classes are not separately enumerated in these 45 files and must not be silently folded into unrelated phases.
+| Java platform | Web target |
+|---|---|
+| AWT/Swing windows, menus, dialogs, events and generic editor | HTML and CSS/SCSS, DOM event bindings, `WebSystem` event translation and the reusable HTML renderers and editor in `@vitral/webgl`. The Angular container hosts the applications. |
+| AWT paint and image buffers | Canvas 2D and browser image APIs. The Scene Editor uses Canvas 2D for wireframe/hidden lines, hidden surfaces and parallel raytrace display. |
+| JOGL4 GPU drawing | WebGL 2, the browser graphics API based on OpenGL ES 3.0, with GLSL ES 3.00. Map NIO uploads to typed arrays and validate capability probing, shaders, buffers, textures, framebuffer lifecycle and depth readback with the browser context. |
+| Java desktop integration and dispatch | Browser-hosted resource loading, file selection and downloads, event-loop dispatch and Web Workers for CPU-parallel work. |
 
-Before Phase 38, the user must choose and document:
+Use the [WebGL 2.0 specification](https://registry.khronos.org/webgl/specs/latest/2.0/)
+for the browser API surface. Record the rendering behavior of GLU tessellation,
+point sizing, polygon modes and desktop-only capabilities as explicit WebGL
+adaptations. Track AWT/Swing responsibilities in Phases 33, 38, 40 and 44 and
+JOGL4 behavior in Phase 41. JOGL2 remains a legacy reference where its observable
+behavior is used by a migrated feature.
 
-- Runtime shape: browser-only, Node plus browser, or separate core/frontend packages.
-- UI mapping: HTML5 plus CSS3 component strategy and event model for Swing/AWT responsibilities.
-- Rendering mapping: WebGL, WebGPU, Canvas 2D, or an explicit combination, including fallback policy.
-- Resource lifecycle, shader compilation, texture/mesh upload, offscreen rendering, and test strategy.
-- Browser support and headless CI environment.
+## Execution plan and original phase inventories
 
-Phases 38, 41, and 44 are therefore decision-gated. Keep them unimplemented, rather than stubbed, until this contract exists. A separate follow-on inventory for the 12 AWT, 65 JOGL2, and 25 JOGL4 Java source files should be generated after the decision; that follow-on is outside the current 580-entry list.
-
-## 45-Phase Execution Plan
-
-The following sequence is the exact numeric order produced by `ls | sort -n`. Class order inside each phase is preserved exactly from its source file.
+Phases 1–45 retain the graph order and historical class lists. Phase 46 covers
+parity and dependency closure. The current matrix governs active status and
+sequencing. Dated advances and gate results below refer to their source
+revisions.
 
 ### Phase 1: Java runtime compatibility
 
@@ -1413,13 +1456,13 @@ of the `AlgebraicExpressionExample` divergence recorded under Offline Example
 Programs, though rewriting `AlgebraicExpression.ts` against it remains open as
 a Phase 4 finding.
 
-Exit: satisfy the standard phase gate before starting Phase 2.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 2: Common entity foundation
 
 Source group: `12_common.txt` (8 class entries).
 
-Work: Port the entity hierarchy, exception hierarchy, VSDK utilities, J2ME compatibility behavior, and PresentationElement dependency with matching public contracts.
+Work: Port the applicable entity and exception hierarchies, VSDK utilities and PresentationElement dependency. J2ME is outside the web scope.
 
 Class inventory:
 
@@ -1434,7 +1477,7 @@ vsdk.toolkit.common.VSDKJ2ME
 vsdk.toolkit.gui.PresentationElement
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 3.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 3: Linear algebra
 
@@ -1463,7 +1506,7 @@ vsdk.toolkit.common.linealAlgebra.Vector4Dd
 vsdk.toolkit.common.linealAlgebra.Vector4Df
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 4.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 4: Symbolic algebra
 
@@ -1483,13 +1526,13 @@ vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpression
 vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 5.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 5: Color
 
 Source group: `13_color.txt` (1 class entries).
 
-Work: Port ColorRgb and also the current Java-only ColorRgba supplemental class identified by the source audit.
+Work: Maintain the ColorRgb, ColorRgba and Cie contracts against the current Java source.
 Supplemental current-Java class required for complete `common`: `vsdk.toolkit.common.color.ColorRgba`.
 
 Class inventory:
@@ -1498,7 +1541,7 @@ Class inventory:
 vsdk.toolkit.common.color.ColorRgb
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 6.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 6: Logging
 
@@ -1512,13 +1555,13 @@ Class inventory:
 vsdk.toolkit.common.logging.Logger
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 7.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 7: Memory management checkpoint
 
 Source group: `13_memory_management.txt` (0 class entries).
 
-Work: The authoritative group has no class entries. Audit imports and generated dependency data; create no empty compatibility files.
+Work: Add the current Java MemoryPool to the inventory and assess its explicit reuse semantics.
 
 Class inventory:
 
@@ -1526,7 +1569,7 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 8.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 8: Quasi-Monte Carlo checkpoint
 
@@ -1540,7 +1583,7 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 9.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 9: Data structures
 
@@ -1565,13 +1608,13 @@ vsdk.toolkit.common.dataStructures.NAryTree
 vsdk.toolkit.common.dataStructures.NAryTreeTraverser
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 10.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 10: Statistics
 
 Source group: `17_statistics.txt` (3 class entries).
 
-Work: Port the listed counters and reports, plus GeometryStatistics and SolidTextureStatistics because they exist in the current Java common package but are absent from the graph inventory. This closes the complete-common milestone.
+Work: Maintain the listed counters and reports, including GeometryStatistics, SolidTextureStatistics and the current raytrace counters.
 Supplemental current-Java classes required for complete `common`: `vsdk.toolkit.common.statistics.GeometryStatistics` and `vsdk.toolkit.common.statistics.SolidTextureStatistics`.
 Milestone gate: phases 1 through 10 plus the two supplemental classes provide the entire current Java `vsdk.toolkit.common` package except the intentionally excluded Web-inapplicable `VSDKJ2ME`. All eleven Java tests located under `common/linealAlgebra` have passing TypeScript translations. `LinearAlgebraStrategiesConsistencyTest` belongs to `processing.linealAlgebra` and remains deferred until its strategy-engine production dependencies are ported.
 
@@ -1583,7 +1626,7 @@ vsdk.toolkit.common.statistics.RaytraceStatistics
 vsdk.toolkit.common.statistics.RenderingStatistics
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 11.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 11: Command-line options checkpoint
 
@@ -1597,7 +1640,7 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 12.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 12: GUI progress-monitor contracts
 
@@ -1637,13 +1680,13 @@ its single event loop, so `run()` is `async` and awaits a 50 ms timer, and the
 owner awaits the returned promise where Java would `join()`. Event ordering and
 console output are unchanged.
 
-Exit: satisfy the standard phase gate before starting Phase 13.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 13: Tangible-interface contracts
 
 Source group: `18_gui_tangible_interfaces.txt` (4 class entries).
 
-Work: Port tangible input devices and controller contracts without selecting a browser UI or GPU backend yet.
+Work: Verify tangible input, browser WebSocket lifecycle and controller contracts through the web editor.
 
 Class inventory:
 
@@ -1654,7 +1697,7 @@ vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceNetworkClient
 vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceNetworkClient.FrameListener
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 14.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 14: Media and image buffers
 
@@ -1730,7 +1773,7 @@ Parity evidence is the sixteen-line byte-level agreement recorded for
 `SolidTextureExample` under WebGL Example Programs, which drives every one of
 these files. No Java test source exists for them.
 
-Exit: satisfy the standard phase gate before starting Phase 15.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 15: General processing
 
@@ -1765,7 +1808,7 @@ vsdk.toolkit.processing.SpharmonicKitWrapper
 vsdk.toolkit.processing.StopWatch
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 16.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 16: Materials
 
@@ -1807,7 +1850,7 @@ from `etc/materials/microFacetMAterials.csv` against `java/base` and prints
 every field of each resulting material; the TypeScript twin agrees on all three
 lines.
 
-Exit: satisfy the standard phase gate before starting Phase 17.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 17: Geometry base
 
@@ -1821,7 +1864,7 @@ Class inventory:
 vsdk.toolkit.environment.geometry.Geometry
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 18.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 18: Curves
 
@@ -1836,7 +1879,7 @@ vsdk.toolkit.environment.geometry.curve.Curve
 vsdk.toolkit.environment.geometry.curve.ParametricCurve
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 19.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 19: Geometry elements
 
@@ -1855,7 +1898,7 @@ vsdk.toolkit.environment.geometry.element.Vertex
 vsdk.toolkit.environment.geometry.element.Vertex2D
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 20.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 20: Concrete geometry elements
 
@@ -1874,7 +1917,7 @@ vsdk.toolkit.environment.geometry.elements.Vertex
 vsdk.toolkit.environment.geometry.elements.Vertex2D
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 21.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 21: Surfaces
 
@@ -1900,7 +1943,7 @@ vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup
 vsdk.toolkit.environment.geometry.surface.TriangleStripMesh
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 22.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 22: Volumes and boundary representation
 
@@ -1943,7 +1986,7 @@ vsdk.toolkit.environment.geometry.volume.Volume
 vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidPredicates
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 23.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 23: Backgrounds
 
@@ -1960,7 +2003,7 @@ vsdk.toolkit.environment.background.FixedBackground
 vsdk.toolkit.environment.background.SimpleBackground
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 24.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 24: Cameras
 
@@ -1975,7 +2018,7 @@ vsdk.toolkit.environment.camera.Camera
 vsdk.toolkit.environment.camera.CameraSnapshot
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 25.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 25: Geometric processing
 
@@ -2366,13 +2409,13 @@ argument list alone; its buffer is a `Uint8Array` where Java reads signed
 `0xff`. No placeholder was created, the source group remains an empty
 checkpoint, and the phase gate has not been run.
 
-Exit: satisfy the standard phase gate before starting Phase 30.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 30: I/O wrappers
 
 Source group: `31_io_wrapper.txt` (2 class entries).
 
-Work: Port stream wrappers with explicit byte, endianness, EOF, resource-lifetime, and exception semantics. Implement `PersistenceElement` using the required runtime-specific hierarchy: a local-file implementation restricted to backend/standalone use and a WEB implementation that reads resources from remote HTTP(S) servers. Add the read-only filesystem web-server tool under `testsuite/Tools` and use it for browser-mode persistence integration tests.
+Work: Complete the Node and browser resource mappings and port ShapeDescriptorPersistence. Verify the existing HTTP fixture publication and error handling. Review the shared stream semantics with Phase 32.
 
 Class inventory:
 
@@ -2381,7 +2424,7 @@ vsdk.toolkit.io.metadata.ShapeDescriptorPersistence
 vsdk.toolkit.io.PersistenceElement
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 31.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 31: I/O context checkpoint
 
@@ -2395,13 +2438,13 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 32.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 32: Binary I/O checkpoint
 
 Source group: `33_io_bin.txt` (0 class entries).
 
-Work: The authoritative group has no class entries. Confirm binary behavior is owned by the wrapper/format phases.
+Work: Verify binary semantics in the shared wrappers, including Java long, signedness, endianness and EOF. Account for the current pipe-stream and decompression wrappers.
 
 Class inventory:
 
@@ -2409,7 +2452,7 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 33.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 33: Image I/O
 
@@ -2536,7 +2579,7 @@ not been run.
 Deferred with the phase: `ImagePersistence` does not yet extend
 `PersistenceElement` (Phase 30), which remains unported.
 
-Exit: satisfy the standard phase gate before starting Phase 34.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 34: XML I/O
 
@@ -2553,13 +2596,13 @@ vsdk.toolkit.io.xml.XmlNodeParam
 vsdk.toolkit.io.XmlException
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 35.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 35: VRML I/O checkpoint
 
 Source group: `36_io_vrml.txt` (0 class entries).
 
-Work: The authoritative group has no class entries. Verify no production source is omitted; do not add a VRML stub.
+Work: Record the VRML reader and its compressed-input dependencies under Phase 36.
 
 Class inventory:
 
@@ -2567,7 +2610,7 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 36.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 36: Geometry I/O
 
@@ -2710,7 +2753,7 @@ opens a stream. The builder's integer-keyed maps are
 recorded under `PolyhedralBoundedSolidExample`. The StepWriter family and the
 other readers are not ported; the phase stays Pending.
 
-Exit: satisfy the standard phase gate before starting Phase 37.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 37: SGL checkpoint
 
@@ -2724,13 +2767,13 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 38.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 38: GUI model and controllers
 
 Source group: `61_gui.txt` (47 class entries).
 
-Work: Deferred platform-sensitive phase. Before implementation, obtain the user's UI target decision. Then port the platform-neutral GUI model/controllers and implement the chosen HTML5/CSS3 event/view bindings completely; do not emulate Swing with empty adapters. For the `ParallelProgressMonitor` symbols, support server runtime mode only. Browser-worker mode is explicitly unsupported until a complete design is selected; do not provide a compatibility stub.
+Work: Complete the platform-neutral interaction model and verify the existing DOM/CSS and Canvas bindings. Compare each camera-control scheme, widget, dialog and gizmo with its Java behavior. Verify worker progress through the renderer owner in Phases 12 and 40.
 
 Class inventory:
 
@@ -2784,11 +2827,9 @@ vsdk.toolkit.gui.visualAnalytics.VisualDoubleVariable
 vsdk.toolkit.gui.visualAnalytics.VisualVariableSet
 ```
 
-Partial advance — 2026-09-12 (out of phase order, to unblock the `MeshExample`
-module of the WebGL testsuite container, and *without* the UI target decision
-this phase is gated on, because none of the three entries touches the Swing
-question): `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` are ported
-1:1 into `@vitral/base`. They live in `vsdk.toolkit.gui.gizmo` in the current
+Historical advance — 2026-09-12: the `MeshExample` port brought `Gizmo`,
+`LightGizmoStyle` and `LightGizmoOmniBillboard` into `@vitral/base`. They
+live in `vsdk.toolkit.gui.gizmo` in the current
 Java source, one package deeper than the inventory above records, which was
 captured before that move; the inventory names are left as they are.
 `LightGizmoStyle` is a string enum so that a style survives a structured clone,
@@ -2806,8 +2847,8 @@ consumer on one event loop, where a plain field already has the get-and-set
 semantics the class's documented thread-safety contract asks for, and the
 contract itself is unchanged.
 
-Second partial advance — 2026-09-13 (same gating reading, to unblock the
-`SolidTextureExample` module): two more **orphans** of the same family are
+Second historical advance — 2026-09-13 (to unblock `SolidTextureExample`):
+two more **orphans** of the same family were
 ported into `@vitral/base` under their Java packages —
 `vsdk.toolkit.gui.gizmo.InfinitePlaneGizmo` with its `PlaneSnapshot` record,
 and `vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceEvent2InfinitePlane
@@ -2816,29 +2857,16 @@ GizmoMapper`. Neither appears in any authoritative source group, as with the
 its pending snapshot in a plain field rather than an `AtomicReference` for the
 reading already recorded for `RayGizmo`: a page runs producer and consumer on
 one event loop, where a plain field already has the get-and-set semantics the
-documented contract asks for. Java's two `setPlane` overloads become one
-signature pair over an optional first argument. The remaining inventory entries
-are still not ported, the phase stays Deferred, and its gate has not been run.
+documented contract asks for. Java's two `setPlane` overloads map to one
+signature pair over an optional first argument.
 
-`RendererConfigurationController` is **not** ported, because it extends
-`vsdk.toolkit.gui.Controller` and takes a `vsdk.toolkit.gui.KeyEvent`, both of
-which are this phase's gated work. Its F1..F9 bindings and shading-type cycle
-live meanwhile in the container's
-`src/WebGLExamples/_shared/example-renderer-configuration-interaction.ts`,
-beside `example-camera-interaction.ts` and for the same reason, and over the
-browser `WebKeyEvent`, whose `keycode` already carries the `KEY_F1`..`KEY_F9`
-names the Java constants have. The remaining entries are not ported, the phase
-stays Deferred, its UI target decision has not been taken, and its gate has not
-been run.
+The current library includes `RendererConfigurationController`,
+`Controller`, `KeyEvent`, `CameraController` and
+`CameraControllerAquynza`. The example-specific camera and renderer bindings
+recorded in September remain comparison points for the behavior of the
+individual examples.
 
-Open dependency — 2026-09-12: the WebGL testsuite modules that port
-`java/testsuite/Jogl4Examples` need `CameraController` and
-`CameraControllerAquynza`, and until this phase ports them they share an
-adapter inside the container application. See WebGL Example Programs; that
-adapter is the one recorded behavioral divergence of every such module, and
-closing this phase is what removes it.
-
-Exit: satisfy the standard phase gate before starting Phase 39.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 39: Software shaders
 
@@ -2884,7 +2912,7 @@ place. The parity evidence is the example above, whose rendered image exercises
 `GouraudTextureShader` (through `LightingShader`) with ambient and point
 lights, shadow rays, and the specular term, and matches Java byte for byte.
 
-Exit: satisfy the standard phase gate before starting Phase 40.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 40: CPU rendering
 
@@ -3008,13 +3036,13 @@ screen subdivision and the two shadow scenes with one light each, are
 identical to Java's (5521 polygons, Java run with
 `-XX:-UseLibmIntrinsic`). The phase stays Pending.
 
-Exit: satisfy the standard phase gate before starting Phase 41.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 41: GPU rendering architecture checkpoint
 
 Source group: `72_render_opengl.txt` (0 class entries).
 
-Work: Deferred platform decision checkpoint. The group is empty, but the user must choose WebGL, WebGPU, Canvas, or a defined combination before any JOGL-equivalent backend work. Do not add a fake renderer.
+Work: Complete the applicable current JOGL4 behavior in WebGL 2. Verify canvas initialization, shader compilation, geometry and texture upload, framebuffer readback, resource disposal and context recovery in the examples and editor.
 
 Class inventory:
 
@@ -3229,7 +3257,7 @@ contour winding, for the reason recorded under the module.
 compile their programs ahead of the first frame. `_PolyhedralBoundedSolidFaceValidator`
 is now exported from the `@vitral/base` barrel.
 
-Exit: satisfy the standard phase gate before starting Phase 42.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 42: Animation
 
@@ -3273,13 +3301,13 @@ Controller` whose Java original drives repaints and gizmo aging rather than a
 mesh, and neither is rewritten on top of the generator here. The source group's
 four entries are complete; the standard phase gate has not been run.
 
-Exit: satisfy the standard phase gate before starting Phase 43.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 43: Application framework
 
 Source group: `81_framework.txt` (3 class entries).
 
-Work: Port framework orchestration only after UI/render contracts are concrete.
+Work: Port the reusable Component and shape-descriptor generator contracts. The web editor's application orchestration already exists.
 
 Class inventory:
 
@@ -3289,13 +3317,13 @@ vsdk.framework.shapeMatching.plugins.ShapeDescriptor2DGeneratorFourier
 vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 44.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 44: GUI persistence
 
 Source group: `81_io_gui.txt` (1 class entries).
 
-Work: Deferred platform-sensitive phase. Port GUI persistence against the selected browser or runtime storage/file-selection APIs with complete behavior.
+Work: Verify the implemented Aquynza GUI and dialog JSON loading paths. Cover command images, translated labels, validation, resource failures and dialog bindings in the browser host.
 
 Class inventory:
 
@@ -3303,7 +3331,7 @@ Class inventory:
 vsdk.toolkit.io.gui.GuiPersistence
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 45.
+Exit: satisfy the applicable standard phase checks.
 
 ### Phase 45: Orphan-inventory closure
 
@@ -3319,9 +3347,19 @@ Class inventory:
 
 Exit: satisfy the standard phase gate and then complete the final inventory audit.
 
-## Existing Java Test Sources Allowed for Migration
+### Phase 46: Parity and dependency closure
 
-Port these files and only these files as tests. Support fixtures and diagnostics in this list may be translated because they are already part of a Java test source set. Do not convert examples under ordinary `src/` directories into new tests.
+Refresh the source and export ledger after each applicable phase closes. Check
+the retained September source findings and the current unmatched paths. Verify
+the public API, private algorithm dependencies, recorded technology mappings,
+test coverage and installed-package entry points. Distinguish file reachability
+from emitted-package availability. Keep the files retained by the 2026-09-16
+decision in the review.
+
+## Original Java test-source inventory
+
+This inventory records the tests and fixtures selected for the original
+migration. Use it with the current Java test tree and dependency closure.
 
 ```text
 java/base/src/test/vsdk/toolkit/common/linealAlgebra/Matrix4x4Test.java
@@ -3387,73 +3425,20 @@ java/testsuite/VSDKExamples/MatrixExample/src/test/matrixexample/MatrixExampleSl
 
 For the complete-common milestone at Phase 10, migrate the eleven tests under `java/base/src/test/vsdk/toolkit/common/linealAlgebra/` and `java/testsuite/VSDKExamples/MatrixExample/src/test/matrixexample/MatrixExampleSlowStrategiesTest.java`. Later test files move with the first phase that completes their production dependency closure.
 
-## Completion Criteria
+## Completion criteria
 
-The port is complete only when all of the following are true:
+- Close the 46 phases against the current inventory, including newly added
+  Java sources and the applicable explicit platform mappings.
+- Verify observable core behavior with Java reference tests and the corresponding
+  TypeScript checks, including numeric, error and degeneracy cases.
+- Pass the clean workspace build, Vitest suites, packaging and temporary-consumer
+  declaration checks. Record skips and their rationale.
+- Build and run the browser container. Verify DOM input, persistence, Canvas 2D
+  and WebGL 2 on the migrated entry points, including lifecycle and teardown.
+- Verify parallel jobs through real Web Workers and the Node adapter where used.
+  Compare outputs, progress and failure behavior with the reference paths.
 
-- All 46 phases are closed in the prescribed order.
-- All 580 unique graph entries are fully implemented or mapped to a verified native semantic equivalent; the three supplemental current-common classes are also fully implemented.
-- Every current Java `vsdk.toolkit.common` production file has a behaviorally equivalent TypeScript implementation.
-- No placeholder/stub patterns or unexplained inventory gaps remain.
-- The clean build reports zero TypeScript errors.
-- All migrated tests from the 59-file allowed inventory pass with no unexplained skip, exclusion, or weakened assertion.
-- `./scripts/clean.sh` is path-independent and removes only generated output.
-- `./scripts/compile.sh` produces JavaScript, declarations, source maps, and an installable npm package.
-- A clean temporary consumer can install the tarball and compile imports from the documented public API.
-- UI and visualization phases implement the user's chosen HTML5/CSS3 and WebGL/WebGPU/Canvas architecture; no Swing/AWT or JOGL behavior is represented by a stub.
-
-## Phase Progress
-
-| Phase | Scope | Status |
-| --- | --- | --- |
-| 1 | Java runtime compatibility | Complete — re-audited 2026-09-12: `java.io.StreamTokenizer` was a regular-expression approximation and is now a literal JDK port; see the Phase 1 record |
-| 2 | Common entity foundation | Parity open (`VSDKJ2ME` excluded for the Web target); the 2026-09-16 sweep adds one method gap: `Entity.typeIsSupported` |
-| 3 | Linear algebra | Complete |
-| 4 | Symbolic algebra | Complete — 7 / 7 symbols; gate passed |
-| 5 | Color | Complete — 2 / 2 applicable symbols; gate passed |
-| 6 | Logging | Parity open — 1 / 1 symbol; gate passed; the 2026-09-16 sweep adds one method gap: `Logger.processFatalError` |
-| 7 | Memory management checkpoint | Complete — empty authoritative group; gate passed |
-| 8 | Quasi-Monte Carlo checkpoint | Complete — empty authoritative group; gate passed |
-| 9 | Data structures | Complete — 12 / 12 symbols; 6 / 6 parity tests; gate passed |
-| 10 | Statistics | Complete — 3 / 3 inventory symbols; 2 / 2 supplemental symbols; 3 / 3 parity tests; gate passed |
-| 11 | Command-line options checkpoint | Complete — empty authoritative group; gate passed |
-| 12 | GUI progress-monitor contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed. Re-audited 2026-09-12: two console-layout defects fixed, and the four unlisted `gui.feedback.parallel` files ported; see the Phase 12 record |
-| 13 | Tangible-interface contracts | Parity open — 4 / 4 symbols; 3 / 3 parity tests; gate passed. The 2026-09-16 sweep adds three method gaps: `TangibleInterfaceNetworkClient.connectAndListen`, `extractNumbers` and `extractString` |
-| 14 | Media and image buffers | Parity open — 20 / 20 symbols; gate passed. Partial advance 2026-09-13: the eleven unlisted `media` / `media.solidTexture` orphans Phase 27 recorded for Phase 45 are ported, closing that orphan set; see the Phase 14 record. The 2026-09-16 sweep adds the `clone`/`positiveMod` members of `Image`, `MediaEntity` and `NormalMap`, `RGBAImageCompressed.reportUnsupportedPixelAccess`, the `readObject`/`writeObject` serialization of both uncompressed buffers, and the `fromInt` decoders of the two `ImageToSolidTexture*` enums |
-| 15 | General processing | In progress — 20 / 22 symbols; `LzwWrapper` and `SpharmonicKitWrapper` remain. The 2026-09-16 sweep adds one method gap: `ComputationalGeometry.computeCohenSutherland2DCode` |
-| 16 | Materials | Complete — 5 / 5 symbols; gate passed out of normal phase order. The deferred `MicroFacetedMaterial(csvFileName, materialName)` constructor was completed 2026-09-13 as `fromCsvText`; see the Phase 16 record |
-| 17 | Geometry base | Complete — 1 / 1 symbol; gate passed out of normal phase order |
-| 18 | Curves | Parity open — 2 / 2 symbols, but the 2026-09-16 sweep found `ParametricCurve` replaces Java's five per-type `evaluate*` bodies with one `basis`/`evalControls` pair (163 lines against 652); the gate recorded on completion did not prove source parity |
-| 19 | Geometry elements | Parity open — 6 / 6 symbols; `Triangle.closestPointOnTriangle` has no counterpart (2026-09-16 sweep) |
-| 20 | Concrete geometry elements | Complete — empty applicable source group; gate passed |
-| 21 | Surfaces | Parity open — 13 / 13 symbols; the 2026-09-16 sweep adds `TriangleMesh.appendTriangles`/`appendVertices`/`calculateMinMaxPositions`/`doIntersectionInternal` and its array-clone helpers, the min/max helpers of `QuadMesh`, `TriangleStripMesh` and `TriangleMeshGroup`, `FunctionalExplicitSurface.init`/`coord`, and `Md2Mesh.fillAniInfo`/`getAniInfo` to the open `ParametricBiCubicPatch` audit item |
-| 22 | Volumes and boundary representation | Complete — 30 / 30 symbols; Java B-rep parity review and standard gate passed |
-| 23 | Backgrounds | Complete — 4 / 4 symbols; standard gate passed |
-| 24 | Cameras | Parity open — 2 / 2 symbols and the standard gate passed, but the 2026-09-16 sweep found `clipLineCohenSutherlandPlanes` is a sequential plane-clipping rewrite of Java's outcode Cohen--Sutherland cycle, and `calculateOutcodeBits` has no counterpart |
-| 25 | Geometric processing | Parity open — phases 25.2–25.7 closed with parity gates passed. The full Java CSG operator inventory (splitter, operator base, predicate processor, intersector, curve builder, vertex/vertex and vertex/face classifiers, set/non-intersecting classifiers, null-edges connector, finisher, structural fallbacks, set operator, modeler wrappers and fixtures) is ported and byte-identical to the Java reference driver on the MANT1986/MANT1988/APPE1967 dumps. The 24 Java CSG test sources plus the ten B-rep volume test sources are migrated. The 2026-09-16 sweep found two polygon-clipper gaps outside that block: `PolygonTopologicalMerger` lacks `compareKeys`, `compareTo`, `equals`, `hashCode` and `splitAndAccumulateSegments`, and `PolygonProcessor` lacks `binaryTreeContainContour`. |
-| 26 | Lights | Complete — `Light` with its nested `LightDirection` record and the `AmbientLight`, `DirectionalLight`, `PointLight`, and `SpotLight` subclasses are bit-identical to the Java reference driver over direction, distance-limit, attenuation, copy, equality, hash, and text output. `LightType` has no source mapping in the current Java base and was not invented. No Java test source exists for this package. |
-| 27 | Tone-mapping checkpoint | Complete — the group is empty, the current Java base has no tone-mapping class, and no placeholder exists. The represented blocks (gamma transfer functions and the HDR buffers) were verified against Java drivers, which exposed and closed three byte-level defects in Phases 14 and 15. Eleven unlisted `media`/`solidTexture` production files were recorded as Phase 45 orphans. |
-| 28 | Scene model | Complete — `SimpleBody`, `SimpleBodyGroup`, `SimpleScene`, and `SimpleSceneSnapshot` are bit-identical to the Java reference driver over transform caches, every world/object conversion, all ray-detail masks, the translation-only and sphere fast paths, group bounds, scene light-id assignment, and snapshot isolation and immutability. Closing the diff required literal corrections to `Matrix4x4d.exportToQuaternion`, `Matrix4x4d.importFromQuaternion`, and `Quaterniond.normalized` from Phase 3. No Java test source has a dependency closure limited to this phase. |
-| 29 | Numerical-analysis checkpoint | Pending — partial advance 2026-09-13: the audit found `LookUpTableSine` and `LookUpTableChecksum16` as unlisted orphans and both are ported; the group is still an empty checkpoint; see the Phase 29 record |
-| 30 | I/O wrappers | Pending — `ShapeDescriptorPersistence` is unported, and the ported `PersistenceElement` lacks `verifyLibrary` and `extractExtensionFromFile` (2026-09-16 sweep) |
-| 31 | I/O context checkpoint | Pending |
-| 32 | Binary I/O checkpoint | Pending |
-| 33 | Image I/O | Pending — 4 / 8 entries: the export path, `importDDSCompressed` and `ImagePersistenceSGI` with its `importIndexedColor` are ported; `ImagePersistenceTarga`, `NativeImageReaderWrapper` with its header record and `RGBColorPalettePersistence` are not, and inside the ported `ImagePersistence` the whole raster import path plus `exportBMP`, `exportPNM` and the file-taking `exportJPG`/`exportGIF` are absent; see the Phase 33 record |
-| 34 | XML I/O | Pending |
-| 35 | VRML I/O checkpoint | Pending |
-| 36 | Geometry I/O | Pending — 18 / 51 entries: `EnvironmentPersistence`, `ReaderObj`, `ReaderMitScene`, `Md2Persistence`, the STEP reader, the STL writer and `FontReader` are ported; the seven remaining readers, the three writers, the nine-file `stepCad.writer` family and the three persistence classes are not, so `EnvironmentPersistence` dispatches one of Java's eight formats and none of its three exports; see the Phase 36 record |
-| 37 | SGL checkpoint | Pending |
-| 38 | GUI model and controllers | Deferred — partial advances 2026-09-12 and 2026-09-13: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo`, `TangibleInterfaceEvent2RayGizmoMapper`, `InfinitePlaneGizmo` and `TangibleInterfaceEvent2InfinitePlaneGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
-| 39 | Software shaders | Complete — 18 / 18 entries ported out of normal phase order (`CookTorranceShader.MicrofacetParams` and `Shader.LocalShadingResult` are present as `_`-prefixed sibling classes, and the eighteenth inventory name, `CookTorranceShader.LightDirection`, is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
-| 40 | CPU rendering | Pending — 33 / 35 entries; only `AutoStereogramGenerator` and `PolyhedralBoundedSolidDebugger` have no counterpart, and the standard gate has not been run; see the Phase 40 record |
-| 41 | GPU rendering architecture checkpoint | Pending — the 2026-09-16 sweep measures 24 of the 25 `java/jogl4` classes ported with their full method inventory; only `Jogl4Renderer` (whose one member is `verifyOpenGLAvailability`) has no counterpart, and the remaining member-level differences are the recorded JOGL boundaries (NIO buffers, the GLU tessellator, `glPointSize`, `glPolygonMode`). The checkpoint gate has not been run; see the Phase 41 record |
-| 42 | Animation | Complete — 4 / 4 symbols ported 2026-09-13 out of normal phase order, to give `MD2Example` its animation; `AnimationEventGenerator.run()` arms the host timer instead of blocking a thread, keeping Java's tick ordering; the standard gate has not been run; see the Phase 42 record |
-| 43 | Application framework | Pending |
-| 44 | GUI persistence | Pending |
-| 45 | Orphan-inventory closure | Pending — the eleven `media` / `solidTexture` orphans are closed under Phase 14, four gizmo/tangible-interface orphans under Phase 38 and two `lookUpTables` orphans under Phase 29; `vsdk.toolkit.io.FileLocator` is added as a new unlisted orphan by the 2026-09-16 sweep; the inventory comparison has not been re-run |
-| 46 | Textual-parity and dependency-closure audit | Pending — its named inputs are now the 81 unported Java files and the 31 same-path method gaps of the 2026-09-16 sweep. The 45 unreachable `src/main` files that sweep found are kept by user decision of 2026-09-16, for package completeness and future applications: they are held to the same 1:1 parity rule, they carry no tests, and the audit must not propose deleting them |
-
-### Phase 1 Checkpoint — 2026-09-09
+## Historical Phase 1 checkpoint — 2026-09-09
 
 The package and build foundation is operational with Node.js 22+, a pinned
 lockfile, strict compilation, a versioned artifact, and a temporary-consumer
@@ -3479,11 +3464,13 @@ allowed Java test yet had a production closure contained in that phase. The
 source scan found no `TODO`, `FIXME`, `@ts-ignore`, `@ts-nocheck`, focused tests,
 or skipped tests.
 
-## ApplicationCases/SceneEditorApplication (2026-10-01)
+## ApplicationCases/SceneEditorApplication
 
 Port of the Java `SceneEditorApplication` (AWT/Swing + JOGL4) in
 `typescript/testsuite/VitralWebTestsuiteContainer/src/ApplicationCases/SceneEditorApplication`,
-listed in the explorer tree of the container under `ApplicationCases`.
+listed in the explorer tree of the container under `ApplicationCases`. The initial
+port was recorded on 2026-10-01. The architecture below reflects the current
+source.
 
 - UI: the GUI is built with the DOM from the same Aquynza GUI definitions
   (`etc/gui/english.json`, `spanish.json`; languages listed by the generated
@@ -3491,18 +3478,21 @@ listed in the explorer tree of the container under `ApplicationCases`.
   pane, windows, file chooser, generic editor) live in `@vitral/webgl`
   (`render/html`, `gui/editor`) with `styles/vitral-html-gui.scss`; the look and
   feel themes (Motif, Metal, Windows, GTK) are CSS classes.
-- Rendering: WebGL2, each frame drawn into an offscreen frame buffer so the
-  depth can be read back (`depthPack*.glsl`). No frame is drawn before the
-  first reshape or while the canvas has no layout size.
+- Rendering: the WebGL 2 mode draws into an offscreen framebuffer for color
+  and depth readback (`depthPack*.glsl`). The Canvas 2D backend presents
+  wireframe and hidden lines, Weiler–Atherton hidden surfaces with optional
+  shadows, and the raytraced image. The editor selects the backend by viewport
+  mode.
 - Raytracing: Web Workers (`ObjectGraphTransfer` + `SimpleSceneSnapshotTransfer`).
-- Files: reads are fetched from `etc` (browsed through `etc/index.json`),
-  writes are downloads.
+- Files: fixture reads use `etc` (browsed through `etc/index.json`), and
+  exports are downloads. The GUI controller loads the language definitions and
+  `dialogs.json` through the shared persistence classes.
 - Agent API: the Java MCP protocol (same tools and JSON) is served in-page by
   `window.vitralEditorMCP.request(line)` when the page URL carries `?arg=-s`.
 - Class names: a production bundle renames classes, so Java names come from
   an `instanceof` mapper (`model/java-class-name.ts`), installed in
   `GenericEditor.setSimpleClassNameResolver` for editor titles.
 
-Pending: model readers other than OBJ (3ds, gts, ply, ase, vrml, vtk, bin),
-XML persistence (`XmlManager`; only used by commented-out Java code), and the
-port of the application's Java tests to vitest.
+The generic environment importer dispatches OBJ. Additional model formats
+are tracked in Phase 36, XML in Phase 34 and browser integration checks in
+Phases 38, 40, 41 and 44.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { _CircularDoubleLinkedList } from "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_CircularDoubleLinkedList.js";
+import { _CircularDoubleLinkedList } from "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_CircularDoubleLinkedList.js";
 
 describe("_CircularDoubleLinkedList", () => {
     it("keeps node links circular through indexed insertion and removal", () => {
