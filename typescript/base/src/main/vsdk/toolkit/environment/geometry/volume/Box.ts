@@ -779,6 +779,36 @@ export class Box extends Solid {
     }
 
     /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest. The box is centered at the origin, with its
+    faces perpendicular to the axes.
+    Java-parity legacy band: per-axis |p_i| within half_i +/- tolerance. It is
+    intentionally not the Euclidean band of classifyPoint.
+    @param p point to classify, in the space of the box
+    @param distanceTolerance distance to the faces of the box under which
+    the point is classified as `LIMIT`
+    @return INSIDE, OUTSIDE or LIMIT constant value
+    */
+    public override doContainmentTest(p: Vector3Dd, distanceTolerance: number): number {
+        const size = this.getSize();
+        const local = p.subtract(this.getCenter());
+        const half = [size.x() / 2, size.y() / 2, size.z() / 2];
+        const coordinates = [local.x(), local.y(), local.z()];
+        let inside = true;
+
+        for (let i = 0; i < 3; i++) {
+            const distance = Math.abs(coordinates[i]!);
+            if (distance > half[i]! + distanceTolerance) {
+                return Box.OUTSIDE;
+            }
+            if (distance >= half[i]! - distanceTolerance) {
+                inside = false;
+            }
+        }
+        return inside ? Box.INSIDE : Box.LIMIT;
+    }
+
+    /**
     @return a new 6 valued double array containing the coordinates of a min-max
     bounding box for current geometry.
     */

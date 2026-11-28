@@ -156,26 +156,14 @@ export class QuadricSurface extends Solid {
     public squareCoefficients(): Vector3Dd {
         return this.square;
     }
-    public setSquareCoefficients(value: Vector3Dd): void {
-        this.square = value;
-    }
     public mixedCoefficients(): Vector3Dd {
         return this.mixed;
-    }
-    public setMixedCoefficients(value: Vector3Dd): void {
-        this.mixed = value;
     }
     public linearCoefficients(): Vector3Dd {
         return this.linear;
     }
-    public setLinearCoefficients(value: Vector3Dd): void {
-        this.linear = value;
-    }
     public constantCoefficient(): number {
         return this.constant;
-    }
-    public setConstantCoefficient(value: number): void {
-        this.constant = value;
     }
 
     public static solve(a: number, b: number, c: number, first: number[], second: number[]): boolean {
@@ -334,26 +322,19 @@ export class QuadricSurface extends Solid {
         return result.add(FloatingInterval.exact(mixed.z()).multiply(y.multiply(z)));
     }
 
-    private coefficientArray(): number[] {
-        const square = this.square,
-            mixed = this.mixed,
-            linear = this.linear;
-        return [
-            square.x(),
-            square.y(),
-            square.z(),
-            mixed.x(),
-            mixed.y(),
-            mixed.z(),
-            linear.x(),
-            linear.y(),
-            linear.z(),
+    public override classifyBoxCertified(center: Vector3Dd, halfWidths: Vector3Dd): GeometryContainment {
+        const coefficients = [
+            this.square.x(),
+            this.square.y(),
+            this.square.z(),
+            this.mixed.x(),
+            this.mixed.y(),
+            this.mixed.z(),
+            this.linear.x(),
+            this.linear.y(),
+            this.linear.z(),
             this.constant,
         ];
-    }
-
-    public override classifyBoxCertified(center: Vector3Dd, halfWidths: Vector3Dd): GeometryContainment {
-        const coefficients = this.coefficientArray();
         for (let i = 0; i < 10; ++i) if (!Double.isFinite(coefficients[i]!)) return GeometryContainment.InvalidInput;
         if (!FloatingInterval.isSupportedEnvironment()) return GeometryContainment.Unsupported;
         const x = FloatingInterval.around(center.x(), halfWidths.x());
@@ -378,7 +359,18 @@ export class QuadricSurface extends Solid {
             !Double.isFinite(point.z())
         )
             return GeometryContainment.InvalidInput;
-        const coefficients = this.coefficientArray();
+        const coefficients = [
+            this.square.x(),
+            this.square.y(),
+            this.square.z(),
+            this.mixed.x(),
+            this.mixed.y(),
+            this.mixed.z(),
+            this.linear.x(),
+            this.linear.y(),
+            this.linear.z(),
+            this.constant,
+        ];
         for (let i = 0; i < 10; ++i) if (!Double.isFinite(coefficients[i]!)) return GeometryContainment.InvalidInput;
         if (!FloatingInterval.isSupportedEnvironment()) return GeometryContainment.Unsupported;
         const coordinates = [point.x(), point.y(), point.z()];

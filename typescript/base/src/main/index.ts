@@ -13,6 +13,7 @@ export { NumberFormatException } from "./java/lang/NumberFormatException.js";
 export { IllegalStateException } from "./java/lang/IllegalStateException.js";
 export { IndexOutOfBoundsException } from "./java/lang/IndexOutOfBoundsException.js";
 export { ArrayIndexOutOfBoundsException } from "./java/lang/ArrayIndexOutOfBoundsException.js";
+export { JavaArray, type JavaArrayLike } from "./java/lang/JavaArray.js";
 export { ArithmeticException } from "./java/lang/ArithmeticException.js";
 export { UnsupportedOperationException } from "./java/lang/UnsupportedOperationException.js";
 export { CloneNotSupportedException } from "./java/lang/CloneNotSupportedException.js";
@@ -49,6 +50,7 @@ export { BufferedInputStream } from "./java/io/BufferedInputStream.js";
 export { ByteArrayInputStream } from "./java/io/ByteArrayInputStream.js";
 export { ByteArrayOutputStream } from "./java/io/ByteArrayOutputStream.js";
 export { IOException } from "./java/io/IOException.js";
+export { EOFException } from "./java/io/EOFException.js";
 export { Reader } from "./java/io/Reader.js";
 export { StringReader } from "./java/io/StringReader.js";
 export { InputStreamReader } from "./java/io/InputStreamReader.js";
@@ -409,10 +411,7 @@ export { PolyhedralBoundedSolidValidationEngine } from "./vsdk/toolkit/environme
 export { PolyhedralBoundedSolidPredicates } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidPredicates.js";
 export { TriangleStripMesh } from "./vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.js";
 export { _AnimationInfo } from "./vsdk/toolkit/environment/geometry/surface/_AnimationInfo.js";
-export {
-    TriangleMeshGroup,
-    type TriangleMeshLike,
-} from "./vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.js";
+export { TriangleMeshGroup } from "./vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.js";
 export { _Polygon2DContour } from "./vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.js";
 export { Polygon2D } from "./vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.js";
 export { Light } from "./vsdk/toolkit/environment/light/Light.js";

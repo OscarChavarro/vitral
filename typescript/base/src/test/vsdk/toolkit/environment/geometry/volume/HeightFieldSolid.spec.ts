@@ -1,4 +1,4 @@
-// Port of cpp/base/src/test/heightfield_solid_tests.cpp
+// Port of java/base/src/test/vsdk/toolkit/environment/geometry/volume/HeightFieldSolidTest.java (reader tests: fs HeightFieldSolidReaders.spec.ts)
 import { test } from "vitest";
 import {
     expectDoubleEq,

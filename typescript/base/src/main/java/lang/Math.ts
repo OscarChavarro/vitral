@@ -165,12 +165,18 @@ export class Math {
         return globalThis.Math.abs(a);
     }
 
+    /**
+    `Math.min(double, double)`: NaN if either argument is NaN, and -0.0 is
+    smaller than 0.0. JavaScript's two-argument `Math.min` has exactly these
+    semantics (and, for int values, those of `Math.min(int, int)`).
+    */
     public static min(a: number, b: number): number {
-        return a < b ? a : b;
+        return globalThis.Math.min(a, b);
     }
 
+    /** `Math.max(double, double)`: see `min`. */
     public static max(a: number, b: number): number {
-        return a > b ? a : b;
+        return globalThis.Math.max(a, b);
     }
 
     /** `Math.toRadians(double)`: `angdeg / 180.0 * PI`. */

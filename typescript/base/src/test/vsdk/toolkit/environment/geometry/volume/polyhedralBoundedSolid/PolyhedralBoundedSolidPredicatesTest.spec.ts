@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { Matrix4x4d } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { PolyhedralBoundedSolidPredicates } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidPredicates.js";
+import { Geometry } from "vsdk/toolkit/environment/geometry/Geometry.js";
+import { PolyhedralBoundedSolidTestFixtures } from "./PolyhedralBoundedSolidTestFixtures.js";
 import { SimpleTestGeometryLibrary } from "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.js";
 
 /**
@@ -85,4 +87,30 @@ describe("PolyhedralBoundedSolidPredicatesTest", () => {
         },
         APPE1967_TIMEOUT_MS,
     );
+    it("given_boxSolid_when_pointsClassified_then_doContainmentTestDistinguishesFaces", () => {
+        // Arrange: unit box centered at (2, 0, 0)
+        const solid = PolyhedralBoundedSolidTestFixtures.createBoxSolid(1, 1, 1, 2, 0, 0);
+        const tolerance = 0.01;
+
+        // Act & Assert
+        expect(solid.doContainmentTest(new Vector3Dd(2, 0, 0), tolerance)).toBe(Geometry.INSIDE);
+        expect(solid.doContainmentTest(new Vector3Dd(2.5, 0.1, -0.2), tolerance)).toBe(Geometry.LIMIT);
+        expect(solid.doContainmentTest(new Vector3Dd(2, 0, 0.505), tolerance)).toBe(Geometry.LIMIT);
+        expect(solid.doContainmentTest(new Vector3Dd(2, 0, 0.6), tolerance)).toBe(Geometry.OUTSIDE);
+        expect(solid.doContainmentTest(new Vector3Dd(0, 0, 0), tolerance)).toBe(Geometry.OUTSIDE);
+    });
+
+    it("given_nonConvexSolid_when_pointInTheNotchClassified_then_itIsOutside", () => {
+        // Arrange: profile of [MANT1986].4 in the XZ plane, extruded along Y
+        // from y = 0.4 to y = 0; its top has a notch between x = 0.37 and
+        // x = 0.60 down to z = 0.30
+        const solid = PolyhedralBoundedSolidTestFixtures.createMant1986_1Solid();
+        const tolerance = 0.001;
+
+        // Act & Assert
+        expect(solid.doContainmentTest(new Vector3Dd(0.48, 0.2, 0.4), tolerance)).toBe(Geometry.OUTSIDE);
+        expect(solid.doContainmentTest(new Vector3Dd(0.48, 0.2, 0.2), tolerance)).toBe(Geometry.INSIDE);
+        expect(solid.doContainmentTest(new Vector3Dd(0.9, 0.2, 0.4), tolerance)).toBe(Geometry.INSIDE);
+        expect(solid.doContainmentTest(new Vector3Dd(0.48, 0.2, 0.3), tolerance)).toBe(Geometry.LIMIT);
+    });
 });

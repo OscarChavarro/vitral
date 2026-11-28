@@ -1,3 +1,4 @@
+import { JavaArray } from "../../../../../java/lang/JavaArray.js";
 import { Double } from "../../../../../java/lang/Double.js";
 import { IllegalArgumentException } from "../../../../../java/lang/IllegalArgumentException.js";
 import { Math as JavaMath } from "../../../../../java/lang/Math.js";
@@ -1122,7 +1123,7 @@ export class SubdividedBezierPatch extends Surface {
         }
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
-                const p: Vector3Dd = net[i]![j]!;
+                const p: Vector3Dd = JavaArray.get(JavaArray.get(net, i), j);
                 if (!Double.isFinite(p.x()) || !Double.isFinite(p.y()) || !Double.isFinite(p.z())) {
                     throw new IllegalArgumentException("SubdividedBezierPatch: control points must be finite");
                 }
@@ -1176,7 +1177,7 @@ export class SubdividedBezierPatch extends Surface {
     }
 
     public getControlPoint(i: number, j: number): Vector3Dd {
-        return this.controlPoints[i]![j]!;
+        return JavaArray.get(JavaArray.get(this.controlPoints, i), j);
     }
 
     // Point of the Bezier surface at (u, v) in [0, 1]^2.

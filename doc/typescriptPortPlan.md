@@ -14,24 +14,27 @@ For a complex algorithm, first map and migrate its complete private dependency g
 
 ## Current status and phase matrix
 
-Review baseline: 2026-11-27, source revision `adecdd8c`. This matrix supersedes
+Review baseline: 2026-11-28, source revision `7662979b` (see the 1:1 audit
+of 2026-11-28 below the matrix). This matrix supersedes
 the September gate records and inventories as a statement of current status.
 The scope includes the current Java core, the web equivalents of the applicable
 AWT/Swing and JOGL4 behavior, and the existing TypeScript applications.
 
 | Production source root | Tracked source files |
 |---|---:|
-| `java/base/src/main` | 604 Java |
+| `java/base/src/main` | 608 Java |
 | `java/awt/src/main` | 15 Java |
 | `java/jogl2/src/main` | 69 Java |
 | `java/jogl4/src/main` | 63 Java |
-| `typescript/base/src/main` | 685 TypeScript, including 576 under `vsdk` |
-| `typescript/fs/src/main` | 19 TypeScript |
-| `typescript/webgl/src/main` | 82 TypeScript |
+| `typescript/base/src/main` | 719 TypeScript, including 605 under `vsdk` |
+| `typescript/fs/src/main` | 21 TypeScript |
+| `typescript/webgl/src/main` | 83 TypeScript |
 
 Comparing the tracked Java core paths with the union of the three TypeScript
-source roots gives 546 same-relative-path matches and 58 unmatched Java
-paths. This is a file inventory. Renames, split classes, runtime equivalents,
+source roots gives 543 same-relative-path matches, 33 files found under a
+TypeScript subfolder of the same package (the Weiler–Atherton clipper and the
+B-rep set-operator split into `booleans/`, `validation/`, `slicing/` and
+similar folders) and 32 Java files without a TypeScript counterpart. This is a file inventory. Renames, split classes, runtime equivalents,
 nested declarations, package exports, and algorithm behavior require separate
 review. Of the 63 JOGL4 file basenames, 62 have a matching WebGL basename after
 replacing `Jogl4` with `WebGL`. The unmatched file is
@@ -44,12 +47,13 @@ implementation, parity or validation item is open. **Pending** means the
 applicable implementation has yet to begin. The shared build, packaging and
 browser verification apply to the release as a whole.
 
-The matrix records 33 finalized phases, 12 in progress and two pending.
+The matrix records 33 finalized phases, 12 in progress and two pending
+(Phase 25 closed and Phase 14 reopened on 2026-11-28).
 
 | Phase | Scope | Status | Evidence or remaining work |
 |---:|---|---|---|
 | 1 | Java runtime compatibility and packaging | In progress | All three tarballs pass standalone type and runtime checks. Object streams support multiple portable records. Java double literals and regex capture queries are covered. Direct binary32 parsing and regex dialect differences remain open. |
-| 2 | Common entity foundation | In progress | Entity inspection applies the Java type whitelist and reads declared control types without evaluating getters. Accessor pairs without metadata still depend on runtime values. |
+| 2 | Common entity foundation | In progress | Entity inspection applies the Java type whitelist and reads declared control types without evaluating getters. Accessor pairs without metadata still depend on runtime values. `EntityControlSpecificationsTest` is translated inside `Entity.spec.ts`, which also holds tests not present in Java; split it into the Java test and remove or justify the extra tests. |
 | 3 | Linear algebra | Finalized | Gate passed on 2026-11-28. All 107 Java linear-algebra test executions are translated one to one. A 3326-line reference driver matches Java bit for bit when HotSpot's libm intrinsics are off. With them on, 33 lines differ by 1 ulp in `Math.sin`/`cos`/`exp`, a documented platform boundary. `Complex.abs()` now uses a literal port of `FdLibm.Hypot`. |
 | 4 | Symbolic algebra | Finalized | The Java `StreamTokenizer` parser and recursive tree construction are ported. Compared tree rendering, values and errors with Java. |
 | 5 | Color | Finalized | `ColorRgb`, `ColorRgba` and the new `Cie` model are present. The focused CIE and RGB suites passed. |
@@ -61,7 +65,7 @@ The matrix records 33 finalized phases, 12 in progress and two pending.
 | 11 | Command-line options checkpoint | Finalized | Empty library group. Entry-point arguments belong to the application host. |
 | 12 | Progress monitors | Finalized | Core monitors and the parallel producer/consumer are present. The tile scheduler routes worker progress notices back to the owner. |
 | 13 | Tangible interfaces | Finalized | Java, Node and Chrome accepted the same fragmented WebSocket pose. Tests cover handshake failure, reconnection, malformed records and listener dispatch. Browser WebSocket events handle asynchronous I/O. |
-| 14 | Media and image buffers | Finalized | Gate passed on 2026-11-28. All 20 inventory entries are exported. Compressed images, raw access, bilinear indexing and cloning match Java (Java's `clone()` was fixed by user decision). `RawImageAccessTest` is translated. Java object serialization is a documented runtime boundary. |
+| 14 | Media and image buffers | In progress | Gate passed on 2026-11-28 for the 20 inventory entries (compressed images, raw access, bilinear indexing and cloning match Java; `RawImageAccessTest` translated; Java object serialization is a documented runtime boundary). Reopened the same day: `RGBImageFloatUncompressed` (158 lines, commit `7662979b`, used by the RGBE reader/writer) has no TypeScript counterpart. |
 | 15 | General processing | Finalized | Gate passed on 2026-11-28. All 22 inventory entries are ported literally. The four Java processing tests are translated, and the reference driver matches Java except for one documented 1-ulp `Math.sin` difference. `LzwWrapper` is a literal port of the native decoder. By user decision, `SpharmonicKitWrapper` fails as Java does without its native library; porting it is Phase 47. |
 | 16 | Materials | Finalized | Literal review of the twelve material classes, the three Java test classes translated (18 tests), Java/TS parity driver bit-exact outside the sampling paths; see the Phase 16 gate record. |
 | 17 | Geometry base | Finalized | The `Geometry` contract is present and used by the current geometry families. |
@@ -72,18 +76,18 @@ The matrix records 33 finalized phases, 12 in progress and two pending.
 | 22 | Volumes and boundary representation | Finalized | `VoxelVolume` ported from the current Java (threshold, voxel traversal, surface data, B-rep export); Box/Cone `doContainmentTest` added; the 19 Java test classes (121 tests) translated; Java/TS parity driver bit-exact over 20 lines; see the Phase 22 gate record. |
 | 23 | Backgrounds | Finalized | All four classes were compared with Java. `FixedBackground` already returns Java's null result. The background suites cover fixed, uniform and cubemap sampling. |
 | 24 | Cameras | Finalized | `Camera` is ported line by line from Java, including the three outcode overloads, both Cohen–Sutherland clippers and the ray projection. A reference driver matched Java bit for bit on five camera setups. `CameraProjectionTest` is ported, and the browser gizmos were exercised. |
-| 25 | Geometric processing | In progress | Both clipping families build and export. The generic clipper suites pass. Revisit polygon-merger and CSG parity on the current sources. |
+| 25 | Geometric processing | Finalized | Gate passed on 2026-11-28. `PolygonTopologicalMerger` rewritten literally (including Java `HashMap` iteration order through `_HashMapIterationOrder`); seven invented specs (33 tests) removed; all 47 Java test classes (152 tests) translated; Java/TS parity driver bit-exact over 123 lines covering the merger, Weiler–Atherton, the monotone triangulator and the convex window clipper; see the Phase 25 gate record. |
 | 26 | Lights | Finalized | The five Java light types are represented. The historical parity record covers attenuation, direction and copying. |
 | 27 | Tone-mapping checkpoint | Finalized | Empty group. Existing gamma and HDR operations remain in Phases 14 and 15. |
 | 28 | Scene model | In progress | Scene containers, CSG and worker snapshot transfer exist. Revalidate scene-instance BVH, transforms and snapshot behavior after the current revisions. |
 | 29 | Numerical analysis | Finalized | The four polynomial-source counterparts and both lookup tables were found. The historical graph group is empty. |
-| 30 | I/O wrappers | In progress | `ShapeDescriptorPersistence` reads and writes the Java stream format. `PersistenceElement` carries the new shared C++/rpkBase semantics (see its update record). Continue the JNI capability mappings and browser resource-failure checks. |
+| 30 | I/O wrappers | In progress | `ShapeDescriptorPersistence` reads and writes the Java stream format. `PersistenceElement` carries the shared C++/rpkBase semantics; since 2026-11-28 Java has the same `checkDirectory` and `readAsciiLine` (EOF ends the read). Open: `FileLocator` (no counterpart), `NativeLibraryLoader` and `VSDKJ2ME` (JNI/J2ME runtime boundaries to record as such), and the browser resource-failure checks. |
 | 31 | I/O context checkpoint | Finalized | The runtime split is explicit in the packages. Format and stream gaps are tracked in Phases 30 and 32–36. |
-| 32 | Binary I/O | In progress | `PersistenceElement` legacy long helpers intentionally read and write four bytes, as Java does. Continue the audit of the pipe and decompression wrappers and of true 64-bit stream contracts. |
-| 33 | Image I/O | In progress | Node raster import, browser decoding, SGI, compressed DDS, palette import and PNG/PPM export exist. Review TGA, uncompressed DDS, native decoding equivalents and remaining export formats. |
+| 32 | Binary I/O | In progress | `PersistenceElement` legacy long helpers intentionally read and write four bytes, as Java does. Open: `FileUncompressWrapper`, `PipeInputStream`, `PipeOutputStream` and `StreamOpenMode` have no TypeScript counterpart (port them or record them as runtime boundaries), and the true 64-bit stream contracts. |
+| 33 | Image I/O | In progress | Node raster import, browser decoding, SGI, compressed DDS, palette import and PNG/PPM export exist. Open: `ImagePersistenceRgbe` (494 lines, new in `7662979b`) and its `ImagePersistenceRgbeTest` (10 tests), `ImagePersistenceTarga`, the `ImagePersistence` dispatch methods without counterpart (`importRGBE`, `exportRGBE`, `importDDSRGB`/`RGBA`, `exportBMP`/`GIF`/`JPG`/`PNM`, `createNotAvailableImage*`, `transferPixels`), and `NativeImageReaderWrapper` as a native boundary. |
 | 34 | XML I/O | Finalized | All four classes are exported. Java reference comparisons cover the legacy line tokenizer, including offsets, quotes, non-tag spans and malformed input. |
 | 35 | VRML checkpoint | Finalized | The graph group is empty. The actual VRML and compressed input work is tracked in Phase 36. |
-| 36 | Geometry I/O | In progress | OBJ and parallel PLY import are wired in the web editor and the Node asynchronous dispatcher. MIT/altimetry/MD2/STEP readers and STL and OBJ/GTS/VTK writers exist. Six other geometry readers, STEP writing, and curve, patch and viewpoint persistence remain open. |
+| 36 | Geometry I/O | In progress | OBJ and parallel PLY import are wired in the web editor and the Node asynchronous dispatcher. MIT/altimetry/MD2/STEP readers and STL and OBJ/GTS/VTK writers exist. Open: `Reader3ds`, `ReaderAse`, `ReaderBinNeedForSpeed`, `ReaderGts`, `ReaderVrml`, `ReaderVtk`, the seven `stepCad/writer` classes, `ParametricCurvePersistence`, `ParametricBiCubicPatchPersistence` and `ViewpointBinaryPersistence`; the Java tests `StlWriterTest` (6) and `ReaderMitSceneTest` (2) are not translated. |
 | 37 | SGL checkpoint | Finalized | Empty group. The current GPU adapter belongs to Phase 41. |
 | 38 | GUI model and controllers | Finalized | Gate passed on 2026-11-28. All 29 inventory entries with a Java source and all 85 current Java `gui` classes have TypeScript exports; the 16 Java GUI test classes (210 tests) pass in Java and TypeScript; camera controllers, quality keys and worker progress were verified in the browser. |
 | 39 | Software shaders | Finalized | Gate passed on 2026-11-28. All 15 current Java shader classes and `TraceWorkspace` are exported. 96 raytraced images, covering every shading type with texture and bump on and off, match Java byte for byte. |
@@ -92,9 +96,60 @@ The matrix records 33 finalized phases, 12 in progress and two pending.
 | 42 | Animation | Finalized | All four animation classes are present. The timer preserves the tick and listener order of the Java loop and supports teardown. |
 | 43 | Application framework | Pending | The three framework/shape-matching classes lack TypeScript counterparts. The existing editor has its own application orchestration. |
 | 44 | GUI persistence | In progress | `GuiPersistence` and `DialogPersistence` load the editor's Aquynza JSON over HTTP. Check validation, resource errors and dialog behavior against Java. |
-| 45 | Orphan-inventory closure | In progress | The source inventory was refreshed. Assign unmatched and new files to phases, and record package export and consumer reachability for each applicable entry. |
-| 46 | Parity and dependency-closure audit | In progress | The historical audit and current build findings are inputs. Repeat the API, private-algorithm and runtime checks on the refreshed inventory. |
+| 45 | Orphan-inventory closure | In progress | Inventory refreshed on 2026-11-28 (see the 1:1 audit): 32 Java files without counterpart, all assigned to Phases 14, 30, 32, 33, 36 and 43; 55 TypeScript-only `vsdk` files (the historical `Vector*D`/`Matrix4x4`/`CircularList*`/`LookUpTable*`/`Random48` set already listed in the parity sweep, plus web/Node host adapters). Record export and consumer reachability for each entry. |
+| 46 | Parity and dependency-closure audit | In progress | A method-level audit (`javap -p` against the TypeScript AST) was run on 2026-11-28; its results are recorded below the matrix. Open: the 24 private Java helpers inlined in TypeScript, the public accessor differences of `WidgetDialog` elements and `NormalMapTexture`, and the runtime checks on the refreshed inventory. |
 | 47 | SpharmonicKit port decision | Pending | Added on 2026-11-28 by user decision. `SpharmonicKitWrapper` currently fails in TypeScript as it does in Java without its native library. Decide later whether to port the `pkgs/SpharmonicKit27` C library (about 25,000 lines) to languages other than C++, starting with TypeScript. |
+
+### 1:1 audit — 2026-11-28
+
+Method: every class of `java/base/build/classes/java/main` (740 classes,
+`javap -p`, private members and nested classes included, synthetic, lambda,
+enum `values`/`valueOf` and record accessors excluded) against the members of
+the TypeScript files of the three packages (TypeScript compiler AST: methods,
+accessors, signatures and module functions). Tests: Java `*Test` classes
+against `*.spec.ts` files, and per test method inside Phase 25.
+
+- Files: 576 of the 608 Java core files have a TypeScript counterpart. The 32
+  without one are `framework/Component` and the two shape-matching classes
+  (Phase 43); `FileLocator`, `NativeLibraryLoader`, `VSDKJ2ME` (Phase 30);
+  `FileUncompressWrapper`, `PipeInputStream`, `PipeOutputStream`,
+  `StreamOpenMode` (Phase 32); `ImagePersistenceRgbe`,
+  `ImagePersistenceTarga`, `NativeImageReaderWrapper` and its header class
+  (Phase 33); `RGBImageFloatUncompressed` (Phase 14); `Reader3ds`,
+  `ReaderAse`, `ReaderBinNeedForSpeed`, `ReaderGts`, `ReaderVrml`,
+  `ReaderVtk`, `ParametricCurvePersistence`,
+  `ParametricBiCubicPatchPersistence`, `ViewpointBinaryPersistence` and the
+  seven `stepCad/writer` classes (Phase 36). Of the 63 JOGL4 files, only
+  `Jogl4VoxelVolumeRenderer` lacks a WebGL counterpart (Phase 41).
+- Java newer than TypeScript: commit `7662979b` added
+  `RGBImageFloatUncompressed`, `ImagePersistenceRgbe` and 122 lines of RGBE
+  dispatch in `ImagePersistence` to Java only. Its `CoordinateSystem` and
+  `CoordinateAxis` additions were already present in TypeScript.
+- Methods: in the 576 matched files, 39 Java files have members without a
+  same-named TypeScript member. Most are private helpers inlined in
+  TypeScript (`AxisAlignedBoundingBox.updateAxisForward`/`Before`,
+  `GridSpatialIndex.boxAt`/`primitiveBox`, `PlanarFace.projectedPosition`,
+  `TriangleMesh.lengthOf`, `CsgDyadic.toUnsigned`,
+  `CsgExactArithmetic.cppGetExponent`, `_InsertionBatchSchedule.log2Value`,
+  `Dithering.valid`, `InfinitePlaneGizmo.buildFrameCorners`/`buildTangent`/
+  `calculateHalfSide`, `GenericEditor.accessorType`,
+  `ReaderPly.unsignedToSigned`, `ShapeDescriptorPersistence.exportByte`/
+  `exportEnding`, `ScreenPolygon.newEmptyVertices`), behavior covered by the
+  phase drivers but not structurally one to one (Phase 46).
+  `Polygon2D.binaryTreeContainContour` is dead code in Java. Public API
+  differences: `WidgetDialog` element getters (`getKind`, `getLabelKey`,
+  `getBinding`, `getAction`) are readonly fields in TypeScript,
+  `NormalMapTexture.getFloatSamples` is the `samples` field,
+  `CsgDyadic.newArray` has no counterpart, enum `value()`/`fromInt` are
+  module functions, and `ImagePersistence` lacks the methods listed in Phase
+  33. `PersistenceElement.verifyLibrary` and the RGB images'
+  `readObject`/`writeObject` are documented runtime boundaries.
+- Tests: of 136 Java test classes, four have no TypeScript translation:
+  `ImagePersistenceRgbeTest` (Phase 33), `StlWriterTest` and
+  `ReaderMitSceneTest` (Phase 36), and `EntityControlSpecificationsTest`,
+  whose single test lives inside `Entity.spec.ts` next to tests without a
+  Java source (Phase 2). In Phase 25, all 152 Java test methods of the 47
+  classes are present; the eight parameterized ones under display names.
 
 ### Initial review before the clipper-path repair
 
@@ -2833,6 +2888,35 @@ vsdk.toolkit.environment.camera.CameraSnapshot
 ```
 
 Exit: satisfy the applicable standard phase checks.
+
+Phase 25 gate record — 2026-11-28:
+
+- Literal port. `PolygonTopologicalMerger` was rewritten from Java:
+  `mergeInPlace` with its null return, contour normalization and
+  equivalence, internal-edge welding, segment splitting sorted with
+  `Double.compare`, split-point deduplication against the last kept point,
+  loop extraction over `HashMap<_PointKey, ...>`, loop tracing and the
+  `atan2` next-edge choice. The signed usage map iterates in JDK table order
+  through the new `java/util/_HashMapIterationOrder` (capacity, spread hash,
+  resize split and treeify threshold of the JDK). The convex window clipper
+  classes use Java array bounds through `JavaArray.get`. The 2026-11-16 Java
+  test moves and the `124b4d04` test changes were already mirrored.
+- Tests. Seven specs without a Java source (33 tests) were removed:
+  `Voxelization`, `PolygonTopologicalMerger`, `WeilerAthertonPolygonClipper`,
+  `_CircularDoubleLinkedList`, `MonotoneDecompositionTriangulator`,
+  `_TrapezoidalMapFoundation` and `_TriangulationScheduling`. The 47 Java test
+  classes (152 test methods) have TypeScript counterparts.
+- Parity driver (`P25.java` / `p25.mjs`, outside the repository): 30 merger
+  cases (duplicate and collinear vertices, opposite-orientation twins, two
+  epsilons), the null and empty inputs, 25 Weiler–Atherton clip and union
+  pairs of rational stars and boxes, 20 monotone triangulations with and
+  without holes, 20 convex window clips with random masks, and the two
+  `ScreenPolygon` bound errors. All 123 lines and stderr are bit-identical.
+  With the previous TypeScript merger, 27 of the 30 merger lines differed
+  and the run stopped at `mergeInPlace(null)`, which it did not accept.
+- `npm run verify`: `@vitral/base` 155 files passed and 3 skipped, 1302
+  tests passed and 10 skipped; `@vitral/fs` 7 files, 29 tests; the package
+  tarballs are created. Both testsuite type-checks pass.
 
 ### Phase 25: Geometric processing
 

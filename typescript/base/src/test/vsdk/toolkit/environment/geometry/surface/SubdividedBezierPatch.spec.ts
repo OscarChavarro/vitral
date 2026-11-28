@@ -1,4 +1,6 @@
-// Port of cpp/base/src/test/subdivided_bezier_patch_tests.cpp
+// Translation of java/base/src/test/vsdk/toolkit/environment/geometry/surface/SubdividedBezierPatchTest.java
+// (port of cpp/base/src/test/subdivided_bezier_patch_tests.cpp); the ReaderMitPrimitives_* tests are in
+// fs/src/test/vsdk/toolkit/io/geometry/SubdividedBezierPatchReaders.spec.ts, as ReaderMitScene is in fs.
 import { test } from "vitest";
 import { expectDoubleEq, expectEq, expectGt, expectNear, expectThrow } from "../../../../../GTestAssertions.js";
 import { BezierPatchSubdivision } from "vsdk/toolkit/environment/geometry/surface/BezierPatchSubdivision.js";

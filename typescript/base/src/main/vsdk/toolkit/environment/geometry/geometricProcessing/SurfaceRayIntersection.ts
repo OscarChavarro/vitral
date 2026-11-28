@@ -17,7 +17,7 @@ export class SurfaceRayIntersection {
             !this.rayIntersectsGeometryBounds(geometry, ray)
         )
             return false;
-        return geometry.doIntersectionFirstHit(ray, out);
+        return (geometry as Geometry).doIntersectionFirstHit(ray, out);
     }
     private static rayIntersectsGeometryBounds(geometry: Geometry, ray: Ray): boolean {
         // Meshes with a prepared acceleration structure keep their bounds;

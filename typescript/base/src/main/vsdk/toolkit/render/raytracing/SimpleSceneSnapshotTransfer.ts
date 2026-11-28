@@ -172,7 +172,7 @@ function sceneTransfer(): ObjectGraphTransfer {
             AlgebraicExpression,
             Quaterniond,
         ];
-        transfer = new ObjectGraphTransfer(classes, new Set<string>(["entityListeners"]));
+        transfer = new ObjectGraphTransfer(classes, new Set<string>(["entityListeners", "rayIntersector"]));
     }
     return transfer;
 }

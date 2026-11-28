@@ -1,26 +1,38 @@
 import type { Image } from "../../../media/Image.js";
+import { ArithmeticException } from "../../../../../java/lang/ArithmeticException.js";
+import { IndexOutOfBoundsException } from "../../../../../java/lang/IndexOutOfBoundsException.js";
 import { _AnimationInfo } from "./_AnimationInfo.js";
 import { TriangleMesh } from "./TriangleMesh.js";
 
-/** In-memory MD2 model data and animation-range metadata. Binary loading remains in the server FS package. */
+/**
+In-memory MD2 model data and animation-range metadata.
+
+Java's `ArrayList<...>` fields are JavaScript arrays here, `float[]` /
+`short[]` / `int[]` are `Float32Array` / `Int16Array` / `Int32Array`, and the
+Java `short` and `float` fields keep their Java value ranges (`toShort`,
+`Math.fround`).
+
+@author
+*/
 export class Md2Mesh {
-    public ident = 0;
-    public version = 0;
-    public skinWidth = 0;
-    public skinHeight = 0;
-    public frameSize = 0;
-    public numSkins = 0;
-    public numVertices = 0;
-    public numTexCoords = 0;
-    public numTriangles = 0;
-    public numGlCommands = 0;
-    public numFrames = 0;
-    public offsetSkins = 0;
-    public offsetTexCoords = 0;
-    public offsetTriangles = 0;
-    public offsetFrames = 0;
-    public offsetGlCommands = 0;
-    public offsetEnd = 0;
+    public ident = 0; // magic number: "IDP2" (844121161)
+    public version = 0; // version: must be 8
+    public skinWidth = 0; // texture width
+    public skinHeight = 0; // texture height
+    public frameSize = 0; // size in bytes of a frame
+    public numSkins = 0; // number of skins
+    public numVertices = 0; // number of vertices per frame
+    public numTexCoords = 0; // number of texture coordinates
+    public numTriangles = 0; // number of triangles
+    public numGlCommands = 0; // number of opengl commands
+    public numFrames = 0; // number of frames
+    public offsetSkins = 0; // offset skin data
+    public offsetTexCoords = 0; // offset texture coordinate data
+    public offsetTriangles = 0; // offset triangle data
+    public offsetFrames = 0; // offset frame data
+    public offsetGlCommands = 0; // offset OpenGL command data
+    public offsetEnd = 0; // offset end of file
+
     public skinNames: string[] = [];
     public skins: Image[] | null = null;
     public frameNames: string[] = [];
@@ -33,38 +45,61 @@ export class Md2Mesh {
     public texCoords: Float32Array | null = null;
     public triangles: number[][] | null = null;
     private aniInfos: _AnimationInfo[] = [];
-    private frameTimeSeg = 0.25;
+    private frameTimeSeg: number = Math.fround(0.25);
     private elapsedTimeSeg = 0;
+    //    private int currentFrame=0;
     private currentAnimationInd = 0;
     private maxAnimationInd = 0;
-    public static readonly anorms: readonly (readonly number[])[] = Md2Mesh.decodeNormals(
-        "LTAuNTI1NzMxLDAuMDAwMDAwLDAuODUwNjUxOy0wLjQ0Mjg2MywwLjIzODg1NiwwLjg2NDE4ODstMC4yOTUyNDIsMC4wMDAwMDAsMC45NTU0MjM7LTAuMzA5MDE3LDAuNTAwMDAwLDAuODA5MDE3Oy0wLjE2MjQ2MCwwLjI2Mjg2NiwwLjk1MTA1NjswLjAwMDAwMCwwLjAwMDAwMCwxLjAwMDAwMDswLjAwMDAwMCwwLjg1MDY1MSwwLjUyNTczMTstMC4xNDc2MjEsMC43MTY1NjcsMC42ODE3MTg7MC4xNDc2MjEsMC43MTY1NjcsMC42ODE3MTg7MC4wMDAwMDAsMC41MjU3MzEsMC44NTA2NTE7MC4zMDkwMTcsMC41MDAwMDAsMC44MDkwMTc7MC41MjU3MzEsMC4wMDAwMDAsMC44NTA2NTE7MC4yOTUyNDIsMC4wMDAwMDAsMC45NTU0MjM7MC40NDI4NjMsMC4yMzg4NTYsMC44NjQxODg7MC4xNjI0NjAsMC4yNjI4NjYsMC45NTEwNTY7LTAuNjgxNzE4LDAuMTQ3NjIxLDAuNzE2NTY3Oy0wLjgwOTAxNywwLjMwOTAxNywwLjUwMDAwMDstMC41ODc3ODUsMC40MjUzMjUsMC42ODgxOTE7LTAuODUwNjUxLDAuNTI1NzMxLDAuMDAwMDAwOy0wLjg2NDE4OCwwLjQ0Mjg2MywwLjIzODg1NjstMC43MTY1NjcsMC42ODE3MTgsMC4xNDc2MjE7LTAuNjg4MTkxLDAuNTg3Nzg1LDAuNDI1MzI1Oy0wLjUwMDAwMCwwLjgwOTAxNywwLjMwOTAxNzstMC4yMzg4NTYsMC44NjQxODgsMC40NDI4NjM7LTAuNDI1MzI1LDAuNjg4MTkxLDAuNTg3Nzg1Oy0wLjcxNjU2NywwLjY4MTcxOCwtMC4xNDc2MjE7LTAuNTAwMDAwLDAuODA5MDE3LC0wLjMwOTAxNzstMC41MjU3MzEsMC44NTA2NTEsMC4wMDAwMDA7MC4wMDAwMDAsMC44NTA2NTEsLTAuNTI1NzMxOy0wLjIzODg1NiwwLjg2NDE4OCwtMC40NDI4NjM7MC4wMDAwMDAsMC45NTU0MjMsLTAuMjk1MjQyOy0wLjI2Mjg2NiwwLjk1MTA1NiwtMC4xNjI0NjA7MC4wMDAwMDAsMS4wMDAwMDAsMC4wMDAwMDA7MC4wMDAwMDAsMC45NTU0MjMsMC4yOTUyNDI7LTAuMjYyODY2LDAuOTUxMDU2LDAuMTYyNDYwOzAuMjM4ODU2LDAuODY0MTg4LDAuNDQyODYzOzAuMjYyODY2LDAuOTUxMDU2LDAuMTYyNDYwOzAuNTAwMDAwLDAuODA5MDE3LDAuMzA5MDE3OzAuMjM4ODU2LDAuODY0MTg4LC0wLjQ0Mjg2MzswLjI2Mjg2NiwwLjk1MTA1NiwtMC4xNjI0NjA7MC41MDAwMDAsMC44MDkwMTcsLTAuMzA5MDE3OzAuODUwNjUxLDAuNTI1NzMxLDAuMDAwMDAwOzAuNzE2NTY3LDAuNjgxNzE4LDAuMTQ3NjIxOzAuNzE2NTY3LDAuNjgxNzE4LC0wLjE0NzYyMTswLjUyNTczMSwwLjg1MDY1MSwwLjAwMDAwMDswLjQyNTMyNSwwLjY4ODE5MSwwLjU4Nzc4NTswLjg2NDE4OCwwLjQ0Mjg2MywwLjIzODg1NjswLjY4ODE5MSwwLjU4Nzc4NSwwLjQyNTMyNTswLjgwOTAxNywwLjMwOTAxNywwLjUwMDAwMDswLjY4MTcxOCwwLjE0NzYyMSwwLjcxNjU2NzswLjU4Nzc4NSwwLjQyNTMyNSwwLjY4ODE5MTswLjk1NTQyMywwLjI5NTI0MiwwLjAwMDAwMDsxLjAwMDAwMCwwLjAwMDAwMCwwLjAwMDAwMDswLjk1MTA1NiwwLjE2MjQ2MCwwLjI2Mjg2NjswLjg1MDY1MSwtMC41MjU3MzEsMC4wMDAwMDA7MC45NTU0MjMsLTAuMjk1MjQyLDAuMDAwMDAwOzAuODY0MTg4LC0wLjQ0Mjg2MywwLjIzODg1NjswLjk1MTA1NiwtMC4xNjI0NjAsMC4yNjI4NjY7MC44MDkwMTcsLTAuMzA5MDE3LDAuNTAwMDAwOzAuNjgxNzE4LC0wLjE0NzYyMSwwLjcxNjU2NzswLjg1MDY1MSwwLjAwMDAwMCwwLjUyNTczMTswLjg2NDE4OCwwLjQ0Mjg2MywtMC4yMzg4NTY7MC44MDkwMTcsMC4zMDkwMTcsLTAuNTAwMDAwOzAuOTUxMDU2LDAuMTYyNDYwLC0wLjI2Mjg2NjswLjUyNTczMSwwLjAwMDAwMCwtMC44NTA2NTE7MC42ODE3MTgsMC4xNDc2MjEsLTAuNzE2NTY3OzAuNjgxNzE4LC0wLjE0NzYyMSwtMC43MTY1Njc7MC44NTA2NTEsMC4wMDAwMDAsLTAuNTI1NzMxOzAuODA5MDE3LC0wLjMwOTAxNywtMC41MDAwMDA7MC44NjQxODgsLTAuNDQyODYzLC0wLjIzODg1NjswLjk1MTA1NiwtMC4xNjI0NjAsLTAuMjYyODY2OzAuMTQ3NjIxLDAuNzE2NTY3LC0wLjY4MTcxODswLjMwOTAxNywwLjUwMDAwMCwtMC44MDkwMTc7MC40MjUzMjUsMC42ODgxOTEsLTAuNTg3Nzg1OzAuNDQyODYzLDAuMjM4ODU2LC0wLjg2NDE4ODswLjU4Nzc4NSwwLjQyNTMyNSwtMC42ODgxOTE7MC42ODgxOTEsMC41ODc3ODUsLTAuNDI1MzI1Oy0wLjE0NzYyMSwwLjcxNjU2NywtMC42ODE3MTg7LTAuMzA5MDE3LDAuNTAwMDAwLC0wLjgwOTAxNzswLjAwMDAwMCwwLjUyNTczMSwtMC44NTA2NTE7LTAuNTI1NzMxLDAuMDAwMDAwLC0wLjg1MDY1MTstMC40NDI4NjMsMC4yMzg4NTYsLTAuODY0MTg4Oy0wLjI5NTI0MiwwLjAwMDAwMCwtMC45NTU0MjM7LTAuMTYyNDYwLDAuMjYyODY2LC0wLjk1MTA1NjswLjAwMDAwMCwwLjAwMDAwMCwtMS4wMDAwMDA7MC4yOTUyNDIsMC4wMDAwMDAsLTAuOTU1NDIzOzAuMTYyNDYwLDAuMjYyODY2LC0wLjk1MTA1NjstMC40NDI4NjMsLTAuMjM4ODU2LC0wLjg2NDE4ODstMC4zMDkwMTcsLTAuNTAwMDAwLC0wLjgwOTAxNzstMC4xNjI0NjAsLTAuMjYyODY2LC0wLjk1MTA1NjswLjAwMDAwMCwtMC44NTA2NTEsLTAuNTI1NzMxOy0wLjE0NzYyMSwtMC43MTY1NjcsLTAuNjgxNzE4OzAuMTQ3NjIxLC0wLjcxNjU2NywtMC42ODE3MTg7MC4wMDAwMDAsLTAuNTI1NzMxLC0wLjg1MDY1MTswLjMwOTAxNywtMC41MDAwMDAsLTAuODA5MDE3OzAuNDQyODYzLC0wLjIzODg1NiwtMC44NjQxODg7MC4xNjI0NjAsLTAuMjYyODY2LC0wLjk1MTA1NjswLjIzODg1NiwtMC44NjQxODgsLTAuNDQyODYzOzAuNTAwMDAwLC0wLjgwOTAxNywtMC4zMDkwMTc7MC40MjUzMjUsLTAuNjg4MTkxLC0wLjU4Nzc4NTswLjcxNjU2NywtMC42ODE3MTgsLTAuMTQ3NjIxOzAuNjg4MTkxLC0wLjU4Nzc4NSwtMC40MjUzMjU7MC41ODc3ODUsLTAuNDI1MzI1LC0wLjY4ODE5MTswLjAwMDAwMCwtMC45NTU0MjMsLTAuMjk1MjQyOzAuMDAwMDAwLC0xLjAwMDAwMCwwLjAwMDAwMDswLjI2Mjg2NiwtMC45NTEwNTYsLTAuMTYyNDYwOzAuMDAwMDAwLC0wLjg1MDY1MSwwLjUyNTczMTswLjAwMDAwMCwtMC45NTU0MjMsMC4yOTUyNDI7MC4yMzg4NTYsLTAuODY0MTg4LDAuNDQyODYzOzAuMjYyODY2LC0wLjk1MTA1NiwwLjE2MjQ2MDswLjUwMDAwMCwtMC44MDkwMTcsMC4zMDkwMTc7MC43MTY1NjcsLTAuNjgxNzE4LDAuMTQ3NjIxOzAuNTI1NzMxLC0wLjg1MDY1MSwwLjAwMDAwMDstMC4yMzg4NTYsLTAuODY0MTg4LC0wLjQ0Mjg2MzstMC41MDAwMDAsLTAuODA5MDE3LC0wLjMwOTAxNzstMC4yNjI4NjYsLTAuOTUxMDU2LC0wLjE2MjQ2MDstMC44NTA2NTEsLTAuNTI1NzMxLDAuMDAwMDAwOy0wLjcxNjU2NywtMC42ODE3MTgsLTAuMTQ3NjIxOy0wLjcxNjU2NywtMC42ODE3MTgsMC4xNDc2MjE7LTAuNTI1NzMxLC0wLjg1MDY1MSwwLjAwMDAwMDstMC41MDAwMDAsLTAuODA5MDE3LDAuMzA5MDE3Oy0wLjIzODg1NiwtMC44NjQxODgsMC40NDI4NjM7LTAuMjYyODY2LC0wLjk1MTA1NiwwLjE2MjQ2MDstMC44NjQxODgsLTAuNDQyODYzLDAuMjM4ODU2Oy0wLjgwOTAxNywtMC4zMDkwMTcsMC41MDAwMDA7LTAuNjg4MTkxLC0wLjU4Nzc4NSwwLjQyNTMyNTstMC42ODE3MTgsLTAuMTQ3NjIxLDAuNzE2NTY3Oy0wLjQ0Mjg2MywtMC4yMzg4NTYsMC44NjQxODg7LTAuNTg3Nzg1LC0wLjQyNTMyNSwwLjY4ODE5MTstMC4zMDkwMTcsLTAuNTAwMDAwLDAuODA5MDE3Oy0wLjE0NzYyMSwtMC43MTY1NjcsMC42ODE3MTg7LTAuNDI1MzI1LC0wLjY4ODE5MSwwLjU4Nzc4NTstMC4xNjI0NjAsLTAuMjYyODY2LDAuOTUxMDU2OzAuNDQyODYzLC0wLjIzODg1NiwwLjg2NDE4ODswLjE2MjQ2MCwtMC4yNjI4NjYsMC45NTEwNTY7MC4zMDkwMTcsLTAuNTAwMDAwLDAuODA5MDE3OzAuMTQ3NjIxLC0wLjcxNjU2NywwLjY4MTcxODswLjAwMDAwMCwtMC41MjU3MzEsMC44NTA2NTE7MC40MjUzMjUsLTAuNjg4MTkxLDAuNTg3Nzg1OzAuNTg3Nzg1LC0wLjQyNTMyNSwwLjY4ODE5MTswLjY4ODE5MSwtMC41ODc3ODUsMC40MjUzMjU7LTAuOTU1NDIzLDAuMjk1MjQyLDAuMDAwMDAwOy0wLjk1MTA1NiwwLjE2MjQ2MCwwLjI2Mjg2NjstMS4wMDAwMDAsMC4wMDAwMDAsMC4wMDAwMDA7LTAuODUwNjUxLDAuMDAwMDAwLDAuNTI1NzMxOy0wLjk1NTQyMywtMC4yOTUyNDIsMC4wMDAwMDA7LTAuOTUxMDU2LC0wLjE2MjQ2MCwwLjI2Mjg2NjstMC44NjQxODgsMC40NDI4NjMsLTAuMjM4ODU2Oy0wLjk1MTA1NiwwLjE2MjQ2MCwtMC4yNjI4NjY7LTAuODA5MDE3LDAuMzA5MDE3LC0wLjUwMDAwMDstMC44NjQxODgsLTAuNDQyODYzLC0wLjIzODg1NjstMC45NTEwNTYsLTAuMTYyNDYwLC0wLjI2Mjg2NjstMC44MDkwMTcsLTAuMzA5MDE3LC0wLjUwMDAwMDstMC42ODE3MTgsMC4xNDc2MjEsLTAuNzE2NTY3Oy0wLjY4MTcxOCwtMC4xNDc2MjEsLTAuNzE2NTY3Oy0wLjg1MDY1MSwwLjAwMDAwMCwtMC41MjU3MzE7LTAuNjg4MTkxLDAuNTg3Nzg1LC0wLjQyNTMyNTstMC41ODc3ODUsMC40MjUzMjUsLTAuNjg4MTkxOy0wLjQyNTMyNSwwLjY4ODE5MSwtMC41ODc3ODU7LTAuNDI1MzI1LC0wLjY4ODE5MSwtMC41ODc3ODU7LTAuNTg3Nzg1LC0wLjQyNTMyNSwtMC42ODgxOTE7LTAuNjg4MTkxLC0wLjU4Nzc4NSwtMC40MjUzMjU=",
-    );
+
+    /** Java `(short)` narrowing conversion. */
+    private static toShort(value: number): number {
+        return (value << 16) >> 16;
+    }
+
     public getMaxAnimationInd(): number {
         return this.maxAnimationInd;
     }
-    public setMaxAnimationInd(value: number): void {
-        this.maxAnimationInd = Math.trunc(value);
+    public setMaxAnimationInd(maxAnimationInd: number): void {
+        this.maxAnimationInd = Md2Mesh.toShort(maxAnimationInd);
     }
     public getCurrentAnimationInd(): number {
         return this.currentAnimationInd;
     }
-    public setCurrentAnimationInd(value: number): void {
-        const size = this.maxAnimationInd + 1;
-        this.currentAnimationInd = size > 0 ? ((Math.trunc(value) % size) + size) % size : 0;
+    public setCurrentAnimationInd(currentAnimationInd: number): void {
+        // Java int remainder: the sign of the dividend; division by zero throws.
+        const divisor = this.maxAnimationInd + 1;
+        if (divisor === 0) {
+            throw new ArithmeticException("/ by zero");
+        }
+        this.currentAnimationInd = Md2Mesh.toShort(Md2Mesh.toShort(currentAnimationInd) % divisor);
     }
     public getFrameTimeSeg(): number {
         return this.frameTimeSeg;
     }
-    public setFrameTimeSeg(value: number): void {
-        this.frameTimeSeg = value;
+    public setFrameTimeSeg(frameTimeSeg: number): void {
+        this.frameTimeSeg = Math.fround(frameTimeSeg);
     }
     public getElapsedTimeSeg(): number {
         return this.elapsedTimeSeg;
     }
-    public setElapsedTimeSeg(value: number): void {
-        this.elapsedTimeSeg = value;
+    public setElapsedTimeSeg(elapsedTimeSeg: number): void {
+        this.elapsedTimeSeg = Math.fround(elapsedTimeSeg);
     }
+    //    public int getCurrentFrame() {
+    //        return currentFrame;
+    //    }
+    //    public void setCurrentFrame(int currentFrame) {
+    //        this.currentFrame = currentFrame % numFrames;
+    //    }
+
+    //    public int getCurrentFrameInc() {
+    //        if(currentFrame == numFrames)// All the animations.
+    //            currentFrame = 0;
+    //        else
+    //            ++currentFrame;
+    //        return currentFrame;
+    //    };
+
     /**
     The triangles of a key frame of the model (without interpolation between
     frames), as a triangle mesh with the positions of the frame.
@@ -99,52 +134,292 @@ export class Md2Mesh {
         return mesh;
     }
 
-    public returnStartEndAnim(index: number, out: Int16Array | number[]): void;
-    public returnStartEndAnim(name: string, out: Int16Array | number[]): void;
-    public returnStartEndAnim(query: number | string, out: Int16Array | number[]): void {
+    /**
+    If frameNames is empty return 0 and 0 in outStartEnd array.
+    Java overloads `returnStartEndAnim(short, short[])` and
+    `returnStartEndAnim(String, short[])`; the index form reads
+    `aniInfos.get(inIndex)`, so an index out of range throws.
+    */
+    public returnStartEndAnim(inIndex: number, outStartEnd: Int16Array | number[]): void;
+    /**
+    If frameNames is empty or inNameAnim is not found, return 0 and 0 in
+    in outStartEnd array.
+    */
+    public returnStartEndAnim(inNameAnim: string, outStartEnd: Int16Array | number[]): void;
+    public returnStartEndAnim(query: number | string, outStartEnd: Int16Array | number[]): void {
         if (this.frameNames.length === 0) {
-            out[0] = 0;
-            out[1] = 0;
+            outStartEnd[0] = 0;
+            outStartEnd[1] = 0;
             return;
         }
-        this.ensureAnimationInfo();
-        const info =
-            typeof query === "number"
-                ? this.aniInfos[Math.max(0, Math.min(this.aniInfos.length - 1, Math.trunc(query)))]
-                : this.aniInfos.find((x) => x.name === query.trim());
-        out[0] = info?.start ?? 0;
-        out[1] = info?.end ?? 0;
+        if (this.aniInfos.length === 0) {
+            this.fillAniInfo();
+        }
+        if (typeof query === "number") {
+            const info = Md2Mesh.listGet(this.aniInfos, Md2Mesh.toShort(query));
+            outStartEnd[0] = info.start;
+            outStartEnd[1] = info.end;
+            return;
+        }
+        const ai = this.getAniInfo(query);
+        if (ai !== null) {
+            outStartEnd[0] = ai.start;
+            outStartEnd[1] = ai.end;
+        } else {
+            outStartEnd[0] = 0;
+            outStartEnd[1] = 0;
+        }
     }
+
     public getAnimationName(index: number): string {
-        if (this.frameNames.length === 0) return "";
-        this.ensureAnimationInfo();
-        return this.aniInfos[Math.max(0, Math.min(this.aniInfos.length - 1, Math.trunc(index)))]?.name ?? "";
+        if (this.frameNames.length === 0) {
+            return "";
+        }
+        if (this.aniInfos.length === 0) {
+            this.fillAniInfo();
+        }
+        if (this.aniInfos.length === 0) {
+            return "";
+        }
+
+        let safeIndex = Md2Mesh.toShort(index);
+        if (safeIndex < 0) {
+            safeIndex = 0;
+        }
+        if (safeIndex >= this.aniInfos.length) {
+            safeIndex = this.aniInfos.length - 1;
+        }
+        // fillAniInfo names every entry it adds.
+        return this.aniInfos[safeIndex]!.name as string;
     }
-    private ensureAnimationInfo(): void {
-        if (this.aniInfos.length !== 0) return;
-        let previous = "";
-        let current: _AnimationInfo | null = null;
-        for (let i = 0; i < this.frameNames.length; i++) {
-            const name = this.frameNames[i]!.trim().split("\0", 1)[0]!.replace(/\d+$/, "");
-            if (current === null || name !== previous) {
-                if (current !== null) {
-                    current.end = i - 1;
-                    this.aniInfos.push(current);
+
+    private getAniInfo(nameAnim: string): _AnimationInfo | null {
+        for (const ai of this.aniInfos) {
+            if (ai.name === Md2Mesh.javaTrim(nameAnim)) return ai;
+        }
+        return null;
+    }
+
+    private fillAniInfo(): void {
+        let i: number;
+        let pos: number;
+        let fName: string;
+        let aniInfoT: _AnimationInfo;
+
+        aniInfoT = new _AnimationInfo();
+        // aniInfoT.name initially must be different from any frame name,
+        // this is guaranteed with a length superior to 16.
+        aniInfoT.name = "12345678901234567890";
+        for (i = 0; i < this.frameNames.length; i = Md2Mesh.toShort(i + 1)) {
+            fName = this.frameNames[i]!;
+            fName = Md2Mesh.javaTrim(fName);
+            pos = Md2Mesh.toShort(fName.indexOf("\u0000")); // \u0000 = null character.
+            if (pos === -1) pos = Md2Mesh.toShort(fName.length);
+            fName = fName.substring(0, pos);
+            pos--;
+            while (pos !== -1 && Md2Mesh.javaIsDigit(fName.charAt(pos))) --pos;
+            fName = fName.substring(0, pos + 1);
+            if (fName !== aniInfoT.name) {
+                if (i !== 0) {
+                    aniInfoT.end = Md2Mesh.toShort(i - 1);
+                    this.aniInfos.push(aniInfoT);
                 }
-                current = new _AnimationInfo();
-                current.name = name;
-                current.start = i;
-                previous = name;
+                aniInfoT = new _AnimationInfo();
+                aniInfoT.name = fName;
+                aniInfoT.start = i;
             }
         }
-        if (current !== null) {
-            current.end = this.frameNames.length - 1;
-            this.aniInfos.push(current);
+        // The last animation(needs the 'i' final value).
+        aniInfoT.end = Md2Mesh.toShort(i - 1);
+        this.aniInfos.push(aniInfoT);
+        this.maxAnimationInd = Md2Mesh.toShort(this.aniInfos.length - 1);
+    }
+
+    /** Java `String.trim()`: removes the leading and trailing chars <= ' '. */
+    private static javaTrim(text: string): string {
+        let start = 0;
+        let end = text.length;
+        while (start < end && text.charCodeAt(start) <= 0x20) start++;
+        while (end > start && text.charCodeAt(end - 1) <= 0x20) end--;
+        return text.substring(start, end);
+    }
+
+    /** Java `Character.isDigit(char)`: Unicode decimal digits. */
+    private static javaIsDigit(c: string): boolean {
+        return /^\p{Nd}$/u.test(c);
+    }
+
+    /** `ArrayList.get` */
+    private static listGet<T>(list: T[], index: number): T {
+        if (index < 0 || index >= list.length) {
+            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + list.length);
         }
-        this.maxAnimationInd = Math.max(0, this.aniInfos.length - 1);
+        return list[index]!;
     }
-    private static decodeNormals(encoded: string): readonly (readonly number[])[] {
-        const text = atob(encoded);
-        return text.split(";").map((row) => row.split(",").map(Number));
-    }
+
+    /** Java `float[][]`: every value is a float. */
+    public static anorms: number[][] = [
+        [Math.fround(-0.525731), Math.fround(0.0), Math.fround(0.850651)],
+        [Math.fround(-0.442863), Math.fround(0.238856), Math.fround(0.864188)],
+        [Math.fround(-0.295242), Math.fround(0.0), Math.fround(0.955423)],
+        [Math.fround(-0.309017), Math.fround(0.5), Math.fround(0.809017)],
+        [Math.fround(-0.16246), Math.fround(0.262866), Math.fround(0.951056)],
+        [Math.fround(0.0), Math.fround(0.0), Math.fround(1.0)],
+        [Math.fround(0.0), Math.fround(0.850651), Math.fround(0.525731)],
+        [Math.fround(-0.147621), Math.fround(0.716567), Math.fround(0.681718)],
+        [Math.fround(0.147621), Math.fround(0.716567), Math.fround(0.681718)],
+        [Math.fround(0.0), Math.fround(0.525731), Math.fround(0.850651)],
+        [Math.fround(0.309017), Math.fround(0.5), Math.fround(0.809017)],
+        [Math.fround(0.525731), Math.fround(0.0), Math.fround(0.850651)],
+        [Math.fround(0.295242), Math.fround(0.0), Math.fround(0.955423)],
+        [Math.fround(0.442863), Math.fround(0.238856), Math.fround(0.864188)],
+        [Math.fround(0.16246), Math.fround(0.262866), Math.fround(0.951056)],
+        [Math.fround(-0.681718), Math.fround(0.147621), Math.fround(0.716567)],
+        [Math.fround(-0.809017), Math.fround(0.309017), Math.fround(0.5)],
+        [Math.fround(-0.587785), Math.fround(0.425325), Math.fround(0.688191)],
+        [Math.fround(-0.850651), Math.fround(0.525731), Math.fround(0.0)],
+        [Math.fround(-0.864188), Math.fround(0.442863), Math.fround(0.238856)],
+        [Math.fround(-0.716567), Math.fround(0.681718), Math.fround(0.147621)],
+        [Math.fround(-0.688191), Math.fround(0.587785), Math.fround(0.425325)],
+        [Math.fround(-0.5), Math.fround(0.809017), Math.fround(0.309017)],
+        [Math.fround(-0.238856), Math.fround(0.864188), Math.fround(0.442863)],
+        [Math.fround(-0.425325), Math.fround(0.688191), Math.fround(0.587785)],
+        [Math.fround(-0.716567), Math.fround(0.681718), Math.fround(-0.147621)],
+        [Math.fround(-0.5), Math.fround(0.809017), Math.fround(-0.309017)],
+        [Math.fround(-0.525731), Math.fround(0.850651), Math.fround(0.0)],
+        [Math.fround(0.0), Math.fround(0.850651), Math.fround(-0.525731)],
+        [Math.fround(-0.238856), Math.fround(0.864188), Math.fround(-0.442863)],
+        [Math.fround(0.0), Math.fround(0.955423), Math.fround(-0.295242)],
+        [Math.fround(-0.262866), Math.fround(0.951056), Math.fround(-0.16246)],
+        [Math.fround(0.0), Math.fround(1.0), Math.fround(0.0)],
+        [Math.fround(0.0), Math.fround(0.955423), Math.fround(0.295242)],
+        [Math.fround(-0.262866), Math.fround(0.951056), Math.fround(0.16246)],
+        [Math.fround(0.238856), Math.fround(0.864188), Math.fround(0.442863)],
+        [Math.fround(0.262866), Math.fround(0.951056), Math.fround(0.16246)],
+        [Math.fround(0.5), Math.fround(0.809017), Math.fround(0.309017)],
+        [Math.fround(0.238856), Math.fround(0.864188), Math.fround(-0.442863)],
+        [Math.fround(0.262866), Math.fround(0.951056), Math.fround(-0.16246)],
+        [Math.fround(0.5), Math.fround(0.809017), Math.fround(-0.309017)],
+        [Math.fround(0.850651), Math.fround(0.525731), Math.fround(0.0)],
+        [Math.fround(0.716567), Math.fround(0.681718), Math.fround(0.147621)],
+        [Math.fround(0.716567), Math.fround(0.681718), Math.fround(-0.147621)],
+        [Math.fround(0.525731), Math.fround(0.850651), Math.fround(0.0)],
+        [Math.fround(0.425325), Math.fround(0.688191), Math.fround(0.587785)],
+        [Math.fround(0.864188), Math.fround(0.442863), Math.fround(0.238856)],
+        [Math.fround(0.688191), Math.fround(0.587785), Math.fround(0.425325)],
+        [Math.fround(0.809017), Math.fround(0.309017), Math.fround(0.5)],
+        [Math.fround(0.681718), Math.fround(0.147621), Math.fround(0.716567)],
+        [Math.fround(0.587785), Math.fround(0.425325), Math.fround(0.688191)],
+        [Math.fround(0.955423), Math.fround(0.295242), Math.fround(0.0)],
+        [Math.fround(1.0), Math.fround(0.0), Math.fround(0.0)],
+        [Math.fround(0.951056), Math.fround(0.16246), Math.fround(0.262866)],
+        [Math.fround(0.850651), Math.fround(-0.525731), Math.fround(0.0)],
+        [Math.fround(0.955423), Math.fround(-0.295242), Math.fround(0.0)],
+        [Math.fround(0.864188), Math.fround(-0.442863), Math.fround(0.238856)],
+        [Math.fround(0.951056), Math.fround(-0.16246), Math.fround(0.262866)],
+        [Math.fround(0.809017), Math.fround(-0.309017), Math.fround(0.5)],
+        [Math.fround(0.681718), Math.fround(-0.147621), Math.fround(0.716567)],
+        [Math.fround(0.850651), Math.fround(0.0), Math.fround(0.525731)],
+        [Math.fround(0.864188), Math.fround(0.442863), Math.fround(-0.238856)],
+        [Math.fround(0.809017), Math.fround(0.309017), Math.fround(-0.5)],
+        [Math.fround(0.951056), Math.fround(0.16246), Math.fround(-0.262866)],
+        [Math.fround(0.525731), Math.fround(0.0), Math.fround(-0.850651)],
+        [Math.fround(0.681718), Math.fround(0.147621), Math.fround(-0.716567)],
+        [Math.fround(0.681718), Math.fround(-0.147621), Math.fround(-0.716567)],
+        [Math.fround(0.850651), Math.fround(0.0), Math.fround(-0.525731)],
+        [Math.fround(0.809017), Math.fround(-0.309017), Math.fround(-0.5)],
+        [Math.fround(0.864188), Math.fround(-0.442863), Math.fround(-0.238856)],
+        [Math.fround(0.951056), Math.fround(-0.16246), Math.fround(-0.262866)],
+        [Math.fround(0.147621), Math.fround(0.716567), Math.fround(-0.681718)],
+        [Math.fround(0.309017), Math.fround(0.5), Math.fround(-0.809017)],
+        [Math.fround(0.425325), Math.fround(0.688191), Math.fround(-0.587785)],
+        [Math.fround(0.442863), Math.fround(0.238856), Math.fround(-0.864188)],
+        [Math.fround(0.587785), Math.fround(0.425325), Math.fround(-0.688191)],
+        [Math.fround(0.688191), Math.fround(0.587785), Math.fround(-0.425325)],
+        [Math.fround(-0.147621), Math.fround(0.716567), Math.fround(-0.681718)],
+        [Math.fround(-0.309017), Math.fround(0.5), Math.fround(-0.809017)],
+        [Math.fround(0.0), Math.fround(0.525731), Math.fround(-0.850651)],
+        [Math.fround(-0.525731), Math.fround(0.0), Math.fround(-0.850651)],
+        [Math.fround(-0.442863), Math.fround(0.238856), Math.fround(-0.864188)],
+        [Math.fround(-0.295242), Math.fround(0.0), Math.fround(-0.955423)],
+        [Math.fround(-0.16246), Math.fround(0.262866), Math.fround(-0.951056)],
+        [Math.fround(0.0), Math.fround(0.0), Math.fround(-1.0)],
+        [Math.fround(0.295242), Math.fround(0.0), Math.fround(-0.955423)],
+        [Math.fround(0.16246), Math.fround(0.262866), Math.fround(-0.951056)],
+        [Math.fround(-0.442863), Math.fround(-0.238856), Math.fround(-0.864188)],
+        [Math.fround(-0.309017), Math.fround(-0.5), Math.fround(-0.809017)],
+        [Math.fround(-0.16246), Math.fround(-0.262866), Math.fround(-0.951056)],
+        [Math.fround(0.0), Math.fround(-0.850651), Math.fround(-0.525731)],
+        [Math.fround(-0.147621), Math.fround(-0.716567), Math.fround(-0.681718)],
+        [Math.fround(0.147621), Math.fround(-0.716567), Math.fround(-0.681718)],
+        [Math.fround(0.0), Math.fround(-0.525731), Math.fround(-0.850651)],
+        [Math.fround(0.309017), Math.fround(-0.5), Math.fround(-0.809017)],
+        [Math.fround(0.442863), Math.fround(-0.238856), Math.fround(-0.864188)],
+        [Math.fround(0.16246), Math.fround(-0.262866), Math.fround(-0.951056)],
+        [Math.fround(0.238856), Math.fround(-0.864188), Math.fround(-0.442863)],
+        [Math.fround(0.5), Math.fround(-0.809017), Math.fround(-0.309017)],
+        [Math.fround(0.425325), Math.fround(-0.688191), Math.fround(-0.587785)],
+        [Math.fround(0.716567), Math.fround(-0.681718), Math.fround(-0.147621)],
+        [Math.fround(0.688191), Math.fround(-0.587785), Math.fround(-0.425325)],
+        [Math.fround(0.587785), Math.fround(-0.425325), Math.fround(-0.688191)],
+        [Math.fround(0.0), Math.fround(-0.955423), Math.fround(-0.295242)],
+        [Math.fround(0.0), Math.fround(-1.0), Math.fround(0.0)],
+        [Math.fround(0.262866), Math.fround(-0.951056), Math.fround(-0.16246)],
+        [Math.fround(0.0), Math.fround(-0.850651), Math.fround(0.525731)],
+        [Math.fround(0.0), Math.fround(-0.955423), Math.fround(0.295242)],
+        [Math.fround(0.238856), Math.fround(-0.864188), Math.fround(0.442863)],
+        [Math.fround(0.262866), Math.fround(-0.951056), Math.fround(0.16246)],
+        [Math.fround(0.5), Math.fround(-0.809017), Math.fround(0.309017)],
+        [Math.fround(0.716567), Math.fround(-0.681718), Math.fround(0.147621)],
+        [Math.fround(0.525731), Math.fround(-0.850651), Math.fround(0.0)],
+        [Math.fround(-0.238856), Math.fround(-0.864188), Math.fround(-0.442863)],
+        [Math.fround(-0.5), Math.fround(-0.809017), Math.fround(-0.309017)],
+        [Math.fround(-0.262866), Math.fround(-0.951056), Math.fround(-0.16246)],
+        [Math.fround(-0.850651), Math.fround(-0.525731), Math.fround(0.0)],
+        [Math.fround(-0.716567), Math.fround(-0.681718), Math.fround(-0.147621)],
+        [Math.fround(-0.716567), Math.fround(-0.681718), Math.fround(0.147621)],
+        [Math.fround(-0.525731), Math.fround(-0.850651), Math.fround(0.0)],
+        [Math.fround(-0.5), Math.fround(-0.809017), Math.fround(0.309017)],
+        [Math.fround(-0.238856), Math.fround(-0.864188), Math.fround(0.442863)],
+        [Math.fround(-0.262866), Math.fround(-0.951056), Math.fround(0.16246)],
+        [Math.fround(-0.864188), Math.fround(-0.442863), Math.fround(0.238856)],
+        [Math.fround(-0.809017), Math.fround(-0.309017), Math.fround(0.5)],
+        [Math.fround(-0.688191), Math.fround(-0.587785), Math.fround(0.425325)],
+        [Math.fround(-0.681718), Math.fround(-0.147621), Math.fround(0.716567)],
+        [Math.fround(-0.442863), Math.fround(-0.238856), Math.fround(0.864188)],
+        [Math.fround(-0.587785), Math.fround(-0.425325), Math.fround(0.688191)],
+        [Math.fround(-0.309017), Math.fround(-0.5), Math.fround(0.809017)],
+        [Math.fround(-0.147621), Math.fround(-0.716567), Math.fround(0.681718)],
+        [Math.fround(-0.425325), Math.fround(-0.688191), Math.fround(0.587785)],
+        [Math.fround(-0.16246), Math.fround(-0.262866), Math.fround(0.951056)],
+        [Math.fround(0.442863), Math.fround(-0.238856), Math.fround(0.864188)],
+        [Math.fround(0.16246), Math.fround(-0.262866), Math.fround(0.951056)],
+        [Math.fround(0.309017), Math.fround(-0.5), Math.fround(0.809017)],
+        [Math.fround(0.147621), Math.fround(-0.716567), Math.fround(0.681718)],
+        [Math.fround(0.0), Math.fround(-0.525731), Math.fround(0.850651)],
+        [Math.fround(0.425325), Math.fround(-0.688191), Math.fround(0.587785)],
+        [Math.fround(0.587785), Math.fround(-0.425325), Math.fround(0.688191)],
+        [Math.fround(0.688191), Math.fround(-0.587785), Math.fround(0.425325)],
+        [Math.fround(-0.955423), Math.fround(0.295242), Math.fround(0.0)],
+        [Math.fround(-0.951056), Math.fround(0.16246), Math.fround(0.262866)],
+        [Math.fround(-1.0), Math.fround(0.0), Math.fround(0.0)],
+        [Math.fround(-0.850651), Math.fround(0.0), Math.fround(0.525731)],
+        [Math.fround(-0.955423), Math.fround(-0.295242), Math.fround(0.0)],
+        [Math.fround(-0.951056), Math.fround(-0.16246), Math.fround(0.262866)],
+        [Math.fround(-0.864188), Math.fround(0.442863), Math.fround(-0.238856)],
+        [Math.fround(-0.951056), Math.fround(0.16246), Math.fround(-0.262866)],
+        [Math.fround(-0.809017), Math.fround(0.309017), Math.fround(-0.5)],
+        [Math.fround(-0.864188), Math.fround(-0.442863), Math.fround(-0.238856)],
+        [Math.fround(-0.951056), Math.fround(-0.16246), Math.fround(-0.262866)],
+        [Math.fround(-0.809017), Math.fround(-0.309017), Math.fround(-0.5)],
+        [Math.fround(-0.681718), Math.fround(0.147621), Math.fround(-0.716567)],
+        [Math.fround(-0.681718), Math.fround(-0.147621), Math.fround(-0.716567)],
+        [Math.fround(-0.850651), Math.fround(0.0), Math.fround(-0.525731)],
+        [Math.fround(-0.688191), Math.fround(0.587785), Math.fround(-0.425325)],
+        [Math.fround(-0.587785), Math.fround(0.425325), Math.fround(-0.688191)],
+        [Math.fround(-0.425325), Math.fround(0.688191), Math.fround(-0.587785)],
+        [Math.fround(-0.425325), Math.fround(-0.688191), Math.fround(-0.587785)],
+        [Math.fround(-0.587785), Math.fround(-0.425325), Math.fround(-0.688191)],
+        [Math.fround(-0.688191), Math.fround(-0.587785), Math.fround(-0.425325)],
+    ];
 }

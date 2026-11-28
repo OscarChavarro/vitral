@@ -1,4 +1,5 @@
-// Port of cpp/base/src/test/planar_face_tests.cpp
+// Translation of java/base/src/test/vsdk/toolkit/environment/geometry/element/PlanarFaceTest.java
+// (itself a port of cpp/base/src/test/planar_face_tests.cpp)
 // PlanarFace is exercised here with no material, solver element or
 // application module: a face is built from positions only
 import { describe, it } from "vitest";
@@ -29,11 +30,11 @@ function expectPoint(x: number, y: number, z: number, p: Vector3Dd, tolerance: n
     expectNear(z, p.z(), tolerance);
 }
 
-describe("PlanarFace", () => {
+describe("PlanarFaceTest", () => {
     // IsTriviallyCopyable is not ported: it checks the C++ only type property
     // std::is_trivially_copyable, which has no TypeScript counterpart
 
-    it("TriangleGeometry", () => {
+    it("triangleGeometry", () => {
         const face = triangle();
         expectTrue(face.isValid());
         expectEq(3, face.getNumberOfVertices());
@@ -45,7 +46,7 @@ describe("PlanarFace", () => {
         expectPoint(2.0 / 3.0, 2.0 / 3.0, 0, face.getMidPoint(), 1e-6);
     });
 
-    it("ParallelogramHasNoJacobian", () => {
+    it("parallelogramHasNoJacobian", () => {
         const face = square();
         expectTrue(face.isValid());
         expectFloatEq(1.0, face.getArea());
@@ -54,7 +55,7 @@ describe("PlanarFace", () => {
         expectFloatEq(0.0, face.planeDistance(new Vector3Dd(0.3, 0.7, 1.0)));
     });
 
-    it("IrregularQuadrilateralAreaAndJacobian", () => {
+    it("irregularQuadrilateralAreaAndJacobian", () => {
         const face = trapezoid();
         expectTrue(face.isValid());
         expectFloatEq(6.0, face.getArea());
@@ -62,7 +63,7 @@ describe("PlanarFace", () => {
         expectFloatEq(face.getArea(), face.getJacobianA() + 0.5 * (face.getJacobianB() + face.getJacobianC()));
     });
 
-    it("ParametersInvertTheMapping", () => {
+    it("parametersInvertTheMapping", () => {
         const faces = [triangle(), square(), trapezoid()];
         for (const face of faces) {
             const p = face.pointAt(0.25, 0.375);
@@ -73,14 +74,14 @@ describe("PlanarFace", () => {
         }
     });
 
-    it("PointsOutsideAreReportedOutside", () => {
+    it("pointsOutsideAreReportedOutside", () => {
         const uv = new Vector2Dd();
         expectFalse(triangle().parameters(new Vector3Dd(1.5, 1.5, 0), uv));
         expectFalse(square().parameters(new Vector3Dd(1.5, 0.5, 1), uv));
         expectFalse(trapezoid().parameters(new Vector3Dd(0.2, 1.8, 0), uv));
     });
 
-    it("UniformMappingPreservesArea", () => {
+    it("uniformMappingPreservesArea", () => {
         const face = trapezoid();
         // The line of uniform u = 0.5 splits the area in two equal halves: by
         // symmetry of the trapezoid it is the vertical line x = 2
@@ -101,7 +102,7 @@ describe("PlanarFace", () => {
         expectNear(0.6, uv.y, 1e-5);
     });
 
-    it("RayHit", () => {
+    it("rayHit", () => {
         const face = square();
         const origin = new Vector3Dd(0.5, 0.25, 3.0);
 
@@ -119,7 +120,7 @@ describe("PlanarFace", () => {
         expectEq(PlanarFace.Side.PARALLEL, face.sideFacing(new Vector3Dd(1, 0, 0), normalDotDirection));
     });
 
-    it("RayHitInOneCall", () => {
+    it("rayHitInOneCall", () => {
         const face = square();
         const origin = new Vector3Dd(0.5, 0.25, 3.0);
         const down = new Vector3Dd(0, 0, -1);
@@ -149,7 +150,7 @@ describe("PlanarFace", () => {
         expectEq(PlanarFace.Side.BACK, hit.getSide());
     });
 
-    it("Facing", () => {
+    it("facing", () => {
         const floor = [new Vector3Dd(0, 0, 0), new Vector3Dd(1, 0, 0), new Vector3Dd(1, 1, 0), new Vector3Dd(0, 1, 0)];
         const ceiling = [
             new Vector3Dd(0, 0, 1),
@@ -166,7 +167,7 @@ describe("PlanarFace", () => {
         expectFalse(floorFace.facing(floorFace)); // Coplanar
     });
 
-    it("InvalidFaces", () => {
+    it("invalidFaces", () => {
         const collinear = [new Vector3Dd(0, 0, 0), new Vector3Dd(1, 0, 0), new Vector3Dd(2, 0, 0)];
         expectEq(PlanarFace.BuildStatus.DEGENERATE_NORMAL, new PlanarFace(3, collinear).getStatus());
         const pentagon = [new Vector3Dd(), new Vector3Dd(), new Vector3Dd(), new Vector3Dd(), new Vector3Dd()];

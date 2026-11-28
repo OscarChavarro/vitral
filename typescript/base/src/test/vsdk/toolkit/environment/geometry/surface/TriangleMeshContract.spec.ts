@@ -1,4 +1,6 @@
-// Port of cpp/base/src/test/triangle_mesh_contract_tests.cpp
+// Translation of java/base/src/test/vsdk/toolkit/environment/geometry/surface/TriangleMeshContractTest.java
+// (itself a port of cpp/base/src/test/triangle_mesh_contract_tests.cpp; each
+// test is named `<cpp suite>_<cpp test>`).
 import { describe, expect, it } from "vitest";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
 import { GeometryBounds } from "vsdk/toolkit/environment/geometry/element/GeometryBounds.js";
@@ -12,9 +14,10 @@ import { Triangle } from "vsdk/toolkit/environment/geometry/element/Triangle.js"
 import { TriangleMesh } from "vsdk/toolkit/environment/geometry/surface/TriangleMesh.js";
 import { SimpleMaterial } from "vsdk/toolkit/environment/material/SimpleMaterial.js";
 import { RayCrossingTestCollector } from "../../../../../RayCrossingTestCollector.js";
+import { expectDoubleEq } from "../../../../../GTestAssertions.js";
 
-describe("TriangleMeshContract", () => {
-    it("OrderedCrossingsCarryFaceAndFirstHitDetails", () => {
+describe("TriangleMeshContractTest", () => {
+    it("TriangleMeshContract_OrderedCrossingsCarryFaceAndFirstHitDetails", () => {
         const mesh = new TriangleMesh();
         mesh.initVertexPositionsArray(6);
         const positions = mesh.getVertexPositions()!;
@@ -36,19 +39,19 @@ describe("TriangleMeshContract", () => {
         const events = new RayCrossingTestCollector();
         expect(mesh.emitRayCrossings(ray, query, events)).toBe(RayCrossingSupport.Supported);
         expect(events.roots.size()).toBe(2);
-        expect(events.roots.get(0)).toBe(2);
-        expect(events.roots.get(1)).toBe(4);
+        expectDoubleEq(2, events.roots.get(0));
+        expectDoubleEq(4, events.roots.get(1));
         expect(events.surfaceIndices.get(0)).toBe(1);
         expect(events.surfaceIndices.get(1)).toBe(0);
         expect(events.geometries.get(0)).toBe(mesh);
         const hit = new RayHit(RayHit.DETAIL_POINT | RayHit.DETAIL_NORMAL | RayHit.DETAIL_UV, false);
         const boundary = new RayBoundary();
         expect(mesh.queryFirstHit(ray, query, hit, boundary)).toBe(RayFirstHitStatus.Hit);
-        expect(hit.getHitDistance()).toBe(2);
-        expect(hit.point.z()).toBe(2);
-        expect(hit.normal.z()).toBe(1);
-        expect(hit.u).toBe(0.25);
-        expect(hit.v).toBe(0.25);
+        expectDoubleEq(2, hit.getHitDistance());
+        expectDoubleEq(2, hit.point.z());
+        expectDoubleEq(1, hit.normal.z());
+        expectDoubleEq(0.25, hit.u);
+        expectDoubleEq(0.25, hit.v);
         expect(boundary.surfaceIndex).toBe(1);
         expect(boundary.geometry).toBe(mesh);
         expect(hit.getAvailableDetailMask()).toBe(RayHit.DETAIL_POINT | RayHit.DETAIL_NORMAL | RayHit.DETAIL_UV);
@@ -59,12 +62,12 @@ describe("TriangleMeshContract", () => {
         expect(assigned.surfaceIndex).toBe(1);
         const deferred = new RayHit(RayHit.DETAIL_NORMAL | RayHit.DETAIL_UV, false);
         expect(mesh.querySurfaceDetail(ray, boundary, deferred)).toBe(RayFirstHitStatus.Hit);
-        expect(deferred.normal.z()).toBe(1);
-        expect(deferred.u).toBe(0.25);
-        expect(deferred.v).toBe(0.25);
+        expectDoubleEq(1, deferred.normal.z());
+        expectDoubleEq(0.25, deferred.u);
+        expectDoubleEq(0.25, deferred.v);
         boundary.normalReversed = true;
         expect(mesh.querySurfaceDetail(ray, boundary, deferred)).toBe(RayFirstHitStatus.Hit);
-        expect(deferred.normal.z()).toBe(-1);
+        expectDoubleEq(-1, deferred.normal.z());
         boundary.surfaceIndex = 99;
         expect(mesh.querySurfaceDetail(ray, boundary, deferred)).toBe(RayFirstHitStatus.InvalidInput);
         expect(deferred.hasHitDistance()).toBe(false);
@@ -73,7 +76,7 @@ describe("TriangleMeshContract", () => {
         expect(boundary.surfaceIndex).toBe(-1);
     });
 
-    it("CoplanarityInvalidMeshAndEmptyAreExplicit", () => {
+    it("TriangleMeshContract_CoplanarityInvalidMeshAndEmptyAreExplicit", () => {
         const mesh = new TriangleMesh();
         mesh.initVertexPositionsArray(6);
         const positions = mesh.getVertexPositions()!;
@@ -100,9 +103,12 @@ describe("TriangleMeshContract", () => {
         expect(empty.queryFirstHit(ray, new RayCrossingQuery(0, 4, 0.01), null)).toBe(RayFirstHitStatus.Unsupported);
     });
 
-    // setOwnsMaterials and the scoped destruction of the original are C++
-    // lifetime management with no TypeScript counterpart.
-    it("MathematicalCopyDoesNotBorrowOwnedAppearance", () => {
+    /**
+    Java has no material ownership flag (`setOwnsMaterials`): the garbage
+    collector owns the materials. An absent material table (null) is the
+    Java form of the cpp empty list.
+    */
+    it("TriangleMeshContract_MathematicalCopyDoesNotBorrowOwnedAppearance", () => {
         let copied: TriangleMesh | null = null;
         {
             const original = new TriangleMesh();
@@ -112,17 +118,15 @@ describe("TriangleMeshContract", () => {
             for (let i = 0; i < 9; ++i) positions[i] = values[i]!;
             original.initTriangleArrays(1);
             original.setTriangleAt(0, new Triangle(0, 1, 2));
-            const materials: SimpleMaterial[] = [];
-            materials.push(new SimpleMaterial());
+            const materials: SimpleMaterial[] = [new SimpleMaterial()];
             original.setMaterials(materials);
-            const copy = original.copyGeometry();
-            copied = copy instanceof TriangleMesh ? copy : null;
+            copied = original.copyGeometry() as TriangleMesh;
             expect(copied).not.toBeNull();
-            expect(copied!.getMaterials()!.length).toBe(0);
+            expect(copied.getMaterials() === null || copied.getMaterials()!.length === 0).toBe(true);
         }
         const boundary = new RayBoundary();
         expect(
-            copied!.queryFirstHit(
+            copied.queryFirstHit(
                 Ray.fromAffine(new Vector3Dd(0.25, 0.25, 1), new Vector3Dd(0, 0, -1)),
                 new RayCrossingQuery(0, 2),
                 null,

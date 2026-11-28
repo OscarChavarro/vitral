@@ -62,16 +62,13 @@ system, so it stays with the caller: `MicrofacetCsvLoader.load` in
 `@vitral/fs` is that constructor, and a browser fetches the text. The parse is
 `fromCsvText` here, literal down to the exception each failure raises.
 
-One Java defect is not reproduced. `PersistenceElement.readAsciiLine` does not
-throw at the end of the stream (`readBytes` stops on the `-1` of `read` and
-leaves the byte buffer as it was), so it keeps appending the last byte read
-until the heap is exhausted. Java's loop expects that read to throw (it
-catches it as `eofLike` and leaves the table), so a material missing from the
-file, or a matching last row without a terminating newline, ends in an
-`OutOfMemoryError` there instead of the `IllegalArgumentException` after the
-loop. Here the end of the text ends the table, as that catch intends: the text
-after the last newline is not a line, and a missing material raises the
-`IllegalArgumentException`.
+At the end of the stream Java's `PersistenceElement.readAsciiLine` throws
+`EOFException` (its `readBytes` rejects a short read), and the loop catches
+it as `eofLike` and leaves the table. So the text after the last newline is
+not a line, and a missing material raises the `IllegalArgumentException`
+after the loop; the same happens here. Before the 2026-11-28 update of
+Java's `PersistenceElement`, `readBytes` ignored the end of the stream and
+that read never ended (`OutOfMemoryError`).
 */
 export class MicroFacetedMaterial extends SimpleMaterial {
     public static readonly FRESNEL_MODEL_SCHLICK = 0;

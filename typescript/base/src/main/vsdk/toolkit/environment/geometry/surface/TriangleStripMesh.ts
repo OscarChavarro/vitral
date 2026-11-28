@@ -1,41 +1,94 @@
 import { Surface } from "./Surface.js";
-import { Vertex } from "../element/Vertex.js";
-import { Ray } from "../element/Ray.js";
-import { RayHit } from "../element/RayHit.js";
-import { Triangle } from "../element/Triangle.js";
+import type { Vertex } from "../element/Vertex.js";
+import type { Ray } from "../element/Ray.js";
+import type { RayHit } from "../element/RayHit.js";
 import { TriangleMesh } from "./TriangleMesh.js";
+import { Double } from "../../../../../java/lang/Double.js";
+import { ArrayIndexOutOfBoundsException } from "../../../../../java/lang/ArrayIndexOutOfBoundsException.js";
+import { NullPointerException } from "../../../../../java/lang/NullPointerException.js";
+
 export class TriangleStripMesh extends Surface<Ray, RayHit> {
-    private name = "default";
-    private vertexes: Vertex[] = [];
-    private strips: number[][] = [];
-    public getMinMax(): Float64Array {
-        const m = new Float64Array([Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
-        for (const v of this.vertexes) {
-            const p = v.getPosition();
-            m[0] = Math.min(m[0]!, p.x());
-            m[1] = Math.min(m[1]!, p.y());
-            m[2] = Math.min(m[2]!, p.z());
-            m[3] = Math.max(m[3]!, p.x());
-            m[4] = Math.max(m[4]!, p.y());
-            m[5] = Math.max(m[5]!, p.z());
-        }
-        return m;
+    //= Class attributes ========================================================
+
+    // Basic mesh data model
+    private name: string = "default";
+    private vertexes: Vertex[] | null = null;
+    private strips: (number[] | null)[] | null = null;
+
+    //= Basic class management methods ==========================================
+
+    public constructor() {
+        super();
     }
-    public getVertexes() {
+
+    /** Needed for supplying the Geometry.getMinMax operation */
+    private calculateMinMaxPositions(): number[] {
+        const minMax: number[] = [0, 0, 0, 0, 0, 0];
+        let minX = Double.MAX_VALUE;
+        let minY = Double.MAX_VALUE;
+        let minZ = Double.MAX_VALUE;
+        let maxX = -Double.MAX_VALUE;
+        let maxY = -Double.MAX_VALUE;
+        let maxZ = -Double.MAX_VALUE;
+        let i: number;
+
+        const vertexes = TriangleStripMesh.nonNull(this.vertexes);
+        for (i = 0; i < vertexes.length; i++) {
+            const position = TriangleStripMesh.nonNull(vertexes[i] ?? null).getPosition();
+            const x = position.x();
+            const y = position.y();
+            const z = position.z();
+
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (z < minZ) minZ = z;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            if (z > maxZ) maxZ = z;
+        }
+        minMax[0] = minX;
+        minMax[1] = minY;
+        minMax[2] = minZ;
+        minMax[3] = maxX;
+        minMax[4] = maxY;
+        minMax[5] = maxZ;
+        return minMax;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.getMinMax.
+    @return a new 6 valued double array containing the coordinates of a min-max
+    bounding box for current geometry.
+    */
+    public override getMinMax(): number[] {
+        return this.calculateMinMaxPositions();
+    }
+
+    public getVertexes(): Vertex[] | null {
         return this.vertexes;
     }
-    public getVertexAt(i: number) {
-        return this.vertexes[i]!;
+
+    public getVertexAt(index: number): Vertex {
+        const vertexes = TriangleStripMesh.nonNull(this.vertexes);
+        if (index < 0 || index >= vertexes.length) {
+            throw new ArrayIndexOutOfBoundsException("Index " + index + " out of bounds for length " + vertexes.length);
+        }
+        return vertexes[index]!;
     }
-    public setVertexes(x: Vertex[]) {
-        this.vertexes = x;
+
+    public setVertexes(vertexes: Vertex[] | null): void {
+        this.vertexes = vertexes;
     }
-    public setStrips(x: number[][]) {
-        this.strips = x;
+
+    public setStrips(indexes: (number[] | null)[] | null): void {
+        this.strips = indexes;
     }
-    public getStrips() {
+
+    public getStrips(): (number[] | null)[] | null {
         return this.strips;
     }
+
     /**
     The triangles of the strips, as a triangle mesh sharing the vertex
     positions: in each strip, every vertex after the first two closes a
@@ -46,8 +99,8 @@ export class TriangleStripMesh extends Surface<Ray, RayHit> {
     are no vertexes or strips
     */
     public exportToTriangleMesh(): TriangleMesh | null {
-        const vertexes: Vertex[] | null = this.vertexes;
-        const strips: (number[] | null)[] | null = this.strips;
+        const vertexes = this.vertexes;
+        const strips = this.strips;
         if (vertexes === null || strips === null) {
             return null;
         }
@@ -57,16 +110,18 @@ export class TriangleStripMesh extends Surface<Ray, RayHit> {
         let j: number;
 
         for (i = 0; i < strips.length; i++) {
-            if (strips[i] !== null && strips[i]!.length > 2) {
-                count += strips[i]!.length - 2;
+            const strip = strips[i] ?? null;
+            if (strip !== null && strip.length > 2) {
+                count += strip.length - 2;
             }
         }
         mesh.initVertexPositionsArray(vertexes.length);
         const positions = mesh.getVertexPositions()!;
         for (i = 0; i < vertexes.length; i++) {
-            positions[3 * i] = vertexes[i]!.getPosition().x();
-            positions[3 * i + 1] = vertexes[i]!.getPosition().y();
-            positions[3 * i + 2] = vertexes[i]!.getPosition().z();
+            const position = TriangleStripMesh.nonNull(vertexes[i] ?? null).getPosition();
+            positions[3 * i] = position.x();
+            positions[3 * i + 1] = position.y();
+            positions[3 * i + 2] = position.z();
         }
         const all = new Int32Array(3 * count);
         count = 0;
@@ -91,24 +146,34 @@ export class TriangleStripMesh extends Surface<Ray, RayHit> {
         return mesh;
     }
 
-    public doIntersectionFirstHit(ray: Ray, out: RayHit): boolean {
-        let best: Ray | null = null;
-        for (const strip of this.strips)
-            for (let i = 2; i < strip.length; i++) {
-                const a = this.vertexes[strip[i - 2]!]?.position,
-                    b = this.vertexes[strip[i - 1]!]?.position,
-                    c = this.vertexes[strip[i]!]?.position;
-                if (a === undefined || b === undefined || c === undefined) continue;
-                const hit = Triangle.doIntersectionWithTriangle(ray, a, b, c);
-                if (hit !== null && (best === null || hit.getT() < best.getT())) {
-                    best = ray.withT(hit.getT());
-                    out.point = hit.getPoint();
-                    out.normal = hit.getNormal();
-                }
-            }
-        if (best === null) return false;
-        out.setRay(best);
-        return true;
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doIntersectionFirstHit.
+    \todo  Method not implemented!
+    Java overload `doIntersectionFirstHit(Ray inOut_Ray)` returns null; the
+    two-argument form returns false.
+    */
+    public doIntersectionFirstHit(inOutRay: Ray): Ray | null;
+    public override doIntersectionFirstHit(inRay: Ray, outHit: RayHit): boolean;
+    public override doIntersectionFirstHit(inRay: Ray, outHit: RayHit | null): boolean;
+    public override doIntersectionFirstHit(_inRay: Ray, outHit?: RayHit | null): Ray | null | boolean {
+        if (outHit === undefined) {
+            return null;
+        }
+        return false;
     }
-    public override doExtraInformation(_ray: Ray, _t: number, _out: RayHit): void {}
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doExtraInformation.
+    \todo  Method not implemented!
+    */
+    public override doExtraInformation(_inRay: Ray, _inT: number, _outData: RayHit): void {}
+
+    private static nonNull<T>(value: T | null): T {
+        if (value === null) {
+            throw new NullPointerException();
+        }
+        return value;
+    }
 }

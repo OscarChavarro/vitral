@@ -1,4 +1,4 @@
-// Port of cpp/base/src/test/brep_export_variants_tests.cpp
+// Port of java/base/src/test/vsdk/toolkit/environment/geometry/volume/BrepExportVariantsTest.java
 import { describe, expect, it } from "vitest";
 import { expectNear } from "../../../../../GTestAssertions.js";
 

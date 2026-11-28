@@ -1,5 +1,6 @@
 import { VSDKFatalException } from "../../../../common/VSDKFatalException.js";
 import { PolygonVertex } from "./PolygonVertex.js";
+import { JavaArray } from "../../../../../../java/lang/JavaArray.js";
 
 /**
 Immutable convex polygon with homogeneous vertices, as clipped by
@@ -60,6 +61,6 @@ export class ScreenPolygon {
     }
 
     public getVertex(index: number): PolygonVertex {
-        return this.vertices[index]!;
+        return JavaArray.get(this.vertices, index);
     }
 }

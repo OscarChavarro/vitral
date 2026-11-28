@@ -1,4 +1,4 @@
-// Port of cpp/base/src/test/implicit_solid_tests.cpp
+// Port of java/base/src/test/vsdk/toolkit/environment/geometry/volume/ImplicitSolidTest.java
 import { test } from "vitest";
 import {
     expectEq,

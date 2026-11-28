@@ -1,4 +1,4 @@
-// Port of cpp/base/src/test/prism_tests.cpp
+// Port of java/base/src/test/vsdk/toolkit/environment/geometry/volume/PrismTest.java
 import { describe, expect, it } from "vitest";
 import { expectNear } from "../../../../../GTestAssertions.js";
 

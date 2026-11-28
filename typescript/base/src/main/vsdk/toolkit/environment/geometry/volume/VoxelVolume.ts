@@ -2,14 +2,48 @@
 //= [KAUF1987] Kaufman, Arie. "Efficient Algorithms for 3D Scan-Conversion  =
 //=     of Parametric Curves, Surfaces, and Volumes", ACM SIGGRAPH Computer =
 //=     Graphics, volume 21, number 4, July 1987.                           =
+//= [AMAN1987] Amanatides, John. Woo, Andrew. "A Fast Voxel Traversal      =
+//=     Algorithm for Ray Tracing", Eurographics '87, 1987.                 =
+//= [SNYD1987] Snyder, John. Barr, Alan. "Ray Tracing Complex Models       =
+//=     Containing Surface Tessellations", SIGGRAPH '87, p. 119-128, 1987.  =
 
 import { VSDK } from "../../../common/VSDK.js";
 import type { Ray } from "../element/Ray.js";
 import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
-import type { RayHit } from "../element/RayHit.js";
+import { RayHit as RayHitClass, type RayHit } from "../element/RayHit.js";
 import { IndexedColorImageUncompressed } from "../../../media/IndexedColorImageUncompressed.js";
+import type { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
+import { PolyhedralBoundedSolidFieldConstructions } from "./polyhedralBoundedSolid/PolyhedralBoundedSolidFieldConstructions.js";
 import { Solid } from "./Solid.js";
+import { Double } from "../../../../../java/lang/Double.js";
+import { Math as JavaMath } from "../../../../../java/lang/Math.js";
+import { ArrayIndexOutOfBoundsException } from "../../../../../java/lang/ArrayIndexOutOfBoundsException.js";
+import { IndexOutOfBoundsException } from "../../../../../java/lang/IndexOutOfBoundsException.js";
+
+/**
+Face of a voxel entered by a ray (Java's private record
+`VoxelVolume.VoxelFaceHit`).
+@param t distance along the ray to the face
+@param axis axis perpendicular to the face (0: x, 1: y, 2: z)
+@param side sign of the outer normal of the face along its axis
+*/
+class _VoxelFaceHit {
+    public constructor(
+        private readonly tValue: number,
+        private readonly axisValue: number,
+        private readonly sideValue: number,
+    ) {}
+    public t(): number {
+        return this.tValue;
+    }
+    public axis(): number {
+        return this.axisValue;
+    }
+    public side(): number {
+        return this.sideValue;
+    }
+}
 
 /**
 VoxelVolume represents a voxelized paralelogram volume in memory, as the
@@ -31,26 +65,63 @@ For general representation of N-dimensional images of arbitrary data sample
 format, use another toolkit, like ITK or VTK.
 */
 export class VoxelVolume extends Solid {
+    /** Default lowest value of a voxel considered part of the solid */
+    public static readonly DEFAULT_THRESHOLD = 127;
+
+    /** Smallest ray direction component not considered parallel to an axis */
+    private static readonly PARALLEL_EPSILON = 1.0e-12;
+
     private data: IndexedColorImageUncompressed[] | null;
+    private threshold: number;
 
     public constructor() {
         super();
         this.data = null;
+        this.threshold = VoxelVolume.DEFAULT_THRESHOLD;
     }
 
     public getXSize(): number {
-        if (this.data === null || this.data.length < 0) return 0;
+        if (this.data === null || this.data.length === 0) return 0;
         return VoxelVolume.listGet(this.data, 0).getXSize();
     }
 
     public getYSize(): number {
-        if (this.data === null || this.data.length < 0) return 0;
-        return VoxelVolume.listGet(this.data, 0).getXSize();
+        if (this.data === null || this.data.length === 0) return 0;
+        return VoxelVolume.listGet(this.data, 0).getYSize();
     }
 
     public getZSize(): number {
-        if (this.data === null || this.data.length < 0) return 0;
+        if (this.data === null || this.data.length === 0) return 0;
         return this.data.length;
+    }
+
+    /**
+    @return lowest value of a voxel considered part of the solid (by the ray
+    intersection and by the renderers)
+    */
+    public getThreshold(): number {
+        return this.threshold;
+    }
+
+    /**
+    @param threshold lowest value of a voxel considered part of the solid
+    */
+    public setThreshold(threshold: number): void {
+        this.threshold = threshold;
+    }
+
+    /**
+    @param x voxel index along X
+    @param y voxel index along Y
+    @param z voxel index along Z
+    @return true if the voxel is inside the volume and its value reaches the
+    threshold
+    */
+    public isFilled(x: number, y: number, z: number): boolean {
+        if (x < 0 || y < 0 || z < 0 || x >= this.getXSize() || y >= this.getYSize() || z >= this.getZSize()) {
+            return false;
+        }
+        return this.getVoxel(x, y, z) >= this.threshold;
     }
 
     public init(xSize: number, ySize: number, zSize: number): boolean {
@@ -219,7 +290,9 @@ export class VoxelVolume extends Solid {
             // bound is checked explicitly.
             const index = slice.getXSize() * y + x;
             if (index < 0 || index >= slice.getXSize() * slice.getYSize()) {
-                throw new RangeError("Array index out of range: " + index);
+                throw new ArrayIndexOutOfBoundsException(
+                    "Index " + index + " out of bounds for length " + slice.getXSize() * slice.getYSize(),
+                );
             }
             return slice.getPixel(x, y);
         } catch {
@@ -247,31 +320,215 @@ export class VoxelVolume extends Solid {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersectionFirstHit.
+    Geometry.doIntersectionFirstHit. The volume is seen as the union of the
+    cubes of its filled voxels (see `isFilled`), and the ray hits the first
+    face through which it enters one of them. A ray starting inside a filled
+    voxel does not hit the voxels it leaves: as with the other solids, only
+    the surface it enters counts.
 
-    NOT IMPLEMENTED YET!
+    The voxels are visited in the order the ray crosses them, as the uniform
+    grid traversal of [SNYD1987] (with the incremental formulation of
+    [AMAN1987]), so the cost grows with the number of voxels crossed, not
+    with the number of voxels of the volume.
 
-    Java overload `doIntersectionFirstHit(Ray inOut_Ray)` returns null.
-    @return true if given ray intersects current VoxelVolume
+    The one argument form (Java's `doIntersectionFirstHit(Ray inOut_Ray)`)
+    returns the ray with the distance to the first filled voxel hit, or null
+    if no filled voxel is hit.
+    @param inRay ray in the space of the volume
+    @param outHit receives the hit, or null if only the test is needed
+    @return true if the ray hits a filled voxel
     */
     public doIntersectionFirstHit(inOut_Ray: Ray): Ray | null;
     public override doIntersectionFirstHit(inRay: Ray, outHit: RayHit): boolean;
     public override doIntersectionFirstHit(inRay: Ray, outHit: RayHit | null): boolean;
-    public override doIntersectionFirstHit(_inRay: Ray, outHit?: RayHit | null): Ray | null | boolean {
+    public override doIntersectionFirstHit(inRay: Ray, outHit?: RayHit | null): Ray | null | boolean {
         if (outHit === undefined) {
+            const hit = new RayHitClass();
+            if (this.doIntersectionFirstHit(inRay, hit)) {
+                return hit.getRay();
+            }
             return null;
         }
-        return false;
+        const hit = this.traceFirstFilledVoxel(inRay);
+
+        if (hit === null) {
+            return false;
+        }
+        if (outHit !== null) {
+            if (outHit.shouldStoreRay() || outHit.needsAnySurfaceData()) {
+                const hitRay = inRay.withT(hit.t());
+                outHit.setRay(hitRay);
+                if (outHit.needsAnySurfaceData()) {
+                    VoxelVolume.fillSurfaceData(hitRay, hit, outHit);
+                    outHit.setRay(hitRay);
+                }
+            } else {
+                outHit.setHitDistance(hit.t());
+            }
+        }
+        return true;
     }
 
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
-    @param inRay
-    @param inT
-    @param outData
+    @param inRay ray (in the space of the volume) whose first hit is described
+    @param inT distance to the hit
+    @param outData receives the point, normal, texture coordinates and
+    tangent of the hit
     */
-    public override doExtraInformation(_inRay: Ray, _inT: number, _outData: RayHit): void {}
+    public override doExtraInformation(inRay: Ray, _inT: number, outData: RayHit): void {
+        const hit = this.traceFirstFilledVoxel(inRay);
+
+        if (hit !== null) {
+            VoxelVolume.fillSurfaceData(inRay.withT(hit.t()), hit, outData);
+        }
+    }
+
+    /**
+    Finds the face of the first filled voxel entered by the ray: clips the
+    ray against the cube <-1, -1, -1>-<1, 1, 1> and visits the voxels it
+    crosses, as `VoxelGrid.gridIntersect` of [SNYD1987]. For each axis,
+    `tNext` is the distance to the next voxel boundary along that axis and
+    `tDelta` the distance between two boundaries; each step moves to the
+    voxel whose boundary is nearest.
+    @param ray ray in the space of the volume
+    @return the face entered, or null if the ray enters no filled voxel
+    */
+    private traceFirstFilledVoxel(ray: Ray | null): _VoxelFaceHit | null {
+        const size = [this.getXSize(), this.getYSize(), this.getZSize()];
+
+        if (size[0]! <= 0 || size[1]! <= 0 || size[2]! <= 0 || ray === null) {
+            return null;
+        }
+
+        const o = ray.getOrigin();
+        const d = ray.getDirection();
+        const origin = [o.x(), o.y(), o.z()];
+        const direction = [d.x(), d.y(), d.z()];
+        const cellSize = [0, 0, 0];
+        let tEnter = Double.NEGATIVE_INFINITY;
+        let tExit = Double.POSITIVE_INFINITY;
+        let enterAxis = 0;
+        let i: number;
+        const EPS = VoxelVolume.PARALLEL_EPSILON;
+
+        //- Clip the ray against the volume cube (slabs method) ------------
+        for (i = 0; i < 3; i++) {
+            cellSize[i] = 2.0 / size[i]!;
+            if (JavaMath.abs(direction[i]!) < EPS) {
+                if (origin[i]! < -1.0 || origin[i]! > 1.0) {
+                    return null;
+                }
+                continue;
+            }
+            const t1 = (-1.0 - origin[i]!) / direction[i]!;
+            const t2 = (1.0 - origin[i]!) / direction[i]!;
+            const tNear = JavaMath.min(t1, t2);
+            const tFar = JavaMath.max(t1, t2);
+            if (tNear > tEnter) {
+                tEnter = tNear;
+                enterAxis = i;
+            }
+            tExit = JavaMath.min(tExit, tFar);
+        }
+        if (tExit < JavaMath.max(tEnter, 0.0)) {
+            return null;
+        }
+        const startsInside = tEnter < 0.0;
+        const t = startsInside ? 0.0 : tEnter;
+
+        //- Setup of the traversal, from the voxel where the ray starts ----
+        const g = [0, 0, 0];
+        const step = [0, 0, 0];
+        const tDelta = [0, 0, 0];
+        const tNext = [0, 0, 0];
+
+        for (i = 0; i < 3; i++) {
+            const p = origin[i]! + t * direction[i]!;
+            g[i] = VoxelVolume.toInt(JavaMath.floor((p + 1.0) / cellSize[i]!));
+            if (g[i]! < 0) {
+                g[i] = 0;
+            }
+            if (g[i]! >= size[i]!) {
+                g[i] = size[i]! - 1;
+            }
+            if (direction[i]! > EPS) {
+                step[i] = 1;
+                tDelta[i] = cellSize[i]! / direction[i]!;
+                tNext[i] = (-1.0 + (g[i]! + 1) * cellSize[i]! - origin[i]!) / direction[i]!;
+            } else if (direction[i]! < -EPS) {
+                step[i] = -1;
+                tDelta[i] = cellSize[i]! / -direction[i]!;
+                tNext[i] = (-1.0 + g[i]! * cellSize[i]! - origin[i]!) / direction[i]!;
+            } else {
+                step[i] = 0;
+                tDelta[i] = Double.POSITIVE_INFINITY;
+                tNext[i] = Double.POSITIVE_INFINITY;
+            }
+        }
+
+        let previousFilled = this.isFilled(g[0]!, g[1]!, g[2]!);
+        if (previousFilled && !startsInside) {
+            return new _VoxelFaceHit(t, enterAxis, direction[enterAxis]! > 0 ? -1 : 1);
+        }
+
+        //- Visit the voxels crossed by the ray -----------------------------
+        while (true) {
+            let axis: number;
+            if (tNext[0]! <= tNext[1]! && tNext[0]! <= tNext[2]!) {
+                axis = 0;
+            } else if (tNext[1]! <= tNext[2]!) {
+                axis = 1;
+            } else {
+                axis = 2;
+            }
+            if (tNext[axis]! > tExit) {
+                return null;
+            }
+            const tCell = tNext[axis]!;
+            g[axis] = (g[axis]! + step[axis]!) | 0;
+            tNext[axis] = tNext[axis]! + tDelta[axis]!;
+            if (g[axis]! < 0 || g[axis]! >= size[axis]!) {
+                return null;
+            }
+            const filled = this.isFilled(g[0]!, g[1]!, g[2]!);
+            if (filled && !previousFilled) {
+                return new _VoxelFaceHit(tCell, axis, -step[axis]!);
+            }
+            previousFilled = filled;
+        }
+    }
+
+    /**
+    Fills the surface data of a hit on a voxel face: the point, the normal of
+    the face, texture coordinates spanning the volume along the two axes of
+    the face, and a tangent along the first of them.
+    */
+    private static fillSurfaceData(hitRay: Ray, hit: _VoxelFaceHit, outData: RayHit): void {
+        const p = hitRay.getOrigin().add(hitRay.getDirection().multiply(hit.t()));
+        const coordinates = [p.x(), p.y(), p.z()];
+        const normal = [0, 0, 0];
+        const tangent = [0, 0, 0];
+        const uAxis = (hit.axis() + 1) % 3;
+        const vAxis = (hit.axis() + 2) % 3;
+
+        normal[hit.axis()] = hit.side();
+        tangent[uAxis] = 1.0;
+        if (outData.needsPoint()) {
+            outData.point = p;
+        }
+        if (outData.needsNormal()) {
+            outData.normal = new Vector3Dd(normal[0]!, normal[1]!, normal[2]!);
+        }
+        if (outData.needsTextureCoordinates()) {
+            outData.u = (coordinates[uAxis]! + 1.0) / 2.0;
+            outData.v = (coordinates[vAxis]! + 1.0) / 2.0;
+        }
+        if (outData.needsTangent()) {
+            outData.tangent = new Vector3Dd(tangent[0]!, tangent[1]!, tangent[2]!);
+        }
+    }
 
     /**
     Current method creates a transformation matrix that represent the
@@ -351,13 +608,92 @@ export class VoxelVolume extends Solid {
         return new Vector3Dd(cmx / M, cmy / M, cmz / M);
     }
 
+    //= Boundary representation =============================================
+
+    /// The default export samples at most this number of voxels along each
+    /// axis
+    public static readonly DEFAULT_EXPORT_MAXIMUM_SAMPLES = 32;
+
+    /**
+    Without argument: polyhedral approximation sampling at most
+    `DEFAULT_EXPORT_MAXIMUM_SAMPLES` voxels along each axis.
+
+    With `step`: polyhedral approximation of the voxels that reach the
+    threshold, built with Euler operators by
+    `PolyhedralBoundedSolidFieldConstructions`: the voxel values are taken as
+    samples at the voxel centers (the field is `threshold - 0.5 - value`,
+    negative for the filled voxels), surrounded by a layer of empty samples,
+    so the surface is closed and passes half way between filled and empty
+    voxel centers.
+    @param step sampling step (at least 1): 1 uses every voxel, 2 every other
+    one along each axis, and so on, for coarser approximations
+    @return a new polyhedral approximation, or null if there are no filled
+    voxels
+    */
+    public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(step: number): PolyhedralBoundedSolid | null;
+    public override exportToPolyhedralBoundedSolid(stepValue?: number): PolyhedralBoundedSolid | null {
+        if (stepValue === undefined) {
+            const largest = JavaMath.max(this.getXSize(), JavaMath.max(this.getYSize(), this.getZSize()));
+            return this.exportToPolyhedralBoundedSolid(
+                JavaMath.max(
+                    1,
+                    Math.trunc(
+                        (largest + VoxelVolume.DEFAULT_EXPORT_MAXIMUM_SAMPLES - 1) /
+                            VoxelVolume.DEFAULT_EXPORT_MAXIMUM_SAMPLES,
+                    ),
+                ),
+            );
+        }
+        let step = stepValue;
+        const xs = this.getXSize();
+        const ys = this.getYSize();
+        const zs = this.getZSize();
+        if (xs <= 0 || ys <= 0 || zs <= 0) {
+            return null;
+        }
+        if (step < 1) {
+            step = 1;
+        }
+        const sx = Math.trunc((xs + step - 1) / step);
+        const sy = Math.trunc((ys + step - 1) / step);
+        const sz = Math.trunc((zs + step - 1) / step);
+        const nx = sx + 2;
+        const ny = sy + 2;
+        const nz = sz + 2;
+        const values = new Float64Array(nx * ny * nz);
+        const level = this.threshold - 0.5;
+
+        for (let k = 0; k < nz; k++) {
+            for (let j = 0; j < ny; j++) {
+                for (let i = 0; i < nx; i++) {
+                    let value = 1.0;
+                    if (i > 0 && j > 0 && k > 0 && i < nx - 1 && j < ny - 1 && k < nz - 1) {
+                        value = level - this.getVoxel((i - 1) * step, (j - 1) * step, (k - 1) * step);
+                    }
+                    values[i + nx * (j + ny * k)] = value;
+                }
+            }
+        }
+
+        // Samples at the voxel centers (see getVoxelPosition), one step
+        // before the first one for the empty layer
+        const spacing = new Vector3Dd((2.0 * step) / xs, (2.0 * step) / ys, (2.0 * step) / zs);
+        const origin = new Vector3Dd(
+            (0.5 / xs) * 2 - 1 - spacing.x(),
+            (0.5 / ys) * 2 - 1 - spacing.y(),
+            (0.5 / zs) * 2 - 1 - spacing.z(),
+        );
+        return PolyhedralBoundedSolidFieldConstructions.createFromSampledField(nx, ny, nz, origin, spacing, values);
+    }
+
     /** Java `ArrayList.get`, which throws for an index outside the list. */
     private static listGet(
         list: readonly IndexedColorImageUncompressed[],
         index: number,
     ): IndexedColorImageUncompressed {
         if (index < 0 || index >= list.length) {
-            throw new RangeError("Index " + index + " out of bounds for length " + list.length);
+            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + list.length);
         }
         return list[index]!;
     }

@@ -16,6 +16,7 @@ Note that original algorithm is available at
 https://github.com/erich666/GraphicsGems/tree/master/gems/PolyScan
 */
 
+import { JavaArray } from "../../../../../../java/lang/JavaArray.js";
 import { VSDKFatalException } from "../../../../common/VSDKFatalException.js";
 import { HomogeneousHalfSpace } from "./HomogeneousHalfSpace.js";
 import { PolygonVertex } from "./PolygonVertex.js";
@@ -144,7 +145,7 @@ export class ConvexWindowClipper {
     ): ScreenPolygon {
         let clipped = polygon;
         for (let i = 0; i < numberOfHalfSpaces; i++) {
-            clipped = ConvexWindowClipper.clipToHalfSpace(clipped, halfSpaces[i]!);
+            clipped = ConvexWindowClipper.clipToHalfSpace(clipped, JavaArray.get(halfSpaces, i));
         }
         return clipped;
     }
