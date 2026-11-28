@@ -9,16 +9,13 @@ import { SimpleScene } from "@vitral/base/vsdk/toolkit/environment/scene/SimpleS
 import { File } from "../../../../java/io/File.js";
 import { PersistenceElement } from "../PersistenceElement.js";
 import { ReaderObj } from "./ReaderObj.js";
+import { ReaderPly } from "./ReaderPly.js";
 
 /**
 Format dispatcher for scene import, as in the Java original.
 
-Only the `obj` branch is wired so far: of the eight readers the Java class
-reaches (obj, 3ds, gts, ply, ase, wrl/gz, vtk and bin), `ReaderObj` is the
-only one ported to TypeScript to date. The remaining extensions therefore
-fall through and leave the scene untouched, which is exactly what Java does
-for any extension it does not recognize. Each reader gets its branch back as
-it is ported.
+The asynchronous entry point also reads PLY and waits for its mesh workers.
+The synchronous entry point serves callers that parse OBJ inline.
 */
 export class EnvironmentPersistence extends PersistenceElement {
     public static importEnvironment(inSceneFileFd: File, inoutScene: SimpleScene): void {
@@ -26,6 +23,15 @@ export class EnvironmentPersistence extends PersistenceElement {
 
         if (type === "obj") {
             ReaderObj.importEnvironment(inSceneFileFd, inoutScene);
+        }
+    }
+
+    public static async importEnvironmentAsync(file: File, scene: SimpleScene, signal?: AbortSignal): Promise<void> {
+        const type = EnvironmentPersistence.extractExtensionFromFile(file).toLowerCase();
+        if (type === "ply") {
+            await ReaderPly.importEnvironment(file, scene, signal);
+        } else {
+            EnvironmentPersistence.importEnvironment(file, scene);
         }
     }
 }

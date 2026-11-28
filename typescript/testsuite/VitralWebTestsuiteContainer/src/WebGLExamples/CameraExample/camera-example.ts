@@ -9,7 +9,7 @@ import {
   ViewChild,
   signal,
 } from '@angular/core';
-import { Camera, Matrix4x4d } from '@vitral/base';
+import { Camera, CameraControllerAquynza, Matrix4x4d } from '@vitral/base';
 import {
   WebGLCameraRenderer,
   WebGLMatrixRenderer,
@@ -34,7 +34,9 @@ export class CameraExample implements AfterViewInit, OnDestroy {
   protected readonly statusMessage = signal<string | null>(null);
 
   private readonly camera = new Camera();
-  private readonly cameraController = new ExampleCameraInteraction(this.camera);
+  private readonly cameraController = new ExampleCameraInteraction(
+    new CameraControllerAquynza(this.camera),
+  );
   private readonly corridor = new WebGLSimpleCorridorSample();
   private gl: WebGL2RenderingContext | null = null;
   private resizeObserver: ResizeObserver | null = null;

@@ -468,8 +468,8 @@ export class TranslateGizmo extends Gizmo {
             let right: Vector3Dd = camera.getLeft().multiply(-1);
 
             right = right.normalized();
-            const a: Vector3Dd | null = camera.projectPointUsingRayMethodResult(p);
-            const b: Vector3Dd | null = camera.projectPointUsingRayMethodResult(p.add(right));
+            const a: Vector3Dd | null = camera.projectPointUsingRayMethod(p);
+            const b: Vector3Dd | null = camera.projectPointUsingRayMethod(p.add(right));
 
             // Keeps the last scale if the size in pixels can not be measured
             if (a !== null && b !== null) {

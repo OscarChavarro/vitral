@@ -7,7 +7,9 @@ import {
     StringTokenizer,
     type ObjResourceProvider,
     type Reader,
+    type ReaderPlyWorkerFactory,
 } from "@vitral/base";
+import { WebReaderPly } from "./WebReaderPly.js";
 
 /**
 The URL-bound half of `vsdk.toolkit.io.geometry.EnvironmentPersistence`, the
@@ -27,18 +29,35 @@ graph is pulled in first: the `.obj` text, then the text of every `.mtl` its
 control flow; the parse that follows sees exactly what Java's `FileReader`
 would have handed it.
 
-As in Java, only the `obj` branch is wired: of the eight readers the Java class
-reaches (obj, 3ds, gts, ply, ase, wrl/gz, vtk and bin), `ReaderObj` is the only
-one ported to TypeScript to date, and an unrecognized extension leaves the
-scene untouched, which is what Java does.
+The PLY branch fetches the binary resource and waits for mesh assembly on the
+browser workers. Unknown extensions leave the scene untouched.
 */
 export class WebEnvironmentPersistence extends PersistenceElement {
-    public static async importEnvironment(sceneUrl: string, inoutScene: SimpleScene): Promise<void> {
+    public static async importEnvironment(
+        sceneUrl: string,
+        inoutScene: SimpleScene,
+        createPlyWorker?: ReaderPlyWorkerFactory,
+    ): Promise<void> {
         const type = WebEnvironmentPersistence.extractExtensionFromUrl(sceneUrl).toLowerCase();
 
         if (type === "obj") {
             const provider = await WebFetchedObjResourceProvider.forObjUrl(sceneUrl);
             ReaderObj.importEnvironment(sceneUrl, inoutScene, provider);
+        } else if (type === "ply") {
+            if (createPlyWorker === undefined) {
+                throw new IOException("PLY import requires a browser mesh worker factory");
+            }
+            const response = await fetch(sceneUrl);
+            if (!response.ok) {
+                throw new IOException(
+                    'Could not read "' + sceneUrl + '" (HTTP ' + response.status + " " + response.statusText + ")",
+                );
+            }
+            await WebReaderPly.importEnvironment(
+                new Uint8Array(await response.arrayBuffer()),
+                inoutScene,
+                createPlyWorker,
+            );
         }
     }
 
@@ -59,6 +78,7 @@ export class WebEnvironmentPersistence extends PersistenceElement {
         resourceName: string,
         contents: Uint8Array,
         inoutScene: SimpleScene,
+        createPlyWorker?: ReaderPlyWorkerFactory,
     ): Promise<void> {
         const type = WebEnvironmentPersistence.extractExtensionFromUrl(resourceName).toLowerCase();
 
@@ -66,6 +86,11 @@ export class WebEnvironmentPersistence extends PersistenceElement {
             const objText = new TextDecoder().decode(contents);
             const provider = await WebFetchedObjResourceProvider.forObjText(resourceName, objText);
             ReaderObj.importEnvironment(resourceName, inoutScene, provider);
+        } else if (type === "ply") {
+            if (createPlyWorker === undefined) {
+                throw new IOException("PLY import requires a browser mesh worker factory");
+            }
+            await WebReaderPly.importEnvironment(contents, inoutScene, createPlyWorker);
         }
     }
 

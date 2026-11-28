@@ -11,13 +11,15 @@ import {
   signal,
 } from '@angular/core';
 import {
+  CameraControllerOrbiter,
+  type ColorRgb,
   JavaMath,
+  type RGBAImageUncompressed,
   SimpleScene,
   TangibleInterfaceNetworkClient,
-  type ColorRgb,
-  type RGBAImageUncompressed,
 } from '@vitral/base';
 import { WebEnvironmentPersistence, WebSystem, type WebGLLabelImageProvider } from '@vitral/webgl';
+import { createPlyWorker } from '../../ply-mesh-worker';
 import { ExampleCameraInteraction } from '../_shared/example-camera-interaction';
 import { ExampleRendererConfigurationInteraction } from '../_shared/example-renderer-configuration-interaction';
 import { AnimationController } from './animation/animation-controller';
@@ -90,7 +92,9 @@ export class SolidTextureExample implements OnChanges, OnDestroy {
   protected readonly statusMessage = signal<string | null>(null);
 
   private readonly model = new SolidTextureModel();
-  private readonly cameraController = new ExampleCameraInteraction(this.model.getCamera());
+  private readonly cameraController = new ExampleCameraInteraction(
+    new CameraControllerOrbiter(this.model.getCamera()),
+  );
   private readonly qualityController = new ExampleRendererConfigurationInteraction(
     this.model.getQualitySelection(),
   );
@@ -167,7 +171,7 @@ export class SolidTextureExample implements OnChanges, OnDestroy {
     this.statusMessage.set('Loading ' + meshUrl + ' ...');
 
     try {
-      await WebEnvironmentPersistence.importEnvironment(meshUrl, scene);
+      await WebEnvironmentPersistence.importEnvironment(meshUrl, scene, createPlyWorker);
     } catch (error) {
       console.error('Failed to read file.');
       console.error(error instanceof Error ? error.message : String(error));
@@ -183,7 +187,6 @@ export class SolidTextureExample implements OnChanges, OnDestroy {
     }
 
     this.model.configureInitialViewAndLightToScene();
-    this.cameraController.adoptCameraState();
     this.statusMessage.set(null);
   }
 

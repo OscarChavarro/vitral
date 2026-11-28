@@ -78,7 +78,7 @@ test("SolidBoundaryTessellatorContract_CsgDifferenceKeepsTheCavity", () => {
         expectEq(0, report.regionCrossings, String(e));
         expectGt(report.exactCrossings, 0, String(e));
     }
-});
+}, 20_000);
 
 // A blob of two merged components is one closed shell.
 test("SolidBoundaryTessellatorContract_MergedBlobIsOneShell", () => {

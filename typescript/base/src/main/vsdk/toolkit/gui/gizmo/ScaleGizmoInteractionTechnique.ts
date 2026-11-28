@@ -269,7 +269,7 @@ export class ScaleGizmoInteractionTechnique {
         }
         camera.updateVectors();
 
-        const projected: Vector3Dd | null = camera.projectPointUsingRayMethodResult(this.gizmo.getPosition());
+        const projected: Vector3Dd | null = camera.projectPointUsingRayMethod(this.gizmo.getPosition());
 
         if (projected === null) {
             return 0.0;

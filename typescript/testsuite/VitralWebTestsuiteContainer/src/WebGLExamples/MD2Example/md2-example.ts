@@ -10,6 +10,7 @@ import {
   ViewChild,
   signal,
 } from '@angular/core';
+import { type Camera, CameraControllerOrbiter } from '@vitral/base';
 import { WebSystem } from '@vitral/webgl';
 import { ExampleCameraInteraction } from '../_shared/example-camera-interaction';
 import { ExampleRendererConfigurationInteraction } from '../_shared/example-renderer-configuration-interaction';
@@ -76,7 +77,9 @@ export class MD2Example implements OnChanges, OnDestroy {
   protected readonly statusMessage = signal<string | null>(null);
 
   private readonly model = new DebuggerModel();
-  private readonly cameraController = new ExampleCameraInteraction(this.model.getCamera());
+  private readonly cameraController = new ExampleCameraInteraction(
+    MD2Example.createCameraController(this.model.getCamera()),
+  );
   private readonly qualityController = new ExampleRendererConfigurationInteraction(
     this.model.getQualitySelection(),
   );
@@ -158,9 +161,14 @@ export class MD2Example implements OnChanges, OnDestroy {
       return;
     }
 
-    this.model.configureInitialView();
-    this.cameraController.adoptCameraState();
     this.statusMessage.set(null);
+  }
+
+  /** Java's `new CameraControllerOrbiter(model.camera)` and `setDeltaMovement(10)`. */
+  private static createCameraController(camera: Camera): CameraControllerOrbiter {
+    const cameraController: CameraControllerOrbiter = new CameraControllerOrbiter(camera);
+    cameraController.setDeltaMovement(10);
+    return cameraController;
   }
 
   protected onPointerDown(event: PointerEvent): void {

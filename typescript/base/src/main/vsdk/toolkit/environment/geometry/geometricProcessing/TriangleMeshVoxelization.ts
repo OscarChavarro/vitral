@@ -1,6 +1,7 @@
 import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
 import type { ProgressMonitor } from "../../../gui/feedback/ProgressMonitor.js";
+import { Containment } from "../../../processing/Containment.js";
 import { Triangle } from "../element/Triangle.js";
 import { VoxelVolume } from "../volume/VoxelVolume.js";
 
@@ -37,7 +38,10 @@ export class TriangleMeshVoxelization {
             for (let i = minI; i <= maxI; i++)
                 for (let j = minJ; j <= maxJ; j++)
                     for (let k = minK; k <= maxK; k++) {
-                        if (Triangle.containmentTest(p0, p1, p2, volume.getVoxelPosition(i, j, k), tolerance) !== 0)
+                        if (
+                            Triangle.containmentTest(p0, p1, p2, volume.getVoxelPosition(i, j, k), tolerance) !==
+                            Containment.OUTSIDE
+                        )
                             volume.putVoxel(i, j, k, 255);
                     }
         }

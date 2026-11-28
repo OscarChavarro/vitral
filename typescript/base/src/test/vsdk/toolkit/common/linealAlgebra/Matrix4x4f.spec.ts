@@ -4,6 +4,8 @@ import { Matrix4x4f } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4f.js";
 import { Vector3Df } from "vsdk/toolkit/common/linealAlgebra/Vector3Df.js";
 import { Vector4Df } from "vsdk/toolkit/common/linealAlgebra/Vector4Df.js";
 import { expectNear } from "../../../../GTestAssertions.js";
+import { IllegalArgumentException } from "java/lang/IllegalArgumentException.js";
+import { IndexOutOfBoundsException } from "java/lang/IndexOutOfBoundsException.js";
 const f = Math.fround;
 describe("Matrix4x4f", () => {
     it("translates vectors", () => {
@@ -83,5 +85,15 @@ describe("Matrix4x4f", () => {
     it("quaternion round trip", () => {
         const r = new Matrix4x4f().axisRotation(0.7, 0.0, 1.0, 0.0);
         expect(r.importFromQuaternion(r.exportToQuaternion()).epsilonEquals(r, 1e-5)).toBe(true);
+    });
+
+    it("uses Java float-array equality and hashing", () => {
+        const one = new Matrix4x4f();
+        const nan = one.withVal(0, 1, NaN);
+        expect(nan.equals(one.withVal(0, 1, NaN))).toBe(true);
+        expect(nan.hashCode()).toBe(one.withVal(0, 1, NaN).hashCode());
+        expect(one.equals(one.withVal(0, 1, -0))).toBe(false);
+        expect(() => one.epsilonEquals(one, -1)).toThrow(IllegalArgumentException);
+        expect(() => one.get(4, 0)).toThrow(IndexOutOfBoundsException);
     });
 });

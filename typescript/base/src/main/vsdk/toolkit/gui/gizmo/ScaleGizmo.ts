@@ -382,8 +382,8 @@ export class ScaleGizmo extends Gizmo {
 
         const p: Vector3Dd = this.getPosition();
         const right: Vector3Dd = this.camera.getLeft().multiply(-1).normalized();
-        const a: Vector3Dd | null = this.camera.projectPointUsingRayMethodResult(p);
-        const b: Vector3Dd | null = this.camera.projectPointUsingRayMethodResult(p.add(right));
+        const a: Vector3Dd | null = this.camera.projectPointUsingRayMethod(p);
+        const b: Vector3Dd | null = this.camera.projectPointUsingRayMethod(p.add(right));
 
         if (a !== null && b !== null) {
             const factor: number = Vector3Dd.distance(a, b);

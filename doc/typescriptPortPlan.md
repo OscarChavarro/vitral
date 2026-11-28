@@ -44,48 +44,50 @@ implementation, parity or validation item is open. **Pending** means the
 applicable implementation has yet to begin. The shared build, packaging and
 browser verification apply to the release as a whole.
 
+The matrix records 22 finalized phases, 23 in progress and one pending.
+
 | Phase | Scope | Status | Evidence or remaining work |
 |---:|---|---|---|
-| 1 | Java runtime compatibility and packaging | In progress | Workspace, strict compilation settings, runtime adapters and packaging scripts exist. Restore the public package build and re-run the consumer check. |
-| 2 | Common entity foundation | In progress | Entity metadata is used by the web editor. Compare Java's `Entity.typeIsSupported` filter with TypeScript attribute specifications. `VSDKJ2ME` remains outside the web scope. |
-| 3 | Linear algebra | In progress | Double and single precision families and recent arithmetic changes are present. Recheck float rounding, matrix helper paths and newer operations against Java. |
-| 4 | Symbolic algebra | In progress | The expression engine exists. Resolve the parser rewrite and the two historical output differences with Java's `StreamTokenizer` parser. |
+| 1 | Java runtime compatibility and packaging | In progress | All three tarballs pass standalone type and runtime checks. Object streams support multiple portable records. Java double literals and regex capture queries are covered. Direct binary32 parsing and regex dialect differences remain open. |
+| 2 | Common entity foundation | In progress | Entity inspection applies the Java type whitelist and reads declared control types without evaluating getters. Accessor pairs without metadata still depend on runtime values. |
+| 3 | Linear algebra | In progress | Matrix, vector and quaternion samples matched the Java bit patterns and exception types. Finish migrating the current Java assertions and resolve the `Complex.abs()` rounding difference. |
+| 4 | Symbolic algebra | Finalized | The Java `StreamTokenizer` parser and recursive tree construction are ported. Compared tree rendering, values and errors with Java. |
 | 5 | Color | Finalized | `ColorRgb`, `ColorRgba` and the new `Cie` model are present. The focused CIE and RGB suites passed. |
-| 6 | Logging | In progress | The browser-safe fatal exception path exists. Verify Java `processFatalError` diagnostics and document the runtime exit mapping. |
-| 7 | Memory management | Pending | The original group was empty. Java now contains `MemoryPool`; review its explicit LIFO borrow/free behavior for a TypeScript mapping. |
+| 6 | Logging | Finalized | Reports match Java in the compared diagnostic text and order. Fatal reports preserve the message and cause. The web host receives an exception when Java would exit the process. |
+| 7 | Memory management | Finalized | `MemoryPool` is exported from `@vitral/base`. The LIFO borrow/free sequence was compared with Java. |
 | 8 | Quasi-Monte Carlo checkpoint | Finalized | Empty group. No corresponding implementation was found in either core. |
 | 9 | Data structures | Finalized | Container implementations and `KDTree` have source matches, and the focused KD-tree tests passed. |
 | 10 | Statistics | Finalized | Core counters, including `RaytraceStatistics`, have TypeScript counterparts. Earlier counter and aggregation checks are recorded below. |
 | 11 | Command-line options checkpoint | Finalized | Empty library group. Entry-point arguments belong to the application host. |
 | 12 | Progress monitors | Finalized | Core monitors and the parallel producer/consumer are present. The tile scheduler routes worker progress notices back to the owner. |
-| 13 | Tangible interfaces | In progress | The browser WebSocket client is wired into the editor and its focused tests pass. Verify its JSON parsing, connection callbacks and failure behavior against Java's listener and extraction paths. |
+| 13 | Tangible interfaces | Finalized | Java, Node and Chrome accepted the same fragmented WebSocket pose. Tests cover handshake failure, reconnection, malformed records and listener dispatch. Browser WebSocket events handle asynchronous I/O. |
 | 14 | Media and image buffers | In progress | Image buffers and HDR/solid textures are present. Recheck cloning, compressed-pixel errors and the mapping of Java object serialization. |
-| 15 | General processing | In progress | Core processing exists. Resolve `LzwWrapper`, `SpharmonicKitWrapper`, and the Cohen–Sutherland outcode path. |
-| 16 | Materials | In progress | Materials and recent double-precision work are present. Java's `ScatteringArithmetic` has no same-path module. Compare its callers and rounding behavior with their TypeScript equivalents. |
+| 15 | General processing | In progress | The Cohen–Sutherland outcode and segment checks follow Java. Resolve the `LzwWrapper` and `SpharmonicKitWrapper` runtime mappings. |
+| 16 | Materials | In progress | `ScatteringArithmetic` is available at the matching source and package paths. The previous `scatteringArithmetic` import still resolves. Continue the material and lobe review. |
 | 17 | Geometry base | Finalized | The `Geometry` contract is present and used by the current geometry families. |
 | 18 | Curves | In progress | Curve evaluation and rendering exist. Compare the shared TypeScript evaluator with Java's separate interpolation paths. |
-| 19 | Geometry elements | In progress | Ray, hit and vertex types are present. Recheck triangle containment and the missing `closestPointOnTriangle` path. |
+| 19 | Geometry elements | In progress | Ported `closestPointOnTriangle` and aligned numeric containment codes. The reference agrees on edge-distance and collapsed-triangle cases. Continue the ray, hit and vertex audit. |
 | 20 | Concrete geometry elements checkpoint | Finalized | The historical plural package entries map to the singular package covered by Phase 19. |
-| 21 | Surfaces | In progress | Surface and mesh implementations exist. Close the `_ParametricBiCubicPatchIntersector` gap and recheck mesh and patch internals. |
+| 21 | Surfaces | In progress | Triangle mesh normal construction follows Java's edge normalization and incident order. Close the `_ParametricBiCubicPatchIntersector` gap and recheck the remaining mesh internals. |
 | 22 | Volumes and boundary representation | In progress | B-rep operators, validators and the recent refactor are present. Verify the private decision paths and the newer Java `VoxelVolume` behavior. |
-| 23 | Backgrounds | In progress | Background modes exist in both cores. Resolve the recorded `FixedBackground` behavior difference and verify current sampling. |
-| 24 | Cameras | In progress | Camera, projection and clipping exist. Check `clipLineCohenSutherlandPlanes` and the missing Java outcode logic. |
-| 25 | Geometric processing | In progress | CSG, BVH, triangulation and both clipping families are present. Repair the `genericPolygonClipper` references and revisit polygon-merger and CSG parity on the current sources. |
+| 23 | Backgrounds | Finalized | All four classes were compared with Java. `FixedBackground` already returns Java's null result. The background suites cover fixed, uniform and cubemap sampling. |
+| 24 | Cameras | Finalized | `Camera` is ported line by line from Java, including the three outcode overloads, both Cohen–Sutherland clippers and the ray projection. A reference driver matched Java bit for bit on five camera setups. `CameraProjectionTest` is ported, and the browser gizmos were exercised. |
+| 25 | Geometric processing | In progress | Both clipping families build and export. The generic clipper suites pass. Revisit polygon-merger and CSG parity on the current sources. |
 | 26 | Lights | Finalized | The five Java light types are represented. The historical parity record covers attenuation, direction and copying. |
 | 27 | Tone-mapping checkpoint | Finalized | Empty group. Existing gamma and HDR operations remain in Phases 14 and 15. |
 | 28 | Scene model | In progress | Scene containers, CSG and worker snapshot transfer exist. Revalidate scene-instance BVH, transforms and snapshot behavior after the current revisions. |
 | 29 | Numerical analysis | Finalized | The four polynomial-source counterparts and both lookup tables were found. The historical graph group is empty. |
-| 30 | I/O wrappers | In progress | Core stream helpers, the Node file subclass and browser HTTP adapters exist. Port `ShapeDescriptorPersistence`, account for the JNI check and validate browser resource loading. |
+| 30 | I/O wrappers | In progress | `ShapeDescriptorPersistence` reads and writes the Java stream format. Continue the JNI capability mappings and browser resource-failure checks. |
 | 31 | I/O context checkpoint | Finalized | The runtime split is explicit in the packages. Format and stream gaps are tracked in Phases 30 and 32–36. |
-| 32 | Binary I/O | In progress | Stream and endian helpers exist. Check `PersistenceElement` use of `number` for Java `long`, and map the current pipe-stream and decompression wrappers. |
+| 32 | Binary I/O | In progress | `PersistenceElement` legacy long helpers intentionally read and write four bytes, as Java does. Continue the audit of the pipe and decompression wrappers and of true 64-bit stream contracts. |
 | 33 | Image I/O | In progress | Node raster import, browser decoding, SGI, compressed DDS, palette import and PNG/PPM export exist. Review TGA, uncompressed DDS, native decoding equivalents and remaining export formats. |
-| 34 | XML I/O | Pending | `XmlImporter`, `XmlNode`, `XmlNodeParam` and `XmlException` lack TypeScript counterparts. |
+| 34 | XML I/O | Finalized | All four classes are exported. Java reference comparisons cover the legacy line tokenizer, including offsets, quotes, non-tag spans and malformed input. |
 | 35 | VRML checkpoint | Finalized | The graph group is empty. The actual VRML and compressed input work is tracked in Phase 36. |
-| 36 | Geometry I/O | In progress | OBJ dispatch, independent MIT/altimetry/MD2/STEP readers, STL and OBJ/GTS/VTK writers exist. Seven geometry readers remain open, including parallel PLY assembly, plus STEP writing and curve, patch and viewpoint persistence. |
+| 36 | Geometry I/O | In progress | OBJ and parallel PLY import are wired in the web editor and the Node asynchronous dispatcher. MIT/altimetry/MD2/STEP readers and STL and OBJ/GTS/VTK writers exist. Six other geometry readers, STEP writing, and curve, patch and viewpoint persistence remain open. |
 | 37 | SGL checkpoint | Finalized | Empty group. The current GPU adapter belongs to Phase 41. |
-| 38 | GUI model and controllers | In progress | DOM/CSS widgets, dialogs, events, viewports, the Aquynza controller and gizmos are present. Map the remaining camera control schemes, HUD/text and visual analytics behaviors by responsibility. |
+| 38 | GUI model and controllers | In progress | DOM/CSS widgets, dialogs, events, viewports, gizmos and the four camera control schemes (Aquynza, Orbiter, Blender, Google Earth) are ported. The Orbiter, Blender and Google Earth controllers matched Java bit for bit in a reference driver. All 16 Java GUI test classes are ported, and their 195 tests pass. The testsuite examples use the ported Aquynza and Orbiter controllers, as their Java programs do, and were verified in the browser. The quality keys go through the ported `RendererConfigurationController`. The HUD icon, text configuration, viewport-window manager, information dialog and visual analytics classes are ported, with reference-driver parity. Verify worker progress through the renderer owner (Phases 12 and 40). |
 | 39 | Software shaders | In progress | The shader family and a historical matching raytrace exist. Close the shader gate against current materials and the current CPU render path. |
-| 40 | CPU rendering | In progress | Canvas 2D modes and tiled worker raytracing are wired in the editor. Include Heckbert scan conversion in the library build, fix the hidden-surface import and review the stereogram and B-rep debugger gaps. |
+| 40 | CPU rendering | In progress | Heckbert scan conversion is exported and matches Java in flat and depth-tested visibility passes. The browser raytrace completed on Web Workers. `AutoStereogramGenerator` matches Java byte for byte. `PolyhedralBoundedSolidDebugger` is ported with a plugin registry in place of Java's class loading. Every inventory class with a Java source is now ported. Run the phase gate. |
 | 41 | GPU rendering | In progress | WebGL 2 renderers, context probing and offscreen color/depth readback are implemented. Map voxel rendering and verify shader, texture and context/resource lifecycle in a browser. |
 | 42 | Animation | Finalized | All four animation classes are present. The timer preserves the tick and listener order of the Java loop and supports teardown. |
 | 43 | Application framework | Pending | The three framework/shape-matching classes lack TypeScript counterparts. The existing editor has its own application orchestration. |
@@ -93,7 +95,7 @@ browser verification apply to the release as a whole.
 | 45 | Orphan-inventory closure | In progress | The source inventory was refreshed. Assign unmatched and new files to phases, and record package export and consumer reachability for each applicable entry. |
 | 46 | Parity and dependency-closure audit | In progress | The historical audit and current build findings are inputs. Repeat the API, private-algorithm and runtime checks on the refreshed inventory. |
 
-### Verification at this baseline
+### Initial review before the clipper-path repair
 
 - `cd typescript && npm run build` exits 1 in `@vitral/base` with eight
   `TS2307` errors. Seven exports in `base/src/main/index.ts` and one import
@@ -115,15 +117,251 @@ browser verification apply to the release as a whole.
   as part of this review. September test counts and pass results apply to
   their recorded revisions.
 
+### Execution update — 2026-11-27
+
+- The public package emits the convex and generic clippers and the new
+  scan-conversion modules. Three 12 × 9 visibility buffers matched the
+  Java reference, including overlapping geometry, a restricted viewport,
+  depth testing and reversed draw order.
+- The symbolic-algebra parser matched Java on 24 expressions and error cases.
+  The `MemoryPool` borrow/release sequence and scattering arithmetic samples
+  also matched the Java reference. Geometry cases matched both the numeric
+  containment codes and the clipped coordinates.
+- Descriptor records matched Java byte for byte for primitive counts and
+  Fourier data. Truncated records raise an I/O error at EOF rather than
+  repeat the chunk loop. The XML line tokenizer preserves the Java byte-span
+  and quoted-text behavior. The four core XML classes do not include the
+  application's `XmlManager` integration.
+- The Angular production build passed. The editor produced a 32 × 24 PNG in
+  headless Chrome using eight real Web Workers. They sent 24 completed tiles
+  and 24 progress notices, and all eight terminated on leaving the editor.
+  A direct request to the same worker entry point returned a structured
+  error and then a valid depth tile. A real Node worker also accepted another
+  request after computation and structured-clone failures.
+- The PLY reader supports ASCII, little-endian and big-endian input and
+  returns point clouds with or without a mesh. The mug fixture and three
+  synthetic Java comparisons matched point coordinates, triangle indices,
+  and vertex and face normals byte for byte. Each runtime launches two jobs
+  for mesh assembly. The browser container supplies its bundled worker
+  factory. Chrome imported the mug from an HTTP resource and from a local
+  file. Each import completed and terminated both workers. Node exposes
+  `EnvironmentPersistence.importEnvironmentAsync` for the PLY route and
+  retains the synchronous OBJ entry point.
+- The clean workspace build and Angular production build passed. The
+  packaged `@vitral/base` passed a strict declaration check from a temporary
+  consumer importing the new APIs. Vitest passed 1,023 base tests with four
+  test workers and 10 skips, and 21 fs tests with one test worker.
+
+### Early-phase verification — 2026-11-27
+
+- A clean workspace build produced the three tarballs. The dry run found
+  2,669 files in `@vitral/base`, 85 in `@vitral/fs` and 334 in
+  `@vitral/webgl`. All three shipped their entry-point JavaScript and
+  declarations without source or build-cache files. An independent ESM
+  package compiled and ran with the tarballs installed, including both
+  polygon clippers and the Node and browser PLY entry points. The Angular
+  production build passed.
+- The portable object stream writes newline-delimited JSON and reads legacy
+  unframed single records. The mapping of JVM-serialized image data remains
+  in Phase 14. The floating-point adapters accept Java double literals,
+  including hexadecimal notation, signed zero and overflow. Float parsing
+  still rounds via binary64 before conversion to binary32. Regex capture
+  counts, unmatched groups and offsets are covered for patterns supported by
+  the ECMAScript engine. Java-specific regex constructs remain a runtime
+  adapter item.
+- Java and TypeScript reported the same sorted entity attributes for a
+  metadata-backed model and for `Prism`. Without declared metadata, Java
+  can distinguish primitive types and compare getter and setter signatures
+  through reflection. Those types are erased in the emitted JavaScript.
+- The Java linear-algebra suite passed 107 tests. A cross-runtime run matched
+  143 numeric and exception results for matrix determinants, cofactors,
+  inverses, projections, rotations, equality, hashing, bounds and vector and
+  quaternion operations. The broader test migration remains active. For
+  example, `Complex(1, 5).abs()` is one binary64 ULP apart between the JVM
+  and Node because both ports use the host's `Math.hypot`.
+- The warning and null-exception reports matched Java's stderr byte for
+  byte. Tests cover fatal exception messages, cause identity and the
+  configurable fatal-exception branch. Java's request to exit the JVM maps to
+  a `VSDKFatalException` handled by the TypeScript host. Source names and
+  stack frames come from the active runtime.
+- A local WebSocket sent a fragmented frame with both a skipped record and a
+  valid pose. The JVM, Node and Chrome reported a successful handshake and
+  the same pose coordinates and quaternion. The WebSocket implementation
+  assembles wire fragments before the browser's message event. CPU-parallel
+  jobs continue to use Web Workers and Node worker threads.
+- Vitest passed 1,036 base tests, with 10 existing skips, and 21 filesystem
+  tests. The final focused run passed 67 tests for the early phases.
+
+### Phase 24 closure — 2026-11-27
+
+- `Camera.ts` previously used different algorithms for plane and
+  canonical-volume clipping, `projectPoint`, `projectPointUsingRayMethod`,
+  the projection matrices, `toString` and `clone`. It is now a textual port
+  of `Camera.java`. Java behaviors kept as observable contracts: the far
+  plane keeps the unnormalized `front` normal; `setUpMaintainingOrthogonality`
+  stores the normalized argument; the ray method's view plane passes through
+  `position + front`, because the near-distance product is discarded; and the
+  plane clipper passes the near and far planes in swapped outcode slots. The
+  clipped-point output parameters stay unobservable, as in Java. The
+  TypeScript-only `*Result` methods were removed, and the gizmo and WebGL
+  viewport callers now use `projectPointUsingRayMethod`, which returns the
+  point or null as in Java.
+- A Java/Node reference driver compared 387 lines of IEEE-754 bit patterns
+  over default, perspective, orthogonal, rotated-orthogonal and
+  `setUpMaintainingOrthogonality` cameras. It covered vectors, normalizing,
+  view-volume, transformation and projection matrices, primary rays,
+  bounding planes, both projections, both clippers, visibility, snapshots,
+  `toString`, copy and `clone`. The outputs were identical. Java ran with
+  `-XX:-UseLibmIntrinsic`.
+- The TypeScript-only `Camera.spec.ts` was replaced by the port of
+  `CameraProjectionTest`. Vitest passed 1,034 base tests with 10 skips.
+  In Chrome, the CameraExample rendered and the scene editor's translate and
+  rotate gizmos kept a finite size. An X-axis drag changed only the X
+  coordinate. No console errors were reported.
+
+### Gizmo test migration — 2026-11-27
+
+- Six Java test classes were ported to Vitest: `TranslateGizmoTest`,
+  `TranslateGizmoInteractionTechniqueTest`, `ScaleGizmoTest`,
+  `ScaleGizmoInteractionTechniqueTest`, `RotateGizmoTest` and
+  `RotateGizmoInteractionTechniqueTest`. Their 134 cases match the Java
+  `@Test` count, and all pass against the current gizmo and camera ports
+  without production changes. The cases cover picking, dragging, cursor
+  wrapping, keyboard and typed-coordinate input, scaling, contours and
+  ring strips.
+- `RotateGizmoTest.given_gridOfRays_when_picked_then_agreesWithTheDistanceToTheRings`
+  stays in the regular suite, as in Java, which has no `@Tag("slow")`.
+  Its oracle allocates about 280 million temporary vectors, which takes
+  about two minutes in V8 (`pickRing` itself handles 10,000 rays in 0.2 s).
+  The test has a 300 s timeout and yields after each pixel row, so the
+  vitest worker RPC stays responsive. The full base run passed 1,168 tests
+  with 10 skips in 150 s.
+
+### GUI test migration and camera controllers — 2026-11-27
+
+- The remaining eight Java GUI test classes were ported to Vitest:
+  `InputGizmoTest` (26 cases), `InputGizmoValueChangeRulesTest` (7),
+  `RayGizmoRollIndicatorTest` (1), `RayGizmoViewThicknessTest` (6),
+  `ReferenceFrameGizmoTest` (7), `CameraControllerInteractionTest` (4),
+  `editor.GenericEditorTest` (8) and `viewport.ViewportSetCoordinatesTest`
+  (2). Every Java GUI test class now has a Vitest counterpart with the same
+  case count. `GenericEditorTest`'s inner `RecordingEditor` became a module
+  class. It reads the protected `specifications` list through accessors,
+  where Java reads the package-private field.
+- `CameraControllerInteractionTest` needed `CameraControllerOrbiter`, which
+  was missing. `CameraControllerOrbiter`, `CameraControllerBlender` and
+  `CameraControllerGoogleEarth` were ported line by line and exported from
+  `@vitral/base`.
+  - Java's dead stores are dropped: Blender's `unicodeId` and `angleInc`,
+    the `RayA` in Google Earth's press handler, and Orbiter's wheel
+    `angleInc`. Each drop is commented in place.
+  - The `expo` and `altura` locals that Java scopes across Google Earth's
+    `KEY_z` and `KEY_Z` cases are hoisted.
+  - `Math.round(Math.log10(z))` goes through the Java `Math` port.
+- A reference driver ran 46 events through Java and TS: keys, numeric-pad
+  keys with and without CTRL, raw codes 107 and 109, presses, drags with each
+  button mask, and wheel clicks in both directions. It covered Orbiter,
+  Blender, Google Earth and Aquynza, dumping position, focus, rotation, fov,
+  orthogonal zoom, clipping distances and projection mode after each event.
+  All 184 lines matched bit for bit (`-XX:-UseLibmIntrinsic`).
+
+### Testsuite camera controllers — 2026-11-28
+
+- The testsuite examples now use the ported controllers that their Java
+  programs construct: `CameraControllerAquynza` in `CameraExample` and
+  `ImageExample`, and `CameraControllerOrbiter` in `MeshExample`,
+  `SolidTextureExample`, `MD2Example`, `ShadersExample`,
+  `PolygonClippingExample` and `PolyhedralBoundedSolidExample`.
+- `_shared/ExampleCameraInteraction` is now only an event adapter, the
+  counterpart of `AwtSystem.awt2vsdkEvent`. It replaces a 320-line orbit
+  imitation.
+  - Pointer events go through `WebSystem.toVitralMouseEvent` /
+    `toVitralWheelEvent`, with AWT button masks and wheel notches.
+  - A move with a button held goes to `processMouseDraggedEvent`; any other
+    move goes to `processMouseMovedEvent`.
+  - `WebKeyEvent` key names map to the `KeyEvent.KEY_*` codes.
+- Workarounds the stand-in needed, now removed:
+  - The `adoptCameraState()` calls.
+  - Re-applying `configureInitialView()` in `MD2Example`, `ShadersExample`
+    and `PolyhedralBoundedSolidExample`.
+- Java behavior restored:
+  - `MD2Example`'s `setDeltaMovement(10)`.
+  - `setPointOfInterest` in `CameraFaceFocusInteraction`,
+    `recenterOrbiterAfterModelChange` (with the previous point read from
+    the orbiter) and `focusCameraOnCurrentScene`.
+  - The camera key-release calls in the PolyhedralBoundedSolid,
+    PolygonClipping, Shaders and MD2 keyboard techniques.
+- Checks:
+  - `tsc` on the testsuite app is clean.
+  - In Chrome: PolyhedralBoundedSolid (drag orbit, wheel, arrow keys),
+    CameraExample (Aquynza drag and keys), MD2 (orbit and the 10-unit `x`
+    step) and Shaders (orbit) rendered and responded, with no console
+    errors.
+- Follow-up the same day: `ExampleRendererConfigurationInteraction` now
+  wraps the ported `RendererConfigurationController` instead of copying it.
+  The copy lacked Java's `KEY_F10` (`changeWithShadows`) binding, which the
+  examples now get. The `WebKeyEvent` to `KeyEvent` conversion that both
+  adapters use lives in `_shared/web-key-event-conversion.ts`.
+
+### Remaining GUI classes — 2026-11-28
+
+- The nine Phase 38 inventory classes that had no TypeScript counterpart
+  were ported line by line into `@vitral/base` and exported from it:
+  - `TextVisualConfiguration` and `HudIcon`.
+  - `ViewportWindow` and `ViewportWindowSetManager`.
+  - `dialog.InformationDialog`.
+  - `visualAnalytics.VisualDoubleVariable`, `VisualVariableSet`,
+    `PercentageWheelWidget` and `PercentageWheelWidgetController`.
+- `HudIcon` reads its image file as Java's
+  `ImagePersistence.importRGBA(new File(name))` does. The read goes through
+  an importer that each runtime registers with `HudIcon.setImageImporter`.
+  `@vitral/fs` registers its PNG/PPM reader when it is loaded, the way it
+  already installs its deflater. Without an importer, a named file throws
+  inside `init`, and the icon takes Java's "Image not found" branch
+  (warning, null image).
+- Java's quirks are kept and commented in place:
+  - `ViewportWindowSetManager.doLayout4` switches on `style % 7` while its
+    caller passes `style % 5`.
+  - `doLayout4` declares the unused `p25`/`p75`, both 0.25.
+- Reference drivers compared Java and TS output:
+  - `PercentageWheelWidgetController` sector picking: 10,854 samples with 4,
+    7 and 12 sectors (2,034 hits). Identical.
+  - `ViewportWindowSetManager`: 0 to 5 views, styles 0 to 9, full-viewport
+    on and off, then pointer picking. 266 lines identical, 22 distinct
+    layouts.
+  - `InformationDialog`'s animation clamps: identical.
+  - `HudIcon` with three PNGs from `etc`, a null name and a missing file:
+    `toString`, `getMapTag`, `doIntersection` and
+    `doIntersectionWithGravity` are identical.
+- Phase 14 parity finding (not fixed): `RGBImageUncompressed.putPixelRgb`
+  out of the buffer. Java's direct `ByteBuffer` throws
+  `IndexOutOfBoundsException` after the in-range components are written.
+  The TypeScript typed array drops the write silently. `HudIcon.overWritePixels`
+  at a negative position, or past the image edge, therefore throws in Java
+  and completes in TS. The same holds for the other `get`/`put` accessors of
+  the uncompressed image classes. A fix adds a bounds check to every pixel
+  access, so it is left for a decision on the render hot paths.
+- Inventory note: 18 entries of `61_gui.txt` do not exist anywhere in the
+  current Java tree, so they have nothing to port. The inventory was captured
+  from an older source tree. The 18 entries are:
+  - `ExceptionGuiBadName` and `ExceptionGuiParseError`.
+  - `Gui`, `GuiButtonGroup`, `GuiCommand`, `GuiCommandExecutor`,
+    `GuiDialog`, `GuiElement`, `GuiMenu`, `GuiMenuElement` and
+    `GuiMenuItem`.
+  - The seven `variable.Gui*Variable` classes.
+  - The gizmo entries live one package deeper (`gui.gizmo`), as already
+    recorded under Phase 38.
+- Remaining for Phase 38:
+  - Verify worker progress through the renderer owner (Phases 12 and 40).
+  - The Jogl2 `VisualAnalyticsPercentagesWheelExample` has no browser
+    renderer yet.
+
 ### Work order
 
-1. Repair the clipper references in the package and tests. Include the
-   applicable scan-conversion sources in the build. Run the workspace gate,
-   check public imports from the emitted package, then build and exercise
-   the Angular container.
-2. Verify browser worker execution for tiled raytracing, including color and
-   depth, error handling, stale results, progress and disposal. Keep the
-   parallel mesh-assembly work with the PLY reader in Phase 36.
+1. Keep validating the workspace, package consumer and Angular entry points
+   as implementation gaps close.
+2. Exercise stale viewport results and cooperative cancellation in
+   the browser raytracing path. Continue the remaining Phase 36 readers.
 3. Close the format and integration gaps by following the application
    entry points into the reusable packages. Compare AWT/Swing interactions
    and JOGL4 rendering to their web counterparts through observable behavior.
@@ -831,15 +1069,10 @@ Migrated so far:
         bold 20-pixel sans-serif face, `measureText` for the right-aligned
         second line, and one `getImageData` replacing the `getRGB` loop.
 
-    One browser-only step has no Java counterpart and is marked in
-    `model.DebuggerModel`: the container's shared `ExampleCameraInteraction`,
-    which stands in for `CameraControllerOrbiter` until Phase 38 ports the
-    controller family, imposes its own default view when it is constructed,
-    where Java's controller leaves the camera it is given alone. Java's two
-    camera lines therefore live in a method that is applied again once the
-    adapter exists, and `adoptCameraState()` then takes that view as the orbit
-    state. Java's `cameraController.setDeltaMovement(10)` has no counterpart
-    either, for the same Phase 38 reason.
+    The camera controller is Java's `CameraControllerOrbiter` with
+    `setDeltaMovement(10)`, fed DOM events by the container's
+    `ExampleCameraInteraction` (since 2026-11-28; until then a stand-in that
+    imposed its own default view, and which this module had to work around).
 
 - `ShadersExample` — `typescript/testsuite/VitralWebTestsuiteContainer/src/
     WebGLExamples/ShadersExample`, ported 2026-09-13.
@@ -937,12 +1170,9 @@ Migrated so far:
         two right-aligned strings, and one `getImageData` replacing the
         `getRGB` loop.
 
-    Two browser-only steps have no Java counterpart. The container's shared
-    `ExampleCameraInteraction`, standing in for `CameraControllerOrbiter` until
-    Phase 38, imposes its own default view when constructed, so Java's three
-    camera lines live in `ShadersModel.configureInitialView()` and are applied
-    again once the adapter exists — the same note `MD2Example` carries. And
-    Java drives both animations from one `javax.swing.Timer`, whose repaint
+    The camera controller is Java's `CameraControllerOrbiter`, fed DOM events
+    by the container's `ExampleCameraInteraction` (since 2026-11-28). One
+    browser-only step has no Java counterpart: Java drives both animations from one `javax.swing.Timer`, whose repaint
     coalescing the component's own repaint flag already provides; the host
     timer takes its place at the same 30-frames-a-second period, with the same
     `Animation.tick` and the same elapsed-time light step.
@@ -1129,9 +1359,10 @@ Migrated so far:
       - Every program a frame can reach is compiled in `init`, per the
         drawing-buffer rule. Before that change, the first frames lost their
         grey background.
-      - The camera stand-in and the fullscreen request are handled as in the
-        other modules. `recenterOrbiterAfterModelChange` and `[c]` hand the new
-        focus to `adoptCameraState()`.
+      - The fullscreen request is handled as in the other modules. Since
+        2026-11-28 the camera controller is Java's `CameraControllerOrbiter`,
+        and `recenterOrbiterAfterModelChange` and `[c]` set its point of
+        interest, as Java does.
 
     Parity was checked byte for byte with a reference driver. It compiles the
     Java example's `models` and `gui` classes and the three JOGL4 polyhedral
@@ -1227,7 +1458,7 @@ record describe the comparison performed at that time.
 | Java responsibility | TypeScript implementation and closure work |
 |---|---|
 | `ParallelRaytracer` thread pool and progress consumer (Phases 12 and 40) | `ParallelRaytracer` schedules tiles over `BrowserWorkerExecutor` in the editor and shader example and `NodeWorkerExecutor` in the offline example. `SimpleSceneSnapshotTransfer` encodes the scene for worker-local reconstruction. The owner collects color and optional depth tiles and forwards progress notices. Verify serial/parallel output, teardown and stale frame handling through the browser entry point. |
-| `ReaderPly` two-task mesh assembly (Phase 36) | Pending. After parsing the stream, dispatch vertex construction and triangle filtering as independent worker jobs over cloneable data. Preserve validated-index filtering and result order, then join before constructing the mesh, normals and material ranges. Define cancellation and cleanup on either task's failure. |
+| `ReaderPly` two-task mesh assembly (Phase 36) | The reader dispatches vertex preparation and triangle filtering as independent worker jobs over cloneable data. It joins both before creating the mesh, normals and material ranges. Workers terminate when the mesh is assembled, the caller aborts, or a job fails. |
 | `TangibleInterfaceNetworkClient` connection thread (Phase 13) | The WebSocket event loop performs asynchronous I/O. Verify callback ordering, fragmented/error input behavior and disconnect/reconnect semantics. Apply the worker contract if CPU-parallel pose processing is added. |
 | `AnimationEventGenerator` thread and Swing/AWT event dispatch (Phases 38 and 42) | The generator uses a cancellable host timer. DOM handlers and the web frame scheduler own UI work. The editor MCP bridge dispatches commands in the page through a promise-based API. |
 | Java `ThreadLocal` scratch and mutable kernel state (Phases 21, 22, 25 and 40) | Audit each compute module used by workers. Give workers isolated scene and scratch state, and verify reentrancy at the appropriate call boundary. |
@@ -1561,7 +1792,7 @@ Exit: satisfy the applicable standard phase checks.
 
 Source group: `13_memory_management.txt` (0 class entries).
 
-Work: Add the current Java MemoryPool to the inventory and assess its explicit reuse semantics.
+Work: Maintain the exported MemoryPool and its Java object-reuse semantics.
 
 Class inventory:
 
@@ -2585,7 +2816,7 @@ Exit: satisfy the applicable standard phase checks.
 
 Source group: `35_io_xml.txt` (4 class entries).
 
-Work: Port XML nodes/importers and parameter handling using a real XML parser appropriate to the selected runtime; preserve malformed-input errors.
+Work: Preserve Java's line-tokenizer behavior, node parameters, byte spans and malformed-input results in the shared package.
 
 Class inventory:
 
@@ -3035,6 +3266,37 @@ scenes of `HiddenSurfaceRendererTest`, plus a 16-body scene that exercises the
 screen subdivision and the two shadow scenes with one light each, are
 identical to Java's (5521 polygons, Java run with
 `-XX:-UseLibmIntrinsic`). The phase stays Pending.
+
+Fifth partial advance — 2026-11-28: the last two inventory classes with a
+Java source are ported 1:1 and exported through `@vitral/base`.
+
+- `render.AutoStereogramGenerator`: Java's `int` arithmetic is kept, with
+  every `(int)` cast and integer division as `Math.trunc`. The defaults
+  overload delegates as Java does. Reference driver: 3 image sizes, 2 tile
+  patterns, the defaults overload and 3 explicit parameter sets (negative
+  and over-256 animation offsets included). The 24 output images are
+  byte-identical to Java's.
+- `render.PolyhedralBoundedSolidDebugger`: Java loads
+  `vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidDebugger` by name
+  and answers null when the class is missing. A JavaScript runtime has no
+  class path, so a package registers a factory under that Java name with
+  `registerPlugin`. Until one does, `createOfflineRenderer` answers null,
+  which is Java's result without JOGL. No browser renderer registers one
+  yet.
+- The rest of the inventory has nothing left to port:
+  - The nested names (`FillEdge`, `SpanShader`, `SceneObjectRenderData`,
+    `SceneRenderCache`, the four `Appel*Dump` records) are ported as
+    namespace members.
+  - The `vsdk.toolkit.render.*` duplicates (`_AppelEdgeCache`,
+    `_AppelEdgeSegment`, `Tile`, `TileGenerationStrategy`, `TileGenerator`,
+    `Rasterizer2D` and its members) have no source in the current Java tree.
+- Phase 14/15 parity fix found by the stereogram driver: `Image.getColorRgbBiLinear`
+  folded Java's two-stage interpolation (`FU0`, `FU1`, then
+  `FU0 + dv * (FU1 - FU0)`) into one regrouped expression. That rounds
+  differently, so `ImageProcessing.resize` upscaling changed some pixels
+  (64x64 to 128, 149, 150 or 200). The method now keeps Java's grouping.
+  Resizing 64x64, 100x37 and 31x17 tiles to 8 upscaled and 2 downscaled
+  sizes is byte-identical to Java.
 
 Exit: satisfy the applicable standard phase checks.
 

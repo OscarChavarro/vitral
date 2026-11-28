@@ -6,37 +6,9 @@
 
 import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 
-/**
-Double precision vector arithmetic of the Phong scattering model, written
-out component by component in the order RenderPark's Vector3D uses, so that
-directions, cosines and densities do not depend on Vector3Dd's methods.
-*/
-export namespace scatteringArithmetic {
-    /** x * b.x + y * b.y + z * b.z, in that order */
-    export function dot(a: Vector3Dd, b: Vector3Dd): number {
-        return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
-    }
+import { ScatteringArithmetic } from "./ScatteringArithmetic.js";
 
-    /** s * v */
-    export function scale(s: number, v: Vector3Dd): Vector3Dd {
-        return new Vector3Dd(s * v.x(), s * v.y(), s * v.z());
-    }
-
-    /** a * v + b * w */
-    export function combine(a: number, v: Vector3Dd, b: number, w: Vector3Dd): Vector3Dd {
-        return new Vector3Dd(a * v.x() + b * w.x(), a * v.y() + b * w.y(), a * v.z() + b * w.z());
-    }
-
-    /**
-    v scaled by the inverse of its norm, left as it is when the norm is within
-    epsilon of 0
-    */
-    export function normalize(v: Vector3Dd, epsilon: number): Vector3Dd {
-        const n = Math.sqrt(v.x() * v.x() + v.y() * v.y() + v.z() * v.z());
-        const factor = n < -epsilon || n > epsilon ? 1.0 / n : 1.0;
-        return scale(factor, v);
-    }
-}
+export { ScatteringArithmetic as scatteringArithmetic };
 
 /**
 Orthonormal frame around a unit Z axis, with the hemisphere sampling of the
@@ -116,9 +88,9 @@ export class ScatteringFrame {
         const cosTheta = Math.sqrt(1.0 - xi2);
         const sinTheta = Math.sqrt(xi2);
 
-        const planar = scatteringArithmetic.combine(cosPhi, this.x, sinPhi, this.y);
+        const planar = ScatteringArithmetic.combine(cosPhi, this.x, sinPhi, this.y);
         density[0] = cosTheta / Math.PI;
-        return scatteringArithmetic.combine(sinTheta, planar, cosTheta, this.z);
+        return ScatteringArithmetic.combine(sinTheta, planar, cosTheta, this.z);
     }
 
     /**
@@ -134,22 +106,22 @@ export class ScatteringFrame {
         const cosTheta = Math.pow(xi2, 1.0 / (n + 1));
         const sinTheta = Math.sqrt(1.0 - cosTheta * cosTheta);
 
-        const planar = scatteringArithmetic.combine(cosPhi, this.x, sinPhi, this.y);
+        const planar = ScatteringArithmetic.combine(cosPhi, this.x, sinPhi, this.y);
         density[0] = ((n + 1.0) * Math.pow(cosTheta, n)) / (2.0 * Math.PI);
-        return scatteringArithmetic.combine(sinTheta, planar, cosTheta, this.z);
+        return ScatteringArithmetic.combine(sinTheta, planar, cosTheta, this.z);
     }
 
     /** Mirror direction of `in` about `normal`, normalized */
     public static idealReflection(inDirection: Vector3Dd, normal: Vector3Dd): Vector3Dd {
         // The product is evaluated in single precision, then widened
-        const twice = 2 * scatteringArithmetic.dot(normal, inDirection);
-        const along = scatteringArithmetic.scale(twice, normal);
+        const twice = 2 * ScatteringArithmetic.dot(normal, inDirection);
+        const along = ScatteringArithmetic.scale(twice, normal);
         const reflected = new Vector3Dd(
             inDirection.x() - along.x(),
             inDirection.y() - along.y(),
             inDirection.z() - along.z(),
         );
-        return scatteringArithmetic.normalize(reflected, ScatteringFrame.NORMALIZATION_EPSILON);
+        return ScatteringArithmetic.normalize(reflected, ScatteringFrame.NORMALIZATION_EPSILON);
     }
 
     /**
@@ -167,7 +139,7 @@ export class ScatteringFrame {
     ): Vector3Dd {
         // [GLAS1989]: real part of the indices only
         const ratio = inIndex / outIndex;
-        const cosIncident = -scatteringArithmetic.dot(inDirection, normal);
+        const cosIncident = -ScatteringArithmetic.dot(inDirection, normal);
         const cosTransmitted2 = 1 + ratio * ratio * (cosIncident * cosIncident - 1);
         if (cosTransmitted2 < 0) {
             totalInternalReflection[0] = true;
@@ -176,12 +148,12 @@ export class ScatteringFrame {
         totalInternalReflection[0] = false;
         const cosTransmitted = Math.sqrt(cosTransmitted2);
         const normalScale = ratio * cosIncident - cosTransmitted;
-        const scaled = scatteringArithmetic.scale(ratio, inDirection);
+        const scaled = ScatteringArithmetic.scale(ratio, inDirection);
         const refracted = new Vector3Dd(
             scaled.x() + normalScale * normal.x(),
             scaled.y() + normalScale * normal.y(),
             scaled.z() + normalScale * normal.z(),
         );
-        return scatteringArithmetic.normalize(refracted, ScatteringFrame.NORMALIZATION_EPSILON);
+        return ScatteringArithmetic.normalize(refracted, ScatteringFrame.NORMALIZATION_EPSILON);
     }
 }

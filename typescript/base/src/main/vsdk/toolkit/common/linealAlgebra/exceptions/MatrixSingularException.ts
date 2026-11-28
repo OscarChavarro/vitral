@@ -1,2 +1,5 @@
-import { VSDKException } from "../../VSDKException.js";
-export class MatrixSingularException extends VSDKException {}
+import { ArithmeticException } from "../../../../../java/lang/ArithmeticException.js";
+
+export class MatrixSingularException extends ArithmeticException {
+    public override name = "MatrixSingularException";
+}

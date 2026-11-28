@@ -10,7 +10,13 @@ import {
   ViewChild,
   signal,
 } from '@angular/core';
-import { Matrix4x4d, Vector3Dd, type Light, type RGBImageUncompressed } from '@vitral/base';
+import {
+  CameraControllerOrbiter,
+  type Light,
+  Matrix4x4d,
+  type RGBImageUncompressed,
+  Vector3Dd,
+} from '@vitral/base';
 import {
   WebGLGeometryRenderer,
   WebGLImageRenderer,
@@ -105,7 +111,9 @@ export class ShadersExample implements OnChanges, OnDestroy {
   protected readonly statusMessage = signal<string | null>(null);
 
   private readonly model = new ShadersModel();
-  private readonly cameraController = new ExampleCameraInteraction(this.model.getCamera());
+  private readonly cameraController = new ExampleCameraInteraction(
+    new CameraControllerOrbiter(this.model.getCamera()),
+  );
   private readonly qualityController = new ExampleRendererConfigurationInteraction(
     this.model.getQuality(),
   );
@@ -207,8 +215,6 @@ export class ShadersExample implements OnChanges, OnDestroy {
       );
       return;
     }
-    this.model.configureInitialView();
-    this.cameraController.adoptCameraState();
     this.statusMessage.set(null);
   }
 

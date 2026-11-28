@@ -6,8 +6,8 @@ import type { DebuggerModel } from '../models/debugger-model';
  *
  * Every technique forwards to the model's camera controller and answers
  * whether the view has to be repainted, as Java's do; the wheel handler prints
- * its `.` first, as Java's does. The controller is the container's stand-in
- * for `CameraControllerOrbiter`.
+ * its `.` first, as Java's does. The controller is Java's
+ * `CameraControllerOrbiter`, reached through `ExampleCameraInteraction`.
  *
  * Java's `processMouseEntered` asks the canvas for the keyboard focus and its
  * `processMouseExited` does nothing; a browser element takes focus on a

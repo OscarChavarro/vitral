@@ -11,10 +11,11 @@ import {
 } from '@angular/core';
 import {
   Camera,
+  CameraControllerAquynza,
+  type Image,
   Matrix4x4d,
   RGBAImageCompressed,
   RGBAImageUncompressed,
-  type Image,
 } from '@vitral/base';
 import {
   WebGLCameraRenderer,
@@ -66,7 +67,9 @@ export class ImageExample implements AfterViewInit, OnDestroy {
   protected readonly statusMessage = signal<string | null>(null);
 
   private readonly camera = new Camera();
-  private readonly cameraController = new ExampleCameraInteraction(this.camera);
+  private readonly cameraController = new ExampleCameraInteraction(
+    new CameraControllerAquynza(this.camera),
+  );
   private readonly corridor = new WebGLSimpleCorridorSample();
   private renderImage: Image | null = null;
   private earthImage: Image | null = null;

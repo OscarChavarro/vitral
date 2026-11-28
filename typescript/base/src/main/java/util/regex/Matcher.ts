@@ -1,3 +1,6 @@
+import { IllegalStateException } from "../../lang/IllegalStateException.js";
+import { IndexOutOfBoundsException } from "../../lang/IndexOutOfBoundsException.js";
+
 export class Matcher {
     private last: RegExpExecArray | undefined;
     private searchOffset = 0;
@@ -7,35 +10,45 @@ export class Matcher {
         private input: string,
     ) {}
     public matches(): boolean {
-        const match = new RegExp(`^(?:${this.expression})$`, this.flags).exec(this.input);
-        this.last = match ?? undefined;
+        const expression = new RegExp(`(?:${this.expression})(?![\\s\\S])`, `${this.flags}dy`);
+        const match = expression.exec(this.input);
+        this.recordMatch(match);
         return match !== null;
     }
-    public find(): boolean {
-        const expression = new RegExp(this.expression, this.flags.includes("g") ? this.flags : `${this.flags}g`);
+    public find(start?: number): boolean {
+        if (start !== undefined) {
+            if (!Number.isInteger(start) || start < 0 || start > this.input.length)
+                throw new IndexOutOfBoundsException(`Illegal start index: ${start}`);
+            this.reset();
+            this.searchOffset = start;
+        }
+        const expression = new RegExp(this.expression, `${this.flags}dg`);
         expression.lastIndex = this.searchOffset;
-        const match = expression.exec(this.input);
-        this.last = match ?? undefined;
-        if (match === null) return false;
-        this.searchOffset = match.index + globalThis.Math.max(match[0].length, 1);
-        return true;
+        const result = expression.exec(this.input);
+        // Unicode matching can rewind a zero-length search into a surrogate pair.
+        if (result !== null && result.index < this.searchOffset) {
+            expression.lastIndex = this.searchOffset + 1;
+            const match = expression.exec(this.input);
+            this.recordMatch(match);
+            return match !== null;
+        }
+        this.recordMatch(result);
+        return result !== null;
     }
-    public group(index = 0): string {
-        if (this.last === undefined) throw new Error("No match available");
-        const value = this.last[index];
-        if (value === undefined) throw new RangeError(`No group ${index}`);
-        return value;
+    public group(index = 0): string | null {
+        return this.getMatch(index)[index] ?? null;
     }
     public groupCount(): number {
-        return this.last === undefined ? this.captureCount() : this.last.length - 1;
+        // The empty alternative lets RegExp expose the number of captures before a match.
+        return this.last
+            ? this.last.length - 1
+            : new RegExp(`(?:${this.expression})|`, this.flags).exec("")!.length - 1;
     }
     public start(index = 0): number {
-        if (this.last === undefined || index !== 0)
-            throw new Error("Only full-match position is available before a match");
-        return this.last.index;
+        return this.getMatch(index).indices![index]?.[0] ?? -1;
     }
     public end(index = 0): number {
-        return this.start(index) + this.group(index).length;
+        return this.getMatch(index).indices![index]?.[1] ?? -1;
     }
     public reset(input = this.input): Matcher {
         this.input = input;
@@ -43,7 +56,14 @@ export class Matcher {
         this.searchOffset = 0;
         return this;
     }
-    private captureCount(): number {
-        return new RegExp(this.expression, this.flags).exec("")?.length ? 0 : 0;
+    private recordMatch(match: RegExpExecArray | null): void {
+        this.last = match ?? undefined;
+        if (match !== null) this.searchOffset = match.index + Math.max(match[0].length, 1);
+    }
+    private getMatch(index: number): RegExpExecArray {
+        if (this.last === undefined) throw new IllegalStateException("No match available");
+        if (!Number.isInteger(index) || index < 0 || index >= this.last.length)
+            throw new IndexOutOfBoundsException(`No group ${index}`);
+        return this.last;
     }
 }

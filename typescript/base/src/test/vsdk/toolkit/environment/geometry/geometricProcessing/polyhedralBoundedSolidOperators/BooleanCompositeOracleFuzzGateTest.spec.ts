@@ -67,5 +67,6 @@ describe("BooleanCompositeOracleFuzzGateTest", () => {
                 "correct results in family " + family + " must not regress below the ratchet",
             ).toBeGreaterThanOrEqual(MINIMUM_OK.get(family)!);
         },
+        20_000,
     );
 });

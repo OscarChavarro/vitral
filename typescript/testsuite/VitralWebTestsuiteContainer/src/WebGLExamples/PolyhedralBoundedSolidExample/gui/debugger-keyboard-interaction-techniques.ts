@@ -43,9 +43,11 @@ export interface DebuggerKeyboardActions {
  * subdivisions are clamped after every keystroke. The faces-subset dump `[I]`
  * prints, with its fixed-width columns, is Java's text.
  *
- * The controllers are the container's stand-ins for `CameraControllerOrbiter`
- * and `RendererConfigurationController`, whose Phase 38 group is not ported;
- * the event that reaches them carries the same `keycode` names the Java
+ * The camera controller is Java's `CameraControllerOrbiter`, reached through
+ * the container's `ExampleCameraInteraction`; the quality controller is Java's
+ * `RendererConfigurationController`, reached through
+ * `ExampleRendererConfigurationInteraction`. The event that
+ * reaches them carries the same `keycode` names the Java
  * `vsdk.toolkit.gui.KeyEvent` constants have.
  */
 export class DebuggerKeyboardInteractionTechniques {
@@ -252,13 +254,9 @@ export class DebuggerKeyboardInteractionTechniques {
     return repaint || handled;
   }
 
-  /**
-   * Java's `keyReleased` hands the event to the camera controller. The camera
-   * stand-in keeps no key-release state, so there is nothing for it to answer
-   * and no repaint follows.
-   */
-  processReleased(_model: DebuggerModel, _event: WebKeyEvent): boolean {
-    return false;
+  /** Java's `keyReleased` hands the event to the camera controller. */
+  processReleased(model: DebuggerModel, event: WebKeyEvent): boolean {
+    return model.getCameraController().processKeyReleased(event);
   }
 
   private static printSolidForCurrentFaceSelection(model: DebuggerModel): void {

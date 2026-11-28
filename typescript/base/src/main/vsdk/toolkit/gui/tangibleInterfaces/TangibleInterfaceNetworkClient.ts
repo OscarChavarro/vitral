@@ -1,31 +1,45 @@
 import { WebSocket, type Listener as WebSocketListener } from "../../../../java/net/http/WebSocket.js";
+import { Double } from "../../../../java/lang/Double.js";
 import { Quaterniond } from "../../common/linealAlgebra/Quaterniond.js";
 import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
 import { TangibleInterfaceEvent } from "./TangibleInterfaceEvent.js";
 import type { TangibleInterfaceListener } from "./TangibleInterfaceListener.js";
 
-type Pose = { readonly label: string; readonly position: readonly number[]; readonly quaternion: readonly number[] };
-
 /** WebSocket frame listener; exposed as the TypeScript counterpart of Java's nested class. */
 export class FrameListener implements Partial<WebSocketListener> {
+    private incomingMessage = "";
+
     public constructor(
         private readonly onMessage: (message: string) => void,
         private readonly onFailure: (event: Event) => void,
         private readonly onConnected?: () => void,
+        private readonly onDisconnected?: (reason: string) => void,
     ) {}
     onOpen(_socket: WebSocket): void {
         this.onConnected?.();
     }
-    public onText(_socket: WebSocket, data: string): void {
-        this.onMessage(data);
+    public onText(_socket: WebSocket, data: string, last = true): void {
+        this.incomingMessage += data;
+        if (last) {
+            const message = this.incomingMessage;
+            this.incomingMessage = "";
+            this.onMessage(message);
+        }
     }
     public onError(_socket: WebSocket, event: Event): void {
         this.onFailure(event);
+    }
+    public onClose(_socket: WebSocket, _code: number, reason: string): void {
+        this.onDisconnected?.(reason);
     }
 }
 
 /** Browser WebSocket client for marker-tracking pose streams. */
 export class TangibleInterfaceNetworkClient {
+    private static readonly GROUP_PATTERN = /\{[^{}]*\}/g;
+    private static readonly LABEL_PATTERN = /"label"[ \t\n\v\f\r]*:[ \t\n\v\f\r]*"([^"]*)"/;
+    private static readonly POSITION_PATTERN = /"position"[ \t\n\v\f\r]*:[ \t\n\v\f\r]*\[([^\]]*)\]/;
+    private static readonly QUATERNION_PATTERN = /"quaternion"[ \t\n\v\f\r]*:[ \t\n\v\f\r]*\[([^\]]*)\]/;
     public static readonly FrameListener = FrameListener;
     private readonly listeners: TangibleInterfaceListener[] = [];
     private webSocket: WebSocket | null = null;
@@ -43,75 +57,101 @@ export class TangibleInterfaceNetworkClient {
      * handshake notification and runs on the browser event loop.
      */
     public run(connectionListener?: (connected: boolean) => void): void {
-        try {
-            this.webSocket = new WebSocket(
-                this.serviceUrl,
-                new FrameListener(
-                    (message) => this.processMessage(message),
-                    (event) => {
-                        this.reportError(event);
-                        connectionListener?.(false);
-                    },
-                    () => connectionListener?.(true),
-                ),
-            );
-        } catch (error) {
-            console.log(`Tangible interface server not found at ${this.serviceUrl}: ${this.errorMessage(error)}`);
-            connectionListener?.(false);
-        }
+        this.disconnect();
+        this.connectAndListen(connectionListener);
     }
     public disconnect(): void {
-        this.webSocket?.sendClose(1000, "Client disconnect");
+        const socket = this.webSocket;
         this.webSocket = null;
+        socket?.sendClose(1000, "Client disconnect");
+    }
+
+    private connectAndListen(connectionListener?: (connected: boolean) => void): void {
+        let handshakePending = true;
+        const failHandshake = (message: string): void => {
+            if (!handshakePending) return;
+            handshakePending = false;
+            console.log(`Tangible interface server not found at ${this.serviceUrl}: ${message}`);
+            connectionListener?.(false);
+        };
+        const reportConnectionError = (message: string): void => {
+            console.log(`Tangible interface connection error on ${this.serviceUrl}: ${message}`);
+        };
+        try {
+            const socket = new WebSocket(
+                this.serviceUrl,
+                new FrameListener(
+                    (message) => {
+                        if (this.webSocket !== socket) return;
+                        try {
+                            this.processMessage(message);
+                        } catch (error) {
+                            reportConnectionError(error instanceof Error ? error.message : String(error));
+                            if (this.webSocket === socket) {
+                                this.webSocket = null;
+                                socket.sendClose();
+                            }
+                        }
+                    },
+                    (event) => {
+                        if (this.webSocket !== socket) return;
+                        const message =
+                            typeof ErrorEvent !== "undefined" && event instanceof ErrorEvent && event.message
+                                ? event.message
+                                : event.type;
+                        if (handshakePending) failHandshake(message);
+                        else reportConnectionError(message);
+                    },
+                    () => {
+                        if (this.webSocket !== socket || !handshakePending) return;
+                        handshakePending = false;
+                        connectionListener?.(true);
+                    },
+                    (reason) => {
+                        if (this.webSocket !== socket) return;
+                        this.webSocket = null;
+                        failHandshake(reason || "Connection closed");
+                    },
+                ),
+            );
+            this.webSocket = socket;
+        } catch (error) {
+            failHandshake(error instanceof Error ? error.message : String(error));
+        }
     }
 
     private processMessage(message: string): void {
-        let value: unknown;
-        try {
-            value = JSON.parse(message);
-        } catch {
-            return;
-        }
-        const groups = Array.isArray(value) ? value : [value];
-        for (const group of groups) {
-            const event = this.parseEvent(group);
+        for (const group of message.matchAll(TangibleInterfaceNetworkClient.GROUP_PATTERN)) {
+            const event = this.parseEvent(group[0]);
             if (event !== null) this.notifyListeners(event);
         }
     }
-    private parseEvent(value: unknown): TangibleInterfaceEvent | null {
-        if (!this.isPose(value)) return null;
+    private parseEvent(group: string): TangibleInterfaceEvent | null {
+        const label = this.extractString(TangibleInterfaceNetworkClient.LABEL_PATTERN, group);
+        const position = this.extractNumbers(TangibleInterfaceNetworkClient.POSITION_PATTERN, group, 3);
+        const rotation = this.extractNumbers(TangibleInterfaceNetworkClient.QUATERNION_PATTERN, group, 4);
+        if (label === null || position === null || rotation === null) return null;
         return new TangibleInterfaceEvent(
-            value.label,
-            new Vector3Dd(value.position[0]!, value.position[1]!, value.position[2]!),
-            new Quaterniond(
-                new Vector3Dd(value.quaternion[1]!, value.quaternion[2]!, value.quaternion[3]!),
-                value.quaternion[0]!,
-            ),
+            label,
+            new Vector3Dd(position[0]!, position[1]!, position[2]!),
+            new Quaterniond(new Vector3Dd(rotation[1]!, rotation[2]!, rotation[3]!), rotation[0]!),
         );
     }
-    private isPose(value: unknown): value is Pose {
-        if (value === null || typeof value !== "object") return false;
-        const candidate = value as { label?: unknown; position?: unknown; quaternion?: unknown };
-        return (
-            typeof candidate.label === "string" &&
-            this.isNumbers(candidate.position, 3) &&
-            this.isNumbers(candidate.quaternion, 4)
-        );
+
+    private extractString(pattern: RegExp, group: string): string | null {
+        return pattern.exec(group)?.[1] ?? null;
     }
-    private isNumbers(value: unknown, count: number): value is readonly number[] {
-        return (
-            Array.isArray(value) &&
-            value.length === count &&
-            value.every((item) => typeof item === "number" && Number.isFinite(item))
-        );
+
+    private extractNumbers(pattern: RegExp, group: string, count: number): number[] | null {
+        const matched = this.extractString(pattern, group);
+        if (matched === null) return null;
+        const fields = matched.split(",");
+        // Java String.split drops trailing empty fields.
+        while (fields.length > 1 && fields.at(-1) === "") fields.pop();
+        if (fields.length !== count) return null;
+        return fields.map((value) => Double.parseDouble(value));
     }
     private notifyListeners(event: TangibleInterfaceEvent): void {
         for (const listener of [...this.listeners]) listener.tangibleInterfaceEventReceived(event);
-    }
-    private reportError(event: Event): void {
-        console.log(`Tangible interface connection error on ${this.serviceUrl}: ${event.type}`);
-    }
-    private errorMessage(error: unknown): string {
-        return error instanceof Error ? error.message : String(error);
     }
 }

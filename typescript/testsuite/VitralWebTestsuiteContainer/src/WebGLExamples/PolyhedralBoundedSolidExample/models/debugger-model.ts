@@ -1,15 +1,16 @@
 import {
   Camera,
+  CameraControllerOrbiter,
   ColorRgb,
   CsgKurlanderBowlFixture,
   JavaMath,
   Light,
   Matrix4x4d,
   PointLight,
+  type PolyhedralBoundedSolid,
   RendererConfiguration,
   SimpleMaterial,
   Vector3Dd,
-  type PolyhedralBoundedSolid,
 } from '@vitral/base';
 import { ExampleCameraInteraction } from '../../_shared/example-camera-interaction';
 import { ExampleRendererConfigurationInteraction } from '../../_shared/example-renderer-configuration-interaction';
@@ -38,13 +39,10 @@ import type { SolidModelNames } from './solid-model-names';
  * records. `canvas` is the `<canvas>` the component draws into, where Java's
  * is the JOGL `GLCanvas`.
  *
- * The camera and quality controllers are the container's stand-ins for
- * `CameraControllerOrbiter` and `RendererConfigurationController`, whose Phase
- * 38 group is not ported. The orbit stand-in imposes its own default view when
- * it is constructed, so the two camera lines of Java's constructor live in
- * `configureInitialView()` and are applied again once it exists, and
- * `adoptCameraState()` then takes that view as the orbit state — the note
- * `MD2Example` and `ShadersExample` carry.
+ * The camera controller is Java's `CameraControllerOrbiter`, wrapped in the
+ * container's `ExampleCameraInteraction` for the DOM events; the quality
+ * controller is Java's `RendererConfigurationController`, wrapped in
+ * `ExampleRendererConfigurationInteraction`.
  */
 export class DebuggerModel {
   private static readonly MIN_SUBDIVISION_CIRCUMFERENCE = 3;
@@ -88,9 +86,7 @@ export class DebuggerModel {
     this.quality.changeWires();
     this.quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
     this.qualityController = new ExampleRendererConfigurationInteraction(this.quality);
-    this.cameraController = new ExampleCameraInteraction(this.camera);
-    this.configureInitialView();
-    this.cameraController.adoptCameraState();
+    this.cameraController = new ExampleCameraInteraction(new CameraControllerOrbiter(this.camera));
 
     this.material = this.defaultMaterial();
     this.light1 = new PointLight(new Vector3Dd(3, -3, 2), new ColorRgb(1, 1, 1));
@@ -100,9 +96,7 @@ export class DebuggerModel {
   }
 
   /**
-   * The two camera lines of Java's constructor, in a method so that they can
-   * be applied again after the orbit stand-in has imposed its own view; see
-   * the class comment.
+   * The two camera lines of Java's constructor.
    */
   configureInitialView(): void {
     this.camera.setPosition(new Vector3Dd(2, -1, 2));

@@ -42,6 +42,7 @@ import {
   type TriangleMesh,
 } from '@vitral/base';
 import { WebEnvironmentPersistence } from '@vitral/webgl';
+import { createPlyWorker } from '../../../ply-mesh-worker';
 import type { ChosenFile } from '../io/chosen-file';
 import { FileSuffixFilter } from '../io/file-suffix-filter';
 import { ImageFiles } from '../io/image-files';
@@ -625,12 +626,17 @@ export class GuiEventExecutor extends CommandListener {
       if ('md2' === FileSuffixFilter.getSuffix(file.name)) {
         await this.importMd2FirstFrame(file);
       } else if (file.path !== null) {
-        await WebEnvironmentPersistence.importEnvironment(file.path, this.scene().scene);
+        await WebEnvironmentPersistence.importEnvironment(
+          file.path,
+          this.scene().scene,
+          createPlyWorker,
+        );
       } else {
         await WebEnvironmentPersistence.importEnvironmentFromBytes(
           file.name,
           await file.readBytes(),
           this.scene().scene,
+          createPlyWorker,
         );
       }
     } finally {

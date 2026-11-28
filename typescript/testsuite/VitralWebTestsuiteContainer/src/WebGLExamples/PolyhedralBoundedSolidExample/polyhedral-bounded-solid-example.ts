@@ -12,10 +12,12 @@ import {
 } from '@angular/core';
 import {
   ByteArrayOutputStream,
-  StlWriter,
-  VSDK,
-  Vector3Dd,
+  type CameraController,
+  CameraControllerOrbiter,
   type PolyhedralBoundedSolid,
+  StlWriter,
+  Vector3Dd,
+  VSDK,
 } from '@vitral/base';
 import { WebSystem } from '@vitral/webgl';
 import { SolidAnimationController } from './animation/solid-animation-controller';
@@ -77,9 +79,6 @@ import { WebGLDebuggerRenderer } from './render/webgl-debugger-renderer';
  *   - `toggleFullscreenMode` rebuilds the `JFrame`, with a separate path for
  *     macOS; a page asks the browser for its fullscreen element, as the
  *     `PolygonClippingExample` module records.
- *   - The orbiter's point of interest, which `recenterOrbiterAfterModelChange`
- *     moves, is the focused position of the camera in the container's stand-in
- *     for `CameraControllerOrbiter`, which `adoptCameraState()` takes.
  *   - `exportCurrentSolidToStl` writes `output.stl` with a `FileOutputStream`
  *     beside the program; the same bytes, written by the ported `StlWriter`
  *     into a `ByteArrayOutputStream`, are handed to the browser as a download
@@ -263,8 +262,7 @@ export class PolyhedralBoundedSolidExample implements OnChanges, OnDestroy {
   /**
    * `InteractiveDebugger.recenterOrbiterAfterModelChange`: when the model
    * changed, keep the eye's offset from the point of interest and move both to
-   * the new solid's centre. The stand-in's point of interest is the camera's
-   * focused position; see the class comment.
+   * the new solid's centre.
    */
   private recenterOrbiterAfterModelChange(
     previousModelName: SolidModelNames,
@@ -276,15 +274,19 @@ export class PolyhedralBoundedSolidExample implements OnChanges, OnDestroy {
     if (this.model.getSolid() === null) {
       return;
     }
+    const orbiterController: CameraController = this.model.getCameraController().getController();
+    if (!(orbiterController instanceof CameraControllerOrbiter)) {
+      return;
+    }
 
     const previousEye: Vector3Dd = this.model.getCamera().getPosition();
     const relativeVector: Vector3Dd = previousEye.subtract(previousPointOfInterest);
     const newPointOfInterest: Vector3Dd = this.calculateSolidCenter();
     const newEye: Vector3Dd = newPointOfInterest.add(relativeVector);
 
+    orbiterController.setPointOfInterest(newPointOfInterest);
     this.model.getCamera().setPosition(newEye);
     this.model.getCamera().setFocusedPositionMaintainingOrthogonality(newPointOfInterest);
-    this.model.getCameraController().adoptCameraState();
   }
 
   /**
@@ -363,7 +365,11 @@ export class PolyhedralBoundedSolidExample implements OnChanges, OnDestroy {
     }
     const vitralEvent = WebSystem.web2vsdkKeyEvent(event);
     const previousModelName: SolidModelNames = this.model.getSolidModelName();
-    const previousPointOfInterest: Vector3Dd = this.model.getCamera().getFocusedPosition();
+    let previousPointOfInterest: Vector3Dd = new Vector3Dd(0, 0, 0);
+    const orbiterController: CameraController = this.model.getCameraController().getController();
+    if (orbiterController instanceof CameraControllerOrbiter) {
+      previousPointOfInterest = orbiterController.getPointOfInterest();
+    }
 
     if (vitralEvent.keycode !== 'KEY_NONE') {
       event.preventDefault();

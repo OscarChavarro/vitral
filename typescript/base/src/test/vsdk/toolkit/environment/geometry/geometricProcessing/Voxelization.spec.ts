@@ -36,10 +36,8 @@ describe("Voxelization", () => {
         volume.init(9, 9, 9);
         TriangleMeshVoxelization.doVoxelization(unitTriangleMesh(), volume, new Matrix4x4d(), null);
         expect(volume.getVoxel(1, 1, 4)).toBe(255);
-        // The legacy Triangle.containmentTest independently clamps both
-        // barycentric coordinates, so the voxelizer fills this bounding-box
-        // corner as well; retain Java's exact rasterization semantics.
-        expect(volume.getVoxel(8, 8, 4)).toBe(255);
+        // Java's nearest point is on the opposite edge, beyond the voxel tolerance.
+        expect(volume.getVoxel(8, 8, 4)).toBe(0);
         expect(volume.getVoxel(1, 1, 0)).toBe(0);
     });
 

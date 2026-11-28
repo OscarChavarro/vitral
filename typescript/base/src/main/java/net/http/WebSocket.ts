@@ -12,7 +12,9 @@ export class WebSocket {
         this.socket =
             protocols === undefined ? new globalThis.WebSocket(url) : new globalThis.WebSocket(url, protocols);
         this.socket.addEventListener("open", () => listener?.onOpen?.(this));
-        this.socket.addEventListener("message", (event) => listener?.onText?.(this, globalThis.String(event.data)));
+        this.socket.addEventListener("message", (event) => {
+            if (typeof event.data === "string") listener?.onText?.(this, event.data);
+        });
         this.socket.addEventListener("close", (event) => listener?.onClose?.(this, event.code, event.reason));
         this.socket.addEventListener("error", (event) => listener?.onError?.(this, event));
     }

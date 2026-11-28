@@ -45,10 +45,10 @@ import {
  *     half of the error pair; the program only ever calls
  *     `setErrorState(String)` and `clearErrorState`, which are both here.
  *
- * The controllers themselves are the container's `ExampleCameraInteraction`
- * and `ExampleRendererConfigurationInteraction`, standing in for
- * `CameraControllerOrbiter` and `RendererConfigurationController` until the
- * plan's decision-gated Phase 38 ports that family; the component owns them,
+ * The controllers — Java's `CameraControllerOrbiter`, wrapped in the
+ * container's `ExampleCameraInteraction`, and Java's
+ * `RendererConfigurationController`, wrapped in
+ * `ExampleRendererConfigurationInteraction` — are owned by the component,
  * because they need the camera this model builds.
  */
 export class PolygonClippingDebuggerModel {

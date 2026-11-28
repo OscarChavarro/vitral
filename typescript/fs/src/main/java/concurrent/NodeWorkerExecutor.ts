@@ -76,7 +76,11 @@ export class NodeWorkerExecutor<
                 ...(options?.onNotice === undefined ? {} : { onNotice: options.onNotice }),
             };
             options?.signal?.addEventListener("abort", abortListener, { once: true });
-            this.post({ id, kind: "run", payload: input });
+            try {
+                this.post({ id, kind: "run", payload: input });
+            } catch (error) {
+                this.finish(id, reject, error);
+            }
         });
     }
 

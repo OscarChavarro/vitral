@@ -6,8 +6,8 @@ import type { ExampleCameraInteraction } from '../../_shared/example-camera-inte
  *
  * Every technique forwards to the camera controller and answers whether the
  * view has to be repainted, exactly as Java's do. Java's controller is a
- * `CameraControllerOrbiter`; until Phase 38 ports that family the container's
- * shared `ExampleCameraInteraction` stands in, with the same contract.
+ * `CameraControllerOrbiter`, reached through the container's
+ * `ExampleCameraInteraction`, which converts the DOM events.
  *
  * Java's `processMouseEntered` asks the canvas for the keyboard focus and its
  * `processMouseExited` does nothing; a browser element takes focus on a

@@ -14,5 +14,6 @@ export { ImagePersistence } from "./vsdk/toolkit/io/image/ImagePersistence.js";
 export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
 export { EnvironmentPersistence } from "./vsdk/toolkit/io/geometry/EnvironmentPersistence.js";
 export { ReaderObj } from "./vsdk/toolkit/io/geometry/ReaderObj.js";
+export { ReaderPly } from "./vsdk/toolkit/io/geometry/ReaderPly.js";
 export { ReaderMitScene } from "./vsdk/toolkit/io/geometry/ReaderMitScene.js";
 export { ReaderAltimetry } from "./vsdk/toolkit/io/geometry/ReaderAltimetry.js";

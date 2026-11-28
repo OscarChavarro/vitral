@@ -646,7 +646,7 @@ export class WebGLViewportWindow {
                 R = R.translation(r.getPosition());
                 R = R.multiply(r.getRotation());
                 const p: Vector3Dd = R.multiply(lv);
-                const tp: Vector3Dd | null = this.viewport.getActiveCamera().projectPointUsingRayMethodResult(p);
+                const tp: Vector3Dd | null = this.viewport.getActiveCamera().projectPointUsingRayMethod(p);
 
                 if (tp !== null) {
                     const yellow: boolean = ColorRgb.distance(c, r.getMaterial()!.getDiffuse()) < VSDK.EPSILON;
@@ -681,7 +681,7 @@ export class WebGLViewportWindow {
             return;
         }
 
-        const projected: Vector3Dd | null = this.viewport.getActiveCamera().projectPointUsingRayMethodResult(anchor);
+        const projected: Vector3Dd | null = this.viewport.getActiveCamera().projectPointUsingRayMethod(anchor);
         const fontSize: number = this.viewportSet
             .getElementScaler()
             .scaleSize(WebGLViewportWindow.BASE_ROTATE_GIZMO_ARC_LABEL_FONT_SIZE);

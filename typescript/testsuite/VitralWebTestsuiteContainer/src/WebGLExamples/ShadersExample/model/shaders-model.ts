@@ -45,10 +45,10 @@ import { ShadersGeometryFixture } from './shaders-geometry-fixture';
  * resource on every `[m]` would only add latency to an identical answer.
  *
  * `getCameraController()` and `getQualityController()` have no counterpart:
- * Java's `CameraControllerOrbiter` and `RendererConfigurationController` live
- * in the decision-gated Phase 38 group, and until it is ported the container's
- * shared `ExampleCameraInteraction` and `ExampleRendererConfigurationInteraction`
- * stand in, owned by the component rather than by the model.
+ * the component owns Java's `CameraControllerOrbiter`, wrapped in the
+ * container's `ExampleCameraInteraction`, and Java's
+ * `RendererConfigurationController`, wrapped in
+ * `ExampleRendererConfigurationInteraction`.
  */
 export class ShadersModel {
   private static readonly MIN_SPHERE_MERIDIANS = 12;
@@ -117,17 +117,7 @@ export class ShadersModel {
     );
   }
 
-  /**
-   * The three camera lines of Java's `initializeDefaults`, in a method so that
-   * they can be applied again.
-   *
-   * This has no Java counterpart. Java hands `CameraControllerOrbiter` a camera
-   * and the controller leaves it alone until the user moves it; the container's
-   * `ExampleCameraInteraction`, which stands in for that controller until Phase
-   * 38 ports it, imposes its own default view when it is constructed. So the
-   * view has to be restored once the adapter exists, and `adoptCameraState()`
-   * then takes it as the orbit state.
-   */
+  /** The three camera lines of Java's `initializeDefaults`. */
   configureInitialView(): void {
     this.camera.setPosition(new Vector3Dd(0, -4, 0));
     const rotation: Matrix4x4d = new Matrix4x4d().eulerAnglesRotation(

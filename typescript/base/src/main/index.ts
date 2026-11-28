@@ -86,6 +86,7 @@ export type { NamedNodeMap } from "./org/w3c/dom/NamedNodeMap.js";
 export { BrowserWorkerExecutor } from "./java/concurrent/BrowserWorkerExecutor.js";
 export { CooperativeFiberScheduler, type CooperativeFiber } from "./java/concurrent/CooperativeFiberScheduler.js";
 export { Entity } from "./vsdk/toolkit/common/Entity.js";
+export { MemoryPool } from "./vsdk/toolkit/common/memoryManagement/MemoryPool.js";
 export { EntityEvent, EntityEventType } from "./vsdk/toolkit/common/EntityEvent.js";
 export type { EntityListener } from "./vsdk/toolkit/common/EntityListener.js";
 export { FundamentalEntity } from "./vsdk/toolkit/common/FundamentalEntity.js";
@@ -269,6 +270,7 @@ export { ScatteringComponent } from "./vsdk/toolkit/environment/material/Scatter
 export { SurfaceShadingPoint } from "./vsdk/toolkit/environment/material/SurfaceShadingPoint.js";
 export { Texture } from "./vsdk/toolkit/environment/material/Texture.js";
 export { ScatteringFrame, scatteringArithmetic } from "./vsdk/toolkit/environment/material/ScatteringFrame.js";
+export { ScatteringArithmetic } from "./vsdk/toolkit/environment/material/ScatteringArithmetic.js";
 export { PhongLobe } from "./vsdk/toolkit/environment/material/PhongLobe.js";
 export { PhongMaterial } from "./vsdk/toolkit/environment/material/PhongMaterial.js";
 export { Geometry, type GeometryRay, type GeometryRayHit } from "./vsdk/toolkit/environment/geometry/Geometry.js";
@@ -482,7 +484,20 @@ export {
 } from "./java/concurrent/WorkerProtocol.js";
 
 export { RenderingElement } from "./vsdk/toolkit/render/RenderingElement.js";
+export { AutoStereogramGenerator } from "./vsdk/toolkit/render/AutoStereogramGenerator.js";
+export { PolyhedralBoundedSolidDebugger } from "./vsdk/toolkit/render/PolyhedralBoundedSolidDebugger.js";
 export { Rasterizer2D } from "./vsdk/toolkit/render/raster/Rasterizer2D.js";
+export { PolygonBox } from "./vsdk/toolkit/render/raster/polygonScanConverter/PolygonBox.js";
+export { PolygonBoxClipper } from "./vsdk/toolkit/render/raster/polygonScanConverter/PolygonBoxClipper.js";
+export { PolygonClipOutcome } from "./vsdk/toolkit/render/raster/polygonScanConverter/PolygonClipOutcome.js";
+export { PolygonClipResult } from "./vsdk/toolkit/render/raster/polygonScanConverter/PolygonClipResult.js";
+export { PolygonRasterContext } from "./vsdk/toolkit/render/raster/polygonScanConverter/PolygonRasterContext.js";
+export {
+    PolygonScanConverter,
+    type RasterDepthValue,
+} from "./vsdk/toolkit/render/raster/polygonScanConverter/PolygonScanConverter.js";
+export { PolygonVisibilityBuffer } from "./vsdk/toolkit/render/raster/polygonScanConverter/PolygonVisibilityBuffer.js";
+export { RasterRectangle2D } from "./vsdk/toolkit/render/raster/polygonScanConverter/RasterRectangle2D.js";
 export { Gizmo2DDrawList } from "./vsdk/toolkit/render/gizmo/Gizmo2DDrawList.js";
 export { Gizmo2DProjector } from "./vsdk/toolkit/render/gizmo/Gizmo2DProjector.js";
 export { InputGizmo2DPainter } from "./vsdk/toolkit/render/gizmo/InputGizmo2DPainter.js";
@@ -526,7 +541,19 @@ export type { ParallelRaytracerSceneLoader } from "./vsdk/toolkit/render/raytrac
 export { SimpleRaytracer } from "./vsdk/toolkit/render/raytracing/SimpleRaytracer.js";
 export { SnellRefraction } from "./vsdk/toolkit/render/raytracing/SnellRefraction.js";
 export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
+export { XmlException } from "./vsdk/toolkit/io/XmlException.js";
+export { ShapeDescriptorPersistence } from "./vsdk/toolkit/io/metadata/ShapeDescriptorPersistence.js";
+export { XmlImporter } from "./vsdk/toolkit/io/xml/XmlImporter.js";
+export { XmlNode } from "./vsdk/toolkit/io/xml/XmlNode.js";
+export { XmlNodeParam } from "./vsdk/toolkit/io/xml/XmlNodeParam.js";
 export { FontReader } from "./vsdk/toolkit/io/geometry/FontReader.js";
+export { ReaderPly } from "./vsdk/toolkit/io/geometry/ReaderPly.js";
+export { ReaderPlyResult } from "./vsdk/toolkit/io/geometry/ReaderPlyResult.js";
+export type {
+    ReaderPlyMeshRequest,
+    ReaderPlyMeshResult,
+    ReaderPlyWorkerFactory,
+} from "./vsdk/toolkit/io/geometry/ReaderPlyMeshWorker.js";
 export { StepLengthUnit } from "./vsdk/toolkit/io/geometry/stepCad/StepLengthUnit.js";
 export { StepReader } from "./vsdk/toolkit/io/geometry/stepCad/reader/StepReader.js";
 export { StlWriter } from "./vsdk/toolkit/io/geometry/stl/StlWriter.js";
@@ -552,6 +579,18 @@ export { CommandListener } from "./vsdk/toolkit/gui/CommandListener.js";
 export { Controller } from "./vsdk/toolkit/gui/Controller.js";
 export { CameraController } from "./vsdk/toolkit/gui/CameraController.js";
 export { CameraControllerAquynza } from "./vsdk/toolkit/gui/CameraControllerAquynza.js";
+export { CameraControllerOrbiter } from "./vsdk/toolkit/gui/CameraControllerOrbiter.js";
+export { CameraControllerGoogleEarth } from "./vsdk/toolkit/gui/CameraControllerGoogleEarth.js";
+export { TextVisualConfiguration } from "./vsdk/toolkit/gui/TextVisualConfiguration.js";
+export { HudIcon, type HudIconImageImporter } from "./vsdk/toolkit/gui/HudIcon.js";
+export { ViewportWindow } from "./vsdk/toolkit/gui/ViewportWindow.js";
+export { ViewportWindowSetManager } from "./vsdk/toolkit/gui/ViewportWindowSetManager.js";
+export { InformationDialog } from "./vsdk/toolkit/gui/dialog/InformationDialog.js";
+export { VisualDoubleVariable } from "./vsdk/toolkit/gui/visualAnalytics/VisualDoubleVariable.js";
+export { VisualVariableSet } from "./vsdk/toolkit/gui/visualAnalytics/VisualVariableSet.js";
+export { PercentageWheelWidget } from "./vsdk/toolkit/gui/visualAnalytics/PercentageWheelWidget.js";
+export { PercentageWheelWidgetController } from "./vsdk/toolkit/gui/visualAnalytics/PercentageWheelWidgetController.js";
+export { CameraControllerBlender } from "./vsdk/toolkit/gui/CameraControllerBlender.js";
 export { RendererConfigurationController } from "./vsdk/toolkit/gui/RendererConfigurationController.js";
 export { Widget } from "./vsdk/toolkit/gui/widget/Widget.js";
 export { WidgetElement } from "./vsdk/toolkit/gui/widget/WidgetElement.js";

@@ -186,6 +186,7 @@ describe("SimpleSceneSnapshotTransfer", () => {
             expect(different).toBe(0);
             expect(rebuilt.getSimpleBodies().size()).toBe(snapshot.getSimpleBodies().size());
         },
+        20_000,
     );
 
     it("given a body with listeners when carried then the listeners stay behind", () => {

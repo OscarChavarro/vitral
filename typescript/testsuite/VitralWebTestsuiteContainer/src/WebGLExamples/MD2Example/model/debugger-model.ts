@@ -61,18 +61,7 @@ export class DebuggerModel {
     this.selectedObject = -1;
   }
 
-  /**
-   * The two camera lines of Java's constructor, in a method so that they can
-   * be applied again.
-   *
-   * They need to be, because the container's shared `ExampleCameraInteraction`
-   * imposes its own default view when it is constructed — the adapter that
-   * stands in for `CameraControllerOrbiter` until Phase 38 ports the
-   * `vsdk.toolkit.gui` controller family. Java hands the controller a camera
-   * and the controller leaves it alone until the user moves it; here the view
-   * has to be restored once the adapter exists, and `adoptCameraState()` then
-   * takes it as the orbit state.
-   */
+  /** The two camera lines of Java's constructor. */
   configureInitialView(): void {
     this.camera.setPosition(new Vector3Dd(0, -100, 0));
     this.camera.setFarPlaneDistance(4000);

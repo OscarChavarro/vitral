@@ -1,5 +1,7 @@
 import { deflateSync } from "node:zlib";
 import {
+    HudIcon,
+    IOException,
     ImagePersistence as ImagePersistenceBase,
     ImagePersistencePng,
     Image,
@@ -20,6 +22,17 @@ import { ImagePersistenceRasterImport } from "./ImagePersistenceRasterImport.js"
 ImagePersistencePng.setDeflater((rawBytes: Uint8Array): Uint8Array => {
     const compressed = deflateSync(rawBytes);
     return new Uint8Array(compressed.buffer, compressed.byteOffset, compressed.byteLength);
+});
+
+// `HudIcon` reads its image file the way Java's does, through
+// `ImagePersistence.importRGBA(new File(imageFilename))`; a failed read throws,
+// as Java's import does, so the icon takes Java's "Image not found" branch.
+HudIcon.setImageImporter((imageFilename: string): RGBAImageUncompressed => {
+    const image: RGBAImageUncompressed | null = ImagePersistence.importRGBA(new File(imageFilename));
+    if (image === null) {
+        throw new IOException("Image not recognized: " + imageFilename);
+    }
+    return image;
 });
 
 /**

@@ -38,9 +38,11 @@ export interface PolygonClippingKeyboardActions {
  * kept exactly, which is why the camera sees the event only when no letter
  * shortcut consumed it while the quality controller always does.
  *
- * The controllers are the container's stand-ins for `CameraControllerOrbiter`
- * and `RendererConfigurationController`, whose Phase 38 group is not ported
- * yet; the event that reaches them carries the same `keycode` names the Java
+ * The camera controller is Java's `CameraControllerOrbiter`, reached through
+ * the container's `ExampleCameraInteraction`; the quality controller is Java's
+ * `RendererConfigurationController`, reached through
+ * `ExampleRendererConfigurationInteraction`. The event that
+ * reaches them carries the same `keycode` names the Java
  * `vsdk.toolkit.gui.KeyEvent` constants have, `KEY_t` and `KEY_T` included.
  */
 export class PolygonClippingKeyboardInteractionTechniques {
@@ -158,11 +160,11 @@ export class PolygonClippingKeyboardInteractionTechniques {
 
   /**
    * Java's `keyReleased` hands the event to the camera controller and then to
-   * the quality controller, repainting if either asks for it. The camera
-   * stand-in keeps no key-release state, so only the quality controller is
-   * consulted here — the same call, on the same event.
+   * the quality controller, repainting if either asks for it.
    */
   processReleased(event: WebKeyEvent): boolean {
-    return this.qualityController.processKeyReleasedEvent(event);
+    const cameraRepaint: boolean = this.cameraController.processKeyReleased(event);
+    const qualityRepaint: boolean = this.qualityController.processKeyReleasedEvent(event);
+    return cameraRepaint || qualityRepaint;
   }
 }

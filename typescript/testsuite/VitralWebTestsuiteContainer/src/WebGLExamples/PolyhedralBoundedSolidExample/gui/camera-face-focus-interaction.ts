@@ -1,14 +1,16 @@
 import {
-  Camera,
-  JavaMath,
-  VSDK,
-  Vector3Dd,
-  type InfinitePlane,
-  type PolyhedralBoundedSolid,
   type _PolyhedralBoundedSolidFace,
   type _PolyhedralBoundedSolidHalfEdge,
   type _PolyhedralBoundedSolidLoop,
   type _PolyhedralBoundedSolidVertex,
+  Camera,
+  type CameraController,
+  CameraControllerOrbiter,
+  type InfinitePlane,
+  JavaMath,
+  type PolyhedralBoundedSolid,
+  Vector3Dd,
+  VSDK,
 } from '@vitral/base';
 import type { DebuggerModel } from '../models/debugger-model';
 
@@ -23,9 +25,6 @@ import type { DebuggerModel } from '../models/debugger-model';
  * close to the current one as the new view allows. Every step is Java's.
  *
  * Java finally hands the centroid to the orbiter as its point of interest.
- * The container's stand-in for `CameraControllerOrbiter` keeps its orbit
- * centre as the camera's focused position, which `setFocusedPositionDirect`
- * has just set to that centroid, so `adoptCameraState()` is the same step.
  */
 export class CameraFaceFocusInteraction {
   private static readonly SAFETY_MARGIN = 1.05;
@@ -83,7 +82,10 @@ export class CameraFaceFocusInteraction {
     camera.setLeftDirect(left);
     camera.setFocusedPositionDirect(center);
 
-    model.getCameraController().adoptCameraState();
+    const cameraController: CameraController = model.getCameraController().getController();
+    if (cameraController instanceof CameraControllerOrbiter) {
+      cameraController.setPointOfInterest(center);
+    }
     return true;
   }
 

@@ -32,9 +32,8 @@ export interface ShadersKeyboardActions {
  * Java reads a `vsdk.toolkit.gui.KeyEvent` whose `keycode` distinguishes
  * `KEY_q` from `KEY_Q`; the browser event carries the same two names, so the
  * case-sensitive bindings — which is what makes `q` remove a meridian and `Q`
- * add one — survive unchanged. The controllers are the container's stand-ins
- * for `CameraControllerOrbiter` and `RendererConfigurationController`, whose
- * Phase 38 group is not ported yet.
+ * add one — survive unchanged. The camera controller is Java's
+ * `CameraControllerOrbiter`, reached through `ExampleCameraInteraction`.
  */
 export class ShadersKeyboardInteractionTechniques {
   constructor(
@@ -170,15 +169,8 @@ export class ShadersKeyboardInteractionTechniques {
     return repaint;
   }
 
-  /**
-   * Java forwards a key release to `CameraControllerOrbiter`, which uses it to
-   * end a keyboard-driven camera move. The container's stand-in has no
-   * key-release state to end — it moves the camera on the press alone — so
-   * this asks the quality controller instead, which is the other half of what
-   * Java's controllers answer and the one that is ported. It answers `false`,
-   * as Java's does for every key that ends no move.
-   */
+  /** Java forwards a key release to `CameraControllerOrbiter`. */
   processReleased(event: WebKeyEvent): boolean {
-    return this.qualityController.processKeyReleasedEvent(event);
+    return this.cameraController.processKeyReleased(event);
   }
 }

@@ -58,7 +58,11 @@ export class BrowserWorkerExecutor<
                 ...(options?.onNotice === undefined ? {} : { onNotice: options.onNotice }),
             };
             options?.signal?.addEventListener("abort", abortListener, { once: true });
-            this.post({ id, kind: "run", payload: input }, options?.transfer);
+            try {
+                this.post({ id, kind: "run", payload: input }, options?.transfer);
+            } catch (error) {
+                this.finish(id, reject, error);
+            }
         });
     }
 

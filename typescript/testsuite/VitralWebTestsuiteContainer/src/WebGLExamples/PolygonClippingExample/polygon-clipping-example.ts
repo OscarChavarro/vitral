@@ -10,7 +10,7 @@ import {
   ViewChild,
   signal,
 } from '@angular/core';
-import { VSDK, Vector3Dd } from '@vitral/base';
+import { type CameraController, CameraControllerOrbiter, Vector3Dd, VSDK } from '@vitral/base';
 import { WebSystem } from '@vitral/webgl';
 import { ExampleCameraInteraction } from '../_shared/example-camera-interaction';
 import { ExampleRendererConfigurationInteraction } from '../_shared/example-renderer-configuration-interaction';
@@ -57,12 +57,6 @@ import { WebGLPolygonClippingRenderer } from './render/webgl-polygon-clipping-re
  *     one, undecorated, on the default screen device, with a separate path for
  *     macOS. A page asks the browser instead, and the browser owns the state
  *     the three `fullScreenMode` fields of the Java model keep.
- *   - `focusCameraOnCurrentScene` asks the camera controller, when it is an
- *     orbiter, to take the scene centre as its point of interest. The
- *     container's `ExampleCameraInteraction` stands in for
- *     `CameraControllerOrbiter` until the plan's Phase 38, and
- *     `adoptCameraState()` is where it takes the framing the model just
- *     computed.
  *   - The snapshot the `[H]` key asks for is written by `ImagePersistence`
  *     beside the Java program; here the same image, under the same
  *     `frameNNNN.png` name, is handed to the browser as a download.
@@ -86,7 +80,9 @@ export class PolygonClippingExample implements OnChanges, OnDestroy {
   protected readonly statusMessage = signal<string | null>(null);
 
   private readonly model = new PolygonClippingDebuggerModel();
-  private readonly cameraController = new ExampleCameraInteraction(this.model.getCamera());
+  private readonly cameraController = new ExampleCameraInteraction(
+    new CameraControllerOrbiter(this.model.getCamera()),
+  );
   private readonly qualityController = new ExampleRendererConfigurationInteraction(
     this.model.getQuality(),
   );
@@ -183,8 +179,7 @@ export class PolygonClippingExample implements OnChanges, OnDestroy {
    * Java's `PolygonClippingExample.focusCameraOnCurrentScene(model)`: keep the
    * current eye-to-focus distance, or twenty when there is none, and place the
    * eye that far along negative Y from the scene centre, looking at it with Z
-   * up. Java then hands the centre to the orbiter as its point of interest;
-   * the stand-in adopts the camera it has just been given instead.
+   * up. Java then hands the centre to the orbiter as its point of interest.
    */
   private focusCameraOnCurrentScene(): void {
     const center: Vector3Dd = PolygonClippingModelingTools.calculateSceneCenter(this.model);
@@ -199,7 +194,10 @@ export class PolygonClippingExample implements OnChanges, OnDestroy {
       .setPosition(new Vector3Dd(center.x(), center.y() - distance, center.z()));
     this.model.getCamera().setFocusedPositionMaintainingOrthogonality(center);
     this.model.getCamera().setUpMaintainingOrthogonality(new Vector3Dd(0, 0, 1));
-    this.cameraController.adoptCameraState();
+    const orbiter: CameraController = this.cameraController.getController();
+    if (orbiter instanceof CameraControllerOrbiter) {
+      orbiter.setPointOfInterest(center);
+    }
   }
 
   private formatBuildErrorMessage(error: unknown): string {

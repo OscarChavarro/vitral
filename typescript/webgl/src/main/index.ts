@@ -20,6 +20,7 @@ export {
 export { _Polygon2DOddWindingTessellator } from "./vsdk/toolkit/render/webgl/surface/polygon/_Polygon2DOddWindingTessellator.js";
 export { WebGLLightRenderer } from "./vsdk/toolkit/render/webgl/WebGLLightRenderer.js";
 export { WebEnvironmentPersistence } from "./vsdk/toolkit/io/geometry/WebEnvironmentPersistence.js";
+export { WebReaderPly } from "./vsdk/toolkit/io/geometry/WebReaderPly.js";
 export { WebGLMinMaxRenderer } from "./vsdk/toolkit/render/webgl/WebGLMinMaxRenderer.js";
 export { WebGLArrowRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLArrowRenderer.js";
 export { WebGLSphereRenderer } from "./vsdk/toolkit/render/webgl/volume/WebGLSphereRenderer.js";

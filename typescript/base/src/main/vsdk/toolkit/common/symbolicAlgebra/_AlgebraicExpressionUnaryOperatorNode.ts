@@ -1,47 +1,77 @@
+import { NullPointerException } from "../../../../java/lang/NullPointerException.js";
 import { AlgebraicExpressionException } from "./AlgebraicExpressionException.js";
 import { _AlgebraicExpressionNode } from "./_AlgebraicExpressionNode.js";
+
 export class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionNode {
-    private operand?: _AlgebraicExpressionNode;
+    private operand: _AlgebraicExpressionNode | null = null;
+
     public constructor(
         _parent: unknown,
         private readonly name: string,
     ) {
         super();
     }
-    public setOperand(v: _AlgebraicExpressionNode): void {
-        this.operand = v;
+
+    public setOperand(operand: _AlgebraicExpressionNode): void {
+        this.operand = operand;
     }
+
     public eval(): number {
-        if (!this.operand) throw new AlgebraicExpressionException("Unary operator has no operand");
-        const x = this.operand.eval();
-        const f: Record<string, (v: number) => number> = {
-            sin: Math.sin,
-            cos: Math.cos,
-            tan: Math.tan,
-            asin: Math.asin,
-            acos: Math.acos,
-            atan: Math.atan,
-            abs: Math.abs,
-            cbrt: (v) => Math.pow(v, 1 / 3),
-            ceil: Math.ceil,
-            sinh: Math.sinh,
-            cosh: Math.cosh,
-            tanh: Math.tanh,
-            toDegrees: (v) => (v * 180) / Math.PI,
-            toRadians: (v) => (v * Math.PI) / 180,
-            exp: Math.exp,
-            floor: Math.floor,
-            log: Math.log,
-            ln: Math.log,
-            log10: Math.log10,
-            sqrt: Math.sqrt,
-            "-": (v) => -v,
-        };
-        const op = f[this.name];
-        if (!op) throw new AlgebraicExpressionException(`Unknown unary operator or function "${this.name}"`);
-        return op(x);
+        if (this.operand === null) {
+            throw new NullPointerException();
+        }
+        const value = this.operand.eval();
+        switch (this.name) {
+            case "sin":
+                return Math.sin(value);
+            case "cos":
+                return Math.cos(value);
+            case "tan":
+                return Math.tan(value);
+            case "asin":
+                return Math.asin(value);
+            case "acos":
+                return Math.acos(value);
+            case "atan":
+                return Math.atan(value);
+            case "abs":
+                return Math.abs(value);
+            case "cbrt":
+                return Math.pow(value, 1.0 / 3.0);
+            case "ceil":
+                return Math.ceil(value);
+            case "sinh":
+                return Math.sinh(value);
+            case "cosh":
+                return Math.cosh(value);
+            case "tanh":
+                return Math.tanh(value);
+            case "toDegrees":
+                return value * (180.0 / Math.PI);
+            case "toRadians":
+                return value * (Math.PI / 180.0);
+            case "exp":
+                return Math.exp(value);
+            case "floor":
+                return Math.floor(value);
+            case "log":
+            case "ln":
+                return Math.log(value);
+            case "log10":
+                return Math.log10(value);
+            case "sqrt":
+                return Math.sqrt(value);
+            case "-":
+                return -value;
+            default:
+                throw new AlgebraicExpressionException('Unknown unary operator or function "' + this.name + '"');
+        }
     }
+
     public override toString(): string {
-        return `${this.name}(${this.operand})`;
+        if (this.operand === null) {
+            throw new NullPointerException();
+        }
+        return this.name + "(" + this.operand.toString() + ")";
     }
 }

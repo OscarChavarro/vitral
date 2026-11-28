@@ -95,4 +95,29 @@ describe("Entity", () => {
         expect(new Sphere(1).getEncapsulatedVariables()).toContain("double:radius");
         expect(new Sphere(1).getEncapsulatedVariables().some((v) => v.includes("controlSpecifications"))).toBe(false);
     });
+
+    it("uses declared primitive types and filters unsupported object values", () => {
+        class ControlEntity extends Entity {
+            public getCount(): number {
+                throw new Error("a declared getter need not run");
+            }
+            public setCount(_value: number): void {}
+            public getCenter(): Vector3Dd {
+                return new Vector3Dd();
+            }
+            public setCenter(_value: Vector3Dd): void {}
+            public getOptions(): object {
+                return {};
+            }
+            public setOptions(_value: object): void {}
+        }
+
+        const entity = new ControlEntity();
+        entity.setControlSpecifications(["int;count;[0, INFINITE)"]);
+
+        expect(entity.getEncapsulatedVariables()).toEqual([
+            "int:count",
+            "vsdk.toolkit.common.linealAlgebra.Vector3Dd:center",
+        ]);
+    });
 });

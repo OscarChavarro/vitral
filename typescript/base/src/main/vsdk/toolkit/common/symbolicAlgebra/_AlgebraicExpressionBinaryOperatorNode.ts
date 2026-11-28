@@ -1,40 +1,56 @@
+import { NullPointerException } from "../../../../java/lang/NullPointerException.js";
 import { AlgebraicExpressionException } from "./AlgebraicExpressionException.js";
 import { _AlgebraicExpressionNode } from "./_AlgebraicExpressionNode.js";
+
 export class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpressionNode {
-    private left?: _AlgebraicExpressionNode;
-    private right?: _AlgebraicExpressionNode;
+    private leftOperand: _AlgebraicExpressionNode | null = null;
+    private rightOperand: _AlgebraicExpressionNode | null = null;
     public constructor(
         _parent: unknown,
         private readonly operator: string,
     ) {
         super();
     }
-    public setLeftOperand(v: _AlgebraicExpressionNode): void {
-        this.left = v;
+    public setLeftOperand(operand: _AlgebraicExpressionNode): void {
+        this.leftOperand = operand;
     }
-    public setRightOperand(v: _AlgebraicExpressionNode): void {
-        this.right = v;
+    public setRightOperand(operand: _AlgebraicExpressionNode): void {
+        this.rightOperand = operand;
     }
+
     public eval(): number {
-        if (!this.left || !this.right) throw new AlgebraicExpressionException("Binary operator has no operands");
-        const l = this.left.eval(),
-            r = this.right.eval();
+        if (this.leftOperand === null) {
+            throw new NullPointerException();
+        }
+        const left = this.leftOperand.eval();
+        if (this.rightOperand === null) {
+            throw new NullPointerException();
+        }
+        const right = this.rightOperand.eval();
         switch (this.operator) {
             case "+":
-                return l + r;
+                return left + right;
             case "-":
-                return l - r;
+                return left - right;
             case "*":
-                return l * r;
+                return left * right;
             case "/":
-                return l / r;
+                return left / right;
             case "^":
-                return Math.pow(l, r);
+                return Math.pow(left, right);
             default:
                 throw new AlgebraicExpressionException(`Unknown binary operator "${this.operator}"`);
         }
     }
+
     public override toString(): string {
-        return `(${this.left}) ${this.operator} (${this.right})`;
+        if (this.leftOperand === null) {
+            throw new NullPointerException();
+        }
+        const left = this.leftOperand.toString();
+        if (this.rightOperand === null) {
+            throw new NullPointerException();
+        }
+        return `(${left}) ${this.operator} (${this.rightOperand.toString()})`;
     }
 }

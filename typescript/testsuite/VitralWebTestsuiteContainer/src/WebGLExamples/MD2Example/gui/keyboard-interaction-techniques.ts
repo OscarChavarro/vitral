@@ -86,7 +86,9 @@ export class KeyboardInteractionTechniques {
   processKeyReleasedEvent(keyEvent: WebKeyEvent): boolean {
     // Java's own `processKeyReleasedEvent` answers false, and `keyReleased`
     // then asks the camera and quality controllers.
-    return this.qualityController.processKeyReleasedEvent(keyEvent);
+    const cameraRepaint: boolean = this.cameraController.processKeyReleased(keyEvent);
+    const qualityRepaint: boolean = this.qualityController.processKeyReleasedEvent(keyEvent);
+    return cameraRepaint || qualityRepaint;
   }
 
   static isMovementKey(keyEvent: WebKeyEvent | null): boolean {
