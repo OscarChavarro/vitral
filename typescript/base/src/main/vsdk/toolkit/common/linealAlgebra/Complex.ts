@@ -1,5 +1,6 @@
 import { FundamentalEntity } from "../FundamentalEntity.js";
 import { VSDK } from "../VSDK.js";
+import { Math as JavaMath } from "../../../../java/lang/Math.js";
 
 /** Complex number with the same value-oriented operations as the Java source. */
 export class Complex extends FundamentalEntity {
@@ -10,7 +11,7 @@ export class Complex extends FundamentalEntity {
         super();
     }
     public abs(): number {
-        return Math.hypot(this.r, this.i);
+        return JavaMath.hypot(this.r, this.i); // Math.sqrt(r*r + i*i)
     }
     public phase(): number {
         return Math.atan2(this.i, this.r);
@@ -42,10 +43,10 @@ export class Complex extends FundamentalEntity {
         return new Complex(Math.exp(this.r) * Math.cos(this.i), Math.exp(this.r) * Math.sin(this.i));
     }
     public sin(): Complex {
-        return new Complex(Math.sin(this.r) * Math.cosh(this.i), Math.cos(this.r) * Math.sinh(this.i));
+        return new Complex(Math.sin(this.r) * JavaMath.cosh(this.i), Math.cos(this.r) * JavaMath.sinh(this.i));
     }
     public cos(): Complex {
-        return new Complex(Math.cos(this.r) * Math.cosh(this.i), -Math.sin(this.r) * Math.sinh(this.i));
+        return new Complex(Math.cos(this.r) * JavaMath.cosh(this.i), -Math.sin(this.r) * JavaMath.sinh(this.i));
     }
     public tan(): Complex {
         return this.sin().divides(this.cos());

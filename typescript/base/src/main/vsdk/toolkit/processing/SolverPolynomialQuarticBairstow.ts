@@ -1,3 +1,5 @@
+import { Double } from "../../../java/lang/Double.js";
+import { platformPrint, platformPrintln } from "../../../java/lang/_PlatformConsole.js";
 import { ProcessingElement } from "./ProcessingElement.js";
 
 /** Literal port of Java's legacy Bairstow quartic solver. */
@@ -99,15 +101,27 @@ export class SolverPolynomialQuarticBairstow extends ProcessingElement {
     }
 
     public print(x: number[], n: number): void {
-        let result = "";
-        for (let i = n - 1; i >= 0; i--) result += x[i]! > 0 ? `+ ${x[i]}x${i} ` : `- ${-x[i]!}x${i} `;
-        console.log(result);
+        let i: number;
+        for (i = n - 1; i >= 0; i--) {
+            if (x[i]! > 0) {
+                platformPrint("+ " + Double.toString(x[i]!) + "x" + i + " ");
+            } else {
+                platformPrint("- " + Double.toString(-x[i]!) + "x" + i + " ");
+            }
+        }
+        platformPrintln("");
     }
 
     public print2(x: number[], n: number): void {
-        let result = "";
-        for (let i = n - 1; i >= 2; i--) result += x[i]! > 0 ? `+ ${x[i]}x${i - 2} ` : `- ${-x[i]!}x${i - 2} `;
-        console.log(`${result}Residuo = {${x[1]}, ${x[0]}}`);
+        let i: number;
+        for (i = n - 1; i >= 2; i--) {
+            if (x[i]! > 0) {
+                platformPrint("+ " + Double.toString(x[i]!) + "x" + (i - 2) + " ");
+            } else {
+                platformPrint("- " + Double.toString(-x[i]!) + "x" + (i - 2) + " ");
+            }
+        }
+        platformPrintln("Residuo = {" + Double.toString(x[1]!) + ", " + Double.toString(x[0]!) + "}");
     }
 
     public roots(r: number, s: number, re: number[], im: number[], n: number): void {

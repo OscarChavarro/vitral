@@ -1,3 +1,5 @@
+import { ArrayIndexOutOfBoundsException } from "../../../../java/lang/ArrayIndexOutOfBoundsException.js";
+import { javaIntCast } from "../../media/_pixel.js";
 import { ColorRgb } from "../../common/color/ColorRgb.js";
 
 /**
@@ -23,6 +25,12 @@ export class Texture {
             return;
         }
         const copy = new Uint8Array(byteCount);
+        // System.arraycopy(inData, 0, data, 0, (int)byteCount)
+        if (byteCount > inData.length) {
+            throw new ArrayIndexOutOfBoundsException(
+                "arraycopy: last source index " + byteCount + " out of bounds for byte[" + inData.length + "]",
+            );
+        }
         for (let i = 0; i < byteCount; i++) {
             copy[i] = inData[i]!;
         }
@@ -50,9 +58,9 @@ export class Texture {
         const u0 = 1.0 - u1;
         const v1 = v - Math.floor(v);
         const v0 = 1.0 - v1;
-        let i = Math.trunc(u1 * this.width);
+        let i = javaIntCast(u1 * this.width);
         let i1 = i + 1;
-        let j = Math.trunc(v1 * this.height);
+        let j = javaIntCast(v1 * this.height);
         let j1 = j + 1;
         if (i < 0) {
             i = 0;

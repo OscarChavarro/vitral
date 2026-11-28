@@ -10,7 +10,7 @@ import vsdk.toolkit.common.logging.Logger;
 Compressed RGBA image storage. Pixel-level access is intentionally unsupported
 because the contents remain in GPU-ready compressed blocks.
 */
-public class RGBAImageCompressed extends Image
+public class RGBAImageCompressed extends Image implements Cloneable
 {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20260430L;

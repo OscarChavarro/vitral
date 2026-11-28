@@ -47,6 +47,7 @@ export class CpuTextureSamplingConfig {
         if (height > 0) {
             dv = CpuTextureSamplingConfig.NORMAL_OFFSET_V_TEXELS / height;
         }
-        return normalMap.getNormal(u + du, v + dv);
+        // Java calls the getNormal(double, double) overload, which is getNormalAt here
+        return normalMap.getNormalAt(u + du, v + dv);
     }
 }

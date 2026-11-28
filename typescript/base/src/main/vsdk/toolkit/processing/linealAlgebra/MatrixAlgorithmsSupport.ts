@@ -1,11 +1,12 @@
 import { MatrixNxM } from "../../common/linealAlgebra/MatrixNxM.js";
 import { MatrixDimensionMismatchException } from "../../common/linealAlgebra/exceptions/MatrixDimensionMismatchException.js";
 import { MatrixNotSquareException } from "../../common/linealAlgebra/exceptions/MatrixNotSquareException.js";
+import { IllegalArgumentException } from "../../../../java/lang/IllegalArgumentException.js";
 
 export class MatrixAlgorithmsSupport {
     private constructor() {}
     public static requireNonNull(matrix: MatrixNxM | null): asserts matrix is MatrixNxM {
-        if (matrix === null) throw new RangeError("matrix cannot be null");
+        if (matrix === null) throw new IllegalArgumentException("matrix cannot be null");
     }
     public static requireSquare(matrix: MatrixNxM | null): asserts matrix is MatrixNxM {
         this.requireNonNull(matrix);

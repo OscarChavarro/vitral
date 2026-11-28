@@ -1,4 +1,5 @@
 import { NullPointerException } from "../../../../java/lang/NullPointerException.js";
+import { Math as JavaMath } from "../../../../java/lang/Math.js";
 import { AlgebraicExpressionException } from "./AlgebraicExpressionException.js";
 import { _AlgebraicExpressionNode } from "./_AlgebraicExpressionNode.js";
 
@@ -41,9 +42,9 @@ export class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionN
             case "ceil":
                 return Math.ceil(value);
             case "sinh":
-                return Math.sinh(value);
+                return JavaMath.sinh(value);
             case "cosh":
-                return Math.cosh(value);
+                return JavaMath.cosh(value);
             case "tanh":
                 return Math.tanh(value);
             case "toDegrees":

@@ -1,4 +1,4 @@
-import { IllegalArgumentException } from "./IllegalArgumentException.js";
+import { NumberFormatException } from "./NumberFormatException.js";
 
 /** Java double helpers, including lossless IEEE-754 bit conversions. */
 export class Double {
@@ -34,7 +34,7 @@ export class Double {
             const exponent = Number(hexadecimal[5]) - 4 * fraction.length;
             return sign * Double.scaleHexadecimal(significand, exponent);
         }
-        throw new IllegalArgumentException(`For input string: "${input}"`);
+        throw new NumberFormatException(`For input string: "${input}"`);
     }
 
     private static scaleHexadecimal(significand: bigint, exponent: number): number {

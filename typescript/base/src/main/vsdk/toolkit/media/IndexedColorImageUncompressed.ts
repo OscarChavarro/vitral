@@ -4,12 +4,14 @@ import { RGBPixel } from "./RGBPixel.js";
 import { RGBAImageUncompressed } from "./RGBAImageUncompressed.js";
 import { RGBImageUncompressed } from "./RGBImageUncompressed.js";
 import { ColorRgb } from "../common/color/ColorRgb.js";
-import { byte, checkArrayIndex, unsigned } from "./_pixel.js";
+import { byte, checkArrayIndex, javaIntCast, unsigned } from "./_pixel.js";
+import { VSDK } from "../common/VSDK.js";
 export class IndexedColorImageUncompressed extends Image {
     private data: Int8Array | null = null;
     private xSize = 0;
     private ySize = 0;
     private colorTable: RGBColorPalette;
+    private staticColor: ColorRgb | null = null;
     public constructor(colorTable: RGBColorPalette | null = null) {
         super();
         this.colorTable = colorTable ?? new RGBColorPalette();
@@ -68,16 +70,20 @@ export class IndexedColorImageUncompressed extends Image {
     public override getPixelRgb(x: number, y: number): RGBPixel;
     public override getPixelRgb(x: number, y: number, p: RGBPixel): void;
     public override getPixelRgb(x: number, y: number, p?: RGBPixel): RGBPixel | void {
-        const c = this.colorTable.evalLinear(this.getPixel(x, y) / 255),
-            o = new RGBPixel();
-        o.importFromColorRgb(c);
+        const index = this.xSize * y + x;
+        checkArrayIndex(index, this.data!.length);
+        let val: number;
+        val = VSDK.signedByte2unsignedInteger(this.data![index]!) / 255.0;
+
+        this.staticColor = this.colorTable.evalLinear(val);
+        const target: RGBPixel = p ?? new RGBPixel();
+        target.r = VSDK.unsigned8BitInteger2signedByte(javaIntCast(this.staticColor.r() * 255.0));
+        target.g = VSDK.unsigned8BitInteger2signedByte(javaIntCast(this.staticColor.g() * 255.0));
+        target.b = VSDK.unsigned8BitInteger2signedByte(javaIntCast(this.staticColor.b() * 255.0));
         if (p) {
-            p.r = o.r;
-            p.g = o.g;
-            p.b = o.b;
             return;
         }
-        return o;
+        return target;
     }
     public getColorTable(): RGBColorPalette {
         return this.colorTable;

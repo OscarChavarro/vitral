@@ -30,7 +30,6 @@ import type {
 } from '@vitral/base/vsdk/toolkit/render/raytracing/ParallelRaytracer';
 // The barrel installs these `RendererConfiguration` methods as a side effect;
 // a worker that does not load the barrel must ask for them explicitly.
-import '@vitral/base/vsdk/toolkit/environment/material/RendererConfigurationBehavior';
 import type { ShadersSceneDescriptor } from './software-raycaster-protocol';
 import { ShadersGeometryFixture } from '../model/shaders-geometry-fixture';
 

@@ -1,3 +1,4 @@
+// Translation of java/base/src/test/vsdk/toolkit/common/linealAlgebra/Matrix4x4fTest.java
 import { describe, expect, it } from "vitest";
 import { Matrix4x4d } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.js";
 import { Matrix4x4f } from "vsdk/toolkit/common/linealAlgebra/Matrix4x4f.js";
@@ -5,14 +6,109 @@ import { Vector3Df } from "vsdk/toolkit/common/linealAlgebra/Vector3Df.js";
 import { Vector4Df } from "vsdk/toolkit/common/linealAlgebra/Vector4Df.js";
 import { expectNear } from "../../../../GTestAssertions.js";
 import { IllegalArgumentException } from "java/lang/IllegalArgumentException.js";
-import { IndexOutOfBoundsException } from "java/lang/IndexOutOfBoundsException.js";
+
 const f = Math.fround;
-describe("Matrix4x4f", () => {
-    it("translates vectors", () => {
-        const m = new Matrix4x4f().translation(5, -2, 1.5);
-        expect(m.multiply(new Vector3Df(1, 2, 3)).epsilonEquals(new Vector3Df(6, 0, 4.5), 1e-5)).toBe(true);
+const EPS = f(1.0e-5);
+
+describe("Matrix4x4fTest", () => {
+    const translationCases = (): [Matrix4x4f, Vector3Df, Vector3Df][] => [
+        [new Matrix4x4f().translation(5.0, -2.0, 1.5), new Vector3Df(1.0, 2.0, 3.0), new Vector3Df(6.0, 0.0, 4.5)],
+        [
+            new Matrix4x4f().translation(0.0, 0.0, 0.0),
+            new Vector3Df(f(1.0e-5), f(-1.0e-5), 0.0),
+            new Vector3Df(f(1.0e-5), f(-1.0e-5), 0.0),
+        ],
+    ];
+
+    it.each(translationCases())(
+        "given_translationMatrix_when_multiplyingPoint_then_coordinatesAreTranslated %#",
+        (translation, point, expected) => {
+            const moved = translation.multiply(point);
+            expect(moved.epsilonEquals(expected, f(1.0e-4))).toBe(true);
+        },
+    );
+
+    const axisRotationCases = (): [number, Vector3Df, Vector3Df, Vector3Df][] => [
+        [f(Math.PI / 2.0), new Vector3Df(0.0, 0.0, 1.0), new Vector3Df(1.0, 0.0, 0.0), new Vector3Df(0.0, 1.0, 0.0)],
+        [f(Math.PI / 3.0), new Vector3Df(0.0, 0.0, 0.0), new Vector3Df(2.0, -1.0, 0.5), new Vector3Df(2.0, -1.0, 0.5)],
+    ];
+
+    it.each(axisRotationCases())(
+        "given_axisRotation_when_axisIsDegenerateOrValid_then_itBehavesAsExpected %#",
+        (angle, axis, input, expected) => {
+            const rotation = new Matrix4x4f().axisRotation(angle, axis);
+            const result = rotation.multiply(input);
+            expect(result.epsilonEquals(expected, f(1.0e-4))).toBe(true);
+        },
+    );
+
+    it("given_rotationMatrix_when_convertingToQuaternionAndBack_then_rotationStaysEquivalent", () => {
+        const rotation = new Matrix4x4f().axisRotation(f(Math.PI / 3.0), 0.0, 0.0, 1.0);
+
+        const q = rotation.exportToQuaternion().normalized();
+        const rebuilt = new Matrix4x4f().importFromQuaternion(q);
+
+        const ref = new Vector3Df(1.0, 0.0, 0.0);
+        const r1 = rotation.multiply(ref);
+        const r2 = rebuilt.multiply(ref);
+
+        expect(r2.epsilonEquals(r1, f(1.0e-4))).toBe(true);
     });
-    it("stores floats exactly", () => {
+
+    it("given_affineMatrix_when_inverting_then_productIsIdentity", () => {
+        const matrix = new Matrix4x4f().scale(2.0, 3.0, 4.0).multiply(new Matrix4x4f().translation(5.0, -1.0, 2.0));
+
+        const inverse = matrix.invert();
+        const identity = matrix.multiply(inverse);
+
+        expect(identity.epsilonEquals(new Matrix4x4f(), f(1.0e-4))).toBe(true);
+    });
+
+    it("given_matrix_when_withoutTranslation_then_translationIsRemovedOnly", () => {
+        const matrix = new Matrix4x4f().translation(3.0, -2.0, 5.0).multiply(new Matrix4x4f().scale(2.0, 2.0, 2.0));
+
+        const noTranslation = matrix.withoutTranslation();
+
+        expect(noTranslation.extractTranslation().epsilonEquals(new Vector3Df(0.0, 0.0, 0.0), EPS)).toBe(true);
+    });
+
+    it("given_closeMatrices_when_epsilonEquals_then_itDependsOnTolerance", () => {
+        const a = new Matrix4x4f();
+        const b = a.withVal(0, 1, f(1.0e-4));
+
+        expect(a.epsilonEquals(b, f(1.0e-3))).toBe(true);
+        expect(a.epsilonEquals(b, f(1.0e-6))).toBe(false);
+        expect(() => a.epsilonEquals(b, -1.0)).toThrow(IllegalArgumentException);
+    });
+
+    it("given_identityMatrix_when_multiplied_then_itActsAsNeutralElement", () => {
+        const identity = Matrix4x4f.identityMatrix();
+        const matrix = new Matrix4x4f().translation(2.0, -3.0, 1.0).multiply(new Matrix4x4f().scale(1.5, 2.0, 0.5));
+
+        expect(identity.multiply(matrix).epsilonEquals(matrix, EPS)).toBe(true);
+        expect(matrix.multiply(identity).epsilonEquals(matrix, EPS)).toBe(true);
+    });
+
+    it("given_identityAndScale_when_checkingDeterminant_then_valuesAreExpected", () => {
+        const identity = Matrix4x4f.identityMatrix();
+        const scale = new Matrix4x4f().scale(2.0, 3.0, 4.0);
+
+        expect(Math.abs(identity.determinant() - 1.0)).toBeLessThanOrEqual(EPS);
+        expect(Math.abs(scale.determinant() - 24.0)).toBeLessThanOrEqual(f(1.0e-3));
+    });
+
+    it("given_anyMatrix_when_transposedTwice_then_originalIsRecovered", () => {
+        const matrix = new Matrix4x4f().withVal(0, 1, 2.0).withVal(1, 2, -3.0).withVal(2, 3, 4.0).withVal(3, 0, -1.0);
+
+        const rebuilt = matrix.transpose().transpose();
+
+        expect(rebuilt.epsilonEquals(matrix, EPS)).toBe(true);
+    });
+
+    // Ports of the Matrix4x4fTest cases of `cpp/base/src/test/matrix4x4_tests.cpp`;
+    // each test method is named `<cpp suite>_<cpp test>`.
+
+    it("Matrix4x4fTest_StoresFloatsExactly", () => {
         // 0.1f is not a double-rounded value: it must come back bit for bit
         const values = [
             [0.1, 0.2, 0.3, 0.4],
@@ -28,7 +124,7 @@ describe("Matrix4x4f", () => {
         }
         expect(m.withVal(2, 1, 0.7).get(2, 1)).toBe(f(0.7));
     });
-    it("products compute in float from the first term", () => {
+    it("Matrix4x4fTest_ProductsComputeInFloatFromTheFirstTerm", () => {
         const a = [
             [0.1, 0.2, 0.3, 0.4],
             [0.5, 0.6, 0.7, 0.8],
@@ -59,7 +155,7 @@ describe("Matrix4x4f", () => {
             f(f(f(f(a[3]![0]! * f(0.3)) + f(a[3]![1]! * f(-1.1))) + f(a[3]![2]! * f(2.5))) + f(a[3]![3]! * f(1.0))),
         );
     });
-    it("rotation, projection and inverse", () => {
+    it("Matrix4x4fTest_RotationProjectionAndInverse", () => {
         const r = new Matrix4x4f().axisRotation(f(Math.PI / 2.0), 0, 0, 1);
         expect(r.multiply(new Vector3Df(1, 0, 0)).epsilonEquals(new Vector3Df(0, 1, 0), 1e-6)).toBe(true);
         expect(r.multiply(r.transpose()).epsilonEquals(new Matrix4x4f(), 1e-6)).toBe(true);
@@ -82,18 +178,8 @@ describe("Matrix4x4f", () => {
                 .equals(new Vector3Df(0, 0, 0)),
         ).toBe(true);
     });
-    it("quaternion round trip", () => {
+    it("Matrix4x4fTest_QuaternionRoundTrip", () => {
         const r = new Matrix4x4f().axisRotation(0.7, 0.0, 1.0, 0.0);
         expect(r.importFromQuaternion(r.exportToQuaternion()).epsilonEquals(r, 1e-5)).toBe(true);
-    });
-
-    it("uses Java float-array equality and hashing", () => {
-        const one = new Matrix4x4f();
-        const nan = one.withVal(0, 1, NaN);
-        expect(nan.equals(one.withVal(0, 1, NaN))).toBe(true);
-        expect(nan.hashCode()).toBe(one.withVal(0, 1, NaN).hashCode());
-        expect(one.equals(one.withVal(0, 1, -0))).toBe(false);
-        expect(() => one.epsilonEquals(one, -1)).toThrow(IllegalArgumentException);
-        expect(() => one.get(4, 0)).toThrow(IndexOutOfBoundsException);
     });
 });

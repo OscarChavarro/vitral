@@ -44,13 +44,13 @@ implementation, parity or validation item is open. **Pending** means the
 applicable implementation has yet to begin. The shared build, packaging and
 browser verification apply to the release as a whole.
 
-The matrix records 22 finalized phases, 23 in progress and one pending.
+The matrix records 29 finalized phases, 16 in progress and two pending.
 
 | Phase | Scope | Status | Evidence or remaining work |
 |---:|---|---|---|
 | 1 | Java runtime compatibility and packaging | In progress | All three tarballs pass standalone type and runtime checks. Object streams support multiple portable records. Java double literals and regex capture queries are covered. Direct binary32 parsing and regex dialect differences remain open. |
 | 2 | Common entity foundation | In progress | Entity inspection applies the Java type whitelist and reads declared control types without evaluating getters. Accessor pairs without metadata still depend on runtime values. |
-| 3 | Linear algebra | In progress | Matrix, vector and quaternion samples matched the Java bit patterns and exception types. Finish migrating the current Java assertions and resolve the `Complex.abs()` rounding difference. |
+| 3 | Linear algebra | Finalized | Gate passed on 2026-11-28. All 107 Java linear-algebra test executions are translated one to one. A 3326-line reference driver matches Java bit for bit when HotSpot's libm intrinsics are off. With them on, 33 lines differ by 1 ulp in `Math.sin`/`cos`/`exp`, a documented platform boundary. `Complex.abs()` now uses a literal port of `FdLibm.Hypot`. |
 | 4 | Symbolic algebra | Finalized | The Java `StreamTokenizer` parser and recursive tree construction are ported. Compared tree rendering, values and errors with Java. |
 | 5 | Color | Finalized | `ColorRgb`, `ColorRgba` and the new `Cie` model are present. The focused CIE and RGB suites passed. |
 | 6 | Logging | Finalized | Reports match Java in the compared diagnostic text and order. Fatal reports preserve the message and cause. The web host receives an exception when Java would exit the process. |
@@ -61,9 +61,9 @@ The matrix records 22 finalized phases, 23 in progress and one pending.
 | 11 | Command-line options checkpoint | Finalized | Empty library group. Entry-point arguments belong to the application host. |
 | 12 | Progress monitors | Finalized | Core monitors and the parallel producer/consumer are present. The tile scheduler routes worker progress notices back to the owner. |
 | 13 | Tangible interfaces | Finalized | Java, Node and Chrome accepted the same fragmented WebSocket pose. Tests cover handshake failure, reconnection, malformed records and listener dispatch. Browser WebSocket events handle asynchronous I/O. |
-| 14 | Media and image buffers | In progress | Image buffers and HDR/solid textures are present. Out-of-range pixel access throws Java's exceptions, and bilinear sampling keeps Java's rounding. Recheck cloning, compressed-pixel errors and the mapping of Java object serialization. |
-| 15 | General processing | In progress | The Cohen–Sutherland outcode and segment checks follow Java. Resolve the `LzwWrapper` and `SpharmonicKitWrapper` runtime mappings. |
-| 16 | Materials | In progress | `ScatteringArithmetic` is available at the matching source and package paths. The previous `scatteringArithmetic` import still resolves. Continue the material and lobe review. |
+| 14 | Media and image buffers | Finalized | Gate passed on 2026-11-28. All 20 inventory entries are exported. Compressed images, raw access, bilinear indexing and cloning match Java (Java's `clone()` was fixed by user decision). `RawImageAccessTest` is translated. Java object serialization is a documented runtime boundary. |
+| 15 | General processing | Finalized | Gate passed on 2026-11-28. All 22 inventory entries are ported literally. The four Java processing tests are translated, and the reference driver matches Java except for one documented 1-ulp `Math.sin` difference. `LzwWrapper` is a literal port of the native decoder. By user decision, `SpharmonicKitWrapper` fails as Java does without its native library; porting it is Phase 47. |
+| 16 | Materials | Finalized | Literal review of the twelve material classes, the three Java test classes translated (18 tests), Java/TS parity driver bit-exact outside the sampling paths; see the Phase 16 gate record. |
 | 17 | Geometry base | Finalized | The `Geometry` contract is present and used by the current geometry families. |
 | 18 | Curves | In progress | Curve evaluation and rendering exist. Compare the shared TypeScript evaluator with Java's separate interpolation paths. |
 | 19 | Geometry elements | In progress | Ported `closestPointOnTriangle` and aligned numeric containment codes. The reference agrees on edge-distance and collapsed-triangle cases. Continue the ray, hit and vertex audit. |
@@ -94,6 +94,7 @@ The matrix records 22 finalized phases, 23 in progress and one pending.
 | 44 | GUI persistence | In progress | `GuiPersistence` and `DialogPersistence` load the editor's Aquynza JSON over HTTP. Check validation, resource errors and dialog behavior against Java. |
 | 45 | Orphan-inventory closure | In progress | The source inventory was refreshed. Assign unmatched and new files to phases, and record package export and consumer reachability for each applicable entry. |
 | 46 | Parity and dependency-closure audit | In progress | The historical audit and current build findings are inputs. Repeat the API, private-algorithm and runtime checks on the refreshed inventory. |
+| 47 | SpharmonicKit port decision | Pending | Added on 2026-11-28 by user decision. `SpharmonicKitWrapper` currently fails in TypeScript as it does in Java without its native library. Decide later whether to port the `pkgs/SpharmonicKit27` C library (about 25,000 lines) to languages other than C++, starting with TypeScript. |
 
 ### Initial review before the clipper-path repair
 
@@ -441,7 +442,7 @@ Phase 13 gate record: `npm run verify` completed successfully. All four inventor
 
 Phase 14 gate record: `npm run verify` completed successfully. All twenty media contracts are exported through `@vitral/base`; image data uses typed byte, float, and unsigned-16-bit buffers while preserving Java row orientation and signed-byte pixel semantics. No Java test source has a production dependency closure limited to this phase.
 
-Phase 16 gate record: `npm run verify` completed successfully. All five material inventory entries and the supporting `Material` contract are exported; CSV loading is isolated to the server-only `@vitral/fs` package. No dedicated Java material test source exists. This phase was closed at user direction while Phase 15 remains in progress.
+Phase 16 gate record: `npm run verify` completed successfully. All five material inventory entries and the supporting `Material` contract are exported; CSV loading is isolated to the server-only `@vitral/fs` package. No dedicated Java material test source exists. This phase was closed at user direction while Phase 15 remains in progress. (Superseded by the Phase 16 gate record of 2026-11-28: three Java material test classes exist now and are translated.)
 
 Phase 17 gate record: `npm run verify` completed successfully. The Geometry root contract is exported with its containment constants, local bounding-volume contract, visibility default, and structural ray/hit contracts to be implemented by Phase 19. No Java test source has a dependency closure limited to this root contract. This phase was completed out of normal order while Phase 15 remains in progress.
 
@@ -1611,7 +1612,8 @@ behavior is used by a migrated feature.
 ## Execution plan and original phase inventories
 
 Phases 1–45 retain the graph order and historical class lists. Phase 46 covers
-parity and dependency closure. The current matrix governs active status and
+parity and dependency closure. Phase 47, added on 2026-11-28, holds the
+deferred SpharmonicKit port decision. The current matrix governs active status and
 sequencing. Dated advances and gate results below refer to their source
 revisions.
 
@@ -1779,6 +1781,42 @@ vsdk.toolkit.common.linealAlgebra.Vector4Df
 ```
 
 Exit: satisfy the applicable standard phase checks.
+
+Phase 3 gate record — 2026-11-28:
+
+- Inventory and completeness: every public Java method of the 13 classes
+  has a TypeScript counterpart, and the four exceptions are exported. The
+  one mapping is `Vector2Dd.x()`/`y()`: in TypeScript they are the `x`/`y`
+  fields, because a field and a method cannot share a name.
+- `java/lang/Math.ts` gained literal ports:
+  - `hypot`, from JDK 17 `FdLibm.Hypot`. `Complex.abs()`, `Torus` and
+    `HiddenSurfaceRenderer` use it, as Java does. It matches Java on 20,576
+    cases; V8's `Math.hypot` differed on 2,626 of them.
+  - `strictExp`, from `FdLibm.Exp`.
+  - `cosh` and `sinh`, from fdlibm, as `StrictMath` uses them. They matter
+    because V8 rounds `exp(1)` correctly while fdlibm does not. `Complex`
+    and the symbolic-algebra unary operators use them. They match Java on
+    300,000 cases.
+- Fixes found by the driver:
+  - `Matrix2x2` lacked Java's copy constructor; the call produced NaN.
+  - `Matrix2x2.get` and `getTranslation` now throw Java's
+    `ArrayIndexOutOfBoundsException`.
+  - `Vector3Df.toString()` reproduces the `Object.toString()` that Java
+    inherits, through `hashCode()`. `Quaternionf.toString()` prints it.
+- Java reference: the 12 test classes pass, with 107 executions.
+- TypeScript tests: the 12 spec files are now one-to-one translations, with
+  Java's test names and 107 executions; tests that did not exist in Java
+  were removed. `npm run verify` passed: `@vitral/base` ran 162 files with
+  1319 tests passed and 10 skipped, `@vitral/fs` passed 29 tests, and the
+  tarballs and consumer check passed.
+- Review: a 3326-line reference driver covers every public method of the
+  13 classes, including exception paths, `toString`, `hashCode` and
+  `equals`. The inputs include zeros, -0, NaN, infinities, singular and
+  non-square matrices.
+  - With `-XX:-UseLibmIntrinsic`, it matches Java on every line.
+  - With HotSpot's default intrinsics, 33 lines differ by 1 ulp in
+    `Math.sin`, `cos` and `exp` (Intel libm). This is the platform boundary
+    recorded for Phase 15.
 
 ### Phase 4: Symbolic algebra
 
@@ -2045,6 +2083,105 @@ Parity evidence is the sixteen-line byte-level agreement recorded for
 `SolidTextureExample` under WebGL Example Programs, which drives every one of
 these files. No Java test source exists for them.
 
+Advance — 2026-11-28 (closing the recheck items of the status row):
+
+- `RGBAImageCompressed` was a condensed port and is now literal:
+  - Pixel access reports `FATAL_ERROR` through `Logger` and returns an
+    empty pixel, as Java does. It used to throw
+    `UnsupportedOperationException` with another message. Under the fatal
+    flags, both sides throw the same `VSDKFatalException`.
+  - `calculateTopLevelDataSize` uses Java's integer division with
+    `Math.max(1, ...)`, so sizes of zero or less give Java's block count.
+  - The direct copy of the blocks is kept apart from the `byte[]` copy, and
+    `getSizeInBytes` uses the `Entity` constants.
+  - Java's `getRawImageDirectBuffer()` fails with a `NullPointerException`
+    after `dettach()`. This one returns null, because the WebGL renderer
+    checks for null; the difference is documented in the class.
+  - A reference driver checked 640 block sizes, 13 `initCompressed` cases
+    (including mutation of the source array), `setRawImage`, `dettach` and
+    eight pixel-access methods under three flag settings. The 55 output
+    lines and the 24 `Logger` reports match Java.
+- Raw pixel access:
+  - Java's `RawImageAccessTest` (4 tests) had no translation; it is now
+    `media/RawImageAccessTest.spec.ts`.
+  - It exposed three gaps in `RGBImageUncompressed` and
+    `RGBAImageUncompressed`, now ported:
+    - `setRawImage` rejects a wrong size with Java's
+      `IllegalArgumentException`.
+    - `getRawImage` returns an independent copy instead of a view.
+    - `getRawImageSizeInBytes` was missing.
+  - No caller in the repository wrote through the old view. The two
+    `getRawImage()` writers in the ShadersExample use indexed images.
+- Bilinear indexing (`Image.getColorRgbBiLinear`, `NormalMap.getNormal(double,
+  double)`):
+  - The private `positiveMod` and the `(int)` cast are now literal helpers
+    in `_pixel.ts` (`positiveMod`, `javaIntCast`). With them, NaN maps to
+    index 0, and an image of size zero throws Java's
+    `ArithmeticException("/ by zero")`.
+  - `CpuTextureSamplingConfig.sampleNormal` now calls `getNormalAt`, this
+    edition's name for the `double` overload. Before, `getNormal` chose the
+    overload by whether the value was an integer, so a sample landing
+    exactly on an integer read the stored normal at that index, or null,
+    instead of the wrapped interpolation.
+  - A reference driver compared 289 coordinate pairs bit for bit:
+    integers as doubles, signed zero, ±1e-300, ±1e300, 3e9, NaN, infinities
+    and 0.1 + 0.2. It also covered both size-zero cases. Everything matches,
+    except the sign bit of a NaN, which Java only exposes through
+    `doubleToRawLongBits`.
+  - The 96 shader renders of the Phase 39 gate were rerun and are still
+    byte-identical.
+- Java object serialization: Java uses `ObjectOutputStream` with these
+  classes only in the testsuite's `RaytracingDistributedExample`. The custom
+  `writeObject`/`readObject` of the two uncompressed images (signed 16-bit
+  sizes, then raw pixels) are not ported. This edition sends images to
+  workers through `SimpleSceneSnapshotTransfer` and structured clone. As
+  allowed by the audit section, this item closes as a documented runtime
+  boundary.
+- Cloning: in Java, `RGBImageUncompressed.clone()`, `RGBAImageUncompressed.clone()`
+  and `RGBAImageCompressed.clone()` always threw `CloneNotSupportedException`,
+  because nothing in their hierarchy implemented `Cloneable` and each one
+  calls `super.clone()` first. The TypeScript versions returned a copy.
+  - The user decided to fix Java, so the three classes now declare
+    `implements Cloneable`. `base`, `awt` and `jogl2` compile.
+  - A reference driver cloned RGB and RGBA images (3×2, 1×1, 0×0 and 7×5)
+    and compressed images (empty, and 8×4 DXT5), then changed the original.
+    Java and TypeScript give identical output: each copy keeps its size,
+    format and bytes, and does not share storage with the original.
+- Tests: `npm run verify` passed. `@vitral/base` ran 160 files and 1242
+  tests, with the 10 skips already recorded. `@vitral/fs` passed 29 tests,
+  and the tarballs and consumer check passed. Java's media test passes
+  (4 tests).
+
+Phase 14 gate record — 2026-11-28:
+
+- Inventory: the 20 entries are exported, and the eleven unlisted
+  `media`/`solidTexture` files were closed on 2026-09-13.
+- Completeness: every member that the audit section listed for this phase
+  is now ported or recorded:
+  - `Image.positiveMod` and `NormalMap.positiveMod` became the `_pixel.ts`
+    helpers.
+  - `RGBAImageCompressed.reportUnsupportedPixelAccess` is ported.
+  - `pixelBaseIndex` is the private `at()` of the two uncompressed images,
+    with the same formula.
+  - `Image.clone` and `MediaEntity.clone` return null after
+    `super.clone()` in Java. Only the three concrete overrides produce
+    anything, and those are covered.
+  - `readObject` and `writeObject` are the documented serialization
+    boundary.
+- Java reference: `RawImageAccessTest` passes (4 tests), and so do the 44
+  render tests that use these buffers.
+- TypeScript tests: `RawImageAccessTest.spec.ts` passes (4 tests).
+  `npm run verify` passed after the TypeScript changes: `@vitral/base` ran
+  160 files and 1242 tests, `@vitral/fs` passed 29 tests, and the tarballs
+  and consumer check passed. The Java `Cloneable` fix changed no TypeScript.
+- Review, against Java reference drivers:
+  - Compressed images: 55 lines.
+  - Bilinear sampling: 289 coordinate pairs, compared bit for bit.
+  - Cloning.
+  - Out-of-range pixel access: 191 lines.
+  - The 96 shader renders that sample textures and bump maps.
+  All of them match Java.
+
 Exit: satisfy the applicable standard phase checks.
 
 ### Phase 15: General processing
@@ -2080,7 +2217,81 @@ vsdk.toolkit.processing.SpharmonicKitWrapper
 vsdk.toolkit.processing.StopWatch
 ```
 
+Phase 15 advance — 2026-11-28 (literal review):
+
+- Inventory: the 22 entries are exported. New files are `LzwWrapper.ts`,
+  `_LzwNativeLibrary.ts` and `SpharmonicKitWrapper.ts`. `Containment.value()`
+  is `containmentValue()`. `ClippedLine2DResult` is also reachable as
+  `ComputationalGeometry.ClippedLine2DResult`.
+- Literal rewrites, line by line from Java:
+  - `ComputationalGeometry`: the containment tests return Java's `int`
+    codes, and Cohen–Sutherland keeps Java's `accept`/`outCodeOut` loop.
+  - `ImageProcessing`: the `byte` overload of `putPixel`, the `(int)` casts
+    and the distance fields now follow Java.
+  - `SignalProcessing`: `-2 * k` is evaluated in int arithmetic, so `k = 0`
+    gives `+0`.
+  - `StopWatch`, `ProcessingElement` (no longer an `Entity`), and the
+    `print`/`print2` methods of `SolverPolynomialQuarticBairstow`.
+  - `LinearAlgebraEngine.DefaultBackend` checks for both strategy
+    interfaces with Java's messages. `IllegalArgumentException` replaces
+    `RangeError` there and in `MatrixAlgorithmsSupport`.
+    `DEFAULT_ENGINE` is created on the first call because the modules
+    import each other; every call still returns the same instance.
+- Bugs found by the driver in Phase 14 classes, now fixed:
+  - `RGBColorPalette` is now literal: the accumulated gray ramp,
+    `evalLinear`/`evalNearest` with `(int)` casts, and the
+    `Double.MAX_VALUE` start in `selectNearestIndexToRgb`.
+  - `IndexedColorImageUncompressed.getPixelRgb` no longer clamps the
+    palette color.
+  - Before the fix, indexed-image copy, gamma and distance-field results
+    differed from Java.
+- `LzwWrapper`: a literal port of `compress.c` and the JNI glue, including
+  the `available()` low-byte quirk. Its output and stderr match Java on 16
+  `.Z` files and on the quirk streams. Where the native library
+  segfaults, TypeScript throws `IllegalStateException`.
+- `SpharmonicKitWrapper`: follows Java's "library not loaded" path, which
+  logs once through `Logger` and then returns false. Porting the C library
+  (about 25,000 lines) is pending the user's decision.
+- Java reference: the processing tests pass (16 tests:
+  CurveModelerGlyphWeld 2, CurveModelerRotationalSweep 2,
+  SolidBoundaryTessellator 6, LinearAlgebraStrategiesConsistency 6).
+- TypeScript tests:
+  - `CurveModelerGlyphWeldTest.spec.ts` and
+    `CurveModelerRotationalSweepTest.spec.ts` are new; the other two were
+    already translated.
+  - `npm run verify` passed: `@vitral/base` ran 162 files with 1246 tests
+    passed and 10 skipped, `@vitral/fs` passed 29 tests, and the tarballs
+    and consumer check passed.
+- Reference driver (178 lines). It covers:
+  - Three strategies, the selector and the engine over 12 matrices,
+    including singular, non-square and NaN ones, plus their error paths.
+  - FFT, IFFT and convolutions.
+  - Bairstow, including its printed output.
+  - 100 geometry cases.
+  - Every `ImageProcessing` operation.
+  - `StopWatch`.
+
+  All of it matches Java bit for bit except two FFT-16 values, which are
+  1 ulp apart. HotSpot's `Math.sin` intrinsic gives a different value for
+  `sin(-11π/16)`; `StrictMath` (fdlibm) agrees with V8, and the Java
+  specification allows a 1-ulp error. This is a documented platform
+  boundary.
+
 Exit: satisfy the applicable standard phase checks.
+
+Phase 15 gate record — 2026-11-28:
+
+- Inventory and completeness: all 22 entries are ported and exported, as
+  recorded in the advance above.
+- `SpharmonicKitWrapper`: by user decision it stays as in Java without its
+  native library, so it reports once and then returns false. The port
+  decision moved to Phase 47.
+- Java reference: the 16 processing tests pass.
+- TypeScript: `npm run verify` passed. `@vitral/base` ran 162 files with
+  1246 tests passed and 10 skipped, `@vitral/fs` passed 29 tests, and the
+  tarballs and consumer check passed.
+- Review: the 178-line reference driver and the LZW parity runs match Java.
+  The only difference is the 1-ulp `Math.sin` platform boundary.
 
 ### Phase 16: Materials
 
@@ -2105,9 +2316,9 @@ part of the group left unported, because it reads a file. It is split the way
 the readers are: the parse is `MicroFacetedMaterial.fromCsvText` in
 `@vitral/base` and is literal — the header row naming the columns, the
 case-insensitive match on `material_name`, every per-field default including
-`alpha` falling back to `roughness * roughness`, the unit-interval clamps, and
-the `readAsciiLine` behavior that never sees a final line without a
-terminating newline. Java's `resolveCsvFile`, which tries the name as given and
+`alpha` falling back to `roughness * roughness`, and the unit-interval clamps
+(the end-of-file behavior this note first claimed for `readAsciiLine` is
+corrected in the Phase 16 gate record below). Java's `resolveCsvFile`, which tries the name as given and
 then under `etc/materials`, is the file-system half and stays with the caller;
 a URL is already resolved, so the browser's half is a fetch.
 
@@ -2123,6 +2334,84 @@ every field of each resulting material; the TypeScript twin agrees on all three
 lines.
 
 Exit: satisfy the applicable standard phase checks.
+
+Phase 16 gate record — 2026-11-28:
+
+- Tests. The three Java test classes are translated one to one:
+  `PhongMaterialTest` (6) and `PhongScatteringTest` (10) in `@vitral/base`,
+  `MicroFacetedMaterialCsvTest` (2) in `@vitral/fs`, because it writes a
+  temporary file. The Java run passes the same 18.
+- `RendererConfiguration` is rewritten literally: the constructor body,
+  `compareTo` with its two accumulators, both `clone` methods (`clone()`
+  copies the LOD hint, `clone(other)` does not, as in Java), the clamps of
+  `setVertexNormalSmoothingThresholdDegrees`, and `toString` through
+  `Double.toString`. The old `Object.assign` in `clone(other)` also copied
+  `lodHint`. `RendererConfigurationBehavior.ts`, a prototype patch that
+  redefined `compareTo`, `toString` and the vertex-color accessors the class
+  already has, is deleted, together with its imports in `index.ts` and the
+  three raytracer workers of the testsuites.
+- `SimpleMaterial` is rewritten literally. `toString` printed `128` for
+  `128.0` and dropped Java's final blank line, and the `with*` methods
+  replaced a null argument with the current value (`??`) where Java passes it
+  through.
+- `MicroFacetedMaterial` stores its fields as Java does. The configuration
+  constructor no longer clamps (Java clamps only in the CSV parse), and
+  `MicrofacetConfig`, a private record in Java, is no longer exported from the
+  package index. The CSV parse follows Java's exceptions: a null name gives
+  the default material, an empty header and any number that does not parse
+  are wrapped in `IllegalStateException("Failed reading microfacet material
+  ...")`, a missing material raises `IllegalArgumentException`, and the
+  numbers go through `Double.parseDouble` and `Integer.parseInt` (so
+  `0x1p-2`, `1e-1d` and `NaN` parse and `1.5` is rejected for an int field).
+  Java's `String.trim` and `isBlank` are used for the fields.
+  `MicrofacetCsvLoader.load` in `@vitral/fs`, which had its own lenient
+  parser, is now only the file half of Java's constructor
+  (`resolveCsvFile`, the not-found exception, the byte read) and returns the
+  material from `fromCsvText`.
+- Java defect, not reproduced. `PersistenceElement.readAsciiLine` does not
+  throw at the end of the stream: `readBytes` stops on the `-1` of `read`
+  and leaves the byte buffer unchanged, so the line keeps growing with the
+  last byte. A JDK 17 run confirms it: `new MicroFacetedMaterial(csv,
+  "Gold")` on a file without `Gold` does not return, and `readAsciiLine` on a
+  stream ending in `c` with no newline ends in `OutOfMemoryError`. The loop's
+  `catch (Exception eofLike)` shows that the end of the file was meant to end
+  the table, which is what TypeScript does: the text after the last newline is
+  not a line and a missing material raises the `IllegalArgumentException`.
+  Fixing Java (for example by having `readAsciiLine` throw or return null at
+  the end of the stream) is left to the user.
+- `Texture`: Java's `System.arraycopy` rejects data shorter than
+  `width * height * channels` with `ArrayIndexOutOfBoundsException("arraycopy:
+  last source index N out of bounds for byte[M]")`, which TypeScript now
+  throws instead of padding with zeros, and the `(int)` casts of
+  `evaluateColor` use `javaIntCast`, so NaN coordinates read pixel 0 as in
+  Java.
+- `java.lang.NumberFormatException` is added, as a subclass of
+  `IllegalArgumentException`, and `Double.parseDouble`, `Integer` and `Long`
+  parsing throw it as Java does.
+- Parity. A reference driver in package `vsdk.toolkit.environment.material`
+  and its Node twin, fed by the same integer LCG, print 3,335 lines covering
+  `ShadingType`, 30 random `RendererConfiguration`s (getters, `toString`,
+  both clones, a `compareTo` grid), `SimpleMaterial` (all constructors and
+  `with*`), all 26 materials of `etc/materials/microFacetMAterials.csv`
+  under upper-cased padded names and their copies, five malformed CSVs and
+  the missing file, `ScatteringComponent`, `ScatteringArithmetic`, `Texture`
+  over 1, 2, 3 and 4 channels including NaN and infinite coordinates and the
+  short-data exception, 300 `ScatteringFrame`s, the `PhongLobe` evaluation,
+  sampling and density paths, and 300 `PhongMaterial`s over random media,
+  components and shading points. All doubles are compared as raw bits. The
+  only differences, 34 lines, are in the direction-sampling results (the
+  `ScatteringFrame` samples and the `reflectionSample`, `transmissionSample`,
+  `scatteringSample` and `emissionSample` results that use them), at most
+  5.4e-14 relative and never in the structure of a line. They come from
+  `Math.sin`, `Math.cos` and `Math.pow`: V8's `pow` differs from HotSpot's
+  default `Math.pow` intrinsic in 146 of 200,000 sampled `pow(xi, 1/(n+1))`
+  and `pow(cos, n)` calls, and from fdlibm (`StrictMath.pow`) in 5,862, so
+  turning the libm intrinsics off does not close the gap. This is the same
+  platform boundary as Phases 3 and 15. Standard error matches except for the
+  class name in the `Logger` header, as recorded for Phase 25.
+- Gate: prettier and eslint are clean; the material, gui and `java` tests of
+  `@vitral/base` (27 files, 241 tests) and the `@vitral/fs` CSV test pass;
+  both testsuite projects type-check; `npm run verify` completed successfully (base: 162 files, 1319 tests passed and 10 skipped; fs: 7 files, 29 tests; the three tarballs install and import in a clean consumer).
 
 ### Phase 17: Geometry base
 
@@ -3779,6 +4068,27 @@ test coverage and installed-package entry points. Distinguish file reachability
 from emitted-package availability. Keep the files retained by the 2026-09-16
 decision in the review.
 
+### Phase 47: SpharmonicKit port decision
+
+Added on 2026-11-28 by user decision while Phase 15 was being closed.
+
+`vsdk.toolkit.processing.SpharmonicKitWrapper` binds the native
+`spharmonickit` library (the CMake project `pkgs/SpharmonicKit27`, about
+25,000 lines of C). The TypeScript edition currently matches Java's behavior
+when the library is not loaded: the first call reports the error once through
+`Logger`, and every call returns false.
+
+Work:
+
+- Decide whether to port SpharmonicKit27 to languages other than C++, and in
+  which order. TypeScript is the first candidate.
+- If a port is approved, translate the library literally and replace the
+  failing path with a call to the port.
+- Verify the port against the native library with a reference driver.
+
+Exit: the decision is recorded and, for each approved language, the port
+passes the reference driver.
+
 ## Original Java test-source inventory
 
 This inventory records the tests and fixtures selected for the original
@@ -3850,7 +4160,7 @@ For the complete-common milestone at Phase 10, migrate the eleven tests under `j
 
 ## Completion criteria
 
-- Close the 46 phases against the current inventory, including newly added
+- Close the 47 phases against the current inventory, including newly added
   Java sources and the applicable explicit platform mappings.
 - Verify observable core behavior with Java reference tests and the corresponding
   TypeScript checks, including numeric, error and degeneracy cases.

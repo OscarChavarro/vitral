@@ -212,7 +212,7 @@ export class Prism extends Solid {
 
     /**
     C++ `Vector2Dd::length()` is `sqrt(x * x + y * y)`; it is evaluated here
-    the same way (the TypeScript `Vector2Dd.length()` uses `Math.hypot`).
+    the same way.
     */
     private static vertexLength(p: Vector2Dd): number {
         return JavaMath.sqrt(p.x * p.x + p.y * p.y);

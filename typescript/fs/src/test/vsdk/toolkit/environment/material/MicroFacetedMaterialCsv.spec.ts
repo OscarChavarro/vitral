@@ -20,10 +20,9 @@ test("MicroFacetedMaterialCsv_ParsesNumericFieldsBeforeTemporaryStringsExpire", 
             "Aluminium,0.4,0.16,0.2,0.7,0.9,0.8,0.7,1.35,0.97,0.62,7.47,6.4,5.3,0,0,0\n",
         "latin1",
     );
-    // The file name constructor of cpp/Java MicroFacetedMaterial is
-    // MicrofacetCsvLoader.load plus the configuration constructor here.
-    const material = new MicroFacetedMaterial(MicrofacetCsvLoader.load(filename, "Copper"));
-    const aluminium = new MicroFacetedMaterial(MicrofacetCsvLoader.load(filename, "Aluminium"));
+    // Java's `new MicroFacetedMaterial(filename, name)` is MicrofacetCsvLoader.load.
+    const material: MicroFacetedMaterial = MicrofacetCsvLoader.load(filename, "Copper");
+    const aluminium: MicroFacetedMaterial = MicrofacetCsvLoader.load(filename, "Aluminium");
     fs.rmSync(directory, { recursive: true });
     expectDoubleEq(0.25, material.getRoughness());
     expectDoubleEq(0.0625, material.getAlpha());

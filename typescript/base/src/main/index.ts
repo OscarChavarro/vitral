@@ -9,6 +9,7 @@ export { identityHashCode } from "./java/lang/_IdentityHashCode.js";
 export { Exception } from "./java/lang/Exception.js";
 export { RuntimeException } from "./java/lang/RuntimeException.js";
 export { IllegalArgumentException } from "./java/lang/IllegalArgumentException.js";
+export { NumberFormatException } from "./java/lang/NumberFormatException.js";
 export { IllegalStateException } from "./java/lang/IllegalStateException.js";
 export { IndexOutOfBoundsException } from "./java/lang/IndexOutOfBoundsException.js";
 export { ArrayIndexOutOfBoundsException } from "./java/lang/ArrayIndexOutOfBoundsException.js";
@@ -220,8 +221,10 @@ export { ZBuffer } from "./vsdk/toolkit/media/ZBuffer.js";
 export { RGBAImageHDRUncompressed } from "./vsdk/toolkit/media/RGBAImageHDRUncompressed.js";
 export { RGBAPixelHDR } from "./vsdk/toolkit/media/RGBAPixelHDR.js";
 export { ProcessingElement } from "./vsdk/toolkit/processing/ProcessingElement.js";
-export { Containment } from "./vsdk/toolkit/processing/Containment.js";
+export { Containment, containmentValue } from "./vsdk/toolkit/processing/Containment.js";
 export { StopWatch } from "./vsdk/toolkit/processing/StopWatch.js";
+export { LzwWrapper } from "./vsdk/toolkit/processing/LzwWrapper.js";
+export { SpharmonicKitWrapper } from "./vsdk/toolkit/processing/SpharmonicKitWrapper.js";
 export { BezierPatchTessellator } from "./vsdk/toolkit/processing/BezierPatchTessellator.js";
 export { SolidBoundaryTessellationReport } from "./vsdk/toolkit/processing/SolidBoundaryTessellationReport.js";
 export { SolidBoundaryTessellator } from "./vsdk/toolkit/processing/SolidBoundaryTessellator.js";
@@ -264,7 +267,7 @@ export { SimpleTestGeometryLibrary } from "./vsdk/toolkit/environment/geometry/g
 export { CsgKurlanderBowlFixture } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/CsgKurlanderBowlFixture.js";
 export type { Material } from "./vsdk/toolkit/environment/material/Material.js";
 export { SimpleMaterial } from "./vsdk/toolkit/environment/material/SimpleMaterial.js";
-export { MicroFacetedMaterial, MicrofacetConfig } from "./vsdk/toolkit/environment/material/MicroFacetedMaterial.js";
+export { MicroFacetedMaterial } from "./vsdk/toolkit/environment/material/MicroFacetedMaterial.js";
 export { RendererConfiguration } from "./vsdk/toolkit/environment/material/RendererConfiguration.js";
 export { ShadingType } from "./vsdk/toolkit/environment/material/ShadingType.js";
 export { ScatteringComponent } from "./vsdk/toolkit/environment/material/ScatteringComponent.js";
@@ -470,7 +473,6 @@ export { CsgPointAttribution } from "./vsdk/toolkit/environment/scene/csg/CsgPoi
 export { CsgPointCandidate } from "./vsdk/toolkit/environment/scene/csg/CsgPointCandidate.js";
 export { CsgPointWorkspace } from "./vsdk/toolkit/environment/scene/csg/CsgPointWorkspace.js";
 export { CsgPointClassification } from "./vsdk/toolkit/environment/scene/csg/CsgPointClassification.js";
-import "./vsdk/toolkit/environment/material/RendererConfigurationBehavior.js";
 export {
     workerError,
     createWorkerMessageHandler,

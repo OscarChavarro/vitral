@@ -1,4 +1,5 @@
 import { Image } from "./Image.js";
+import { IllegalArgumentException } from "../../../java/lang/IllegalArgumentException.js";
 import { RGBPixel } from "./RGBPixel.js";
 import { byte, checkBufferIndex } from "./_pixel.js";
 import { RGBAImageUncompressed } from "./RGBAImageUncompressed.js";
@@ -89,17 +90,33 @@ export class RGBImageUncompressed extends Image {
     public getYSize(): number {
         return this.ySize;
     }
+    /** An independent copy of the pixel bytes, as Java's `getRawImage()`. */
     public getRawImage(): Int8Array {
-        return new Int8Array(this.data!.buffer, this.data!.byteOffset, this.data!.length);
+        const copy: Int8Array = new Int8Array(this.getRawImageSizeInBytes());
+        copy.set(new Int8Array(this.data!.buffer, this.data!.byteOffset, copy.length));
+        return copy;
+    }
+    public getRawImageSizeInBytes(): number {
+        return Math.imul(Math.imul(this.xSize, this.ySize), 3);
     }
     public getRawImageDirectBuffer(): Uint8Array {
         return this.data!;
     }
     public setRawImage(w: number, h: number, data: Int8Array | Uint8Array): void {
-        this.xSize = w;
-        this.ySize = h;
-        this.rowStride = w * 3;
-        this.data = new Uint8Array(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+        if (data.length !== Math.imul(Math.imul(w, h), 3)) {
+            throw new IllegalArgumentException(
+                "Expected " +
+                    Math.imul(Math.imul(w, h), 3) +
+                    " bytes for a " +
+                    w +
+                    "x" +
+                    h +
+                    " RGB image, but got " +
+                    data.length,
+            );
+        }
+        this.initNoFill(w, h);
+        this.data!.set(data);
     }
     public override clone(): RGBImageUncompressed {
         const c = new RGBImageUncompressed();

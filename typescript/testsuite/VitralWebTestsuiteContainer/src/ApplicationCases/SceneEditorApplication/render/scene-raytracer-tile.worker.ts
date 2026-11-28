@@ -14,7 +14,6 @@ import { ParallelRaytracerTileRenderer } from '@vitral/base/vsdk/toolkit/render/
 import { decodeSimpleSceneSnapshot } from '@vitral/base/vsdk/toolkit/render/raytracing/SimpleSceneSnapshotTransfer';
 // The barrel installs these `RendererConfiguration` methods as a side effect;
 // a worker that does not load the barrel must ask for them explicitly.
-import '@vitral/base/vsdk/toolkit/environment/material/RendererConfigurationBehavior';
 
 /**
  * Worker entry module of the `ParallelRaytracer` of the scene editor (see

@@ -1428,8 +1428,8 @@ export class HiddenSurfaceRenderer extends RenderingElement {
             const last: number[] = points.get(points.size() - 1);
             const first: number[] = points.get(0);
             if (
-                Math.hypot(last[0]! - x, last[1]! - y) <= HiddenSurfaceRenderer.MINIMUM_EDGE_LENGTH ||
-                Math.hypot(first[0]! - x, first[1]! - y) <= HiddenSurfaceRenderer.MINIMUM_EDGE_LENGTH
+                JavaMath.hypot(last[0]! - x, last[1]! - y) <= HiddenSurfaceRenderer.MINIMUM_EDGE_LENGTH ||
+                JavaMath.hypot(first[0]! - x, first[1]! - y) <= HiddenSurfaceRenderer.MINIMUM_EDGE_LENGTH
             ) {
                 return;
             }
@@ -1461,7 +1461,7 @@ export class HiddenSurfaceRenderer extends RenderingElement {
             const q: Vertex2D = vertices[(i + 1) % n]!;
             // An edge of (almost) no length gives no direction: its half
             // plane would cut at random
-            if (Math.hypot(q.x - p.x, q.y - p.y) <= HiddenSurfaceRenderer.MINIMUM_EDGE_LENGTH) {
+            if (JavaMath.hypot(q.x - p.x, q.y - p.y) <= HiddenSurfaceRenderer.MINIMUM_EDGE_LENGTH) {
                 continue;
             }
             // Inside is at the left of the edge: a*x + b*y + c >= 0
@@ -1526,7 +1526,7 @@ export class HiddenSurfaceRenderer extends RenderingElement {
             const q: Vertex2D = vertices[(i + 1) % n]!;
             const r: Vertex2D = vertices[(i + 2) % n]!;
             const cross: number = (q.x - p.x) * (r.y - q.y) - (q.y - p.y) * (r.x - q.x);
-            const scale: number = Math.hypot(q.x - p.x, q.y - p.y) * Math.hypot(r.x - q.x, r.y - q.y);
+            const scale: number = JavaMath.hypot(q.x - p.x, q.y - p.y) * JavaMath.hypot(r.x - q.x, r.y - q.y);
             if (cross < -1.0e-9 * scale) {
                 return false;
             }
@@ -2091,7 +2091,7 @@ export class HiddenSurfaceRenderer extends RenderingElement {
         for (let i = 0; i < n; i++) {
             const p: Vertex2D = loop.vertices[i]!;
             const q: Vertex2D = loop.vertices[(i + 1) % n]!;
-            length += Math.hypot(q.x - p.x, q.y - p.y);
+            length += JavaMath.hypot(q.x - p.x, q.y - p.y);
         }
         return length;
     }

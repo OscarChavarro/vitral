@@ -1,123 +1,206 @@
 import { ColorRgb } from "../../common/color/ColorRgb.js";
+import { Double } from "../../../../java/lang/Double.js";
+import { IllegalArgumentException } from "../../../../java/lang/IllegalArgumentException.js";
+import { IllegalStateException } from "../../../../java/lang/IllegalStateException.js";
+import { Integer } from "../../../../java/lang/Integer.js";
+import { Throwable } from "../../../../java/lang/Throwable.js";
 import { SimpleMaterial } from "./SimpleMaterial.js";
+//= References:                                                             =
+//= [COOK1982] Cook, Robert L.; Torrance, Kenneth E. "A Reflectance Model   =
+//= for Computer Graphics", ACM Transactions on Graphics, 1982.             =
+//= [TORR1967] Torrance, K. E.; Sparrow, E. M. "Theory for Off-Specular     =
+//= Reflection from Roughened Surfaces", JOSA, 1967.                        =
+//= [BECK1963] Beckmann, P.; Spizzichino, A. "The Scattering of              =
+//= Electromagnetic Waves from Rough Surfaces", 1963.                        =
+
+/**
+Java's private record `MicroFacetedMaterial.MicrofacetConfig`. It is exported
+from this module only so that the configuration constructor below can name
+it; it is not part of the package index, as the record is not part of Java's
+API.
+*/
 export class MicrofacetConfig {
     public constructor(
-        public readonly name = "VSDK_default_material",
-        public readonly ambient = new ColorRgb(0.1, 0.1, 0.1),
-        public readonly diffuse = new ColorRgb(0.9, 0.5, 0.5),
-        public readonly specular = new ColorRgb(1, 1, 1),
-        public readonly doubleSided = true,
-        public readonly reflectionCoefficient = 0,
-        public readonly refractionCoefficient = 0,
-        public readonly opacity = 1,
-        public readonly phongExponent = 128,
-        public readonly roughness = 0.35,
-        public readonly alpha = 0.1225,
-        public readonly fresnelF0 = new ColorRgb(0.04, 0.04, 0.04),
-        public readonly eta = new ColorRgb(1.5, 1.5, 1.5),
-        public readonly kappa = new ColorRgb(),
-        public readonly kd = 1,
-        public readonly ks = 1,
-        public readonly fresnelModel = 0,
-        public readonly ndfModel = 0,
-        public readonly geometryModel = 0,
+        public readonly name: string,
+        public readonly ambient: ColorRgb,
+        public readonly diffuse: ColorRgb,
+        public readonly specular: ColorRgb,
+        public readonly doubleSided: boolean,
+        public readonly reflectionCoefficient: number,
+        public readonly refractionCoefficient: number,
+        public readonly opacity: number,
+        public readonly phongExponent: number,
+        public readonly roughness: number,
+        public readonly alpha: number,
+        public readonly fresnelF0: ColorRgb,
+        public readonly eta: ColorRgb,
+        public readonly kappa: ColorRgb,
+        public readonly kd: number,
+        public readonly ks: number,
+        public readonly fresnelModel: number,
+        public readonly ndfModel: number,
+        public readonly geometryModel: number,
     ) {}
 }
+
 /**
-The platform-neutral half of Java's `MicroFacetedMaterial(String csvFileName,
-String materialName)` constructor.
+Cook-Torrance oriented extension of {@link SimpleMaterial}.
 
-Java's constructor does two things: it finds the CSV file — `resolveCsvFile`
-tries the name as given and then under `etc/materials` — and it parses it. Only
-the first is bound to a file system, so it stays with the caller, which hands
-the already-read text over here; `@vitral/fs` reads it from disk and a browser
-fetches it. The parse itself is the Java one, `readAsciiLine` by
-`readAsciiLine`: the header row names the columns, a row matching the material
-name case-insensitively supplies whatever fields it carries, and every absent
-or blank field falls back to the same default the Java reader uses, which for
-`alpha` is `roughness * roughness`.
+This class stores the per-object microfacet parameters shared by CPU and GPU
+shaders. It does not implement shading by itself.
 
-Java's `readAsciiLine` throws at end of file, and the reading loop treats that
-throw as the end of the table, so a final line with no terminating newline is
-never seen. Splitting the text on newlines would see it, which is why the split
-below drops a trailing empty segment only, leaving that Java behavior intact
-for a file that ends properly and reproducing it for one that does not.
+The target BRDF structure is the Cook-Torrance microfacet model
+f_r ~ D * F * G / (4 * (N.L) * (N.V)), where:
+- D: normal distribution function (NDF)
+- F: Fresnel reflectance
+- G: geometric attenuation / masking-shadowing
+
+Java's `MicroFacetedMaterial(String csvFileName, String materialName)` does two
+things: it finds the CSV file (`resolveCsvFile` tries the name as given and
+then under `etc/materials`) and it parses it. Only the first is bound to a file
+system, so it stays with the caller: `MicrofacetCsvLoader.load` in
+`@vitral/fs` is that constructor, and a browser fetches the text. The parse is
+`fromCsvText` here, literal down to the exception each failure raises.
+
+One Java defect is not reproduced. `PersistenceElement.readAsciiLine` does not
+throw at the end of the stream (`readBytes` stops on the `-1` of `read` and
+leaves the byte buffer as it was), so it keeps appending the last byte read
+until the heap is exhausted. Java's loop expects that read to throw (it
+catches it as `eofLike` and leaves the table), so a material missing from the
+file, or a matching last row without a terminating newline, ends in an
+`OutOfMemoryError` there instead of the `IllegalArgumentException` after the
+loop. Here the end of the text ends the table, as that catch intends: the text
+after the last newline is not a line, and a missing material raises the
+`IllegalArgumentException`.
 */
 export class MicroFacetedMaterial extends SimpleMaterial {
     public static readonly FRESNEL_MODEL_SCHLICK = 0;
     public static readonly FRESNEL_MODEL_CONDUCTOR = 1;
+
     public static readonly NDF_MODEL_BECKMANN = 0;
     public static readonly NDF_MODEL_GGX = 1;
+
     public static readonly GEOMETRY_MODEL_SMITH = 0;
     public static readonly GEOMETRY_MODEL_IMPLICIT = 1;
-    private readonly config: MicrofacetConfig;
+
+    // [COOK1982] RMS slope proxy ("m") controlling micro-facet spread.
+    private readonly roughness: number;
+    // Helper used by common NDF/G parameterization (often alpha = m^2).
+    private readonly alpha: number;
+
+    // [COOK1982] Reflectance at normal incidence (per channel), used as
+    // practical Fresnel anchor when full spectral data is unavailable.
+    private readonly fresnelF0: ColorRgb;
+    // [COOK1982] Complex refractive index terms for conductor Fresnel:
+    // n (eta) and k (kappa), per channel.
+    private readonly eta: ColorRgb;
+    private readonly kappa: ColorRgb;
+
+    // Runtime diffuse/specular energy split (implementation policy).
+    private readonly kd: number;
+    private readonly ks: number;
+
+    // Optional model selectors for runtime shader branching:
+    // D term (Beckmann/GGX), F term (Schlick/Conductor), G term.
+    private readonly fresnelModel: number;
+    private readonly ndfModel: number;
+    private readonly geometryModel: number;
+
+    /**
+    Java's `MicroFacetedMaterial()`, `MicroFacetedMaterial(MicroFacetedMaterial)`
+    and the private `MicroFacetedMaterial(MicrofacetConfig)`.
+    */
     public constructor();
     public constructor(other: MicroFacetedMaterial);
     public constructor(config: MicrofacetConfig);
-    public constructor(value: MicroFacetedMaterial | MicrofacetConfig = new MicrofacetConfig()) {
-        const c = value instanceof MicroFacetedMaterial ? value.config : value;
+    public constructor(value?: MicroFacetedMaterial | MicrofacetConfig) {
+        if (value instanceof MicroFacetedMaterial) {
+            const other: MicroFacetedMaterial = value;
+            super(
+                other.getName(),
+                other.getAmbientReference(),
+                other.getDiffuseReference(),
+                other.getSpecularReference(),
+                other.isDoubleSided(),
+                other.getReflectionCoefficient(),
+                other.getRefractionCoefficient(),
+                other.getOpacity(),
+                other.getPhongExponent(),
+            );
+            this.roughness = other.roughness;
+            this.alpha = other.alpha;
+            this.fresnelF0 = new ColorRgb(other.fresnelF0);
+            this.eta = new ColorRgb(other.eta);
+            this.kappa = new ColorRgb(other.kappa);
+            this.kd = other.kd;
+            this.ks = other.ks;
+            this.fresnelModel = other.fresnelModel;
+            this.ndfModel = other.ndfModel;
+            this.geometryModel = other.geometryModel;
+            return;
+        }
+        const config: MicrofacetConfig = value === undefined ? MicroFacetedMaterial.defaultConfig() : value;
         super(
-            c.name,
-            c.ambient,
-            c.diffuse,
-            c.specular,
-            c.doubleSided,
-            c.reflectionCoefficient,
-            c.refractionCoefficient,
-            c.opacity,
-            c.phongExponent,
+            config.name,
+            config.ambient,
+            config.diffuse,
+            config.specular,
+            config.doubleSided,
+            config.reflectionCoefficient,
+            config.refractionCoefficient,
+            config.opacity,
+            config.phongExponent,
         );
-        this.config = new MicrofacetConfig(
-            c.name,
-            new ColorRgb(c.ambient),
-            new ColorRgb(c.diffuse),
-            new ColorRgb(c.specular),
-            c.doubleSided,
-            c.reflectionCoefficient,
-            c.refractionCoefficient,
-            c.opacity,
-            c.phongExponent,
-            Math.max(0, Math.min(1, c.roughness)),
-            Math.max(0, Math.min(1, c.alpha)),
-            new ColorRgb(c.fresnelF0),
-            new ColorRgb(c.eta),
-            new ColorRgb(c.kappa),
-            Math.max(0, Math.min(1, c.kd)),
-            Math.max(0, Math.min(1, c.ks)),
-            c.fresnelModel,
-            c.ndfModel,
-            c.geometryModel,
-        );
+        this.roughness = config.roughness;
+        this.alpha = config.alpha;
+        this.fresnelF0 = new ColorRgb(config.fresnelF0);
+        this.eta = new ColorRgb(config.eta);
+        this.kappa = new ColorRgb(config.kappa);
+        this.kd = config.kd;
+        this.ks = config.ks;
+        this.fresnelModel = config.fresnelModel;
+        this.ndfModel = config.ndfModel;
+        this.geometryModel = config.geometryModel;
     }
-    public getRoughness() {
-        return this.config.roughness;
+
+    public getRoughness(): number {
+        return this.roughness;
     }
-    public getAlpha() {
-        return this.config.alpha;
+
+    public getAlpha(): number {
+        return this.alpha;
     }
-    public getFresnelF0() {
-        return new ColorRgb(this.config.fresnelF0);
+
+    public getFresnelF0(): ColorRgb {
+        return new ColorRgb(this.fresnelF0);
     }
-    public getEta() {
-        return new ColorRgb(this.config.eta);
+
+    public getEta(): ColorRgb {
+        return new ColorRgb(this.eta);
     }
-    public getKappa() {
-        return new ColorRgb(this.config.kappa);
+
+    public getKappa(): ColorRgb {
+        return new ColorRgb(this.kappa);
     }
-    public getKd() {
-        return this.config.kd;
+
+    public getKd(): number {
+        return this.kd;
     }
-    public getKs() {
-        return this.config.ks;
+
+    public getKs(): number {
+        return this.ks;
     }
-    public getFresnelModel() {
-        return this.config.fresnelModel;
+
+    public getFresnelModel(): number {
+        return this.fresnelModel;
     }
-    public getNdfModel() {
-        return this.config.ndfModel;
+
+    public getNdfModel(): number {
+        return this.ndfModel;
     }
-    public getGeometryModel() {
-        return this.config.geometryModel;
+
+    public getGeometryModel(): number {
+        return this.geometryModel;
     }
 
     private static clampToUnitInterval(value: number): number {
@@ -137,128 +220,164 @@ export class MicroFacetedMaterial extends SimpleMaterial {
 
     @param csvText The complete contents of the microfacet CSV file
     @param materialName The `material_name` to look for, matched ignoring case
-    @param sourceName The name of the read resource, for diagnostics
+    @param sourceName Java's `csvFile.getAbsolutePath()`, for the messages
     */
-    public static fromCsvText(csvText: string, materialName: string, sourceName: string): MicroFacetedMaterial {
-        return new MicroFacetedMaterial(MicroFacetedMaterial.loadConfigFromCsvText(csvText, materialName, sourceName));
+    public static fromCsvText(
+        csvText: string | null,
+        materialName: string | null,
+        sourceName: string,
+    ): MicroFacetedMaterial {
+        return new MicroFacetedMaterial(MicroFacetedMaterial.loadConfigFromCsv(csvText, materialName, sourceName));
     }
 
-    private static loadConfigFromCsvText(csvText: string, materialName: string, sourceName: string): MicrofacetConfig {
-        const defaultConfig: MicrofacetConfig = new MicrofacetConfig();
-        const normalizedName: string = materialName.trim().toLowerCase();
-        const lines: string[] = MicroFacetedMaterial.readAsciiLines(csvText);
-
-        const headerLine: string | null = lines.length > 0 ? lines[0]! : null;
-        if (headerLine === null || headerLine.trim().length < 1) {
-            throw new Error("Empty CSV header in file: " + sourceName);
-        }
-        const headerIndex: Map<string, number> = MicroFacetedMaterial.parseHeaderIndex(headerLine);
-
-        let lineNumber: number;
-        for (lineNumber = 1; lineNumber < lines.length; lineNumber++) {
-            const line: string = lines[lineNumber]!;
-            if (line.trim().length < 1) {
-                continue;
-            }
-            const row: string[] = MicroFacetedMaterial.splitCsv(line);
-            const rowName: string | null = MicroFacetedMaterial.field(row, headerIndex, "material_name");
-            if (rowName === null) {
-                continue;
-            }
-            if (rowName.trim().toLowerCase() !== normalizedName) {
-                continue;
-            }
-
-            const roughness: number = MicroFacetedMaterial.clampToUnitInterval(
-                MicroFacetedMaterial.doubleField(row, headerIndex, "roughness", defaultConfig.roughness),
-            );
-            const alpha: number = MicroFacetedMaterial.clampToUnitInterval(
-                MicroFacetedMaterial.doubleField(row, headerIndex, "alpha", roughness * roughness),
-            );
-            const diffuseColor: ColorRgb = MicroFacetedMaterial.rgbField(
-                row,
-                headerIndex,
-                "diffuse_r",
-                "diffuse_g",
-                "diffuse_b",
-                defaultConfig.diffuse,
-            );
-            const f0: ColorRgb = MicroFacetedMaterial.rgbField(
-                row,
-                headerIndex,
-                "f0_r",
-                "f0_g",
-                "f0_b",
-                defaultConfig.fresnelF0,
-            );
-            const eta: ColorRgb = MicroFacetedMaterial.rgbField(
-                row,
-                headerIndex,
-                "eta_r",
-                "eta_g",
-                "eta_b",
-                defaultConfig.eta,
-            );
-            const kappa: ColorRgb = MicroFacetedMaterial.rgbField(
-                row,
-                headerIndex,
-                "kappa_r",
-                "kappa_g",
-                "kappa_b",
-                defaultConfig.kappa,
-            );
-            return new MicrofacetConfig(
-                rowName.trim(),
-                defaultConfig.ambient,
-                diffuseColor,
-                f0,
-                defaultConfig.doubleSided,
-                defaultConfig.reflectionCoefficient,
-                defaultConfig.refractionCoefficient,
-                defaultConfig.opacity,
-                defaultConfig.phongExponent,
-                roughness,
-                alpha,
-                f0,
-                eta,
-                kappa,
-                MicroFacetedMaterial.clampToUnitInterval(
-                    MicroFacetedMaterial.doubleField(row, headerIndex, "kd", defaultConfig.kd),
-                ),
-                MicroFacetedMaterial.clampToUnitInterval(
-                    MicroFacetedMaterial.doubleField(row, headerIndex, "ks", defaultConfig.ks),
-                ),
-                MicroFacetedMaterial.intField(
-                    row,
-                    headerIndex,
-                    "fresnel_model",
-                    MicroFacetedMaterial.FRESNEL_MODEL_SCHLICK,
-                ),
-                MicroFacetedMaterial.intField(row, headerIndex, "ndf_model", MicroFacetedMaterial.NDF_MODEL_BECKMANN),
-                MicroFacetedMaterial.intField(
-                    row,
-                    headerIndex,
-                    "geometry_model",
-                    MicroFacetedMaterial.GEOMETRY_MODEL_SMITH,
-                ),
-            );
+    private static loadConfigFromCsv(
+        csvText: string | null,
+        materialName: string | null,
+        sourceName: string,
+    ): MicrofacetConfig {
+        if (csvText === null || materialName === null) {
+            return MicroFacetedMaterial.defaultConfig();
         }
 
-        throw new Error("SimpleMaterial '" + materialName + "' not found in CSV: " + sourceName);
+        const defaultConfig: MicrofacetConfig = MicroFacetedMaterial.defaultConfig();
+        const normalizedName: string = MicroFacetedMaterial.trim(materialName).toLowerCase();
+        try {
+            const lines: string[] = MicroFacetedMaterial.readAsciiLines(csvText);
+            let lineIndex = 0;
+            const headerLine: string | null = lineIndex < lines.length ? lines[lineIndex++]! : null;
+            if (headerLine === null || MicroFacetedMaterial.isBlank(headerLine)) {
+                throw new IllegalArgumentException("Empty CSV header in file: " + sourceName);
+            }
+            const headerIndex: Map<string, number> = MicroFacetedMaterial.parseHeaderIndex(headerLine);
+
+            while (true) {
+                let line: string;
+                if (lineIndex >= lines.length) {
+                    break;
+                }
+                line = lines[lineIndex++]!;
+                if (MicroFacetedMaterial.isBlank(line)) {
+                    continue;
+                }
+                const row: string[] = MicroFacetedMaterial.splitCsv(line);
+                const rowName: string | null = MicroFacetedMaterial.field(row, headerIndex, "material_name");
+                if (rowName === null) {
+                    continue;
+                }
+                if (MicroFacetedMaterial.trim(rowName).toLowerCase() !== normalizedName) {
+                    continue;
+                }
+
+                const roughness: number = MicroFacetedMaterial.clampToUnitInterval(
+                    MicroFacetedMaterial.doubleField(row, headerIndex, "roughness", defaultConfig.roughness),
+                );
+                const alpha: number = MicroFacetedMaterial.clampToUnitInterval(
+                    MicroFacetedMaterial.doubleField(row, headerIndex, "alpha", roughness * roughness),
+                );
+                const diffuseColor: ColorRgb = MicroFacetedMaterial.rgbField(
+                    row,
+                    headerIndex,
+                    "diffuse_r",
+                    "diffuse_g",
+                    "diffuse_b",
+                    defaultConfig.diffuse,
+                );
+                const f0: ColorRgb = MicroFacetedMaterial.rgbField(
+                    row,
+                    headerIndex,
+                    "f0_r",
+                    "f0_g",
+                    "f0_b",
+                    defaultConfig.fresnelF0,
+                );
+                const eta: ColorRgb = MicroFacetedMaterial.rgbField(
+                    row,
+                    headerIndex,
+                    "eta_r",
+                    "eta_g",
+                    "eta_b",
+                    defaultConfig.eta,
+                );
+                const kappa: ColorRgb = MicroFacetedMaterial.rgbField(
+                    row,
+                    headerIndex,
+                    "kappa_r",
+                    "kappa_g",
+                    "kappa_b",
+                    defaultConfig.kappa,
+                );
+                return new MicrofacetConfig(
+                    MicroFacetedMaterial.trim(rowName),
+                    defaultConfig.ambient,
+                    diffuseColor,
+                    f0,
+                    defaultConfig.doubleSided,
+                    defaultConfig.reflectionCoefficient,
+                    defaultConfig.refractionCoefficient,
+                    defaultConfig.opacity,
+                    defaultConfig.phongExponent,
+                    roughness,
+                    alpha,
+                    f0,
+                    eta,
+                    kappa,
+                    MicroFacetedMaterial.clampToUnitInterval(
+                        MicroFacetedMaterial.doubleField(row, headerIndex, "kd", defaultConfig.kd),
+                    ),
+                    MicroFacetedMaterial.clampToUnitInterval(
+                        MicroFacetedMaterial.doubleField(row, headerIndex, "ks", defaultConfig.ks),
+                    ),
+                    MicroFacetedMaterial.intField(
+                        row,
+                        headerIndex,
+                        "fresnel_model",
+                        MicroFacetedMaterial.FRESNEL_MODEL_SCHLICK,
+                    ),
+                    MicroFacetedMaterial.intField(
+                        row,
+                        headerIndex,
+                        "ndf_model",
+                        MicroFacetedMaterial.NDF_MODEL_BECKMANN,
+                    ),
+                    MicroFacetedMaterial.intField(
+                        row,
+                        headerIndex,
+                        "geometry_model",
+                        MicroFacetedMaterial.GEOMETRY_MODEL_SMITH,
+                    ),
+                );
+            }
+        } catch (e) {
+            throw new IllegalStateException(
+                "Failed reading microfacet material '" + materialName + "' from " + sourceName,
+                e instanceof Throwable ? e : undefined,
+            );
+        }
+
+        throw new IllegalArgumentException("SimpleMaterial '" + materialName + "' not found in CSV: " + sourceName);
     }
 
     /**
-    The lines Java's loop would obtain from `readAsciiLine`: the terminator is
-    dropped and a `\r` before it with it, and the segment after a final
-    newline — which Java never reaches, because that read throws — is not a
-    line.
+    The lines Java's loop obtains from `readAsciiLine`: every `\r` is dropped,
+    and each `\n` ends a line. The text after the last `\n` is not a line (see
+    the class note).
     */
     private static readAsciiLines(csvText: string): string[] {
         const lines: string[] = csvText.split("\n").map((line) => line.replace(/\r/g, ""));
-        if (lines.length > 0 && lines[lines.length - 1] === "") {
-            lines.pop();
-        }
+        lines.pop();
         return lines;
+    }
+
+    /** Java's `String.trim`: strips the code points up to U+0020 at both ends. */
+    private static trim(value: string): string {
+        // eslint-disable-next-line no-control-regex
+        return value.replace(/^[\u0000-\u0020]+|[\u0000-\u0020]+$/g, "");
+    }
+
+    /** Java's `String.isBlank`, for the `Character.isWhitespace` code points. */
+    private static isBlank(value: string): boolean {
+        // eslint-disable-next-line no-control-regex
+        return /^[\t\n\u000b\f\r\u001c-\u001f \u1680\u2000-\u2006\u2008-\u200a\u2028\u2029\u205f\u3000]*$/.test(value);
     }
 
     private static parseHeaderIndex(headerLine: string): Map<string, number> {
@@ -266,7 +385,7 @@ export class MicroFacetedMaterial extends SimpleMaterial {
         const headerIndex = new Map<string, number>();
         let i: number;
         for (i = 0; i < header.length; i++) {
-            headerIndex.set(header[i]!.trim().toLowerCase(), i);
+            headerIndex.set(MicroFacetedMaterial.trim(header[i]!).toLowerCase(), i);
         }
         return headerIndex;
     }
@@ -284,7 +403,7 @@ export class MicroFacetedMaterial extends SimpleMaterial {
         if (index < 0 || index >= row.length) {
             return null;
         }
-        return row[index]!.trim();
+        return MicroFacetedMaterial.trim(row[index]!);
     }
 
     private static doubleField(
@@ -294,10 +413,10 @@ export class MicroFacetedMaterial extends SimpleMaterial {
         defaultValue: number,
     ): number {
         const value: string | null = MicroFacetedMaterial.field(row, headerIndex, key);
-        if (value === null || value.trim().length < 1) {
+        if (value === null || MicroFacetedMaterial.isBlank(value)) {
             return defaultValue;
         }
-        return Number.parseFloat(value);
+        return Double.parseDouble(value);
     }
 
     private static intField(
@@ -307,10 +426,10 @@ export class MicroFacetedMaterial extends SimpleMaterial {
         defaultValue: number,
     ): number {
         const value: string | null = MicroFacetedMaterial.field(row, headerIndex, key);
-        if (value === null || value.trim().length < 1) {
+        if (value === null || MicroFacetedMaterial.isBlank(value)) {
             return defaultValue;
         }
-        return Number.parseInt(value, 10);
+        return Integer.parseInt(value);
     }
 
     private static rgbField(
@@ -325,5 +444,29 @@ export class MicroFacetedMaterial extends SimpleMaterial {
         const g: number = MicroFacetedMaterial.doubleField(row, headerIndex, keyG, defaultValue.g());
         const b: number = MicroFacetedMaterial.doubleField(row, headerIndex, keyB, defaultValue.b());
         return new ColorRgb(r, g, b);
+    }
+
+    private static defaultConfig(): MicrofacetConfig {
+        return new MicrofacetConfig(
+            "VSDK_default_material",
+            new ColorRgb(0.1, 0.1, 0.1),
+            new ColorRgb(0.9, 0.5, 0.5),
+            new ColorRgb(1, 1, 1),
+            true,
+            0.0,
+            0.0,
+            1.0,
+            128.0,
+            0.35,
+            0.35 * 0.35,
+            new ColorRgb(0.04, 0.04, 0.04),
+            new ColorRgb(1.5, 1.5, 1.5),
+            new ColorRgb(0.0, 0.0, 0.0),
+            1.0,
+            1.0,
+            MicroFacetedMaterial.FRESNEL_MODEL_SCHLICK,
+            MicroFacetedMaterial.NDF_MODEL_BECKMANN,
+            MicroFacetedMaterial.GEOMETRY_MODEL_SMITH,
+        );
     }
 }
