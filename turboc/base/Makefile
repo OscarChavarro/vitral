@@ -30,6 +30,7 @@ SOURCES = \
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.cpp \
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.cpp \
     src/main/vsdk/toolkit/common/linealAlgebra/AlgebraPrimitives.cpp \
+    src/main/vsdk/toolkit/common/linealAlgebra/CoordinateSystem.cpp \
     src/main/vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.cpp \
     src/main/vsdk/toolkit/processing/ComputationalGeometry.cpp \
     src/main/vsdk/toolkit/numericalAnalysis/lookUpTables/LookUpTableChecksum16.cpp \
@@ -236,6 +237,7 @@ SOURCES = \
     src/main/vsdk/toolkit/io/geometry/ReaderPlyResult.cpp \
     src/main/vsdk/toolkit/io/geometry/ReaderMitScene.cpp \
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp \
+    src/main/vsdk/toolkit/io/image/ImagePersistenceRgbe.cpp \
     src/main/vsdk/toolkit/media/solidTexture/TextureUtils.cpp \
     src/main/vsdk/toolkit/media/solidTexture/from2d/ControlledRGBAImageHDRUncompressed.cpp \
     src/main/vsdk/toolkit/media/solidTexture/from2d/ImageTexture.cpp \
@@ -252,6 +254,7 @@ SOURCES = \
     src/main/vsdk/toolkit/media/GrayScalePalette.cpp \
     src/main/vsdk/toolkit/media/Image.cpp \
     src/main/vsdk/toolkit/media/RGBImageUncompressed.cpp \
+    src/main/vsdk/toolkit/media/RGBImageFloatUncompressed.cpp \
     src/main/vsdk/toolkit/media/RGBAImageUncompressed.cpp \
     src/main/vsdk/toolkit/media/RGBAImageHDRUncompressed.cpp \
     src/main/vsdk/toolkit/media/IndexedColorImageUncompressed.cpp \

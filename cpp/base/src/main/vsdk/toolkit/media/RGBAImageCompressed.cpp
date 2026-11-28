@@ -136,16 +136,16 @@ void RGBAImageCompressed::reportUnsupportedPixelAccess(const char* method) const
     fprintf(stderr, "FATAL_ERROR in %s: Pixel access is not implemented for RGBAImageCompressed.\n", method);
 }
 
-void RGBAImageCompressed::putPixelRgb(int x, int y, RGBPixel* p) {
+void RGBAImageCompressed::putPixelRgb(int /*x*/, int /*y*/, RGBPixel* /*p*/) {
     reportUnsupportedPixelAccess("putPixelRgb");
 }
 
-RGBPixel* RGBAImageCompressed::getPixelRgb(int x, int y) const {
+RGBPixel* RGBAImageCompressed::getPixelRgb(int /*x*/, int /*y*/) const {
     reportUnsupportedPixelAccess("getPixelRgb");
     return new RGBPixel();
 }
 
-void RGBAImageCompressed::getPixelRgb(int x, int y, RGBPixel* p) const {
+void RGBAImageCompressed::getPixelRgb(int /*x*/, int /*y*/, RGBPixel* /*p*/) const {
     reportUnsupportedPixelAccess("getPixelRgb");
 }
 

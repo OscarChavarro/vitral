@@ -44,7 +44,7 @@ implementation, parity or validation item is open. **Pending** means the
 applicable implementation has yet to begin. The shared build, packaging and
 browser verification apply to the release as a whole.
 
-The matrix records 29 finalized phases, 16 in progress and two pending.
+The matrix records 33 finalized phases, 12 in progress and two pending.
 
 | Phase | Scope | Status | Evidence or remaining work |
 |---:|---|---|---|
@@ -65,11 +65,11 @@ The matrix records 29 finalized phases, 16 in progress and two pending.
 | 15 | General processing | Finalized | Gate passed on 2026-11-28. All 22 inventory entries are ported literally. The four Java processing tests are translated, and the reference driver matches Java except for one documented 1-ulp `Math.sin` difference. `LzwWrapper` is a literal port of the native decoder. By user decision, `SpharmonicKitWrapper` fails as Java does without its native library; porting it is Phase 47. |
 | 16 | Materials | Finalized | Literal review of the twelve material classes, the three Java test classes translated (18 tests), Java/TS parity driver bit-exact outside the sampling paths; see the Phase 16 gate record. |
 | 17 | Geometry base | Finalized | The `Geometry` contract is present and used by the current geometry families. |
-| 18 | Curves | In progress | Curve evaluation and rendering exist. Compare the shared TypeScript evaluator with Java's separate interpolation paths. |
-| 19 | Geometry elements | In progress | Ported `closestPointOnTriangle` and aligned numeric containment codes. The reference agrees on edge-distance and collapsed-triangle cases. Continue the ray, hit and vertex audit. |
+| 18 | Curves | Finalized | `Curve` and `ParametricCurve` rewritten literally; Java/TS parity driver bit-exact over 31,711 lines; see the Phase 18 gate record. |
+| 19 | Geometry elements | Finalized | `Ray`, `RayHit`, `Vertex` and `Triangle` aligned with Java, `java.lang.Math.min`/`max` fixed; Java/TS parity driver bit-exact over 3,349 lines; see the Phase 19 gate record. |
 | 20 | Concrete geometry elements checkpoint | Finalized | The historical plural package entries map to the singular package covered by Phase 19. |
-| 21 | Surfaces | In progress | Triangle mesh normal construction follows Java's edge normalization and incident order. Close the `_ParametricBiCubicPatchIntersector` gap and recheck the remaining mesh internals. |
-| 22 | Volumes and boundary representation | In progress | B-rep operators, validators and the recent refactor are present. Verify the private decision paths and the newer Java `VoxelVolume` behavior. |
+| 21 | Surfaces | Finalized | The surface classes rewritten literally, `_ParametricBiCubicPatchIntersector` ported, the three Java test classes translated (15 tests); Java/TS parity driver bit-exact over 132 lines; see the Phase 21 gate record. |
+| 22 | Volumes and boundary representation | Finalized | `VoxelVolume` ported from the current Java (threshold, voxel traversal, surface data, B-rep export); Box/Cone `doContainmentTest` added; the 19 Java test classes (121 tests) translated; Java/TS parity driver bit-exact over 20 lines; see the Phase 22 gate record. |
 | 23 | Backgrounds | Finalized | All four classes were compared with Java. `FixedBackground` already returns Java's null result. The background suites cover fixed, uniform and cubemap sampling. |
 | 24 | Cameras | Finalized | `Camera` is ported line by line from Java, including the three outcode overloads, both Cohen–Sutherland clippers and the ray projection. A reference driver matched Java bit for bit on five camera setups. `CameraProjectionTest` is ported, and the browser gizmos were exercised. |
 | 25 | Geometric processing | In progress | Both clipping families build and export. The generic clipper suites pass. Revisit polygon-merger and CSG parity on the current sources. |
@@ -77,7 +77,7 @@ The matrix records 29 finalized phases, 16 in progress and two pending.
 | 27 | Tone-mapping checkpoint | Finalized | Empty group. Existing gamma and HDR operations remain in Phases 14 and 15. |
 | 28 | Scene model | In progress | Scene containers, CSG and worker snapshot transfer exist. Revalidate scene-instance BVH, transforms and snapshot behavior after the current revisions. |
 | 29 | Numerical analysis | Finalized | The four polynomial-source counterparts and both lookup tables were found. The historical graph group is empty. |
-| 30 | I/O wrappers | In progress | `ShapeDescriptorPersistence` reads and writes the Java stream format. Continue the JNI capability mappings and browser resource-failure checks. |
+| 30 | I/O wrappers | In progress | `ShapeDescriptorPersistence` reads and writes the Java stream format. `PersistenceElement` carries the new shared C++/rpkBase semantics (see its update record). Continue the JNI capability mappings and browser resource-failure checks. |
 | 31 | I/O context checkpoint | Finalized | The runtime split is explicit in the packages. Format and stream gaps are tracked in Phases 30 and 32–36. |
 | 32 | Binary I/O | In progress | `PersistenceElement` legacy long helpers intentionally read and write four bytes, as Java does. Continue the audit of the pipe and decompression wrappers and of true 64-bit stream contracts. |
 | 33 | Image I/O | In progress | Node raster import, browser decoding, SGI, compressed DDS, palette import and PNG/PPM export exist. Review TGA, uncompressed DDS, native decoding equivalents and remaining export formats. |
@@ -446,13 +446,13 @@ Phase 16 gate record: `npm run verify` completed successfully. All five material
 
 Phase 17 gate record: `npm run verify` completed successfully. The Geometry root contract is exported with its containment constants, local bounding-volume contract, visibility default, and structural ray/hit contracts to be implemented by Phase 19. No Java test source has a dependency closure limited to this root contract. This phase was completed out of normal order while Phase 15 remains in progress.
 
-Phase 18 gate record: `npm run verify` completed successfully. Both curve contracts are exported, including parametric linear, quadratic, Hermite, Bézier and uniform B-spline evaluation, sampling, approximate bounds, and containment. The only related Java test depends on later polyhedral-solid production classes. This phase was completed out of normal order while Phase 15 remains in progress.
+Phase 18 gate record: `npm run verify` completed successfully. Both curve contracts are exported, including parametric linear, quadratic, Hermite, Bézier and uniform B-spline evaluation, sampling, approximate bounds, and containment. The only related Java test depends on later polyhedral-solid production classes. This phase was completed out of normal order while Phase 15 remains in progress. (Superseded by the Phase 18 gate record of 2026-11-28: the curves are now literal and checked by a parity driver.)
 
-Phase 19 gate record: `npm run verify` completed successfully. All six geometry elements are exported, including immutable rays, configurable ray-hit records, triangle intersection and containment, and vertex data contracts. No Java test source has a dependency closure limited to these elements. This phase was completed out of normal order while Phase 15 remains in progress.
+Phase 19 gate record: `npm run verify` completed successfully. All six geometry elements are exported, including immutable rays, configurable ray-hit records, triangle intersection and containment, and vertex data contracts. No Java test source has a dependency closure limited to these elements. This phase was completed out of normal order while Phase 15 remains in progress. (Superseded by the Phase 19 gate record of 2026-11-28.)
 
 Phase 20 gate record: the six `vsdk.toolkit.environment.geometry.elements.*` graph entries have no Java source mapping in the current source of record; their singular-package counterparts were completed in Phase 19. No duplicate compatibility aliases were added. `npm run verify` completed successfully.
 
-Phase 22 gate record: `npm run verify` completed successfully on 2026-09-10. All thirty inventory entries are exported through `@vitral/base`; the Java B-rep reference suite compiled and passed. Fifty-eight deterministic TypeScript tests in forty-three modules pass, including primitive B-rep exports, numeric/strict/topological validation, point-in-solid and quantitative-invisibility edge cases, topology editing, node ownership, and the Euler inverse and wrapper contracts (`mvfs`/`kvfs`, `lmev`/`lkev`, `lmef`/`lkef`, `lkemr`/`lmekr`, `lringmv`, and `lkimrh`/`lmikrh`). The face-plane corner fallback preserves the Java behavior for open-wire `lmef`/`lkef` inverse sequences. This phase was completed out of normal order while Phase 15 remains in progress.
+Phase 22 gate record: `npm run verify` completed successfully on 2026-09-10. All thirty inventory entries are exported through `@vitral/base`; the Java B-rep reference suite compiled and passed. Fifty-eight deterministic TypeScript tests in forty-three modules pass, including primitive B-rep exports, numeric/strict/topological validation, point-in-solid and quantitative-invisibility edge cases, topology editing, node ownership, and the Euler inverse and wrapper contracts (`mvfs`/`kvfs`, `lmev`/`lkev`, `lmef`/`lkef`, `lkemr`/`lmekr`, `lringmv`, and `lkimrh`/`lmikrh`). The face-plane corner fallback preserves the Java behavior for open-wire `lmef`/`lkef` inverse sequences. This phase was completed out of normal order while Phase 15 remains in progress. (Superseded by the Phase 22 gate record of 2026-11-28: `VoxelVolume` now has the Java ray traversal and B-rep export, and the Java volume tests are translated.)
 
 Phase 23 gate record: `npm run verify` completed successfully on 2026-09-10. All four background models are exported through `@vitral/base`; deterministic tests cover uniform colours, the Java-compatible unfinished fixed background, cubemap face selection, image replacement, and camera ownership.
 
@@ -2377,8 +2377,11 @@ Phase 16 gate record — 2026-11-28:
   `catch (Exception eofLike)` shows that the end of the file was meant to end
   the table, which is what TypeScript does: the text after the last newline is
   not a line and a missing material raises the `IllegalArgumentException`.
-  Fixing Java (for example by having `readAsciiLine` throw or return null at
-  the end of the stream) is left to the user.
+  Fixed in Java on 2026-11-28 by the `PersistenceElement` update:
+  `readBytes` throws `EOFException` on a short read, so `readAsciiLine`
+  throws at the end of the stream. A JDK 17 run now gives the TypeScript
+  behavior: the material of an unterminated last row and a missing material
+  both raise the `IllegalArgumentException`.
 - `Texture`: Java's `System.arraycopy` rejects data shorter than
   `width * height * channels` with `ArrayIndexOutOfBoundsException("arraycopy:
   last source index N out of bounds for byte[M]")`, which TypeScript now
@@ -2442,6 +2445,72 @@ vsdk.toolkit.environment.geometry.curve.ParametricCurve
 
 Exit: satisfy the applicable standard phase checks.
 
+Phase 18 gate record — 2026-11-28:
+
+- Tests. Java has no test class for `vsdk.toolkit.environment.geometry.curve`
+  and TypeScript has none either; the curves are exercised by the translated
+  `CurveModelerGlyphWeldTest`, `CurveModelerRotationalSweepTest` and
+  `SimpleSceneSnapshotTransfer` tests, which pass.
+- `Curve` now has Java's two `doIntersectionFirstHit` methods: the
+  one-argument form returns null, and the two-argument form calls it, as
+  Java does, instead of returning false directly. Its type parameters,
+  which Java does not have and nothing used, are removed so that the
+  overload can take `Ray` and `RayHit` (as `Box` does).
+- `ParametricCurve` was a compact rewrite with one shared evaluator. It is
+  now Java's code method by method, and these behaviors changed:
+  - `evaluateQuadratic`: Java writes the weights of the two inner Bezier
+    points as `2/3` and `1/3`, int divisions that are 0, so those points are
+    `qp0` and `qp1`. TypeScript used the real fractions and drew different
+    quadratic segments (the `QUAD` points of `WebFontReader`, as Java's of
+    `AwtFontReader`). The Java values are kept and named
+    `TWO_THIRDS_AS_JAVA_INT` and `ONE_THIRD_AS_JAVA_INT`. This is a Java
+    defect (even with real fractions the second point would be wrong:
+    the degree elevation is `qp2 + (qp1 - qp2) * 2/3`); fixing it is left to
+    the user.
+  - The linear, Hermite and Bezier evaluators accumulate in Java's order
+    (first term times its weight, then the others added), not from a zero
+    vector, which could change the sign of a zero.
+  - `calculatePoints` stops when the evaluation at `t = 0` gives null, and
+    with zero approximation steps evaluates only `t = 0` (the old loop
+    evaluated `0/0`, NaN).
+  - `getMinMax` starts from `Double.MAX_VALUE` and `Double.MIN_VALUE` (the
+    smallest positive double, so a curve entirely on the negative side of
+    an axis reports `4.9e-324` as its maximum) and compares as Java does,
+    instead of from the infinities through `Math.min`/`Math.max`.
+  - `doContainmentTest` skips a `BREAK` and the point after it, as Java
+    does (`exportToCalligraphic3DBuffer` already did).
+  - `addPoint` checks for a consecutive repeated endpoint as Java's
+    `shouldSkipConsecutiveEndpoint` does, including a null first vector.
+  - The point list is still a public array, as the modeler, the WebGL
+    renderer and the font reader use it, but every access the Java methods
+    make through `ArrayList` has its checks: `get`, `set` and `remove`
+    throw `IndexOutOfBoundsException("Index i out of bounds for length n")`,
+    `add(index, ...)` throws `IndexOutOfBoundsException("Index: i, Size:
+    n")`, and a control point read throws `ArrayIndexOutOfBoundsException`
+    or `NullPointerException` where Java's does. A null vector is returned
+    where Java returns it (in `calculatePoints`' list) and fails where Java
+    uses it.
+  - The five basis matrices are mutable statics, as in Java.
+- Parity. A reference driver in package
+  `vsdk.toolkit.environment.geometry.curve` and its Node twin, fed by the
+  same integer LCG, build 400 curves of up to 12 control points of every type
+  (`BREAK`, `CORNER`, `QUAD`, `HERMITE`, `BEZIER`, `UNRBSPLINE`,
+  `NUNRBSPLINE`, `CATMULLROM`), one in five with malformed control points
+  (null, empty, one vector, a null first or second vector), repeated
+  endpoints, `addPointAt`, `removePoint` and `setPointAt` at valid and
+  invalid positions, and 0, 1, 7 or 50 approximation steps. For every index
+  from -1 to the size they print `getPoint`, `evaluate` at
+  `t = 0, 1, 0.37, -0.5, 1.5, NaN`, and `calculatePoints` with and without
+  broken rects; then `getMinMax`, six `doContainmentTest`s, the exported
+  segments and the three intersection calls. Doubles are compared as raw
+  bits and exceptions by class and message (the message of a
+  `NullPointerException` aside, as Java's helpful messages name the Java
+  expression; the JVM runs with `-XX:-OmitStackTraceInFastThrow` so that
+  repeated exceptions keep their message). The 31,711 lines are identical.
+- Gate: prettier and eslint are clean; the geometry, curve-modeler and
+  scene-snapshot tests of `@vitral/base` pass (773 passed, 10 skipped); both testsuite
+  projects type-check; `npm run verify` completed successfully (base: 162 files, 1319 tests passed and 10 skipped; fs: 7 files, 29 tests; the three tarballs install and import in a clean consumer).
+
 ### Phase 19: Geometry elements
 
 Source group: `22_geometry_element.txt` (6 class entries).
@@ -2460,6 +2529,57 @@ vsdk.toolkit.environment.geometry.element.Vertex2D
 ```
 
 Exit: satisfy the applicable standard phase checks.
+
+Phase 19 gate record — 2026-11-28:
+
+- Tests. The one Java test class of the package, `PlanarFaceTest` (10
+  tests), was already translated; its describe and test names now are the
+  Java ones (`triangleGeometry`, ...). `TriangleContainment.spec.ts`, a
+  TypeScript-only test with no Java or C++ counterpart, is deleted.
+- `Ray` is immutable as in Java. The setters `setOrigin`, `setDirection`,
+  `setT` and `setOriginAndDirection`, which Java does not have and nothing
+  called, are removed. The constructors and `fromAffine`/`with*` follow
+  Java's private four-argument constructor (selected by a module-private
+  token) with its `Objects.requireNonNull` checks and messages ("Ray origin
+  cannot be null", "Ray direction cannot be null", "Ray to copy cannot be
+  null"); `copyOf` returns the same object, as Java does for an immutable
+  ray, instead of a copy; `withT` records `RaytraceStatistics.recordRayWithT`.
+- `RayHit` has Java's four constructors, including the copy constructor
+  `RayHit(RayHit)`, records `recordRayHitInstance` and `recordHitInfoClone`,
+  and `clear` sets the three vectors to the shared `ZERO_VECTOR`.
+  `clone(other)` copies Java's fields one by one instead of `Object.assign`;
+  `clone()` is the one inherited from `Entity`, as in Java, instead of a
+  TypeScript-only copy.
+- `Vertex` has Java's six constructors. The old one ignored the binormal and
+  tangent of `Vertex(position, normal, binormal, tangent)` and normalized its
+  normal, had no `Vertex(Vertex)` (a vertex passed to it was read as a
+  position), and copied the position of `Vertex(position)`, which Java
+  keeps. `getIncidentTriangleAt` checks the index as `ArrayList.get` does.
+- `Triangle`: `minMax` nests `Math.min`/`Math.max` as Java does and
+  `containmentTest` returns the containment code through `containmentValue`.
+  `Intersection` and `Vertex2D` already matched.
+- `java.lang.Math.min`/`max` (the `JavaMath` port) were `a < b ? a : b`,
+  which returns the second argument when either is NaN and +0.0 for
+  `min(0.0, -0.0)`. They now use JavaScript's two-argument `Math.min`/`max`,
+  which have Java's semantics. The parity driver found it through
+  `Triangle.minMax`; the method has 67 callers across the port.
+- Parity. A reference driver in package
+  `vsdk.toolkit.environment.geometry.element` and its Node twin, fed by the
+  same integer LCG, print 3,349 lines: 200 rays through every constructor
+  and copy (directions near zero, near unit length and zero), `equals`,
+  `hashCode`, `toString` and every null-argument exception; 60 `RayHit`s
+  through the four constructors, the detail masks, the hit distance, the
+  copy, `clone`, `reset` and `resetForDistanceOnly`; 60 vertices through the
+  six constructors and the setters; `Vertex2D` and `Intersection`; 3,000
+  triangles, a tenth with NaN, infinite and zero coordinates, degenerate and
+  parallel cases, through `queryIntersection` (all query forms),
+  `intersectRay`, `doIntersectionWithTriangle`, `supportingPlane`, the
+  projection helpers, `containmentTest` and `minMax`; and the final
+  `RaytraceStatistics` summary (200 `withT` calls, 180 `RayHit` instances,
+  120 clones). All doubles are compared as raw bits and the lines are
+  identical.
+- Gate: prettier and eslint are clean; both testsuite projects type-check;
+  the Java test passes; `npm run verify` completed successfully (base: 161 files, 1317 tests passed and 10 skipped, one file and two tests fewer than before because of the deleted invented spec; fs: 7 files, 29 tests; the three tarballs install and import in a clean consumer).
 
 ### Phase 20: Concrete geometry elements
 
@@ -2505,6 +2625,139 @@ vsdk.toolkit.environment.geometry.surface.TriangleStripMesh
 ```
 
 Exit: satisfy the applicable standard phase checks.
+
+Phase 21 gate record — 2026-11-28:
+
+- Tests. The three Java test classes of the package are translated one to
+  one (15 tests): `TriangleMeshContractTest` (3, with the Java names),
+  `ParametricBiCubicPatchTest` (8; the TypeScript spec had one test) and
+  `SubdividedBezierPatchTest` (4: the two surface tests in `@vitral/base`,
+  the two `ReaderMitPrimitives_*` tests in `@vitral/fs`, where
+  `ReaderMitScene` is). `Polygon2D.spec.ts` and `TriangleMeshSlice.spec.ts`,
+  TypeScript-only tests with no Java counterpart, are deleted. The 15 Java
+  tests pass.
+- `TriangleMesh` is Java's code method by method (the `Float64Array` /
+  `Int32Array` storage stays; element accesses outside the intersection
+  loop throw as Java's arrays do through `JavaArray`). Changed behaviors:
+  the default name is `"default"`; the `init*Array` methods reuse an array
+  of the right length and only the positions and triangles reset the
+  acceleration structure; `setVertexes` takes Java's five arguments;
+  `setVertexAt` writes every vertex array (a null one throws, as in Java);
+  `clone` copies the geometry arrays and the acceleration structure but not
+  the materials, textures and ranges, and no longer recomputes the normals;
+  `copyGeometry` is `clone`; `getMinMax` starts from `Double.MAX_VALUE`;
+  `toString` lists the material and texture spans; the intersection has
+  Java's one-, two- and three-argument `doIntersectionFirstHit`, the
+  barycentric normal and (u, v) interpolation, the normal turned against
+  the ray and the material/texture range lookup; `doContainmentTest`
+  returns `LIMIT` as soon as a triangle is not `OUTSIDE`; and `compact`,
+  `removeSelectedVertices` and `slice` (with its three triangle cuts) are
+  ported. `slice` keeps Java's defects: the cuts receive
+  `3*triangleIndexes[3*i]` (+0, +1, +2) as triangle and vertex indexes, so
+  most cut configurations end in `ArrayIndexOutOfBoundsException`; the
+  `MyCase4` and `Unhandled case` console lines; and the
+  `extraVertices is null!` warning reported as `simpleTriangleCut` by the
+  three cuts. Fixing them is left to the user. The typed ray queries
+  (`queryFirstHit`, `querySurfaceDetail`, `emitRayCrossings`, `getBounds`)
+  already matched Java.
+- `TriangleMeshGroup` (the `TriangleMeshLike` interface is removed),
+  `TriangleStripMesh` (its TypeScript-only intersection is removed: Java
+  returns no hit), `QuadMesh` (TypeScript-only normal, binormal, tangent
+  and UV helpers removed; `exportToTriangleMeshGroup` is Java's),
+  `InfinitePlane` (`setFromPointNormal` computes `d` from the given normal
+  before normalizing it, as Java does; `overlapsWith` uses
+  `Vector3Dd.length`), `FunctionalExplicitSurface` (Java's `init` and its
+  logger reports; no validation in `setTesselationHint`), `Polygon2D`,
+  `_Polygon2DContour` and `_AnimationInfo` were rewritten literally.
+- `Md2Mesh` keeps Java's `short` and `float` fields (`setCurrentAnimationInd`
+  narrows and takes Java's remainder; `setFrameTimeSeg` rounds to float);
+  `fillAniInfo` is Java's loop, with `String.trim` and the Unicode
+  `Character.isDigit`; `returnStartEndAnim(short, ...)` reads
+  `aniInfos.get(index)`, so an index out of range throws (the old version
+  clamped it); and `anorms` holds Java's float values (it held the decimal
+  doubles).
+- `ParametricBiCubicPatch` intersected nothing: its comment still said that
+  Java leaves the intersection unimplemented. `_ParametricBiCubicPatchIntersector`
+  (Bezier conversion, uniform-depth de Casteljau subdivision, bounding
+  sphere tree, Möller–Trumbore leaves and Newton refinement) is ported, and
+  the patch now has Java's `doIntersectionFirstHit` (both forms),
+  `doExtraInformation`, `getBezierControlPoint` and the `getMinMax` of the
+  Bezier net. The evaluators use Java's parameter matrices. The
+  TypeScript-only `RangeError`/`Error` validations are removed: a missing
+  net, contour or control point throws `NullPointerException` or
+  `ArrayIndexOutOfBoundsException` where Java does. The lazily built
+  intersector is skipped by the worker scene transfer, as Java's field is
+  `transient`.
+- `SubdividedBezierPatch`, `SubdividedBezierPatchNode` and
+  `BezierPatchSubdivision` were already literal; `getControlPoint` and the
+  constructor's net read now have Java's array checks. `HalfSpace`,
+  `Surface` and `TriangleMeshIntersectionIndex` match.
+- Parity. A reference driver (package `p21`) and its Node twin, fed by the
+  same integer LCG, print 132 lines: 25 random meshes (normals, minmax,
+  `toString`, eight brute-force and six SAH-accelerated intersections with
+  the full hit data, `doExtraInformation`, containment, reorientation,
+  `clone`, vertex access errors, `removeSelectedVertices`), 30 random
+  `slice` calls, `setVertexes`/`setTriangles`/`compact`, 40 planes through
+  their three constructors and every operation, 8 quad meshes and their
+  triangulation, 10 polygons with holes (`classifyContourHoles`, `invert`,
+  `eraseLastLoop`), the `Md2Mesh` animation table (frame names with
+  NUL, spaces, an empty name and an Arabic-Indic digit) and 12 Bezier and
+  Ferguson patches (evaluators, minmax, control net, ten aimed rays with
+  hit data, `doExtraInformation`, quad export, and the null and
+  out-of-range errors). Doubles are compared as raw bits and exceptions by
+  class and message (the message of a `NullPointerException` aside). The
+  stdout and stderr are identical. The polygon vertices are rational
+  points of the circle, as Java's `Math.cos`/`sin` and V8's differ by
+  1 ulp (the documented platform boundary).
+- Gate: prettier and eslint are clean; the environment, I/O and
+  scene-transfer tests of `@vitral/base` pass (884 passed, 10 skipped); both testsuite
+  projects type-check; `npm run verify` completed successfully (base: 162 files, 1321 tests passed and 10 skipped; fs: 7 files, 29 tests; the three tarballs install and import in a clean consumer).
+
+Phase 22 gate record — 2026-11-28:
+
+- Tests. The 19 Java test classes of the package (121 tests) have
+  TypeScript counterparts: 118 tests in `@vitral/base` and the three
+  `Reader*` tests of `HeightFieldSolidTest` in `@vitral/fs`
+  (`HeightFieldSolidReaders.spec.ts`). New translations:
+  `BoxConeContainmentTest` (3), `TorusTest` (5), `VoxelVolumeTest` (6) and
+  the two missing `PolyhedralBoundedSolidPredicatesTest` tests
+  (`doContainmentTest` on a box and on the notched [MANT1986] solid). The
+  headers of the specs first ported from C++ (`PrismTest`,
+  `BrepExportVariantsTest`, `ImplicitSolid`, `HeightFieldSolid`) now cite
+  the Java test; their bodies already matched it. The 121 Java tests pass.
+- `VoxelVolume` is the current Java class: `DEFAULT_THRESHOLD`,
+  `getThreshold`/`setThreshold`, `isFilled`, the ray traversal of
+  [SNYD1987]/[AMAN1987] (`traceFirstFilledVoxel` with the private
+  `VoxelFaceHit` record as `_VoxelFaceHit`), the one- and two-argument
+  `doIntersectionFirstHit`, `doExtraInformation` and `fillSurfaceData`, and
+  `exportToPolyhedralBoundedSolid()` / `(step)` through
+  `PolyhedralBoundedSolidFieldConstructions.createFromSampledField`. Two
+  defects of the old TypeScript class are fixed: `getYSize` returned the X
+  size, and the empty-list test was `length < 0`. `Volume`'s export now
+  returns `PolyhedralBoundedSolid | null`.
+- `Box` and `Cone` gain Java's `doContainmentTest` (they used the
+  `Geometry` default). `Sphere.emitCrossing` is a private method as in Java
+  instead of a closure. `QuadricSurface` loses the TypeScript-only
+  `set*Coefficients` setters and the `coefficientArray` helper (Java builds
+  the array inline). `Prism.getCircumradius` uses `Vector2Dd.length()`.
+- Reviewed without changes: `Torus` (its 1150 extra Java lines are a
+  commented-out `calculateRoot`), `Tube`, `Cone` (the private intersection
+  helpers), `HeightFieldSolid`, `ImplicitSolid`, `Prism`, and the
+  B-rep package (`EulerOperators`, `GeometricValidator`, `NumericPolicy`,
+  `TopologySummary`). The method-size differences come from formatting
+  and from merged overloads.
+- Parity driver (`P22.java` / `p22.mjs`, outside the repository). It covers
+  `VoxelVolume` (random sizes, fills and thresholds, voxel and position
+  accessors, center of mass, rays with three detail masks, stored and
+  non-stored rays, null hits, `doExtraInformation`, exports with steps
+  1, 2 and 0 and a 40x3x70 export, the frame transform), Box/Cone
+  containment, Sphere crossings, QuadricSurface classification, Prism
+  circumradius and Torus hits. All 20 lines are bit-identical, and stderr
+  is identical. The Prism input uses rational base vertices, because the
+  n-gon constructor's `cos`/`sin` differ by 1 ulp between HotSpot and V8.
+- `npm run verify`: `@vitral/base` 162 files passed and 3 skipped, 1337
+  tests passed and 10 skipped; `@vitral/fs` 7 files, 29 tests; the package
+  tarballs are created. Both testsuite type-checks pass.
 
 ### Phase 22: Volumes and boundary representation
 
@@ -2986,6 +3239,46 @@ vsdk.toolkit.io.PersistenceElement
 ```
 
 Exit: satisfy the applicable standard phase checks.
+
+`PersistenceElement` update record — 2026-11-28:
+
+- Source of the changes. The C++ `PersistenceElement` of `cpp/base`, now
+  shared with rpkCpp, gained Java-side counterparts in rpkCpp's
+  `rpkBase/src/main/vsdk/toolkit/io/wrapper/PersistenceElement.java`; that
+  Java file is the reference for these semantics. Vitral's
+  `java/base/src/main/vsdk/toolkit/io/PersistenceElement.java` received them
+  on 2026-11-28 (rpkBase's file in the `vsdk.toolkit.io` package, with the
+  shared C++ `checkDirectory`, which creates a missing directory with
+  `mkdirs`; rpkBase disables that). The TurboC port already matched the
+  shared C++ (only the legacy-compiler spellings differ). The 1284 tests of
+  Java `base` pass.
+- `@vitral/base` now has `java.io.EOFException`. `readBytes(stream, buffer)`
+  rejects a null buffer with `IllegalArgumentException("bytesBuffer can not
+  be null")`, stops on a non-positive read and throws `EOFException("Could
+  not read requested length (o/l)")` on a short read. The new
+  `readBytes(stream, buffer, length)` reports an invalid buffer and a short
+  read through `Logger` and zero-fills the rest. `writeBytes(stream,
+  buffer, length)`, `writeByte`, `writeBool`, `writeInt32LE`,
+  `writeInt64LE` (a `bigint`) and `writeDoubleLE` are added. The one-byte
+  readers go through `readBytes`, and `readAsciiToken` has the
+  three-argument form that stops at a NUL byte. The ASCII readers convert
+  bytes as Java's `(char)byte` does (`0x80`–`0xff` become
+  `0xff80`–`0xffff`). The string writers write `""` for null. Two old
+  conversions were wrong: `byteArray2doubleInvert` read from the wrong
+  starting byte (`cnt` is now 7), and `byteArray2floatBE` did not round its
+  `long` to float.
+- `@vitral/fs`: `checkDirectory` follows the shared C++. An empty name, an
+  existing file and a directory without read/write access are reported,
+  and a missing directory is created (`mkdirs`). rpkBase's Java disables
+  that creation. `extractExtensionFromFile` uses the last-dot loop and
+  returns `""` for an empty name.
+- Parity. A driver over rpkBase's Java `PersistenceElement` and its Node
+  twin print 324 lines covering every reader, writer and conversion,
+  including short reads, null buffers and the `Logger` reports. The stderr
+  is identical, and 323 lines are identical. The other line is the
+  documented platform boundary: V8 quiets a signalling NaN when a float32
+  is widened, so `Float.intBitsToFloat(0x7f9192bb)` comes back as
+  `0x7fd192bb`. The I/O tests of both packages pass.
 
 ### Phase 31: I/O context checkpoint
 

@@ -1825,5 +1825,12 @@ base/src/test/kd_tree_tests.cpp,BASE/SRC/TEST/KDTETEST.CPP,kd_tree_tests.cpp,KDT
 base/src/test/vector_tests.cpp,BASE/SRC/TEST/VECTTEST.CPP,vector_tests.cpp,VECTTEST.CPP
 base/src/main/vsdk/toolkit/common/color/Cie.cpp,BASE/SRC/MAIN/V/T/COMMON/COLOR/CIE.CPP,Cie.cpp,CIE.CPP
 base/src/main/vsdk/toolkit/common/color/Cie.h,BASE/SRC/MAIN/V/T/COMMON/COLOR/CIE.H,Cie.h,CIE.H
+base/src/main/vsdk/toolkit/common/linealAlgebra/CoordinateAxis.h,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/COORAXIS.H,CoordinateAxis.h,COORAXIS.H
+base/src/main/vsdk/toolkit/common/linealAlgebra/CoordinateSystem.cpp,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/COORSYST.CPP,CoordinateSystem.cpp,COORSYST.CPP
+base/src/main/vsdk/toolkit/common/linealAlgebra/CoordinateSystem.h,BASE/SRC/MAIN/V/T/COMMON/LINEALGE/COORSYST.H,CoordinateSystem.h,COORSYST.H
 base/src/main/vsdk/toolkit/environment/geometry/volume/Prism.cpp,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/PRISM.CPP,Prism.cpp,PRISM.CPP
 base/src/main/vsdk/toolkit/environment/geometry/volume/Prism.h,BASE/SRC/MAIN/V/T/ENVI/GEOM/VOLUM/PRISM.H,Prism.h,PRISM.H
+base/src/main/vsdk/toolkit/io/image/ImagePersistenceRgbe.cpp,BASE/SRC/MAIN/V/T/IO/IMAGE/IMAGPRGB.CPP,ImagePersistenceRgbe.cpp,IMAGPRGB.CPP
+base/src/main/vsdk/toolkit/io/image/ImagePersistenceRgbe.h,BASE/SRC/MAIN/V/T/IO/IMAGE/IMAGPRGB.H,ImagePersistenceRgbe.h,IMAGPRGB.H
+base/src/main/vsdk/toolkit/media/RGBImageFloatUncompressed.cpp,BASE/SRC/MAIN/V/T/MEDIA/RGBIMFLU.CPP,RGBImageFloatUncompressed.cpp,RGBIMFLU.CPP
+base/src/main/vsdk/toolkit/media/RGBImageFloatUncompressed.h,BASE/SRC/MAIN/V/T/MEDIA/RGBIMFLU.H,RGBImageFloatUncompressed.h,RGBIMFLU.H
