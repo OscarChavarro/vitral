@@ -436,6 +436,19 @@ its own locale (`X_LOCALE`): `legacy.mk` detects it (`_Xsetlocale` in
 libX11) and defines `VITRAL_X_LOCALE`. The menus use Helvetica, or the
 `fixed` fonts when it is missing (Debian 1.1 installs only the misc fonts).
 
+8-bit indexed displays (PseudoColor, i.e. the CDE console of Tru64 UNIX,
+which has one visual and one installed colormap) are supported. The scene
+editor shares the default colormap when its GLX visual is the default one:
+under CDE, Motif takes the pixels of its widgets from the color server, as
+cells of the default colormap, so a private colormap shows its texts with
+the colors of other cells. The 2D Xlib drawing of the xt library (icons,
+images, gizmos and the CPU renderers of both the xm and xaw variants)
+converts colors with `XlibColorPalette`: masks on TrueColor visuals, and on
+indexed ones the cells of a `ColorCube` (base, `render/dithering`; 5 x 9 x 5
+levels, the dither palette of Mesa, so the cells are shared with the OpenGL
+rendering) allocated read-only on demand, with ordered dithering for images
+and the nearest color of the colormap when it is full.
+
 Without `WITH_POSIX_THREADS=1` the Makefiles define `VITRAL_WITHOUT_PTHREADS`
 for the library and the examples: `java/lang/PosixThreads.h` then replaces
 pthreads with a single threaded subset (no-op mutexes and conditions, and a

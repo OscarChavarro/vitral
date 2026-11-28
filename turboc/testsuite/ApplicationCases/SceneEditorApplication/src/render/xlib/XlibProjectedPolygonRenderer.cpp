@@ -40,9 +40,10 @@ static XPoint toPoint(const Vertex2D& v, int x0, int y0, int width,
     return point;
 }
 
-static unsigned long toPixel(Visual* visual, const ColorRgb& color)
+static unsigned long toPixel(Display* display, Visual* visual,
+                             const ColorRgb& color)
 {
-    return XlibRGBImageUncompressedRenderer::rgbToPixel(visual,
+    return XlibRGBImageUncompressedRenderer::rgbToPixel(display, visual,
         toChannel(color.r()), toChannel(color.g()), toChannel(color.b()));
 }
 
@@ -107,7 +108,7 @@ void XlibProjectedPolygonRenderer::draw(Display* display, Drawable frame,
         if ( path.size() < 3 ) {
             continue;
         }
-        XSetForeground(display, gc, toPixel(visual, polygons[i]->getColor()));
+        XSetForeground(display, gc, toPixel(display, visual, polygons[i]->getColor()));
         XFillPolygon(display, frame, gc, &path[0], (int)path.size(), Complex,
                      CoordModeOrigin);
     }
@@ -131,7 +132,7 @@ void XlibProjectedPolygonRenderer::drawContours(Display* display,
         ((unsigned int)Math::floor(lineWidth + 0.5)), LineSolid, CapRound,
         JoinRound);
     if ( lineColor != NULL ) {
-        XSetForeground(display, gc, toPixel(visual, *lineColor));
+        XSetForeground(display, gc, toPixel(display, visual, *lineColor));
     }
     for ( i = 0; i < polygons.size(); i++ ) {
         ArrayList<XPoint> path;
@@ -139,7 +140,7 @@ void XlibProjectedPolygonRenderer::drawContours(Display* display,
 
         if ( lineColor == NULL ) {
             XSetForeground(display, gc,
-                toPixel(visual, polygons[i]->getColor()));
+                toPixel(display, visual, polygons[i]->getColor()));
         }
         toPath(polygons[i], x0, y0, width, height, path, loopStarts);
         for ( j = 0; j + 1 < loopStarts.size(); j++ ) {

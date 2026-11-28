@@ -11,8 +11,8 @@ class Gizmo2DDrawList;
 Draws a `Gizmo2DDrawList` (the 2D presentation of the gizmos, computed by
 the painters of `vsdk/toolkit/render/gizmo`) with the 2D operations of
 Xlib, so gizmos can be shown over a viewport without any 3D API. It is the
-counterpart of the Java `AwtGizmo2DDrawListRenderer`, for TrueColor
-visuals.
+counterpart of the Java `AwtGizmo2DDrawListRenderer`, for TrueColor and
+indexed visuals (colors converted by `XlibColorPalette`).
 
 The X11 core protocol has no translucency: translucent polygons are blended
 in the client, reading the pixels below them back (`XGetImage`) over the
@@ -57,7 +57,7 @@ public:
     int getTextHeight(int fontSize) const override;
 
     /**
-    @param drawable drawable where to draw, of a TrueColor visual
+    @param drawable drawable where to draw
     @param gc graphics context of the drawable (its line attributes and
     foreground are changed)
     @param visual visual of the drawable

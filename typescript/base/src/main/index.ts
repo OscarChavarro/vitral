@@ -587,6 +587,8 @@ export { HudIcon, type HudIconImageImporter } from "./vsdk/toolkit/gui/HudIcon.j
 export { ViewportWindow } from "./vsdk/toolkit/gui/ViewportWindow.js";
 export { ViewportWindowSetManager } from "./vsdk/toolkit/gui/ViewportWindowSetManager.js";
 export { InformationDialog } from "./vsdk/toolkit/gui/dialog/InformationDialog.js";
+export { DialogFileFilter } from "./vsdk/toolkit/gui/dialog/components/DialogFileFilter.js";
+export { DialogTreeNode } from "./vsdk/toolkit/gui/dialog/components/DialogTreeNode.js";
 export { VisualDoubleVariable } from "./vsdk/toolkit/gui/visualAnalytics/VisualDoubleVariable.js";
 export { VisualVariableSet } from "./vsdk/toolkit/gui/visualAnalytics/VisualVariableSet.js";
 export { PercentageWheelWidget } from "./vsdk/toolkit/gui/visualAnalytics/PercentageWheelWidget.js";

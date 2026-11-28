@@ -46,6 +46,7 @@ static int ditheringBayer(unsigned x, unsigned y) {
     for (bit = 0; bit < 3; bit++) v = (v << 2) | (((y >> bit) & 1) << 1) | ((mixed >> bit) & 1);
     return (int)v;
 }
+int Dithering::orderedThreshold(unsigned x, unsigned y) { return ditheringBayer(x % 8, y % 8); }
 static int ditheringClamp(int v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
 
 void Dithering::orderedRgb565(unsigned char DITHERING_HUGE *rgb, unsigned width, unsigned height) {

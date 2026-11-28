@@ -2,7 +2,7 @@
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_Polygon2DWA.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_Polygon2DWA.h"
 _Polygon2DWA::_Polygon2DWA() : currentLoop(0) { nextLoop(); }
 
 _Polygon2DWA::_Polygon2DWA(const Polygon2D& polyToCopy, BOOLEAN copyClean) : currentLoop(0)

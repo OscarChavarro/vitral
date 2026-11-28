@@ -2,6 +2,7 @@
 
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAPixel.h"
+#include "vsdk/toolkit/render/xlib/XlibColorPalette.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBAImageUncompressedRenderer.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 
@@ -19,6 +20,7 @@ Pixmap XlibRGBAImageUncompressedRenderer::exportToPixmap(
     int backgroundRgb[3] = {
         background.red >> 8, background.green >> 8, background.blue >> 8
     };
+    XlibColorPalette* palette = XlibColorPalette::forVisual(display, visual);
     RGBAPixel pixel;
     for ( int y = 0; y < height; y++ ) {
         for ( int x = 0; x < width; x++ ) {
@@ -33,8 +35,10 @@ Pixmap XlibRGBAImageUncompressedRenderer::exportToPixmap(
                 rgb[c] = (rgb[c] * alpha + backgroundRgb[c] * (255 - alpha)) /
                     255;
             }
-            XPutPixel(image, x, y, XlibRGBImageUncompressedRenderer::rgbToPixel(
-                visual, rgb[0], rgb[1], rgb[2]));
+            // The transparent parts keep the exact background pixel: on
+            // indexed visuals it may not be a color of the palette
+            XPutPixel(image, x, y, alpha == 0 ? background.pixel :
+                      palette->rgbToPixel(rgb[0], rgb[1], rgb[2], x, y));
         }
     }
     Pixmap pixmap = XCreatePixmap(display, drawable, width, height, depth);

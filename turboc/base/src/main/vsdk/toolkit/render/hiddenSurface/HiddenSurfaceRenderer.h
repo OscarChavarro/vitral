@@ -11,7 +11,7 @@
 // First: gcc 2.7.2 fails if _DoubleLinkedListNode is defined before it
 // (see WeilerAthertonPolygonClipper.h)
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/WeilerAthertonPolygonClipper.h"
 #include "java/util/ArrayList.h"
 #include "java/util/TreeMap.h"
 #include "vsdk/toolkit/common/Entity.h"

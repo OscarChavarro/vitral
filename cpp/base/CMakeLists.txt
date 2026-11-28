@@ -131,6 +131,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/element/RayCrossingQuery.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayCrossing.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayCrossingSink.cpp
+    src/main/vsdk/toolkit/render/dithering/ColorCube.cpp
     src/main/vsdk/toolkit/render/dithering/Dithering.cpp
     src/main/vsdk/toolkit/animation/AnimationEventGenerator.cpp
     src/main/vsdk/toolkit/common/VSDK.cpp

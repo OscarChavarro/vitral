@@ -102,6 +102,8 @@
         "src/main/vsdk/toolkit/gui/ViewportWindow.ts",
         "src/main/vsdk/toolkit/gui/ViewportWindowSetManager.ts",
         "src/main/vsdk/toolkit/gui/dialog/InformationDialog.ts",
+        "src/main/vsdk/toolkit/gui/dialog/components/DialogFileFilter.ts",
+        "src/main/vsdk/toolkit/gui/dialog/components/DialogTreeNode.ts",
         "src/main/vsdk/toolkit/gui/visualAnalytics/VisualDoubleVariable.ts",
         "src/main/vsdk/toolkit/gui/visualAnalytics/VisualVariableSet.ts",
         "src/main/vsdk/toolkit/gui/visualAnalytics/PercentageWheelWidget.ts",

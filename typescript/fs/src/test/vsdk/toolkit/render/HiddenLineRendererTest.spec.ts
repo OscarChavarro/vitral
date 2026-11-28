@@ -38,6 +38,11 @@ several seconds here (Java runs the whole class in about 4 s) carry the
 repository's 120 s per-test timeout instead of Vitest's 5 s default.
 */
 
+/** Ends the current macrotask, so a long synchronous case does not starve the worker. */
+function yieldToEventLoop(): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 /** `String.format("%.Nf", value)` */
 function f(value: number, digits: number): string {
     return value.toFixed(digits);
@@ -365,7 +370,7 @@ describe("HiddenLineRendererTest", () => {
     compared against an orientation-free ground-truth ray-march of the rotated
     solid, skipping the measure-zero band around each true visibility transition.
     */
-    it("given_splitTestPart1_partialOcclusion_then_edgesClippedToGroundTruth", () => {
+    it("given_splitTestPart1_partialOcclusion_then_edgesClippedToGroundTruth", async () => {
         const rotations: number[][] = [
             [135, 45],
             [90, 120],
@@ -435,6 +440,9 @@ describe("HiddenLineRendererTest", () => {
                     }
                 }
             }
+            // Lets the test runner's worker answer its RPC between the
+            // orientations; a single synchronous run takes about 30 s.
+            await yieldToEventLoop();
         }
         expect(bad.length, "Partial-occlusion clipping mismatches vs ground truth:\n" + bad).toBe(0);
     }, 120_000);

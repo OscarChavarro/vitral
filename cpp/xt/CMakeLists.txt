@@ -37,6 +37,7 @@ add_library(vitral_xt SHARED
     src/main/vsdk/toolkit/render/xt/XtDialogHost.cpp
     src/main/vsdk/toolkit/render/xt/XtTreeView.cpp
     src/main/vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.cpp
+    src/main/vsdk/toolkit/render/xlib/XlibColorPalette.cpp
     src/main/vsdk/toolkit/render/xlib/XlibRGBAImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.cpp
 )

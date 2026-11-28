@@ -3,8 +3,8 @@
 
 // First: gcc 2.7.2 fails if _DoubleLinkedListNode is defined before it
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_VertexNode2D.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_CircularDoubleLinkedList.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_VertexNode2D.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_CircularDoubleLinkedList.h"
 class _Polygon2DContourWA {
 public:
     _CircularDoubleLinkedList<_VertexNode2D> vertices;

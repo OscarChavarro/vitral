@@ -38,6 +38,7 @@
 #include "application/XtOpenGL1ApplicationController.h"
 #include "vsdk/toolkit/gui/XtTextEncoding.h"
 #include "vsdk/toolkit/gui/XFontSelection.h"
+#include "vsdk/toolkit/render/xlib/XlibColorPalette.h"
 #include "application/XtOpenGL1GuiEventExecutor.h"
 #include "application/XtOpenGL1SceneEditorApplication.h"
 #include "application/mcp/XtOpenGL1VitralEditorMCP.h"
@@ -302,6 +303,7 @@ public:
             panelFontSet = NULL;
         }
         if (display != NULL) {
+            XlibColorPalette::releaseDisplay(display);
             // Frees the colors cached by the Xt converters in the colormap:
             // it goes with the connection, afterwards
             XtCloseDisplay(display);
@@ -830,10 +832,12 @@ private:
             XVisualInfo* visualInfo = chooseVisual();
             visual = visualInfo->visual;
             visualDepth = visualInfo->depth;
-            colormap = XCreateColormap(display,
-                RootWindow(display, visualInfo->screen), visual, AllocNone);
+            colormap = colormapFor(visualInfo);
             XFree(visualInfo);
         }
+        // The 2D Xlib drawing (icons, images, gizmos, CPU renderers) allocates
+        // its colors in the colormap of the shell on indexed visuals
+        XlibColorPalette::setColormap(display, visual, colormap);
 
         Arg args[9];
         Cardinal n = 0;
@@ -885,6 +889,25 @@ private:
         cpuShellMode = cpu;
     }
 
+    /**
+    Colormap of the shell for the GLX visual: the default colormap when the
+    visual is the default one, a new colormap otherwise. On 8-bit PseudoColor
+    servers (i.e. Tru64 CDE) the GLX visual of Mesa is the default visual, and
+    a private colormap breaks the Motif colors: under CDE, Motif takes the
+    pixels of its widgets from the color server, indices of the default
+    colormap, that point to unrelated colors in a private one (texts drawn
+    with the background color). Sharing it also avoids the colormap swaps of
+    the window manager (one installed colormap only).
+    */
+    Colormap colormapFor(XVisualInfo* visualInfo)
+    {
+        if (visualInfo->visual == DefaultVisual(display, visualInfo->screen))
+            return DefaultColormap(display, visualInfo->screen);
+        return XCreateColormap(display,
+            RootWindow(display, visualInfo->screen), visualInfo->visual,
+            AllocNone);
+    }
+
     void rebuildShell(BOOLEAN cpu)
     {
         if (cpu == cpuShellMode) return;
@@ -914,6 +937,7 @@ private:
         viewportMenu = NULL;
         viewportMenuCommands.clear();
         window = 0;
+        XlibColorPalette::releaseColormap(display, colormap);
         if (colormap != 0 && colormap != DefaultColormap(display, DefaultScreen(display)))
             XFreeColormap(display, colormap);
         colormap = 0;

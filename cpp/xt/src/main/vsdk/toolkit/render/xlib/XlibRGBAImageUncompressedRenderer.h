@@ -13,9 +13,9 @@ the image is blended over a background color.
 class XlibRGBAImageUncompressedRenderer {
 public:
     /**
-    @param background color the transparent parts are blended with
-    @return a new pixmap (free it with `XFreePixmap`), or `None` if the
-    visual is not TrueColor
+    @param background color the transparent parts are blended with (its
+    pixel is used where the image is fully transparent)
+    @return a new pixmap (free it with `XFreePixmap`), or `None`
     */
     static Pixmap exportToPixmap(Display* display, Drawable drawable,
                                  Visual* visual, int depth,

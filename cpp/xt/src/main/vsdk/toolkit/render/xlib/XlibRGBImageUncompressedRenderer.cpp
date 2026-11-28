@@ -4,40 +4,19 @@
 
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/render/xlib/XlibColorPalette.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 
-namespace {
-
-int shiftOf(unsigned long mask)
-{
-    int shift = 0;
-    while ( mask != 0 && (mask & 1) == 0 ) {
-        mask >>= 1;
-        shift++;
-    }
-    return shift;
-}
-
-unsigned long channel(int value, unsigned long mask)
-{
-    unsigned long bits = mask >> shiftOf(mask);
-    return ((static_cast<unsigned long>(value) * bits / 255) <<
-            shiftOf(mask)) & mask;
-}
-
-}
-
 unsigned long XlibRGBImageUncompressedRenderer::rgbToPixel(
-    const Visual* visual, int r, int g, int b)
+    Display* display, const Visual* visual, int r, int g, int b)
 {
-    return channel(r, visual->red_mask) | channel(g, visual->green_mask) |
-        channel(b, visual->blue_mask);
+    return XlibColorPalette::forVisual(display, visual)->rgbToPixel(r, g, b);
 }
 
 XImage* XlibRGBImageUncompressedRenderer::createXImage(
     Display* display, Visual* visual, int depth, int width, int height)
 {
-    if ( visual == nullptr || visual->red_mask == 0 || width <= 0 ||
+    if ( visual == nullptr || width <= 0 ||
          height <= 0 ) {
         return nullptr;
     }
@@ -65,14 +44,15 @@ XImage* XlibRGBImageUncompressedRenderer::exportToXImage(
     if ( image == nullptr ) {
         return nullptr;
     }
+    XlibColorPalette* palette = XlibColorPalette::forVisual(display, visual);
     RGBPixel pixel;
     for ( int y = 0; y < height; y++ ) {
         for ( int x = 0; x < width; x++ ) {
             source.getPixelRgb(x, y, &pixel);
-            XPutPixel(image, x, y, rgbToPixel(visual,
+            XPutPixel(image, x, y, palette->rgbToPixel(
                 static_cast<unsigned char>(pixel.r),
                 static_cast<unsigned char>(pixel.g),
-                static_cast<unsigned char>(pixel.b)));
+                static_cast<unsigned char>(pixel.b), x, y));
         }
     }
     return image;

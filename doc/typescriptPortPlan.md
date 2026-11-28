@@ -85,9 +85,9 @@ The matrix records 22 finalized phases, 23 in progress and one pending.
 | 35 | VRML checkpoint | Finalized | The graph group is empty. The actual VRML and compressed input work is tracked in Phase 36. |
 | 36 | Geometry I/O | In progress | OBJ and parallel PLY import are wired in the web editor and the Node asynchronous dispatcher. MIT/altimetry/MD2/STEP readers and STL and OBJ/GTS/VTK writers exist. Six other geometry readers, STEP writing, and curve, patch and viewpoint persistence remain open. |
 | 37 | SGL checkpoint | Finalized | Empty group. The current GPU adapter belongs to Phase 41. |
-| 38 | GUI model and controllers | In progress | DOM/CSS widgets, dialogs, events, viewports, gizmos and the four camera control schemes (Aquynza, Orbiter, Blender, Google Earth) are ported. The Orbiter, Blender and Google Earth controllers matched Java bit for bit in a reference driver. All 16 Java GUI test classes are ported, and their 195 tests pass. The testsuite examples use the ported Aquynza and Orbiter controllers, as their Java programs do, and were verified in the browser. The quality keys go through the ported `RendererConfigurationController`. The HUD icon, text configuration, viewport-window manager, information dialog and visual analytics classes are ported, with reference-driver parity. Verify worker progress through the renderer owner (Phases 12 and 40). |
-| 39 | Software shaders | In progress | The shader family and a historical matching raytrace exist. Close the shader gate against current materials and the current CPU render path. |
-| 40 | CPU rendering | In progress | Heckbert scan conversion is exported and matches Java in flat and depth-tested visibility passes. The browser raytrace completed on Web Workers. `AutoStereogramGenerator` matches Java byte for byte. `PolyhedralBoundedSolidDebugger` is ported with a plugin registry in place of Java's class loading. Every inventory class with a Java source is now ported. Run the phase gate. |
+| 38 | GUI model and controllers | Finalized | Gate passed on 2026-11-28. All 29 inventory entries with a Java source and all 85 current Java `gui` classes have TypeScript exports; the 16 Java GUI test classes (210 tests) pass in Java and TypeScript; camera controllers, quality keys and worker progress were verified in the browser. |
+| 39 | Software shaders | Finalized | Gate passed on 2026-11-28. All 15 current Java shader classes and `TraceWorkspace` are exported. 96 raytraced images, covering every shading type with texture and bump on and off, match Java byte for byte. |
+| 40 | CPU rendering | Finalized | Gate passed on 2026-11-28: every inventory class with a Java source is ported, the 44 Java render tests pass, their 10 TypeScript translations pass, and packaging and a browser raytrace on Web Workers were verified. |
 | 41 | GPU rendering | In progress | WebGL 2 renderers, context probing and offscreen color/depth readback are implemented. Map voxel rendering and verify shader, texture and context/resource lifecycle in a browser. |
 | 42 | Animation | Finalized | All four animation classes are present. The timer preserves the tick and listener order of the Java loop and supports teardown. |
 | 43 | Application framework | Pending | The three framework/shape-matching classes lack TypeScript counterparts. The existing editor has its own application orchestration. |
@@ -347,10 +347,8 @@ The matrix records 22 finalized phases, 23 in progress and one pending.
   - The seven `variable.Gui*Variable` classes.
   - The gizmo entries live one package deeper (`gui.gizmo`), as already
     recorded under Phase 38.
-- Remaining for Phase 38:
-  - Verify worker progress through the renderer owner (Phases 12 and 40).
-  - The Jogl2 `VisualAnalyticsPercentagesWheelExample` has no browser
-    renderer yet.
+- Phase 38 was closed by its gate on 2026-11-28; see the gate record under
+  Phase 38.
 
 
 ### Out-of-range pixel access and fatal errors — 2026-11-28
@@ -3140,6 +3138,52 @@ The current library includes `RendererConfigurationController`,
 recorded in September remain comparison points for the behavior of the
 individual examples.
 
+Phase 38 gate record — 2026-11-28:
+
+- Inventory: 29 of the 47 entries have a current Java source, and each has a
+  TypeScript export. The other 18 do not exist in the current Java tree,
+  as recorded under "Remaining GUI classes — 2026-11-28".
+- Current Java package check: all 85 classes under `vsdk/toolkit/gui` were
+  checked, because the inventory predates them. Two were missing:
+  `dialog.components.DialogFileFilter` and `DialogTreeNode`. Both are now
+  ported as orphans and exported.
+  - Java's `toLowerCase(Locale.ROOT)` is JavaScript's locale-independent
+    `toLowerCase()`.
+  - `getChildren()` returns the read-only `Collections.unmodifiableList`
+    view.
+  - A reference driver compared suffix matching (case, Unicode and
+    multi-dot suffixes, directories), the descriptions, the tree accessors
+    and the read-only child list. The output is identical to Java's.
+- Completeness scan of `gui/` (sources and specs) and of `@vitral/webgl`:
+  - No focused or skipped test, `any` or compiler-suppression comment.
+  - The two `TODO` comments in `widget/Widget.ts` are copied from
+    `Widget.java`.
+- Java reference: the 16 test classes of `vsdk.toolkit.gui.*` pass (210
+  tests, 0 failures, 0 skipped).
+- TypeScript tests:
+  - The same 16 classes are translated, with the same number of tests in
+    each. All 21 GUI spec files pass (219 tests, including the
+    progress-monitor and tangible-interface specs of other phases).
+  - `npm run verify`: clean build. `@vitral/base` passed 159 files and
+    1238 tests, with the 10 skips already recorded. `@vitral/fs` passed 29
+    tests. The tarballs and the consumer check passed.
+- Review:
+  - Reference drivers (2026-11-27 and 2026-11-28) match Java exactly for:
+    - the Orbiter, Blender and Google Earth camera controllers;
+    - `PercentageWheelWidgetController`, `ViewportWindowSetManager`,
+      `InformationDialog` and `HudIcon`;
+    - the two dialog components.
+  - Browser checks in this session found no console errors:
+    - Aquynza and Orbiter controllers in the testsuite examples.
+    - The quality keys (F2, F3, F10) through `RendererConfigurationController`.
+    - Worker progress through the renderer owner, as recorded under the
+      Phase 40 gate.
+- Not covered by the gate:
+  - The Jogl2 `VisualAnalyticsPercentagesWheelExample` has no browser
+    example yet. Its classes are ported and checked against Java.
+  - The PolyhedralBoundedSolid example's camera recenter after a model
+    change was not exercised in the browser.
+
 Exit: satisfy the applicable standard phase checks.
 
 ### Phase 39: Software shaders
@@ -3185,6 +3229,37 @@ also guards on `info.t == null`, which cannot happen in the port because
 place. The parity evidence is the example above, whose rendered image exercises
 `GouraudTextureShader` (through `LightingShader`) with ambient and point
 lights, shadow rays, and the specular term, and matches Java byte for byte.
+
+Phase 39 gate record — 2026-11-28:
+
+- Inventory:
+  - The 17 entries with a Java source are exported. The 18th,
+    `CookTorranceShader.LightDirection`, is `Light.LightDirection` (Phase 26).
+  - The current package also has `ShadowTransmittance`, which is not in the
+    inventory. It is ported and exported. With it, all 15 Java classes in
+    `render/shaders` have a TypeScript export.
+- Completeness scan of `render/shaders` and `TraceWorkspace.ts`: no `TODO`,
+  `any` or compiler-suppression comment, and ESLint is clean.
+- Java reference: there are no Java shader tests, so there was nothing to
+  translate.
+- Parity: a pair of reference drivers rendered the same scenes with Java's
+  `SimpleRaytracer` and TypeScript's, at 64×36, through `ReaderMitScene`.
+  - Scenes: `bumpMapping`, `test`, `glass_lens` and `balls`.
+  - Configurations: shading types 0 to 4, plus the out-of-range type 5
+    that falls back to Gouraud, each with texture and bump on and off.
+    That is 24 images per scene and 96 in all.
+  - The FNV-1a hashes and the byte sums are identical. The run covers:
+    - every `ShaderSelector` branch;
+    - texture sampling;
+    - Blinn bump perturbation under Phong and Cook-Torrance;
+    - the microfacet parameters;
+    - shadow transmittance through the glass lens.
+  - Flat, Gouraud and Phong without bump give the same image. Java does
+    the same, because all three are the per-pixel `LightingShader`.
+- Packaging and tests: no source changed in this phase. The
+  `npm run verify` of the Phase 38 gate, run the same day, covers it.
+- Browser: the SceneEditor F11 raytrace of the Phase 40 gate runs these
+  shaders on Web Workers.
 
 Exit: satisfy the applicable standard phase checks.
 
@@ -3340,6 +3415,49 @@ Java source are ported 1:1 and exported through `@vitral/base`.
   (64x64 to 128, 149, 150 or 200). The method now keeps Java's grouping.
   Resizing 64x64, 100x37 and 31x17 tiles to 8 upscaled and 2 downscaled
   sizes is byte-identical to Java.
+
+Phase 40 gate record — 2026-11-28:
+
+- Inventory: every entry with a current Java source has a TypeScript export.
+  The nested members are namespace members. The `vsdk.toolkit.render.*`
+  duplicates have no source in the current Java tree, as recorded in the
+  fifth advance above.
+- Completeness scan of `render/` (sources and specs): no `TODO`, focused or
+  skipped test, `any` or compiler-suppression comment.
+- Java reference: the 10 classes of `vsdk.toolkit.render.*` tests pass
+  (44 tests, 0 failures, 0 skipped).
+- Test port: the three Java render tests without a translation were ported:
+  - `TileGeneratorTest` (3 tests) and `SelectionCornersTest` (6 tests),
+    in `@vitral/base`.
+  - `HiddenLineRendererTest` (8 tests), in `@vitral/fs`, because two of its
+    cases read `etc/solids/kurlanderBowl.step` through Java's
+    `StepReader.readSolid(File)`.
+  - Java runs `HiddenLineRendererTest` in about 4 s; here it takes 45 to
+    65 s. Its three slow cases carry the repository's 120 s timeout. The
+    partial-occlusion case yields to the event loop between orientations,
+    because its 30 s of synchronous work made the Vitest worker miss its
+    `onTaskUpdate` RPC. The assertions are unchanged.
+- `npm run verify`: clean build passed.
+  - `@vitral/base`: 159 files and 1238 tests passed, with the 10 skips
+    already recorded.
+  - `@vitral/fs`: 29 tests passed in each of three runs after the yield
+    fix. A run just before those had one failing test that was not
+    identified.
+  - `scripts/compile.sh`: produced the three tarballs, and a consumer
+    compiled and ran against them.
+- Review, against Java reference drivers:
+  - `AutoStereogramGenerator` and `ImageProcessing.resize`: byte-identical.
+  - Out-of-range pixel access: identical exceptions and partial writes.
+- Browser check (testsuite, Chrome):
+  - In `SceneEditorApplication`, F11 raytraces the scene on 8 Web Workers.
+    The owner prints the workers' progress notices (20.83 % to 100 % of 240
+    tiles), the image appears in the image control window, and the run
+    finishes in 450 to 690 ms.
+  - Two requests sent back to back run one after the other, and both
+    complete.
+  - Switching to `ShadersExample` disposes the editor and loads the next
+    example, with no console error.
+  - Whether the workers terminate was not checked separately.
 
 Exit: satisfy the applicable standard phase checks.
 

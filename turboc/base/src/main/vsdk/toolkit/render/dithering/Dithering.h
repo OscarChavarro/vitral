@@ -21,6 +21,11 @@ public:
         int rgb[MAX_COLORS * 3];
     };
     enum Method { Nearest, Ordered, FloydSteinberg };
+    /**
+    @return the threshold of the 8x8 ordered (Bayer) dithering matrix at a
+    pixel, in [0, 63]; the one of orderedRgb565 and of the Ordered method
+    */
+    static int orderedThreshold(unsigned x, unsigned y);
     static void orderedRgb565(unsigned char DITHERING_HUGE *rgb, unsigned width, unsigned height);
     static BOOLEAN optimizePalette(const unsigned char DITHERING_HUGE *rgb, unsigned width, unsigned height,
                                    unsigned colors, Palette *out);

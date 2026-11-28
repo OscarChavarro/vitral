@@ -4,7 +4,7 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_DoubleLinkedListNode.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/_DoubleLinkedListNode.h"
 template <class E>
 class _CircularDoubleLinkedList {
 private:

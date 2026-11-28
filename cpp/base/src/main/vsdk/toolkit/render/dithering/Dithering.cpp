@@ -73,6 +73,11 @@ Dithering::bayer(unsigned x, unsigned y) {
     return (int)v;
 }
 
+int
+Dithering::orderedThreshold(unsigned x, unsigned y) {
+    return bayer(x % BAYER_SIZE, y % BAYER_SIZE);
+}
+
 void
 Dithering::orderedRgb565(uint8_t *rgb, unsigned width, unsigned height) {
     if (!rgb) {

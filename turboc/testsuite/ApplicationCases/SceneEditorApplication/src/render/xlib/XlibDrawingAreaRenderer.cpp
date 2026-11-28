@@ -55,24 +55,18 @@
 #include "vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.h"
 #include "vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.h"
 #include "vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.h"
+#include "vsdk/toolkit/render/xlib/XlibColorPalette.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 #include "java/lang/Math.h"
 
 
-static unsigned long pixel(Visual* visual, const ColorRgb& color)
+static unsigned long pixel(Display* display, Visual* visual,
+                           const ColorRgb& color)
 {
-    return XlibRGBImageUncompressedRenderer::rgbToPixel(visual,
+    return XlibRGBImageUncompressedRenderer::rgbToPixel(display, visual,
         ((int)(Math::max(0.0, Math::min(1.0, color.r())) * 255)),
         ((int)(Math::max(0.0, Math::min(1.0, color.g())) * 255)),
         ((int)(Math::max(0.0, Math::min(1.0, color.b())) * 255)));
-}
-
-static int channel(unsigned long value, unsigned long mask)
-{
-    if (!mask) return 0;
-    int shift = 0;
-    while (!(mask & 1)) { mask >>= 1; ++shift; }
-    return ((int)(((value >> shift) & mask) * 255 / mask));
 }
 
 class XlibFrameBufferSource : public FrameBufferSource {
@@ -92,13 +86,14 @@ public:
         XImage* image = XGetImage(display, frame, x, y, width, height,
                                   AllPlanes, ZPixmap);
         if (!image) return result;
+        XlibColorPalette* palette = XlibColorPalette::forVisual(display, visual);
+        palette->refreshColors();
+        int rgb[3];
         for (int row = 0; row < height; ++row) {
             for (int col = 0; col < width; ++col) {
-                unsigned long p = XGetPixel(image, col, row);
-                result->putPixel(col, row,
-                    ((char)(channel(p, visual->red_mask))),
-                    ((char)(channel(p, visual->green_mask))),
-                    ((char)(channel(p, visual->blue_mask))));
+                palette->pixelToRgb(XGetPixel(image, col, row), rgb);
+                result->putPixel(col, row, ((char)(rgb[0])),
+                    ((char)(rgb[1])), ((char)(rgb[2])));
             }
         }
         XDestroyImage(image);
@@ -422,7 +417,7 @@ void XlibDrawingAreaRenderer::drawTitle(Display* display, Drawable frame,
     }
     viewport->setTitleArea(0, 0, textWidth + 2*borderX,
                            textHeight + 2*borderY);
-    XSetForeground(display, gc, pixel(visual, set->getTitleColorFor(viewport)));
+    XSetForeground(display, gc, pixel(display, visual, set->getTitleColorFor(viewport)));
     if (titleFont)
         Xutf8DrawString(display, frame, titleFont, gc, x+borderX, baseline,
                         title.c_str(), title.length());
@@ -456,7 +451,7 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
                 display, frame, gc, visual, depth, *image, x, y);
     }
     else {
-        XSetForeground(display, gc, pixel(visual,
+        XSetForeground(display, gc, pixel(display, visual,
             scene->simpleBackground->colorInDireccion(camera->getFront())));
         XFillRectangle(display, frame, gc, x, y, width, height);
     }
@@ -509,7 +504,7 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
             Calligraphic2DBuffer lines;
             WireframeRenderer::execute(&lines, wires, camera);
             drawLines(display, frame, gc, lines, x, y, width, height,
-                      pixel(visual, ColorRgb(0,0,0)));
+                      pixel(display, visual, ColorRgb(0,0,0)));
         }
         if (solids.size()) {
             Calligraphic2DBuffer contours, visible, hidden;
@@ -536,22 +531,22 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
             if (quality->isWiresSet()) {
                 for (i = 0; i < freeLines.size(); ++i) {
                     drawLines(display, frame, gc, *freeHidden[i], x, y, width,
-                              height, pixel(visual, freeLines[i]->color), 1,
+                              height, pixel(display, visual, freeLines[i]->color), 1,
                               TRUE);
                 }
                 drawLines(display, frame, gc, hidden, x, y, width, height,
-                          pixel(visual, ColorRgb(.32,.32,.32)), 1, TRUE);
+                          pixel(display, visual, ColorRgb(.32,.32,.32)), 1, TRUE);
             }
             for (i = 0; i < freeLines.size(); ++i) {
                 drawLines(display, frame, gc, *freeVisible[i], x, y, width,
-                          height, pixel(visual, freeLines[i]->color));
+                          height, pixel(display, visual, freeLines[i]->color));
                 delete freeVisible[i];
                 delete freeHidden[i];
             }
             drawLines(display, frame, gc, visible, x, y, width, height,
-                      pixel(visual, ColorRgb(0,0,0)));
+                      pixel(display, visual, ColorRgb(0,0,0)));
             drawLines(display, frame, gc, contours, x, y, width, height,
-                      pixel(visual, ColorRgb(0,0,0)), 2);
+                      pixel(display, visual, ColorRgb(0,0,0)), 2);
         }
         else {
             Matrix4x4d projection = camera->calculateProjectionMatrix();
@@ -563,7 +558,7 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
                     projectLine(projection, ends[0], ends[1], projected);
                 }
                 drawLines(display, frame, gc, projected, x, y, width, height,
-                          pixel(visual, freeLines[i]->color));
+                          pixel(display, visual, freeLines[i]->color));
             }
         }
         for (i = 0; i < freeLines.size(); ++i) delete freeLines[i];
@@ -642,7 +637,7 @@ void XlibDrawingAreaRenderer::display(Display* display, Window window,
 
     Pixmap frame = XCreatePixmap(display, window, width, height, depth);
     GC gc = XCreateGC(display, frame, 0, NULL);
-    XSetForeground(display, gc, pixel(visual, ColorRgb(.77,.77,.77)));
+    XSetForeground(display, gc, pixel(display, visual, ColorRgb(.77,.77,.77)));
     XFillRectangle(display, frame, gc, 0, 0, width, height);
 
     const ArrayList<Viewport*>& viewports = set->getViewports();
@@ -655,7 +650,7 @@ void XlibDrawingAreaRenderer::display(Display* display, Window window,
             int y = ((int)((1-v->getStartYPercent()-v->getSizeYPercent()) * height));
             int w = ((int)(v->getSizeXPercent() * width));
             int h = ((int)(v->getSizeYPercent() * height));
-            XSetForeground(display, gc, pixel(visual,
+            XSetForeground(display, gc, pixel(display, visual,
                 set->isSelected(v) ? ColorRgb(1,.96,0) : ColorRgb(.21,.25,.29)));
             XFillRectangle(display, frame, gc, x, y, w, h);
         }

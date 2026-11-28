@@ -7,7 +7,7 @@
 #include "vsdk/toolkit/render/gizmo/Gizmo2DDrawList.h"
 #include "vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.h"
 #include "vsdk/toolkit/gui/XFontSelection.h"
-#include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
+#include "vsdk/toolkit/render/xlib/XlibColorPalette.h"
 
 namespace {
 
@@ -20,22 +20,6 @@ int clampChannel(double value)
 {
     value = value < 0 ? 0 : value > 1 ? 1 : value;
     return static_cast<int>(value * 255 + 0.5);
-}
-
-/**
-@return the 8 bit value of a channel of a TrueColor pixel
-*/
-int channel(unsigned long value, unsigned long mask)
-{
-    if ( !mask ) {
-        return 0;
-    }
-    int shift = 0;
-    while ( !(mask & 1) ) {
-        mask >>= 1;
-        shift++;
-    }
-    return static_cast<int>(((value >> shift) & mask) * 255 / mask);
 }
 
 }
@@ -139,6 +123,7 @@ void XlibGizmo2DDrawListRenderer::draw(Drawable drawable, GC gc,
     if ( display == nullptr || list.isEmpty() ) {
         return;
     }
+    XlibColorPalette* palette = XlibColorPalette::forVisual(display, visual);
     java::ArrayList<Gizmo2DDrawList::Primitive> primitives =
         list.getPrimitivesInDrawingOrder();
 
@@ -148,9 +133,8 @@ void XlibGizmo2DDrawListRenderer::draw(Drawable drawable, GC gc,
         unsigned long rgb = static_cast<unsigned long>(clampChannel(c.r())) << 16 |
             static_cast<unsigned long>(clampChannel(c.g())) << 8 |
             static_cast<unsigned long>(clampChannel(c.b()));
-        unsigned long pixel = XlibRGBImageUncompressedRenderer::rgbToPixel(
-            visual, clampChannel(c.r()), clampChannel(c.g()),
-            clampChannel(c.b()));
+        unsigned long pixel = palette->rgbToPixel(clampChannel(c.r()),
+            clampChannel(c.g()), clampChannel(c.b()));
 
         XSetForeground(display, gc, pixel);
         switch ( p.getKind() ) {
@@ -280,6 +264,9 @@ void XlibGizmo2DDrawListRenderer::fillTranslucentPolygon(Drawable drawable,
         XDestroyImage(coverage);
         return;
     }
+    XlibColorPalette* palette = XlibColorPalette::forVisual(display, visual);
+    // Indexed visuals: the colors of the pixels below come from the colormap
+    palette->refreshColors();
     int r = static_cast<int>(rgb >> 16 & 0xFF);
     int g = static_cast<int>(rgb >> 8 & 0xFF);
     int b = static_cast<int>(rgb & 0xFF);
@@ -288,16 +275,17 @@ void XlibGizmo2DDrawListRenderer::fillTranslucentPolygon(Drawable drawable,
             if ( !XGetPixel(coverage, column, row) ) {
                 continue;
             }
-            unsigned long p = XGetPixel(below, column, row);
-            int pr = channel(p, visual->red_mask);
-            int pg = channel(p, visual->green_mask);
-            int pb = channel(p, visual->blue_mask);
+            int pixelRgb[3];
+            palette->pixelToRgb(XGetPixel(below, column, row), pixelRgb);
+            int pr = pixelRgb[0];
+            int pg = pixelRgb[1];
+            int pb = pixelRgb[2];
             pr = static_cast<int>(pr + (r - pr) * opacity + 0.5);
             pg = static_cast<int>(pg + (g - pg) * opacity + 0.5);
             pb = static_cast<int>(pb + (b - pb) * opacity + 0.5);
-            XPutPixel(below, column, row,
-                XlibRGBImageUncompressedRenderer::rgbToPixel(visual, pr, pg,
-                                                             pb));
+            XPutPixel(below, column, row, palette->rgbToPixel(pr, pg, pb,
+                static_cast<int>(minX + column),
+                static_cast<int>(minY + row)));
         }
     }
     XPutImage(display, drawable, gc, below, 0, 0, minX, minY, w, h);

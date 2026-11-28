@@ -8,7 +8,9 @@ class RGBImageUncompressed;
 /**
 Presents vitral RGB images with Xlib, as `AwtRGBImageUncompressedRenderer`
 does with AWT: drawing them over a drawable and exporting them to Xlib
-images, for TrueColor visuals.
+images, for TrueColor and indexed (i.e. 8-bit PseudoColor) visuals: the
+colors are converted with the `XlibColorPalette` of the visual, with ordered
+dithering on indexed ones.
 */
 class XlibRGBImageUncompressedRenderer {
 public:
@@ -20,15 +22,14 @@ public:
                      const RGBImageUncompressed& image, int x0, int y0);
 
     /**
-    @return a new image (destroy it with `XDestroyImage`), or null if the
-    visual is not TrueColor
+    @return a new image (destroy it with `XDestroyImage`), or null
     */
     static XImage* exportToXImage(Display* display, Visual* visual,
                                   int depth,
                                   const RGBImageUncompressed& image);
 
     /**
-    @return an empty image of a TrueColor visual (destroy it with
+    @return an empty image of the visual (destroy it with
     `XDestroyImage`), or null
     */
     static XImage* createXImage(Display* display, Visual* visual, int depth,
@@ -38,9 +39,11 @@ public:
     @param r red, in [0, 255]
     @param g green, in [0, 255]
     @param b blue, in [0, 255]
-    @return the pixel value of the color in a TrueColor visual
+    @return the pixel value of the color in the visual (see
+    `XlibColorPalette::rgbToPixel`)
     */
-    static unsigned long rgbToPixel(const Visual* visual, int r, int g, int b);
+    static unsigned long rgbToPixel(Display* display, const Visual* visual,
+                                    int r, int g, int b);
 
 private:
     XlibRGBImageUncompressedRenderer();

@@ -217,6 +217,15 @@ cmake -DVITRAL_XT_WIDGET_SET=xaw ..           # to build with Athena
 The `xt_layers` test (`scripts/checkXtLayers.py`) checks that the Xt layer
 uses neither widget set and that they do not use each other.
 
+8-bit indexed displays (PseudoColor) are supported, as in the turboc port:
+the scene editor shares the default colormap when its GLX visual is the
+default one (under CDE, Motif widgets take their pixels from the default
+colormap), and the Xlib renderers of `xt` convert colors with
+`XlibColorPalette`: masks on TrueColor visuals, and on indexed ones the
+cells of a `ColorCube` (base, `render/dithering`; 5 x 9 x 5 levels, the
+dither palette of Mesa) allocated read-only on demand, with ordered
+dithering for images and the nearest color when the colormap is full.
+
 ## Building with Image Format Support
 
 Once you have installed the required libraries, build with support enabled:

@@ -50,24 +50,17 @@
 #include "vsdk/toolkit/render/gizmo/ScaleGizmo2DPainter.h"
 #include "vsdk/toolkit/render/gizmo/TranslateGizmo2DPainter.h"
 #include "vsdk/toolkit/render/xlib/XlibGizmo2DDrawListRenderer.h"
+#include "vsdk/toolkit/render/xlib/XlibColorPalette.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 
 namespace {
 
-unsigned long pixel(Visual* visual, const ColorRgb& color)
+unsigned long pixel(Display* display, Visual* visual, const ColorRgb& color)
 {
-    return XlibRGBImageUncompressedRenderer::rgbToPixel(visual,
+    return XlibRGBImageUncompressedRenderer::rgbToPixel(display, visual,
         static_cast<int>(java::Math::max(0.0, java::Math::min(1.0, color.r())) * 255),
         static_cast<int>(java::Math::max(0.0, java::Math::min(1.0, color.g())) * 255),
         static_cast<int>(java::Math::max(0.0, java::Math::min(1.0, color.b())) * 255));
-}
-
-int channel(unsigned long value, unsigned long mask)
-{
-    if (!mask) return 0;
-    int shift = 0;
-    while (!(mask & 1)) { mask >>= 1; ++shift; }
-    return static_cast<int>(((value >> shift) & mask) * 255 / mask);
 }
 
 class XlibFrameBufferSource : public FrameBufferSource {
@@ -87,13 +80,14 @@ public:
         XImage* image = XGetImage(display, frame, x, y, width, height,
                                   AllPlanes, ZPixmap);
         if (!image) return result;
+        XlibColorPalette* palette = XlibColorPalette::forVisual(display, visual);
+        palette->refreshColors();
+        int rgb[3];
         for (int row = 0; row < height; ++row) {
             for (int col = 0; col < width; ++col) {
-                unsigned long p = XGetPixel(image, col, row);
-                result->putPixel(col, row,
-                    static_cast<char>(channel(p, visual->red_mask)),
-                    static_cast<char>(channel(p, visual->green_mask)),
-                    static_cast<char>(channel(p, visual->blue_mask)));
+                palette->pixelToRgb(XGetPixel(image, col, row), rgb);
+                result->putPixel(col, row, static_cast<char>(rgb[0]),
+                    static_cast<char>(rgb[1]), static_cast<char>(rgb[2]));
             }
         }
         XDestroyImage(image);
@@ -135,7 +129,7 @@ void drawLayers(Display* display, Drawable frame, GC gc, Visual* visual,
         const Calligraphic2DBuffer* lines = layer->getLines();
         int lineWidth = static_cast<int>(std::lround(
             java::Math::max(1.0, layer->getWidth() * widthScale)));
-        XSetForeground(display, gc, pixel(visual, layer->getColor()));
+        XSetForeground(display, gc, pixel(display, visual, layer->getColor()));
 
         if (layer->getStyle() == ProjectedLineLayer::POINTS) {
             for (int i = 0; i < lines->getNumLines(); ++i) {
@@ -218,12 +212,12 @@ void drawContours(Display* display, Drawable frame, GC gc, Visual* visual,
         static_cast<int>(std::lround(lineWidth)), LineSolid, CapRound,
         JoinRound);
     if (lineColor != nullptr) {
-        XSetForeground(display, gc, pixel(visual, *lineColor));
+        XSetForeground(display, gc, pixel(display, visual, *lineColor));
     }
     for (long i = 0; i < polygons.size(); i++) {
         const ProjectedPolygon* polygon = polygons.get(i);
         if (lineColor == nullptr) {
-            XSetForeground(display, gc, pixel(visual, polygon->getColor()));
+            XSetForeground(display, gc, pixel(display, visual, polygon->getColor()));
         }
         const Polygon2D* area = polygon->getArea();
         for (long l = 0; l < area->loops.size(); l++) {
@@ -362,7 +356,7 @@ void XlibDrawingAreaRenderer::drawTitle(Display* display, Drawable frame,
     }
     viewport->setTitleArea(0, 0, textWidth + 2*borderX,
                            textHeight + 2*borderY);
-    XSetForeground(display, gc, pixel(visual, set->getTitleColorFor(viewport)));
+    XSetForeground(display, gc, pixel(display, visual, set->getTitleColorFor(viewport)));
     if (titleFont)
         Xutf8DrawString(display, frame, titleFont, gc, x+borderX, baseline,
                         title.c_str(), title.length());
@@ -396,7 +390,7 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
                 display, frame, gc, visual, depth, *image, x, y);
     }
     else {
-        XSetForeground(display, gc, pixel(visual,
+        XSetForeground(display, gc, pixel(display, visual,
             scene->simpleBackground->colorInDireccion(camera->getFront())));
         XFillRectangle(display, frame, gc, x, y, width, height);
     }
@@ -523,7 +517,7 @@ void XlibDrawingAreaRenderer::drawHiddenSurfaces(Display* display,
         XlibSpanSink sink(display, frame, gc);
         for (long i = 0; i < polygons->size(); i++) {
             const ProjectedPolygon* polygon = (*polygons)[i];
-            XSetForeground(display, gc, pixel(visual, polygon->getColor()));
+            XSetForeground(display, gc, pixel(display, visual, polygon->getColor()));
             ProjectedPolygonScanConverter::fill(*polygon, x, y, width,
                                                 height, sink);
         }
@@ -551,7 +545,7 @@ void XlibDrawingAreaRenderer::display(Display* display, Window window,
 
     Pixmap frame = XCreatePixmap(display, window, width, height, depth);
     GC gc = XCreateGC(display, frame, 0, nullptr);
-    XSetForeground(display, gc, pixel(visual, ColorRgb(.77,.77,.77)));
+    XSetForeground(display, gc, pixel(display, visual, ColorRgb(.77,.77,.77)));
     XFillRectangle(display, frame, gc, 0, 0, width, height);
 
     const java::ArrayList<Viewport*>& viewports = set->getViewports();
@@ -564,7 +558,7 @@ void XlibDrawingAreaRenderer::display(Display* display, Window window,
             int y = static_cast<int>((1-v->getStartYPercent()-v->getSizeYPercent()) * height);
             int w = static_cast<int>(v->getSizeXPercent() * width);
             int h = static_cast<int>(v->getSizeYPercent() * height);
-            XSetForeground(display, gc, pixel(visual,
+            XSetForeground(display, gc, pixel(display, visual,
                 set->isSelected(v) ? ColorRgb(1,.96,0) : ColorRgb(.21,.25,.29)));
             XFillRectangle(display, frame, gc, x, y, w, h);
         }

@@ -5,7 +5,7 @@
 #include "java/util/ArrayList.txx"
 #include "java/util/HashMap.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonTopologicalMerger.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/genericPolygonClipper/PolygonTopologicalMerger.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 static Vertex2D copyVertex(const Vertex2D& v)
 {
