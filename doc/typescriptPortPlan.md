@@ -61,7 +61,7 @@ The matrix records 22 finalized phases, 23 in progress and one pending.
 | 11 | Command-line options checkpoint | Finalized | Empty library group. Entry-point arguments belong to the application host. |
 | 12 | Progress monitors | Finalized | Core monitors and the parallel producer/consumer are present. The tile scheduler routes worker progress notices back to the owner. |
 | 13 | Tangible interfaces | Finalized | Java, Node and Chrome accepted the same fragmented WebSocket pose. Tests cover handshake failure, reconnection, malformed records and listener dispatch. Browser WebSocket events handle asynchronous I/O. |
-| 14 | Media and image buffers | In progress | Image buffers and HDR/solid textures are present. Recheck cloning, compressed-pixel errors and the mapping of Java object serialization. |
+| 14 | Media and image buffers | In progress | Image buffers and HDR/solid textures are present. Out-of-range pixel access throws Java's exceptions, and bilinear sampling keeps Java's rounding. Recheck cloning, compressed-pixel errors and the mapping of Java object serialization. |
 | 15 | General processing | In progress | The Cohen–Sutherland outcode and segment checks follow Java. Resolve the `LzwWrapper` and `SpharmonicKitWrapper` runtime mappings. |
 | 16 | Materials | In progress | `ScatteringArithmetic` is available at the matching source and package paths. The previous `scatteringArithmetic` import still resolves. Continue the material and lobe review. |
 | 17 | Geometry base | Finalized | The `Geometry` contract is present and used by the current geometry families. |
@@ -333,14 +333,10 @@ The matrix records 22 finalized phases, 23 in progress and one pending.
   - `HudIcon` with three PNGs from `etc`, a null name and a missing file:
     `toString`, `getMapTag`, `doIntersection` and
     `doIntersectionWithGravity` are identical.
-- Phase 14 parity finding (not fixed): `RGBImageUncompressed.putPixelRgb`
-  out of the buffer. Java's direct `ByteBuffer` throws
-  `IndexOutOfBoundsException` after the in-range components are written.
-  The TypeScript typed array drops the write silently. `HudIcon.overWritePixels`
-  at a negative position, or past the image edge, therefore throws in Java
-  and completes in TS. The same holds for the other `get`/`put` accessors of
-  the uncompressed image classes. A fix adds a bounds check to every pixel
-  access, so it is left for a decision on the render hot paths.
+- Phase 14 parity finding, fixed on 2026-11-28 (see "Out-of-range pixel access
+  and fatal errors" below): `HudIcon.overWritePixels` at a negative position,
+  or past the image edge, used to throw in Java and complete silently in TS.
+  The uncompressed image classes now throw as Java does.
 - Inventory note: 18 entries of `61_gui.txt` do not exist anywhere in the
   current Java tree, so they have nothing to port. The inventory was captured
   from an older source tree. The 18 entries are:
@@ -355,6 +351,53 @@ The matrix records 22 finalized phases, 23 in progress and one pending.
   - Verify worker progress through the renderer owner (Phases 12 and 40).
   - The Jogl2 `VisualAnalyticsPercentagesWheelExample` has no browser
     renderer yet.
+
+
+### Out-of-range pixel access and fatal errors — 2026-11-28
+
+- TypeScript pixel accessors now throw what Java throws. A typed array drops
+  an out-of-range write and reads `undefined`, so each component access is
+  checked in Java's order, and a write stops after the components that fit,
+  as Java's does:
+  - `RGBImageUncompressed` and `RGBAImageUncompressed` are backed in Java by
+    a direct `ByteBuffer`. They throw `IndexOutOfBoundsException` with no
+    message, as JDK 17 does.
+  - `IndexedColorImageUncompressed`, `IndexedColorImageHDRUncompressed`,
+    `RGBAImageHDRUncompressed` and `ZBuffer` are backed in Java by arrays.
+    They throw the new `java.lang.ArrayIndexOutOfBoundsException` with the
+    JDK message `Index i out of bounds for length n`.
+  - The library does not catch these exceptions. The calling application
+    decides what to do, as in Java. In a page, an uncaught one is reported
+    on the console and the page keeps running.
+  - Reference driver: puts and gets at 11 in-range and out-of-range
+    positions on the six classes, plus `HudIcon.overWritePixels` for three
+    PNGs from `etc` at six positions. 191 lines, 91 exceptions and the image
+    sums after partial writes are identical to Java's.
+- Java no longer terminates the process on an error inside the library.
+  Each case throws, and the calling application decides how to handle it:
+  - `Logger`'s fatal reports throw `VSDKFatalException` instead of calling
+    `System.exit(1)`. `withSystemExit` is kept as a compatibility switch.
+    When it is on (the default), fatal errors throw. When it is off, they
+    throw only with `setWithFatalExceptions(true)`. This is what the
+    TypeScript `Logger` already did.
+  - `ScreenPolygon`, `ConvexWindowClipper` and `PolygonBoxClipper` still
+    print their message to `System.err`. They then throw
+    `VSDKFatalException` with that message, which the TypeScript port
+    already did.
+  - `ReaderBinNeedForSpeed` throws `IOException` with the message it
+    prints. Its methods already declare `throws Exception`.
+  - `ReaderAse` throws `VSDKFatalException`.
+  - `jogl2`'s `Jogl2StereoStrategyPBufferRenderer` throws
+    `VSDKFatalException` with the pbuffer creation failure as its cause.
+  - A driver checked the result: an oversized `ScreenPolygon` and a
+    `FATAL_ERROR` report under the default settings. Java and TS give the
+    same exceptions and messages, and both processes keep running.
+- Two kinds of exit are left as they are:
+  - `System.exit` calls in testsuite programs. They are the calling
+    applications.
+  - The "Exit" menu item of `SwingGuiRenderer`.
+- The C++ and TurboC ports still call `exit` in the clippers and in
+  `Logger`. Aligning them is not part of this change.
 
 ### Work order
 

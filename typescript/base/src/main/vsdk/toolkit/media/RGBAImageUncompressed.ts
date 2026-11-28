@@ -2,7 +2,7 @@ import { Image } from "./Image.js";
 import { RGBPixel } from "./RGBPixel.js";
 import { RGBAPixel } from "./RGBAPixel.js";
 import { RGBImageUncompressed } from "./RGBImageUncompressed.js";
-import { byte } from "./_pixel.js";
+import { byte, checkBufferIndex } from "./_pixel.js";
 export class RGBAImageUncompressed extends Image {
     private data: Uint8Array | null = null;
     private xSize = 0;
@@ -37,35 +37,51 @@ export class RGBAImageUncompressed extends Image {
         const i = this.at(x, y),
             d = this.data!;
         if (r instanceof RGBAPixel) {
+            checkBufferIndex(i, d.length);
             d[i] = r.r;
+            checkBufferIndex(i + 1, d.length);
             d[i + 1] = r.g;
+            checkBufferIndex(i + 2, d.length);
             d[i + 2] = r.b;
+            checkBufferIndex(i + 3, d.length);
             d[i + 3] = r.a;
         } else {
             // Java only declares the `byte` overloads here, which store the
             // signed bytes as given; the three-argument one fills the alpha
             // channel with `(byte) -1`.
+            checkBufferIndex(i, d.length);
             d[i] = r;
+            checkBufferIndex(i + 1, d.length);
             d[i + 1] = g!;
+            checkBufferIndex(i + 2, d.length);
             d[i + 2] = b!;
+            checkBufferIndex(i + 3, d.length);
             d[i + 3] = a === undefined ? -1 : a;
         }
     }
     public override putPixelRgb(x: number, y: number, p: RGBPixel): void {
         const i = this.at(x, y),
             d = this.data!;
+        checkBufferIndex(i, d.length);
         d[i] = p.r;
+        checkBufferIndex(i + 1, d.length);
         d[i + 1] = p.g;
+        checkBufferIndex(i + 2, d.length);
         d[i + 2] = p.b;
+        checkBufferIndex(i + 3, d.length);
         d[i + 3] = 127;
     }
     public getPixel(x: number, y: number): RGBAPixel {
         const i = this.at(x, y),
             d = this.data!,
             p = new RGBAPixel();
+        checkBufferIndex(i, d.length);
         p.r = byte(d[i]!);
+        checkBufferIndex(i + 1, d.length);
         p.g = byte(d[i + 1]!);
+        checkBufferIndex(i + 2, d.length);
         p.b = byte(d[i + 2]!);
+        checkBufferIndex(i + 3, d.length);
         p.a = byte(d[i + 3]!);
         return p;
     }

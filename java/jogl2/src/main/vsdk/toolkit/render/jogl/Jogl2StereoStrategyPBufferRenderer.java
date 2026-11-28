@@ -11,6 +11,7 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLDrawableFactory;
 
+import vsdk.toolkit.common.VSDKFatalException;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class Jogl2StereoStrategyPBufferRenderer extends Jogl2StereoStrategyRenderer
@@ -40,7 +41,7 @@ public class Jogl2StereoStrategyPBufferRenderer extends Jogl2StereoStrategyRende
           }
           catch ( Exception e ) {
               System.err.println("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.");
-              System.exit(1);
+              throw new VSDKFatalException("Error creating OpenGL Pbuffer. This program requires a 3D accelerator card.", e);
         }
         leftPbuffer.addGLEventListener(leftRenderer);
         rightPbuffer.addGLEventListener(rightRenderer);

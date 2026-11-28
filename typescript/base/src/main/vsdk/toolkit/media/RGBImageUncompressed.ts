@@ -1,6 +1,6 @@
 import { Image } from "./Image.js";
 import { RGBPixel } from "./RGBPixel.js";
-import { byte } from "./_pixel.js";
+import { byte, checkBufferIndex } from "./_pixel.js";
 import { RGBAImageUncompressed } from "./RGBAImageUncompressed.js";
 import { RGBAPixel } from "./RGBAPixel.js";
 export class RGBImageUncompressed extends Image {
@@ -39,14 +39,20 @@ export class RGBImageUncompressed extends Image {
         const i = this.at(x, y),
             d = this.data!;
         if (r instanceof RGBPixel) {
+            checkBufferIndex(i, d.length);
             d[i] = r.r;
+            checkBufferIndex(i + 1, d.length);
             d[i + 1] = r.g;
+            checkBufferIndex(i + 2, d.length);
             d[i + 2] = r.b;
         } else {
             // Java only declares the `byte` overload here, which stores the
             // signed byte as given; the unsigned backing array wraps it back.
+            checkBufferIndex(i, d.length);
             d[i] = r;
+            checkBufferIndex(i + 1, d.length);
             d[i + 1] = g!;
+            checkBufferIndex(i + 2, d.length);
             d[i + 2] = b!;
         }
     }
@@ -57,8 +63,11 @@ export class RGBImageUncompressed extends Image {
         const i = this.at(x, y),
             d = this.data!,
             p = new RGBPixel();
+        checkBufferIndex(i, d.length);
         p.r = byte(d[i]!);
+        checkBufferIndex(i + 1, d.length);
         p.g = byte(d[i + 1]!);
+        checkBufferIndex(i + 2, d.length);
         p.b = byte(d[i + 2]!);
         return p;
     }

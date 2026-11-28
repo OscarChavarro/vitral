@@ -3,7 +3,7 @@ import { IndexedColorImageUncompressed } from "./IndexedColorImageUncompressed.j
 import { RGBImageUncompressed } from "./RGBImageUncompressed.js";
 import { RGBAImageUncompressed } from "./RGBAImageUncompressed.js";
 import { RGBColorPalette } from "./RGBColorPalette.js";
-import { byte } from "./_pixel.js";
+import { byte, checkArrayIndex } from "./_pixel.js";
 export class ZBuffer extends MediaEntity {
     private depth: Float32Array;
     private xSize: number;
@@ -33,13 +33,17 @@ export class ZBuffer extends MediaEntity {
         return this.depth;
     }
     public getZ(x: number, y: number): number {
-        return this.depth[this.xSize * y + x]!;
+        const pos = this.xSize * y + x;
+        checkArrayIndex(pos, this.depth.length);
+        return this.depth[pos]!;
     }
     public setZBuffer(d: Float32Array): void {
         this.depth = new Float32Array(d);
     }
     public setZ(x: number, y: number, v: number): void {
-        this.depth[this.xSize * y + x] = v;
+        const pos = this.xSize * y + x;
+        checkArrayIndex(pos, this.depth.length);
+        this.depth[pos] = v;
     }
     public exportIndexedColorImage(): IndexedColorImageUncompressed {
         const o = new IndexedColorImageUncompressed();

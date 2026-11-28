@@ -4,7 +4,7 @@ import { RGBPixel } from "./RGBPixel.js";
 import { RGBAImageUncompressed } from "./RGBAImageUncompressed.js";
 import { RGBImageUncompressed } from "./RGBImageUncompressed.js";
 import { ColorRgb } from "../common/color/ColorRgb.js";
-import { byte, unsigned } from "./_pixel.js";
+import { byte, checkArrayIndex, unsigned } from "./_pixel.js";
 export class IndexedColorImageUncompressed extends Image {
     private data: Int8Array | null = null;
     private xSize = 0;
@@ -42,7 +42,9 @@ export class IndexedColorImageUncompressed extends Image {
     }
     /** Java overload `putPixel(int x, int y, int val)`: clamps `val` to 0..255. */
     public putPixel(x: number, y: number, v: number): void {
-        this.data![this.xSize * y + x] = byte(v);
+        const index = this.xSize * y + x;
+        checkArrayIndex(index, this.data!.length);
+        this.data![index] = byte(v);
     }
     /**
     Java overload `putPixel(int x, int y, byte val)`: stores the signed byte
@@ -51,13 +53,17 @@ export class IndexedColorImageUncompressed extends Image {
     */
     public putPixelByte(x: number, y: number, v: number): void {
         const index = this.xSize * y + x;
+        checkArrayIndex(index, this.data!.length);
         this.data![index] = v;
     }
     public override getPixel8bitGrayScale(x: number, y: number): number {
+        checkArrayIndex(this.xSize * y + x, this.data!.length);
         return this.data![this.xSize * y + x]!;
     }
     public getPixel(x: number, y: number): number {
-        return unsigned(this.data![this.xSize * y + x]!);
+        const index = this.xSize * y + x;
+        checkArrayIndex(index, this.data!.length);
+        return unsigned(this.data![index]!);
     }
     public override getPixelRgb(x: number, y: number): RGBPixel;
     public override getPixelRgb(x: number, y: number, p: RGBPixel): void;

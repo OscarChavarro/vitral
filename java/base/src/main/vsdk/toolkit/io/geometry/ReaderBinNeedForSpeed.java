@@ -2,6 +2,7 @@ package vsdk.toolkit.io.geometry;
 
 // Java basic classes
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -178,7 +179,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
              !skipKeysUntil(is, MAGIC_OBJECTSTART) ||
              !skipKeysUntil(is, MAGIC_ZEROES) ) {
             System.out.println("Bad body start! Aborting.");
-            System.exit(0);
+            throw new IOException("Bad body start! Aborting.");
         }
 
         String name;
@@ -191,7 +192,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         if ( key != MAGIC_MESHTEXTURES ) {
             System.out.println("Bad name end! Aborting.");
-            System.exit(0);
+            throw new IOException("Bad name end! Aborting.");
         }
         int ntextures;
         ntextures = (int)(readLongLE(is) / 8);
@@ -214,7 +215,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             skip = readLongLE(is);
             if ( skip != 0 ) {
                 System.out.println("Texture chunk error!");
-                System.exit(0);
+                throw new IOException("Texture chunk error!");
             }
             RGBAImageUncompressed img = null;
             if ( ids != null ) {
@@ -257,7 +258,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         //-----------------------------------------------------------------
         if ( !skipKeysUntil(is, MAGIC_MESHNUMS) ) {
             System.out.println("No mesh found! Aborting.");
-            System.exit(0);
+            throw new IOException("No mesh found! Aborting.");
         }
         readChunkStart(is, arr4);
         skipKeys(is, 8); // ??
@@ -274,7 +275,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         if ( !skipKeysUntil(is, MAGIC_MESHVERTICES) ) {
             System.out.println("No mesh found! Aborting.");
-            System.exit(0);
+            throw new IOException("No mesh found! Aborting.");
         }
 
         //-----------------------------------------------------------------
@@ -371,7 +372,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         //if ( key != MAGIC_MESHTRIANGLES ) {
         if ( !skipKeysUntil(is, MAGIC_MESHTRIANGLES) ) {
             System.out.println("No mesh found! Aborting.");
-            System.exit(0);
+            throw new IOException("No mesh found! Aborting.");
         }
 
         //-----------------------------------------------------------------
@@ -599,7 +600,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 }
                 else {
                     System.out.println("Error!");
-                    System.exit(0);
+                    throw new IOException("Error!");
                 }
                 started = false;
             }

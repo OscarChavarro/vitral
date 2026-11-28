@@ -11,6 +11,7 @@ export { RuntimeException } from "./java/lang/RuntimeException.js";
 export { IllegalArgumentException } from "./java/lang/IllegalArgumentException.js";
 export { IllegalStateException } from "./java/lang/IllegalStateException.js";
 export { IndexOutOfBoundsException } from "./java/lang/IndexOutOfBoundsException.js";
+export { ArrayIndexOutOfBoundsException } from "./java/lang/ArrayIndexOutOfBoundsException.js";
 export { ArithmeticException } from "./java/lang/ArithmeticException.js";
 export { UnsupportedOperationException } from "./java/lang/UnsupportedOperationException.js";
 export { CloneNotSupportedException } from "./java/lang/CloneNotSupportedException.js";

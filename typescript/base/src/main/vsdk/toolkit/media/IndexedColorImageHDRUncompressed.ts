@@ -1,4 +1,5 @@
 import { RGBAPixelHDR } from "./RGBAPixelHDR.js";
+import { checkArrayIndex } from "./_pixel.js";
 
 /**
 Port of `vsdk.toolkit.media.IndexedColorImageHDRUncompressed`.
@@ -54,10 +55,12 @@ export class IndexedColorImageHDRUncompressed {
     }
 
     public getPixel(x: number, y: number): number {
+        checkArrayIndex(y * this.xSize + x, this.data!.length);
         return this.data![y * this.xSize + x]!;
     }
 
     public setPixel(x: number, y: number, value: number): void {
+        checkArrayIndex(y * this.xSize + x, this.data!.length);
         this.data![y * this.xSize + x] = value & 0xff;
     }
 }

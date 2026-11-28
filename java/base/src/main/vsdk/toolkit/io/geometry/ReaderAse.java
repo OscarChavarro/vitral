@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 // VSDK Classes
+import vsdk.toolkit.common.VSDKFatalException;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.color.ColorRgb;
@@ -459,7 +460,7 @@ public class ReaderAse extends PersistenceElement
                         index = Integer.parseInt(parser.sval);
                         if ( index != vertexData.size()/3 ) {
                             System.out.println("readVertex: non consecutive vertex list!");
-                            System.exit(0);
+                            throw new VSDKFatalException("readVertex: non consecutive vertex list!");
                         }
                     }
                     else {
@@ -542,7 +543,8 @@ public class ReaderAse extends PersistenceElement
                         System.out.println("Error in triangle format!");
                         System.out.println("  - Line " + parser.lineno());
                         System.out.println("  - Token " + i);
-                        System.exit(0);
+                        throw new VSDKFatalException("Error in triangle format! Line " +
+                            parser.lineno() + ", token " + i);
                     }
                     else if ( i == 2 ) {
                         // P0
@@ -581,7 +583,7 @@ public class ReaderAse extends PersistenceElement
         }
         catch ( Exception e ) {
             System.out.println("Error reading smoothing groups!");
-            System.exit(0);
+            throw new VSDKFatalException("Error reading smoothing groups!", e);
         }
 
         int j;
